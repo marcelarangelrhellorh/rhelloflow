@@ -3,10 +3,12 @@ import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Edit, Trash2, User, Briefcase } from "lucide-react";
+import { ArrowLeft, Edit, Trash2, User, Briefcase, Calendar, Clock } from "lucide-react";
 import { StatusBadge } from "@/components/StatusBadge";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { getBusinessDaysFromNow, isWithinDeadline } from "@/lib/dateUtils";
 
 type Vaga = {
   id: string;
@@ -173,9 +175,31 @@ export default function VagaDetalhes() {
 
       <div className="space-y-6">
         <div>
-          <div className="mb-2 flex items-center gap-2">
+          <div className="mb-2 flex items-center gap-2 flex-wrap">
             <h1 className="text-3xl font-bold">{vaga.titulo}</h1>
             <StatusBadge status={vaga.status} type={getStatusType(vaga.status)} />
+            {(() => {
+              const businessDays = getBusinessDaysFromNow(vaga.criado_em);
+              const withinDeadline = isWithinDeadline(vaga.criado_em);
+              return (
+                <>
+                  <Badge variant="outline" className="flex items-center gap-1">
+                    <Calendar className="h-3 w-3" />
+                    {businessDays} dias úteis em aberto
+                  </Badge>
+                  <Badge 
+                    variant="outline" 
+                    className={withinDeadline 
+                      ? "bg-success/10 text-success border-success/20" 
+                      : "bg-destructive/10 text-destructive border-destructive/20"
+                    }
+                  >
+                    <Clock className="mr-1 h-3 w-3" />
+                    {withinDeadline ? "Dentro do prazo" : "Fora do prazo"}
+                  </Badge>
+                </>
+              );
+            })()}
           </div>
           <p className="text-xl text-muted-foreground">{vaga.empresa}</p>
         </div>

@@ -4,8 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
-import { Briefcase, Calendar, User } from "lucide-react";
+import { Briefcase, Calendar, User, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { getBusinessDaysFromNow } from "@/lib/dateUtils";
 
 type StatusVaga = 
   | "A iniciar"
@@ -27,6 +28,7 @@ interface Vaga {
   status: StatusVaga;
   prioridade: string | null;
   criado_em: string | null;
+  candidatos_count?: number;
 }
 
 const statusColumns: StatusVaga[] = [
@@ -84,13 +86,26 @@ export default function FunilVagas() {
   async function loadVagas() {
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      const { data: vagasData, error: vagasError } = await supabase
         .from("vagas")
         .select("*")
         .order("criado_em", { ascending: false });
 
-      if (error) throw error;
-      setVagas(data || []);
+      if (vagasError) throw vagasError;
+
+      // Load candidate counts for each vaga
+      const vagasWithCounts = await Promise.all(
+        (vagasData || []).map(async (vaga) => {
+          const { count } = await supabase
+            .from("candidatos")
+            .select("*", { count: "exact", head: true })
+            .eq("vaga_relacionada_id", vaga.id);
+          
+          return { ...vaga, candidatos_count: count || 0 };
+        })
+      );
+
+      setVagas(vagasWithCounts);
     } catch (error: any) {
       toast({
         title: "Erro ao carregar vagas",
@@ -146,13 +161,6 @@ export default function FunilVagas() {
     return vagas.filter((vaga) => vaga.status === status);
   };
 
-  const getDaysOpen = (criadoEm: string | null) => {
-    if (!criadoEm) return 0;
-    const created = new Date(criadoEm);
-    const now = new Date();
-    const diff = now.getTime() - created.getTime();
-    return Math.floor(diff / (1000 * 60 * 60 * 24));
-  };
 
   const activeVaga = activeId ? vagas.find((v) => v.id === activeId) : null;
 
@@ -232,18 +240,22 @@ export default function FunilVagas() {
                         )}
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
                           <Calendar className="h-3 w-3" />
-                          <span>{getDaysOpen(vaga.criado_em)} dias</span>
+                          <span>{vaga.criado_em ? getBusinessDaysFromNow(vaga.criado_em) : 0} dias úteis</span>
                         </div>
-                        {vaga.prioridade && (
-                          <div className="flex justify-end">
+                        <div className="flex items-center justify-between pt-1">
+                          <Badge variant="outline" className="bg-info/10 text-info border-info/20 text-xs">
+                            <Users className="mr-1 h-3 w-3" />
+                            {vaga.candidatos_count || 0}
+                          </Badge>
+                          {vaga.prioridade && (
                             <Badge
                               variant="outline"
-                              className={priorityColors[vaga.prioridade] || ""}
+                              className={`text-xs ${priorityColors[vaga.prioridade] || ""}`}
                             >
                               {vaga.prioridade}
                             </Badge>
-                          </div>
-                        )}
+                          )}
+                        </div>
                       </CardContent>
                     </Card>
                   ))}

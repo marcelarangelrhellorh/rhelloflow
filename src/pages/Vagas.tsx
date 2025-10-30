@@ -3,11 +3,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, Briefcase, User, Calendar, Building2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Plus, Search, Briefcase, User, Calendar, Building2, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { getBusinessDaysFromNow } from "@/lib/dateUtils";
 
 type Vaga = {
   id: string;
@@ -19,6 +21,7 @@ type Vaga = {
   complexidade: string | null;
   prioridade: string | null;
   criado_em: string;
+  candidatos_count?: number;
 };
 
 export default function Vagas() {
@@ -34,13 +37,26 @@ export default function Vagas() {
 
   const loadVagas = async () => {
     try {
-      const { data, error } = await supabase
+      const { data: vagasData, error: vagasError } = await supabase
         .from("vagas")
         .select("*")
         .order("criado_em", { ascending: false });
 
-      if (error) throw error;
-      setVagas(data || []);
+      if (vagasError) throw vagasError;
+
+      // Load candidate counts for each vaga
+      const vagasWithCounts = await Promise.all(
+        (vagasData || []).map(async (vaga) => {
+          const { count } = await supabase
+            .from("candidatos")
+            .select("*", { count: "exact", head: true })
+            .eq("vaga_relacionada_id", vaga.id);
+          
+          return { ...vaga, candidatos_count: count || 0 };
+        })
+      );
+
+      setVagas(vagasWithCounts);
     } catch (error) {
       console.error("Erro ao carregar vagas:", error);
       toast.error("Erro ao carregar vagas");
@@ -56,12 +72,6 @@ export default function Vagas() {
     return matchesSearch && matchesStatus;
   });
 
-  const getDaysOpen = (criadoEm: string) => {
-    const today = new Date();
-    const created = new Date(criadoEm);
-    const diffTime = Math.abs(today.getTime() - created.getTime());
-    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  };
 
   const getStatusType = (status: string): "active" | "pending" | "cancelled" | "completed" => {
     if (status === "Concluído") return "completed";
@@ -158,7 +168,13 @@ export default function Vagas() {
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Calendar className="h-4 w-4" />
-                {getDaysOpen(vaga.criado_em)} dias em aberto
+                {getBusinessDaysFromNow(vaga.criado_em)} dias úteis
+              </div>
+              <div className="flex items-center gap-2 pt-2">
+                <Badge variant="outline" className="bg-info/10 text-info border-info/20">
+                  <Users className="mr-1 h-3 w-3" />
+                  {vaga.candidatos_count || 0} candidato{vaga.candidatos_count !== 1 ? 's' : ''}
+                </Badge>
               </div>
             </CardContent>
           </Card>
