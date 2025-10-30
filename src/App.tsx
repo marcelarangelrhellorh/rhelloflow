@@ -6,7 +6,11 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import Dashboard from "./pages/Dashboard";
 import Vagas from "./pages/Vagas";
+import VagaForm from "./pages/VagaForm";
+import VagaDetalhes from "./pages/VagaDetalhes";
 import Candidatos from "./pages/Candidatos";
+import CandidatoForm from "./pages/CandidatoForm";
+import CandidatoDetalhes from "./pages/CandidatoDetalhes";
 import BancoTalentos from "./pages/BancoTalentos";
 import Analises from "./pages/Analises";
 import Login from "./pages/Login";
@@ -25,7 +29,13 @@ const App = () => (
           <Route element={<Layout />}>
             <Route path="/" element={<Dashboard />} />
             <Route path="/vagas" element={<Vagas />} />
+            <Route path="/vagas/nova" element={<VagaForm />} />
+            <Route path="/vagas/:id" element={<VagaDetalhes />} />
+            <Route path="/vagas/:id/editar" element={<VagaForm />} />
             <Route path="/candidatos" element={<Candidatos />} />
+            <Route path="/candidatos/novo" element={<CandidatoForm />} />
+            <Route path="/candidatos/:id" element={<CandidatoDetalhes />} />
+            <Route path="/candidatos/:id/editar" element={<CandidatoForm />} />
             <Route path="/banco-talentos" element={<BancoTalentos />} />
             <Route path="/analises" element={<Analises />} />
           </Route>
