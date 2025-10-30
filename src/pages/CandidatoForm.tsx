@@ -292,10 +292,9 @@ export default function CandidatoForm() {
                 <Label htmlFor="vaga_relacionada_id">Vaga Relacionada</Label>
                 <Select value={formData.vaga_relacionada_id} onValueChange={(value) => setFormData({ ...formData, vaga_relacionada_id: value })}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecione uma vaga" />
+                    <SelectValue placeholder="Selecione uma vaga (opcional)" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Nenhuma vaga</SelectItem>
                     {vagas.map((vaga) => (
                       <SelectItem key={vaga.id} value={vaga.id}>{vaga.titulo}</SelectItem>
                     ))}
