@@ -21,7 +21,9 @@ import { toast } from "sonner";
 const menuItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
   { title: "Vagas", url: "/vagas", icon: Briefcase },
+  { title: "Funil de Vagas", url: "/funil-vagas", icon: Briefcase },
   { title: "Candidatos", url: "/candidatos", icon: Users },
+  { title: "Funil de Candidatos", url: "/funil-candidatos", icon: Users },
   { title: "Banco de Talentos", url: "/banco-talentos", icon: Database },
   { title: "Análises", url: "/analises", icon: BarChart3 },
 ];

@@ -8,9 +8,11 @@ import Dashboard from "./pages/Dashboard";
 import Vagas from "./pages/Vagas";
 import VagaForm from "./pages/VagaForm";
 import VagaDetalhes from "./pages/VagaDetalhes";
+import FunilVagas from "./pages/FunilVagas";
 import Candidatos from "./pages/Candidatos";
 import CandidatoForm from "./pages/CandidatoForm";
 import CandidatoDetalhes from "./pages/CandidatoDetalhes";
+import FunilCandidatos from "./pages/FunilCandidatos";
 import BancoTalentos from "./pages/BancoTalentos";
 import Analises from "./pages/Analises";
 import Login from "./pages/Login";
@@ -32,10 +34,12 @@ const App = () => (
             <Route path="/vagas/nova" element={<VagaForm />} />
             <Route path="/vagas/:id" element={<VagaDetalhes />} />
             <Route path="/vagas/:id/editar" element={<VagaForm />} />
+            <Route path="/funil-vagas" element={<FunilVagas />} />
             <Route path="/candidatos" element={<Candidatos />} />
             <Route path="/candidatos/novo" element={<CandidatoForm />} />
             <Route path="/candidatos/:id" element={<CandidatoDetalhes />} />
             <Route path="/candidatos/:id/editar" element={<CandidatoForm />} />
+            <Route path="/funil-candidatos" element={<FunilCandidatos />} />
             <Route path="/banco-talentos" element={<BancoTalentos />} />
             <Route path="/analises" element={<Analises />} />
           </Route>
