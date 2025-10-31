@@ -2,11 +2,19 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, Link2, Copy } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { VagaCard } from "@/components/VagaCard";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+} from "@/components/ui/dropdown-menu";
 
 type Vaga = {
   id: string;
@@ -69,6 +77,18 @@ export default function Vagas() {
     return matchesSearch && matchesStatus;
   });
 
+  const copyPublicFormLink = () => {
+    const publicLink = `${window.location.origin}/solicitar-vaga`;
+    navigator.clipboard.writeText(publicLink);
+    toast.success("Link copiado! Compartilhe com seus clientes.", {
+      description: publicLink,
+    });
+  };
+
+  const openPublicForm = () => {
+    window.open("/solicitar-vaga", "_blank");
+  };
+
 
 
   if (loading) {
@@ -81,15 +101,38 @@ export default function Vagas() {
 
   return (
     <div className="p-8">
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Vagas</h1>
           <p className="text-muted-foreground">Gerencie todas as vagas abertas</p>
         </div>
-        <Button onClick={() => navigate("/vagas/nova")}>
-          <Plus className="mr-2 h-5 w-5" />
-          Nova Vaga
-        </Button>
+        <div className="flex gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                <Link2 className="mr-2 h-4 w-4" />
+                Formulário Público
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-64">
+              <DropdownMenuLabel>Compartilhar com Cliente</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={copyPublicFormLink}>
+                <Copy className="mr-2 h-4 w-4" />
+                Copiar Link
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={openPublicForm}>
+                <Link2 className="mr-2 h-4 w-4" />
+                Abrir em Nova Aba
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          
+          <Button onClick={() => navigate("/vagas/nova")}>
+            <Plus className="mr-2 h-5 w-5" />
+            Nova Vaga
+          </Button>
+        </div>
       </div>
 
       <div className="mb-6 flex gap-4">

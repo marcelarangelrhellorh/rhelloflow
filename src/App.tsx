@@ -7,6 +7,7 @@ import { Layout } from "./components/Layout";
 import Dashboard from "./pages/Dashboard";
 import Vagas from "./pages/Vagas";
 import VagaForm from "./pages/VagaForm";
+import PublicVagaForm from "./pages/PublicVagaForm";
 import VagaDetalhes from "./pages/VagaDetalhes";
 import FunilVagas from "./pages/FunilVagas";
 import Candidatos from "./pages/Candidatos";
@@ -28,6 +29,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Auth />} />
+          <Route path="/solicitar-vaga" element={<PublicVagaForm />} />
           <Route element={<Layout />}>
             <Route path="/" element={<Dashboard />} />
             <Route path="/vagas" element={<Vagas />} />
