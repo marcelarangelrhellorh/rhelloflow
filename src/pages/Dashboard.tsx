@@ -12,12 +12,21 @@ export default function Dashboard() {
     candidatosAtivos: 0,
     vagasAntigas: 0,
   });
+  const [last30Stats, setLast30Stats] = useState<{
+    tempoMedioUteis: number;
+    taxaAprovacao: number;
+    totalAprovados: number;
+    totalFinalizados: number;
+    feedbacksPendentes: number;
+    vagasReabertas: number;
+  } | null>(null);
   const [loading, setLoading] = useState(true);
   const [userName, setUserName] = useState<string>("");
 
   useEffect(() => {
     loadStats();
     loadUserProfile();
+    loadLast30DaysStats();
   }, []);
 
   const loadUserProfile = async () => {
@@ -36,6 +45,32 @@ export default function Dashboard() {
       }
     } catch (error) {
       console.error("Erro ao carregar perfil:", error);
+    }
+  };
+
+  const loadLast30DaysStats = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("dashboard_last30")
+        .select("*")
+        .single();
+
+      if (error) throw error;
+
+      if (data) {
+        setLast30Stats({
+          tempoMedioUteis: data.tempo_medio_uteis || 0,
+          taxaAprovacao: typeof data.taxa_aprovacao_percent === 'number' 
+            ? data.taxa_aprovacao_percent 
+            : parseFloat(String(data.taxa_aprovacao_percent || "0")),
+          totalAprovados: data.total_aprovados || 0,
+          totalFinalizados: data.total_finalizados || 0,
+          feedbacksPendentes: data.feedbacks_pendentes || 0,
+          vagasReabertas: data.vagas_reabertas || 0,
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao carregar estatísticas dos últimos 30 dias:", error);
     }
   };
 
@@ -213,61 +248,87 @@ export default function Dashboard() {
           </Card>
         )}
 
-        {/* Performance Summary (Placeholder) */}
+        {/* Performance Summary */}
         {!hasNoData && (
           <div>
             <h2 className="text-lg font-semibold text-foreground mb-4">
               Resumo dos últimos 30 dias
             </h2>
             <div className="grid gap-4 md:grid-cols-4">
-              <Card className="bg-card">
+              <Card className="bg-card cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:shadow-md">
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-3">
                     <div className="text-2xl">🕓</div>
                     <div>
-                      <p className="text-2xl font-bold text-card-foreground">—</p>
+                      <p className="text-2xl font-bold text-card-foreground">
+                        {last30Stats ? `${last30Stats.tempoMedioUteis}d` : "—"}
+                      </p>
                       <p className="text-xs text-muted-foreground">
                         Tempo médio de fechamento
                       </p>
+                      {last30Stats && last30Stats.tempoMedioUteis > 0 && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          ({last30Stats.tempoMedioUteis} dias úteis)
+                        </p>
+                      )}
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="bg-card">
+              <Card className="bg-card cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:shadow-md">
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-3">
                     <div className="text-2xl">🎯</div>
                     <div>
-                      <p className="text-2xl font-bold text-card-foreground">—</p>
+                      <p className="text-2xl font-bold text-card-foreground">
+                        {last30Stats ? `${last30Stats.taxaAprovacao.toFixed(1)}%` : "—"}
+                      </p>
                       <p className="text-xs text-muted-foreground">
                         Taxa de aprovação
                       </p>
+                      {last30Stats && last30Stats.totalFinalizados > 0 && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {last30Stats.totalAprovados}/{last30Stats.totalFinalizados} processos
+                        </p>
+                      )}
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="bg-card">
+              <Card 
+                className="bg-card cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:shadow-md"
+                onClick={() => navigate("/funil-candidatos")}
+              >
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-3">
                     <div className="text-2xl">💬</div>
                     <div>
-                      <p className="text-2xl font-bold text-card-foreground">—</p>
+                      <p className="text-2xl font-bold text-card-foreground">
+                        {last30Stats ? last30Stats.feedbacksPendentes : "—"}
+                      </p>
                       <p className="text-xs text-muted-foreground">
                         Feedbacks pendentes
                       </p>
+                      {last30Stats && last30Stats.feedbacksPendentes > 0 && (
+                        <p className="text-xs text-warning mt-1">
+                          Requer atenção
+                        </p>
+                      )}
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="bg-card">
+              <Card className="bg-card cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:shadow-md">
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-3">
                     <div className="text-2xl">🔁</div>
                     <div>
-                      <p className="text-2xl font-bold text-card-foreground">—</p>
+                      <p className="text-2xl font-bold text-card-foreground">
+                        {last30Stats ? last30Stats.vagasReabertas : "—"}
+                      </p>
                       <p className="text-xs text-muted-foreground">
                         Vagas reabertas
                       </p>
