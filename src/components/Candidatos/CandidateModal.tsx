@@ -150,10 +150,31 @@ export function CandidateModal({ open, onClose, candidatoId, onSave }: Candidate
         if (error) throw error;
         toast.success("Candidato atualizado com sucesso!");
       } else {
-        const { error } = await supabase
+        const { data: newCandidato, error } = await supabase
           .from("candidatos")
-          .insert([dataToSave]);
+          .insert([dataToSave])
+          .select()
+          .single();
         if (error) throw error;
+
+        // Logar evento se candidato foi vinculado a uma vaga
+        if (dataToSave.vaga_relacionada_id) {
+          const { logVagaEvento } = await import("@/lib/vagaEventos");
+          const { data: { user } } = await supabase.auth.getUser();
+          
+          await logVagaEvento({
+            vagaId: dataToSave.vaga_relacionada_id,
+            actorUserId: user?.id,
+            tipo: "CANDIDATO_ADICIONADO",
+            descricao: `Candidato "${dataToSave.nome_completo}" adicionado à vaga`,
+            payload: {
+              candidatoId: newCandidato?.id,
+              nomeCandidato: dataToSave.nome_completo,
+              etapaInicial: dataToSave.status
+            }
+          });
+        }
+
         toast.success("Candidato criado com sucesso!");
       }
       

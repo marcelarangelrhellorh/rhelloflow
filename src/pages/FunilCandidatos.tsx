@@ -131,6 +131,8 @@ export default function FunilCandidatos() {
 
     const candidatoId = active.id as string;
     const newStatus = over.id as StatusCandidato;
+    const candidato = candidatos.find(c => c.id === candidatoId);
+    const oldStatus = candidato?.status;
 
     try {
       const { error } = await supabase
@@ -145,6 +147,25 @@ export default function FunilCandidatos() {
           candidato.id === candidatoId ? { ...candidato, status: newStatus } : candidato
         )
       );
+
+      // Logar evento se candidato vinculado a vaga
+      if (candidato?.vaga_relacionada_id) {
+        const { logVagaEvento } = await import("@/lib/vagaEventos");
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        await logVagaEvento({
+          vagaId: candidato.vaga_relacionada_id,
+          actorUserId: user?.id,
+          tipo: "CANDIDATO_MOVIDO",
+          descricao: `Candidato "${candidato.nome_completo}" movido para "${newStatus}"`,
+          payload: {
+            candidatoId,
+            nomeCandidato: candidato.nome_completo,
+            de: oldStatus,
+            para: newStatus
+          }
+        });
+      }
 
       toast({
         title: "Candidato movido com sucesso",

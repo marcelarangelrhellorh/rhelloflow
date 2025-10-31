@@ -5,6 +5,16 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { getBusinessDaysFromNow } from "@/lib/dateUtils";
 import { JOB_STAGES, getStageIndex, calculateProgress } from "@/lib/jobStages";
+import { getEventoIcon, getEventoColor, type TipoEvento } from "@/lib/vagaEventos";
+import type { Database } from "@/integrations/supabase/types";
+
+type VagaEvento = {
+  id: string;
+  tipo: TipoEvento;
+  descricao: string;
+  created_at: string;
+  payload: any;
+};
 
 type Vaga = {
   id: string;
@@ -50,15 +60,17 @@ export default function VagaDetalhes() {
   const navigate = useNavigate();
   const [vaga, setVaga] = useState<Vaga | null>(null);
   const [candidatos, setCandidatos] = useState<Candidato[]>([]);
+  const [eventos, setEventos] = useState<VagaEvento[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (id) {
       loadVaga();
       loadCandidatos();
+      loadEventos();
 
       // Subscribe to real-time updates for this job
-      const channel = supabase
+      const vagaChannel = supabase
         .channel(`job-${id}`)
         .on(
           'postgres_changes',
@@ -74,11 +86,45 @@ export default function VagaDetalhes() {
         )
         .subscribe();
 
+      // Subscribe to real-time updates for events
+      const eventosChannel = supabase
+        .channel(`job-eventos-${id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'vaga_eventos',
+            filter: `vaga_id=eq.${id}`
+          },
+          (payload) => {
+            setEventos((prev) => [payload.new as VagaEvento, ...prev]);
+          }
+        )
+        .subscribe();
+
       return () => {
-        supabase.removeChannel(channel);
+        supabase.removeChannel(vagaChannel);
+        supabase.removeChannel(eventosChannel);
       };
     }
   }, [id]);
+
+  const loadEventos = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("vaga_eventos")
+        .select("*")
+        .eq("vaga_id", id)
+        .order("created_at", { ascending: false })
+        .limit(20);
+
+      if (error) throw error;
+      setEventos((data || []) as VagaEvento[]);
+    } catch (error) {
+      console.error("Erro ao carregar eventos:", error);
+    }
+  };
 
   const loadVaga = async () => {
     try {
@@ -126,37 +172,28 @@ export default function VagaDetalhes() {
   };
 
   const getRecentActivities = (): Activity[] => {
-    const activities: Activity[] = [];
-
-    if (vaga) {
-      activities.push({
-        id: "1",
-        type: "process_started",
-        description: `Processo de contratação para ${vaga.titulo} iniciado`,
-        date: format(new Date(vaga.criado_em), "d 'de' MMMM 'de' yyyy", { locale: ptBR })
-      });
-    }
-
-    candidatos.slice(0, 3).forEach((candidato, index) => {
-      const activityType = index === 0 ? "status_change" : 
-                          index === 1 && candidato.status === "Oferta Enviada" ? "offer" : 
-                          "candidate_added";
+    // Usar eventos reais da tabela
+    return eventos.map((evento) => {
+      // Mapear tipos de eventos para os tipos esperados pelo ActivityLog
+      let type: Activity["type"] = "process_started";
       
-      const description = activityType === "status_change" 
-        ? `${candidato.nome_completo} avançou para a etapa de ${candidato.status}`
-        : activityType === "offer"
-        ? `Oferta enviada para ${candidato.nome_completo}`
-        : `Nova candidata "${candidato.nome_completo}" adicionada`;
+      if (evento.tipo === "CANDIDATO_ADICIONADO") {
+        type = "candidate_added";
+      } else if (evento.tipo === "CANDIDATO_MOVIDO") {
+        type = "status_change";
+      } else if (evento.tipo === "ETAPA_ALTERADA") {
+        type = "status_change";
+      } else if (evento.tipo === "FEEDBACK_ADICIONADO") {
+        type = "status_change";
+      }
 
-      activities.push({
-        id: `candidate-${candidato.id}`,
-        type: activityType,
-        description,
-        date: format(new Date(candidato.criado_em), "d 'de' MMMM 'de' yyyy", { locale: ptBR })
-      });
+      return {
+        id: evento.id,
+        type,
+        description: evento.descricao,
+        date: format(new Date(evento.created_at), "d 'de' MMMM 'de' yyyy 'às' HH:mm", { locale: ptBR })
+      };
     });
-
-    return activities.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   };
 
   const getStatusBadgeClass = (status: string) => {

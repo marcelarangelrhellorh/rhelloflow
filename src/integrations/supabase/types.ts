@@ -319,6 +319,44 @@ export type Database = {
         }
         Relationships: []
       }
+      vaga_eventos: {
+        Row: {
+          actor_user_id: string | null
+          created_at: string
+          descricao: string
+          id: string
+          payload: Json | null
+          tipo: string
+          vaga_id: string
+        }
+        Insert: {
+          actor_user_id?: string | null
+          created_at?: string
+          descricao: string
+          id?: string
+          payload?: Json | null
+          tipo: string
+          vaga_id: string
+        }
+        Update: {
+          actor_user_id?: string | null
+          created_at?: string
+          descricao?: string
+          id?: string
+          payload?: Json | null
+          tipo?: string
+          vaga_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vaga_eventos_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vagas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vagas: {
         Row: {
           beneficios: string[] | null

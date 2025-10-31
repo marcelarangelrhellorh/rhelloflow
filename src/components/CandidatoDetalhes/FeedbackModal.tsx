@@ -79,6 +79,30 @@ export function FeedbackModal({
 
       if (error) throw error;
 
+      // Logar evento se há vaga relacionada
+      if (vagaId) {
+        const { data: candidato } = await supabase
+          .from("candidatos")
+          .select("nome_completo, status")
+          .eq("id", candidatoId)
+          .single();
+
+        const { logVagaEvento } = await import("@/lib/vagaEventos");
+        
+        await logVagaEvento({
+          vagaId,
+          actorUserId: user.id,
+          tipo: "FEEDBACK_ADICIONADO",
+          descricao: `Feedback adicionado para "${candidato?.nome_completo}"`,
+          payload: {
+            candidatoId,
+            nomeCandidato: candidato?.nome_completo,
+            statusCandidato: candidato?.status,
+            tipoFeedback: tipo
+          }
+        });
+      }
+
       toast({
         title: "Sucesso",
         description: "Feedback adicionado com sucesso!"

@@ -64,6 +64,13 @@ export function LinkToJobModal({ open, onOpenChange, candidateId, onSuccess }: L
     setLoading(true);
 
     try {
+      // Buscar dados do candidato
+      const { data: candidato } = await supabase
+        .from("candidatos")
+        .select("nome_completo")
+        .eq("id", candidateId)
+        .single();
+
       const { error } = await supabase
         .from("candidatos")
         .update({
@@ -73,6 +80,22 @@ export function LinkToJobModal({ open, onOpenChange, candidateId, onSuccess }: L
         .eq("id", candidateId);
 
       if (error) throw error;
+
+      // Logar evento
+      const { logVagaEvento } = await import("@/lib/vagaEventos");
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      await logVagaEvento({
+        vagaId: selectedVagaId,
+        actorUserId: user?.id,
+        tipo: "CANDIDATO_ADICIONADO",
+        descricao: `Candidato "${candidato?.nome_completo}" adicionado à vaga`,
+        payload: {
+          candidatoId: candidateId,
+          nomeCandidato: candidato?.nome_completo,
+          etapaInicial: "Selecionado"
+        }
+      });
 
       toast.success("Candidato vinculado à vaga com sucesso!");
       onSuccess();

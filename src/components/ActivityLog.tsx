@@ -1,9 +1,9 @@
-import { FileText, UserCheck, UserPlus, Briefcase } from "lucide-react";
+import { FileText, UserCheck, UserPlus, Briefcase, ArrowRightLeft, Trash2, MessageSquare } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 
 interface Activity {
   id: string;
-  type: "offer" | "status_change" | "candidate_added" | "process_started";
+  type: "offer" | "status_change" | "candidate_added" | "process_started" | "candidate_moved" | "candidate_removed" | "feedback_added";
   description: string;
   date: string;
 }
@@ -17,13 +17,19 @@ const activityIcons = {
   status_change: UserCheck,
   candidate_added: UserPlus,
   process_started: Briefcase,
+  candidate_moved: ArrowRightLeft,
+  candidate_removed: Trash2,
+  feedback_added: MessageSquare,
 };
 
 const activityIconColors = {
   offer: "bg-success/10 text-success",
   status_change: "bg-info/10 text-info",
-  candidate_added: "bg-primary/10 text-primary",
+  candidate_added: "bg-success/10 text-success",
   process_started: "bg-muted text-muted-foreground",
+  candidate_moved: "bg-primary/10 text-primary",
+  candidate_removed: "bg-destructive/10 text-destructive",
+  feedback_added: "bg-muted text-muted-foreground",
 };
 
 export function ActivityLog({ activities }: ActivityLogProps) {
