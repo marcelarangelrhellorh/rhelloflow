@@ -5,6 +5,7 @@ import { Progress } from "@/components/ui/progress";
 import { Briefcase, User, MoreVertical, Users, Calendar } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { getBusinessDaysFromNow } from "@/lib/dateUtils";
+import { formatSalaryRange } from "@/lib/salaryUtils";
 
 interface VagaCardProps {
   vaga: {
@@ -15,6 +16,9 @@ interface VagaCardProps {
     status: string;
     criado_em: string | null;
     candidatos_count?: number;
+    salario_min?: number | null;
+    salario_max?: number | null;
+    salario_modalidade?: string | null;
   };
   draggable?: boolean;
   onDragStart?: () => void;
@@ -118,6 +122,16 @@ export function VagaCard({ vaga, draggable = false, onDragStart, onClick }: Vaga
             </div>
           </div>
         </div>
+
+        {/* Salary Range */}
+        {(vaga.salario_min || vaga.salario_max || vaga.salario_modalidade) && (
+          <div className="pt-2 border-t border-border">
+            <p className="text-xs text-muted-foreground mb-1">Faixa Salarial</p>
+            <p className="text-sm font-semibold text-foreground">
+              {formatSalaryRange(vaga.salario_min, vaga.salario_max, vaga.salario_modalidade)}
+            </p>
+          </div>
+        )}
 
         {/* Progresso do Pipeline */}
         <div className="space-y-2">

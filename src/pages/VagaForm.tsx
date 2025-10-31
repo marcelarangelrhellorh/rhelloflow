@@ -11,10 +11,28 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, Save } from "lucide-react";
 import { toast } from "sonner";
 import { Constants } from "@/integrations/supabase/types";
+import { MultiSelect, MultiSelectOption } from "@/components/ui/multi-select";
+import { parseCurrency, applyCurrencyMask } from "@/lib/salaryUtils";
 
 const RECRUTADORES = ["Ítalo", "Bianca Marques", "Victor", "Mariana", "Isabella"];
 const CS_RESPONSAVEIS = ["Marcela Rangel", "Ana Carolina"];
 const DIAS_SEMANA = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
+
+const BENEFICIOS_OPTIONS: MultiSelectOption[] = [
+  { label: "VR (Vale Refeição)", value: "VR" },
+  { label: "VA (Vale Alimentação)", value: "VA" },
+  { label: "Convênio Médico", value: "Convênio Médico" },
+  { label: "Convênio Odontológico", value: "Convênio Odonto" },
+  { label: "Convênio Farmácia", value: "Convênio Farmácia" },
+  { label: "Seguro de Vida", value: "Seguro de Vida" },
+  { label: "PLR (Participação nos Lucros)", value: "PLR" },
+  { label: "Comissão", value: "Comissão" },
+  { label: "Wellhub (Gympass)", value: "Wellhub" },
+  { label: "Ajuda de Custo/Transporte", value: "Ajuda de Custo" },
+  { label: "VT (Vale Transporte)", value: "VT" },
+  { label: "Day Off", value: "Day Off" },
+  { label: "Outros", value: "Outros" },
+];
 
 export default function VagaForm() {
   const { id } = useParams();
@@ -32,11 +50,13 @@ export default function VagaForm() {
     status: "A iniciar",
     salario_min: "",
     salario_max: "",
+    salario_modalidade: "FAIXA" as "FAIXA" | "A_COMBINAR",
     modelo_trabalho: "",
     horario_inicio: "",
     horario_fim: "",
     dias_semana: [] as string[],
-    beneficios: "",
+    beneficios: [] as string[],
+    beneficios_outros: "",
     requisitos_obrigatorios: "",
     requisitos_desejaveis: "",
     responsabilidades: "",
@@ -71,11 +91,13 @@ export default function VagaForm() {
           status: data.status || "A iniciar",
           salario_min: data.salario_min?.toString() || "",
           salario_max: data.salario_max?.toString() || "",
+          salario_modalidade: (data.salario_modalidade as any) || "FAIXA",
           modelo_trabalho: data.modelo_trabalho || "",
           horario_inicio: data.horario_inicio || "",
           horario_fim: data.horario_fim || "",
           dias_semana: data.dias_semana || [],
-          beneficios: data.beneficios?.join(", ") || "",
+          beneficios: data.beneficios || [],
+          beneficios_outros: data.beneficios_outros || "",
           requisitos_obrigatorios: data.requisitos_obrigatorios || "",
           requisitos_desejaveis: data.requisitos_desejaveis || "",
           responsabilidades: data.responsabilidades || "",
@@ -93,6 +115,24 @@ export default function VagaForm() {
     setLoading(true);
 
     try {
+      // Validations
+      if (formData.salario_modalidade === "FAIXA") {
+        const salMin = parseCurrency(formData.salario_min);
+        const salMax = parseCurrency(formData.salario_max);
+        
+        if (!salMin && !salMax) {
+          toast.error("Informe pelo menos um valor de salário ou marque 'A combinar'");
+          setLoading(false);
+          return;
+        }
+        
+        if (salMin && salMax && salMin > salMax) {
+          toast.error("O salário mínimo não pode ser maior que o máximo");
+          setLoading(false);
+          return;
+        }
+      }
+
       const dataToSave = {
         titulo: formData.titulo,
         empresa: formData.empresa,
@@ -103,13 +143,15 @@ export default function VagaForm() {
         complexidade: (formData.complexidade || null) as any,
         prioridade: (formData.prioridade || null) as any,
         status: formData.status as any,
-        salario_min: formData.salario_min ? parseFloat(formData.salario_min) : null,
-        salario_max: formData.salario_max ? parseFloat(formData.salario_max) : null,
+        salario_min: formData.salario_modalidade === "A_COMBINAR" ? null : parseCurrency(formData.salario_min),
+        salario_max: formData.salario_modalidade === "A_COMBINAR" ? null : parseCurrency(formData.salario_max),
+        salario_modalidade: formData.salario_modalidade,
         modelo_trabalho: (formData.modelo_trabalho || null) as any,
         horario_inicio: formData.horario_inicio || null,
         horario_fim: formData.horario_fim || null,
         dias_semana: formData.dias_semana.length > 0 ? formData.dias_semana : null,
-        beneficios: formData.beneficios ? formData.beneficios.split(",").map(b => b.trim()) : null,
+        beneficios: formData.beneficios.length > 0 ? formData.beneficios : null,
+        beneficios_outros: formData.beneficios.includes("Outros") ? formData.beneficios_outros : null,
         requisitos_obrigatorios: formData.requisitos_obrigatorios || null,
         requisitos_desejaveis: formData.requisitos_desejaveis || null,
         responsabilidades: formData.responsabilidades || null,
@@ -283,28 +325,68 @@ export default function VagaForm() {
               <CardTitle>Detalhes da Vaga</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="salario_min">Salário Mínimo (R$)</Label>
-                  <Input
-                    id="salario_min"
-                    type="number"
-                    step="0.01"
-                    value={formData.salario_min}
-                    onChange={(e) => setFormData({ ...formData, salario_min: e.target.value })}
+              {/* Salário */}
+              <div className="space-y-3">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="salario_a_combinar"
+                    checked={formData.salario_modalidade === "A_COMBINAR"}
+                    onCheckedChange={(checked) => 
+                      setFormData({ 
+                        ...formData, 
+                        salario_modalidade: checked ? "A_COMBINAR" : "FAIXA",
+                        salario_min: "",
+                        salario_max: ""
+                      })
+                    }
                   />
+                  <Label htmlFor="salario_a_combinar">A combinar</Label>
                 </div>
 
-                <div>
-                  <Label htmlFor="salario_max">Salário Máximo (R$)</Label>
-                  <Input
-                    id="salario_max"
-                    type="number"
-                    step="0.01"
-                    value={formData.salario_max}
-                    onChange={(e) => setFormData({ ...formData, salario_max: e.target.value })}
-                  />
-                </div>
+                {formData.salario_modalidade === "FAIXA" && (
+                  <>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="salario_min">Salário Mínimo (R$)</Label>
+                        <Input
+                          id="salario_min"
+                          placeholder="5000"
+                          value={formData.salario_min}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/[^\d]/g, "");
+                            setFormData({ ...formData, salario_min: value });
+                          }}
+                          onBlur={(e) => {
+                            if (e.target.value) {
+                              setFormData({ ...formData, salario_min: applyCurrencyMask(e.target.value) });
+                            }
+                          }}
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="salario_max">Salário Máximo (R$)</Label>
+                        <Input
+                          id="salario_max"
+                          placeholder="8000"
+                          value={formData.salario_max}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/[^\d]/g, "");
+                            setFormData({ ...formData, salario_max: value });
+                          }}
+                          onBlur={(e) => {
+                            if (e.target.value) {
+                              setFormData({ ...formData, salario_max: applyCurrencyMask(e.target.value) });
+                            }
+                          }}
+                        />
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Digite apenas números; formatamos automaticamente (ex: 5000 → R$ 5.000)
+                    </p>
+                  </>
+                )}
               </div>
 
               <div>
@@ -365,15 +447,28 @@ export default function VagaForm() {
                 </div>
               </div>
 
+              {/* Benefícios */}
               <div>
-                <Label htmlFor="beneficios">Benefícios (separados por vírgula)</Label>
-                <Input
-                  id="beneficios"
-                  placeholder="VR, VT, Plano de Saúde"
+                <Label>Benefícios</Label>
+                <MultiSelect
+                  options={BENEFICIOS_OPTIONS}
                   value={formData.beneficios}
-                  onChange={(e) => setFormData({ ...formData, beneficios: e.target.value })}
+                  onChange={(value) => setFormData({ ...formData, beneficios: value })}
+                  placeholder="Selecione os benefícios oferecidos"
                 />
               </div>
+
+              {formData.beneficios.includes("Outros") && (
+                <div>
+                  <Label htmlFor="beneficios_outros">Especifique outros benefícios</Label>
+                  <Input
+                    id="beneficios_outros"
+                    placeholder="Ex: Auxílio home office, Bônus anual..."
+                    value={formData.beneficios_outros}
+                    onChange={(e) => setFormData({ ...formData, beneficios_outros: e.target.value })}
+                  />
+                </div>
+              )}
             </CardContent>
           </Card>
 

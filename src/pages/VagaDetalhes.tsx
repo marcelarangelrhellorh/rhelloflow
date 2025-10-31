@@ -6,6 +6,8 @@ import { ptBR } from "date-fns/locale";
 import { getBusinessDaysFromNow } from "@/lib/dateUtils";
 import { JOB_STAGES, getStageIndex, calculateProgress } from "@/lib/jobStages";
 import { getEventoIcon, getEventoColor, type TipoEvento } from "@/lib/vagaEventos";
+import { formatSalaryRange } from "@/lib/salaryUtils";
+import { ExternalJobBanner } from "@/components/ExternalJobBanner";
 import type { Database } from "@/integrations/supabase/types";
 
 type VagaEvento = {
@@ -30,15 +32,18 @@ type Vaga = {
   prioridade: string | null;
   salario_min: number | null;
   salario_max: number | null;
+  salario_modalidade: string | null;
   modelo_trabalho: string | null;
   horario_inicio: string | null;
   horario_fim: string | null;
   dias_semana: string[] | null;
   beneficios: string[] | null;
+  beneficios_outros: string | null;
   requisitos_obrigatorios: string | null;
   requisitos_desejaveis: string | null;
   responsabilidades: string | null;
   observacoes: string | null;
+  source: string | null;
 };
 
 type Candidato = {
@@ -237,6 +242,19 @@ export default function VagaDetalhes() {
       {/* Main Content */}
       <main className="flex-1 px-6 sm:px-10 lg:px-20 py-8">
         <div className="mx-auto max-w-7xl">
+          {/* External Job Banner */}
+          {vaga.source === "externo" && (
+            <div className="mb-6">
+              <ExternalJobBanner
+                vagaId={vaga.id}
+                recrutador={vaga.recrutador}
+                csResponsavel={vaga.cs_responsavel}
+                complexidade={vaga.complexidade}
+                prioridade={vaga.prioridade}
+              />
+            </div>
+          )}
+
           {/* Title Section */}
           <div className="mb-8">
             <h1 className="text-primary-text-light dark:text-primary-text-dark text-4xl font-black tracking-tight">
@@ -245,6 +263,11 @@ export default function VagaDetalhes() {
             <p className="text-secondary-text-light dark:text-secondary-text-dark text-base font-normal mt-2">
               Acompanhe o progresso do processo de contratação para a vaga de {vaga.titulo}, {vaga.empresa}.
             </p>
+            {(vaga.salario_min || vaga.salario_max || vaga.salario_modalidade) && (
+              <p className="text-secondary-text-light dark:text-secondary-text-dark text-sm font-medium mt-1">
+                Faixa Salarial: {formatSalaryRange(vaga.salario_min, vaga.salario_max, vaga.salario_modalidade)}
+              </p>
+            )}
           </div>
 
           {/* KPI Cards Grid */}

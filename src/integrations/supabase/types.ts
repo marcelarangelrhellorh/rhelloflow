@@ -250,6 +250,44 @@ export type Database = {
           },
         ]
       }
+      notificacoes: {
+        Row: {
+          created_at: string | null
+          id: string
+          lida: boolean | null
+          mensagem: string
+          tipo: string
+          titulo: string
+          vaga_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          lida?: boolean | null
+          mensagem: string
+          tipo: string
+          titulo: string
+          vaga_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          lida?: boolean | null
+          mensagem?: string
+          tipo?: string
+          titulo?: string
+          vaga_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notificacoes_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vagas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           body: string | null
@@ -360,6 +398,7 @@ export type Database = {
       vagas: {
         Row: {
           beneficios: string[] | null
+          beneficios_outros: string | null
           complexidade: Database["public"]["Enums"]["complexidade_vaga"] | null
           confidencial: boolean | null
           criado_em: string | null
@@ -380,6 +419,8 @@ export type Database = {
           responsabilidades: string | null
           salario_max: number | null
           salario_min: number | null
+          salario_modalidade: string | null
+          source: string | null
           status: Database["public"]["Enums"]["status_vaga"] | null
           status_changed_at: string | null
           titulo: string
@@ -387,6 +428,7 @@ export type Database = {
         }
         Insert: {
           beneficios?: string[] | null
+          beneficios_outros?: string | null
           complexidade?: Database["public"]["Enums"]["complexidade_vaga"] | null
           confidencial?: boolean | null
           criado_em?: string | null
@@ -409,6 +451,8 @@ export type Database = {
           responsabilidades?: string | null
           salario_max?: number | null
           salario_min?: number | null
+          salario_modalidade?: string | null
+          source?: string | null
           status?: Database["public"]["Enums"]["status_vaga"] | null
           status_changed_at?: string | null
           titulo: string
@@ -416,6 +460,7 @@ export type Database = {
         }
         Update: {
           beneficios?: string[] | null
+          beneficios_outros?: string | null
           complexidade?: Database["public"]["Enums"]["complexidade_vaga"] | null
           confidencial?: boolean | null
           criado_em?: string | null
@@ -438,6 +483,8 @@ export type Database = {
           responsabilidades?: string | null
           salario_max?: number | null
           salario_min?: number | null
+          salario_modalidade?: string | null
+          source?: string | null
           status?: Database["public"]["Enums"]["status_vaga"] | null
           status_changed_at?: string | null
           titulo?: string
