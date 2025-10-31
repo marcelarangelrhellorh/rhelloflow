@@ -5,8 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Search, Plus, Grid3x3, List, Star } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 import { CandidateCard } from "@/components/BancoTalentos/CandidateCard";
-import { AddCandidateModal } from "@/components/BancoTalentos/AddCandidateModal";
 import { CandidateProfileDrawer } from "@/components/BancoTalentos/CandidateProfileDrawer";
 import { LinkToJobModal } from "@/components/BancoTalentos/LinkToJobModal";
 import { differenceInDays } from "date-fns";
@@ -36,6 +36,7 @@ interface Candidato {
 }
 
 export default function BancoTalentos() {
+  const navigate = useNavigate();
   const [candidatos, setCandidatos] = useState<Candidato[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -44,7 +45,6 @@ export default function BancoTalentos() {
   const [cidadeFilter, setCidadeFilter] = useState<string>("");
   const [avaliacaoFilter, setAvaliacaoFilter] = useState<string>("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [showAddModal, setShowAddModal] = useState(false);
   const [selectedCandidate, setSelectedCandidate] = useState<Candidato | null>(null);
   const [showProfileDrawer, setShowProfileDrawer] = useState(false);
   const [showLinkJobModal, setShowLinkJobModal] = useState(false);
@@ -163,7 +163,7 @@ export default function BancoTalentos() {
           </div>
         </div>
         <Button 
-          onClick={() => setShowAddModal(true)}
+          onClick={() => navigate('/candidatos/novo')}
           className="bg-[#F9EC3F] hover:bg-[#E5D72E] text-[#00141D] font-bold"
         >
           <Plus className="mr-2 h-5 w-5" />
@@ -290,7 +290,7 @@ export default function BancoTalentos() {
             Cadastre novos ou acompanhe os processos em andamento.
           </p>
           <Button 
-            onClick={() => setShowAddModal(true)}
+            onClick={() => navigate('/candidatos/novo')}
             className="bg-[#F9EC3F] hover:bg-[#E5D72E] text-[#00141D] font-bold"
           >
             <Plus className="mr-2 h-5 w-5" />
@@ -316,15 +316,6 @@ export default function BancoTalentos() {
       )}
 
       {/* Modals */}
-      <AddCandidateModal
-        open={showAddModal}
-        onOpenChange={setShowAddModal}
-        onSuccess={() => {
-          loadCandidatos();
-          setShowAddModal(false);
-        }}
-      />
-
       {selectedCandidate && (
         <CandidateProfileDrawer
           open={showProfileDrawer}
