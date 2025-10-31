@@ -21,7 +21,9 @@ interface Vaga {
   empresa: string;
   recrutador: string | null;
   cs_responsavel?: string | null;
-  status: string;
+  status: string; // Legado
+  status_slug: string; // Novo campo padronizado
+  status_order: number; // Ordem no funil
   prioridade: string | null;
   criado_em: string | null;
   candidatos_count?: number;
@@ -30,7 +32,10 @@ interface Vaga {
 
 interface Stage {
   id: string;
+  slug: string;
   name: string;
+  order: number;
+  kind: "normal" | "final" | "frozen" | "paused" | "canceled";
   color: {
     bg: string;
     text: string;
@@ -41,8 +46,8 @@ interface Stage {
 interface PipelineBoardProps {
   jobs: Vaga[];
   stages: Stage[];
-  progresso: (status: string) => number;
-  onJobMove: (jobId: string, fromStage: string, toStage: string) => Promise<void>;
+  progresso: (statusSlug: string) => number;
+  onJobMove: (jobId: string, fromSlug: string, toSlug: string) => Promise<void>;
   onJobClick: (jobId: string) => void;
   onJobEdit: (jobId: string) => void;
   onJobMoveStage: (jobId: string) => void;
@@ -74,8 +79,8 @@ export function PipelineBoard({
     })
   );
 
-  const getJobsByStage = (stageName: string) => {
-    return jobs.filter((job) => job.status === stageName);
+  const getJobsByStage = (stageSlug: string) => {
+    return jobs.filter((job) => job.status_slug === stageSlug);
   };
 
   const handleDragStart = (event: DragStartEvent) => {
@@ -91,17 +96,17 @@ export function PipelineBoard({
     }
 
     const activeJob = jobs.find((j) => j.id === active.id);
-    const overStage = stages.find((s) => s.name === over.id);
+    const overStage = stages.find((s) => s.slug === over.id);
 
-    if (activeJob && overStage && activeJob.status !== overStage.name) {
-      await onJobMove(activeJob.id, activeJob.status, overStage.name);
+    if (activeJob && overStage && activeJob.status_slug !== overStage.slug) {
+      await onJobMove(activeJob.id, activeJob.status_slug, overStage.slug);
     }
 
     setActiveId(null);
   };
 
   const activeJob = activeId ? jobs.find((j) => j.id === activeId) : null;
-  const activeStage = activeJob ? stages.find((s) => s.name === activeJob.status) : null;
+  const activeStage = activeJob ? stages.find((s) => s.slug === activeJob.status_slug) : null;
 
   return (
     <DndContext
@@ -115,7 +120,7 @@ export function PipelineBoard({
           <Column
             key={stage.id}
             stage={stage}
-            jobs={getJobsByStage(stage.name)}
+            jobs={getJobsByStage(stage.slug)}
             progresso={progresso}
             onJobClick={onJobClick}
             onJobEdit={onJobEdit}
@@ -133,7 +138,7 @@ export function PipelineBoard({
               vaga={activeJob}
               stageColor={activeStage.color}
               diasEmAberto={getBusinessDaysFromNow(activeJob.criado_em || "")}
-              progresso={progresso(activeJob.status)}
+              progresso={progresso(activeJob.status_slug)}
               onDragStart={() => {}}
               onView={() => {}}
               onEdit={() => {}}

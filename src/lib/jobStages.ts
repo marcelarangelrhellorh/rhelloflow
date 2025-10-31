@@ -1,106 +1,204 @@
 // Definição centralizada das etapas do funil de vagas
+// Agora padronizado e sincronizado com a tabela vaga_status_ref
 
 export const JOB_STAGES = [
   {
     id: "a-iniciar",
+    slug: "a_iniciar",
     name: "A iniciar",
+    order: 1,
+    kind: "normal" as const,
     color: {
-      bg: "#BFFCC5",
-      text: "#1C7C2E",
-      columnBg: "#F9FFF9",
+      bg: "#16A34A",
+      text: "#FFFFFF",
+      columnBg: "#F0FDF4",
     },
   },
   {
     id: "discovery",
+    slug: "discovery",
     name: "Discovery",
+    order: 2,
+    kind: "normal" as const,
     color: {
-      bg: "#CDEAFF",
-      text: "#005C99",
-      columnBg: "#F8FBFF",
+      bg: "#2563EB",
+      text: "#FFFFFF",
+      columnBg: "#EFF6FF",
+    },
+  },
+  {
+    id: "divulgacao",
+    slug: "divulgacao",
+    name: "Divulgação",
+    order: 3,
+    kind: "normal" as const,
+    color: {
+      bg: "#0EA5E9",
+      text: "#FFFFFF",
+      columnBg: "#F0F9FF",
     },
   },
   {
     id: "triagem",
+    slug: "triagem",
     name: "Triagem",
+    order: 4,
+    kind: "normal" as const,
     color: {
-      bg: "#E4D4FF",
-      text: "#5A38A0",
-      columnBg: "#FBF9FF",
+      bg: "#7C3AED",
+      text: "#FFFFFF",
+      columnBg: "#F5F3FF",
     },
   },
   {
     id: "entrevistas-rhello",
-    name: "Entrevistas Rhello",
+    slug: "entrevistas_rhello",
+    name: "Entrevistas rhello",
+    order: 5,
+    kind: "normal" as const,
     color: {
-      bg: "#FFE3C3",
-      text: "#A35900",
-      columnBg: "#FFFCF7",
+      bg: "#FB923C",
+      text: "#FFFFFF",
+      columnBg: "#FFF7ED",
     },
   },
   {
     id: "aguardando-retorno-cliente",
+    slug: "aguardando_retorno_cliente",
     name: "Aguardando retorno do cliente",
+    order: 6,
+    kind: "normal" as const,
     color: {
-      bg: "#FFD6E8",
-      text: "#99004D",
-      columnBg: "#FFF8FB",
+      bg: "#F59E0B",
+      text: "#FFFFFF",
+      columnBg: "#FFFBEB",
     },
   },
   {
     id: "apresentacao-candidatos",
-    name: "Apresentação de Candidatos",
+    slug: "apresentacao_candidatos",
+    name: "Apresentação de candidatos",
+    order: 7,
+    kind: "normal" as const,
     color: {
-      bg: "#FFF2B8",
-      text: "#7A6000",
-      columnBg: "#FFFEF5",
+      bg: "#10B981",
+      text: "#FFFFFF",
+      columnBg: "#ECFDF5",
     },
   },
   {
-    id: "entrevista-cliente",
-    name: "Entrevista cliente",
+    id: "entrevistas-solicitante",
+    slug: "entrevistas_solicitante",
+    name: "Entrevistas solicitante",
+    order: 8,
+    kind: "normal" as const,
     color: {
-      bg: "#FFE3C3",
-      text: "#A35900",
-      columnBg: "#FFFCF7",
+      bg: "#14B8A6",
+      text: "#FFFFFF",
+      columnBg: "#F0FDFA",
     },
   },
   {
     id: "em-processo-contratacao",
+    slug: "em_processo_contratacao",
     name: "Em processo de contratação",
+    order: 9,
+    kind: "normal" as const,
     color: {
-      bg: "#D4F4DD",
-      text: "#0D5C1F",
-      columnBg: "#F7FEF9",
+      bg: "#6366F1",
+      text: "#FFFFFF",
+      columnBg: "#EEF2FF",
     },
   },
   {
-    id: "concluido",
-    name: "Concluído",
+    id: "concluida",
+    slug: "concluida",
+    name: "Concluída",
+    order: 10,
+    kind: "final" as const,
     color: {
-      bg: "#BFFCC5",
-      text: "#1C7C2E",
-      columnBg: "#F9FFF9",
+      bg: "#22C55E",
+      text: "#FFFFFF",
+      columnBg: "#F0FDF4",
+    },
+  },
+  {
+    id: "congelada",
+    slug: "congelada",
+    name: "Congelada",
+    order: 11,
+    kind: "frozen" as const,
+    color: {
+      bg: "#94A3B8",
+      text: "#FFFFFF",
+      columnBg: "#F8FAFC",
+    },
+  },
+  {
+    id: "pausada",
+    slug: "pausada",
+    name: "Pausada",
+    order: 12,
+    kind: "paused" as const,
+    color: {
+      bg: "#E5E7EB",
+      text: "#374151",
+      columnBg: "#F9FAFB",
     },
   },
   {
     id: "cancelada",
+    slug: "cancelada",
     name: "Cancelada",
+    order: 13,
+    kind: "canceled" as const,
     color: {
-      bg: "#FFD4D4",
-      text: "#991F1F",
-      columnBg: "#FFF8F8",
+      bg: "#EF4444",
+      text: "#FFFFFF",
+      columnBg: "#FEF2F2",
     },
   },
 ];
 
+export type JobStageKind = "normal" | "final" | "frozen" | "paused" | "canceled";
+
 export type JobStage = (typeof JOB_STAGES)[number];
 
-export const getStageIndex = (stageName: string): number => {
-  return JOB_STAGES.findIndex(stage => stage.name === stageName);
+// Buscar stage por nome ou slug
+export const getStageByName = (stageName: string): JobStage | undefined => {
+  return JOB_STAGES.find(stage => stage.name === stageName || stage.slug === stageName);
 };
 
-export const calculateProgress = (status: string): number => {
-  const stageIndex = getStageIndex(status);
-  if (stageIndex === -1) return 0;
-  return Math.round(((stageIndex + 1) / JOB_STAGES.length) * 100);
+// Buscar stage por slug
+export const getStageBySlug = (slug: string): JobStage | undefined => {
+  return JOB_STAGES.find(stage => stage.slug === slug);
+};
+
+export const getStageIndex = (stageName: string): number => {
+  return JOB_STAGES.findIndex(stage => stage.name === stageName || stage.slug === stageName);
+};
+
+// Calcular progresso baseado na ordem do status
+export const calculateProgress = (statusOrSlug: string): number => {
+  const stage = getStageByName(statusOrSlug) || getStageBySlug(statusOrSlug);
+  if (!stage) return 0;
+  
+  // Para estados finais, retornar 100%
+  if (stage.kind === 'final') return 100;
+  
+  // Para estados congelados/pausados/cancelados, usar ordem atual
+  const totalNormalStages = JOB_STAGES.filter(s => s.kind === 'normal').length;
+  return Math.round((stage.order / totalNormalStages) * 100);
+};
+
+// Mapear status legado para slug (para compatibilidade)
+export const mapLegacyStatusToSlug = (oldStatus: string): string => {
+  const stage = getStageByName(oldStatus);
+  return stage ? stage.slug : 'a_iniciar';
+};
+
+// Mapear slug para label (para exibição)
+export const getStatusLabel = (slugOrName: string): string => {
+  const stage = getStageBySlug(slugOrName) || getStageByName(slugOrName);
+  return stage ? stage.name : slugOrName;
 };

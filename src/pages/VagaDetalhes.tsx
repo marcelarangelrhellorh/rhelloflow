@@ -30,7 +30,9 @@ type Vaga = {
   id: string;
   titulo: string;
   empresa: string;
-  status: string;
+  status: string; // Legado - ainda usado para exibição
+  status_slug: string; // Novo campo padronizado
+  status_order: number; // Ordem no funil
   criado_em: string;
   confidencial: boolean | null;
   motivo_confidencial: string | null;
@@ -176,15 +178,30 @@ export default function VagaDetalhes() {
     }
   };
 
-  const handleStatusChange = async (newStatus: string) => {
+  const handleStatusChange = async (newStatusSlug: string) => {
     if (!id || !vaga) return;
+    
+    // Buscar stage pelo slug
+    const newStage = JOB_STAGES.find(s => s.slug === newStatusSlug);
+    if (!newStage) {
+      toast({
+        title: "Erro",
+        description: "Status inválido selecionado.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     try {
-      // Atualizar status da vaga
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      // Atualizar status da vaga com os novos campos
       const { error: updateError } = await supabase
         .from("vagas")
         .update({ 
-          status: newStatus as Database['public']['Enums']['status_vaga'],
+          status: newStage.name as Database['public']['Enums']['status_vaga'], // Manter compatibilidade
+          status_slug: newStage.slug,
+          status_order: newStage.order,
           status_changed_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         })
@@ -195,22 +212,29 @@ export default function VagaDetalhes() {
       // Registrar evento
       await logVagaEvento({
         vagaId: id,
-        actorUserId: null,
+        actorUserId: user?.id || null,
         tipo: "ETAPA_ALTERADA",
-        descricao: `Etapa da vaga alterada para "${newStatus}"`,
+        descricao: `Etapa da vaga alterada de "${vaga.status}" para "${newStage.name}"`,
         payload: { 
-          status_anterior: vaga.status, 
-          status_novo: newStatus 
+          status_anterior: vaga.status,
+          status_anterior_slug: vaga.status_slug,
+          status_novo: newStage.name,
+          status_novo_slug: newStage.slug
         }
       });
 
       // Atualizar estado local
-      setVaga({ ...vaga, status: newStatus });
+      setVaga({ 
+        ...vaga, 
+        status: newStage.name, 
+        status_slug: newStage.slug, 
+        status_order: newStage.order 
+      });
 
       // Mostrar toast de sucesso
       toast({
         title: "Etapa atualizada",
-        description: `Etapa da vaga atualizada para ${newStatus} com sucesso.`,
+        description: `Etapa da vaga atualizada para ${newStage.name} com sucesso.`,
       });
 
       // Recarregar dados
@@ -226,14 +250,15 @@ export default function VagaDetalhes() {
     }
   };
 
-  const getTimelineSteps = (currentStatus: string) => {
-    const currentIndex = getStageIndex(currentStatus);
+  const getTimelineSteps = (currentStatusSlug: string) => {
+    const currentStage = JOB_STAGES.find(s => s.slug === currentStatusSlug);
+    const currentIndex = currentStage ? currentStage.order - 1 : 0;
     
-    return JOB_STAGES.map((stage, index) => ({
+    return JOB_STAGES.map((stage) => ({
       label: stage.name,
       dates: "",
-      status: index < currentIndex ? "completed" as const : 
-              index === currentIndex ? "current" as const : 
+      status: stage.order - 1 < currentIndex ? "completed" as const : 
+              stage.order - 1 === currentIndex ? "current" as const : 
               "pending" as const,
       color: stage.color
     }));
@@ -310,9 +335,9 @@ export default function VagaDetalhes() {
   }
 
   const daysOpen = getBusinessDaysFromNow(vaga.criado_em);
-  const timelineSteps = getTimelineSteps(vaga.status);
+  const timelineSteps = getTimelineSteps(vaga.status_slug || 'a_iniciar');
   const activities = getRecentActivities();
-  const progress = calculateProgress(vaga.status);
+  const progress = calculateProgress(vaga.status_slug || 'a_iniciar');
 
   return (
     <div className="relative flex min-h-screen w-full flex-col font-display bg-background-light dark:bg-background-dark">
@@ -354,9 +379,9 @@ export default function VagaDetalhes() {
                 Etapa Atual da Contratação
               </p>
               <Select
-                value={vaga.status}
+                value={vaga.status_slug || 'a_iniciar'}
                 onValueChange={handleStatusChange}
-                disabled={vaga.status === "Concluído"}
+                disabled={vaga.status_slug === "concluida"}
               >
                 <SelectTrigger className="w-full bg-white dark:bg-background-dark border-border hover:bg-primary/5 transition-colors">
                   <SelectValue />
@@ -365,18 +390,18 @@ export default function VagaDetalhes() {
                   {JOB_STAGES.map((stage) => (
                     <SelectItem 
                       key={stage.id} 
-                      value={stage.name}
+                      value={stage.slug}
                       className="cursor-pointer hover:bg-primary/10"
                     >
-                      <span className={vaga.status === stage.name ? "font-bold" : ""}>
-                        {vaga.status === stage.name && "✅ "}
+                      <span className={vaga.status_slug === stage.slug ? "font-bold" : ""}>
+                        {vaga.status_slug === stage.slug && "✅ "}
                         {stage.name}
                       </span>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              {vaga.status === "Concluído" && (
+              {vaga.status_slug === "concluida" && (
                 <p className="text-xs text-secondary-text-light dark:text-secondary-text-dark">
                   Etapa bloqueada - vaga concluída
                 </p>

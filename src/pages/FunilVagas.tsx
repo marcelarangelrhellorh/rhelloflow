@@ -9,6 +9,7 @@ import { FilterBar } from "@/components/FunilVagas/FilterBar";
 import { PipelineBoard } from "@/components/FunilVagas/PipelineBoard";
 import { JobDrawer } from "@/components/FunilVagas/JobDrawer";
 import { JOB_STAGES, calculateProgress } from "@/lib/jobStages";
+import { logVagaEvento } from "@/lib/vagaEventos";
 
 interface Vaga {
   id: string;
@@ -16,7 +17,9 @@ interface Vaga {
   empresa: string;
   recrutador: string | null;
   cs_responsavel: string | null;
-  status: string;
+  status: string; // Legado - ainda usado para exibição
+  status_slug: string; // Novo campo padronizado
+  status_order: number; // Ordem no funil
   prioridade: string | null;
   criado_em: string | null;
   candidatos_count?: number;
@@ -52,12 +55,12 @@ export default function FunilVagas() {
     try {
       setLoading(true);
 
-      // Load jobs
+      // Load jobs - excluir apenas vagas canceladas
       const { data: jobsData, error: jobsError } = await supabase
         .from("vagas")
         .select("*")
-        .not("status", "in", '("Cancelada")')
-        .order("criado_em", { ascending: false });
+        .neq("status_slug", "cancelada")
+        .order("status_order", { ascending: true });
 
       if (jobsError) throw jobsError;
 
@@ -97,15 +100,26 @@ export default function FunilVagas() {
     }
   };
 
-  const handleJobMove = async (jobId: string, fromStage: string, toStage: string) => {
+  const handleJobMove = async (jobId: string, fromSlug: string, toSlug: string) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
+      
+      // Buscar stage de origem e destino
+      const fromStage = JOB_STAGES.find(s => s.slug === fromSlug);
+      const toStage = JOB_STAGES.find(s => s.slug === toSlug);
+      
+      if (!toStage) {
+        toast.error("Etapa de destino inválida");
+        return;
+      }
 
-      // Update job status
+      // Update job status usando slug e order
       const { error: updateError } = await supabase
         .from("vagas")
         .update({
-          status: toStage as any,
+          status: toStage.name as any, // Manter compatibilidade com enum legado
+          status_slug: toStage.slug,
+          status_order: toStage.order,
           status_changed_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         })
@@ -118,21 +132,32 @@ export default function FunilVagas() {
         .from("job_stage_history")
         .insert({
           job_id: jobId,
-          from_status: fromStage,
-          to_status: toStage,
+          from_status: fromStage?.name || fromSlug,
+          to_status: toStage.name,
           changed_by: user?.id,
         });
 
       if (historyError) console.error("Error recording history:", historyError);
+      
+      // Log evento da vaga
+      await logVagaEvento({
+        vagaId: jobId,
+        actorUserId: user?.id,
+        tipo: "ETAPA_ALTERADA",
+        descricao: `Etapa alterada de "${fromStage?.name || fromSlug}" para "${toStage.name}"`,
+        payload: { from: fromSlug, to: toSlug }
+      });
 
       // Update local state
       setJobs((prev) =>
         prev.map((job) =>
-          job.id === jobId ? { ...job, status: toStage as any } : job
+          job.id === jobId 
+            ? { ...job, status: toStage.name as any, status_slug: toStage.slug, status_order: toStage.order } 
+            : job
         )
       );
 
-      toast.success(`Vaga movida para ${toStage}`);
+      toast.success(`Vaga movida para ${toStage.name}`);
     } catch (error) {
       console.error("Error moving job:", error);
       toast.error("Erro ao mover vaga");
@@ -181,7 +206,7 @@ export default function FunilVagas() {
   // Calculate stats
   const totalJobs = filteredJobs.length;
   const jobsByStage = JOB_STAGES.reduce((acc, stage) => {
-    acc[stage.name] = filteredJobs.filter((j) => j.status === stage.name).length;
+    acc[stage.name] = filteredJobs.filter((j) => j.status_slug === stage.slug).length;
     return acc;
   }, {} as Record<string, number>);
 

@@ -11,7 +11,9 @@ interface Vaga {
   empresa: string;
   recrutador: string | null;
   cs_responsavel?: string | null;
-  status: string;
+  status: string; // Legado
+  status_slug: string; // Novo campo padronizado
+  status_order: number; // Ordem no funil
   prioridade: string | null;
   criado_em: string | null;
   candidatos_count?: number;
@@ -21,7 +23,10 @@ interface Vaga {
 interface ColumnProps {
   stage: {
     id: string;
+    slug: string;
     name: string;
+    order: number;
+    kind: "normal" | "final" | "frozen" | "paused" | "canceled";
     color: {
       bg: string;
       text: string;
@@ -29,7 +34,7 @@ interface ColumnProps {
     };
   };
   jobs: Vaga[];
-  progresso: (status: string) => number;
+  progresso: (statusSlug: string) => number;
   onJobClick: (jobId: string) => void;
   onJobEdit: (jobId: string) => void;
   onJobMoveStage: (jobId: string) => void;
@@ -48,7 +53,7 @@ export function Column({
   onJobClose
 }: ColumnProps) {
   const { setNodeRef, isOver } = useDroppable({
-    id: stage.name, // Use stage name as droppable ID to match job status
+    id: stage.slug, // Use stage slug as droppable ID
   });
 
   return (
@@ -96,7 +101,7 @@ export function Column({
                 vaga={vaga}
                 stageColor={stage.color}
                 diasEmAberto={getBusinessDaysFromNow(vaga.criado_em || "")}
-                progresso={progresso(vaga.status)}
+                progresso={progresso(vaga.status_slug)}
                 onDragStart={() => {}}
                 onView={() => onJobClick(vaga.id)}
                 onEdit={() => onJobEdit(vaga.id)}
