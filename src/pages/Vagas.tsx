@@ -29,9 +29,17 @@ type Vaga = {
   candidatos_count?: number;
 };
 
+type StatusRef = {
+  slug: string;
+  label: string;
+  color: string;
+  order: number;
+};
+
 export default function Vagas() {
   const navigate = useNavigate();
   const [vagas, setVagas] = useState<Vaga[]>([]);
+  const [statusOptions, setStatusOptions] = useState<StatusRef[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -42,8 +50,23 @@ export default function Vagas() {
   const attentionIds = searchParams.get('ids')?.split(',') || [];
 
   useEffect(() => {
+    loadStatusOptions();
     loadVagas();
   }, []);
+
+  const loadStatusOptions = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("vaga_status_ref")
+        .select("slug, label, color, order")
+        .order("order");
+
+      if (error) throw error;
+      setStatusOptions(data || []);
+    } catch (error) {
+      console.error("Erro ao carregar status:", error);
+    }
+  };
 
   const loadVagas = async () => {
     try {
@@ -182,12 +205,11 @@ export default function Vagas() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos os status</SelectItem>
-            <SelectItem value="A iniciar">A iniciar</SelectItem>
-            <SelectItem value="Discovery">Discovery</SelectItem>
-            <SelectItem value="Triagem">Triagem</SelectItem>
-            <SelectItem value="Entrevistas Rhello">Entrevistas Rhello</SelectItem>
-            <SelectItem value="Concluído">Concluído</SelectItem>
-            <SelectItem value="Cancelada">Cancelada</SelectItem>
+            {statusOptions.map((status) => (
+              <SelectItem key={status.slug} value={status.label}>
+                {status.label}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
