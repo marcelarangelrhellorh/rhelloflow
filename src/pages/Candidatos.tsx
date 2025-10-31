@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Plus, Search, User, MapPin, Briefcase } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { StatusBadge } from "@/components/StatusBadge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { StatsHeader } from "@/components/Candidatos/StatsHeader";
+import { FilterBar } from "@/components/Candidatos/FilterBar";
+import { CandidateCard } from "@/components/Candidatos/CandidateCard";
+import { CandidateModal } from "@/components/Candidatos/CandidateModal";
+import { LinkToJobModal } from "@/components/BancoTalentos/LinkToJobModal";
 
 type Candidato = {
   id: string;
@@ -29,6 +31,12 @@ export default function Candidatos() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [recrutadorFilter, setRecrutadorFilter] = useState<string>("all");
+  const [areaFilter, setAreaFilter] = useState<string>("all");
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [linkingJobId, setLinkingJobId] = useState<string | null>(null);
 
   useEffect(() => {
     loadCandidatos();
@@ -51,107 +59,166 @@ export default function Candidatos() {
     }
   };
 
+  const handleDelete = async () => {
+    if (!deletingId) return;
+
+    try {
+      const { error } = await supabase
+        .from("candidatos")
+        .delete()
+        .eq("id", deletingId);
+
+      if (error) throw error;
+
+      toast.success("Candidato excluído com sucesso");
+      loadCandidatos();
+    } catch (error) {
+      console.error("Erro ao excluir candidato:", error);
+      toast.error("Erro ao excluir candidato");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   const filteredCandidatos = candidatos.filter((candidato) => {
-    const matchesSearch = candidato.nome_completo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      candidato.email.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = 
+      candidato.nome_completo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      candidato.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (candidato.cidade && candidato.cidade.toLowerCase().includes(searchTerm.toLowerCase()));
+    
     const matchesStatus = statusFilter === "all" || candidato.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    const matchesRecrutador = recrutadorFilter === "all" || candidato.recrutador === recrutadorFilter;
+    const matchesArea = areaFilter === "all" || candidato.area === areaFilter;
+    
+    return matchesSearch && matchesStatus && matchesRecrutador && matchesArea;
   });
 
-  const getStatusType = (status: string): "active" | "pending" | "cancelled" | "completed" => {
-    if (status === "Contratado") return "completed";
-    if (status.includes("Reprovado")) return "cancelled";
-    if (status === "Banco de Talentos") return "pending";
-    return "active";
-  };
+  // Get unique values for filters
+  const recrutadores = Array.from(new Set(candidatos.map(c => c.recrutador).filter(Boolean))) as string[];
+  const areas = Array.from(new Set(candidatos.map(c => c.area).filter(Boolean))) as string[];
+
+  // Calculate stats
+  const statsByStatus = candidatos.reduce((acc, c) => {
+    acc[c.status] = (acc[c.status] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-secondary/30">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
       </div>
     );
   }
 
   return (
-    <div className="p-8">
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Candidatos</h1>
-          <p className="text-muted-foreground">Gerencie todos os candidatos</p>
+    <div className="min-h-screen bg-secondary/30">
+      {/* Header - Fixed */}
+      <div className="sticky top-0 z-20 bg-background border-b border-border">
+        <div className="px-6 py-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h1 className="text-3xl font-bold text-foreground">Candidatos</h1>
+              <p className="text-muted-foreground mt-1">Gerencie todos os candidatos</p>
+            </div>
+            <Button onClick={() => setModalOpen(true)} size="lg">
+              <Plus className="mr-2 h-5 w-5" />
+              Novo Candidato
+            </Button>
+          </div>
+
+          {/* Stats */}
+          <StatsHeader total={candidatos.length} byStatus={statsByStatus} />
+
+          {/* Filters */}
+          <div className="mt-4">
+            <FilterBar
+              searchTerm={searchTerm}
+              onSearchChange={setSearchTerm}
+              statusFilter={statusFilter}
+              onStatusChange={setStatusFilter}
+              recrutadorFilter={recrutadorFilter}
+              onRecrutadorChange={setRecrutadorFilter}
+              areaFilter={areaFilter}
+              onAreaChange={setAreaFilter}
+              recrutadores={recrutadores}
+              areas={areas}
+            />
+          </div>
         </div>
-        <Button onClick={() => navigate("/candidatos/novo")}>
-          <Plus className="mr-2 h-5 w-5" />
-          Novo Candidato
-        </Button>
       </div>
 
-      <div className="mb-6 flex gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Buscar candidatos..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[220px]">
-            <SelectValue placeholder="Filtrar por status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos os status</SelectItem>
-            <SelectItem value="Banco de Talentos">Banco de Talentos</SelectItem>
-            <SelectItem value="Triado para a vaga">Triado para a vaga</SelectItem>
-            <SelectItem value="Entrevista rhello">Entrevista Rhello</SelectItem>
-            <SelectItem value="Aprovado rhello">Aprovado Rhello</SelectItem>
-            <SelectItem value="Contratado">Contratado</SelectItem>
-          </SelectContent>
-        </Select>
+      {/* Cards Grid */}
+      <div className="px-6 py-6">
+        {filteredCandidatos.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="mb-4 rounded-full bg-primary/10 p-6">
+              <Plus className="h-12 w-12 text-primary" />
+            </div>
+            <h3 className="text-xl font-semibold text-foreground mb-2">
+              Nenhum candidato encontrado
+            </h3>
+            <p className="text-muted-foreground mb-6 max-w-md">
+              💛 Adicione um novo clicando em "+ Novo Candidato"
+            </p>
+            <Button onClick={() => setModalOpen(true)} size="lg">
+              <Plus className="mr-2 h-5 w-5" />
+              Novo Candidato
+            </Button>
+          </div>
+        ) : (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {filteredCandidatos.map((candidato) => (
+              <CandidateCard
+                key={candidato.id}
+                candidato={candidato}
+                onView={() => navigate(`/candidatos/${candidato.id}`)}
+                onEdit={() => {
+                  setEditingId(candidato.id);
+                  setModalOpen(true);
+                }}
+                onDelete={() => setDeletingId(candidato.id)}
+                onLinkJob={() => setLinkingJobId(candidato.id)}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {filteredCandidatos.map((candidato) => (
-          <Card
-            key={candidato.id}
-            className="cursor-pointer transition-shadow hover:shadow-lg"
-            onClick={() => navigate(`/candidatos/${candidato.id}`)}
-          >
-            <CardHeader>
-              <div className="mb-2 flex items-start justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="rounded-lg bg-info/10 p-2">
-                    <User className="h-5 w-5 text-info" />
-                  </div>
-                  <StatusBadge status={candidato.status} type={getStatusType(candidato.status)} />
-                </div>
-              </div>
-              <CardTitle className="text-lg">{candidato.nome_completo}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Briefcase className="h-4 w-4" />
-                {candidato.nivel} - {candidato.area}
-              </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <MapPin className="h-4 w-4" />
-                {candidato.cidade}, {candidato.estado}
-              </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <User className="h-4 w-4" />
-                {candidato.recrutador || "Não atribuído"}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      {/* Modals */}
+      <CandidateModal
+        open={modalOpen}
+        onClose={() => {
+          setModalOpen(false);
+          setEditingId(null);
+        }}
+        candidatoId={editingId}
+        onSave={loadCandidatos}
+      />
 
-      {filteredCandidatos.length === 0 && (
-        <div className="py-12 text-center">
-          <p className="text-muted-foreground">Nenhum candidato encontrado</p>
-        </div>
-      )}
+      <LinkToJobModal
+        open={!!linkingJobId}
+        onOpenChange={() => setLinkingJobId(null)}
+        candidateId={linkingJobId || ""}
+        onSuccess={loadCandidatos}
+      />
+
+      <AlertDialog open={!!deletingId} onOpenChange={() => setDeletingId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir este candidato? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
