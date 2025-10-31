@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
@@ -9,6 +9,9 @@ import { getEventoIcon, getEventoColor, type TipoEvento, logVagaEvento } from "@
 import { formatSalaryRange } from "@/lib/salaryUtils";
 import { ExternalJobBanner } from "@/components/ExternalJobBanner";
 import { toast } from "@/hooks/use-toast";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Progress } from "@/components/ui/progress";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   Select,
   SelectContent,
@@ -240,6 +243,14 @@ export default function VagaDetalhes() {
       // Recarregar dados
       loadVaga();
       loadEventos();
+      
+      // Scroll para etapa atual após pequeno delay
+      setTimeout(() => {
+        const currentStepElement = document.getElementById("current-step");
+        if (currentStepElement) {
+          currentStepElement.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+        }
+      }, 300);
     } catch (error) {
       console.error("Erro ao atualizar status da vaga:", error);
       toast({
@@ -436,37 +447,84 @@ export default function VagaDetalhes() {
                 Linha do Tempo do Processo
               </h2>
 
-              <div className="relative flex flex-col md:flex-row justify-between w-full text-center text-sm font-medium text-secondary-text-light dark:text-secondary-text-dark px-4 mb-12">
-                {/* Progress bar background */}
-                <div className="absolute top-4 left-0 w-full h-1 bg-gray-200 dark:bg-secondary-text-light/20 rounded-full">
-                  <div className="h-1 bg-primary rounded-full transition-all duration-500" style={{ width: `${progress}%` }}></div>
-                </div>
-
-                {/* Timeline Steps */}
-                {timelineSteps.map((step, index) => (
-                  <div key={index} className={`relative flex-1 flex flex-col items-center ${step.status === "pending" ? "opacity-50" : ""}`}>
-                    <div 
-                      className={`w-8 h-8 rounded-full flex items-center justify-center z-10 transition-all`}
-                      style={{
-                        backgroundColor: step.status === "pending" ? "#e5e7eb" : step.color.bg,
-                        opacity: step.status === "current" ? 1 : step.status === "completed" ? 0.9 : 0.5
-                      }}
-                    >
-                      {step.status === "completed" && (
-                        <span className="material-symbols-outlined text-xl" style={{ color: step.color.text }}>check</span>
-                      )}
-                      {step.status === "current" && (
-                        <div className="w-3 h-3 rounded-full animate-pulse" style={{ backgroundColor: step.color.text }}></div>
-                      )}
+              <div className="mb-12">
+                <ScrollArea className="w-full">
+                  <div className="relative min-w-max pb-2">
+                    <div className="flex items-center gap-8 px-4">
+                      {/* Timeline Steps */}
+                      {timelineSteps.map((step, index) => (
+                        <TooltipProvider key={index}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div 
+                                id={step.status === "current" ? "current-step" : undefined}
+                                className="relative flex flex-col items-center min-w-[140px]"
+                                style={{ opacity: step.status === "pending" ? 0.5 : 1 }}
+                              >
+                                {/* Connector Line */}
+                                {index < timelineSteps.length - 1 && (
+                                  <div 
+                                    className="absolute left-1/2 top-[20px] h-[2px] w-[calc(100%+32px)] -translate-y-1/2"
+                                    style={{
+                                      backgroundColor: step.status === "completed" ? "#F9EC3F" : "#E5E7EB",
+                                      zIndex: 0
+                                    }}
+                                  />
+                                )}
+                                
+                                {/* Step Circle */}
+                                <div 
+                                  className="relative z-10 flex h-10 w-10 items-center justify-center rounded-full transition-all mb-3"
+                                  style={{
+                                    backgroundColor: step.status === "pending" ? "#D1D5DB" : 
+                                                   step.status === "current" ? "#ffffff" :
+                                                   "#F9EC3F",
+                                    border: step.status === "current" ? "3px solid #F9EC3F" : "none"
+                                  }}
+                                >
+                                  {step.status === "completed" && (
+                                    <span className="material-symbols-outlined text-xl" style={{ color: "#00141D" }}>check</span>
+                                  )}
+                                  {step.status === "current" && (
+                                    <div className="h-4 w-4 rounded-full animate-pulse" style={{ backgroundColor: "#F9EC3F" }}></div>
+                                  )}
+                                </div>
+                                
+                                {/* Step Label */}
+                                <p 
+                                  className={`text-center text-xs font-semibold whitespace-nowrap ${
+                                    step.status === "current" ? "text-[#00141D]" : 
+                                    step.status === "pending" ? "text-[#9CA3AF]" : 
+                                    "text-[#00141D]"
+                                  }`}
+                                >
+                                  {step.label}
+                                </p>
+                                
+                                {step.status === "current" && (
+                                  <p className="text-[10px] text-[#F9EC3F] mt-1 font-medium">Em Progresso</p>
+                                )}
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>{step.label}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      ))}
                     </div>
-                    <p 
-                      className={`mt-2 text-sm ${step.status === "current" ? "font-bold" : ""}`}
-                      style={{ color: step.status === "pending" ? "#9ca3af" : step.color.text }}
-                    >
-                      {step.label}
-                    </p>
                   </div>
-                ))}
+                  <ScrollBar orientation="horizontal" />
+                </ScrollArea>
+                
+                {/* Progress Indicator */}
+                <div className="mt-4 px-4">
+                  <div className="flex items-center justify-between text-xs text-secondary-text-light dark:text-secondary-text-dark mb-1">
+                    <span>Progresso</span>
+                    <span className="font-semibold">{Math.round(progress)}%</span>
+                  </div>
+                  <Progress value={progress} className="h-2" indicatorClassName="bg-[#F9EC3F]" />
+                </div>
               </div>
 
               {/* Candidato Contratado Banner */}
