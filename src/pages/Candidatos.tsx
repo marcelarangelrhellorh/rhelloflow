@@ -8,7 +8,6 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { StatsHeader } from "@/components/Candidatos/StatsHeader";
 import { FilterBar } from "@/components/Candidatos/FilterBar";
 import { CandidateCard } from "@/components/Candidatos/CandidateCard";
-import { CandidateModal } from "@/components/Candidatos/CandidateModal";
 import { LinkToJobModal } from "@/components/BancoTalentos/LinkToJobModal";
 
 type Candidato = {
@@ -33,8 +32,6 @@ export default function Candidatos() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [recrutadorFilter, setRecrutadorFilter] = useState<string>("all");
   const [areaFilter, setAreaFilter] = useState<string>("all");
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [linkingJobId, setLinkingJobId] = useState<string | null>(null);
 
@@ -135,7 +132,7 @@ export default function Candidatos() {
               <h1 className="text-2xl font-bold text-foreground">Candidatos</h1>
               <p className="text-sm text-muted-foreground mt-0.5">Gerencie todos os candidatos</p>
             </div>
-            <Button onClick={() => setModalOpen(true)}>
+            <Button onClick={() => navigate('/candidatos/novo')}>
               <Plus className="mr-2 h-4 w-4" />
               Novo Candidato
             </Button>
@@ -193,7 +190,7 @@ export default function Candidatos() {
             <p className="text-sm text-muted-foreground mb-4 max-w-md">
               💛 Adicione um novo clicando em "+ Novo Candidato"
             </p>
-            <Button onClick={() => setModalOpen(true)}>
+            <Button onClick={() => navigate('/candidatos/novo')}>
               <Plus className="mr-2 h-4 w-4" />
               Novo Candidato
             </Button>
@@ -205,10 +202,7 @@ export default function Candidatos() {
                 key={candidato.id}
                 candidato={candidato}
                 onView={() => navigate(`/candidatos/${candidato.id}`)}
-                onEdit={() => {
-                  setEditingId(candidato.id);
-                  setModalOpen(true);
-                }}
+                onEdit={() => navigate(`/candidatos/${candidato.id}/editar`)}
                 onDelete={() => setDeletingId(candidato.id)}
                 onLinkJob={() => setLinkingJobId(candidato.id)}
               />
@@ -218,16 +212,6 @@ export default function Candidatos() {
       </div>
 
       {/* Modals */}
-      <CandidateModal
-        open={modalOpen}
-        onClose={() => {
-          setModalOpen(false);
-          setEditingId(null);
-        }}
-        candidatoId={editingId}
-        onSave={loadCandidatos}
-      />
-
       <LinkToJobModal
         open={!!linkingJobId}
         onOpenChange={() => setLinkingJobId(null)}
