@@ -10,7 +10,7 @@ import { FilterBar } from "@/components/FunilCandidatos/FilterBar";
 type StatusCandidato =
   | "Banco de Talentos"
   | "Selecionado"
-  | "Entrevista Rhello"
+  | "Entrevista rhello"
   | "Reprovado Rhello"
   | "Aprovado Rhello"
   | "Entrevistas Solicitante"
@@ -41,7 +41,7 @@ interface Vaga {
 const statusColumns: StatusCandidato[] = [
   "Banco de Talentos",
   "Selecionado",
-  "Entrevista Rhello",
+  "Entrevista rhello",
   "Reprovado Rhello",
   "Aprovado Rhello",
   "Entrevistas Solicitante",
@@ -53,7 +53,7 @@ const statusColumns: StatusCandidato[] = [
 const statusColors: Record<StatusCandidato, string> = {
   "Banco de Talentos": "bg-info/10 text-info border-info/20",
   "Selecionado": "bg-[#BBF7D0] text-green-800 border-green-200",
-  "Entrevista Rhello": "bg-[#BFDBFE] text-blue-800 border-blue-200",
+  "Entrevista rhello": "bg-[#BFDBFE] text-blue-800 border-blue-200",
   "Reprovado Rhello": "bg-[#FECACA] text-red-800 border-red-200",
   "Aprovado Rhello": "bg-[#FDE68A] text-yellow-800 border-yellow-200",
   "Entrevistas Solicitante": "bg-[#E9D5FF] text-purple-800 border-purple-200",
