@@ -80,10 +80,14 @@ export default function FunilVagas() {
     try {
       setLoading(true);
 
-      // Load jobs - excluir apenas vagas canceladas
+      // Load jobs com JOIN na tabela users - excluir apenas vagas canceladas
       const { data: jobsData, error: jobsError } = await supabase
         .from("vagas")
-        .select("*")
+        .select(`
+          *,
+          recrutador_user:users!vagas_recrutador_id_fkey(name),
+          cs_user:users!vagas_cs_id_fkey(name)
+        `)
         .neq("status_slug", "cancelada")
         .order("status_order", { ascending: true });
 
@@ -97,7 +101,13 @@ export default function FunilVagas() {
             .select("*", { count: "exact", head: true })
             .eq("vaga_relacionada_id", job.id);
 
-          return { ...job, candidatos_count: count || 0 };
+          // Mesclar nome do recrutador e CS do JOIN
+          return { 
+            ...job, 
+            candidatos_count: count || 0,
+            recrutador: job.recrutador_user?.name || job.recrutador || null,
+            cs_responsavel: job.cs_user?.name || job.cs_responsavel || null
+          };
         })
       );
 
@@ -105,10 +115,10 @@ export default function FunilVagas() {
 
       // Extract unique filter options
       const uniqueRecrutadores = Array.from(
-        new Set(jobsData?.map((j) => j.recrutador).filter(Boolean))
+        new Set(jobsWithCounts.map((j: any) => j.recrutador).filter(Boolean))
       ) as string[];
       const uniqueCS = Array.from(
-        new Set(jobsData?.map((j) => j.cs_responsavel).filter(Boolean))
+        new Set(jobsWithCounts.map((j: any) => j.cs_responsavel).filter(Boolean))
       ) as string[];
       const uniqueClientes = Array.from(
         new Set(jobsData?.map((j) => j.empresa).filter(Boolean))

@@ -357,6 +357,33 @@ export type Database = {
         }
         Relationships: []
       }
+      users: {
+        Row: {
+          active: boolean
+          created_at: string | null
+          email: string
+          id: string
+          name: string
+          role: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string | null
+          email: string
+          id: string
+          name: string
+          role: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string | null
+          email?: string
+          id?: string
+          name?: string
+          role?: string
+        }
+        Relationships: []
+      }
       vaga_eventos: {
         Row: {
           actor_user_id: string | null
@@ -425,7 +452,9 @@ export type Database = {
           beneficios_outros: string | null
           complexidade: Database["public"]["Enums"]["complexidade_vaga"] | null
           confidencial: boolean | null
+          created_by: string | null
           criado_em: string | null
+          cs_id: string | null
           cs_responsavel: string | null
           dias_semana: string[] | null
           empresa: string
@@ -438,6 +467,7 @@ export type Database = {
           prioridade: Database["public"]["Enums"]["prioridade_vaga"] | null
           recruiter_id: string | null
           recrutador: string | null
+          recrutador_id: string | null
           requisitos_desejaveis: string | null
           requisitos_obrigatorios: string | null
           responsabilidades: string | null
@@ -451,13 +481,16 @@ export type Database = {
           status_slug: string | null
           titulo: string
           updated_at: string | null
+          updated_by: string | null
         }
         Insert: {
           beneficios?: string[] | null
           beneficios_outros?: string | null
           complexidade?: Database["public"]["Enums"]["complexidade_vaga"] | null
           confidencial?: boolean | null
+          created_by?: string | null
           criado_em?: string | null
+          cs_id?: string | null
           cs_responsavel?: string | null
           dias_semana?: string[] | null
           empresa: string
@@ -472,6 +505,7 @@ export type Database = {
           prioridade?: Database["public"]["Enums"]["prioridade_vaga"] | null
           recruiter_id?: string | null
           recrutador?: string | null
+          recrutador_id?: string | null
           requisitos_desejaveis?: string | null
           requisitos_obrigatorios?: string | null
           responsabilidades?: string | null
@@ -485,13 +519,16 @@ export type Database = {
           status_slug?: string | null
           titulo: string
           updated_at?: string | null
+          updated_by?: string | null
         }
         Update: {
           beneficios?: string[] | null
           beneficios_outros?: string | null
           complexidade?: Database["public"]["Enums"]["complexidade_vaga"] | null
           confidencial?: boolean | null
+          created_by?: string | null
           criado_em?: string | null
+          cs_id?: string | null
           cs_responsavel?: string | null
           dias_semana?: string[] | null
           empresa?: string
@@ -506,6 +543,7 @@ export type Database = {
           prioridade?: Database["public"]["Enums"]["prioridade_vaga"] | null
           recruiter_id?: string | null
           recrutador?: string | null
+          recrutador_id?: string | null
           requisitos_desejaveis?: string | null
           requisitos_obrigatorios?: string | null
           responsabilidades?: string | null
@@ -519,6 +557,7 @@ export type Database = {
           status_slug?: string | null
           titulo?: string
           updated_at?: string | null
+          updated_by?: string | null
         }
         Relationships: [
           {
@@ -529,10 +568,38 @@ export type Database = {
             referencedColumns: ["slug"]
           },
           {
+            foreignKeyName: "vagas_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vagas_cs_id_fkey"
+            columns: ["cs_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "vagas_recruiter_id_fkey"
             columns: ["recruiter_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vagas_recrutador_id_fkey"
+            columns: ["recrutador_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vagas_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]

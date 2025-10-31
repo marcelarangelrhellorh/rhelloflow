@@ -72,7 +72,11 @@ export default function Vagas() {
     try {
       const { data: vagasData, error: vagasError } = await supabase
         .from("vagas")
-        .select("*")
+        .select(`
+          *,
+          recrutador_user:users!vagas_recrutador_id_fkey(name),
+          cs_user:users!vagas_cs_id_fkey(name)
+        `)
         .order("criado_em", { ascending: false });
 
       if (vagasError) throw vagasError;
@@ -85,7 +89,13 @@ export default function Vagas() {
             .select("*", { count: "exact", head: true })
             .eq("vaga_relacionada_id", vaga.id);
           
-          return { ...vaga, candidatos_count: count || 0 };
+          // Mesclar nome do recrutador e CS do JOIN
+          return { 
+            ...vaga, 
+            candidatos_count: count || 0,
+            recrutador: vaga.recrutador_user?.name || vaga.recrutador || null,
+            cs_responsavel: vaga.cs_user?.name || vaga.cs_responsavel || null
+          };
         })
       );
 

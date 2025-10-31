@@ -149,12 +149,22 @@ export default function VagaDetalhes() {
     try {
       const { data, error } = await supabase
         .from("vagas")
-        .select("*")
+        .select(`
+          *,
+          recrutador_user:users!vagas_recrutador_id_fkey(name),
+          cs_user:users!vagas_cs_id_fkey(name)
+        `)
         .eq("id", id)
         .single();
 
       if (error) throw error;
-      setVaga(data);
+      
+      // Mesclar nome do recrutador e CS do JOIN
+      setVaga({
+        ...data,
+        recrutador: data.recrutador_user?.name || data.recrutador || null,
+        cs_responsavel: data.cs_user?.name || data.cs_responsavel || null
+      });
     } catch (error) {
       console.error("Erro ao carregar vaga:", error);
     } finally {

@@ -13,9 +13,8 @@ import { toast } from "sonner";
 import { Constants } from "@/integrations/supabase/types";
 import { MultiSelect, MultiSelectOption } from "@/components/ui/multi-select";
 import { parseCurrency, applyCurrencyMask } from "@/lib/salaryUtils";
+import { useUsers } from "@/hooks/useUsers";
 
-const RECRUTADORES = ["Ítalo", "Bianca Marques", "Victor", "Mariana", "Isabella"];
-const CS_RESPONSAVEIS = ["Marcela Rangel", "Ana Carolina"];
 const DIAS_SEMANA = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
 
 const BENEFICIOS_OPTIONS: MultiSelectOption[] = [
@@ -38,13 +37,16 @@ export default function VagaForm() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const { users: recrutadores } = useUsers('recrutador');
+  const { users: csUsers } = useUsers('cs');
+  
   const [formData, setFormData] = useState({
     titulo: "",
     empresa: "",
     confidencial: false,
     motivo_confidencial: "",
-    recrutador: "",
-    cs_responsavel: "",
+    recrutador_id: "",
+    cs_id: "",
     complexidade: "",
     prioridade: "",
     status: "A iniciar",
@@ -84,8 +86,8 @@ export default function VagaForm() {
           empresa: data.empresa || "",
           confidencial: data.confidencial || false,
           motivo_confidencial: data.motivo_confidencial || "",
-          recrutador: data.recrutador || "",
-          cs_responsavel: data.cs_responsavel || "",
+          recrutador_id: data.recrutador_id || "",
+          cs_id: data.cs_id || "",
           complexidade: data.complexidade || "",
           prioridade: data.prioridade || "",
           status: data.status || "A iniciar",
@@ -138,8 +140,8 @@ export default function VagaForm() {
         empresa: formData.empresa,
         confidencial: formData.confidencial,
         motivo_confidencial: formData.confidencial ? formData.motivo_confidencial : null,
-        recrutador: formData.recrutador || null,
-        cs_responsavel: formData.cs_responsavel || null,
+        recrutador_id: formData.recrutador_id || null,
+        cs_id: formData.cs_id || null,
         complexidade: (formData.complexidade || null) as any,
         prioridade: (formData.prioridade || null) as any,
         status: formData.status as any,
@@ -248,13 +250,15 @@ export default function VagaForm() {
             <CardContent className="space-y-4">
               <div>
                 <Label htmlFor="recrutador">Recrutador</Label>
-                <Select value={formData.recrutador} onValueChange={(value) => setFormData({ ...formData, recrutador: value })}>
+                <Select value={formData.recrutador_id} onValueChange={(value) => setFormData({ ...formData, recrutador_id: value })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione um recrutador" />
                   </SelectTrigger>
                   <SelectContent>
-                    {RECRUTADORES.map((rec) => (
-                      <SelectItem key={rec} value={rec}>{rec}</SelectItem>
+                    {recrutadores.map((rec) => (
+                      <SelectItem key={rec.id} value={rec.id}>
+                        {rec.name}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -262,13 +266,15 @@ export default function VagaForm() {
 
               <div>
                 <Label htmlFor="cs_responsavel">CS Responsável</Label>
-                <Select value={formData.cs_responsavel} onValueChange={(value) => setFormData({ ...formData, cs_responsavel: value })}>
+                <Select value={formData.cs_id} onValueChange={(value) => setFormData({ ...formData, cs_id: value })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione um CS" />
                   </SelectTrigger>
                   <SelectContent>
-                    {CS_RESPONSAVEIS.map((cs) => (
-                      <SelectItem key={cs} value={cs}>{cs}</SelectItem>
+                    {csUsers.map((cs) => (
+                      <SelectItem key={cs.id} value={cs.id}>
+                        {cs.name}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>

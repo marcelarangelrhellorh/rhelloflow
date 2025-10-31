@@ -10,7 +10,7 @@ import { getBusinessDaysFromNow } from "@/lib/dateUtils";
 import { formatSalaryRange } from "@/lib/salaryUtils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface VagaCardProps {
   vaga: {
@@ -18,6 +18,7 @@ interface VagaCardProps {
     titulo: string;
     empresa: string;
     recrutador: string | null;
+    recrutador_id?: string | null;
     status: string;
     criado_em: string | null;
     candidatos_count?: number;
@@ -60,8 +61,33 @@ export function VagaCard({ vaga, draggable = false, onDragStart, onClick }: Vaga
   const navigate = useNavigate();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [recrutadorName, setRecrutadorName] = useState<string | null>(vaga.recrutador);
   const progress = statusProgressMap[vaga.status] || 0;
   const daysOpen = vaga.criado_em ? getBusinessDaysFromNow(vaga.criado_em) : 0;
+
+  useEffect(() => {
+    // Se tiver recrutador_id, buscar o nome
+    if (vaga.recrutador_id && !vaga.recrutador) {
+      loadRecrutadorName();
+    }
+  }, [vaga.recrutador_id]);
+
+  const loadRecrutadorName = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('name')
+        .eq('id', vaga.recrutador_id)
+        .single();
+
+      if (error) throw error;
+      if (data) {
+        setRecrutadorName(data.name);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar nome do recrutador:', error);
+    }
+  };
 
   const handleClick = () => {
     if (onClick) {
@@ -183,7 +209,7 @@ export function VagaCard({ vaga, draggable = false, onDragStart, onClick }: Vaga
             </div>
             <div className="min-w-0">
               <p className="text-xs text-[#00141D]/60">Recrutador</p>
-              <p className="text-sm font-semibold truncate text-[#00141D]">{vaga.recrutador || "Não atribuído"}</p>
+              <p className="text-sm font-semibold truncate text-[#00141D]">{recrutadorName || "Não atribuído"}</p>
             </div>
           </div>
         </div>
