@@ -653,6 +653,7 @@ export type Database = {
         Args: { end_date: string; start_date: string }
         Returns: number
       }
+      get_user_role: { Args: { user_id: string }; Returns: string }
       map_legacy_status_to_slug: {
         Args: { old_status: string }
         Returns: string
