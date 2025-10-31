@@ -2,11 +2,17 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Edit, Trash2, Mail, Phone, MapPin, Linkedin, FileText, Briefcase } from "lucide-react";
-import { StatusBadge } from "@/components/StatusBadge";
+import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { CandidateHeader } from "@/components/CandidatoDetalhes/CandidateHeader";
+import { StatsBar } from "@/components/CandidatoDetalhes/StatsBar";
+import { ContactCard } from "@/components/CandidatoDetalhes/ContactCard";
+import { ProfessionalInfoCard } from "@/components/CandidatoDetalhes/ProfessionalInfoCard";
+import { FeedbackList } from "@/components/CandidatoDetalhes/FeedbackList";
+import { HistoryTimeline } from "@/components/CandidatoDetalhes/HistoryTimeline";
+import { CandidateModal } from "@/components/Candidatos/CandidateModal";
+import { LinkToJobModal } from "@/components/BancoTalentos/LinkToJobModal";
 
 type Candidato = {
   id: string;
@@ -48,6 +54,10 @@ export default function CandidatoDetalhes() {
   const [vaga, setVaga] = useState<Vaga | null>(null);
   const [historico, setHistorico] = useState<Historico[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [relocateModalOpen, setRelocateModalOpen] = useState(false);
+  const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
 
   useEffect(() => {
     loadCandidato();
@@ -112,26 +122,23 @@ export default function CandidatoDetalhes() {
     }
   };
 
-  const getStatusType = (status: string): "active" | "pending" | "cancelled" | "completed" => {
-    if (status === "Contratado") return "completed";
-    if (status.includes("Reprovado")) return "cancelled";
-    if (status === "Banco de Talentos") return "pending";
-    return "active";
-  };
-
-  const formatCurrency = (value: number | null) => {
-    if (!value) return "-";
-    return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
-  };
-
-  const formatDate = (date: string | null) => {
-    if (!date) return "-";
-    return new Date(date).toLocaleDateString("pt-BR");
-  };
+  // Mock feedbacks (can be fetched from database in the future)
+  const mockFeedbacks = candidato?.feedback
+    ? [
+        {
+          id: "1",
+          tipo: "interno" as const,
+          autor: candidato.recrutador || "Sistema",
+          conteudo: candidato.feedback,
+          data: candidato.criado_em,
+          sentimento: "neutro" as const,
+        },
+      ]
+    : [];
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-secondary/30">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
       </div>
     );
@@ -139,180 +146,150 @@ export default function CandidatoDetalhes() {
 
   if (!candidato) {
     return (
-      <div className="p-8">
-        <p>Candidato não encontrado</p>
+      <div className="min-h-screen bg-secondary/30 p-8">
+        <div className="text-center">
+          <p className="text-muted-foreground mb-4">Candidato não encontrado</p>
+          <Button onClick={() => navigate("/candidatos")}>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Voltar para Candidatos
+          </Button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="p-8">
-      <div className="mb-6 flex items-center justify-between">
-        <Button variant="ghost" onClick={() => navigate("/candidatos")}>
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Voltar
-        </Button>
-        <div className="flex gap-2">
-          <Button onClick={() => navigate(`/candidatos/${id}/editar`)}>
-            <Edit className="mr-2 h-4 w-4" />
-            Editar
+    <div className="min-h-screen bg-secondary/30">
+      {/* Breadcrumb / Back Button */}
+      <div className="sticky top-0 z-10 bg-background border-b border-border">
+        <div className="px-6 py-4">
+          <Button variant="ghost" onClick={() => navigate("/candidatos")}>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Voltar | Candidatos / {candidato.nome_completo}
           </Button>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="destructive">
-                <Trash2 className="mr-2 h-4 w-4" />
-                Excluir
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Tem certeza que deseja excluir este candidato? Esta ação não pode ser desfeita.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDelete}>Excluir</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
         </div>
       </div>
 
-      <div className="space-y-6">
-        <div>
-          <div className="mb-2 flex items-center gap-2">
-            <h1 className="text-3xl font-bold">{candidato.nome_completo}</h1>
-            <StatusBadge status={candidato.status} type={getStatusType(candidato.status)} />
-          </div>
-          <p className="text-xl text-muted-foreground">
-            {candidato.nivel} - {candidato.area}
-          </p>
+      {/* Content */}
+      <div className="px-6 py-6 space-y-6 max-w-7xl mx-auto">
+        {/* Header */}
+        <CandidateHeader
+          nome={candidato.nome_completo}
+          status={candidato.status}
+          nivel={candidato.nivel}
+          area={candidato.area}
+          cidade={candidato.cidade}
+          estado={candidato.estado}
+          recrutador={candidato.recrutador}
+          onEdit={() => setEditModalOpen(true)}
+          onDelete={() => setDeleteDialogOpen(true)}
+          onAddFeedback={() => setFeedbackModalOpen(true)}
+          onRelocate={() => setRelocateModalOpen(true)}
+        />
+
+        {/* Stats Bar */}
+        <StatsBar
+          criadoEm={candidato.criado_em}
+          ultimoFeedback={candidato.feedback ? candidato.criado_em : null}
+          processosParticipados={historico.length}
+          realocacoes={historico.filter(h => h.resultado !== "Contratado").length}
+        />
+
+        {/* Two Column Layout */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          <ContactCard
+            email={candidato.email}
+            telefone={candidato.telefone}
+            cidade={candidato.cidade}
+            estado={candidato.estado}
+            linkedin={candidato.linkedin}
+            curriculoLink={candidato.curriculo_link}
+          />
+
+          <ProfessionalInfoCard
+            recrutador={candidato.recrutador}
+            pretensaoSalarial={candidato.pretensao_salarial}
+            vagaTitulo={vaga?.titulo || null}
+            vagaId={candidato.vaga_relacionada_id}
+            dataCadastro={candidato.criado_em}
+            nivel={candidato.nivel}
+            area={candidato.area}
+            onVagaClick={() => vaga && navigate(`/vagas/${vaga.id}`)}
+          />
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Contato</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4 text-muted-foreground" />
-                <a href={`mailto:${candidato.email}`} className="text-info hover:underline">
-                  {candidato.email}
-                </a>
-              </div>
-              {candidato.telefone && (
-                <div className="flex items-center gap-2">
-                  <Phone className="h-4 w-4 text-muted-foreground" />
-                  <a href={`tel:${candidato.telefone}`} className="hover:underline">
-                    {candidato.telefone}
-                  </a>
-                </div>
-              )}
-              {candidato.cidade && candidato.estado && (
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-muted-foreground" />
-                  <span>
-                    {candidato.cidade}, {candidato.estado}
-                  </span>
-                </div>
-              )}
-              {candidato.linkedin && (
-                <div className="flex items-center gap-2">
-                  <Linkedin className="h-4 w-4 text-muted-foreground" />
-                  <a href={candidato.linkedin} target="_blank" rel="noopener noreferrer" className="text-info hover:underline">
-                    LinkedIn
-                  </a>
-                </div>
-              )}
-              {candidato.curriculo_link && (
-                <div className="flex items-center gap-2">
-                  <FileText className="h-4 w-4 text-muted-foreground" />
-                  <a href={candidato.curriculo_link} target="_blank" rel="noopener noreferrer" className="text-info hover:underline">
-                    Ver Currículo
-                  </a>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+        {/* Feedbacks */}
+        <FeedbackList
+          feedbacks={mockFeedbacks}
+          onAddFeedback={() => setFeedbackModalOpen(true)}
+        />
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Informações Profissionais</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div>
-                <p className="text-sm text-muted-foreground">Recrutador</p>
-                <p className="font-medium">{candidato.recrutador || "Não atribuído"}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Pretensão Salarial</p>
-                <p className="font-medium">{formatCurrency(candidato.pretensao_salarial)}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Vaga Relacionada</p>
-                {vaga ? (
-                  <Button
-                    variant="link"
-                    className="h-auto p-0 font-medium text-info"
-                    onClick={() => navigate(`/vagas/${vaga.id}`)}
-                  >
-                    <Briefcase className="mr-1 h-4 w-4" />
-                    {vaga.titulo}
-                  </Button>
-                ) : (
-                  <p className="font-medium">Nenhuma vaga relacionada</p>
-                )}
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Data de Cadastro</p>
-                <p className="font-medium">{formatDate(candidato.criado_em)}</p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {candidato.feedback && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Feedback</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="whitespace-pre-wrap">{candidato.feedback}</p>
-            </CardContent>
-          </Card>
-        )}
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Histórico</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {historico.length === 0 ? (
-              <p className="text-muted-foreground">Nenhum histórico registrado</p>
-            ) : (
-              <div className="space-y-4">
-                {historico.map((item) => (
-                  <div key={item.id} className="rounded-lg border p-4">
-                    <div className="mb-2 flex items-center justify-between">
-                      <span className="font-medium">{item.resultado}</span>
-                      <span className="text-sm text-muted-foreground">{formatDate(item.data)}</span>
-                    </div>
-                    {item.recrutador && (
-                      <p className="text-sm text-muted-foreground">Recrutador: {item.recrutador}</p>
-                    )}
-                    {item.feedback && (
-                      <p className="mt-2 text-sm">{item.feedback}</p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        {/* History Timeline */}
+        <HistoryTimeline
+          historico={historico}
+          onVagaClick={(vagaId) => navigate(`/vagas/${vagaId}`)}
+        />
       </div>
+
+      {/* Modals */}
+      <CandidateModal
+        open={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        candidatoId={id}
+        onSave={() => {
+          loadCandidato();
+          setEditModalOpen(false);
+        }}
+      />
+
+      <LinkToJobModal
+        open={relocateModalOpen}
+        onOpenChange={setRelocateModalOpen}
+        candidateId={id || ""}
+        onSuccess={() => {
+          loadCandidato();
+          setRelocateModalOpen(false);
+        }}
+      />
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir este candidato? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* TODO: Implement feedback modal */}
+      {feedbackModalOpen && (
+        <AlertDialog open={feedbackModalOpen} onOpenChange={setFeedbackModalOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Adicionar Feedback</AlertDialogTitle>
+              <AlertDialogDescription>
+                Funcionalidade em desenvolvimento. Por enquanto, use o botão "Editar" para adicionar observações.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogAction onClick={() => setFeedbackModalOpen(false)}>
+                Entendi
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
     </div>
   );
 }
