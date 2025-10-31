@@ -221,6 +221,18 @@ export function JobDrawer({ jobId, open, onOpenChange, onEdit }: JobDrawerProps)
           <div className="space-y-3">
             <Button
               onClick={() => {
+                navigate(`/vagas/${jobId}`);
+                onOpenChange(false);
+              }}
+              className="w-full"
+            >
+              <Briefcase className="h-4 w-4 mr-2" />
+              Ver ficha completa da vaga
+            </Button>
+
+            <Button
+              variant="outline"
+              onClick={() => {
                 onEdit();
                 onOpenChange(false);
               }}
