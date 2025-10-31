@@ -11,10 +11,13 @@ interface FilterBarProps {
   onRecrutadorChange: (value: string) => void;
   areaFilter: string;
   onAreaChange: (value: string) => void;
+  nivelFilter: string;
+  onNivelChange: (value: string) => void;
   disponibilidadeFilter: string;
   onDisponibilidadeChange: (value: string) => void;
   recrutadores: string[];
   areas: string[];
+  niveis: string[];
 }
 
 const statusOptions = [
@@ -39,10 +42,13 @@ export function FilterBar({
   onRecrutadorChange,
   areaFilter,
   onAreaChange,
+  nivelFilter,
+  onNivelChange,
   disponibilidadeFilter,
   onDisponibilidadeChange,
   recrutadores,
   areas,
+  niveis,
 }: FilterBarProps) {
   return (
     <div className="sticky top-0 z-10 bg-background border-b border-border pb-4">
@@ -105,6 +111,20 @@ export function FilterBar({
             {areas.map((area) => (
               <SelectItem key={area} value={area}>
                 {area}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select value={nivelFilter} onValueChange={onNivelChange}>
+          <SelectTrigger className="w-full sm:w-[180px] bg-background">
+            <SelectValue placeholder="Nível" />
+          </SelectTrigger>
+          <SelectContent className="bg-popover z-50">
+            <SelectItem value="all">Todos os níveis</SelectItem>
+            {niveis.map((nivel) => (
+              <SelectItem key={nivel} value={nivel}>
+                {nivel}
               </SelectItem>
             ))}
           </SelectContent>

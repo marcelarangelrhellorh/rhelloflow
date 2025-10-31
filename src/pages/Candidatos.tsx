@@ -33,6 +33,7 @@ export default function Candidatos() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [recrutadorFilter, setRecrutadorFilter] = useState<string>("all");
   const [areaFilter, setAreaFilter] = useState<string>("all");
+  const [nivelFilter, setNivelFilter] = useState<string>("all");
   const [disponibilidadeFilter, setDisponibilidadeFilter] = useState<string>("disponível");
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [linkingJobId, setLinkingJobId] = useState<string | null>(null);
@@ -92,13 +93,14 @@ export default function Candidatos() {
     const matchesStatus = statusFilter === "all" || candidato.status === statusFilter;
     const matchesRecrutador = recrutadorFilter === "all" || candidato.recrutador === recrutadorFilter;
     const matchesArea = areaFilter === "all" || candidato.area === areaFilter;
+    const matchesNivel = nivelFilter === "all" || candidato.nivel === nivelFilter;
     const matchesDisponibilidade = disponibilidadeFilter === "all" || 
       candidato.disponibilidade_status === disponibilidadeFilter;
     
     // Filtro de atenção: candidatos aguardando feedback do cliente
     const matchesAttention = attentionFilter !== 'awaiting_client_feedback' || candidato.status === 'Entrevistas Solicitante';
     
-    return matchesSearch && matchesStatus && matchesRecrutador && matchesArea && matchesDisponibilidade && matchesAttention;
+    return matchesSearch && matchesStatus && matchesRecrutador && matchesArea && matchesNivel && matchesDisponibilidade && matchesAttention;
   });
 
   const hasActiveFilter = attentionFilter === 'awaiting_client_feedback';
@@ -111,6 +113,7 @@ export default function Candidatos() {
   // Get unique values for filters
   const recrutadores = Array.from(new Set(candidatos.map(c => c.recrutador).filter(Boolean))) as string[];
   const areas = Array.from(new Set(candidatos.map(c => c.area).filter(Boolean))) as string[];
+  const niveis = Array.from(new Set(candidatos.map(c => c.nivel).filter(Boolean))) as string[];
 
   // Calculate stats
   const statsByStatus = candidatos.reduce((acc, c) => {
@@ -177,10 +180,13 @@ export default function Candidatos() {
               onRecrutadorChange={setRecrutadorFilter}
               areaFilter={areaFilter}
               onAreaChange={setAreaFilter}
+              nivelFilter={nivelFilter}
+              onNivelChange={setNivelFilter}
               disponibilidadeFilter={disponibilidadeFilter}
               onDisponibilidadeChange={setDisponibilidadeFilter}
               recrutadores={recrutadores}
               areas={areas}
+              niveis={niveis}
             />
           </div>
         </div>
