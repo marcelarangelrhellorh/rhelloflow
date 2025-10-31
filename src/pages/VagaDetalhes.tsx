@@ -65,6 +65,7 @@ export default function VagaDetalhes() {
   const navigate = useNavigate();
   const [vaga, setVaga] = useState<Vaga | null>(null);
   const [candidatos, setCandidatos] = useState<Candidato[]>([]);
+  const [candidatoContratado, setCandidatoContratado] = useState<Candidato | null>(null);
   const [eventos, setEventos] = useState<VagaEvento[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -158,6 +159,10 @@ export default function VagaDetalhes() {
 
       if (error) throw error;
       setCandidatos(data || []);
+
+      // Buscar candidato contratado
+      const contratado = (data || []).find(c => c.status === "Contratado");
+      setCandidatoContratado(contratado || null);
     } catch (error) {
       console.error("Erro ao carregar candidatos:", error);
     }
@@ -177,8 +182,20 @@ export default function VagaDetalhes() {
   };
 
   const getRecentActivities = (): Activity[] => {
+    const activities: Activity[] = [];
+
+    // Adicionar candidato contratado no topo se existir
+    if (candidatoContratado && vaga?.status === "Concluído") {
+      activities.push({
+        id: `contratado-${candidatoContratado.id}`,
+        type: "offer",
+        description: `Candidato "${candidatoContratado.nome_completo}" foi contratado para esta vaga`,
+        date: format(new Date(candidatoContratado.criado_em), "d 'de' MMMM 'de' yyyy 'às' HH:mm", { locale: ptBR })
+      });
+    }
+
     // Usar eventos reais da tabela
-    return eventos.map((evento) => {
+    const eventosAtividades = eventos.map((evento) => {
       // Mapear tipos de eventos para os tipos esperados pelo ActivityLog
       let type: Activity["type"] = "process_started";
       
@@ -199,6 +216,8 @@ export default function VagaDetalhes() {
         date: format(new Date(evento.created_at), "d 'de' MMMM 'de' yyyy 'às' HH:mm", { locale: ptBR })
       };
     });
+
+    return [...activities, ...eventosAtividades];
   };
 
   const getStatusBadgeClass = (status: string) => {
@@ -341,6 +360,25 @@ export default function VagaDetalhes() {
                   </div>
                 ))}
               </div>
+
+              {/* Candidato Contratado Banner */}
+              {vaga.status === "Concluído" && candidatoContratado && (
+                <div className="mb-8 p-6 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border-2 border-green-500 dark:border-green-400 rounded-lg shadow-sm">
+                  <div className="flex items-center gap-3">
+                    <span className="material-symbols-outlined text-green-600 dark:text-green-400 text-3xl">
+                      celebration
+                    </span>
+                    <div>
+                      <h3 className="text-lg font-bold text-green-800 dark:text-green-300">
+                        Vaga Concluída com Sucesso!
+                      </h3>
+                      <p className="text-green-700 dark:text-green-400 text-sm mt-1">
+                        Candidato contratado: <span className="font-semibold">{candidatoContratado.nome_completo}</span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Active Candidates Table */}
               <h2 className="text-primary-text-light dark:text-primary-text-dark text-2xl font-bold tracking-tight mt-12 mb-6">
