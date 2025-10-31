@@ -5,9 +5,17 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { getBusinessDaysFromNow } from "@/lib/dateUtils";
 import { JOB_STAGES, getStageIndex, calculateProgress } from "@/lib/jobStages";
-import { getEventoIcon, getEventoColor, type TipoEvento } from "@/lib/vagaEventos";
+import { getEventoIcon, getEventoColor, type TipoEvento, logVagaEvento } from "@/lib/vagaEventos";
 import { formatSalaryRange } from "@/lib/salaryUtils";
 import { ExternalJobBanner } from "@/components/ExternalJobBanner";
+import { toast } from "@/hooks/use-toast";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type { Database } from "@/integrations/supabase/types";
 
 type VagaEvento = {
@@ -168,6 +176,56 @@ export default function VagaDetalhes() {
     }
   };
 
+  const handleStatusChange = async (newStatus: string) => {
+    if (!id || !vaga) return;
+
+    try {
+      // Atualizar status da vaga
+      const { error: updateError } = await supabase
+        .from("vagas")
+        .update({ 
+          status: newStatus as Database['public']['Enums']['status_vaga'],
+          status_changed_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", id);
+
+      if (updateError) throw updateError;
+
+      // Registrar evento
+      await logVagaEvento({
+        vagaId: id,
+        actorUserId: null,
+        tipo: "ETAPA_ALTERADA",
+        descricao: `Etapa da vaga alterada para "${newStatus}"`,
+        payload: { 
+          status_anterior: vaga.status, 
+          status_novo: newStatus 
+        }
+      });
+
+      // Atualizar estado local
+      setVaga({ ...vaga, status: newStatus });
+
+      // Mostrar toast de sucesso
+      toast({
+        title: "Etapa atualizada",
+        description: `Etapa da vaga atualizada para ${newStatus} com sucesso.`,
+      });
+
+      // Recarregar dados
+      loadVaga();
+      loadEventos();
+    } catch (error) {
+      console.error("Erro ao atualizar status da vaga:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar a etapa da vaga.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const getTimelineSteps = (currentStatus: string) => {
     const currentIndex = getStageIndex(currentStatus);
     
@@ -291,13 +349,38 @@ export default function VagaDetalhes() {
 
           {/* KPI Cards Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-            <div className="flex flex-col gap-2 rounded-lg p-6 bg-white dark:bg-background-dark border border-gray-200 dark:border-secondary-text-light/20 shadow-sm">
+            <div className="flex flex-col gap-3 rounded-lg p-6 bg-white dark:bg-background-dark border border-gray-200 dark:border-secondary-text-light/20 shadow-sm">
               <p className="text-secondary-text-light dark:text-secondary-text-dark text-base font-medium">
                 Etapa Atual da Contratação
               </p>
-              <p className="text-primary-text-light dark:text-primary-text-dark text-3xl font-bold">
-                {vaga.status}
-              </p>
+              <Select
+                value={vaga.status}
+                onValueChange={handleStatusChange}
+                disabled={vaga.status === "Concluído"}
+              >
+                <SelectTrigger className="w-full bg-white dark:bg-background-dark border-border hover:bg-primary/5 transition-colors">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-popover z-50">
+                  {JOB_STAGES.map((stage) => (
+                    <SelectItem 
+                      key={stage.id} 
+                      value={stage.name}
+                      className="cursor-pointer hover:bg-primary/10"
+                    >
+                      <span className={vaga.status === stage.name ? "font-bold" : ""}>
+                        {vaga.status === stage.name && "✅ "}
+                        {stage.name}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {vaga.status === "Concluído" && (
+                <p className="text-xs text-secondary-text-light dark:text-secondary-text-dark">
+                  Etapa bloqueada - vaga concluída
+                </p>
+              )}
             </div>
 
             <div className="flex flex-col gap-2 rounded-lg p-6 bg-white dark:bg-background-dark border border-gray-200 dark:border-secondary-text-light/20 shadow-sm">
