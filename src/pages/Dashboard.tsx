@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Briefcase, Users, AlertTriangle, MessageSquare, Clock, Target, Share2, UserPlus } from "lucide-react";
+import { Plus, Briefcase, Users, AlertTriangle, MessageSquare, Clock, Target, Share2, UserPlus, XCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -110,6 +110,7 @@ export default function Dashboard() {
     mediaFechamento: 0,
     taxaAprovacao: 0,
     feedbacksPendentes: 0,
+    vagasCanceladas: 0,
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -150,6 +151,12 @@ export default function Dashboard() {
 
       if (queryError) throw queryError;
 
+      // Buscar vagas canceladas separadamente
+      const { count: canceladasCount } = await supabase
+        .from('vagas')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'Cancelada');
+
       setStats({
         vagasAbertas: data.vagas_abertas ?? 0,
         candidatosAtivos: data.candidatos_ativos ?? 0,
@@ -158,6 +165,7 @@ export default function Dashboard() {
         mediaFechamento: data.media_dias_fechamento ?? 0,
         taxaAprovacao: data.taxa_aprovacao ?? 0,
         feedbacksPendentes: data.feedbacks_pendentes ?? 0,
+        vagasCanceladas: canceladasCount ?? 0,
       });
       setError(false);
     } catch (error) {
@@ -193,6 +201,7 @@ export default function Dashboard() {
   const handleFeedbacksClick = () => navigate('/candidatos?attention=awaiting_client_feedback');
   const handleTempoMedioClick = () => navigate('/vagas?metric=avg_time_to_close');
   const handleTaxaAprovacaoClick = () => navigate('/relatorios?focus=conversion');
+  const handleVagasCanceladasClick = () => navigate('/vagas?status=Cancelada');
 
   const copyPublicFormLink = () => {
     const link = `${window.location.origin}/solicitar-vaga`;
@@ -299,6 +308,7 @@ export default function Dashboard() {
               <KPISkeleton />
               <KPISkeleton />
               <KPISkeleton />
+              <KPISkeleton />
             </>
           ) : (
             <>
@@ -381,6 +391,19 @@ export default function Dashboard() {
                 iconColor="text-success"
                 onClick={handleTaxaAprovacaoClick}
                 ariaLabel={`Ver taxa de conversão (${formatPercent(stats.taxaAprovacao)})`}
+              />
+
+              {/* 7. Vagas Canceladas */}
+              <KPICard
+                title="Vagas Canceladas"
+                value={formatInt(stats.vagasCanceladas)}
+                subtitle="Total de vagas canceladas"
+                icon={<XCircle className="h-7 w-7" />}
+                borderColor="border-l-destructive"
+                iconBgColor="bg-destructive/10"
+                iconColor="text-destructive"
+                onClick={handleVagasCanceladasClick}
+                ariaLabel={`Ver vagas canceladas (${stats.vagasCanceladas} vagas)`}
               />
             </>
           )}
