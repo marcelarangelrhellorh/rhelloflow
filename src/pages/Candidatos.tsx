@@ -129,14 +129,14 @@ export default function Candidatos() {
     <div className="min-h-screen bg-secondary/30">
       {/* Header - Fixed */}
       <div className="sticky top-0 z-20 bg-background border-b border-border">
-        <div className="px-6 py-6">
-          <div className="flex items-center justify-between mb-4">
+        <div className="px-6 py-4">
+          <div className="flex items-center justify-between mb-3">
             <div>
-              <h1 className="text-3xl font-bold text-foreground">Candidatos</h1>
-              <p className="text-muted-foreground mt-1">Gerencie todos os candidatos</p>
+              <h1 className="text-2xl font-bold text-foreground">Candidatos</h1>
+              <p className="text-sm text-muted-foreground mt-0.5">Gerencie todos os candidatos</p>
             </div>
-            <Button onClick={() => setModalOpen(true)} size="lg">
-              <Plus className="mr-2 h-5 w-5" />
+            <Button onClick={() => setModalOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
               Novo Candidato
             </Button>
           </div>
@@ -146,7 +146,7 @@ export default function Candidatos() {
 
           {/* Filter chip */}
           {hasActiveFilter && (
-            <div className="mt-4 flex items-center gap-2 p-3 bg-purple/10 border border-purple/20 rounded-lg">
+            <div className="mt-3 flex items-center gap-2 p-2 bg-purple/10 border border-purple/20 rounded-lg">
               <MessageSquare className="h-4 w-4 text-purple" />
               <span className="text-sm font-medium">
                 Aguardando feedback do cliente
@@ -163,7 +163,7 @@ export default function Candidatos() {
           )}
 
           {/* Filters */}
-          <div className="mt-4">
+          <div className="mt-3">
             <FilterBar
               searchTerm={searchTerm}
               onSearchChange={setSearchTerm}
@@ -181,25 +181,25 @@ export default function Candidatos() {
       </div>
 
       {/* Cards Grid */}
-      <div className="px-6 py-6">
+      <div className="px-6 py-4">
         {filteredCandidatos.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <div className="mb-4 rounded-full bg-primary/10 p-6">
-              <Plus className="h-12 w-12 text-primary" />
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="mb-3 rounded-full bg-primary/10 p-4">
+              <Plus className="h-10 w-10 text-primary" />
             </div>
-            <h3 className="text-xl font-semibold text-foreground mb-2">
+            <h3 className="text-lg font-semibold text-foreground mb-2">
               Nenhum candidato encontrado
             </h3>
-            <p className="text-muted-foreground mb-6 max-w-md">
+            <p className="text-sm text-muted-foreground mb-4 max-w-md">
               💛 Adicione um novo clicando em "+ Novo Candidato"
             </p>
-            <Button onClick={() => setModalOpen(true)} size="lg">
-              <Plus className="mr-2 h-5 w-5" />
+            <Button onClick={() => setModalOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
               Novo Candidato
             </Button>
           </div>
         ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {filteredCandidatos.map((candidato) => (
               <CandidateCard
                 key={candidato.id}

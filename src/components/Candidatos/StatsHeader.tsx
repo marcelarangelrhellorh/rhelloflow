@@ -29,16 +29,16 @@ export function StatsHeader({ total, byStatus }: StatsHeaderProps) {
     .reduce((sum, [, count]) => sum + count, 0);
 
   return (
-    <div className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-card p-4">
+    <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-card p-3">
       <div className="flex items-center gap-2">
-        <Users className="h-5 w-5 text-muted-foreground" />
-        <span className="text-lg font-semibold text-foreground">{total} candidatos</span>
+        <Users className="h-4 w-4 text-muted-foreground" />
+        <span className="text-base font-semibold text-foreground">{total} candidatos</span>
       </div>
       
-      <div className="h-6 w-px bg-border" />
+      <div className="h-5 w-px bg-border" />
       
       {activeCount > 0 && (
-        <Badge variant="outline" className="bg-success/10 text-success border-success/20">
+        <Badge variant="outline" className="bg-success/10 text-success border-success/20 text-xs">
           🟢 {activeCount} ativos
         </Badge>
       )}
@@ -50,7 +50,7 @@ export function StatsHeader({ total, byStatus }: StatsHeaderProps) {
           <Badge
             key={status}
             variant="outline"
-            className={statusColors[status] || "bg-muted/10 text-muted-foreground border-muted"}
+            className={`text-xs ${statusColors[status] || "bg-muted/10 text-muted-foreground border-muted"}`}
           >
             {statusIcons[status] || "⚪"} {count} {status.toLowerCase()}
           </Badge>

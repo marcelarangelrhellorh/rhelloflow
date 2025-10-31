@@ -59,10 +59,10 @@ export function CandidateCard({ candidato, onView, onEdit, onDelete, onLinkJob }
 
   return (
     <Card className="group transition-all duration-200 hover:shadow-lg hover:scale-[1.01] bg-card">
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">
+      <CardHeader className="pb-2 pt-4 px-4">
+        <div className="flex items-start justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold text-sm">
               {getInitials(candidato.nome_completo)}
             </div>
             <div className="flex-1">
@@ -76,12 +76,12 @@ export function CandidateCard({ candidato, onView, onEdit, onDelete, onLinkJob }
           </div>
         </div>
         
-        <h3 className="text-lg font-semibold text-card-foreground line-clamp-1">
+        <h3 className="text-base font-semibold text-card-foreground line-clamp-1">
           {candidato.nome_completo}
         </h3>
       </CardHeader>
 
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-2 px-4 pb-4">
         {(candidato.nivel || candidato.area) && (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Briefcase className="h-4 w-4 flex-shrink-0" />
@@ -114,13 +114,13 @@ export function CandidateCard({ candidato, onView, onEdit, onDelete, onLinkJob }
 
         {/* Quick Actions */}
         <TooltipProvider>
-          <div className="flex gap-1 pt-3 border-t border-border">
+          <div className="flex gap-1 pt-2 border-t border-border">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-9 flex-1"
+                  className="h-8 flex-1"
                   onClick={(e) => {
                     e.stopPropagation();
                     onView();
@@ -139,7 +139,7 @@ export function CandidateCard({ candidato, onView, onEdit, onDelete, onLinkJob }
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-9 flex-1"
+                  className="h-8 flex-1"
                   onClick={(e) => {
                     e.stopPropagation();
                     onEdit();
@@ -159,7 +159,7 @@ export function CandidateCard({ candidato, onView, onEdit, onDelete, onLinkJob }
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-9 flex-1"
+                    className="h-8 flex-1"
                     onClick={(e) => {
                       e.stopPropagation();
                       onLinkJob();
@@ -179,7 +179,7 @@ export function CandidateCard({ candidato, onView, onEdit, onDelete, onLinkJob }
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-9 flex-1 text-destructive hover:text-destructive"
+                  className="h-8 flex-1 text-destructive hover:text-destructive"
                   onClick={(e) => {
                     e.stopPropagation();
                     onDelete();
