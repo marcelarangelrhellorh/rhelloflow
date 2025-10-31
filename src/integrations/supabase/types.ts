@@ -395,6 +395,30 @@ export type Database = {
           },
         ]
       }
+      vaga_status_ref: {
+        Row: {
+          color: string
+          kind: string
+          label: string
+          order: number
+          slug: string
+        }
+        Insert: {
+          color: string
+          kind: string
+          label: string
+          order: number
+          slug: string
+        }
+        Update: {
+          color?: string
+          kind?: string
+          label?: string
+          order?: number
+          slug?: string
+        }
+        Relationships: []
+      }
       vagas: {
         Row: {
           beneficios: string[] | null
@@ -423,6 +447,8 @@ export type Database = {
           source: string | null
           status: Database["public"]["Enums"]["status_vaga"] | null
           status_changed_at: string | null
+          status_order: number | null
+          status_slug: string | null
           titulo: string
           updated_at: string | null
         }
@@ -455,6 +481,8 @@ export type Database = {
           source?: string | null
           status?: Database["public"]["Enums"]["status_vaga"] | null
           status_changed_at?: string | null
+          status_order?: number | null
+          status_slug?: string | null
           titulo: string
           updated_at?: string | null
         }
@@ -487,10 +515,19 @@ export type Database = {
           source?: string | null
           status?: Database["public"]["Enums"]["status_vaga"] | null
           status_changed_at?: string | null
+          status_order?: number | null
+          status_slug?: string | null
           titulo?: string
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_vagas_status_slug"
+            columns: ["status_slug"]
+            isOneToOne: false
+            referencedRelation: "vaga_status_ref"
+            referencedColumns: ["slug"]
+          },
           {
             foreignKeyName: "vagas_recruiter_id_fkey"
             columns: ["recruiter_id"]
@@ -548,6 +585,10 @@ export type Database = {
       business_days_between: {
         Args: { end_date: string; start_date: string }
         Returns: number
+      }
+      map_legacy_status_to_slug: {
+        Args: { old_status: string }
+        Returns: string
       }
       reports_overview: {
         Args: {
