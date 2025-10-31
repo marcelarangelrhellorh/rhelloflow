@@ -18,23 +18,23 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Rhello Brand Colors - Exact from HTML */
+    /* Rhello Brand Colors */
     --primary: 47 100% 50%;              /* #ffcd00 */
     --primary-foreground: 197 100% 6%;   /* #00141d */
-    --accent: 56 97% 89%;                /* #faec3e */
+    --accent: 56 97% 59%;                /* #faec3e */
     --accent-foreground: 197 100% 6%;
     
     /* Backgrounds */
-    --background: 50 100% 98%;           /* #fffdf6 - background-light */
+    --background: 50 100% 98%;           /* #fffdf6 */
     --background-light: 50 100% 98%;
     --background-dark: 197 100% 6%;      /* #00141d */
     
     /* Text Colors */
-    --foreground: 197 100% 6%;           /* #00141d - primary-text-light */
+    --foreground: 197 100% 6%;           /* #00141d */
     --primary-text-light: 197 100% 6%;
     --primary-text-dark: 50 100% 98%;
     --secondary-text-light: 206 13% 24%; /* #36404a */
-    --secondary-text-dark: 206 29% 72%;  /* #b0c0d0 */
+    --secondary-text-dark: 206 29% 72%;
 
     --card: 0 0% 100%;
     --card-foreground: 197 100% 6%;
