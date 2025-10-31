@@ -1,12 +1,14 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Clock, MessageSquare, Briefcase, Star, RefreshCw } from "lucide-react";
+import { Clock, MessageSquare, Briefcase, Star } from "lucide-react";
 import { getBusinessDaysFromNow } from "@/lib/dateUtils";
+import { StarRating } from "@/components/ui/star-rating";
 
 interface StatsBarProps {
   criadoEm: string;
   ultimoFeedback?: string | null;
   processosParticipados: number;
-  realocacoes: number;
+  mediaAvaliacao?: number | null;
+  qtdAvaliacoes?: number;
   totalFeedbacks?: number;
 }
 
@@ -14,17 +16,18 @@ export function StatsBar({
   criadoEm,
   ultimoFeedback,
   processosParticipados,
-  realocacoes,
+  mediaAvaliacao,
+  qtdAvaliacoes = 0,
   totalFeedbacks = 0,
 }: StatsBarProps) {
   const diasNaEtapa = getBusinessDaysFromNow(criadoEm);
   
   const ultimoFeedbackFormatado = ultimoFeedback
     ? new Date(ultimoFeedback).toLocaleDateString("pt-BR")
-    : "Nenhum";
+    : "—";
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <Card>
         <CardContent className="flex items-center gap-3 p-4">
           <div className="rounded-full bg-warning/10 p-2">
@@ -68,19 +71,14 @@ export function StatsBar({
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Avaliação</p>
-            <p className="text-lg font-bold text-card-foreground">—</p>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent className="flex items-center gap-3 p-4">
-          <div className="rounded-full bg-muted/20 p-2">
-            <RefreshCw className="h-5 w-5 text-muted-foreground" />
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Realocações</p>
-            <p className="text-lg font-bold text-card-foreground">{realocacoes}</p>
+            {mediaAvaliacao && qtdAvaliacoes > 0 ? (
+              <div className="flex items-center gap-2">
+                <p className="text-lg font-bold text-card-foreground">{mediaAvaliacao.toFixed(1)} ★</p>
+                <p className="text-sm text-muted-foreground">({qtdAvaliacoes})</p>
+              </div>
+            ) : (
+              <p className="text-lg font-bold text-card-foreground">—</p>
+            )}
           </div>
         </CardContent>
       </Card>

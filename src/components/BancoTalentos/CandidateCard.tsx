@@ -24,6 +24,8 @@ interface CandidateCardProps {
     days_in_bank: number;
     status: string;
     curriculo_link: string | null;
+    mediaRating?: number | null;
+    qtdAvaliacoes?: number;
   };
   onViewProfile: () => void;
   onLinkToJob: () => void;
@@ -178,6 +180,15 @@ export function CandidateCard({ candidate, onViewProfile, onLinkToJob, viewMode 
             <Calendar className="h-4 w-4 flex-shrink-0" />
             <span>Disponível há {candidate.days_in_bank} dias</span>
           </div>
+
+          {candidate.mediaRating !== undefined && candidate.mediaRating !== null && candidate.qtdAvaliacoes! > 0 && (
+            <div className="flex items-center gap-2 text-sm">
+              <Star className="h-4 w-4 flex-shrink-0 fill-yellow-400 text-yellow-400" />
+              <span className="font-medium text-[#00141D]">
+                {candidate.mediaRating.toFixed(1)} ★ ({candidate.qtdAvaliacoes})
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Status */}

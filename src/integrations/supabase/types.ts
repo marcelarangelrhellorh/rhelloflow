@@ -479,6 +479,23 @@ export type Database = {
         }
         Relationships: []
       }
+      vw_candidato_rating: {
+        Row: {
+          candidato_id: string | null
+          media_rating: number | null
+          qtd_avaliacoes: number | null
+          qtd_feedbacks: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedbacks_candidato_id_fkey"
+            columns: ["candidato_id"]
+            isOneToOne: false
+            referencedRelation: "candidatos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       business_days_between: {

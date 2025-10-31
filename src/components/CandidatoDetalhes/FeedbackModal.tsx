@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { StarRating } from "@/components/ui/star-rating";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -52,6 +53,15 @@ export function FeedbackModal({
       toast({
         title: "Erro",
         description: "Por favor, preencha o conteúdo do feedback.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!avaliacao) {
+      toast({
+        title: "Erro",
+        description: "Por favor, selecione uma avaliação (1-5 estrelas).",
         variant: "destructive"
       });
       return;
@@ -221,20 +231,13 @@ export function FeedbackModal({
 
           {/* Avaliação */}
           <div className="space-y-2">
-            <Label>Avaliação (opcional)</Label>
-            <div className="flex gap-2">
-              {[1, 2, 3, 4, 5].map((rating) => (
-                <Button
-                  key={rating}
-                  type="button"
-                  size="sm"
-                  variant={avaliacao === rating ? "default" : "outline"}
-                  onClick={() => setAvaliacao(avaliacao === rating ? null : rating)}
-                >
-                  {rating} ⭐
-                </Button>
-              ))}
-            </div>
+            <Label className="text-destructive">Avaliação * (obrigatório)</Label>
+            <StarRating 
+              value={avaliacao}
+              onChange={setAvaliacao}
+              size="lg"
+              showValue={true}
+            />
           </div>
 
           {/* Templates Rápidos */}

@@ -60,6 +60,19 @@ export default function CandidatoDetalhes() {
   const [candidato, setCandidato] = useState<Candidato | null>(null);
   const [vaga, setVaga] = useState<Vaga | null>(null);
   const [historico, setHistorico] = useState<Historico[]>([]);
+  const [stats, setStats] = useState<{
+    ultimoFeedback: string | null;
+    totalProcessos: number;
+    mediaRating: number | null;
+    qtdAvaliacoes: number;
+    totalFeedbacks: number;
+  }>({
+    ultimoFeedback: null,
+    totalProcessos: 0,
+    mediaRating: null,
+    qtdAvaliacoes: 0,
+    totalFeedbacks: 0
+  });
   const [loading, setLoading] = useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [relocateModalOpen, setRelocateModalOpen] = useState(false);
@@ -69,9 +82,10 @@ export default function CandidatoDetalhes() {
     if (id) {
       loadCandidato();
       loadHistorico();
+      refreshStats();
 
       // Subscribe to realtime updates
-      const channel = supabase
+      const candidatoChannel = supabase
         .channel('candidato-changes')
         .on(
           'postgres_changes',
@@ -90,11 +104,34 @@ export default function CandidatoDetalhes() {
         )
         .subscribe();
 
+      // Subscribe to feedback updates
+      const feedbackChannel = supabase
+        .channel('feedback-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'feedbacks',
+            filter: `candidato_id=eq.${id}`
+          },
+          () => {
+            refreshStats();
+          }
+        )
+        .subscribe();
+
       return () => {
-        supabase.removeChannel(channel);
+        supabase.removeChannel(candidatoChannel);
+        supabase.removeChannel(feedbackChannel);
       };
     }
   }, [id]);
+
+  const refreshStats = async () => {
+    const newStats = await loadStats();
+    setStats(newStats);
+  };
 
   const loadCandidato = async () => {
     try {
@@ -120,6 +157,52 @@ export default function CandidatoDetalhes() {
       toast.error("Erro ao carregar candidato");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadStats = async () => {
+    if (!id) return { ultimoFeedback: null, totalProcessos: 0, mediaRating: null, qtdAvaliacoes: 0, totalFeedbacks: 0 };
+
+    try {
+      // Buscar último feedback
+      const { data: fbUltimo } = await supabase
+        .from('feedbacks')
+        .select('criado_em')
+        .eq('candidato_id', id)
+        .order('criado_em', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      // Buscar total de processos distintos
+      const { data: processosData } = await supabase
+        .from('candidatos')
+        .select('vaga_relacionada_id')
+        .eq('id', id);
+
+      // Buscar estatísticas de avaliação
+      const { data: ratingData } = await supabase
+        .from('feedbacks')
+        .select('avaliacao')
+        .eq('candidato_id', id);
+
+      const ratings = (ratingData || [])
+        .map(f => f.avaliacao)
+        .filter((n): n is number => typeof n === 'number' && Number.isFinite(n));
+      
+      const mediaRating = ratings.length > 0 
+        ? ratings.reduce((a, b) => a + b, 0) / ratings.length 
+        : null;
+
+      return {
+        ultimoFeedback: fbUltimo?.criado_em || null,
+        totalProcessos: processosData?.[0]?.vaga_relacionada_id ? 1 : 0,
+        mediaRating,
+        qtdAvaliacoes: ratings.length,
+        totalFeedbacks: ratingData?.length || 0
+      };
+    } catch (error) {
+      console.error("Erro ao carregar estatísticas:", error);
+      return { ultimoFeedback: null, totalProcessos: 0, mediaRating: null, qtdAvaliacoes: 0, totalFeedbacks: 0 };
     }
   };
 
@@ -208,10 +291,11 @@ export default function CandidatoDetalhes() {
         {/* Stats Bar */}
         <StatsBar
           criadoEm={candidato.criado_em}
-          ultimoFeedback={(candidato as any).ultimo_feedback || null}
-          processosParticipados={historico.length}
-          realocacoes={historico.filter(h => h.resultado !== "Contratado").length}
-          totalFeedbacks={(candidato as any).total_feedbacks || 0}
+          ultimoFeedback={stats.ultimoFeedback}
+          processosParticipados={stats.totalProcessos}
+          mediaAvaliacao={stats.mediaRating}
+          qtdAvaliacoes={stats.qtdAvaliacoes}
+          totalFeedbacks={stats.totalFeedbacks}
         />
 
         {/* Two Column Layout */}
