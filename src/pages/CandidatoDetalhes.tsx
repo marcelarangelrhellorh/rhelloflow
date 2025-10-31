@@ -299,7 +299,7 @@ export default function CandidatoDetalhes() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-secondary/30">
+      <div className="flex min-h-screen items-center justify-center bg-background-light">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
       </div>
     );
@@ -307,7 +307,7 @@ export default function CandidatoDetalhes() {
 
   if (!candidato) {
     return (
-      <div className="min-h-screen bg-secondary/30 p-8">
+      <div className="min-h-screen bg-background-light p-8">
         <div className="text-center">
           <p className="text-muted-foreground mb-4">Candidato não encontrado</p>
           <Button onClick={() => navigate("/candidatos")}>
@@ -320,7 +320,7 @@ export default function CandidatoDetalhes() {
   }
 
   return (
-    <div className="min-h-screen bg-secondary/30">
+    <div className="min-h-screen bg-background-light">
       {/* Breadcrumb / Back Button */}
       <div className="sticky top-0 z-10 bg-background border-b border-border">
         <div className="px-6 py-4">
