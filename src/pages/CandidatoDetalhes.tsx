@@ -121,9 +121,27 @@ export default function CandidatoDetalhes() {
         )
         .subscribe();
 
+      // Subscribe to historico updates
+      const historicoChannel = supabase
+        .channel('historico-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'historico_candidatos',
+            filter: `candidato_id=eq.${id}`
+          },
+          () => {
+            loadHistorico();
+          }
+        )
+        .subscribe();
+
       return () => {
         supabase.removeChannel(candidatoChannel);
         supabase.removeChannel(feedbackChannel);
+        supabase.removeChannel(historicoChannel);
       };
     }
   }, [id]);

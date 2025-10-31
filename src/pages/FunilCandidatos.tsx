@@ -148,6 +148,24 @@ export default function FunilCandidatos() {
         )
       );
 
+      // Adicionar ao histórico em etapas importantes
+      const etapasImportantes = ["Contratado", "Reprovado Rhello", "Reprovado Solicitante", "Aprovado Rhello", "Aprovado Solicitante"];
+      if (candidato?.vaga_relacionada_id && etapasImportantes.includes(newStatus)) {
+        const resultado = newStatus.includes("Reprovado") ? "Reprovado" : 
+                         newStatus.includes("Aprovado") ? "Aprovado" : 
+                         "Contratado";
+        
+        await supabase
+          .from("historico_candidatos")
+          .insert({
+            candidato_id: candidatoId,
+            vaga_id: candidato.vaga_relacionada_id,
+            resultado: resultado,
+            recrutador: candidato.recrutador,
+            feedback: `Status alterado para ${newStatus}`
+          });
+      }
+
       // Logar evento se candidato vinculado a vaga
       if (candidato?.vaga_relacionada_id) {
         const { logVagaEvento } = await import("@/lib/vagaEventos");

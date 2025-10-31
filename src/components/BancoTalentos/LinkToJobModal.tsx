@@ -67,7 +67,7 @@ export function LinkToJobModal({ open, onOpenChange, candidateId, onSuccess }: L
       // Buscar dados do candidato
       const { data: candidato } = await supabase
         .from("candidatos")
-        .select("nome_completo")
+        .select("nome_completo, recrutador")
         .eq("id", candidateId)
         .single();
 
@@ -80,6 +80,17 @@ export function LinkToJobModal({ open, onOpenChange, candidateId, onSuccess }: L
         .eq("id", candidateId);
 
       if (error) throw error;
+
+      // Adicionar ao histórico
+      await supabase
+        .from("historico_candidatos")
+        .insert({
+          candidato_id: candidateId,
+          vaga_id: selectedVagaId,
+          resultado: "Em andamento",
+          recrutador: candidato?.recrutador,
+          feedback: "Candidato vinculado à vaga"
+        });
 
       // Logar evento
       const { logVagaEvento } = await import("@/lib/vagaEventos");
