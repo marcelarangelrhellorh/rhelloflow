@@ -18,7 +18,8 @@ type StatusCandidato =
   | "Feedback Cliente"
   | "Aguardando Retorno"
   | "Aprovado"
-  | "Não Seguiu";
+  | "Declinou"
+  | "Reprovado Cliente";
 
 interface Candidato {
   id: string;
@@ -49,7 +50,8 @@ const statusColumns: StatusCandidato[] = [
   "Feedback Cliente",
   "Aguardando Retorno",
   "Aprovado",
-  "Não Seguiu"
+  "Declinou",
+  "Reprovado Cliente"
 ];
 
 const statusColors: Record<StatusCandidato, string> = {
@@ -61,7 +63,8 @@ const statusColors: Record<StatusCandidato, string> = {
   "Feedback Cliente": "bg-warning/10 text-warning border-warning/20",
   "Aguardando Retorno": "bg-muted/50 text-muted-foreground border-muted",
   "Aprovado": "bg-success/10 text-success border-success/20",
-  "Não Seguiu": "bg-destructive/10 text-destructive border-destructive/20",
+  "Declinou": "bg-destructive/10 text-destructive border-destructive/20",
+  "Reprovado Cliente": "bg-destructive/10 text-destructive border-destructive/20",
 };
 
 export default function FunilCandidatos() {
@@ -184,7 +187,7 @@ export default function FunilCandidatos() {
 
   // Count active candidates (excluding final statuses)
   const activeCandidatesCount = candidatos.filter(c => 
-    c.status !== "Aprovado" && c.status !== "Não Seguiu"
+    c.status !== "Aprovado" && c.status !== "Declinou" && c.status !== "Reprovado Cliente"
   ).length;
 
   const activeCandidato = activeId ? candidatos.find((c) => c.id === activeId) : null;
