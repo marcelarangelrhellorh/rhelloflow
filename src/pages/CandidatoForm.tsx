@@ -88,7 +88,9 @@ export default function CandidatoForm() {
           area: data.area || "",
           recrutador: data.recrutador || "",
           vaga_relacionada_id: data.vaga_relacionada_id || "",
-          pretensao_salarial: data.pretensao_salarial?.toString() || "",
+          pretensao_salarial: data.pretensao_salarial 
+            ? `R$ ${data.pretensao_salarial.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+            : "",
           disponibilidade_mudanca: data.disponibilidade_mudanca || "",
           pontos_fortes: data.pontos_fortes || "",
           pontos_desenvolver: data.pontos_desenvolver || "",
@@ -193,7 +195,9 @@ export default function CandidatoForm() {
         area: (formData.area || null) as any,
         recrutador: formData.recrutador || null,
         vaga_relacionada_id: formData.vaga_relacionada_id || null,
-        pretensao_salarial: formData.pretensao_salarial ? parseFloat(formData.pretensao_salarial) : null,
+        pretensao_salarial: formData.pretensao_salarial 
+          ? parseFloat(formData.pretensao_salarial.replace(/[R$\s.]/g, '').replace(',', '.'))
+          : null,
         disponibilidade_mudanca: formData.disponibilidade_mudanca || null,
         pontos_fortes: formData.pontos_fortes || null,
         pontos_desenvolver: formData.pontos_desenvolver || null,
@@ -493,11 +497,45 @@ export default function CandidatoForm() {
                 <Label htmlFor="pretensao_salarial">Pretensão Salarial (R$)</Label>
                 <Input
                   id="pretensao_salarial"
-                  type="number"
-                  step="0.01"
+                  type="text"
+                  placeholder="R$ 0,00"
                   value={formData.pretensao_salarial}
-                  onChange={(e) => setFormData({ ...formData, pretensao_salarial: e.target.value })}
+                  onChange={(e) => {
+                    // Remove tudo exceto números
+                    const value = e.target.value.replace(/\D/g, '');
+                    
+                    if (value === '') {
+                      setFormData({ ...formData, pretensao_salarial: '' });
+                      return;
+                    }
+                    
+                    // Converte para número e formata
+                    const numericValue = parseInt(value) / 100;
+                    const formatted = numericValue.toLocaleString('pt-BR', {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2
+                    });
+                    
+                    setFormData({ ...formData, pretensao_salarial: `R$ ${formatted}` });
+                  }}
+                  onBlur={(e) => {
+                    // Garante formatação ao perder o foco
+                    if (e.target.value && !e.target.value.startsWith('R$ ')) {
+                      const value = e.target.value.replace(/\D/g, '');
+                      if (value) {
+                        const numericValue = parseInt(value) / 100;
+                        const formatted = numericValue.toLocaleString('pt-BR', {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2
+                        });
+                        setFormData({ ...formData, pretensao_salarial: `R$ ${formatted}` });
+                      }
+                    }
+                  }}
                 />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Digite apenas números. Ex: 5000 = R$ 5.000,00
+                </p>
               </div>
 
               <div>
