@@ -1,12 +1,10 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
-import { Briefcase, Calendar, User, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { getBusinessDaysFromNow } from "@/lib/dateUtils";
+import { VagaCard } from "@/components/VagaCard";
 
 type StatusVaga = 
   | "A iniciar"
@@ -215,49 +213,13 @@ export default function FunilVagas() {
                   }}
                 >
                   {vagasInColumn.map((vaga) => (
-                    <Card
+                    <VagaCard
                       key={vaga.id}
+                      vaga={vaga}
                       draggable
                       onDragStart={() => setActiveId(vaga.id)}
                       onClick={() => navigate(`/vagas/${vaga.id}`)}
-                      className="cursor-move hover:shadow-md transition-shadow bg-card"
-                    >
-                      <CardHeader className="p-4 pb-2">
-                        <CardTitle className="text-sm font-semibold line-clamp-2">
-                          {vaga.titulo}
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="p-4 pt-2 space-y-2">
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <Briefcase className="h-3 w-3" />
-                          <span className="truncate">{vaga.empresa}</span>
-                        </div>
-                        {vaga.recrutador && (
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <User className="h-3 w-3" />
-                            <span className="truncate">{vaga.recrutador}</span>
-                          </div>
-                        )}
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <Calendar className="h-3 w-3" />
-                          <span>{vaga.criado_em ? getBusinessDaysFromNow(vaga.criado_em) : 0} dias úteis</span>
-                        </div>
-                        <div className="flex items-center justify-between pt-1">
-                          <Badge variant="outline" className="bg-info/10 text-info border-info/20 text-xs">
-                            <Users className="mr-1 h-3 w-3" />
-                            {vaga.candidatos_count || 0}
-                          </Badge>
-                          {vaga.prioridade && (
-                            <Badge
-                              variant="outline"
-                              className={`text-xs ${priorityColors[vaga.prioridade] || ""}`}
-                            >
-                              {vaga.prioridade}
-                            </Badge>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
+                    />
                   ))}
                 </div>
               </div>
@@ -267,19 +229,9 @@ export default function FunilVagas() {
 
         <DragOverlay>
           {activeVaga && (
-            <Card className="cursor-move shadow-lg rotate-3 bg-card">
-              <CardHeader className="p-4 pb-2">
-                <CardTitle className="text-sm font-semibold line-clamp-2">
-                  {activeVaga.titulo}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-4 pt-2 space-y-2">
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <Briefcase className="h-3 w-3" />
-                  <span className="truncate">{activeVaga.empresa}</span>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="rotate-3">
+              <VagaCard vaga={activeVaga} />
+            </div>
           )}
         </DragOverlay>
       </DndContext>

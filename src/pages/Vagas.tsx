@@ -1,15 +1,12 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Plus, Search, Briefcase, User, Calendar, Building2, Users } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { StatusBadge } from "@/components/StatusBadge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { getBusinessDaysFromNow } from "@/lib/dateUtils";
+import { VagaCard } from "@/components/VagaCard";
 
 type Vaga = {
   id: string;
@@ -73,21 +70,6 @@ export default function Vagas() {
   });
 
 
-  const getStatusType = (status: string): "active" | "pending" | "cancelled" | "completed" => {
-    if (status === "Concluído") return "completed";
-    if (status === "Cancelada") return "cancelled";
-    if (status === "A iniciar" || status === "Discovery") return "pending";
-    return "active";
-  };
-
-  const getPriorityColor = (prioridade: string | null) => {
-    switch (prioridade) {
-      case "Crítica": return "text-destructive";
-      case "Alta": return "text-warning";
-      case "Normal": return "text-info";
-      default: return "text-muted-foreground";
-    }
-  };
 
   if (loading) {
     return (
@@ -138,46 +120,7 @@ export default function Vagas() {
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {filteredVagas.map((vaga) => (
-          <Card
-            key={vaga.id}
-            className="cursor-pointer transition-shadow hover:shadow-lg"
-            onClick={() => navigate(`/vagas/${vaga.id}`)}
-          >
-            <CardHeader>
-              <div className="mb-2 flex items-start justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="rounded-lg bg-primary/10 p-2">
-                    <Briefcase className="h-5 w-5 text-primary" />
-                  </div>
-                  <StatusBadge status={vaga.status} type={getStatusType(vaga.status)} />
-                </div>
-                <span className={`text-sm font-medium ${getPriorityColor(vaga.prioridade)}`}>
-                  {vaga.prioridade}
-                </span>
-              </div>
-              <CardTitle className="text-lg">{vaga.titulo}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Building2 className="h-4 w-4" />
-                {vaga.empresa}
-              </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <User className="h-4 w-4" />
-                {vaga.recrutador || "Não atribuído"}
-              </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Calendar className="h-4 w-4" />
-                {getBusinessDaysFromNow(vaga.criado_em)} dias úteis
-              </div>
-              <div className="flex items-center gap-2 pt-2">
-                <Badge variant="outline" className="bg-info/10 text-info border-info/20">
-                  <Users className="mr-1 h-3 w-3" />
-                  {vaga.candidatos_count || 0} candidato{vaga.candidatos_count !== 1 ? 's' : ''}
-                </Badge>
-              </div>
-            </CardContent>
-          </Card>
+          <VagaCard key={vaga.id} vaga={vaga} />
         ))}
       </div>
 
