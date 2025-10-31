@@ -171,26 +171,15 @@ export function JobCard({
               </div>
 
               {/* Subheader - Cliente/Área */}
-              {!vaga.confidencial && (
-                <div className="flex items-center gap-2">
-                  <p 
-                    className="text-[13px] font-medium text-[#6B7280] truncate"
-                    style={{ fontFamily: "Manrope, sans-serif" }}
-                  >
-                    {vaga.empresa}
-                    {vaga.area && ` • ${vaga.area}`}
-                  </p>
-                </div>
-              )}
-              
-              {vaga.confidencial && (
+              <div className="flex items-center gap-2">
                 <p 
-                  className="text-[13px] font-medium text-[#6B7280] italic"
+                  className="text-[13px] font-medium text-[#6B7280] truncate"
                   style={{ fontFamily: "Manrope, sans-serif" }}
                 >
-                  Cliente oculto
+                  {vaga.empresa}
+                  {vaga.area && ` • ${vaga.area}`}
                 </p>
-              )}
+              </div>
             </div>
 
             {/* Métricas rápidas */}
