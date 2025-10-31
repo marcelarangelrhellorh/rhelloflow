@@ -2,10 +2,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Briefcase, User, MoreVertical, Users, Calendar } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Briefcase, User, MoreVertical, Users, Calendar, Edit, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { getBusinessDaysFromNow } from "@/lib/dateUtils";
 import { formatSalaryRange } from "@/lib/salaryUtils";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { useState } from "react";
 
 interface VagaCardProps {
   vaga: {
@@ -53,6 +58,8 @@ const getStatusIndicator = (status: string) => {
 
 export function VagaCard({ vaga, draggable = false, onDragStart, onClick }: VagaCardProps) {
   const navigate = useNavigate();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const progress = statusProgressMap[vaga.status] || 0;
   const daysOpen = vaga.criado_em ? getBusinessDaysFromNow(vaga.criado_em) : 0;
 
@@ -69,6 +76,34 @@ export function VagaCard({ vaga, draggable = false, onDragStart, onClick }: Vaga
     navigate(`/vagas/${vaga.id}`);
   };
 
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate(`/vagas/${vaga.id}/editar`);
+  };
+
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase
+        .from("vagas")
+        .delete()
+        .eq("id", vaga.id);
+
+      if (error) throw error;
+
+      toast.success("✅ Vaga excluída com sucesso");
+      
+      // Recarregar a página após exclusão
+      window.location.reload();
+    } catch (error) {
+      console.error("Erro ao excluir vaga:", error);
+      toast.error("❌ Erro ao excluir a vaga. Tente novamente.");
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteDialog(false);
+    }
+  };
+
   return (
     <Card
       draggable={draggable}
@@ -82,14 +117,44 @@ export function VagaCard({ vaga, draggable = false, onDragStart, onClick }: Vaga
           <h3 className="text-lg font-bold text-[#00141D] leading-tight pr-2 line-clamp-2">
             {vaga.titulo}
           </h3>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 shrink-0"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <MoreVertical className="h-4 w-4" />
-          </Button>
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 shrink-0 text-[#00141D] hover:opacity-70"
+              >
+                <MoreVertical className="h-5 w-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent 
+              align="end" 
+              className="w-48 bg-white rounded-lg shadow-lg border border-[#E5E7EB] p-1"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <DropdownMenuItem 
+                onClick={handleEdit}
+                className="flex items-center gap-2 px-3 py-2 text-[#00141D] font-medium hover:bg-[#F9EC3F] hover:font-bold cursor-pointer rounded"
+                style={{ fontFamily: "Manrope, sans-serif", fontSize: "14px" }}
+              >
+                <Edit className="h-4 w-4" />
+                Editar vaga
+              </DropdownMenuItem>
+              <div className="my-1 h-px bg-[#E5E7EB]" />
+              <DropdownMenuItem 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowDeleteDialog(true);
+                }}
+                className="flex items-center gap-2 px-3 py-2 text-[#D32F2F] font-medium hover:bg-[#FEE] hover:font-bold cursor-pointer rounded"
+                style={{ fontFamily: "Manrope, sans-serif", fontSize: "14px" }}
+              >
+                <Trash2 className="h-4 w-4" />
+                Excluir vaga
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {/* Status Badge */}
@@ -162,6 +227,36 @@ export function VagaCard({ vaga, draggable = false, onDragStart, onClick }: Vaga
           Ver Detalhes
         </Button>
       </CardContent>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent className="bg-white border border-[#E5E7EB]">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-[#00141D]" style={{ fontFamily: "Manrope, sans-serif" }}>
+              Excluir vaga
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-[#6B7280]" style={{ fontFamily: "Manrope, sans-serif" }}>
+              Tem certeza de que deseja excluir esta vaga? Esta ação não poderá ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel 
+              className="border border-[#D1D5DB] text-[#00141D] bg-transparent hover:bg-[#F9FAFB]"
+              style={{ fontFamily: "Manrope, sans-serif" }}
+            >
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="bg-[#D32F2F] text-white hover:bg-[#B71C1C]"
+              style={{ fontFamily: "Manrope, sans-serif" }}
+            >
+              {isDeleting ? "Excluindo..." : "Excluir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 }
