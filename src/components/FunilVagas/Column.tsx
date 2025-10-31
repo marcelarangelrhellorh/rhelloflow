@@ -56,8 +56,8 @@ export function Column({
       ref={setNodeRef}
       className={cn(
         "flex flex-col min-w-[320px] h-full rounded-lg transition-all duration-200",
-        "border border-gray-200",
-        isOver && "border-2 border-primary ring-2 ring-primary/20"
+        "border border-gray-200 shadow-sm bg-white",
+        isOver && "border-2 border-[#FFCD00] ring-2 ring-[#FFCD00]/20"
       )}
       style={{ backgroundColor: stage.color.columnBg }}
     >

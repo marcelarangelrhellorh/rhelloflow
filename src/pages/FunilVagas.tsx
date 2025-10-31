@@ -194,54 +194,54 @@ export default function FunilVagas() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-background">
+    <div className="flex flex-col h-screen bg-[#FFFDF6]">
       {/* Header */}
-      <div className="border-b border-border bg-card/50 backdrop-blur-sm">
-        <div className="px-6 py-4">
-          <div className="flex items-center justify-between mb-3">
+      <div className="border-b border-gray-200 bg-white">
+        <div className="px-4 py-4">
+          <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="text-2xl font-bold text-foreground">Funil de Vagas</h1>
-              <p className="text-sm text-muted-foreground mt-0.5">
+              <h1 className="text-2xl font-bold text-[#00141D]">Funil de Vagas</h1>
+              <p className="text-sm text-[#36404A] mt-0.5">
                 Gerencie o pipeline de recrutamento
               </p>
             </div>
-            <Button onClick={() => navigate("/vagas/nova")} className="rounded-xl">
+            <Button onClick={() => navigate("/vagas/nova")} className="h-9 rounded-lg bg-[#FFCD00] hover:bg-[#FAEC3E] text-[#00141D] font-medium">
               <Plus className="mr-2 h-4 w-4" />
               Nova Vaga
             </Button>
           </div>
 
           {/* Stats */}
-          <StatsHeader
-            totalVagasAbertas={totalJobs}
-            mediaDiasAbertos={0}
-            vagasEmAtencao={0}
-            totalCandidatosAtivos={0}
-          />
-
-          {/* Filters */}
-          <div className="mt-3">
-            <FilterBar
-              searchTerm={searchTerm}
-              onSearchChange={setSearchTerm}
-              recrutadorFilter={recrutadorFilter}
-              onRecrutadorChange={setRecrutadorFilter}
-              clienteFilter={clienteFilter}
-              onClienteChange={setClienteFilter}
-              areaFilter={areaFilter}
-              onAreaChange={setAreaFilter}
-              ordenacao={ordenacao}
-              onOrdenacaoChange={setOrdenacao}
-              recrutadores={recrutadores}
-              clientes={clientes}
-              areas={[]}
+          <div className="mb-4">
+            <StatsHeader
+              totalVagasAbertas={totalJobs}
+              mediaDiasAbertos={0}
+              vagasEmAtencao={0}
+              totalCandidatosAtivos={0}
             />
           </div>
+
+          {/* Filters */}
+          <FilterBar
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            recrutadorFilter={recrutadorFilter}
+            onRecrutadorChange={setRecrutadorFilter}
+            clienteFilter={clienteFilter}
+            onClienteChange={setClienteFilter}
+            areaFilter={areaFilter}
+            onAreaChange={setAreaFilter}
+            ordenacao={ordenacao}
+            onOrdenacaoChange={setOrdenacao}
+            recrutadores={recrutadores}
+            clientes={clientes}
+            areas={[]}
+          />
         </div>
       </div>
 
       {/* Pipeline Board */}
-      <div className="flex-1 overflow-hidden p-6">
+      <div className="flex-1 overflow-hidden p-4">
         <PipelineBoard
           jobs={filteredJobs}
           stages={JOB_STAGES}

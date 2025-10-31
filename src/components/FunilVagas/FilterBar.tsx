@@ -1,6 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search } from "lucide-react";
+import { Search, User, Building2, ListFilter } from "lucide-react";
 
 interface FilterBarProps {
   searchTerm: string;
@@ -34,23 +34,24 @@ export function FilterBar({
   areas,
 }: FilterBarProps) {
   return (
-    <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-      <div className="relative flex-1 min-w-[250px]">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3 overflow-x-auto pb-2">
+      <div className="relative flex-1 min-w-[200px]">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#36404A]" />
         <Input
-          placeholder="🔍 Buscar vaga..."
+          placeholder="Buscar vaga..."
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="pl-10"
+          className="h-9 pl-9 text-sm bg-white border-gray-200 text-[#00141D] placeholder:text-[#36404A]"
         />
       </div>
 
       <Select value={recrutadorFilter} onValueChange={onRecrutadorChange}>
-        <SelectTrigger className="w-full sm:w-[200px] bg-background">
+        <SelectTrigger className="h-9 w-full sm:w-[180px] bg-white border-gray-200 text-sm">
+          <User className="h-4 w-4 mr-2 text-[#36404A]" />
           <SelectValue placeholder="Recrutador" />
         </SelectTrigger>
-        <SelectContent className="bg-popover z-50">
-          <SelectItem value="all">Todos</SelectItem>
+        <SelectContent className="bg-white z-50">
+          <SelectItem value="all">Todos recrutadores</SelectItem>
           {recrutadores.map((rec) => (
             <SelectItem key={rec} value={rec}>
               {rec}
@@ -60,11 +61,12 @@ export function FilterBar({
       </Select>
 
       <Select value={clienteFilter} onValueChange={onClienteChange}>
-        <SelectTrigger className="w-full sm:w-[200px] bg-background">
+        <SelectTrigger className="h-9 w-full sm:w-[180px] bg-white border-gray-200 text-sm">
+          <Building2 className="h-4 w-4 mr-2 text-[#36404A]" />
           <SelectValue placeholder="Cliente" />
         </SelectTrigger>
-        <SelectContent className="bg-popover z-50">
-          <SelectItem value="all">Todos</SelectItem>
+        <SelectContent className="bg-white z-50">
+          <SelectItem value="all">Todos clientes</SelectItem>
           {clientes.map((cli) => (
             <SelectItem key={cli} value={cli}>
               {cli}
@@ -73,28 +75,15 @@ export function FilterBar({
         </SelectContent>
       </Select>
 
-      <Select value={areaFilter} onValueChange={onAreaChange}>
-        <SelectTrigger className="w-full sm:w-[200px] bg-background">
-          <SelectValue placeholder="Área" />
-        </SelectTrigger>
-        <SelectContent className="bg-popover z-50">
-          <SelectItem value="all">Todas</SelectItem>
-          {areas.map((area) => (
-            <SelectItem key={area} value={area}>
-              {area}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-
       <Select value={ordenacao} onValueChange={onOrdenacaoChange}>
-        <SelectTrigger className="w-full sm:w-[200px] bg-background">
-          <SelectValue placeholder="Ordenar por" />
+        <SelectTrigger className="h-9 w-full sm:w-[180px] bg-white border-gray-200 text-sm">
+          <ListFilter className="h-4 w-4 mr-2 text-[#36404A]" />
+          <SelectValue placeholder="Ordenar" />
         </SelectTrigger>
-        <SelectContent className="bg-popover z-50">
+        <SelectContent className="bg-white z-50">
           <SelectItem value="recentes">Mais recentes</SelectItem>
           <SelectItem value="antigas">Mais antigas</SelectItem>
-          <SelectItem value="candidatos">Maior nº de candidatos</SelectItem>
+          <SelectItem value="candidatos">Mais candidatos</SelectItem>
           <SelectItem value="dias">Dias em aberto</SelectItem>
         </SelectContent>
       </Select>
