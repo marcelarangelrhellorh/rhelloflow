@@ -12,7 +12,6 @@ import { ProfessionalInfoCard } from "@/components/CandidatoDetalhes/Professiona
 import { FeedbackList } from "@/components/CandidatoDetalhes/FeedbackList";
 import { FeedbackModal } from "@/components/CandidatoDetalhes/FeedbackModal";
 import { HistoryTimeline } from "@/components/CandidatoDetalhes/HistoryTimeline";
-import { CandidateModal } from "@/components/Candidatos/CandidateModal";
 import { LinkToJobModal } from "@/components/BancoTalentos/LinkToJobModal";
 
 type Candidato = {
@@ -62,7 +61,6 @@ export default function CandidatoDetalhes() {
   const [vaga, setVaga] = useState<Vaga | null>(null);
   const [historico, setHistorico] = useState<Historico[]>([]);
   const [loading, setLoading] = useState(true);
-  const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [relocateModalOpen, setRelocateModalOpen] = useState(false);
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
@@ -201,7 +199,7 @@ export default function CandidatoDetalhes() {
           cidade={candidato.cidade}
           estado={candidato.estado}
           recrutador={candidato.recrutador}
-          onEdit={() => setEditModalOpen(true)}
+          onEdit={() => navigate(`/candidatos/${id}/editar`)}
           onDelete={() => setDeleteDialogOpen(true)}
           onAddFeedback={() => setFeedbackModalOpen(true)}
           onRelocate={() => setRelocateModalOpen(true)}
@@ -260,16 +258,6 @@ export default function CandidatoDetalhes() {
       </div>
 
       {/* Modals */}
-      <CandidateModal
-        open={editModalOpen}
-        onClose={() => setEditModalOpen(false)}
-        candidatoId={id}
-        onSave={() => {
-          loadCandidato();
-          setEditModalOpen(false);
-        }}
-      />
-
       <LinkToJobModal
         open={relocateModalOpen}
         onOpenChange={setRelocateModalOpen}
