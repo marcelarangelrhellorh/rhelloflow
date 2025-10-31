@@ -22,6 +22,7 @@ export type Database = {
           curriculo_link: string | null
           curriculo_url: string | null
           disponibilidade_mudanca: string | null
+          disponibilidade_status: string | null
           email: string
           estado: string | null
           feedback: string | null
@@ -48,6 +49,7 @@ export type Database = {
           curriculo_link?: string | null
           curriculo_url?: string | null
           disponibilidade_mudanca?: string | null
+          disponibilidade_status?: string | null
           email: string
           estado?: string | null
           feedback?: string | null
@@ -74,6 +76,7 @@ export type Database = {
           curriculo_link?: string | null
           curriculo_url?: string | null
           disponibilidade_mudanca?: string | null
+          disponibilidade_status?: string | null
           email?: string
           estado?: string | null
           feedback?: string | null

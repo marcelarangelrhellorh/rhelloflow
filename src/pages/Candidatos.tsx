@@ -22,6 +22,7 @@ type Candidato = {
   status: string;
   recrutador: string | null;
   vaga_relacionada_id: string | null;
+  disponibilidade_status?: string | null;
 };
 
 export default function Candidatos() {
@@ -32,6 +33,7 @@ export default function Candidatos() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [recrutadorFilter, setRecrutadorFilter] = useState<string>("all");
   const [areaFilter, setAreaFilter] = useState<string>("all");
+  const [disponibilidadeFilter, setDisponibilidadeFilter] = useState<string>("disponível");
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [linkingJobId, setLinkingJobId] = useState<string | null>(null);
 
@@ -90,11 +92,13 @@ export default function Candidatos() {
     const matchesStatus = statusFilter === "all" || candidato.status === statusFilter;
     const matchesRecrutador = recrutadorFilter === "all" || candidato.recrutador === recrutadorFilter;
     const matchesArea = areaFilter === "all" || candidato.area === areaFilter;
+    const matchesDisponibilidade = disponibilidadeFilter === "all" || 
+      candidato.disponibilidade_status === disponibilidadeFilter;
     
     // Filtro de atenção: candidatos aguardando feedback do cliente
     const matchesAttention = attentionFilter !== 'awaiting_client_feedback' || candidato.status === 'Entrevistas Solicitante';
     
-    return matchesSearch && matchesStatus && matchesRecrutador && matchesArea && matchesAttention;
+    return matchesSearch && matchesStatus && matchesRecrutador && matchesArea && matchesDisponibilidade && matchesAttention;
   });
 
   const hasActiveFilter = attentionFilter === 'awaiting_client_feedback';
@@ -170,6 +174,8 @@ export default function Candidatos() {
               onRecrutadorChange={setRecrutadorFilter}
               areaFilter={areaFilter}
               onAreaChange={setAreaFilter}
+              disponibilidadeFilter={disponibilidadeFilter}
+              onDisponibilidadeChange={setDisponibilidadeFilter}
               recrutadores={recrutadores}
               areas={areas}
             />

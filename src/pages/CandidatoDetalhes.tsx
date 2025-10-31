@@ -33,6 +33,7 @@ type Candidato = {
   vaga_relacionada_id: string | null;
   pretensao_salarial: number | null;
   disponibilidade_mudanca: string | null;
+  disponibilidade_status: string | null;
   pontos_fortes: string | null;
   pontos_desenvolver: string | null;
   parecer_final: string | null;
@@ -237,6 +238,7 @@ export default function CandidatoDetalhes() {
             curriculoUrl={candidato.curriculo_url}
             portfolioUrl={candidato.portfolio_url}
             disponibilidadeMudanca={candidato.disponibilidade_mudanca}
+            disponibilidadeStatus={candidato.disponibilidade_status}
             pontosFortes={candidato.pontos_fortes}
             pontosDesenvolver={candidato.pontos_desenvolver}
             parecerFinal={candidato.parecer_final}

@@ -16,6 +16,7 @@ interface ProfessionalInfoCardProps {
   curriculoUrl: string | null;
   portfolioUrl: string | null;
   disponibilidadeMudanca: string | null;
+  disponibilidadeStatus: string | null;
   pontosFortes: string | null;
   pontosDesenvolver: string | null;
   parecerFinal: string | null;
@@ -33,6 +34,7 @@ export function ProfessionalInfoCard({
   curriculoUrl,
   portfolioUrl,
   disponibilidadeMudanca,
+  disponibilidadeStatus,
   pontosFortes,
   pontosDesenvolver,
   parecerFinal,
@@ -111,6 +113,27 @@ export function ProfessionalInfoCard({
               <p className="text-base font-medium text-card-foreground">{area}</p>
             </div>
           )}
+
+          {/* Disponibilidade do candidato */}
+          <div className="sm:col-span-2">
+            <p className="text-sm text-muted-foreground mb-1 flex items-center gap-1">
+              <User className="h-3.5 w-3.5" />
+              Disponibilidade do Candidato
+            </p>
+            <div className="flex items-center gap-2">
+              {disponibilidadeStatus === "disponível" ? (
+                <Badge className="bg-[#C9F4C7] text-[#1B5E20] hover:bg-[#C9F4C7]/90">
+                  ✅ Disponível
+                </Badge>
+              ) : disponibilidadeStatus === "não_disponível" ? (
+                <Badge className="bg-[#FFD6D6] text-[#B71C1C] hover:bg-[#FFD6D6]/90">
+                  ❌ Não disponível
+                </Badge>
+              ) : (
+                <span className="text-base font-medium text-muted-foreground">Não informado</span>
+              )}
+            </div>
+          </div>
 
           {/* Disponibilidade para mudança */}
           <div className="sm:col-span-2">

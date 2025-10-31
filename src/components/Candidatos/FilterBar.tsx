@@ -11,6 +11,8 @@ interface FilterBarProps {
   onRecrutadorChange: (value: string) => void;
   areaFilter: string;
   onAreaChange: (value: string) => void;
+  disponibilidadeFilter: string;
+  onDisponibilidadeChange: (value: string) => void;
   recrutadores: string[];
   areas: string[];
 }
@@ -37,6 +39,8 @@ export function FilterBar({
   onRecrutadorChange,
   areaFilter,
   onAreaChange,
+  disponibilidadeFilter,
+  onDisponibilidadeChange,
   recrutadores,
   areas,
 }: FilterBarProps) {
@@ -53,8 +57,19 @@ export function FilterBar({
           />
         </div>
 
+        <Select value={disponibilidadeFilter} onValueChange={onDisponibilidadeChange}>
+          <SelectTrigger className="w-full sm:w-[180px] bg-background">
+            <SelectValue placeholder="Disponibilidade" />
+          </SelectTrigger>
+          <SelectContent className="bg-popover z-50">
+            <SelectItem value="all">Todos</SelectItem>
+            <SelectItem value="disponível">✅ Disponíveis</SelectItem>
+            <SelectItem value="não_disponível">❌ Não disponíveis</SelectItem>
+          </SelectContent>
+        </Select>
+
         <Select value={statusFilter} onValueChange={onStatusChange}>
-          <SelectTrigger className="w-full sm:w-[200px] bg-background">
+          <SelectTrigger className="w-full sm:w-[180px] bg-background">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent className="bg-popover z-50">
@@ -68,7 +83,7 @@ export function FilterBar({
         </Select>
 
         <Select value={recrutadorFilter} onValueChange={onRecrutadorChange}>
-          <SelectTrigger className="w-full sm:w-[200px] bg-background">
+          <SelectTrigger className="w-full sm:w-[180px] bg-background">
             <SelectValue placeholder="Recrutador" />
           </SelectTrigger>
           <SelectContent className="bg-popover z-50">
@@ -82,7 +97,7 @@ export function FilterBar({
         </Select>
 
         <Select value={areaFilter} onValueChange={onAreaChange}>
-          <SelectTrigger className="w-full sm:w-[200px] bg-background">
+          <SelectTrigger className="w-full sm:w-[180px] bg-background">
             <SelectValue placeholder="Área" />
           </SelectTrigger>
           <SelectContent className="bg-popover z-50">

@@ -17,6 +17,7 @@ interface Candidato {
   status: string;
   recrutador: string | null;
   vaga_relacionada_id: string | null;
+  disponibilidade_status?: string | null;
 }
 
 interface CandidateCardProps {
@@ -57,21 +58,35 @@ export function CandidateCard({ candidato, onView, onEdit, onDelete, onLinkJob }
       : name.substring(0, 2).toUpperCase();
   };
 
+  const isAvailable = candidato.disponibilidade_status !== 'não_disponível';
+
   return (
-    <Card className="group transition-all duration-200 hover:shadow-lg hover:scale-[1.01] bg-card">
+    <Card className={cn(
+      "group transition-all duration-200 hover:shadow-lg hover:scale-[1.01] bg-card",
+      !isAvailable && "opacity-70"
+    )}>
       <CardHeader className="pb-2 pt-4 px-4">
         <div className="flex items-start justify-between mb-2">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold text-sm">
               {getInitials(candidato.nome_completo)}
             </div>
-            <div className="flex-1">
+            <div className="flex gap-1 flex-wrap">
               <Badge
                 variant="outline"
-                className={cn("text-xs font-medium mb-1", statusColors[candidato.status] || statusColors["Banco de Talentos"])}
+                className={cn("text-xs font-medium", statusColors[candidato.status] || statusColors["Banco de Talentos"])}
               >
                 {statusIcons[candidato.status] || "⚪"} {candidato.status}
               </Badge>
+              {candidato.disponibilidade_status === 'disponível' ? (
+                <Badge className="text-xs font-semibold bg-[#C9F4C7] text-[#1B5E20] hover:bg-[#C9F4C7]/90">
+                  ✅ Disponível
+                </Badge>
+              ) : candidato.disponibilidade_status === 'não_disponível' ? (
+                <Badge className="text-xs font-semibold bg-[#FFD6D6] text-[#B71C1C] hover:bg-[#FFD6D6]/90">
+                  ❌ Não disponível
+                </Badge>
+              ) : null}
             </div>
           </div>
         </div>

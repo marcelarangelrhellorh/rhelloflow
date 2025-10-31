@@ -37,6 +37,7 @@ export default function CandidatoForm() {
     vaga_relacionada_id: "",
     pretensao_salarial: "",
     disponibilidade_mudanca: "",
+    disponibilidade_status: "disponível",
     pontos_fortes: "",
     pontos_desenvolver: "",
     parecer_final: "",
@@ -92,6 +93,7 @@ export default function CandidatoForm() {
             ? `R$ ${data.pretensao_salarial.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
             : "",
           disponibilidade_mudanca: data.disponibilidade_mudanca || "",
+          disponibilidade_status: data.disponibilidade_status || "disponível",
           pontos_fortes: data.pontos_fortes || "",
           pontos_desenvolver: data.pontos_desenvolver || "",
           parecer_final: data.parecer_final || "",
@@ -199,6 +201,7 @@ export default function CandidatoForm() {
           ? parseFloat(formData.pretensao_salarial.replace(/[R$\s.]/g, '').replace(',', '.'))
           : null,
         disponibilidade_mudanca: formData.disponibilidade_mudanca || null,
+        disponibilidade_status: formData.disponibilidade_status || 'disponível',
         pontos_fortes: formData.pontos_fortes || null,
         pontos_desenvolver: formData.pontos_desenvolver || null,
         parecer_final: formData.parecer_final || null,
@@ -438,6 +441,27 @@ export default function CandidatoForm() {
               </div>
 
               <div>
+                <Label htmlFor="disponibilidade_status">
+                  Disponibilidade do Candidato *
+                </Label>
+                <Select 
+                  value={formData.disponibilidade_status} 
+                  onValueChange={(value) => setFormData({ ...formData, disponibilidade_status: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white z-50">
+                    <SelectItem value="disponível">✅ Disponível</SelectItem>
+                    <SelectItem value="não_disponível">❌ Não disponível</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Indica se o candidato está disponível para processos seletivos
+                </p>
+              </div>
+
+              <div>
                 <Label htmlFor="disponibilidade_mudanca">
                   Disponibilidade para Mudança *
                 </Label>
@@ -448,7 +472,7 @@ export default function CandidatoForm() {
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-white z-50">
                     <SelectItem value="Sim">Sim</SelectItem>
                     <SelectItem value="Não">Não</SelectItem>
                     <SelectItem value="A combinar">A combinar</SelectItem>
