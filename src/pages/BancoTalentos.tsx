@@ -147,24 +147,24 @@ export default function BancoTalentos() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FFFDF6] p-8">
+    <div className="min-h-screen bg-background-light p-8">
       {/* Cabeçalho */}
       <div className="mb-8 flex items-start justify-between">
         <div>
-          <h1 className="text-4xl font-bold text-[#00141D] mb-2">Banco de Talentos</h1>
-          <p className="text-[#36404A] mb-2">
+          <h1 className="text-3xl font-bold text-foreground mb-2">Banco de Talentos</h1>
+          <p className="text-muted-foreground mb-2">
             Visualize e gerencie candidatos disponíveis para realocação.
           </p>
           <div className="inline-flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-full">
             <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-            <span className="text-sm font-medium text-[#00141D]">
+            <span className="text-sm font-medium text-foreground">
               {filteredCandidatos.length} candidato{filteredCandidatos.length !== 1 ? "s" : ""} disponível{filteredCandidatos.length !== 1 ? "eis" : ""} para realocação
             </span>
           </div>
         </div>
         <Button 
           onClick={() => setShowAddModal(true)}
-          className="bg-[#F9EC3F] hover:bg-[#F9EC3F]/90 text-[#00141D] font-semibold"
+          className="bg-[#F9EC3F] hover:bg-[#E5D72E] text-[#00141D] font-bold"
         >
           <Plus className="mr-2 h-5 w-5" />
           Adicionar Candidato
@@ -172,20 +172,20 @@ export default function BancoTalentos() {
       </div>
 
       {/* Filtros e busca */}
-      <div className="sticky top-20 z-10 bg-[#FFFDF6]/95 backdrop-blur-sm pb-6 mb-6 border-b">
+      <div className="sticky top-20 z-10 bg-background/95 backdrop-blur-sm pb-6 mb-6 border-b">
         <div className="flex flex-wrap gap-4 mb-4">
           <div className="relative flex-1 min-w-[300px]">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#36404A]" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Buscar por nome, área ou cidade..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className={`pl-10 border-2 ${searchTerm ? 'border-[#F9EC3F]' : 'border-border'}`}
+              className={`pl-10 ${searchTerm ? 'border-2 border-primary' : ''}`}
             />
           </div>
 
           <Select value={areaFilter} onValueChange={setAreaFilter}>
-            <SelectTrigger className={`w-[200px] ${areaFilter !== 'all' ? 'border-2 border-[#F9EC3F]' : ''}`}>
+            <SelectTrigger className={`w-[200px] ${areaFilter !== 'all' ? 'border-2 border-primary' : ''}`}>
               <SelectValue placeholder="Área de atuação" />
             </SelectTrigger>
             <SelectContent>
@@ -201,7 +201,7 @@ export default function BancoTalentos() {
           </Select>
 
           <Select value={nivelFilter} onValueChange={setNivelFilter}>
-            <SelectTrigger className={`w-[180px] ${nivelFilter !== 'all' ? 'border-2 border-[#F9EC3F]' : ''}`}>
+            <SelectTrigger className={`w-[180px] ${nivelFilter !== 'all' ? 'border-2 border-primary' : ''}`}>
               <SelectValue placeholder="Nível" />
             </SelectTrigger>
             <SelectContent>
@@ -216,7 +216,7 @@ export default function BancoTalentos() {
           </Select>
 
           <Select value={avaliacaoFilter} onValueChange={setAvaliacaoFilter}>
-            <SelectTrigger className={`w-[200px] ${avaliacaoFilter !== 'all' ? 'border-2 border-[#F9EC3F]' : ''}`}>
+            <SelectTrigger className={`w-[200px] ${avaliacaoFilter !== 'all' ? 'border-2 border-primary' : ''}`}>
               <SelectValue placeholder="Avaliação" />
             </SelectTrigger>
             <SelectContent>
@@ -233,7 +233,7 @@ export default function BancoTalentos() {
             placeholder="Filtrar por cidade..."
             value={cidadeFilter}
             onChange={(e) => setCidadeFilter(e.target.value)}
-            className={`w-[180px] ${cidadeFilter ? 'border-2 border-[#F9EC3F]' : ''}`}
+            className={`w-[180px] ${cidadeFilter ? 'border-2 border-primary' : ''}`}
           />
 
           <div className="flex gap-2 ml-auto">
@@ -241,7 +241,7 @@ export default function BancoTalentos() {
               variant={viewMode === "grid" ? "default" : "outline"}
               size="icon"
               onClick={() => setViewMode("grid")}
-              className={viewMode === "grid" ? "bg-[#F9EC3F] text-[#00141D] hover:bg-[#F9EC3F]/90" : ""}
+              className={viewMode === "grid" ? "bg-[#F9EC3F] text-[#00141D] hover:bg-[#E5D72E]" : ""}
             >
               <Grid3x3 className="h-4 w-4" />
             </Button>
@@ -249,7 +249,7 @@ export default function BancoTalentos() {
               variant={viewMode === "list" ? "default" : "outline"}
               size="icon"
               onClick={() => setViewMode("list")}
-              className={viewMode === "list" ? "bg-[#F9EC3F] text-[#00141D] hover:bg-[#F9EC3F]/90" : ""}
+              className={viewMode === "list" ? "bg-[#F9EC3F] text-[#00141D] hover:bg-[#E5D72E]" : ""}
             >
               <List className="h-4 w-4" />
             </Button>
@@ -258,7 +258,7 @@ export default function BancoTalentos() {
 
         {hasActiveFilters && (
           <div className="flex items-center justify-between">
-            <p className="text-sm text-[#36404A]">
+            <p className="text-sm text-muted-foreground">
               {filteredCandidatos.length} resultado{filteredCandidatos.length !== 1 ? "s" : ""} encontrado{filteredCandidatos.length !== 1 ? "s" : ""}
             </p>
             <Button
@@ -271,7 +271,7 @@ export default function BancoTalentos() {
                 setAvaliacaoFilter("all");
                 setSearchTerm("");
               }}
-              className="text-[#36404A] hover:text-[#00141D]"
+              className="text-muted-foreground hover:text-foreground"
             >
               Limpar filtros
             </Button>
@@ -283,15 +283,15 @@ export default function BancoTalentos() {
       {filteredCandidatos.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <div className="mb-6 text-6xl">💛</div>
-          <h3 className="text-2xl font-bold text-[#00141D] mb-2">
+          <h3 className="text-2xl font-bold text-foreground mb-2">
             Nenhum talento disponível no momento
           </h3>
-          <p className="text-[#36404A] mb-6">
+          <p className="text-muted-foreground mb-6">
             Cadastre novos ou acompanhe os processos em andamento.
           </p>
           <Button 
             onClick={() => setShowAddModal(true)}
-            className="bg-[#F9EC3F] hover:bg-[#F9EC3F]/90 text-[#00141D] font-semibold"
+            className="bg-[#F9EC3F] hover:bg-[#E5D72E] text-[#00141D] font-bold"
           >
             <Plus className="mr-2 h-5 w-5" />
             Adicionar Primeiro Candidato

@@ -15,6 +15,7 @@ const menuItems = [
   { title: "Funil de Vagas", url: "/funil-vagas" },
   { title: "Candidatos", url: "/candidatos" },
   { title: "Funil de Candidatos", url: "/funil-candidatos" },
+  { title: "Banco de Talentos", url: "/banco-talentos" },
   { title: "Relatórios", url: "/relatorios" },
 ];
 
