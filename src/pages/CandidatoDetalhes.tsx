@@ -32,7 +32,7 @@ type Candidato = {
   recrutador: string | null;
   vaga_relacionada_id: string | null;
   pretensao_salarial: number | null;
-  disponibilidade_mudanca: boolean | null;
+  disponibilidade_mudanca: string | null;
   pontos_fortes: string | null;
   pontos_desenvolver: string | null;
   parecer_final: string | null;
@@ -70,6 +70,30 @@ export default function CandidatoDetalhes() {
     if (id) {
       loadCandidato();
       loadHistorico();
+
+      // Subscribe to realtime updates
+      const channel = supabase
+        .channel('candidato-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'candidatos',
+            filter: `id=eq.${id}`
+          },
+          (payload) => {
+            console.log('Candidato atualizado:', payload);
+            if (payload.eventType === 'UPDATE') {
+              loadCandidato();
+            }
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
     }
   }, [id]);
 

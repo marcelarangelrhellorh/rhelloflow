@@ -2,8 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { User, Briefcase, DollarSign, Calendar, ExternalLink, FileText, Download, CheckCircle2, XCircle, MapPin } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { User, Briefcase, DollarSign, Calendar, ExternalLink, FileText, MapPin, CheckCircle2, XCircle } from "lucide-react";
 import { toast } from "sonner";
 
 interface ProfessionalInfoCardProps {
@@ -16,7 +15,7 @@ interface ProfessionalInfoCardProps {
   area: string | null;
   curriculoUrl: string | null;
   portfolioUrl: string | null;
-  disponibilidadeMudanca: boolean | null;
+  disponibilidadeMudanca: string | null;
   pontosFortes: string | null;
   pontosDesenvolver: string | null;
   parecerFinal: string | null;
@@ -52,29 +51,14 @@ export function ProfessionalInfoCard({
     });
   };
 
-  const handleDownload = async (path: string, fileName: string) => {
+  const handleDownload = async (url: string, fileName: string) => {
     try {
-      const bucket = fileName.includes('curriculo') ? 'curriculos' : 'portfolios';
-      const { data, error } = await supabase.storage
-        .from(bucket)
-        .download(path);
-
-      if (error) throw error;
-
-      // Create download link
-      const url = window.URL.createObjectURL(data);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = fileName;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-
-      toast.success("Download iniciado");
+      // Open URL in new tab for public files
+      window.open(url, '_blank');
+      toast.success("Abrindo arquivo");
     } catch (error) {
-      console.error("Erro ao fazer download:", error);
-      toast.error("Erro ao fazer download do arquivo");
+      console.error("Erro ao abrir arquivo:", error);
+      toast.error("Erro ao abrir arquivo");
     }
   };
 
@@ -135,15 +119,25 @@ export function ProfessionalInfoCard({
               Disponibilidade para Mudança
             </p>
             <div className="flex items-center gap-2">
-              {disponibilidadeMudanca ? (
+              {disponibilidadeMudanca === "Sim" ? (
                 <>
                   <CheckCircle2 className="h-4 w-4 text-green-500" />
                   <span className="text-base font-medium text-green-600">Sim</span>
                 </>
+              ) : disponibilidadeMudanca === "Não" ? (
+                <>
+                  <XCircle className="h-4 w-4 text-orange-500" />
+                  <span className="text-base font-medium text-orange-600">Não</span>
+                </>
+              ) : disponibilidadeMudanca === "A combinar" ? (
+                <>
+                  <CheckCircle2 className="h-4 w-4 text-blue-500" />
+                  <span className="text-base font-medium text-blue-600">A combinar</span>
+                </>
               ) : (
                 <>
                   <XCircle className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-base font-medium text-muted-foreground">Não</span>
+                  <span className="text-base font-medium text-muted-foreground">Não informado</span>
                 </>
               )}
             </div>
@@ -177,9 +171,9 @@ export function ProfessionalInfoCard({
               >
                 <div className="flex items-center gap-2">
                   <FileText className="h-4 w-4" />
-                  <span>Currículo</span>
+                  <span>Ver Currículo</span>
                 </div>
-                <Download className="h-4 w-4" />
+                <ExternalLink className="h-4 w-4" />
               </Button>
             )}
             {portfolioUrl && (
@@ -191,9 +185,9 @@ export function ProfessionalInfoCard({
               >
                 <div className="flex items-center gap-2">
                   <FileText className="h-4 w-4" />
-                  <span>Portfólio</span>
+                  <span>Ver Portfólio</span>
                 </div>
-                <Download className="h-4 w-4" />
+                <ExternalLink className="h-4 w-4" />
               </Button>
             )}
             {!curriculoUrl && !portfolioUrl && (

@@ -36,7 +36,7 @@ export default function CandidatoForm() {
     recrutador: "",
     vaga_relacionada_id: "",
     pretensao_salarial: "",
-    disponibilidade_mudanca: false,
+    disponibilidade_mudanca: "",
     pontos_fortes: "",
     pontos_desenvolver: "",
     parecer_final: "",
@@ -89,7 +89,7 @@ export default function CandidatoForm() {
           recrutador: data.recrutador || "",
           vaga_relacionada_id: data.vaga_relacionada_id || "",
           pretensao_salarial: data.pretensao_salarial?.toString() || "",
-          disponibilidade_mudanca: data.disponibilidade_mudanca || false,
+          disponibilidade_mudanca: data.disponibilidade_mudanca || "",
           pontos_fortes: data.pontos_fortes || "",
           pontos_desenvolver: data.pontos_desenvolver || "",
           parecer_final: data.parecer_final || "",
@@ -117,7 +117,12 @@ export default function CandidatoForm() {
 
     if (uploadError) throw uploadError;
 
-    return filePath;
+    // Get public URL
+    const { data } = supabase.storage
+      .from(bucket)
+      .getPublicUrl(filePath);
+
+    return data.publicUrl;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -189,7 +194,7 @@ export default function CandidatoForm() {
         recrutador: formData.recrutador || null,
         vaga_relacionada_id: formData.vaga_relacionada_id || null,
         pretensao_salarial: formData.pretensao_salarial ? parseFloat(formData.pretensao_salarial) : null,
-        disponibilidade_mudanca: formData.disponibilidade_mudanca,
+        disponibilidade_mudanca: formData.disponibilidade_mudanca || null,
         pontos_fortes: formData.pontos_fortes || null,
         pontos_desenvolver: formData.pontos_desenvolver || null,
         parecer_final: formData.parecer_final || null,
@@ -224,9 +229,16 @@ export default function CandidatoForm() {
         return;
       }
       // Validate file type
-      const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+      const allowedTypes = [
+        'application/pdf', 
+        'application/msword', 
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'image/png',
+        'image/jpeg',
+        'image/jpg'
+      ];
       if (!allowedTypes.includes(file.type)) {
-        toast.error("Formato de arquivo não permitido. Use PDF ou Word.");
+        toast.error("Formato de arquivo não permitido. Use PDF, DOC, DOCX, PNG ou JPG.");
         return;
       }
       setCurriculoFile(file);
@@ -239,6 +251,18 @@ export default function CandidatoForm() {
       // Validate file size (10MB)
       if (file.size > 10485760) {
         toast.error("O arquivo deve ter no máximo 10MB");
+        return;
+      }
+      // Validate file type
+      const allowedTypes = [
+        'application/pdf',
+        'image/png',
+        'image/jpeg',
+        'image/jpg',
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+      ];
+      if (!allowedTypes.includes(file.type)) {
+        toast.error("Formato de arquivo não permitido. Use PDF, PNG, JPG ou PPTX.");
         return;
       }
       setPortfolioFile(file);
@@ -334,7 +358,7 @@ export default function CandidatoForm() {
                     <Input
                       id="curriculo"
                       type="file"
-                      accept=".pdf,.doc,.docx"
+                      accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
                       onChange={handleCurriculoChange}
                       className="cursor-pointer"
                       disabled={uploading}
@@ -363,7 +387,7 @@ export default function CandidatoForm() {
                     </div>
                   )}
                   <p className="text-xs text-muted-foreground">
-                    Formatos aceitos: PDF, DOC, DOCX (máx. 10MB)
+                    Formatos aceitos: PDF, DOC, DOCX, PNG, JPG (máx. 10MB)
                   </p>
                 </div>
               </div>
@@ -375,7 +399,7 @@ export default function CandidatoForm() {
                     <Input
                       id="portfolio"
                       type="file"
-                      accept=".pdf,.doc,.docx,.zip"
+                      accept=".pdf,.png,.jpg,.jpeg,.pptx"
                       onChange={handlePortfolioChange}
                       className="cursor-pointer"
                       disabled={uploading}
@@ -404,25 +428,28 @@ export default function CandidatoForm() {
                     </div>
                   )}
                   <p className="text-xs text-muted-foreground">
-                    Formatos aceitos: PDF, DOC, DOCX, ZIP (máx. 10MB)
+                    Formatos aceitos: PDF, PNG, JPG, PPTX (máx. 10MB)
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="disponibilidade_mudanca"
-                  checked={formData.disponibilidade_mudanca}
-                  onCheckedChange={(checked) => 
-                    setFormData({ ...formData, disponibilidade_mudanca: checked as boolean })
-                  }
-                />
-                <Label
-                  htmlFor="disponibilidade_mudanca"
-                  className="text-sm font-normal cursor-pointer"
-                >
-                  Tem disponibilidade para mudança
+              <div>
+                <Label htmlFor="disponibilidade_mudanca">
+                  Disponibilidade para Mudança *
                 </Label>
+                <Select 
+                  value={formData.disponibilidade_mudanca} 
+                  onValueChange={(value) => setFormData({ ...formData, disponibilidade_mudanca: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Sim">Sim</SelectItem>
+                    <SelectItem value="Não">Não</SelectItem>
+                    <SelectItem value="A combinar">A combinar</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </CardContent>
           </Card>
@@ -513,10 +540,14 @@ export default function CandidatoForm() {
                 <Textarea
                   id="pontos_fortes"
                   rows={3}
+                  maxLength={500}
                   placeholder="Descreva os pontos fortes do candidato..."
                   value={formData.pontos_fortes}
                   onChange={(e) => setFormData({ ...formData, pontos_fortes: e.target.value })}
                 />
+                <p className="text-xs text-muted-foreground mt-1">
+                  {formData.pontos_fortes.length}/500 caracteres
+                </p>
               </div>
 
               <div>
@@ -524,10 +555,14 @@ export default function CandidatoForm() {
                 <Textarea
                   id="pontos_desenvolver"
                   rows={3}
+                  maxLength={500}
                   placeholder="Descreva os pontos que o candidato precisa desenvolver..."
                   value={formData.pontos_desenvolver}
                   onChange={(e) => setFormData({ ...formData, pontos_desenvolver: e.target.value })}
                 />
+                <p className="text-xs text-muted-foreground mt-1">
+                  {formData.pontos_desenvolver.length}/500 caracteres
+                </p>
               </div>
 
               <div>
@@ -535,10 +570,14 @@ export default function CandidatoForm() {
                 <Textarea
                   id="parecer_final"
                   rows={4}
+                  maxLength={500}
                   placeholder="Parecer final sobre o candidato..."
                   value={formData.parecer_final}
                   onChange={(e) => setFormData({ ...formData, parecer_final: e.target.value })}
                 />
+                <p className="text-xs text-muted-foreground mt-1">
+                  {formData.parecer_final.length}/500 caracteres
+                </p>
               </div>
             </CardContent>
           </Card>
