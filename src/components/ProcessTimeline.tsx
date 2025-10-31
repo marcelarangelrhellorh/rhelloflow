@@ -14,12 +14,12 @@ interface ProcessTimelineProps {
 
 export function ProcessTimeline({ steps }: ProcessTimelineProps) {
   return (
-    <ScrollArea className="w-full">
-      <div className="relative min-w-max pb-2">
-        <div className="flex items-center gap-8 px-4">
-          {steps.map((step, index) => (
-            <TooltipProvider key={index}>
-              <Tooltip>
+    <TooltipProvider>
+      <ScrollArea className="w-full">
+        <div className="relative min-w-max pb-2">
+          <div className="flex items-center gap-8 px-4">
+            {steps.map((step, index) => (
+              <Tooltip key={index}>
                 <TooltipTrigger asChild>
                   <div 
                     id={step.status === "current" ? "current-step" : undefined}
@@ -76,11 +76,11 @@ export function ProcessTimeline({ steps }: ProcessTimelineProps) {
                   <p>{step.label}</p>
                 </TooltipContent>
               </Tooltip>
-            </TooltipProvider>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
-      <ScrollBar orientation="horizontal" />
-    </ScrollArea>
+        <ScrollBar orientation="horizontal" />
+      </ScrollArea>
+    </TooltipProvider>
   );
 }
