@@ -1,5 +1,4 @@
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "./AppSidebar";
+import { AppNavbar } from "./AppNavbar";
 import { Outlet, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -37,13 +36,11 @@ export function Layout() {
   }
 
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen w-full">
-        <AppSidebar />
-        <main className="flex-1 overflow-auto bg-secondary/30">
-          <Outlet />
-        </main>
-      </div>
-    </SidebarProvider>
+    <div className="min-h-screen w-full">
+      <AppNavbar />
+      <main className="bg-secondary/30">
+        <Outlet />
+      </main>
+    </div>
   );
 }
