@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, MessageSquare, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -37,6 +37,10 @@ export default function Candidatos() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [linkingJobId, setLinkingJobId] = useState<string | null>(null);
+
+  // Verificar se há filtro de atenção pela URL
+  const searchParams = new URLSearchParams(window.location.search);
+  const attentionFilter = searchParams.get('attention');
 
   useEffect(() => {
     loadCandidatos();
@@ -90,8 +94,18 @@ export default function Candidatos() {
     const matchesRecrutador = recrutadorFilter === "all" || candidato.recrutador === recrutadorFilter;
     const matchesArea = areaFilter === "all" || candidato.area === areaFilter;
     
-    return matchesSearch && matchesStatus && matchesRecrutador && matchesArea;
+    // Filtro de atenção: candidatos aguardando feedback do cliente
+    const matchesAttention = attentionFilter !== 'awaiting_client_feedback' || candidato.status === 'Entrevistas Solicitante';
+    
+    return matchesSearch && matchesStatus && matchesRecrutador && matchesArea && matchesAttention;
   });
+
+  const hasActiveFilter = attentionFilter === 'awaiting_client_feedback';
+  
+  const clearAttentionFilter = () => {
+    navigate('/candidatos');
+    window.location.reload();
+  };
 
   // Get unique values for filters
   const recrutadores = Array.from(new Set(candidatos.map(c => c.recrutador).filter(Boolean))) as string[];
@@ -129,6 +143,24 @@ export default function Candidatos() {
 
           {/* Stats */}
           <StatsHeader total={candidatos.length} byStatus={statsByStatus} />
+
+          {/* Filter chip */}
+          {hasActiveFilter && (
+            <div className="mt-4 flex items-center gap-2 p-3 bg-purple/10 border border-purple/20 rounded-lg">
+              <MessageSquare className="h-4 w-4 text-purple" />
+              <span className="text-sm font-medium">
+                Aguardando feedback do cliente
+              </span>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={clearAttentionFilter}
+                className="ml-auto"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
 
           {/* Filters */}
           <div className="mt-4">

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, Link2, Copy } from "lucide-react";
+import { Plus, Search, Link2, Copy, AlertTriangle, ExternalLink } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
@@ -82,6 +82,13 @@ export default function Vagas() {
     const matchesAttention = attentionFilter !== 'out_of_sla' || attentionIds.includes(vaga.id);
     return matchesSearch && matchesStatus && matchesAttention;
   });
+  
+  const hasActiveFilter = attentionFilter === 'out_of_sla';
+  
+  const clearAttentionFilter = () => {
+    navigate('/vagas');
+    window.location.reload();
+  };
 
   const copyPublicFormLink = () => {
     const publicLink = `${window.location.origin}/solicitar-vaga`;
@@ -128,7 +135,7 @@ export default function Vagas() {
                 Copiar Link
               </DropdownMenuItem>
               <DropdownMenuItem onClick={openPublicForm}>
-                <Link2 className="mr-2 h-4 w-4" />
+                <ExternalLink className="mr-2 h-4 w-4" />
                 Abrir em Nova Aba
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -140,6 +147,24 @@ export default function Vagas() {
           </Button>
         </div>
       </div>
+
+      {/* Filter chip */}
+      {hasActiveFilter && (
+        <div className="mb-4 flex items-center gap-2 p-3 bg-warning/10 border border-warning/20 rounded-lg">
+          <AlertTriangle className="h-4 w-4 text-warning" />
+          <span className="text-sm font-medium">
+            Atenção: Fora do prazo (&gt;30 dias úteis)
+          </span>
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={clearAttentionFilter}
+            className="ml-auto"
+          >
+            Limpar
+          </Button>
+        </div>
+      )}
 
       <div className="mb-6 flex gap-4">
         <div className="relative flex-1">

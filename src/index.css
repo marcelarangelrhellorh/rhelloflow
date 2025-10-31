@@ -9,63 +9,62 @@ All colors MUST be HSL.
 @layer base {
   :root {
     /* Rhello brand colors */
-    --rhello-yellow: 48 100% 60%;
-    --rhello-yellow-dark: 48 100% 50%;
-    --rhello-yellow-light: 48 100% 95%;
+    --rhello-yellow: 48 100% 50%;        /* #FFCD00 */
+    --rhello-yellow-light: 51 97% 62%;   /* #FAEC3E */
+    --rhello-dark: 195 100% 6%;          /* #00141D */
+    --rhello-gray: 207 13% 24%;          /* #36404A */
+    --rhello-cream: 48 100% 98%;         /* #FFFDF6 */
     
-    --background: 0 0% 100%;
-    --foreground: 240 10% 10%;
+    --background: 48 100% 98%;           /* Fundo claro Rhello */
+    --foreground: 195 100% 6%;           /* Azul escuro para texto */
 
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 10%;
+    --card-foreground: 195 100% 6%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 10%;
+    --popover-foreground: 195 100% 6%;
 
-    --primary: 48 100% 60%;
-    --primary-foreground: 240 10% 10%;
+    --primary: 48 100% 50%;              /* Amarelo primário */
+    --primary-foreground: 195 100% 6%;
 
-    --secondary: 240 5% 96%;
-    --secondary-foreground: 240 10% 10%;
+    --secondary: 51 97% 62%;             /* Amarelo secundário */
+    --secondary-foreground: 195 100% 6%;
 
     --muted: 240 5% 96%;
-    --muted-foreground: 240 4% 46%;
+    --muted-foreground: 207 13% 24%;     /* Cinza de interface */
 
-    --accent: 48 100% 60%;
-    --accent-foreground: 240 10% 10%;
+    --accent: 48 100% 50%;
+    --accent-foreground: 195 100% 6%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 142 76% 36%;
+    --success: 160 84% 39%;              /* Verde para aprovações */
     --success-foreground: 0 0% 100%;
 
-    --warning: 38 92% 50%;
-    --warning-foreground: 0 0% 100%;
+    --warning: 35 100% 50%;              /* Laranja para atenção */
+    --warning-foreground: 195 100% 6%;
 
     --info: 199 89% 48%;
     --info-foreground: 0 0% 100%;
 
+    --purple: 258 90% 66%;               /* Roxo para feedbacks */
+    --purple-foreground: 0 0% 100%;
+
     --border: 240 6% 90%;
     --input: 240 6% 90%;
-    --ring: 48 100% 60%;
+    --ring: 48 100% 50%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;                      /* 16px para cantos arredondados */
 
-    --sidebar-background: 240 10% 10%;
+    --sidebar-background: 195 100% 6%;
     --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 48 100% 60%;
-    --sidebar-primary-foreground: 240 10% 10%;
-    --sidebar-accent: 240 8% 15%;
+    --sidebar-primary: 48 100% 50%;
+    --sidebar-primary-foreground: 195 100% 6%;
+    --sidebar-accent: 207 13% 24%;
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 240 8% 20%;
-    --sidebar-ring: 48 100% 60%;
-    
-    /* Status colors */
-    --status-active: 142 76% 36%;
-    --status-pending: 38 92% 50%;
-    --status-cancelled: 0 84% 60%;
-    --status-completed: 199 89% 48%;
+    --sidebar-ring: 48 100% 50%;
   }
 
   .dark {
