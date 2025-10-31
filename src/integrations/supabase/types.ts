@@ -124,6 +124,117 @@ export type Database = {
           },
         ]
       }
+      job_stage_history: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          from_status: string | null
+          id: string
+          job_id: string
+          to_status: string
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          from_status?: string | null
+          id?: string
+          job_id: string
+          to_status: string
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          from_status?: string | null
+          id?: string
+          job_id?: string
+          to_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_stage_history_changed_by_fkey"
+            columns: ["changed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_stage_history_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "vagas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string | null
+          id: string
+          job_id: string | null
+          kind: string
+          read_at: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string | null
+          id?: string
+          job_id?: string | null
+          kind: string
+          read_at?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string | null
+          id?: string
+          job_id?: string | null
+          kind?: string
+          read_at?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "vagas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          full_name: string
+          id: string
+          role: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          full_name: string
+          id: string
+          role?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          full_name?: string
+          id?: string
+          role?: string | null
+        }
+        Relationships: []
+      }
       vagas: {
         Row: {
           beneficios: string[] | null
@@ -140,6 +251,7 @@ export type Database = {
           motivo_confidencial: string | null
           observacoes: string | null
           prioridade: Database["public"]["Enums"]["prioridade_vaga"] | null
+          recruiter_id: string | null
           recrutador: string | null
           requisitos_desejaveis: string | null
           requisitos_obrigatorios: string | null
@@ -147,7 +259,9 @@ export type Database = {
           salario_max: number | null
           salario_min: number | null
           status: Database["public"]["Enums"]["status_vaga"] | null
+          status_changed_at: string | null
           titulo: string
+          updated_at: string | null
         }
         Insert: {
           beneficios?: string[] | null
@@ -166,6 +280,7 @@ export type Database = {
           motivo_confidencial?: string | null
           observacoes?: string | null
           prioridade?: Database["public"]["Enums"]["prioridade_vaga"] | null
+          recruiter_id?: string | null
           recrutador?: string | null
           requisitos_desejaveis?: string | null
           requisitos_obrigatorios?: string | null
@@ -173,7 +288,9 @@ export type Database = {
           salario_max?: number | null
           salario_min?: number | null
           status?: Database["public"]["Enums"]["status_vaga"] | null
+          status_changed_at?: string | null
           titulo: string
+          updated_at?: string | null
         }
         Update: {
           beneficios?: string[] | null
@@ -192,6 +309,7 @@ export type Database = {
           motivo_confidencial?: string | null
           observacoes?: string | null
           prioridade?: Database["public"]["Enums"]["prioridade_vaga"] | null
+          recruiter_id?: string | null
           recrutador?: string | null
           requisitos_desejaveis?: string | null
           requisitos_obrigatorios?: string | null
@@ -199,9 +317,19 @@ export type Database = {
           salario_max?: number | null
           salario_min?: number | null
           status?: Database["public"]["Enums"]["status_vaga"] | null
+          status_changed_at?: string | null
           titulo?: string
+          updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "vagas_recruiter_id_fkey"
+            columns: ["recruiter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
