@@ -26,6 +26,13 @@ interface Vaga {
   confidencial?: boolean | null;
 }
 
+interface StatusRef {
+  slug: string;
+  label: string;
+  color: string;
+  order: number;
+}
+
 
 export default function FunilVagas() {
   const navigate = useNavigate();
@@ -40,16 +47,33 @@ export default function FunilVagas() {
   const [csFilter, setCsFilter] = useState("all");
   const [clienteFilter, setClienteFilter] = useState("all");
   const [areaFilter, setAreaFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [ordenacao, setOrdenacao] = useState("recentes");
 
   // Filter options
   const [recrutadores, setRecrutadores] = useState<string[]>([]);
   const [csResponsaveis, setCsResponsaveis] = useState<string[]>([]);
   const [clientes, setClientes] = useState<string[]>([]);
+  const [statusOptions, setStatusOptions] = useState<StatusRef[]>([]);
 
   useEffect(() => {
+    loadStatusOptions();
     loadJobs();
   }, []);
+
+  const loadStatusOptions = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("vaga_status_ref")
+        .select("slug, label, color, order")
+        .order("order");
+
+      if (error) throw error;
+      setStatusOptions(data || []);
+    } catch (error) {
+      console.error("Erro ao carregar status:", error);
+    }
+  };
 
   const loadJobs = async () => {
     try {
@@ -200,7 +224,10 @@ export default function FunilVagas() {
     const matchesCliente =
       clienteFilter === "all" || job.empresa === clienteFilter;
 
-    return matchesSearch && matchesRecrutador && matchesCS && matchesCliente;
+    const matchesStatus =
+      statusFilter === "all" || job.status === statusFilter;
+
+    return matchesSearch && matchesRecrutador && matchesCS && matchesCliente && matchesStatus;
   });
 
   // Calculate stats
@@ -256,11 +283,14 @@ export default function FunilVagas() {
             onClienteChange={setClienteFilter}
             areaFilter={areaFilter}
             onAreaChange={setAreaFilter}
+            statusFilter={statusFilter}
+            onStatusChange={setStatusFilter}
             ordenacao={ordenacao}
             onOrdenacaoChange={setOrdenacao}
             recrutadores={recrutadores}
             clientes={clientes}
             areas={[]}
+            statusOptions={statusOptions}
           />
         </div>
       </div>

@@ -1,6 +1,13 @@
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, User, Building2, ListFilter } from "lucide-react";
+import { Search, User, Building2, ListFilter, Tag } from "lucide-react";
+
+interface StatusRef {
+  slug: string;
+  label: string;
+  color: string;
+  order: number;
+}
 
 interface FilterBarProps {
   searchTerm: string;
@@ -11,11 +18,14 @@ interface FilterBarProps {
   onClienteChange: (value: string) => void;
   areaFilter: string;
   onAreaChange: (value: string) => void;
+  statusFilter: string;
+  onStatusChange: (value: string) => void;
   ordenacao: string;
   onOrdenacaoChange: (value: string) => void;
   recrutadores: string[];
   clientes: string[];
   areas: string[];
+  statusOptions: StatusRef[];
 }
 
 export function FilterBar({
@@ -27,11 +37,14 @@ export function FilterBar({
   onClienteChange,
   areaFilter,
   onAreaChange,
+  statusFilter,
+  onStatusChange,
   ordenacao,
   onOrdenacaoChange,
   recrutadores,
   clientes,
   areas,
+  statusOptions,
 }: FilterBarProps) {
   return (
     <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3 overflow-x-auto pb-2">
@@ -70,6 +83,21 @@ export function FilterBar({
           {clientes.map((cli) => (
             <SelectItem key={cli} value={cli}>
               {cli}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      <Select value={statusFilter} onValueChange={onStatusChange}>
+        <SelectTrigger className="h-9 w-full sm:w-[180px] bg-white border-gray-200 text-sm">
+          <Tag className="h-4 w-4 mr-2 text-[#36404A]" />
+          <SelectValue placeholder="Status" />
+        </SelectTrigger>
+        <SelectContent className="bg-white z-50">
+          <SelectItem value="all">Todos os status</SelectItem>
+          {statusOptions.map((status) => (
+            <SelectItem key={status.slug} value={status.label}>
+              {status.label}
             </SelectItem>
           ))}
         </SelectContent>
