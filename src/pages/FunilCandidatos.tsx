@@ -110,7 +110,6 @@ export default function FunilCandidatos() {
       const { data, error } = await supabase
         .from("candidatos")
         .select("*")
-        .neq("status", "Banco de Talentos")
         .order("criado_em", { ascending: false });
 
       if (error) throw error;
@@ -180,40 +179,24 @@ export default function FunilCandidatos() {
     });
   };
 
+  // Filter out "Banco de Talentos" from funnel display
+  const funnelColumns = statusColumns.filter(status => status !== "Banco de Talentos");
+
   // Get unique recruiters
   const recrutadores = Array.from(new Set(candidatos.map(c => c.recrutador).filter(Boolean))) as string[];
 
-  // Count active candidates (excluding final statuses)
+  // Count active candidates (excluding final statuses and banco de talentos)
   const activeCandidatesCount = candidatos.filter(c => 
-    c.status !== "Aprovado" && c.status !== "Declinou" && c.status !== "Reprovado Cliente"
+    c.status !== "Aprovado" && 
+    c.status !== "Declinou" && 
+    c.status !== "Reprovado Cliente" &&
+    c.status !== "Banco de Talentos"
   ).length;
 
-  // Calculate average days in funnel
-  const mediaDiasNoFunil = candidatos.length > 0
-    ? Math.round(
-        candidatos.reduce((acc, c) => {
-          const days = Math.floor(
-            (new Date().getTime() - new Date(c.criado_em).getTime()) / (1000 * 60 * 60 * 24)
-          );
-          return acc + days;
-        }, 0) / candidatos.length
-      )
-    : 0;
-
-  // Candidates in attention (more than 30 days)
-  const candidatosEmAtencao = candidatos.filter(c => {
-    const days = Math.floor(
-      (new Date().getTime() - new Date(c.criado_em).getTime()) / (1000 * 60 * 60 * 24)
-    );
-    return days > 30 && c.status !== "Aprovado" && c.status !== "Declinou" && c.status !== "Reprovado Cliente";
-  }).length;
-
-  // Conversion rate
-  const totalCandidatos = candidatos.length;
-  const candidatosAprovados = candidatos.filter(c => c.status === "Aprovado").length;
-  const taxaConversao = totalCandidatos > 0 
-    ? Math.round((candidatosAprovados / totalCandidatos) * 100)
-    : 0;
+  // Count candidates in banco de talentos
+  const candidatosBancoTalentos = candidatos.filter(c => 
+    c.status === "Banco de Talentos"
+  ).length;
 
   const activeCandidato = activeId ? candidatos.find((c) => c.id === activeId) : null;
 
@@ -241,9 +224,7 @@ export default function FunilCandidatos() {
           {/* Stats */}
           <StatsHeader
             totalCandidatosAtivos={activeCandidatesCount}
-            mediaDiasNoFunil={mediaDiasNoFunil}
-            candidatosEmAtencao={candidatosEmAtencao}
-            taxaConversao={taxaConversao}
+            candidatosBancoTalentos={candidatosBancoTalentos}
           />
 
           {/* Filters */}
@@ -269,7 +250,7 @@ export default function FunilCandidatos() {
       >
         <div className="overflow-x-auto pb-4">
           <div className="flex gap-4 px-6 py-4" style={{ minWidth: 'max-content' }}>
-            {statusColumns.map((status) => {
+            {funnelColumns.map((status) => {
               const candidatosInColumn = getCandidatosByStatus(status);
               return (
                 <FunnelColumn
