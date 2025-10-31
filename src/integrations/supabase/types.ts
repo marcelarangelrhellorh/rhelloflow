@@ -238,7 +238,7 @@ export type Database = {
         | "Em andamento"
       status_candidato:
         | "Banco de Talentos"
-        | "Triado para a vaga"
+        | "Selecionado"
         | "Entrevista rhello"
         | "Reprovado rhello"
         | "Aprovado rhello"
@@ -408,7 +408,7 @@ export const Constants = {
       ],
       status_candidato: [
         "Banco de Talentos",
-        "Triado para a vaga",
+        "Selecionado",
         "Entrevista rhello",
         "Reprovado rhello",
         "Aprovado rhello",

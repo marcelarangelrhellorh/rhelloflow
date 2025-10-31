@@ -108,7 +108,7 @@ export default function FunilCandidatos() {
         .order("criado_em", { ascending: false });
 
       if (error) throw error;
-      setCandidatos(data || []);
+      setCandidatos((data || []) as Candidato[]);
     } catch (error: any) {
       toast({
         title: "Erro ao carregar candidatos",
@@ -132,7 +132,7 @@ export default function FunilCandidatos() {
     try {
       const { error } = await supabase
         .from("candidatos")
-        .update({ status: newStatus })
+        .update({ status: newStatus as any })
         .eq("id", candidatoId);
 
       if (error) throw error;
