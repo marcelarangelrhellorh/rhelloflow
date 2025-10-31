@@ -228,6 +228,15 @@ export default function Relatorios() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Banner de construção */}
+      <div className="bg-[#F9EC3F] border-b-2 border-[#E5D72E]">
+        <div className="px-6 md:px-8 py-3 max-w-[1600px] mx-auto">
+          <p className="text-center text-[#00141D] font-semibold text-sm">
+            🚧 Página em construção - Alguns recursos ainda estão sendo desenvolvidos
+          </p>
+        </div>
+      </div>
+
       {/* Header */}
       <div className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="px-6 md:px-8 py-6 max-w-[1600px] mx-auto">
