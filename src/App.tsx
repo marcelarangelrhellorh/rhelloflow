@@ -16,6 +16,7 @@ import CandidatoDetalhes from "./pages/CandidatoDetalhes";
 import FunilCandidatos from "./pages/FunilCandidatos";
 import BancoTalentos from "./pages/BancoTalentos";
 import Analises from "./pages/Analises";
+import Relatorios from "./pages/Relatorios";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -44,6 +45,7 @@ const App = () => (
             <Route path="/funil-candidatos" element={<FunilCandidatos />} />
             <Route path="/banco-talentos" element={<BancoTalentos />} />
             <Route path="/analises" element={<Analises />} />
+            <Route path="/relatorios" element={<Relatorios />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

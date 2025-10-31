@@ -9,7 +9,8 @@ import {
   Menu,
   X,
   GitBranch,
-  UserCircle
+  UserCircle,
+  FileText
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { NotificationBell } from "./NotificationBell";
@@ -25,6 +26,7 @@ const menuItems = [
   { title: "Funil de Candidatos", url: "/funil-candidatos", icon: UserCircle },
   { title: "Banco de Talentos", url: "/banco-talentos", icon: Database },
   { title: "Análises", url: "/analises", icon: BarChart3 },
+  { title: "Relatórios", url: "/relatorios", icon: FileText },
 ];
 
 export function AppNavbar() {
