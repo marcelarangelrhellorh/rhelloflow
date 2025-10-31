@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { Menu, X, Plus } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Button } from "./ui/button";
 import { NotificationBell } from "./NotificationBell";
 import { UserMenu } from "./UserMenu";
@@ -63,13 +63,6 @@ export function AppNavbar() {
 
         {/* Right Side - Desktop */}
         <div className="hidden lg:flex items-center gap-3">
-          <Button 
-            onClick={() => navigate('/vagas/novo')}
-            className="bg-[#F9EC3F] text-[#00141D] font-semibold hover:bg-[#E5DA37] rounded-lg px-4 py-2 transition-colors"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Adicionar Nova Vaga
-          </Button>
           <ConnectionIndicator />
           <NotificationBell />
           <UserMenu />
@@ -105,17 +98,6 @@ export function AppNavbar() {
               </SheetHeader>
 
               <nav className="mt-8 flex flex-col gap-2">
-                <Button 
-                  onClick={() => {
-                    navigate('/vagas/novo');
-                    setMobileMenuOpen(false);
-                  }}
-                  className="w-full bg-[#F9EC3F] text-[#00141D] font-semibold hover:bg-[#E5DA37] mb-4"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Adicionar Nova Vaga
-                </Button>
-
                 {menuItems.map((item) => (
                   <NavLink
                     key={item.title}
