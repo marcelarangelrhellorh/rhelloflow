@@ -149,12 +149,14 @@ export function FeedbackModal({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="Banco de Talentos">Banco de Talentos</SelectItem>
-                <SelectItem value="Triado">Triado</SelectItem>
+                <SelectItem value="Selecionado">Selecionado</SelectItem>
                 <SelectItem value="Entrevista Rhello">Entrevista Rhello</SelectItem>
-                <SelectItem value="Enviado Cliente">Enviado Cliente</SelectItem>
-                <SelectItem value="Entrevista Cliente">Entrevista Cliente</SelectItem>
-                <SelectItem value="Aprovado">Aprovado</SelectItem>
-                <SelectItem value="Reprovado">Reprovado</SelectItem>
+                <SelectItem value="Reprovado Rhello">Reprovado Rhello</SelectItem>
+                <SelectItem value="Aprovado Rhello">Aprovado Rhello</SelectItem>
+                <SelectItem value="Entrevistas Solicitante">Entrevistas Solicitante</SelectItem>
+                <SelectItem value="Reprovado Solicitante">Reprovado Solicitante</SelectItem>
+                <SelectItem value="Aprovado Solicitante">Aprovado Solicitante</SelectItem>
+                <SelectItem value="Contratado">Contratado</SelectItem>
               </SelectContent>
             </Select>
           </div>
