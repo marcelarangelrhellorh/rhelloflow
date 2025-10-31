@@ -182,7 +182,7 @@ export default function VagaForm() {
   };
 
   return (
-    <div className="p-8">
+    <div className="min-h-screen p-8" style={{ backgroundColor: '#00141d' }}>
       <div className="mb-6">
         <Button variant="ghost" onClick={() => navigate("/vagas")}>
           <ArrowLeft className="mr-2 h-4 w-4" />

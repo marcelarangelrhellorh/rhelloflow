@@ -320,7 +320,7 @@ export default function CandidatoDetalhes() {
   }
 
   return (
-    <div className="min-h-screen bg-background-light">
+    <div className="min-h-screen" style={{ backgroundColor: '#00141d' }}>
       {/* Breadcrumb / Back Button */}
       <div className="sticky top-0 z-10 bg-background border-b border-border">
         <div className="px-6 py-4">

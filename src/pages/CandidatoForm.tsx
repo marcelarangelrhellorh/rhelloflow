@@ -277,7 +277,7 @@ export default function CandidatoForm() {
   };
 
   return (
-    <div className="p-8">
+    <div className="min-h-screen p-8" style={{ backgroundColor: '#00141d' }}>
       <div className="mb-6">
         <Button variant="ghost" onClick={() => navigate("/candidatos")}>
           <ArrowLeft className="mr-2 h-4 w-4" />
