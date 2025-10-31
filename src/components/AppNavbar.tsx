@@ -3,6 +3,7 @@ import { LayoutDashboard, Briefcase, Users, Database, BarChart3, LogOut } from "
 import { Button } from "./ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { NotificationBell } from "./NotificationBell";
 
 const menuItems = [
   { title: "Painel", url: "/", icon: LayoutDashboard },
@@ -59,16 +60,19 @@ export function AppNavbar() {
           ))}
         </nav>
 
-        {/* Logout Button */}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleLogout}
-          className="shrink-0"
-          title="Sair"
-        >
-          <LogOut className="h-4 w-4" />
-        </Button>
+        {/* Notificações e Logout */}
+        <div className="flex items-center gap-2">
+          <NotificationBell />
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleLogout}
+            className="shrink-0"
+            title="Sair"
+          >
+            <LogOut className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
     </header>
   );

@@ -15,7 +15,7 @@ import CandidatoDetalhes from "./pages/CandidatoDetalhes";
 import FunilCandidatos from "./pages/FunilCandidatos";
 import BancoTalentos from "./pages/BancoTalentos";
 import Analises from "./pages/Analises";
-import Login from "./pages/Login";
+import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,7 +27,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/login" element={<Login />} />
+          <Route path="/login" element={<Auth />} />
           <Route element={<Layout />}>
             <Route path="/" element={<Dashboard />} />
             <Route path="/vagas" element={<Vagas />} />
