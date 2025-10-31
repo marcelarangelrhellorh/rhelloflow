@@ -1,13 +1,11 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors, closestCenter } from "@dnd-kit/core";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
 import { FunnelColumn } from "@/components/FunilCandidatos/FunnelColumn";
 import { CandidateFunnelCard } from "@/components/FunilCandidatos/CandidateFunnelCard";
+import { StatsHeader } from "@/components/FunilCandidatos/StatsHeader";
+import { FilterBar } from "@/components/FunilCandidatos/FilterBar";
 
 type StatusCandidato =
   | "Banco de Talentos"
@@ -190,6 +188,33 @@ export default function FunilCandidatos() {
     c.status !== "Aprovado" && c.status !== "Declinou" && c.status !== "Reprovado Cliente"
   ).length;
 
+  // Calculate average days in funnel
+  const mediaDiasNoFunil = candidatos.length > 0
+    ? Math.round(
+        candidatos.reduce((acc, c) => {
+          const days = Math.floor(
+            (new Date().getTime() - new Date(c.criado_em).getTime()) / (1000 * 60 * 60 * 24)
+          );
+          return acc + days;
+        }, 0) / candidatos.length
+      )
+    : 0;
+
+  // Candidates in attention (more than 30 days)
+  const candidatosEmAtencao = candidatos.filter(c => {
+    const days = Math.floor(
+      (new Date().getTime() - new Date(c.criado_em).getTime()) / (1000 * 60 * 60 * 24)
+    );
+    return days > 30 && c.status !== "Aprovado" && c.status !== "Declinou" && c.status !== "Reprovado Cliente";
+  }).length;
+
+  // Conversion rate
+  const totalCandidatos = candidatos.length;
+  const candidatosAprovados = candidatos.filter(c => c.status === "Aprovado").length;
+  const taxaConversao = totalCandidatos > 0 
+    ? Math.round((candidatosAprovados / totalCandidatos) * 100)
+    : 0;
+
   const activeCandidato = activeId ? candidatos.find((c) => c.id === activeId) : null;
 
   if (loading) {
@@ -201,61 +226,37 @@ export default function FunilCandidatos() {
   }
 
   return (
-    <div className="min-h-screen bg-secondary/30">
-      {/* Header - Fixed */}
-      <div className="sticky top-0 z-20 bg-background border-b border-border">
-        <div className="px-6 py-6">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">Funil de Candidatos</h1>
-              <p className="text-muted-foreground mt-1">
-                Arraste e solte os cards para alterar o status dos candidatos
-              </p>
-            </div>
-            <Badge variant="outline" className="h-10 px-4 text-base">
+    <div className="min-h-screen" style={{ backgroundColor: "#FFFDF6" }}>
+      {/* Header - Compact */}
+      <div className="sticky top-0 z-20 bg-white border-b border-gray-200 shadow-sm">
+        <div className="px-6 py-4 space-y-3">
+          {/* Title */}
+          <div>
+            <h1 className="text-2xl font-bold text-[#00141D]">Funil de Candidatos</h1>
+            <p className="text-sm text-[#36404A] mt-1">
               {activeCandidatesCount} {activeCandidatesCount === 1 ? 'candidato' : 'candidatos'} em andamento
-            </Badge>
+            </p>
           </div>
+
+          {/* Stats */}
+          <StatsHeader
+            totalCandidatosAtivos={activeCandidatesCount}
+            mediaDiasNoFunil={mediaDiasNoFunil}
+            candidatosEmAtencao={candidatosEmAtencao}
+            taxaConversao={taxaConversao}
+          />
 
           {/* Filters */}
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className="relative flex-1 max-w-xs">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Buscar por nome ou e-mail..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <Select value={vagaFilter} onValueChange={setVagaFilter}>
-              <SelectTrigger className="w-full sm:w-[250px] bg-background">
-                <SelectValue placeholder="Filtrar por vaga" />
-              </SelectTrigger>
-              <SelectContent className="bg-popover z-50">
-                <SelectItem value="all">Todas as vagas</SelectItem>
-                {vagas.map((vaga) => (
-                  <SelectItem key={vaga.id} value={vaga.id}>
-                    {vaga.titulo}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select value={recrutadorFilter} onValueChange={setRecrutadorFilter}>
-              <SelectTrigger className="w-full sm:w-[250px] bg-background">
-                <SelectValue placeholder="Filtrar por recrutador" />
-              </SelectTrigger>
-              <SelectContent className="bg-popover z-50">
-                <SelectItem value="all">Todos os recrutadores</SelectItem>
-                {recrutadores.map((recrutador) => (
-                  <SelectItem key={recrutador} value={recrutador}>
-                    {recrutador}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <FilterBar
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            vagaFilter={vagaFilter}
+            onVagaChange={setVagaFilter}
+            recrutadorFilter={recrutadorFilter}
+            onRecrutadorChange={setRecrutadorFilter}
+            vagas={vagas}
+            recrutadores={recrutadores}
+          />
         </div>
       </div>
 
@@ -266,8 +267,8 @@ export default function FunilCandidatos() {
         onDragEnd={handleDragEnd}
         collisionDetection={closestCenter}
       >
-        <div className="overflow-x-auto pb-6">
-          <div className="flex gap-4 px-6 pt-6" style={{ minWidth: 'max-content' }}>
+        <div className="overflow-x-auto pb-4">
+          <div className="flex gap-4 px-6 py-4" style={{ minWidth: 'max-content' }}>
             {statusColumns.map((status) => {
               const candidatosInColumn = getCandidatosByStatus(status);
               return (
@@ -306,7 +307,7 @@ export default function FunilCandidatos() {
 
         <DragOverlay>
           {activeCandidato && (
-            <div className="w-[280px]">
+            <div className="w-[320px]">
               <CandidateFunnelCard
                 candidato={activeCandidato}
                 onDragStart={() => {}}
