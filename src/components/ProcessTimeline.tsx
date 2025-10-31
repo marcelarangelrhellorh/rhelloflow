@@ -26,7 +26,7 @@ export function ProcessTimeline({ steps }: ProcessTimelineProps) {
               />
             )}
             
-            {/* Step Circle */}
+            {/* Círculo da Etapa */}
             <div className="relative z-10 mb-2">
               {step.status === "completed" && (
                 <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center">
@@ -45,7 +45,7 @@ export function ProcessTimeline({ steps }: ProcessTimelineProps) {
               )}
             </div>
 
-            {/* Step Label */}
+            {/* Rótulo da Etapa */}
             <div className="text-center">
               <p className={`text-sm font-medium ${
                 step.status === "pending" ? "text-muted-foreground" : "text-foreground"

@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 const menuItems = [
-  { title: "Dashboard", url: "/", icon: LayoutDashboard },
+  { title: "Painel", url: "/", icon: LayoutDashboard },
   { title: "Vagas", url: "/vagas", icon: Briefcase },
   { title: "Funil de Vagas", url: "/funil-vagas", icon: Briefcase },
   { title: "Candidatos", url: "/candidatos", icon: Users },
