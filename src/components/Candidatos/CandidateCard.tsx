@@ -30,24 +30,26 @@ interface CandidateCardProps {
 
 const statusColors: Record<string, string> = {
   "Banco de Talentos": "bg-muted/10 text-muted-foreground border-muted",
-  "Selecionado": "bg-primary/10 text-primary border-primary/20",
-  "Entrevista Rhello": "bg-warning/10 text-warning border-warning/20",
-  "Enviado ao Cliente": "bg-info/10 text-info border-info/20",
-  "Entrevista com Cliente": "bg-warning/10 text-warning border-warning/20",
-  "Feedback Cliente": "bg-warning/10 text-warning border-warning/20",
-  "Aguardando Retorno": "bg-muted/10 text-muted-foreground border-muted",
-  "Aprovado": "bg-success/10 text-success border-success/20",
-  "Declinou": "bg-destructive/10 text-destructive border-destructive/20",
-  "Reprovado Cliente": "bg-destructive/10 text-destructive border-destructive/20",
+  "Selecionado": "bg-[#BBF7D0] text-green-800 border-green-200",
+  "Entrevista Rhello": "bg-[#BFDBFE] text-blue-800 border-blue-200",
+  "Reprovado Rhello": "bg-[#FECACA] text-red-800 border-red-200",
+  "Aprovado Rhello": "bg-[#FDE68A] text-yellow-800 border-yellow-200",
+  "Entrevistas Solicitante": "bg-[#E9D5FF] text-purple-800 border-purple-200",
+  "Reprovado Solicitante": "bg-[#FECACA] text-red-800 border-red-200",
+  "Aprovado Solicitante": "bg-[#FDE68A] text-yellow-800 border-yellow-200",
+  "Contratado": "bg-[#D9F99D] text-lime-800 border-lime-200",
 };
 
 const statusIcons: Record<string, string> = {
-  "Selecionado": "🟡",
-  "Entrevista Rhello": "🔵",
-  "Aprovado": "🟢",
-  "Declinou": "🔴",
-  "Reprovado Cliente": "🔴",
   "Banco de Talentos": "⚪",
+  "Selecionado": "🟢",
+  "Entrevista Rhello": "🔵",
+  "Reprovado Rhello": "🔴",
+  "Aprovado Rhello": "🟡",
+  "Entrevistas Solicitante": "🟣",
+  "Reprovado Solicitante": "🔴",
+  "Aprovado Solicitante": "🟡",
+  "Contratado": "✅",
 };
 
 export function CandidateCard({ candidato, onView, onEdit, onDelete, onLinkJob }: CandidateCardProps) {

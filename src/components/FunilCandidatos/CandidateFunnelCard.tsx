@@ -50,6 +50,9 @@ export function CandidateFunnelCard({ candidato, onDragStart, isDragging }: Cand
       })
     : null;
 
+  // Check if candidate is in a final stage
+  const isFinalStage = ["Reprovado Rhello", "Reprovado Solicitante", "Contratado"].includes(candidato.status);
+
   const handleCardClick = (e: React.MouseEvent) => {
     // Don't navigate if clicking on action buttons
     if ((e.target as HTMLElement).closest('button')) {
@@ -69,7 +72,8 @@ export function CandidateFunnelCard({ candidato, onDragStart, isDragging }: Cand
       onClick={handleCardClick}
       className={cn(
         "cursor-move transition-all duration-200 hover:shadow-md hover:scale-[1.01] bg-card",
-        isDragging && "shadow-lg rotate-3 opacity-50"
+        isDragging && "shadow-lg rotate-3 opacity-50",
+        isFinalStage && "opacity-60 hover:opacity-70"
       )}
     >
       <CardHeader className="p-4 pb-2">
