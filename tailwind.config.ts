@@ -18,7 +18,13 @@ export default {
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
+        "background-light": "hsl(var(--background-light))",
+        "background-dark": "hsl(var(--background-dark))",
         foreground: "hsl(var(--foreground))",
+        "primary-text-light": "hsl(var(--primary-text-light))",
+        "primary-text-dark": "hsl(var(--primary-text-dark))",
+        "secondary-text-light": "hsl(var(--secondary-text-light))",
+        "secondary-text-dark": "hsl(var(--secondary-text-dark))",
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
@@ -74,10 +80,18 @@ export default {
           ring: "hsl(var(--sidebar-ring))",
         },
       },
+      fontFamily: {
+        display: ["Manrope", "sans-serif"],
+        sans: ["Manrope", "system-ui", "-apple-system", "sans-serif"],
+      },
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        DEFAULT: "0.5rem",   /* 8px */
+        sm: "0.5rem",        /* 8px */
+        md: "0.75rem",       /* 12px */
+        lg: "0.75rem",       /* 12px */
+        xl: "1rem",          /* 16px */
+        "2xl": "1.25rem",    /* 20px */
+        full: "9999px",
       },
       keyframes: {
         "accordion-down": {
