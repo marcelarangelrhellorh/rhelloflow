@@ -127,16 +127,19 @@ export default function Candidatos() {
   }
 
   return (
-    <div className="min-h-screen bg-secondary/30">
+    <div className="min-h-screen bg-background-light">
       {/* Header - Fixed */}
-      <div className="sticky top-0 z-20 bg-background border-b border-border">
+      <div className="sticky top-0 z-20 bg-background border-b border-border shadow-sm">
         <div className="px-6 py-4">
           <div className="flex items-center justify-between mb-3">
             <div>
-              <h1 className="text-2xl font-bold text-foreground">Candidatos</h1>
-              <p className="text-sm text-muted-foreground mt-0.5">Gerencie todos os candidatos</p>
+              <h1 className="text-3xl font-bold text-foreground">Candidatos</h1>
+              <p className="text-muted-foreground">Gerencie todos os candidatos</p>
             </div>
-            <Button onClick={() => navigate('/candidatos/novo')}>
+            <Button 
+              onClick={() => navigate('/candidatos/novo')}
+              className="bg-[#F9EC3F] hover:bg-[#E5D72E] text-[#00141D] font-bold"
+            >
               <Plus className="mr-2 h-4 w-4" />
               Novo Candidato
             </Button>
@@ -196,7 +199,10 @@ export default function Candidatos() {
             <p className="text-sm text-muted-foreground mb-4 max-w-md">
               💛 Adicione um novo clicando em "+ Novo Candidato"
             </p>
-            <Button onClick={() => navigate('/candidatos/novo')}>
+            <Button 
+              onClick={() => navigate('/candidatos/novo')}
+              className="bg-[#F9EC3F] hover:bg-[#E5D72E] text-[#00141D] font-bold"
+            >
               <Plus className="mr-2 h-4 w-4" />
               Novo Candidato
             </Button>

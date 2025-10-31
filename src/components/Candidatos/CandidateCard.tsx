@@ -64,28 +64,28 @@ export function CandidateCard({ candidato, onView, onEdit, onDelete, onLinkJob }
 
   return (
     <Card className={cn(
-      "group transition-all duration-200 hover:shadow-lg hover:scale-[1.01] bg-card",
+      "hover-lift card-shadow bg-white border border-[#E5E7EB] overflow-hidden rounded-2xl",
       !isAvailable && "opacity-70"
     )}>
-      <CardHeader className="pb-2 pt-4 px-4">
+      <CardHeader className="pb-2 pt-4 px-5">
         <div className="flex items-start justify-between mb-2">
           <div className="flex items-center gap-2 flex-wrap">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold text-sm">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F9EC3F]/20 text-[#00141D] font-bold text-sm">
               {getInitials(candidato.nome_completo)}
             </div>
             <div className="flex gap-1 flex-wrap">
               <Badge
                 variant="outline"
-                className={cn("text-xs font-medium", statusColors[candidato.status] || statusColors["Banco de Talentos"])}
+                className={cn("text-xs font-bold rounded-full px-3", statusColors[candidato.status] || statusColors["Banco de Talentos"])}
               >
                 {statusIcons[candidato.status] || "⚪"} {candidato.status}
               </Badge>
               {candidato.disponibilidade_status === 'disponível' ? (
-                <Badge className="text-xs font-semibold bg-[#C9F4C7] text-[#1B5E20] hover:bg-[#C9F4C7]/90">
+                <Badge className="text-xs font-bold rounded-full px-3 bg-[#C9F4C7] text-[#1B5E20] hover:bg-[#C9F4C7]/90">
                   ✅ Disponível
                 </Badge>
               ) : candidato.disponibilidade_status === 'não_disponível' ? (
-                <Badge className="text-xs font-semibold bg-[#FFD6D6] text-[#B71C1C] hover:bg-[#FFD6D6]/90">
+                <Badge className="text-xs font-bold rounded-full px-3 bg-[#FFD6D6] text-[#B71C1C] hover:bg-[#FFD6D6]/90">
                   ❌ Não disponível
                 </Badge>
               ) : null}
@@ -93,29 +93,29 @@ export function CandidateCard({ candidato, onView, onEdit, onDelete, onLinkJob }
           </div>
         </div>
         
-        <h3 className="text-base font-semibold text-card-foreground line-clamp-1">
+        <h3 className="text-lg font-bold text-[#00141D] line-clamp-1">
           {candidato.nome_completo}
         </h3>
       </CardHeader>
 
-      <CardContent className="space-y-2 px-4 pb-4">
+      <CardContent className="space-y-2 px-5 pb-4">
         {(candidato.nivel || candidato.area) && (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Briefcase className="h-4 w-4 flex-shrink-0" />
+          <div className="flex items-center gap-2 text-sm text-[#00141D]/80 font-medium">
+            <Briefcase className="h-4 w-4 flex-shrink-0 text-[#00141D]/60" />
             <span className="truncate">
               {[candidato.nivel, candidato.area].filter(Boolean).join(" – ")}
             </span>
           </div>
         )}
 
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Mail className="h-4 w-4 flex-shrink-0" />
+        <div className="flex items-center gap-2 text-sm text-[#00141D]/80 font-medium">
+          <Mail className="h-4 w-4 flex-shrink-0 text-[#00141D]/60" />
           <span className="truncate">{candidato.email}</span>
         </div>
 
         {(candidato.cidade || candidato.estado) && (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <MapPin className="h-4 w-4 flex-shrink-0" />
+          <div className="flex items-center gap-2 text-sm text-[#00141D]/80 font-medium">
+            <MapPin className="h-4 w-4 flex-shrink-0 text-[#00141D]/60" />
             <span className="truncate">
               {[candidato.cidade, candidato.estado].filter(Boolean).join(", ")}
             </span>
@@ -123,21 +123,21 @@ export function CandidateCard({ candidato, onView, onEdit, onDelete, onLinkJob }
         )}
 
         {candidato.recrutador && (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <User className="h-4 w-4 flex-shrink-0" />
+          <div className="flex items-center gap-2 text-sm text-[#00141D]/80 font-medium">
+            <User className="h-4 w-4 flex-shrink-0 text-[#00141D]/60" />
             <span className="truncate">{candidato.recrutador}</span>
           </div>
         )}
 
         {/* Quick Actions */}
         <TooltipProvider>
-          <div className="flex gap-1 pt-2 border-t border-border">
+          <div className="flex gap-1 pt-2 border-t border-[#E5E7EB]">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-8 flex-1"
+                  className="h-9 flex-1 hover:bg-[#F9EC3F]/20 hover:text-[#00141D] font-medium"
                   onClick={(e) => {
                     e.stopPropagation();
                     onView();
@@ -156,7 +156,7 @@ export function CandidateCard({ candidato, onView, onEdit, onDelete, onLinkJob }
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-8 flex-1"
+                  className="h-9 flex-1 hover:bg-[#F9EC3F]/20 hover:text-[#00141D] font-medium"
                   onClick={(e) => {
                     e.stopPropagation();
                     onEdit();
@@ -176,7 +176,7 @@ export function CandidateCard({ candidato, onView, onEdit, onDelete, onLinkJob }
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-8 flex-1"
+                    className="h-9 flex-1 hover:bg-[#F9EC3F]/20 hover:text-[#00141D] font-medium"
                     onClick={(e) => {
                       e.stopPropagation();
                       onLinkJob();
@@ -196,7 +196,7 @@ export function CandidateCard({ candidato, onView, onEdit, onDelete, onLinkJob }
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-8 flex-1 text-destructive hover:text-destructive"
+                  className="h-9 flex-1 text-destructive hover:text-destructive hover:bg-destructive/10 font-medium"
                   onClick={(e) => {
                     e.stopPropagation();
                     onDelete();
