@@ -408,6 +408,18 @@ export type Database = {
         }
         Relationships: []
       }
+      dashboard_overview: {
+        Row: {
+          candidatos_ativos: number | null
+          feedbacks_pendentes: number | null
+          ids_vagas_atencao: string[] | null
+          media_dias_fechamento: number | null
+          taxa_aprovacao: number | null
+          vagas_abertas: number | null
+          vagas_atencao: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       business_days_between: {

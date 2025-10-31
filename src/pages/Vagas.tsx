@@ -35,6 +35,11 @@ export default function Vagas() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  
+  // Verificar se há filtro de atenção pela URL
+  const searchParams = new URLSearchParams(window.location.search);
+  const attentionFilter = searchParams.get('attention');
+  const attentionIds = searchParams.get('ids')?.split(',') || [];
 
   useEffect(() => {
     loadVagas();
@@ -72,9 +77,10 @@ export default function Vagas() {
 
   const filteredVagas = vagas.filter((vaga) => {
     const matchesSearch = vaga.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      vaga.empresa.toLowerCase().includes(searchTerm.toLowerCase());
+                         vaga.empresa.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || vaga.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    const matchesAttention = attentionFilter !== 'out_of_sla' || attentionIds.includes(vaga.id);
+    return matchesSearch && matchesStatus && matchesAttention;
   });
 
   const copyPublicFormLink = () => {

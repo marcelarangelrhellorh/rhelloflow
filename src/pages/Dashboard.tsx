@@ -11,22 +11,18 @@ export default function Dashboard() {
     vagasAbertas: 0,
     candidatosAtivos: 0,
     vagasAntigas: 0,
+    idsVagasAtencao: [] as string[],
   });
   const [last30Stats, setLast30Stats] = useState<{
-    tempoMedioUteis: number;
+    tempoMedio: number;
     taxaAprovacao: number;
-    totalAprovados: number;
-    totalFinalizados: number;
     feedbacksPendentes: number;
-    vagasReabertas: number;
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [userName, setUserName] = useState<string>("");
 
   useEffect(() => {
-    loadStats();
-    loadUserProfile();
-    loadLast30DaysStats();
+    loadData();
   }, []);
 
   const loadUserProfile = async () => {
@@ -48,62 +44,48 @@ export default function Dashboard() {
     }
   };
 
-  const loadLast30DaysStats = async () => {
+  const loadDashboardOverview = async () => {
     try {
       const { data, error } = await supabase
-        .from("dashboard_last30")
-        .select("*")
+        .from('dashboard_overview')
+        .select('*')
         .single();
 
       if (error) throw error;
 
-      if (data) {
-        setLast30Stats({
-          tempoMedioUteis: data.tempo_medio_uteis || 0,
-          taxaAprovacao: typeof data.taxa_aprovacao_percent === 'number' 
-            ? data.taxa_aprovacao_percent 
-            : parseFloat(String(data.taxa_aprovacao_percent || "0")),
-          totalAprovados: data.total_aprovados || 0,
-          totalFinalizados: data.total_finalizados || 0,
-          feedbacksPendentes: data.feedbacks_pendentes || 0,
-          vagasReabertas: data.vagas_reabertas || 0,
-        });
-      }
+      setStats({
+        vagasAbertas: data.vagas_abertas ?? 0,
+        candidatosAtivos: data.candidatos_ativos ?? 0,
+        vagasAntigas: data.vagas_atencao ?? 0,
+        idsVagasAtencao: data.ids_vagas_atencao ?? [],
+      });
+
+      setLast30Stats({
+        tempoMedio: data.media_dias_fechamento ?? 0,
+        taxaAprovacao: data.taxa_aprovacao ?? 0,
+        feedbacksPendentes: data.feedbacks_pendentes ?? 0,
+      });
     } catch (error) {
-      console.error("Erro ao carregar estatísticas dos últimos 30 dias:", error);
+      console.error("Erro ao carregar dashboard:", error);
+      throw error;
     }
   };
 
-  const loadStats = async () => {
+  const loadData = async () => {
+    setLoading(true);
     try {
-      const { data: vagas } = await supabase
-        .from("vagas")
-        .select("id, criado_em, status")
-        .not("status", "in", '("Concluído","Cancelada")');
-
-      const { data: candidatos } = await supabase
-        .from("candidatos")
-        .select("id")
-        .neq("status", "Banco de Talentos");
-
-      const today = new Date();
-      const vagasAntigas = vagas?.filter((vaga) => {
-        const criadoEm = new Date(vaga.criado_em);
-        const diffTime = Math.abs(today.getTime() - criadoEm.getTime());
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        return diffDays > 30;
-      }).length || 0;
-
-      setStats({
-        vagasAbertas: vagas?.length || 0,
-        candidatosAtivos: candidatos?.length || 0,
-        vagasAntigas,
-      });
+      await loadUserProfile();
+      await loadDashboardOverview();
     } catch (error) {
-      console.error("Erro ao carregar estatísticas:", error);
+      console.error("Erro ao carregar dados:", error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleAttentionClick = () => {
+    const ids = (stats.idsVagasAtencao ?? []).join(',');
+    navigate(`/vagas?attention=out_of_sla&ids=${encodeURIComponent(ids)}`);
   };
 
   if (loading) {
@@ -179,7 +161,7 @@ export default function Dashboard() {
           {/* Atenção Necessária */}
           <Card 
             className="group cursor-pointer border-l-4 border-l-warning bg-card transition-all duration-200 hover:scale-[1.02] hover:shadow-lg"
-            onClick={() => navigate("/vagas")}
+            onClick={handleAttentionClick}
           >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-card-foreground">
@@ -194,7 +176,7 @@ export default function Dashboard() {
                 {stats.vagasAntigas}
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                Vagas com mais de 30 dias
+                Vagas abertas há mais de 30 dias úteis
               </p>
             </CardContent>
           </Card>
@@ -254,21 +236,21 @@ export default function Dashboard() {
             <h2 className="text-lg font-semibold text-foreground mb-4">
               Resumo dos últimos 30 dias
             </h2>
-            <div className="grid gap-4 md:grid-cols-4">
+            <div className="grid gap-4 md:grid-cols-3">
               <Card className="bg-card cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:shadow-md">
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-3">
                     <div className="text-2xl">🕓</div>
                     <div>
                       <p className="text-2xl font-bold text-card-foreground">
-                        {last30Stats ? `${last30Stats.tempoMedioUteis}d` : "—"}
+                        {last30Stats ? `${last30Stats.tempoMedio}d` : "—"}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         Tempo médio de fechamento
                       </p>
-                      {last30Stats && last30Stats.tempoMedioUteis > 0 && (
+                      {last30Stats && last30Stats.tempoMedio > 0 && (
                         <p className="text-xs text-muted-foreground mt-1">
-                          ({last30Stats.tempoMedioUteis} dias úteis)
+                          (dias corridos)
                         </p>
                       )}
                     </div>
@@ -287,11 +269,6 @@ export default function Dashboard() {
                       <p className="text-xs text-muted-foreground">
                         Taxa de aprovação
                       </p>
-                      {last30Stats && last30Stats.totalFinalizados > 0 && (
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {last30Stats.totalAprovados}/{last30Stats.totalFinalizados} processos
-                        </p>
-                      )}
                     </div>
                   </div>
                 </CardContent>
@@ -316,22 +293,6 @@ export default function Dashboard() {
                           Requer atenção
                         </p>
                       )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-card cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:shadow-md">
-                <CardContent className="pt-6">
-                  <div className="flex items-center gap-3">
-                    <div className="text-2xl">🔁</div>
-                    <div>
-                      <p className="text-2xl font-bold text-card-foreground">
-                        {last30Stats ? last30Stats.vagasReabertas : "—"}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Vagas reabertas
-                      </p>
                     </div>
                   </div>
                 </CardContent>
