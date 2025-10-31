@@ -91,7 +91,7 @@ export function PipelineBoard({
     }
 
     const activeJob = jobs.find((j) => j.id === active.id);
-    const overStage = stages.find((s) => s.id === over.id);
+    const overStage = stages.find((s) => s.name === over.id);
 
     if (activeJob && overStage && activeJob.status !== overStage.name) {
       await onJobMove(activeJob.id, activeJob.status, overStage.name);

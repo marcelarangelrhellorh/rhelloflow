@@ -91,7 +91,7 @@ export function JobCard({
     >
       <Card
         className={cn(
-          "cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-[1.01]",
+          "cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-[1.01] group",
           "bg-white border border-gray-200"
         )}
         onClick={onView}
@@ -99,7 +99,7 @@ export function JobCard({
         <CardContent className="p-4 space-y-3">
           {/* Header */}
           <div className="flex items-start justify-between gap-2">
-            <div className="flex-1 min-w-0" {...attributes} {...listeners}>
+            <div className="flex-1 min-w-0 cursor-move" {...attributes} {...listeners}>
               <h3 className="font-semibold text-sm text-foreground line-clamp-2 mb-1">
                 {vaga.confidencial && <span className="mr-1">🔒</span>}
                 {vaga.titulo}
