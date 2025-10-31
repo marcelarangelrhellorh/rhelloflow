@@ -8,6 +8,7 @@ import { StatsHeader } from "@/components/FunilVagas/StatsHeader";
 import { FilterBar } from "@/components/FunilVagas/FilterBar";
 import { PipelineBoard } from "@/components/FunilVagas/PipelineBoard";
 import { JobDrawer } from "@/components/FunilVagas/JobDrawer";
+import { JOB_STAGES, calculateProgress } from "@/lib/jobStages";
 
 interface Vaga {
   id: string;
@@ -22,77 +23,6 @@ interface Vaga {
   confidencial?: boolean | null;
 }
 
-// Stage configuration with Rhello colors
-const STAGES = [
-  {
-    id: "a-iniciar",
-    name: "A iniciar",
-    color: {
-      bg: "#BFFCC5",
-      text: "#1C7C2E",
-      columnBg: "#F9FFF9",
-    },
-  },
-  {
-    id: "discovery",
-    name: "Discovery",
-    color: {
-      bg: "#CDEAFF",
-      text: "#005C99",
-      columnBg: "#F8FBFF",
-    },
-  },
-  {
-    id: "triagem",
-    name: "Triagem",
-    color: {
-      bg: "#E4D4FF",
-      text: "#5A38A0",
-      columnBg: "#FBF9FF",
-    },
-  },
-  {
-    id: "entrevistas-rhello",
-    name: "Entrevistas Rhello",
-    color: {
-      bg: "#FFE3C3",
-      text: "#A35900",
-      columnBg: "#FFFCF7",
-    },
-  },
-  {
-    id: "apresentacao-candidatos",
-    name: "Apresentação de Candidatos",
-    color: {
-      bg: "#FFF2B8",
-      text: "#7A6000",
-      columnBg: "#FFFEF5",
-    },
-  },
-  {
-    id: "entrevista-cliente",
-    name: "Entrevista cliente",
-    color: {
-      bg: "#FFE3C3",
-      text: "#A35900",
-      columnBg: "#FFFCF7",
-    },
-  },
-];
-
-const calculateProgress = (status: string): number => {
-  const progressMap: Record<string, number> = {
-    "A iniciar": 10,
-    "Discovery": 20,
-    "Triagem": 35,
-    "Entrevistas Rhello": 50,
-    "Apresentação de Candidatos": 65,
-    "Entrevista cliente": 80,
-    "Concluído": 100,
-    "Cancelada": 0,
-  };
-  return progressMap[status] || 0;
-};
 
 export default function FunilVagas() {
   const navigate = useNavigate();
@@ -250,7 +180,7 @@ export default function FunilVagas() {
 
   // Calculate stats
   const totalJobs = filteredJobs.length;
-  const jobsByStage = STAGES.reduce((acc, stage) => {
+  const jobsByStage = JOB_STAGES.reduce((acc, stage) => {
     acc[stage.name] = filteredJobs.filter((j) => j.status === stage.name).length;
     return acc;
   }, {} as Record<string, number>);
@@ -314,7 +244,7 @@ export default function FunilVagas() {
       <div className="flex-1 overflow-hidden p-6">
         <PipelineBoard
           jobs={filteredJobs}
-          stages={STAGES}
+          stages={JOB_STAGES}
           progresso={calculateProgress}
           onJobMove={handleJobMove}
           onJobClick={handleJobClick}

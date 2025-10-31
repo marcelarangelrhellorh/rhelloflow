@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { getBusinessDaysFromNow } from "@/lib/dateUtils";
+import { JOB_STAGES, getStageIndex, calculateProgress } from "@/lib/jobStages";
 
 type Vaga = {
   id: string;
@@ -55,6 +56,27 @@ export default function VagaDetalhes() {
     if (id) {
       loadVaga();
       loadCandidatos();
+
+      // Subscribe to real-time updates for this job
+      const channel = supabase
+        .channel(`job-${id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'vagas',
+            filter: `id=eq.${id}`
+          },
+          (payload) => {
+            setVaga(payload.new as Vaga);
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
     }
   }, [id]);
 
@@ -90,34 +112,16 @@ export default function VagaDetalhes() {
     }
   };
 
-  const getTimelineSteps = (currentStatus: string, criadoEm: string) => {
-    const statusOrder = [
-      { label: "Busca", dates: "1-10 Out" },
-      { label: "Triagem", dates: "11-15 Out" },
-      { label: "1ª Entrevista", dates: "16-22 Out" },
-      { label: "Entrevista Final", dates: "Em Progresso" },
-      { label: "Oferta", dates: "" },
-      { label: "Contratado", dates: "" }
-    ];
+  const getTimelineSteps = (currentStatus: string) => {
+    const currentIndex = getStageIndex(currentStatus);
     
-    const statusMap: Record<string, number> = {
-      "A iniciar": 0,
-      "Discovery": 1,
-      "Triagem": 1,
-      "Entrevistas Rhello": 2,
-      "Apresentação de Candidatos": 3,
-      "Entrevista cliente": 3,
-      "Oferta Enviada": 4,
-      "Contratado": 5
-    };
-    
-    const currentIndex = statusMap[currentStatus] ?? 0;
-    
-    return statusOrder.map((step, index) => ({
-      ...step,
-      status: index < currentIndex ? "completed" : 
-              index === currentIndex ? "current" : 
-              "pending"
+    return JOB_STAGES.map((stage, index) => ({
+      label: stage.name,
+      dates: "",
+      status: index < currentIndex ? "completed" as const : 
+              index === currentIndex ? "current" as const : 
+              "pending" as const,
+      color: stage.color
     }));
   };
 
@@ -187,9 +191,9 @@ export default function VagaDetalhes() {
   }
 
   const daysOpen = getBusinessDaysFromNow(vaga.criado_em);
-  const timelineSteps = getTimelineSteps(vaga.status, vaga.criado_em);
+  const timelineSteps = getTimelineSteps(vaga.status);
   const activities = getRecentActivities();
-  const progress = (timelineSteps.filter(s => s.status === "completed").length / timelineSteps.length) * 100;
+  const progress = calculateProgress(vaga.status);
 
   return (
     <div className="relative flex min-h-screen w-full flex-col font-display bg-background-light dark:bg-background-dark">
@@ -254,22 +258,26 @@ export default function VagaDetalhes() {
                 {/* Timeline Steps */}
                 {timelineSteps.map((step, index) => (
                   <div key={index} className={`relative flex-1 flex flex-col items-center ${step.status === "pending" ? "opacity-50" : ""}`}>
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center z-10 ${
-                      step.status === "completed" ? "bg-primary" :
-                      step.status === "current" ? "bg-primary animate-pulse" :
-                      "bg-gray-200 dark:bg-secondary-text-light/20"
-                    }`}>
+                    <div 
+                      className={`w-8 h-8 rounded-full flex items-center justify-center z-10 transition-all`}
+                      style={{
+                        backgroundColor: step.status === "pending" ? "#e5e7eb" : step.color.bg,
+                        opacity: step.status === "current" ? 1 : step.status === "completed" ? 0.9 : 0.5
+                      }}
+                    >
                       {step.status === "completed" && (
-                        <span className="material-symbols-outlined text-primary-text-light text-xl">check</span>
+                        <span className="material-symbols-outlined text-xl" style={{ color: step.color.text }}>check</span>
                       )}
                       {step.status === "current" && (
-                        <div className="w-3 h-3 bg-primary-text-light rounded-full"></div>
+                        <div className="w-3 h-3 rounded-full animate-pulse" style={{ backgroundColor: step.color.text }}></div>
                       )}
                     </div>
-                    <p className={`mt-2 ${step.status === "current" ? "font-bold text-primary-text-light dark:text-primary-text-dark" : ""}`}>
+                    <p 
+                      className={`mt-2 text-sm ${step.status === "current" ? "font-bold" : ""}`}
+                      style={{ color: step.status === "pending" ? "#9ca3af" : step.color.text }}
+                    >
                       {step.label}
                     </p>
-                    <p className="text-xs">{step.dates}</p>
                   </div>
                 ))}
               </div>
