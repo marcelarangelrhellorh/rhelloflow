@@ -12,7 +12,9 @@ import symbolRhelloLight from "@/assets/symbol-rhello-light.png";
 const menuItems = [
   { title: "Dashboard", url: "/" },
   { title: "Vagas", url: "/vagas" },
-  { title: "Clientes", url: "/candidatos" },
+  { title: "Funil de Vagas", url: "/funil-vagas" },
+  { title: "Candidatos", url: "/candidatos" },
+  { title: "Funil de Candidatos", url: "/funil-candidatos" },
   { title: "Relatórios", url: "/relatorios" },
 ];
 
