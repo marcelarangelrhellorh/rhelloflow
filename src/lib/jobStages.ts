@@ -38,6 +38,15 @@ export const JOB_STAGES = [
     },
   },
   {
+    id: "aguardando-retorno-cliente",
+    name: "Aguardando retorno do cliente",
+    color: {
+      bg: "#FFD6E8",
+      text: "#99004D",
+      columnBg: "#FFF8FB",
+    },
+  },
+  {
     id: "apresentacao-candidatos",
     name: "Apresentação de Candidatos",
     color: {
@@ -53,6 +62,33 @@ export const JOB_STAGES = [
       bg: "#FFE3C3",
       text: "#A35900",
       columnBg: "#FFFCF7",
+    },
+  },
+  {
+    id: "em-processo-contratacao",
+    name: "Em processo de contratação",
+    color: {
+      bg: "#D4F4DD",
+      text: "#0D5C1F",
+      columnBg: "#F7FEF9",
+    },
+  },
+  {
+    id: "concluido",
+    name: "Concluído",
+    color: {
+      bg: "#BFFCC5",
+      text: "#1C7C2E",
+      columnBg: "#F9FFF9",
+    },
+  },
+  {
+    id: "cancelada",
+    name: "Cancelada",
+    color: {
+      bg: "#FFD4D4",
+      text: "#991F1F",
+      columnBg: "#FFF8F8",
     },
   },
 ];
