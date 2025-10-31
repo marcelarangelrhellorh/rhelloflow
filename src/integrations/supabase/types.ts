@@ -396,10 +396,24 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      dashboard_last30: {
+        Row: {
+          feedbacks_pendentes: number | null
+          taxa_aprovacao_percent: number | null
+          tempo_medio_corridos: number | null
+          tempo_medio_uteis: number | null
+          total_aprovados: number | null
+          total_finalizados: number | null
+          vagas_reabertas: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      [_ in never]: never
+      business_days_between: {
+        Args: { end_date: string; start_date: string }
+        Returns: number
+      }
     }
     Enums: {
       area_candidato:
