@@ -1,79 +1,72 @@
 import { useState } from "react";
-import { NavLink } from "react-router-dom";
-import { 
-  LayoutDashboard, 
-  Briefcase, 
-  Users, 
-  Database, 
-  BarChart3,
-  Menu,
-  X,
-  GitBranch,
-  UserCircle,
-  FileText
-} from "lucide-react";
+import { NavLink, useNavigate } from "react-router-dom";
+import { Menu, X, Plus } from "lucide-react";
 import { Button } from "./ui/button";
 import { NotificationBell } from "./NotificationBell";
 import { UserMenu } from "./UserMenu";
 import { ConnectionIndicator } from "./ConnectionIndicator";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet";
+import logoRhelloDark from "@/assets/logo-rhello-dark.png";
+import symbolRhelloLight from "@/assets/symbol-rhello-light.png";
 
 const menuItems = [
-  { title: "Painel", url: "/", icon: LayoutDashboard },
-  { title: "Vagas", url: "/vagas", icon: Briefcase },
-  { title: "Funil de Vagas", url: "/funil-vagas", icon: GitBranch },
-  { title: "Candidatos", url: "/candidatos", icon: Users },
-  { title: "Funil de Candidatos", url: "/funil-candidatos", icon: UserCircle },
-  { title: "Banco de Talentos", url: "/banco-talentos", icon: Database },
-  { title: "Análises", url: "/analises", icon: BarChart3 },
-  { title: "Relatórios", url: "/relatorios", icon: FileText },
+  { title: "Dashboard", url: "/" },
+  { title: "Vagas", url: "/vagas" },
+  { title: "Clientes", url: "/candidatos" },
+  { title: "Relatórios", url: "/relatorios" },
 ];
 
 export function AppNavbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background shadow-md">
-      <div className="flex h-16 items-center px-4 sm:px-6 gap-4">
+    <header className="sticky top-0 z-50 w-full border-b bg-white shadow-[0px_1px_3px_rgba(0,0,0,0.08)]">
+      <div className="flex h-16 items-center px-4 sm:px-6 gap-6 max-w-[1600px] mx-auto">
         {/* Logo */}
-        <NavLink to="/" className="flex items-center gap-2 shrink-0 group">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F9EC3F] transition-transform group-hover:scale-110">
-            <span className="text-xl font-bold text-[#00141D]">R</span>
-          </div>
-          <span className="text-lg font-bold text-[#00141D] hidden sm:inline">
-            Rhello RH
-          </span>
+        <NavLink to="/" className="flex items-center shrink-0">
+          <img 
+            src={logoRhelloDark} 
+            alt="rhello" 
+            className="h-8 hidden sm:block"
+          />
+          <img 
+            src={symbolRhelloLight} 
+            alt="rhello" 
+            className="h-10 w-10 sm:hidden"
+          />
         </NavLink>
 
         {/* Desktop Navigation */}
-        <nav className="hidden lg:flex flex-1 items-center gap-1 overflow-x-auto">
-          {menuItems.map((item) => {
-            const isVagasOrCandidatos = item.title === "Vagas" || item.title === "Candidatos";
-            
-            return (
-              <NavLink
-                key={item.title}
-                to={item.url}
-                end={item.url === "/"}
-                className={({ isActive }) =>
-                  `flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all whitespace-nowrap relative group ${
-                    isActive && isVagasOrCandidatos
-                      ? "bg-[#00141d] text-white font-semibold"
-                      : isActive
-                      ? "text-[#00141D] font-semibold"
-                      : "text-[#36404A] hover:bg-[#FFF59D]/30"
-                  } ${isActive && !isVagasOrCandidatos ? "after:absolute after:bottom-0 after:left-0 after:right-0 after:h-1 after:bg-[#F9EC3F] after:rounded-t-md" : ""}`
-                }
-              >
-                <item.icon className="h-4 w-4 transition-transform group-hover:scale-110" />
-                <span>{item.title}</span>
-              </NavLink>
-            );
-          })}
+        <nav className="hidden lg:flex flex-1 items-center justify-center gap-6">
+          {menuItems.map((item) => (
+            <NavLink
+              key={item.title}
+              to={item.url}
+              end={item.url === "/"}
+              className={({ isActive }) =>
+                `px-3 py-2 text-sm font-medium transition-all duration-200 ease-in-out whitespace-nowrap relative ${
+                  isActive
+                    ? "text-[#00141D] font-semibold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#F9EC3F] after:rounded-t-md"
+                    : "text-[#00141D] hover:bg-[rgba(249,236,63,0.08)] hover:text-[#F9EC3F] rounded-lg"
+                }`
+              }
+              style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '14px' }}
+            >
+              {item.title}
+            </NavLink>
+          ))}
         </nav>
 
         {/* Right Side - Desktop */}
         <div className="hidden lg:flex items-center gap-3">
+          <Button 
+            onClick={() => navigate('/vagas/novo')}
+            className="bg-[#F9EC3F] text-[#00141D] font-semibold hover:bg-[#E5DA37] rounded-lg px-4 py-2 transition-colors"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Adicionar Nova Vaga
+          </Button>
           <ConnectionIndicator />
           <NotificationBell />
           <UserMenu />
@@ -97,40 +90,46 @@ export function AppNavbar() {
             <SheetContent side="left" className="w-72">
               <SheetHeader>
                 <SheetTitle className="flex items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#F9EC3F]">
-                    <span className="text-base font-bold text-[#00141D]">R</span>
-                  </div>
+                  <img 
+                    src={symbolRhelloLight} 
+                    alt="rhello" 
+                    className="h-8 w-8"
+                  />
                   <span className="text-base font-bold text-[#00141D]">
-                    Rhello RH
+                    rhello
                   </span>
                 </SheetTitle>
               </SheetHeader>
 
               <nav className="mt-8 flex flex-col gap-2">
-                {menuItems.map((item) => {
-                  const isVagasOrCandidatos = item.title === "Vagas" || item.title === "Candidatos";
-                  
-                  return (
-                    <NavLink
-                      key={item.title}
-                      to={item.url}
-                      end={item.url === "/"}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={({ isActive }) =>
-                        `flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${
-                          isActive && isVagasOrCandidatos
-                            ? "bg-[#00141d] text-white font-semibold"
-                            : isActive
-                            ? "bg-[#F9EC3F]/20 text-[#00141D] font-semibold"
-                            : "text-[#36404A] hover:bg-muted"
-                        }`
-                      }
-                    >
-                      <item.icon className="h-5 w-5" />
-                      <span>{item.title}</span>
-                    </NavLink>
-                  );
-                })}
+                <Button 
+                  onClick={() => {
+                    navigate('/vagas/novo');
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full bg-[#F9EC3F] text-[#00141D] font-semibold hover:bg-[#E5DA37] mb-4"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Adicionar Nova Vaga
+                </Button>
+
+                {menuItems.map((item) => (
+                  <NavLink
+                    key={item.title}
+                    to={item.url}
+                    end={item.url === "/"}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={({ isActive }) =>
+                      `flex items-center px-4 py-3 rounded-lg text-sm font-medium transition-all ${
+                        isActive
+                          ? "bg-[#F9EC3F]/20 text-[#00141D] font-semibold"
+                          : "text-[#36404A] hover:bg-muted"
+                      }`
+                    }
+                  >
+                    <span>{item.title}</span>
+                  </NavLink>
+                ))}
               </nav>
 
               <div className="mt-8 pt-6 border-t flex flex-col gap-3">
