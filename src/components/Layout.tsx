@@ -44,7 +44,7 @@ export function Layout() {
   return (
     <div className="min-h-screen w-full">
       <AppNavbar />
-      <main className="bg-secondary/30">
+      <main className="bg-[#00141D] bg-gradient-to-b from-[#00141D] to-[#001820] min-h-screen">
         <Outlet />
       </main>
     </div>

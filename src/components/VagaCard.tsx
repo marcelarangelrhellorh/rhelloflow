@@ -74,12 +74,12 @@ export function VagaCard({ vaga, draggable = false, onDragStart, onClick }: Vaga
       draggable={draggable}
       onDragStart={onDragStart}
       onClick={handleClick}
-      className="cursor-pointer hover:shadow-lg transition-all bg-card border border-border overflow-hidden"
+      className="cursor-pointer hover-lift card-shadow bg-white border border-[#E5E7EB] overflow-hidden rounded-2xl"
     >
       <CardContent className="p-5 space-y-4">
         {/* Header */}
         <div className="flex items-start justify-between">
-          <h3 className="text-lg font-semibold text-foreground leading-tight pr-2 line-clamp-2">
+          <h3 className="text-lg font-bold text-[#00141D] leading-tight pr-2 line-clamp-2">
             {vaga.titulo}
           </h3>
           <Button
@@ -94,7 +94,7 @@ export function VagaCard({ vaga, draggable = false, onDragStart, onClick }: Vaga
 
         {/* Status Badge */}
         <div>
-          <Badge className={`${getStatusColor(vaga.status)} border-0`}>
+          <Badge className={`${getStatusColor(vaga.status)} border-0 font-bold rounded-full px-3 py-1`}>
             <span className="mr-1">{getStatusIndicator(vaga.status)}</span>
             {vaga.status}
           </Badge>
@@ -103,31 +103,31 @@ export function VagaCard({ vaga, draggable = false, onDragStart, onClick }: Vaga
         {/* Cliente e Recrutador */}
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 flex-1 min-w-0">
-            <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center shrink-0">
-              <Briefcase className="h-4 w-4 text-muted-foreground" />
+            <div className="h-9 w-9 rounded-lg bg-[#00141D]/10 flex items-center justify-center shrink-0">
+              <Briefcase className="h-4 w-4 text-[#00141D]/80" />
             </div>
             <div className="min-w-0">
-              <p className="text-xs text-muted-foreground">Cliente</p>
-              <p className="text-sm font-medium truncate">{vaga.empresa}</p>
+              <p className="text-xs text-[#00141D]/60">Cliente</p>
+              <p className="text-sm font-semibold truncate text-[#00141D]">{vaga.empresa}</p>
             </div>
           </div>
 
           <div className="flex items-center gap-2 flex-1 min-w-0">
-            <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-              <User className="h-4 w-4 text-primary" />
+            <div className="h-9 w-9 rounded-lg bg-[#F9EC3F]/20 flex items-center justify-center shrink-0">
+              <User className="h-4 w-4 text-[#00141D]" />
             </div>
             <div className="min-w-0">
-              <p className="text-xs text-muted-foreground">Recrutador</p>
-              <p className="text-sm font-medium truncate">{vaga.recrutador || "Não atribuído"}</p>
+              <p className="text-xs text-[#00141D]/60">Recrutador</p>
+              <p className="text-sm font-semibold truncate text-[#00141D]">{vaga.recrutador || "Não atribuído"}</p>
             </div>
           </div>
         </div>
 
         {/* Salary Range */}
         {(vaga.salario_min || vaga.salario_max || vaga.salario_modalidade) && (
-          <div className="pt-2 border-t border-border">
-            <p className="text-xs text-muted-foreground mb-1">Faixa Salarial</p>
-            <p className="text-sm font-semibold text-foreground">
+          <div className="pt-2 border-t border-[#E5E7EB]">
+            <p className="text-xs text-[#00141D]/60 mb-1">Faixa Salarial</p>
+            <p className="text-sm font-bold text-[#00141D]">
               {formatSalaryRange(vaga.salario_min, vaga.salario_max, vaga.salario_modalidade)}
             </p>
           </div>
@@ -136,27 +136,27 @@ export function VagaCard({ vaga, draggable = false, onDragStart, onClick }: Vaga
         {/* Progresso do Pipeline */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-foreground">Progresso do Pipeline</p>
-            <p className="text-sm font-semibold text-primary">{vaga.status} - {progress}%</p>
+            <p className="text-sm font-semibold text-[#00141D]">Progresso do Pipeline</p>
+            <p className="text-sm font-bold text-[#00141D]">{progress}%</p>
           </div>
-          <Progress value={progress} className="h-2 bg-secondary [&>div]:bg-primary" />
+          <Progress value={progress} className="h-3 bg-[#E5E7EB] [&>div]:bg-[#F9EC3F] [&>div]:transition-all [&>div]:duration-300" />
         </div>
 
         {/* Métricas */}
         <div className="grid grid-cols-2 gap-4 pt-2">
           <div className="text-center">
-            <div className="text-3xl font-bold text-foreground">{vaga.candidatos_count || 0}</div>
-            <div className="text-xs text-muted-foreground mt-1">Total de Candidatos</div>
+            <div className="text-3xl font-bold text-[#00141D]">{vaga.candidatos_count || 0}</div>
+            <div className="text-xs text-[#00141D]/60 mt-1 font-medium">Total de Candidatos</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-foreground">{daysOpen}</div>
-            <div className="text-xs text-muted-foreground mt-1">Dias em Aberto</div>
+            <div className="text-3xl font-bold text-[#00141D]">{daysOpen}</div>
+            <div className="text-xs text-[#00141D]/60 mt-1 font-medium">Dias em Aberto</div>
           </div>
         </div>
 
         {/* Botão Ver Detalhes */}
         <Button 
-          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
+          className="w-full bg-[#F9EC3F] hover:bg-[#E5D72E] text-[#00141D] font-bold rounded-xl transition-all duration-200 hover:scale-[1.03] shadow-sm"
           onClick={handleViewDetails}
         >
           Ver Detalhes

@@ -23,12 +23,12 @@ export function AppNavbar() {
   const navigate = useNavigate();
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-white shadow-[0px_1px_3px_rgba(0,0,0,0.08)]">
+    <header className="sticky top-0 z-50 w-full border-b border-[#F9EC3F]/20 bg-[#00141D] backdrop-blur-md shadow-lg">
       <div className="flex h-16 items-center px-4 sm:px-6 gap-6 max-w-[1600px] mx-auto">
         {/* Logo */}
         <NavLink to="/" className="flex items-center shrink-0">
           <img 
-            src={logoRhelloDark} 
+            src={symbolRhelloLight} 
             alt="rhello" 
             className="h-8 hidden sm:block"
           />
@@ -49,11 +49,11 @@ export function AppNavbar() {
               className={({ isActive }) =>
                 `px-3 py-2 text-sm font-medium transition-all duration-200 ease-in-out whitespace-nowrap relative ${
                   isActive
-                    ? "text-[#00141D] font-semibold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#F9EC3F] after:rounded-t-md"
-                    : "text-[#00141D] hover:bg-[rgba(249,236,63,0.08)] hover:text-[#F9EC3F] rounded-lg"
+                    ? "text-[#F9EC3F] font-semibold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#F9EC3F] after:rounded-t-md"
+                    : "text-white hover:bg-[rgba(249,236,63,0.1)] hover:text-[#F9EC3F] rounded-lg"
                 }`
               }
-              style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '14px' }}
+              style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 500, fontSize: '14px' }}
             >
               {item.title}
             </NavLink>

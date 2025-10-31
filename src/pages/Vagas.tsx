@@ -113,11 +113,11 @@ export default function Vagas() {
   }
 
   return (
-    <div className="p-8">
+    <div className="p-8 min-h-screen">
       <div className="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Vagas</h1>
-          <p className="text-muted-foreground">Gerencie todas as vagas abertas</p>
+          <h1 className="text-3xl font-bold text-white">Vagas</h1>
+          <p className="text-[#B0BEC5]">Gerencie todas as vagas abertas</p>
         </div>
         <div className="flex gap-2">
           <DropdownMenu>
@@ -168,19 +168,19 @@ export default function Vagas() {
 
       <div className="mb-6 flex gap-4">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#F9EC3F]" />
           <Input
             placeholder="Buscar vagas..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
+            className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-[#D1D5DB] focus:border-[#F9EC3F] focus:ring-[#F9EC3F]"
           />
         </div>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[200px]">
+          <SelectTrigger className="w-[200px] bg-white border-white/20 text-foreground">
             <SelectValue placeholder="Filtrar por status" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-white">
             <SelectItem value="all">Todos os status</SelectItem>
             <SelectItem value="A iniciar">A iniciar</SelectItem>
             <SelectItem value="Discovery">Discovery</SelectItem>
@@ -200,7 +200,7 @@ export default function Vagas() {
 
       {filteredVagas.length === 0 && (
         <div className="py-12 text-center">
-          <p className="text-muted-foreground">Nenhuma vaga encontrada</p>
+          <p className="text-[#B0BEC5]">Nenhuma vaga encontrada</p>
         </div>
       )}
     </div>
