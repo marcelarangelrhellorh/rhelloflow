@@ -6,7 +6,6 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Users, Clock, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
-import symbolRhelloLight from "@/assets/symbol-rhello-light.png";
 
 interface Vaga {
   id: string;
@@ -110,20 +109,6 @@ export function JobCard({
           onClick={onView}
           style={{ minHeight: "44px" }}
         >
-          {/* Watermark para vagas confidenciais */}
-          {vaga.confidencial && (
-            <div 
-              className="absolute inset-0 flex items-center justify-center pointer-events-none"
-              style={{
-                backgroundImage: `url(${symbolRhelloLight})`,
-                backgroundRepeat: "no-repeat",
-                backgroundPosition: "center",
-                backgroundSize: "120px",
-                opacity: 0.08,
-              }}
-            />
-          )}
-
           <div className="relative p-4 space-y-3" {...attributes} {...listeners}>
             {/* Header */}
             <div className="space-y-2">
