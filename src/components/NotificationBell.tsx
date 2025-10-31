@@ -5,7 +5,6 @@ import { Badge } from "./ui/badge";
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -13,12 +12,11 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
 
 interface Notification {
   id: string;
   job_id: string | null;
+  link: string | null;
   kind: string;
   title: string;
   body: string | null;
@@ -70,8 +68,8 @@ export function NotificationBell() {
 
       if (error) throw error;
 
-      setNotifications((data as Notification[]) || []);
-      setUnreadCount((data || []).filter((n) => !n.read_at).length);
+      setNotifications(data as any[] || []);
+      setUnreadCount((data || []).filter((n: any) => !n.read_at).length);
     } catch (error: any) {
       console.error("Erro ao carregar notificações:", error);
     }
@@ -96,78 +94,139 @@ export function NotificationBell() {
     if (!notification.read_at) {
       await markAsRead(notification.id);
     }
-    if (notification.job_id) {
+    
+    // Navigate using link or job_id
+    if (notification.link) {
+      navigate(notification.link);
+    } else if (notification.job_id) {
       navigate(`/vagas/${notification.job_id}`);
     }
   };
 
-  const getNotificationIcon = (kind: string) => {
-    switch (kind) {
-      case "stage_age_threshold":
-        return "⚠️";
-      case "no_activity":
-        return "📅";
-      default:
-        return "🔔";
+  const markAllAsRead = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { error } = await supabase
+        .from("notifications")
+        .update({ read_at: new Date().toISOString() })
+        .eq("user_id", user.id)
+        .is("read_at", null);
+
+      if (error) throw error;
+
+      toast.success("Todas as notificações foram marcadas como lidas");
+      loadNotifications();
+    } catch (error: any) {
+      console.error("Erro ao marcar todas como lidas:", error);
+      toast.error("Erro ao marcar notificações");
     }
+  };
+
+  const getNotificationIcon = (kind: string) => {
+    const icons = {
+      vaga: "💼",
+      candidato: "👤",
+      feedback: "💬",
+      sistema: "🔔",
+      stage_age_threshold: "⚠️",
+      no_activity: "📅"
+    };
+    return icons[kind as keyof typeof icons] || "🔔";
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return "Agora";
+    if (diffMins < 60) return `${diffMins}m atrás`;
+    if (diffHours < 24) return `${diffHours}h atrás`;
+    if (diffDays < 7) return `${diffDays}d atrás`;
+    return date.toLocaleDateString("pt-BR");
   };
 
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="relative shrink-0"
+          title="Notificações"
+        >
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
             <Badge
-              className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-destructive text-destructive-foreground"
+              variant="destructive"
+              className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs animate-pulse"
             >
-              {unreadCount}
+              {unreadCount > 9 ? "9+" : unreadCount}
             </Badge>
           )}
         </Button>
       </SheetTrigger>
-      <SheetContent>
+      
+      <SheetContent className="w-full sm:max-w-md">
         <SheetHeader>
-          <SheetTitle>Notificações</SheetTitle>
-          <SheetDescription>
-            {unreadCount > 0
-              ? `Você tem ${unreadCount} notificação${unreadCount > 1 ? "ões" : ""} não lida${unreadCount > 1 ? "s" : ""}`
-              : "Você não tem notificações não lidas"}
-          </SheetDescription>
+          <div className="flex items-center justify-between">
+            <SheetTitle>Notificações</SheetTitle>
+            {unreadCount > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={markAllAsRead}
+                className="text-xs"
+              >
+                Marcar todas como lidas
+              </Button>
+            )}
+          </div>
         </SheetHeader>
 
-        <div className="mt-6 space-y-3">
+        <div className="mt-6 space-y-2">
           {notifications.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">
-              Nenhuma notificação
-            </p>
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <Bell className="h-12 w-12 text-muted-foreground mb-4" />
+              <p className="text-sm text-muted-foreground">
+                Nenhuma notificação
+              </p>
+            </div>
           ) : (
             notifications.map((notification) => (
               <div
                 key={notification.id}
-                className={`p-4 rounded-lg border cursor-pointer transition-colors hover:bg-accent ${
-                  notification.read_at ? "opacity-60" : "bg-primary/5"
-                }`}
                 onClick={() => handleNotificationClick(notification)}
+                className={`p-4 rounded-lg border cursor-pointer transition-all hover:shadow-md ${
+                  notification.read_at
+                    ? "bg-card border-border"
+                    : "bg-primary/5 border-primary/20"
+                }`}
               >
                 <div className="flex items-start gap-3">
-                  <span className="text-2xl">{getNotificationIcon(notification.kind)}</span>
+                  <span className="text-2xl">
+                    {getNotificationIcon(notification.kind)}
+                  </span>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm">{notification.title}</p>
+                    <div className="flex items-start justify-between gap-2">
+                      <h4 className="text-sm font-medium text-card-foreground">
+                        {notification.title}
+                      </h4>
+                      <span className="text-xs text-muted-foreground whitespace-nowrap">
+                        {formatDate(notification.created_at)}
+                      </span>
+                    </div>
                     {notification.body && (
-                      <p className="text-sm text-muted-foreground mt-1">
+                      <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
                         {notification.body}
                       </p>
                     )}
-                    <p className="text-xs text-muted-foreground mt-2">
-                      {format(new Date(notification.created_at), "d 'de' MMMM 'às' HH:mm", {
-                        locale: ptBR,
-                      })}
-                    </p>
                   </div>
-                  {!notification.read_at && (
-                    <div className="h-2 w-2 rounded-full bg-primary shrink-0 mt-1" />
-                  )}
                 </div>
               </div>
             ))
