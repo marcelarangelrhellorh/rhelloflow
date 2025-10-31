@@ -1,52 +1,83 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors, closestCenter } from "@dnd-kit/core";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { StatsHeader } from "@/components/FunilVagas/StatsHeader";
 import { FilterBar } from "@/components/FunilVagas/FilterBar";
-import { StageColumn } from "@/components/FunilVagas/StageColumn";
-import { JobCard } from "@/components/FunilVagas/JobCard";
-import { JobSidePanel } from "@/components/FunilVagas/JobSidePanel";
-
-type StatusVaga = 
-  | "A iniciar"
-  | "Discovery"
-  | "Triagem"
-  | "Entrevistas Rhello"
-  | "Shortlist enviada"
-  | "Entrevistas Cliente"
-  | "Em fechamento"
-  | "Concluídas"
-  | "Aguardando retorno do cliente"
-  | "Apresentação de Candidatos"
-  | "Entrevista cliente"
-  | "Em processo de contratação"
-  | "Concluído"
-  | "Cancelada";
+import { PipelineBoard } from "@/components/FunilVagas/PipelineBoard";
+import { JobDrawer } from "@/components/FunilVagas/JobDrawer";
 
 interface Vaga {
   id: string;
   titulo: string;
   empresa: string;
   recrutador: string | null;
-  status: StatusVaga;
+  cs_responsavel: string | null;
+  status: string;
   prioridade: string | null;
   criado_em: string | null;
   candidatos_count?: number;
+  confidencial?: boolean | null;
 }
 
-const statusColumns: { status: StatusVaga; icon: string; color: string }[] = [
-  { status: "A iniciar", icon: "🟢", color: "bg-success/10 text-success border-success/20" },
-  { status: "Discovery", icon: "🔵", color: "bg-info/10 text-info border-info/20" },
-  { status: "Triagem", icon: "🟣", color: "bg-warning/10 text-warning border-warning/20" },
-  { status: "Entrevistas Rhello", icon: "🟠", color: "bg-warning/10 text-warning border-warning/20" },
-  { status: "Shortlist enviada", icon: "🟡", color: "bg-primary/10 text-primary border-primary/20" },
-  { status: "Entrevistas Cliente", icon: "⚫", color: "bg-muted/50 text-muted-foreground border-muted" },
-  { status: "Em fechamento", icon: "🟤", color: "bg-success/10 text-success border-success/20" },
-  { status: "Concluídas", icon: "⚪", color: "bg-success/10 text-success border-success/20" },
+// Stage configuration with Rhello colors
+const STAGES = [
+  {
+    id: "a-iniciar",
+    name: "A iniciar",
+    color: {
+      bg: "#BFFCC5",
+      text: "#1C7C2E",
+      columnBg: "#F9FFF9",
+    },
+  },
+  {
+    id: "discovery",
+    name: "Discovery",
+    color: {
+      bg: "#CDEAFF",
+      text: "#005C99",
+      columnBg: "#F8FBFF",
+    },
+  },
+  {
+    id: "triagem",
+    name: "Triagem",
+    color: {
+      bg: "#E4D4FF",
+      text: "#5A38A0",
+      columnBg: "#FBF9FF",
+    },
+  },
+  {
+    id: "entrevistas-rhello",
+    name: "Entrevistas Rhello",
+    color: {
+      bg: "#FFE3C3",
+      text: "#A35900",
+      columnBg: "#FFFCF7",
+    },
+  },
+  {
+    id: "apresentacao-candidatos",
+    name: "Apresentação de Candidatos",
+    color: {
+      bg: "#FFF2B8",
+      text: "#7A6000",
+      columnBg: "#FFFEF5",
+    },
+  },
+  {
+    id: "entrevista-cliente",
+    name: "Entrevista cliente",
+    color: {
+      bg: "#FFE3C3",
+      text: "#A35900",
+      columnBg: "#FFFCF7",
+    },
+  },
 ];
 
 const calculateProgress = (status: string): number => {
@@ -55,217 +86,211 @@ const calculateProgress = (status: string): number => {
     "Discovery": 20,
     "Triagem": 35,
     "Entrevistas Rhello": 50,
-    "Shortlist enviada": 65,
-    "Entrevistas Cliente": 80,
-    "Em fechamento": 90,
-    "Concluídas": 100,
-    "Cancelada": 0,
-    // Old statuses
-    "Aguardando retorno do cliente": 70,
     "Apresentação de Candidatos": 65,
     "Entrevista cliente": 80,
-    "Em processo de contratação": 90,
     "Concluído": 100,
+    "Cancelada": 0,
   };
   return progressMap[status] || 0;
 };
 
-const calculateDaysOpen = (criadoEm: string | null): number => {
-  if (!criadoEm) return 0;
-  const created = new Date(criadoEm);
-  const today = new Date();
-  const diffTime = Math.abs(today.getTime() - created.getTime());
-  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-};
-
 export default function FunilVagas() {
-  const [vagas, setVagas] = useState<Vaga[]>([]);
+  const navigate = useNavigate();
+  const [jobs, setJobs] = useState<Vaga[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeId, setActiveId] = useState<string | null>(null);
-  const [dragOverColumn, setDragOverColumn] = useState<string | null>(null);
-  const [selectedVaga, setSelectedVaga] = useState<Vaga | null>(null);
-  const [sidePanelOpen, setSidePanelOpen] = useState(false);
+  const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   
   // Filters
   const [searchTerm, setSearchTerm] = useState("");
-  const [recrutadorFilter, setRecrutadorFilter] = useState<string>("all");
-  const [clienteFilter, setClienteFilter] = useState<string>("all");
-  const [areaFilter, setAreaFilter] = useState<string>("all");
-  const [ordenacao, setOrdenacao] = useState<string>("recentes");
+  const [recrutadorFilter, setRecrutadorFilter] = useState("all");
+  const [csFilter, setCsFilter] = useState("all");
+  const [clienteFilter, setClienteFilter] = useState("all");
+  const [areaFilter, setAreaFilter] = useState("all");
+  const [ordenacao, setOrdenacao] = useState("recentes");
 
-  const { toast } = useToast();
-  const navigate = useNavigate();
-
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    })
-  );
+  // Filter options
+  const [recrutadores, setRecrutadores] = useState<string[]>([]);
+  const [csResponsaveis, setCsResponsaveis] = useState<string[]>([]);
+  const [clientes, setClientes] = useState<string[]>([]);
 
   useEffect(() => {
-    loadVagas();
+    loadJobs();
   }, []);
 
-  async function loadVagas() {
+  const loadJobs = async () => {
     try {
       setLoading(true);
-      const { data: vagasData, error: vagasError } = await supabase
+
+      // Load jobs
+      const { data: jobsData, error: jobsError } = await supabase
         .from("vagas")
         .select("*")
         .not("status", "in", '("Cancelada")')
         .order("criado_em", { ascending: false });
 
-      if (vagasError) throw vagasError;
+      if (jobsError) throw jobsError;
 
-      // Load candidate counts for each vaga
-      const vagasWithCounts = await Promise.all(
-        (vagasData || []).map(async (vaga) => {
+      // Load candidate counts for each job
+      const jobsWithCounts = await Promise.all(
+        (jobsData || []).map(async (job) => {
           const { count } = await supabase
             .from("candidatos")
             .select("*", { count: "exact", head: true })
-            .eq("vaga_relacionada_id", vaga.id);
-          
-          return { ...vaga, candidatos_count: count || 0 };
+            .eq("vaga_relacionada_id", job.id);
+
+          return { ...job, candidatos_count: count || 0 };
         })
       );
 
-      setVagas(vagasWithCounts as any);
-    } catch (error: any) {
-      toast({
-        title: "Erro ao carregar vagas",
-        description: error.message,
-        variant: "destructive",
-      });
+      setJobs(jobsWithCounts as any);
+
+      // Extract unique filter options
+      const uniqueRecrutadores = Array.from(
+        new Set(jobsData?.map((j) => j.recrutador).filter(Boolean))
+      ) as string[];
+      const uniqueCS = Array.from(
+        new Set(jobsData?.map((j) => j.cs_responsavel).filter(Boolean))
+      ) as string[];
+      const uniqueClientes = Array.from(
+        new Set(jobsData?.map((j) => j.empresa).filter(Boolean))
+      ) as string[];
+
+      setRecrutadores(uniqueRecrutadores);
+      setCsResponsaveis(uniqueCS);
+      setClientes(uniqueClientes);
+    } catch (error) {
+      console.error("Error loading jobs:", error);
+      toast.error("Erro ao carregar vagas");
     } finally {
       setLoading(false);
     }
-  }
+  };
 
-  async function handleDragEnd(event: DragEndEvent) {
-    const { active, over } = event;
-    setActiveId(null);
-    setDragOverColumn(null);
-
-    if (!over || active.id === over.id) return;
-
-    const vagaId = active.id as string;
-    const newStatus = over.id as StatusVaga;
-
+  const handleJobMove = async (jobId: string, fromStage: string, toStage: string) => {
     try {
-      const { error } = await supabase
+      const { data: { user } } = await supabase.auth.getUser();
+
+      // Update job status
+      const { error: updateError } = await supabase
         .from("vagas")
-        .update({ status: newStatus as any })
-        .eq("id", vagaId);
+        .update({
+          status: toStage as any,
+          status_changed_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", jobId);
 
-      if (error) throw error;
+      if (updateError) throw updateError;
 
-      setVagas((prev) =>
-        prev.map((vaga) =>
-          vaga.id === vagaId ? { ...vaga, status: newStatus } : vaga
+      // Record stage change in history
+      const { error: historyError } = await supabase
+        .from("job_stage_history")
+        .insert({
+          job_id: jobId,
+          from_status: fromStage,
+          to_status: toStage,
+          changed_by: user?.id,
+        });
+
+      if (historyError) console.error("Error recording history:", historyError);
+
+      // Update local state
+      setJobs((prev) =>
+        prev.map((job) =>
+          job.id === jobId ? { ...job, status: toStage as any } : job
         )
       );
 
-      toast({
-        title: "Vaga movida com sucesso",
-        description: `Status atualizado para "${newStatus}"`,
-      });
-    } catch (error: any) {
-      toast({
-        title: "Erro ao atualizar status",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast.success(`Vaga movida para ${toStage}`);
+    } catch (error) {
+      console.error("Error moving job:", error);
+      toast.error("Erro ao mover vaga");
     }
-  }
+  };
 
-  function handleDragStart(event: DragStartEvent) {
-    setActiveId(event.active.id as string);
-  }
+  const handleJobClick = (jobId: string) => {
+    setSelectedJobId(jobId);
+    setDrawerOpen(true);
+  };
 
-  // Get unique values for filters
-  const recrutadores = Array.from(new Set(vagas.map(v => v.recrutador).filter(Boolean))) as string[];
-  const clientes = Array.from(new Set(vagas.map(v => v.empresa).filter(Boolean))) as string[];
-  const areas: string[] = []; // TODO: Add area field to vagas table
+  const handleJobEdit = (jobId: string) => {
+    navigate(`/vagas/${jobId}/editar`);
+  };
 
-  // Apply filters and sorting
-  const filteredVagas = vagas.filter((vaga) => {
-    const matchesSearch = vaga.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      vaga.empresa.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesRecrutador = recrutadorFilter === "all" || vaga.recrutador === recrutadorFilter;
-    const matchesCliente = clienteFilter === "all" || vaga.empresa === clienteFilter;
-    
-    return matchesSearch && matchesRecrutador && matchesCliente;
-  }).sort((a, b) => {
-    switch (ordenacao) {
-      case "antigas":
-        return new Date(a.criado_em || 0).getTime() - new Date(b.criado_em || 0).getTime();
-      case "candidatos":
-        return (b.candidatos_count || 0) - (a.candidatos_count || 0);
-      case "dias":
-        return calculateDaysOpen(b.criado_em) - calculateDaysOpen(a.criado_em);
-      case "recentes":
-      default:
-        return new Date(b.criado_em || 0).getTime() - new Date(a.criado_em || 0).getTime();
-    }
+  const handleJobMoveStage = (jobId: string) => {
+    toast.info("Arraste o card para mover de etapa");
+  };
+
+  const handleJobDuplicate = (jobId: string) => {
+    toast.info("Funcionalidade em desenvolvimento");
+  };
+
+  const handleJobClose = (jobId: string) => {
+    toast.info("Funcionalidade em desenvolvimento");
+  };
+
+  // Apply filters
+  const filteredJobs = jobs.filter((job) => {
+    const matchesSearch =
+      job.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      job.empresa.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesRecrutador =
+      recrutadorFilter === "all" || job.recrutador === recrutadorFilter;
+
+    const matchesCS =
+      csFilter === "all" || job.cs_responsavel === csFilter;
+
+    const matchesCliente =
+      clienteFilter === "all" || job.empresa === clienteFilter;
+
+    return matchesSearch && matchesRecrutador && matchesCS && matchesCliente;
   });
 
-  const getVagasByStatus = (status: StatusVaga) => {
-    return filteredVagas.filter((vaga) => vaga.status === status);
-  };
-
   // Calculate stats
-  const totalVagasAbertas = filteredVagas.length;
-  const mediaDiasAbertos = filteredVagas.length > 0
-    ? Math.round(filteredVagas.reduce((sum, v) => sum + calculateDaysOpen(v.criado_em), 0) / filteredVagas.length)
-    : 0;
-  const vagasEmAtencao = filteredVagas.filter(v => calculateDaysOpen(v.criado_em) > 7).length;
-  const totalCandidatosAtivos = filteredVagas.reduce((sum, v) => sum + (v.candidatos_count || 0), 0);
-
-  const activeVaga = activeId ? vagas.find((v) => v.id === activeId) : null;
-
-  const handleViewVaga = (vaga: Vaga) => {
-    setSelectedVaga(vaga);
-    setSidePanelOpen(true);
-  };
+  const totalJobs = filteredJobs.length;
+  const jobsByStage = STAGES.reduce((acc, stage) => {
+    acc[stage.name] = filteredJobs.filter((j) => j.status === stage.name).length;
+    return acc;
+  }, {} as Record<string, number>);
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-secondary/30">
+      <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-secondary/30">
-      {/* Header - Fixed */}
-      <div className="sticky top-0 z-20 bg-background border-b border-border">
-        <div className="px-6 py-6">
-          <div className="flex items-center justify-between mb-4">
+    <div className="flex flex-col h-screen bg-background">
+      {/* Header */}
+      <div className="border-b border-border bg-card/50 backdrop-blur-sm">
+        <div className="px-6 py-4">
+          <div className="flex items-center justify-between mb-3">
             <div>
-              <h1 className="text-3xl font-bold text-foreground">Funil de Vagas</h1>
-              <p className="text-muted-foreground mt-1">
-                Arraste e solte os cards para alterar o status das vagas
+              <h1 className="text-2xl font-bold text-foreground">Funil de Vagas</h1>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                Gerencie o pipeline de recrutamento
               </p>
             </div>
-            <Button onClick={() => navigate("/vagas/nova")} size="lg">
-              <Plus className="mr-2 h-5 w-5" />
+            <Button onClick={() => navigate("/vagas/nova")} className="rounded-xl">
+              <Plus className="mr-2 h-4 w-4" />
               Nova Vaga
             </Button>
           </div>
 
           {/* Stats */}
           <StatsHeader
-            totalVagasAbertas={totalVagasAbertas}
-            mediaDiasAbertos={mediaDiasAbertos}
-            vagasEmAtencao={vagasEmAtencao}
-            totalCandidatosAtivos={totalCandidatosAtivos}
+            totalVagasAbertas={totalJobs}
+            mediaDiasAbertos={0}
+            vagasEmAtencao={0}
+            totalCandidatosAtivos={0}
           />
 
           {/* Filters */}
-          <div className="mt-4">
+          <div className="mt-3">
             <FilterBar
               searchTerm={searchTerm}
               onSearchChange={setSearchTerm}
@@ -279,83 +304,33 @@ export default function FunilVagas() {
               onOrdenacaoChange={setOrdenacao}
               recrutadores={recrutadores}
               clientes={clientes}
-              areas={areas}
+              areas={[]}
             />
           </div>
         </div>
       </div>
 
-      {/* Funnel Columns */}
-      <DndContext
-        sensors={sensors}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
-        collisionDetection={closestCenter}
-      >
-        <div className="overflow-x-auto pb-6">
-          <div className="flex gap-4 px-6 pt-6" style={{ minWidth: 'max-content' }}>
-            {statusColumns.map(({ status, icon, color }) => {
-              const vagasInColumn = getVagasByStatus(status);
-              return (
-                <StageColumn
-                  key={status}
-                  status={status}
-                  count={vagasInColumn.length}
-                  colorClass={color}
-                  icon={icon}
-                  isOver={dragOverColumn === status}
-                  onDragOver={() => setDragOverColumn(status)}
-                  onDragLeave={() => setDragOverColumn(null)}
-                >
-                  {vagasInColumn.map((vaga) => (
-                    <JobCard
-                      key={vaga.id}
-                      vaga={vaga}
-                      diasEmAberto={calculateDaysOpen(vaga.criado_em)}
-                      progresso={calculateProgress(vaga.status)}
-                      onDragStart={() => setActiveId(vaga.id)}
-                      onView={() => handleViewVaga(vaga)}
-                      onEdit={() => navigate(`/vagas/${vaga.id}/editar`)}
-                      onDuplicate={() => toast({ title: "Funcionalidade em desenvolvimento" })}
-                      onClose={() => toast({ title: "Funcionalidade em desenvolvimento" })}
-                    />
-                  ))}
-                </StageColumn>
-              );
-            })}
-          </div>
-        </div>
+      {/* Pipeline Board */}
+      <div className="flex-1 overflow-hidden p-6">
+        <PipelineBoard
+          jobs={filteredJobs}
+          stages={STAGES}
+          progresso={calculateProgress}
+          onJobMove={handleJobMove}
+          onJobClick={handleJobClick}
+          onJobEdit={handleJobEdit}
+          onJobMoveStage={handleJobMoveStage}
+          onJobDuplicate={handleJobDuplicate}
+          onJobClose={handleJobClose}
+        />
+      </div>
 
-        <DragOverlay>
-          {activeVaga && (
-            <div className="w-[300px]">
-              <JobCard
-                vaga={activeVaga}
-                diasEmAberto={calculateDaysOpen(activeVaga.criado_em)}
-                progresso={calculateProgress(activeVaga.status)}
-                onDragStart={() => {}}
-                onView={() => {}}
-                onEdit={() => {}}
-                onDuplicate={() => {}}
-                onClose={() => {}}
-                isDragging
-              />
-            </div>
-          )}
-        </DragOverlay>
-      </DndContext>
-
-      {/* Side Panel */}
-      <JobSidePanel
-        open={sidePanelOpen}
-        onClose={() => setSidePanelOpen(false)}
-        vaga={selectedVaga}
-        diasEmAberto={selectedVaga ? calculateDaysOpen(selectedVaga.criado_em) : 0}
-        onOpenFullDetails={() => {
-          if (selectedVaga) {
-            navigate(`/vagas/${selectedVaga.id}`);
-          }
-        }}
+      {/* Job Details Drawer */}
+      <JobDrawer
+        jobId={selectedJobId}
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+        onEdit={() => selectedJobId && handleJobEdit(selectedJobId)}
       />
     </div>
   );
