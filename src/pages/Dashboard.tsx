@@ -259,6 +259,36 @@ export default function Dashboard() {
           </div>
         )}
 
+        {/* Ações Rápidas - Movidas para cima */}
+        <div className="mb-6">
+          <h2 className="text-base font-semibold text-foreground mb-3">Ações rápidas</h2>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Button 
+              onClick={() => navigate("/vagas/nova")} 
+              className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-medium transition-all duration-150 rounded-xl h-11"
+            >
+              <Plus className="mr-2 h-5 w-5" />
+              Nova Vaga
+            </Button>
+            <Button 
+              onClick={() => navigate("/candidatos/novo")} 
+              variant="outline"
+              className="flex-1 border-2 hover:bg-muted transition-all duration-150 rounded-xl h-11"
+            >
+              <UserPlus className="mr-2 h-5 w-5" />
+              Novo Candidato
+            </Button>
+            <Button 
+              onClick={copyPublicFormLink}
+              variant="outline"
+              className="flex-1 border-2 hover:bg-muted transition-all duration-150 rounded-xl h-11"
+            >
+              <Share2 className="mr-2 h-5 w-5" />
+              Compartilhar Formulário
+            </Button>
+          </div>
+        </div>
+
         {/* KPI Cards Grid */}
         <div className="grid gap-6 mb-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {loading ? (
@@ -354,39 +384,6 @@ export default function Dashboard() {
               />
             </>
           )}
-        </div>
-
-        {/* Ações Rápidas */}
-        <div className="mb-8">
-          <h2 className="text-[18px] font-semibold text-foreground mb-4">Ações rápidas</h2>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Button 
-              onClick={() => navigate("/vagas/nova")} 
-              size="lg"
-              className="flex-1 bg-primary hover:bg-secondary text-primary-foreground font-medium transition-all duration-150"
-            >
-              <Plus className="mr-2 h-5 w-5" />
-              Nova Vaga
-            </Button>
-            <Button 
-              onClick={() => navigate("/candidatos/novo")} 
-              size="lg"
-              variant="outline"
-              className="flex-1 border-2 hover:bg-muted transition-all duration-150"
-            >
-              <UserPlus className="mr-2 h-5 w-5" />
-              Novo Candidato
-            </Button>
-            <Button 
-              onClick={copyPublicFormLink}
-              size="lg"
-              variant="outline"
-              className="flex-1 border-2 hover:bg-muted transition-all duration-150"
-            >
-              <Share2 className="mr-2 h-5 w-5" />
-              Compartilhar Formulário
-            </Button>
-          </div>
         </div>
       </div>
     </div>
