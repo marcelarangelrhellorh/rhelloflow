@@ -10,6 +10,7 @@ import { StatsBar } from "@/components/CandidatoDetalhes/StatsBar";
 import { ContactCard } from "@/components/CandidatoDetalhes/ContactCard";
 import { ProfessionalInfoCard } from "@/components/CandidatoDetalhes/ProfessionalInfoCard";
 import { FeedbackList } from "@/components/CandidatoDetalhes/FeedbackList";
+import { FeedbackModal } from "@/components/CandidatoDetalhes/FeedbackModal";
 import { HistoryTimeline } from "@/components/CandidatoDetalhes/HistoryTimeline";
 import { CandidateModal } from "@/components/Candidatos/CandidateModal";
 import { LinkToJobModal } from "@/components/BancoTalentos/LinkToJobModal";
@@ -60,8 +61,10 @@ export default function CandidatoDetalhes() {
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
 
   useEffect(() => {
-    loadCandidato();
-    loadHistorico();
+    if (id) {
+      loadCandidato();
+      loadHistorico();
+    }
   }, [id]);
 
   const loadCandidato = async () => {
@@ -122,20 +125,6 @@ export default function CandidatoDetalhes() {
     }
   };
 
-  // Mock feedbacks (can be fetched from database in the future)
-  const mockFeedbacks = candidato?.feedback
-    ? [
-        {
-          id: "1",
-          tipo: "interno" as const,
-          autor: candidato.recrutador || "Sistema",
-          conteudo: candidato.feedback,
-          data: candidato.criado_em,
-          sentimento: "neutro" as const,
-        },
-      ]
-    : [];
-
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-secondary/30">
@@ -190,9 +179,10 @@ export default function CandidatoDetalhes() {
         {/* Stats Bar */}
         <StatsBar
           criadoEm={candidato.criado_em}
-          ultimoFeedback={candidato.feedback ? candidato.criado_em : null}
+          ultimoFeedback={(candidato as any).ultimo_feedback || null}
           processosParticipados={historico.length}
           realocacoes={historico.filter(h => h.resultado !== "Contratado").length}
+          totalFeedbacks={(candidato as any).total_feedbacks || 0}
         />
 
         {/* Two Column Layout */}
@@ -220,7 +210,7 @@ export default function CandidatoDetalhes() {
 
         {/* Feedbacks */}
         <FeedbackList
-          feedbacks={mockFeedbacks}
+          candidatoId={id!}
           onAddFeedback={() => setFeedbackModalOpen(true)}
         />
 
@@ -272,24 +262,17 @@ export default function CandidatoDetalhes() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* TODO: Implement feedback modal */}
-      {feedbackModalOpen && (
-        <AlertDialog open={feedbackModalOpen} onOpenChange={setFeedbackModalOpen}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Adicionar Feedback</AlertDialogTitle>
-              <AlertDialogDescription>
-                Funcionalidade em desenvolvimento. Por enquanto, use o botão "Editar" para adicionar observações.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogAction onClick={() => setFeedbackModalOpen(false)}>
-                Entendi
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      )}
+      {/* Feedback Modal */}
+      <FeedbackModal
+        open={feedbackModalOpen}
+        onOpenChange={setFeedbackModalOpen}
+        candidatoId={id!}
+        vagaId={candidato.vaga_relacionada_id}
+        etapaAtual={candidato.status}
+        onSuccess={() => {
+          loadCandidato();
+        }}
+      />
     </div>
   );
 }

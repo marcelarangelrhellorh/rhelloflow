@@ -7,6 +7,7 @@ interface StatsBarProps {
   ultimoFeedback?: string | null;
   processosParticipados: number;
   realocacoes: number;
+  totalFeedbacks?: number;
 }
 
 export function StatsBar({
@@ -14,6 +15,7 @@ export function StatsBar({
   ultimoFeedback,
   processosParticipados,
   realocacoes,
+  totalFeedbacks = 0,
 }: StatsBarProps) {
   const diasNaEtapa = getBusinessDaysFromNow(criadoEm);
   
@@ -41,8 +43,8 @@ export function StatsBar({
             <MessageSquare className="h-5 w-5 text-info" />
           </div>
           <div>
-            <p className="text-sm text-muted-foreground">Último feedback</p>
-            <p className="text-lg font-bold text-card-foreground">{ultimoFeedbackFormatado}</p>
+            <p className="text-sm text-muted-foreground">Feedbacks / Último</p>
+            <p className="text-lg font-bold text-card-foreground">{totalFeedbacks} / {ultimoFeedbackFormatado}</p>
           </div>
         </CardContent>
       </Card>

@@ -31,6 +31,8 @@ export type Database = {
           recrutador: string | null
           status: Database["public"]["Enums"]["status_candidato"] | null
           telefone: string | null
+          total_feedbacks: number
+          ultimo_feedback: string | null
           vaga_relacionada_id: string | null
         }
         Insert: {
@@ -49,6 +51,8 @@ export type Database = {
           recrutador?: string | null
           status?: Database["public"]["Enums"]["status_candidato"] | null
           telefone?: string | null
+          total_feedbacks?: number
+          ultimo_feedback?: string | null
           vaga_relacionada_id?: string | null
         }
         Update: {
@@ -67,12 +71,71 @@ export type Database = {
           recrutador?: string | null
           status?: Database["public"]["Enums"]["status_candidato"] | null
           telefone?: string | null
+          total_feedbacks?: number
+          ultimo_feedback?: string | null
           vaga_relacionada_id?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "candidatos_vaga_relacionada_id_fkey"
             columns: ["vaga_relacionada_id"]
+            isOneToOne: false
+            referencedRelation: "vagas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feedbacks: {
+        Row: {
+          atualizado_em: string
+          author_user_id: string
+          avaliacao: number | null
+          candidato_id: string
+          conteudo: string
+          criado_em: string
+          disposicao: string | null
+          etapa: string | null
+          id: string
+          tipo: string
+          vaga_id: string | null
+        }
+        Insert: {
+          atualizado_em?: string
+          author_user_id: string
+          avaliacao?: number | null
+          candidato_id: string
+          conteudo: string
+          criado_em?: string
+          disposicao?: string | null
+          etapa?: string | null
+          id?: string
+          tipo: string
+          vaga_id?: string | null
+        }
+        Update: {
+          atualizado_em?: string
+          author_user_id?: string
+          avaliacao?: number | null
+          candidato_id?: string
+          conteudo?: string
+          criado_em?: string
+          disposicao?: string | null
+          etapa?: string | null
+          id?: string
+          tipo?: string
+          vaga_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedbacks_candidato_id_fkey"
+            columns: ["candidato_id"]
+            isOneToOne: false
+            referencedRelation: "candidatos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedbacks_vaga_id_fkey"
+            columns: ["vaga_id"]
             isOneToOne: false
             referencedRelation: "vagas"
             referencedColumns: ["id"]
