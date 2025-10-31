@@ -47,29 +47,23 @@ export function AppNavbar() {
 
         {/* Desktop Navigation */}
         <nav className="hidden lg:flex flex-1 items-center gap-1 overflow-x-auto">
-          {menuItems.map((item) => {
-            const isVagasOrCandidatos = item.title === "Vagas" || item.title === "Candidatos";
-            
-            return (
-              <NavLink
-                key={item.title}
-                to={item.url}
-                end={item.url === "/"}
-                className={({ isActive }) =>
-                  `flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all whitespace-nowrap relative group ${
-                    isActive && isVagasOrCandidatos
-                      ? "bg-[#00141d] text-white font-semibold"
-                      : isActive
-                      ? "text-[#00141D] font-semibold"
-                      : "text-[#36404A] hover:bg-[#FFF59D]/30"
-                  } ${isActive && !isVagasOrCandidatos ? "after:absolute after:bottom-0 after:left-0 after:right-0 after:h-1 after:bg-[#F9EC3F] after:rounded-t-md" : ""}`
-                }
-              >
-                <item.icon className="h-4 w-4 transition-transform group-hover:scale-110" />
-                <span>{item.title}</span>
-              </NavLink>
-            );
-          })}
+          {menuItems.map((item) => (
+            <NavLink
+              key={item.title}
+              to={item.url}
+              end={item.url === "/"}
+              className={({ isActive }) =>
+                `flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all whitespace-nowrap relative group ${
+                  isActive
+                    ? "text-[#00141D] font-semibold"
+                    : "text-[#36404A] hover:bg-[#FFF59D]/30"
+                } ${isActive ? "after:absolute after:bottom-0 after:left-0 after:right-0 after:h-1 after:bg-[#F9EC3F] after:rounded-t-md" : ""}`
+              }
+            >
+              <item.icon className="h-4 w-4 transition-transform group-hover:scale-110" />
+              <span>{item.title}</span>
+            </NavLink>
+          ))}
         </nav>
 
         {/* Right Side - Desktop */}
@@ -107,30 +101,24 @@ export function AppNavbar() {
               </SheetHeader>
 
               <nav className="mt-8 flex flex-col gap-2">
-                {menuItems.map((item) => {
-                  const isVagasOrCandidatos = item.title === "Vagas" || item.title === "Candidatos";
-                  
-                  return (
-                    <NavLink
-                      key={item.title}
-                      to={item.url}
-                      end={item.url === "/"}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={({ isActive }) =>
-                        `flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${
-                          isActive && isVagasOrCandidatos
-                            ? "bg-[#00141d] text-white font-semibold"
-                            : isActive
-                            ? "bg-[#F9EC3F]/20 text-[#00141D] font-semibold"
-                            : "text-[#36404A] hover:bg-muted"
-                        }`
-                      }
-                    >
-                      <item.icon className="h-5 w-5" />
-                      <span>{item.title}</span>
-                    </NavLink>
-                  );
-                })}
+                {menuItems.map((item) => (
+                  <NavLink
+                    key={item.title}
+                    to={item.url}
+                    end={item.url === "/"}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${
+                        isActive
+                          ? "bg-[#F9EC3F]/20 text-[#00141D] font-semibold"
+                          : "text-[#36404A] hover:bg-muted"
+                      }`
+                    }
+                  >
+                    <item.icon className="h-5 w-5" />
+                    <span>{item.title}</span>
+                  </NavLink>
+                ))}
               </nav>
 
               <div className="mt-8 pt-6 border-t flex flex-col gap-3">
