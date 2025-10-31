@@ -24,6 +24,7 @@ interface Vaga {
   criado_em: string | null;
   candidatos_count?: number;
   confidencial?: boolean | null;
+  area?: string | null;
 }
 
 interface StatusRef {
