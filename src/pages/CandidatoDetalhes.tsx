@@ -24,12 +24,18 @@ type Candidato = {
   estado: string | null;
   linkedin: string | null;
   curriculo_link: string | null;
+  curriculo_url: string | null;
+  portfolio_url: string | null;
   nivel: string | null;
   area: string | null;
   status: string;
   recrutador: string | null;
   vaga_relacionada_id: string | null;
   pretensao_salarial: number | null;
+  disponibilidade_mudanca: boolean | null;
+  pontos_fortes: string | null;
+  pontos_desenvolver: string | null;
+  parecer_final: string | null;
   feedback: string | null;
   criado_em: string;
 };
@@ -204,6 +210,12 @@ export default function CandidatoDetalhes() {
             dataCadastro={candidato.criado_em}
             nivel={candidato.nivel}
             area={candidato.area}
+            curriculoUrl={candidato.curriculo_url}
+            portfolioUrl={candidato.portfolio_url}
+            disponibilidadeMudanca={candidato.disponibilidade_mudanca}
+            pontosFortes={candidato.pontos_fortes}
+            pontosDesenvolver={candidato.pontos_desenvolver}
+            parecerFinal={candidato.parecer_final}
             onVagaClick={() => vaga && navigate(`/vagas/${vaga.id}`)}
           />
         </div>

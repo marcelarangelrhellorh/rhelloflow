@@ -7,7 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Save } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ArrowLeft, Save, Upload, FileText, X } from "lucide-react";
 import { toast } from "sonner";
 import { Constants } from "@/integrations/supabase/types";
 
@@ -17,7 +18,10 @@ export default function CandidatoForm() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [vagas, setVagas] = useState<{ id: string; titulo: string }[]>([]);
+  const [curriculoFile, setCurriculoFile] = useState<File | null>(null);
+  const [portfolioFile, setPortfolioFile] = useState<File | null>(null);
   const [formData, setFormData] = useState({
     nome_completo: "",
     email: "",
@@ -25,12 +29,17 @@ export default function CandidatoForm() {
     cidade: "",
     estado: "",
     linkedin: "",
-    curriculo_link: "",
+    curriculo_url: "",
+    portfolio_url: "",
     nivel: "",
     area: "",
     recrutador: "",
     vaga_relacionada_id: "",
     pretensao_salarial: "",
+    disponibilidade_mudanca: false,
+    pontos_fortes: "",
+    pontos_desenvolver: "",
+    parecer_final: "",
     status: "Banco de Talentos",
     feedback: "",
   });
@@ -73,12 +82,17 @@ export default function CandidatoForm() {
           cidade: data.cidade || "",
           estado: data.estado || "",
           linkedin: data.linkedin || "",
-          curriculo_link: data.curriculo_link || "",
+          curriculo_url: data.curriculo_url || "",
+          portfolio_url: data.portfolio_url || "",
           nivel: data.nivel || "",
           area: data.area || "",
           recrutador: data.recrutador || "",
           vaga_relacionada_id: data.vaga_relacionada_id || "",
           pretensao_salarial: data.pretensao_salarial?.toString() || "",
+          disponibilidade_mudanca: data.disponibilidade_mudanca || false,
+          pontos_fortes: data.pontos_fortes || "",
+          pontos_desenvolver: data.pontos_desenvolver || "",
+          parecer_final: data.parecer_final || "",
           status: data.status || "Banco de Talentos",
           feedback: data.feedback || "",
         });
@@ -89,11 +103,78 @@ export default function CandidatoForm() {
     }
   };
 
+  const uploadFile = async (file: File, bucket: string, candidatoId: string): Promise<string> => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${candidatoId}_${Date.now()}.${fileExt}`;
+    const filePath = `${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from(bucket)
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
+
+    if (uploadError) throw uploadError;
+
+    return filePath;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate required file
+    if (!id && !curriculoFile && !formData.curriculo_url) {
+      toast.error("É obrigatório anexar um currículo");
+      return;
+    }
+
     setLoading(true);
+    setUploading(true);
 
     try {
+      let curriculoUrl = formData.curriculo_url;
+      let portfolioUrl = formData.portfolio_url;
+
+      // If this is a new candidate, insert first to get the ID
+      let candidatoId = id;
+      
+      if (!id) {
+        const { data: newCandidato, error: insertError } = await supabase
+          .from("candidatos")
+          .insert([{
+            nome_completo: formData.nome_completo,
+            email: formData.email,
+          }])
+          .select()
+          .single();
+
+        if (insertError) throw insertError;
+        candidatoId = newCandidato.id;
+      }
+
+      // Upload curriculo if new file selected
+      if (curriculoFile && candidatoId) {
+        try {
+          curriculoUrl = await uploadFile(curriculoFile, 'curriculos', candidatoId);
+        } catch (error) {
+          console.error("Erro ao fazer upload do currículo:", error);
+          toast.error("Erro ao fazer upload do currículo");
+          throw error;
+        }
+      }
+
+      // Upload portfolio if new file selected
+      if (portfolioFile && candidatoId) {
+        try {
+          portfolioUrl = await uploadFile(portfolioFile, 'portfolios', candidatoId);
+        } catch (error) {
+          console.error("Erro ao fazer upload do portfólio:", error);
+          toast.error("Erro ao fazer upload do portfólio");
+          throw error;
+        }
+      }
+
       const dataToSave = {
         nome_completo: formData.nome_completo,
         email: formData.email,
@@ -101,36 +182,66 @@ export default function CandidatoForm() {
         cidade: formData.cidade || null,
         estado: formData.estado || null,
         linkedin: formData.linkedin || null,
-        curriculo_link: formData.curriculo_link || null,
+        curriculo_url: curriculoUrl || null,
+        portfolio_url: portfolioUrl || null,
         nivel: (formData.nivel || null) as any,
         area: (formData.area || null) as any,
         recrutador: formData.recrutador || null,
         vaga_relacionada_id: formData.vaga_relacionada_id || null,
         pretensao_salarial: formData.pretensao_salarial ? parseFloat(formData.pretensao_salarial) : null,
+        disponibilidade_mudanca: formData.disponibilidade_mudanca,
+        pontos_fortes: formData.pontos_fortes || null,
+        pontos_desenvolver: formData.pontos_desenvolver || null,
+        parecer_final: formData.parecer_final || null,
         status: formData.status as any,
         feedback: formData.feedback || null,
       };
 
-      if (id) {
-        const { error } = await supabase
-          .from("candidatos")
-          .update(dataToSave)
-          .eq("id", id);
-        if (error) throw error;
-        toast.success("Candidato atualizado com sucesso!");
-      } else {
-        const { error } = await supabase
-          .from("candidatos")
-          .insert([dataToSave]);
-        if (error) throw error;
-        toast.success("Candidato criado com sucesso!");
-      }
+      const { error } = await supabase
+        .from("candidatos")
+        .update(dataToSave)
+        .eq("id", candidatoId!);
+
+      if (error) throw error;
+      
+      toast.success(id ? "Candidato atualizado com sucesso!" : "Candidato criado com sucesso!");
       navigate("/candidatos");
     } catch (error) {
       console.error("Erro ao salvar candidato:", error);
       toast.error("Erro ao salvar candidato");
     } finally {
       setLoading(false);
+      setUploading(false);
+    }
+  };
+
+  const handleCurriculoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file size (10MB)
+      if (file.size > 10485760) {
+        toast.error("O arquivo deve ter no máximo 10MB");
+        return;
+      }
+      // Validate file type
+      const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+      if (!allowedTypes.includes(file.type)) {
+        toast.error("Formato de arquivo não permitido. Use PDF ou Word.");
+        return;
+      }
+      setCurriculoFile(file);
+    }
+  };
+
+  const handlePortfolioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file size (10MB)
+      if (file.size > 10485760) {
+        toast.error("O arquivo deve ter no máximo 10MB");
+        return;
+      }
+      setPortfolioFile(file);
     }
   };
 
@@ -217,13 +328,101 @@ export default function CandidatoForm() {
               </div>
 
               <div>
-                <Label htmlFor="curriculo_link">Link do Currículo</Label>
-                <Input
-                  id="curriculo_link"
-                  placeholder="https://..."
-                  value={formData.curriculo_link}
-                  onChange={(e) => setFormData({ ...formData, curriculo_link: e.target.value })}
+                <Label htmlFor="curriculo">Anexar Currículo *</Label>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Input
+                      id="curriculo"
+                      type="file"
+                      accept=".pdf,.doc,.docx"
+                      onChange={handleCurriculoChange}
+                      className="cursor-pointer"
+                      disabled={uploading}
+                    />
+                    {curriculoFile && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setCurriculoFile(null)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                  {curriculoFile && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <FileText className="h-4 w-4" />
+                      <span>{curriculoFile.name}</span>
+                    </div>
+                  )}
+                  {formData.curriculo_url && !curriculoFile && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <FileText className="h-4 w-4" />
+                      <span>Currículo anexado anteriormente</span>
+                    </div>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    Formatos aceitos: PDF, DOC, DOCX (máx. 10MB)
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="portfolio">Anexar Portfólio (opcional)</Label>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Input
+                      id="portfolio"
+                      type="file"
+                      accept=".pdf,.doc,.docx,.zip"
+                      onChange={handlePortfolioChange}
+                      className="cursor-pointer"
+                      disabled={uploading}
+                    />
+                    {portfolioFile && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setPortfolioFile(null)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                  {portfolioFile && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <FileText className="h-4 w-4" />
+                      <span>{portfolioFile.name}</span>
+                    </div>
+                  )}
+                  {formData.portfolio_url && !portfolioFile && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <FileText className="h-4 w-4" />
+                      <span>Portfólio anexado anteriormente</span>
+                    </div>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    Formatos aceitos: PDF, DOC, DOCX, ZIP (máx. 10MB)
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="disponibilidade_mudanca"
+                  checked={formData.disponibilidade_mudanca}
+                  onCheckedChange={(checked) => 
+                    setFormData({ ...formData, disponibilidade_mudanca: checked as boolean })
+                  }
                 />
+                <Label
+                  htmlFor="disponibilidade_mudanca"
+                  className="text-sm font-normal cursor-pointer"
+                >
+                  Tem disponibilidade para mudança
+                </Label>
               </div>
             </CardContent>
           </Card>
@@ -306,6 +505,46 @@ export default function CandidatoForm() {
 
           <Card>
             <CardHeader>
+              <CardTitle>Avaliação</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="pontos_fortes">Pontos Fortes</Label>
+                <Textarea
+                  id="pontos_fortes"
+                  rows={3}
+                  placeholder="Descreva os pontos fortes do candidato..."
+                  value={formData.pontos_fortes}
+                  onChange={(e) => setFormData({ ...formData, pontos_fortes: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="pontos_desenvolver">Pontos a Desenvolver</Label>
+                <Textarea
+                  id="pontos_desenvolver"
+                  rows={3}
+                  placeholder="Descreva os pontos que o candidato precisa desenvolver..."
+                  value={formData.pontos_desenvolver}
+                  onChange={(e) => setFormData({ ...formData, pontos_desenvolver: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="parecer_final">Parecer Final</Label>
+                <Textarea
+                  id="parecer_final"
+                  rows={4}
+                  placeholder="Parecer final sobre o candidato..."
+                  value={formData.parecer_final}
+                  onChange={(e) => setFormData({ ...formData, parecer_final: e.target.value })}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
               <CardTitle>Status e Feedback</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -337,11 +576,20 @@ export default function CandidatoForm() {
           </Card>
 
           <div className="flex gap-4">
-            <Button type="submit" disabled={loading}>
-              <Save className="mr-2 h-4 w-4" />
-              {loading ? "Salvando..." : "Salvar Candidato"}
+            <Button type="submit" disabled={loading || uploading}>
+              {uploading ? (
+                <>
+                  <Upload className="mr-2 h-4 w-4 animate-pulse" />
+                  Fazendo upload...
+                </>
+              ) : (
+                <>
+                  <Save className="mr-2 h-4 w-4" />
+                  {loading ? "Salvando..." : "Salvar Candidato"}
+                </>
+              )}
             </Button>
-            <Button type="button" variant="outline" onClick={() => navigate("/candidatos")}>
+            <Button type="button" variant="outline" onClick={() => navigate("/candidatos")} disabled={uploading}>
               Cancelar
             </Button>
           </div>

@@ -20,6 +20,8 @@ export type Database = {
           cidade: string | null
           criado_em: string | null
           curriculo_link: string | null
+          curriculo_url: string | null
+          disponibilidade_mudanca: boolean | null
           email: string
           estado: string | null
           feedback: string | null
@@ -27,6 +29,10 @@ export type Database = {
           linkedin: string | null
           nivel: Database["public"]["Enums"]["nivel_candidato"] | null
           nome_completo: string
+          parecer_final: string | null
+          pontos_desenvolver: string | null
+          pontos_fortes: string | null
+          portfolio_url: string | null
           pretensao_salarial: number | null
           recrutador: string | null
           status: Database["public"]["Enums"]["status_candidato"] | null
@@ -40,6 +46,8 @@ export type Database = {
           cidade?: string | null
           criado_em?: string | null
           curriculo_link?: string | null
+          curriculo_url?: string | null
+          disponibilidade_mudanca?: boolean | null
           email: string
           estado?: string | null
           feedback?: string | null
@@ -47,6 +55,10 @@ export type Database = {
           linkedin?: string | null
           nivel?: Database["public"]["Enums"]["nivel_candidato"] | null
           nome_completo: string
+          parecer_final?: string | null
+          pontos_desenvolver?: string | null
+          pontos_fortes?: string | null
+          portfolio_url?: string | null
           pretensao_salarial?: number | null
           recrutador?: string | null
           status?: Database["public"]["Enums"]["status_candidato"] | null
@@ -60,6 +72,8 @@ export type Database = {
           cidade?: string | null
           criado_em?: string | null
           curriculo_link?: string | null
+          curriculo_url?: string | null
+          disponibilidade_mudanca?: boolean | null
           email?: string
           estado?: string | null
           feedback?: string | null
@@ -67,6 +81,10 @@ export type Database = {
           linkedin?: string | null
           nivel?: Database["public"]["Enums"]["nivel_candidato"] | null
           nome_completo?: string
+          parecer_final?: string | null
+          pontos_desenvolver?: string | null
+          pontos_fortes?: string | null
+          portfolio_url?: string | null
           pretensao_salarial?: number | null
           recrutador?: string | null
           status?: Database["public"]["Enums"]["status_candidato"] | null

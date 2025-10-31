@@ -1,7 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { User, Briefcase, DollarSign, Calendar, ExternalLink } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { User, Briefcase, DollarSign, Calendar, ExternalLink, FileText, Download, CheckCircle2, XCircle, MapPin } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface ProfessionalInfoCardProps {
   recrutador: string | null;
@@ -11,6 +14,12 @@ interface ProfessionalInfoCardProps {
   dataCadastro: string;
   nivel: string | null;
   area: string | null;
+  curriculoUrl: string | null;
+  portfolioUrl: string | null;
+  disponibilidadeMudanca: boolean | null;
+  pontosFortes: string | null;
+  pontosDesenvolver: string | null;
+  parecerFinal: string | null;
   onVagaClick?: () => void;
 }
 
@@ -22,6 +31,12 @@ export function ProfessionalInfoCard({
   dataCadastro,
   nivel,
   area,
+  curriculoUrl,
+  portfolioUrl,
+  disponibilidadeMudanca,
+  pontosFortes,
+  pontosDesenvolver,
+  parecerFinal,
   onVagaClick,
 }: ProfessionalInfoCardProps) {
   const formatCurrency = (value: number | null) => {
@@ -37,12 +52,38 @@ export function ProfessionalInfoCard({
     });
   };
 
+  const handleDownload = async (path: string, fileName: string) => {
+    try {
+      const bucket = fileName.includes('curriculo') ? 'curriculos' : 'portfolios';
+      const { data, error } = await supabase.storage
+        .from(bucket)
+        .download(path);
+
+      if (error) throw error;
+
+      // Create download link
+      const url = window.URL.createObjectURL(data);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast.success("Download iniciado");
+    } catch (error) {
+      console.error("Erro ao fazer download:", error);
+      toast.error("Erro ao fazer download do arquivo");
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
         <CardTitle className="text-lg">Informações Profissionais</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-6">
         {/* Grid Layout */}
         <div className="grid gap-4 sm:grid-cols-2">
           {/* Recrutador */}
@@ -87,6 +128,27 @@ export function ProfessionalInfoCard({
             </div>
           )}
 
+          {/* Disponibilidade para mudança */}
+          <div className="sm:col-span-2">
+            <p className="text-sm text-muted-foreground mb-1 flex items-center gap-1">
+              <MapPin className="h-3.5 w-3.5" />
+              Disponibilidade para Mudança
+            </p>
+            <div className="flex items-center gap-2">
+              {disponibilidadeMudanca ? (
+                <>
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  <span className="text-base font-medium text-green-600">Sim</span>
+                </>
+              ) : (
+                <>
+                  <XCircle className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-base font-medium text-muted-foreground">Não</span>
+                </>
+              )}
+            </div>
+          </div>
+
           {/* Data de Cadastro */}
           <div className="sm:col-span-2">
             <p className="text-sm text-muted-foreground mb-1 flex items-center gap-1">
@@ -97,8 +159,53 @@ export function ProfessionalInfoCard({
           </div>
         </div>
 
+        <Separator />
+
+        {/* Documentos */}
+        <div>
+          <p className="text-sm font-medium mb-3 flex items-center gap-1">
+            <FileText className="h-4 w-4" />
+            Documentos Anexados
+          </p>
+          <div className="space-y-2">
+            {curriculoUrl && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full justify-between"
+                onClick={() => handleDownload(curriculoUrl, 'curriculo.pdf')}
+              >
+                <div className="flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
+                  <span>Currículo</span>
+                </div>
+                <Download className="h-4 w-4" />
+              </Button>
+            )}
+            {portfolioUrl && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full justify-between"
+                onClick={() => handleDownload(portfolioUrl, 'portfolio.pdf')}
+              >
+                <div className="flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
+                  <span>Portfólio</span>
+                </div>
+                <Download className="h-4 w-4" />
+              </Button>
+            )}
+            {!curriculoUrl && !portfolioUrl && (
+              <p className="text-sm text-muted-foreground italic">Nenhum documento anexado</p>
+            )}
+          </div>
+        </div>
+
+        <Separator />
+
         {/* Vaga Relacionada */}
-        <div className="pt-3 border-t border-border">
+        <div>
           <p className="text-sm text-muted-foreground mb-2 flex items-center gap-1">
             <Briefcase className="h-3.5 w-3.5" />
             Vaga Relacionada
@@ -117,6 +224,37 @@ export function ProfessionalInfoCard({
             <p className="text-sm text-muted-foreground italic">Nenhuma vaga relacionada</p>
           )}
         </div>
+
+        {/* Avaliação */}
+        {(pontosFortes || pontosDesenvolver || parecerFinal) && (
+          <>
+            <Separator />
+            <div className="space-y-4">
+              <h4 className="text-sm font-semibold">Avaliação</h4>
+              
+              {pontosFortes && (
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground mb-1">Pontos Fortes</p>
+                  <p className="text-sm text-card-foreground whitespace-pre-wrap">{pontosFortes}</p>
+                </div>
+              )}
+
+              {pontosDesenvolver && (
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground mb-1">Pontos a Desenvolver</p>
+                  <p className="text-sm text-card-foreground whitespace-pre-wrap">{pontosDesenvolver}</p>
+                </div>
+              )}
+
+              {parecerFinal && (
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground mb-1">Parecer Final</p>
+                  <p className="text-sm text-card-foreground whitespace-pre-wrap">{parecerFinal}</p>
+                </div>
+              )}
+            </div>
+          </>
+        )}
       </CardContent>
     </Card>
   );
