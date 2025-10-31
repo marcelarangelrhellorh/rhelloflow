@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { RefreshCw, TrendingUp, TrendingDown, Clock, Target, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import {
   Area,
   AreaChart,
@@ -41,37 +42,37 @@ const COLORS = {
 
 const PIE_COLORS = [COLORS.primary, COLORS.secondary, COLORS.orange, COLORS.purple, COLORS.blue, COLORS.gray];
 
-interface SummaryStats {
-  totalVagas: number;
-  mediaFechamento: number;
-  percentForaSLA: number;
-  percentAprovacao: number;
-  percentFeedbacksPendentes: number;
-}
-
-interface VagasTimeData {
-  semana: string;
-  abertas: number;
-  fechadas: number;
-}
-
-interface RecrutadorAvgData {
-  recrutador: string;
-  media_dias: number;
-}
-
-interface FunilData {
-  etapa: string;
-  qtd: number;
-}
-
-interface AreaData {
-  area: string;
-  total: number;
-}
-
-interface SLAData {
-  media_dias_uteis: number;
+interface ReportsData {
+  summary: {
+    vagas_abertas: number;
+    candidatos_ativos: number;
+    vagas_atencao: number;
+    ids_vagas_atencao: string[];
+    media_dias_fechamento: number;
+    taxa_aprovacao: number;
+    feedbacks_pendentes: number;
+  };
+  series_open_closed: Array<{
+    week: string;
+    opened: number;
+    closed: number;
+  }>;
+  avg_time_by_recruiter: Array<{
+    recruiter: string;
+    avg_days: number;
+  }>;
+  funnel_by_stage: Array<{
+    stage: string;
+    count: number;
+  }>;
+  candidates_by_area: Array<{
+    area: string;
+    total: number;
+  }>;
+  sla: {
+    avg_business_days: number;
+    limit: number;
+  };
 }
 
 const SummaryCard = ({ 
@@ -134,20 +135,7 @@ export default function Relatorios() {
   const [recrutadorFilter, setRecrutadorFilter] = useState("todos");
   const [clienteFilter, setClienteFilter] = useState("todos");
   
-  const [summaryStats, setSummaryStats] = useState<SummaryStats>({
-    totalVagas: 0,
-    mediaFechamento: 0,
-    percentForaSLA: 0,
-    percentAprovacao: 0,
-    percentFeedbacksPendentes: 0,
-  });
-  
-  const [vagasTimeData, setVagasTimeData] = useState<VagasTimeData[]>([]);
-  const [recrutadorAvgData, setRecrutadorAvgData] = useState<RecrutadorAvgData[]>([]);
-  const [funilData, setFunilData] = useState<FunilData[]>([]);
-  const [areaData, setAreaData] = useState<AreaData[]>([]);
-  const [slaData, setSlaData] = useState<SLAData>({ media_dias_uteis: 0 });
-
+  const [reports, setReports] = useState<ReportsData | null>(null);
   const [recrutadores, setRecrutadores] = useState<string[]>([]);
   const [clientes, setClientes] = useState<string[]>([]);
 
@@ -155,24 +143,9 @@ export default function Relatorios() {
     loadAllData();
   }, [periodFilter, recrutadorFilter, clienteFilter]);
 
-  const loadAllData = async () => {
-    setLoading(true);
-    try {
-      await Promise.all([
-        loadSummaryStats(),
-        loadVagasTimeData(),
-        loadRecrutadorAvgData(),
-        loadFunilData(),
-        loadAreaData(),
-        loadSLAData(),
-        loadFiltersData(),
-      ]);
-    } catch (error) {
-      console.error("Erro ao carregar dados:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    loadFiltersData();
+  }, []);
 
   const loadFiltersData = async () => {
     try {
@@ -190,226 +163,32 @@ export default function Relatorios() {
     }
   };
 
-  const loadSummaryStats = async () => {
+  const loadAllData = async () => {
+    setLoading(true);
     try {
-      // Total de vagas
-      let query = supabase
-        .from("vagas")
-        .select("*", { count: "exact" })
-        .gte("criado_em", `now() - interval '${periodFilter} days'`);
+      // Calcular datas com base no filtro de período
+      const endDate = new Date();
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - parseInt(periodFilter));
 
-      if (recrutadorFilter !== "todos") {
-        query = query.eq("recrutador", recrutadorFilter);
+      const { data, error } = await supabase.rpc('reports_overview', {
+        start_date: startDate.toISOString().split('T')[0],
+        end_date: endDate.toISOString().split('T')[0],
+        recrutador_param: recrutadorFilter === "todos" ? null : recrutadorFilter,
+        cliente_param: clienteFilter === "todos" ? null : clienteFilter,
+      });
+
+      if (error) {
+        console.error("Erro ao carregar relatórios:", error);
+        toast.error("Erro ao carregar dados dos relatórios");
+        throw error;
       }
-      if (clienteFilter !== "todos") {
-        query = query.eq("empresa", clienteFilter);
-      }
 
-      const { count: totalVagas } = await query;
-
-      // Média de fechamento
-      const { data: fechamentoData } = await supabase
-        .from("vagas")
-        .select("criado_em, status_changed_at")
-        .eq("status", "Concluído")
-        .not("status_changed_at", "is", null)
-        .gte("criado_em", `now() - interval '${periodFilter} days'`);
-
-      const mediaFechamento = fechamentoData && fechamentoData.length > 0
-        ? fechamentoData.reduce((acc, v) => {
-            const diff = new Date(v.status_changed_at).getTime() - new Date(v.criado_em).getTime();
-            return acc + diff / (1000 * 60 * 60 * 24);
-          }, 0) / fechamentoData.length
-        : 0;
-
-      // % fora do SLA (>30 dias)
-      const { data: foraSLAData } = await supabase
-        .from("vagas")
-        .select("criado_em")
-        .not("status", "in", '("Concluído","Cancelada")')
-        .gte("criado_em", `now() - interval '${periodFilter} days'`);
-
-      const foraSLA = foraSLAData?.filter(v => {
-        const diff = Date.now() - new Date(v.criado_em).getTime();
-        return diff > 30 * 24 * 60 * 60 * 1000;
-      }).length || 0;
-
-      const percentForaSLA = totalVagas ? (foraSLA / totalVagas) * 100 : 0;
-
-      // Taxa de aprovação
-      const { data: historicoData } = await supabase
-        .from("historico_candidatos")
-        .select("resultado")
-        .gte("data", `now() - interval '${periodFilter} days'`)
-        .in("resultado", ["Aprovado", "Reprovado", "Contratado"]);
-
-      const totalProcessos = historicoData?.length || 0;
-      const aprovados = historicoData?.filter(h => h.resultado === "Contratado").length || 0;
-      const percentAprovacao = totalProcessos ? (aprovados / totalProcessos) * 100 : 0;
-
-      // Feedbacks pendentes
-      const { data: candidatosData } = await supabase
-        .from("candidatos")
-        .select("id, ultimo_feedback")
-        .eq("status", "Entrevistas Solicitante");
-
-      const pendentes = candidatosData?.length || 0;
-      const percentFeedbacksPendentes = totalVagas ? (pendentes / totalVagas) * 100 : 0;
-
-      setSummaryStats({
-        totalVagas: totalVagas || 0,
-        mediaFechamento,
-        percentForaSLA,
-        percentAprovacao,
-        percentFeedbacksPendentes,
-      });
+      setReports(data as unknown as ReportsData);
     } catch (error) {
-      console.error("Erro ao carregar estatísticas:", error);
-    }
-  };
-
-  const loadVagasTimeData = async () => {
-    try {
-      const { data: vagasData } = await supabase
-        .from("vagas")
-        .select("criado_em, status, status_changed_at")
-        .gte("criado_em", `now() - interval '${periodFilter} days'`);
-
-      const weeklyData: Record<string, { abertas: number; fechadas: number }> = {};
-
-      vagasData?.forEach(v => {
-        const week = new Date(v.criado_em).toISOString().slice(0, 10);
-        if (!weeklyData[week]) weeklyData[week] = { abertas: 0, fechadas: 0 };
-        
-        if (v.status !== "Concluído" && v.status !== "Cancelada") {
-          weeklyData[week].abertas++;
-        }
-        if (v.status === "Concluído" && v.status_changed_at) {
-          const closedWeek = new Date(v.status_changed_at).toISOString().slice(0, 10);
-          if (!weeklyData[closedWeek]) weeklyData[closedWeek] = { abertas: 0, fechadas: 0 };
-          weeklyData[closedWeek].fechadas++;
-        }
-      });
-
-      const formattedData = Object.entries(weeklyData)
-        .map(([semana, values]) => ({
-          semana: new Date(semana).toLocaleDateString("pt-BR", { month: "short", day: "numeric" }),
-          ...values,
-        }))
-        .sort((a, b) => a.semana.localeCompare(b.semana));
-
-      setVagasTimeData(formattedData);
-    } catch (error) {
-      console.error("Erro ao carregar dados de tempo:", error);
-    }
-  };
-
-  const loadRecrutadorAvgData = async () => {
-    try {
-      const { data } = await supabase
-        .from("vagas")
-        .select("recrutador, criado_em, status_changed_at")
-        .eq("status", "Concluído")
-        .not("status_changed_at", "is", null)
-        .not("recrutador", "is", null);
-
-      const recrutadorMap: Record<string, { total: number; count: number }> = {};
-
-      data?.forEach(v => {
-        if (!v.recrutador) return;
-        const diff = new Date(v.status_changed_at).getTime() - new Date(v.criado_em).getTime();
-        const dias = diff / (1000 * 60 * 60 * 24);
-
-        if (!recrutadorMap[v.recrutador]) {
-          recrutadorMap[v.recrutador] = { total: 0, count: 0 };
-        }
-        recrutadorMap[v.recrutador].total += dias;
-        recrutadorMap[v.recrutador].count++;
-      });
-
-      const formattedData = Object.entries(recrutadorMap)
-        .map(([recrutador, { total, count }]) => ({
-          recrutador,
-          media_dias: Math.round(total / count),
-        }))
-        .sort((a, b) => b.media_dias - a.media_dias);
-
-      setRecrutadorAvgData(formattedData);
-    } catch (error) {
-      console.error("Erro ao carregar dados de recrutadores:", error);
-    }
-  };
-
-  const loadFunilData = async () => {
-    try {
-      const { data } = await supabase
-        .from("candidatos")
-        .select("status")
-        .gte("criado_em", `now() - interval '60 days'`);
-
-      const statusMap: Record<string, number> = {};
-      data?.forEach(c => {
-        statusMap[c.status] = (statusMap[c.status] || 0) + 1;
-      });
-
-      const formattedData = Object.entries(statusMap)
-        .map(([etapa, qtd]) => ({ etapa, qtd }))
-        .sort((a, b) => b.qtd - a.qtd);
-
-      setFunilData(formattedData);
-    } catch (error) {
-      console.error("Erro ao carregar dados do funil:", error);
-    }
-  };
-
-  const loadAreaData = async () => {
-    try {
-      const { data } = await supabase
-        .from("candidatos")
-        .select("area");
-
-      const areaMap: Record<string, number> = {};
-      data?.forEach(c => {
-        if (c.area) {
-          areaMap[c.area] = (areaMap[c.area] || 0) + 1;
-        }
-      });
-
-      const formattedData = Object.entries(areaMap)
-        .map(([area, total]) => ({ area, total }))
-        .sort((a, b) => b.total - a.total)
-        .slice(0, 6); // Top 6
-
-      setAreaData(formattedData);
-    } catch (error) {
-      console.error("Erro ao carregar dados de área:", error);
-    }
-  };
-
-  const loadSLAData = async () => {
-    try {
-      const { data } = await supabase
-        .from("vagas")
-        .select("criado_em, status_changed_at")
-        .not("status", "in", '("Cancelada")');
-
-      let totalDias = 0;
-      let count = 0;
-
-      data?.forEach(v => {
-        const end = v.status_changed_at ? new Date(v.status_changed_at) : new Date();
-        const start = new Date(v.criado_em);
-        const diff = end.getTime() - start.getTime();
-        const dias = diff / (1000 * 60 * 60 * 24);
-        
-        totalDias += dias;
-        count++;
-      });
-
-      const media = count > 0 ? totalDias / count : 0;
-      setSlaData({ media_dias_uteis: Math.round(media * 0.71) }); // Aproximação de dias úteis
-    } catch (error) {
-      console.error("Erro ao carregar dados de SLA:", error);
+      console.error("Erro ao carregar dados:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -432,6 +211,20 @@ export default function Relatorios() {
       </div>
     );
   }
+
+  if (!reports) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="text-center">
+          <p className="text-muted-foreground mb-4">Erro ao carregar relatórios</p>
+          <Button onClick={loadAllData}>Tentar novamente</Button>
+        </div>
+      </div>
+    );
+  }
+
+  const summary = reports.summary;
+  const sla = reports.sla;
 
   return (
     <div className="min-h-screen bg-background">
@@ -492,33 +285,33 @@ export default function Relatorios() {
         <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
           <SummaryCard
             title="Total de Vagas"
-            value={formatInt(summaryStats.totalVagas)}
+            value={formatInt(summary.vagas_abertas)}
             icon={TrendingUp}
             color="text-primary"
           />
           <SummaryCard
             title="Média de Fechamento"
-            value={`${formatInt(summaryStats.mediaFechamento)}d`}
+            value={`${formatInt(summary.media_dias_fechamento)}d`}
             icon={Clock}
             color="text-blue-600"
           />
           <SummaryCard
-            title="% Fora do SLA"
-            value={formatPercent(summaryStats.percentForaSLA)}
+            title="Vagas com Atenção"
+            value={formatInt(summary.vagas_atencao)}
             icon={AlertCircle}
             color="text-orange-600"
-            trend={summaryStats.percentForaSLA > 20 ? "up" : "down"}
+            trend={summary.vagas_atencao > 0 ? "up" : "down"}
           />
           <SummaryCard
-            title="% Aprovação"
-            value={formatPercent(summaryStats.percentAprovacao)}
+            title="Taxa de Aprovação"
+            value={formatPercent(summary.taxa_aprovacao)}
             icon={Target}
             color="text-green-600"
-            trend={summaryStats.percentAprovacao > 50 ? "up" : "down"}
+            trend={summary.taxa_aprovacao > 50 ? "up" : "down"}
           />
           <SummaryCard
-            title="% Feedbacks Pendentes"
-            value={formatPercent(summaryStats.percentFeedbacksPendentes)}
+            title="Feedbacks Pendentes"
+            value={formatInt(summary.feedbacks_pendentes)}
             icon={AlertCircle}
             color="text-purple-600"
           />
@@ -526,13 +319,13 @@ export default function Relatorios() {
 
         {/* Gráfico 1: Vagas abertas e fechadas */}
         <ChartCard 
-          title="Vagas Abertas vs Fechadas (Últimos 90 dias)" 
-          onRefresh={loadVagasTimeData}
+          title="Vagas Abertas vs Fechadas" 
+          onRefresh={loadAllData}
         >
           <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={vagasTimeData}>
+            <AreaChart data={reports.series_open_closed}>
               <CartesianGrid strokeDasharray="3 3" stroke={COLORS.gray} opacity={0.1} />
-              <XAxis dataKey="semana" stroke={COLORS.gray} style={{ fontSize: 12 }} />
+              <XAxis dataKey="week" stroke={COLORS.gray} style={{ fontSize: 12 }} />
               <YAxis stroke={COLORS.gray} style={{ fontSize: 12 }} />
               <Tooltip 
                 contentStyle={{ backgroundColor: COLORS.cream, border: `1px solid ${COLORS.gray}` }}
@@ -541,7 +334,7 @@ export default function Relatorios() {
               <Legend wrapperStyle={{ paddingTop: 20 }} />
               <Area 
                 type="monotone" 
-                dataKey="abertas" 
+                dataKey="opened" 
                 stackId="1" 
                 stroke={COLORS.primary} 
                 fill={COLORS.primary} 
@@ -550,7 +343,7 @@ export default function Relatorios() {
               />
               <Area 
                 type="monotone" 
-                dataKey="fechadas" 
+                dataKey="closed" 
                 stackId="2" 
                 stroke={COLORS.green} 
                 fill={COLORS.green} 
@@ -564,22 +357,22 @@ export default function Relatorios() {
         {/* Gráfico 2: Tempo médio por recrutador */}
         <ChartCard 
           title="Tempo Médio de Fechamento por Recrutador" 
-          onRefresh={loadRecrutadorAvgData}
+          onRefresh={loadAllData}
         >
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={recrutadorAvgData} layout="vertical">
+            <BarChart data={reports.avg_time_by_recruiter} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke={COLORS.gray} opacity={0.1} />
               <XAxis type="number" stroke={COLORS.gray} style={{ fontSize: 12 }} />
-              <YAxis dataKey="recrutador" type="category" stroke={COLORS.gray} style={{ fontSize: 12 }} width={120} />
+              <YAxis dataKey="recruiter" type="category" stroke={COLORS.gray} style={{ fontSize: 12 }} width={120} />
               <Tooltip 
                 contentStyle={{ backgroundColor: COLORS.cream, border: `1px solid ${COLORS.gray}` }}
                 formatter={(value: any) => [`${value} dias`, "Média"]}
               />
               <Bar 
-                dataKey="media_dias" 
+                dataKey="avg_days" 
                 fill={COLORS.primary}
                 radius={[0, 8, 8, 0]}
-                onClick={(data) => navigate(`/vagas?recrutador=${encodeURIComponent(data.recrutador)}`)}
+                onClick={(data) => navigate(`/vagas?recrutador=${encodeURIComponent(data.recruiter)}`)}
                 style={{ cursor: "pointer" }}
               />
             </BarChart>
@@ -588,25 +381,25 @@ export default function Relatorios() {
 
         {/* Gráfico 3: Funil de aprovação */}
         <ChartCard 
-          title="Taxa de Aprovação por Etapa" 
-          onRefresh={loadFunilData}
+          title="Distribuição por Etapa do Funil" 
+          onRefresh={loadAllData}
         >
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={funilData}>
+            <BarChart data={reports.funnel_by_stage}>
               <CartesianGrid strokeDasharray="3 3" stroke={COLORS.gray} opacity={0.1} />
-              <XAxis dataKey="etapa" stroke={COLORS.gray} style={{ fontSize: 12 }} angle={-45} textAnchor="end" height={100} />
+              <XAxis dataKey="stage" stroke={COLORS.gray} style={{ fontSize: 12 }} angle={-45} textAnchor="end" height={100} />
               <YAxis stroke={COLORS.gray} style={{ fontSize: 12 }} />
               <Tooltip 
                 contentStyle={{ backgroundColor: COLORS.cream, border: `1px solid ${COLORS.gray}` }}
               />
               <Bar 
-                dataKey="qtd" 
+                dataKey="count" 
                 fill={COLORS.secondary}
                 radius={[8, 8, 0, 0]}
-                onClick={(data) => navigate(`/candidatos?etapa=${encodeURIComponent(data.etapa)}`)}
+                onClick={(data) => navigate(`/candidatos?status=${encodeURIComponent(data.stage)}`)}
                 style={{ cursor: "pointer" }}
               >
-                {funilData.map((entry, index) => (
+                {reports.funnel_by_stage.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
                 ))}
               </Bar>
@@ -618,12 +411,12 @@ export default function Relatorios() {
           {/* Gráfico 4: Distribuição por área */}
           <ChartCard 
             title="Distribuição de Candidatos por Área" 
-            onRefresh={loadAreaData}
+            onRefresh={loadAllData}
           >
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
-                  data={areaData}
+                  data={reports.candidates_by_area}
                   cx="50%"
                   cy="50%"
                   labelLine={false}
@@ -632,7 +425,7 @@ export default function Relatorios() {
                   fill={COLORS.primary}
                   dataKey="total"
                 >
-                  {areaData.map((entry, index) => (
+                  {reports.candidates_by_area.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
                   ))}
                 </Pie>
@@ -646,30 +439,30 @@ export default function Relatorios() {
           {/* Gráfico 5: SLA Gauge */}
           <ChartCard 
             title="SLA de Vagas (Tempo Real)" 
-            onRefresh={loadSLAData}
+            onRefresh={loadAllData}
           >
             <div className="flex flex-col items-center justify-center h-[300px]">
               <div 
                 className="relative w-48 h-48 rounded-full flex items-center justify-center"
                 style={{
-                  background: `conic-gradient(${getSLAColor(slaData.media_dias_uteis)} ${(slaData.media_dias_uteis / 45) * 360}deg, ${COLORS.gray}20 0deg)`,
+                  background: `conic-gradient(${getSLAColor(sla.avg_business_days)} ${(sla.avg_business_days / 45) * 360}deg, ${COLORS.gray}20 0deg)`,
                 }}
               >
                 <div className="absolute inset-4 bg-background rounded-full flex flex-col items-center justify-center">
-                  <p className="text-4xl font-bold" style={{ color: getSLAColor(slaData.media_dias_uteis) }}>
-                    {slaData.media_dias_uteis}
+                  <p className="text-4xl font-bold" style={{ color: getSLAColor(sla.avg_business_days) }}>
+                    {formatInt(sla.avg_business_days)}
                   </p>
                   <p className="text-sm text-muted-foreground">dias úteis</p>
                 </div>
               </div>
               <div className="mt-6 text-center">
-                <p className="text-lg font-semibold" style={{ color: getSLAColor(slaData.media_dias_uteis) }}>
-                  {getSLAStatus(slaData.media_dias_uteis)}
+                <p className="text-lg font-semibold" style={{ color: getSLAColor(sla.avg_business_days) }}>
+                  {getSLAStatus(sla.avg_business_days)}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  {slaData.media_dias_uteis <= 20 && "Dentro do prazo ideal"}
-                  {slaData.media_dias_uteis > 20 && slaData.media_dias_uteis <= 30 && "Próximo ao limite"}
-                  {slaData.media_dias_uteis > 30 && "Acima do SLA de 30 dias úteis"}
+                  {sla.avg_business_days <= 20 && "Dentro do prazo ideal"}
+                  {sla.avg_business_days > 20 && sla.avg_business_days <= 30 && "Próximo ao limite"}
+                  {sla.avg_business_days > 30 && "Acima do SLA de 30 dias úteis"}
                 </p>
               </div>
             </div>

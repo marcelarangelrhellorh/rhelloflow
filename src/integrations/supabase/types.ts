@@ -426,6 +426,15 @@ export type Database = {
         Args: { end_date: string; start_date: string }
         Returns: number
       }
+      reports_overview: {
+        Args: {
+          cliente_param?: string
+          end_date: string
+          recrutador_param?: string
+          start_date: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       area_candidato:
