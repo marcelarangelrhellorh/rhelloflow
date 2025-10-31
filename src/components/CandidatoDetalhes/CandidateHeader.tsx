@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Edit, Trash2, MessageSquare, RefreshCw, Briefcase, MapPin, User, PartyPopper, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface CandidateHeaderProps {
   nome: string;
@@ -15,7 +16,20 @@ interface CandidateHeaderProps {
   onDelete: () => void;
   onAddFeedback: () => void;
   onRelocate: () => void;
+  onStatusChange: (newStatus: string) => void;
 }
+
+const ETAPAS_DISPONIVEIS = [
+  "Banco de Talentos",
+  "Selecionado",
+  "Entrevista rhello",
+  "Aprovado Rhello",
+  "Reprovado Rhello",
+  "Entrevistas Solicitante",
+  "Aprovado Solicitante",
+  "Reprovado Solicitante",
+  "Contratado"
+] as const;
 
 const statusColors: Record<string, string> = {
   "Banco de Talentos": "bg-muted/10 text-muted-foreground border-muted",
@@ -49,6 +63,7 @@ export function CandidateHeader({
   onDelete,
   onAddFeedback,
   onRelocate,
+  onStatusChange,
 }: CandidateHeaderProps) {
   const getInitials = (name: string) => {
     const parts = name.split(" ");
@@ -95,7 +110,7 @@ export function CandidateHeader({
 
             {/* Info */}
             <div className="flex-1">
-              <div className="mb-2 flex flex-wrap items-center gap-2">
+              <div className="mb-3 flex flex-wrap items-center gap-2">
                 <h1 className="text-2xl font-bold text-card-foreground">{nome}</h1>
                 <Badge
                   variant={isContratado ? "default" : "outline"}
@@ -107,6 +122,34 @@ export function CandidateHeader({
                 >
                   {isContratado ? "✅" : "⚪"} {status}
                 </Badge>
+              </div>
+
+              {/* Seletor de Etapa */}
+              <div className="mb-3">
+                <Select value={status} onValueChange={onStatusChange}>
+                  <SelectTrigger className="w-full sm:w-[280px] h-9 border-border bg-background hover:bg-accent/5 transition-colors">
+                    <SelectValue placeholder="Selecionar etapa">
+                      <span className="text-sm">
+                        <span className="text-muted-foreground">Etapa:</span>{" "}
+                        <span className="font-medium text-foreground">{status}</span>
+                      </span>
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover z-50">
+                    {ETAPAS_DISPONIVEIS.map((etapa) => (
+                      <SelectItem 
+                        key={etapa} 
+                        value={etapa}
+                        className={cn(
+                          "cursor-pointer",
+                          etapa === status && "font-semibold"
+                        )}
+                      >
+                        {etapa === status && "✓ "}{etapa}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-1 text-sm text-muted-foreground">

@@ -239,6 +239,48 @@ export default function CandidatoDetalhes() {
     }
   };
 
+  const handleStatusChange = async (newStatus: string) => {
+    if (!id || !candidato) return;
+    
+    const oldStatus = candidato.status;
+    
+    try {
+      // Atualizar status do candidato
+      const { error: updateError } = await supabase
+        .from("candidatos")
+        .update({ status: newStatus as any })
+        .eq("id", id);
+
+      if (updateError) throw updateError;
+
+      // Registrar no histórico com resultado mapeado
+      const resultadoHistorico = newStatus === "Contratado" ? "Contratado" : 
+                                 newStatus.includes("Aprovado") ? "Aprovado" :
+                                 newStatus.includes("Reprovado") ? "Reprovado" : "Em andamento";
+      
+      const { error: historicoError } = await supabase
+        .from("historico_candidatos")
+        .insert({
+          candidato_id: id,
+          vaga_id: candidato.vaga_relacionada_id,
+          resultado: resultadoHistorico as "Aprovado" | "Reprovado" | "Contratado" | "Em andamento",
+          recrutador: candidato.recrutador,
+          feedback: `Etapa alterada de "${oldStatus}" para "${newStatus}"`,
+        });
+
+      if (historicoError) throw historicoError;
+
+      toast.success(`✅ Etapa atualizada com sucesso para "${newStatus}"`);
+      
+      // Recarregar dados
+      await loadCandidato();
+      await loadHistorico();
+    } catch (error) {
+      console.error("Erro ao atualizar etapa:", error);
+      toast.error("Erro ao atualizar etapa do candidato");
+    }
+  };
+
   const handleDelete = async () => {
     try {
       const { error } = await supabase
@@ -304,6 +346,7 @@ export default function CandidatoDetalhes() {
           onDelete={() => setDeleteDialogOpen(true)}
           onAddFeedback={() => setFeedbackModalOpen(true)}
           onRelocate={() => setRelocateModalOpen(true)}
+          onStatusChange={handleStatusChange}
         />
 
         {/* Stats Bar */}
