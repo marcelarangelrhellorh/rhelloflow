@@ -12,11 +12,25 @@ export type AuditAction =
   | "CANDIDATE_CREATE"
   | "CANDIDATE_UPDATE"
   | "CANDIDATE_DELETE"
+  | "CANDIDATE_SOFT_DELETE"
+  | "CANDIDATE_HARD_DELETE"
   | "FILE_DOWNLOAD"
   | "JOB_CREATE"
   | "JOB_UPDATE"
   | "JOB_DELETE"
+  | "JOB_SOFT_DELETE"
+  | "JOB_HARD_DELETE"
+  | "FEEDBACK_CREATE"
+  | "FEEDBACK_UPDATE"
+  | "FEEDBACK_DELETE"
+  | "FEEDBACK_SOFT_DELETE"
+  | "FEEDBACK_HARD_DELETE"
+  | "DELETE_ATTEMPT_DENIED"
+  | "DELETE_APPROVAL_REQUEST"
+  | "DELETE_APPROVAL_GRANTED"
+  | "DELETE_APPROVAL_REJECTED"
   | "GDPR_ERASURE_REQUEST"
+  | "GDPR_ERASURE_COMPLETE"
   | "RECORD_REDACTED";
 
 export interface AuditActor {
@@ -242,5 +256,166 @@ export async function logGDPRErasure(
     action: "GDPR_ERASURE_REQUEST",
     resource: { type: resourceType, id: resourceId },
     payload: { reason },
+  });
+}
+
+/**
+ * Log soft-delete operation
+ */
+export async function logSoftDelete(
+  resourceType: "candidate" | "job" | "feedback",
+  resourceId: string,
+  resourceName: string,
+  reason: string,
+  preSnapshot: Record<string, any>,
+  correlationId?: string
+) {
+  const actionMap = {
+    candidate: "CANDIDATE_SOFT_DELETE" as const,
+    job: "JOB_SOFT_DELETE" as const,
+    feedback: "FEEDBACK_SOFT_DELETE" as const,
+  };
+
+  return logAuditEvent({
+    action: actionMap[resourceType],
+    resource: { type: resourceType, id: resourceId },
+    payload: {
+      resource_name: resourceName,
+      deletion_type: "SOFT",
+      deletion_reason: reason,
+      pre_snapshot: preSnapshot,
+      recoverable: true,
+    },
+    correlationId,
+  });
+}
+
+/**
+ * Log hard-delete operation (irreversible)
+ */
+export async function logHardDelete(
+  resourceType: "candidate" | "job" | "feedback",
+  resourceId: string,
+  resourceName: string,
+  reason: string,
+  approvalId: string | null,
+  preSnapshot: Record<string, any>,
+  correlationId?: string
+) {
+  const actionMap = {
+    candidate: "CANDIDATE_HARD_DELETE" as const,
+    job: "JOB_HARD_DELETE" as const,
+    feedback: "FEEDBACK_HARD_DELETE" as const,
+  };
+
+  return logAuditEvent({
+    action: actionMap[resourceType],
+    resource: { type: resourceType, id: resourceId },
+    payload: {
+      resource_name: resourceName,
+      deletion_type: "HARD",
+      deletion_reason: reason,
+      approval_id: approvalId,
+      pre_snapshot: preSnapshot,
+      recoverable: false,
+      irreversible: true,
+    },
+    correlationId,
+  });
+}
+
+/**
+ * Log denied deletion attempt (non-admin trying to delete)
+ */
+export async function logDeleteAttemptDenied(
+  resourceType: "candidate" | "job" | "feedback",
+  resourceId: string,
+  resourceName: string,
+  attemptedBy: string,
+  reason: string
+) {
+  return logAuditEvent({
+    action: "DELETE_ATTEMPT_DENIED",
+    resource: { type: resourceType, id: resourceId },
+    payload: {
+      resource_name: resourceName,
+      attempted_by: attemptedBy,
+      denial_reason: reason,
+      security_violation: true,
+    },
+  });
+}
+
+/**
+ * Log deletion approval request
+ */
+export async function logDeleteApprovalRequest(
+  resourceType: "candidate" | "job" | "feedback",
+  resourceId: string,
+  resourceName: string,
+  requestedBy: string,
+  reason: string,
+  riskLevel: "medium" | "high" | "critical",
+  correlationId: string
+) {
+  return logAuditEvent({
+    action: "DELETE_APPROVAL_REQUEST",
+    resource: { type: resourceType, id: resourceId },
+    payload: {
+      resource_name: resourceName,
+      requested_by: requestedBy,
+      deletion_reason: reason,
+      risk_level: riskLevel,
+      requires_approval: true,
+    },
+    correlationId,
+  });
+}
+
+/**
+ * Log deletion approval granted
+ */
+export async function logDeleteApprovalGranted(
+  approvalId: string,
+  resourceType: "candidate" | "job" | "feedback",
+  resourceId: string,
+  approvedBy: string,
+  correlationId: string
+) {
+  return logAuditEvent({
+    action: "DELETE_APPROVAL_GRANTED",
+    resource: { type: "deletion_approval", id: approvalId },
+    payload: {
+      approval_id: approvalId,
+      resource_type: resourceType,
+      resource_id: resourceId,
+      approved_by: approvedBy,
+    },
+    correlationId,
+  });
+}
+
+/**
+ * Log deletion approval rejected
+ */
+export async function logDeleteApprovalRejected(
+  approvalId: string,
+  resourceType: "candidate" | "job" | "feedback",
+  resourceId: string,
+  rejectedBy: string,
+  rejectionReason: string,
+  correlationId: string
+) {
+  return logAuditEvent({
+    action: "DELETE_APPROVAL_REJECTED",
+    resource: { type: "deletion_approval", id: approvalId },
+    payload: {
+      approval_id: approvalId,
+      resource_type: resourceType,
+      resource_id: resourceId,
+      rejected_by: rejectedBy,
+      rejection_reason: rejectionReason,
+    },
+    correlationId,
   });
 }

@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Plus, MessageSquare, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Plus, MessageSquare, X, AlertTriangle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -9,6 +11,7 @@ import { StatsHeader } from "@/components/Candidatos/StatsHeader";
 import { FilterBar } from "@/components/Candidatos/FilterBar";
 import { CandidateCard } from "@/components/Candidatos/CandidateCard";
 import { LinkToJobModal } from "@/components/BancoTalentos/LinkToJobModal";
+import { handleDelete as performDeletion } from "@/lib/deletionUtils";
 
 type Candidato = {
   id: string;
@@ -36,6 +39,8 @@ export default function Candidatos() {
   const [nivelFilter, setNivelFilter] = useState<string>("all");
   const [disponibilidadeFilter, setDisponibilidadeFilter] = useState<string>("disponível");
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deletionReason, setDeletionReason] = useState("");
+  const [requiresApproval, setRequiresApproval] = useState(false);
   const [linkingJobId, setLinkingJobId] = useState<string | null>(null);
 
   // Verificar se há filtro de atenção pela URL
@@ -66,21 +71,61 @@ export default function Candidatos() {
   const handleDelete = async () => {
     if (!deletingId) return;
 
+    if (!deletionReason.trim()) {
+      toast.error("❌ Por favor, informe o motivo da exclusão");
+      return;
+    }
+
     try {
-      const { error } = await supabase
-        .from("candidatos")
-        .delete()
-        .eq("id", deletingId);
+      // Find the candidate to get their data for snapshot
+      const candidato = candidatos.find(c => c.id === deletingId);
+      if (!candidato) {
+        toast.error("❌ Candidato não encontrado");
+        return;
+      }
 
-      if (error) throw error;
+      // Create pre-delete snapshot
+      const preSnapshot = {
+        id: candidato.id,
+        nome_completo: candidato.nome_completo,
+        email: candidato.email,
+        telefone: candidato.telefone,
+        status: candidato.status,
+        recrutador: candidato.recrutador,
+        vaga_relacionada_id: candidato.vaga_relacionada_id,
+      };
 
-      toast.success("Candidato excluído com sucesso");
+      const result = await performDeletion(
+        "candidate",
+        deletingId,
+        candidato.nome_completo,
+        deletionReason,
+        preSnapshot
+      );
+
+      if (!result.success) {
+        toast.error(`❌ ${result.error || "Erro ao excluir candidato"}`);
+        return;
+      }
+
+      if (result.requiresApproval) {
+        setRequiresApproval(true);
+        toast.info("⚠️ Este candidato possui processos ativos. Solicitação de exclusão enviada para aprovação de admin.", {
+          duration: 5000,
+        });
+        setDeletingId(null);
+        return;
+      }
+
+      toast.success("✅ Candidato marcado para exclusão com sucesso");
       loadCandidatos();
     } catch (error) {
       console.error("Erro ao excluir candidato:", error);
-      toast.error("Erro ao excluir candidato");
+      toast.error("❌ Erro ao excluir candidato");
     } finally {
       setDeletingId(null);
+      setDeletionReason("");
+      setRequiresApproval(false);
     }
   };
 
@@ -237,18 +282,47 @@ export default function Candidatos() {
         onSuccess={loadCandidatos}
       />
 
-      <AlertDialog open={!!deletingId} onOpenChange={() => setDeletingId(null)}>
+      <AlertDialog open={!!deletingId} onOpenChange={() => {
+        setDeletingId(null);
+        setDeletionReason("");
+      }}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tem certeza que deseja excluir este candidato? Esta ação não pode ser desfeita.
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              Confirmar exclusão
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-4">
+              <p>Tem certeza que deseja excluir este candidato?</p>
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-amber-800">
+                <p className="text-sm font-semibold mb-1">⚠️ Atenção:</p>
+                <ul className="text-sm space-y-1 list-disc list-inside">
+                  <li>Candidatos em processos ativos requerem aprovação de admin</li>
+                  <li>Todos os dados serão preservados para auditoria</li>
+                  <li>Esta ação pode ser revertida por administradores</li>
+                </ul>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="candidate-deletion-reason" className="font-medium">
+                  Motivo da exclusão *
+                </Label>
+                <Input
+                  id="candidate-deletion-reason"
+                  placeholder="Ex: Candidato desistiu, duplicado, contratado em outro processo..."
+                  value={deletionReason}
+                  onChange={(e) => setDeletionReason(e.target.value)}
+                />
+              </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Excluir
+            <AlertDialogAction 
+              onClick={handleDelete} 
+              disabled={!deletionReason.trim()}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 disabled:opacity-50"
+            >
+              Confirmar Exclusão
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

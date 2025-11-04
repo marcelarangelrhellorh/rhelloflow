@@ -2,15 +2,18 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Briefcase, User, MoreVertical, Users, Calendar, Edit, Trash2 } from "lucide-react";
+import { Briefcase, User, MoreVertical, Users, Calendar, Edit, Trash2, AlertTriangle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { getBusinessDaysFromNow } from "@/lib/dateUtils";
 import { formatSalaryRange } from "@/lib/salaryUtils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
+import { handleDelete as performDeletion } from "@/lib/deletionUtils";
 
 interface VagaCardProps {
   vaga: {
@@ -61,6 +64,8 @@ export function VagaCard({ vaga, draggable = false, onDragStart, onClick }: Vaga
   const navigate = useNavigate();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [deletionReason, setDeletionReason] = useState("");
+  const [requiresApproval, setRequiresApproval] = useState(false);
   const [recrutadorName, setRecrutadorName] = useState<string | null>(vaga.recrutador);
   const progress = statusProgressMap[vaga.status] || 0;
   const daysOpen = vaga.criado_em ? getBusinessDaysFromNow(vaga.criado_em) : 0;
@@ -108,25 +113,59 @@ export function VagaCard({ vaga, draggable = false, onDragStart, onClick }: Vaga
   };
 
   const handleDelete = async () => {
+    if (!deletionReason.trim()) {
+      toast.error("❌ Por favor, informe o motivo da exclusão");
+      return;
+    }
+
     setIsDeleting(true);
     try {
-      const { error } = await supabase
-        .from("vagas")
-        .delete()
-        .eq("id", vaga.id);
+      // Create pre-delete snapshot with current vaga data
+      const preSnapshot = {
+        id: vaga.id,
+        titulo: vaga.titulo,
+        empresa: vaga.empresa,
+        recrutador: recrutadorName,
+        status: vaga.status,
+        candidatos_count: vaga.candidatos_count || 0,
+        salario_min: vaga.salario_min,
+        salario_max: vaga.salario_max,
+      };
 
-      if (error) throw error;
+      const result = await performDeletion(
+        "job",
+        vaga.id,
+        vaga.titulo,
+        deletionReason,
+        preSnapshot
+      );
 
-      toast.success("✅ Vaga excluída com sucesso");
+      if (!result.success) {
+        toast.error(`❌ ${result.error || "Erro ao excluir a vaga"}`);
+        return;
+      }
+
+      if (result.requiresApproval) {
+        setRequiresApproval(true);
+        toast.info("⚠️ Esta vaga possui candidatos ativos. Solicitação de exclusão enviada para aprovação de admin.", {
+          duration: 5000,
+        });
+        setShowDeleteDialog(false);
+        return;
+      }
+
+      toast.success("✅ Vaga marcada para exclusão com sucesso");
       
       // Recarregar a página após exclusão
-      window.location.reload();
+      setTimeout(() => window.location.reload(), 1000);
     } catch (error) {
       console.error("Erro ao excluir vaga:", error);
       toast.error("❌ Erro ao excluir a vaga. Tente novamente.");
     } finally {
       setIsDeleting(false);
-      setShowDeleteDialog(false);
+      if (!requiresApproval) {
+        setShowDeleteDialog(false);
+      }
     }
   };
 
@@ -258,27 +297,49 @@ export function VagaCard({ vaga, draggable = false, onDragStart, onClick }: Vaga
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent className="bg-white border border-[#E5E7EB]">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-[#00141D]" style={{ fontFamily: "Manrope, sans-serif" }}>
+            <AlertDialogTitle className="text-[#00141D] flex items-center gap-2" style={{ fontFamily: "Manrope, sans-serif" }}>
+              <AlertTriangle className="h-5 w-5 text-[#D32F2F]" />
               Excluir vaga
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-[#6B7280]" style={{ fontFamily: "Manrope, sans-serif" }}>
-              Tem certeza de que deseja excluir esta vaga? Esta ação não poderá ser desfeita.
+            <AlertDialogDescription className="text-[#6B7280] space-y-4" style={{ fontFamily: "Manrope, sans-serif" }}>
+              <p>Tem certeza de que deseja excluir esta vaga?</p>
+              <div className="bg-[#FFF3CD] border border-[#FFE69C] rounded-lg p-3 text-[#856404]">
+                <p className="text-sm font-semibold mb-1">⚠️ Atenção:</p>
+                <ul className="text-sm space-y-1 list-disc list-inside">
+                  <li>Vagas com candidatos ativos requerem aprovação de admin</li>
+                  <li>Todos os dados serão preservados para auditoria</li>
+                  <li>Esta ação pode ser revertida por administradores</li>
+                </ul>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="deletion-reason" className="text-[#00141D] font-medium">
+                  Motivo da exclusão *
+                </Label>
+                <Input
+                  id="deletion-reason"
+                  placeholder="Ex: Vaga cancelada pelo cliente, duplicada, preenchida externamente..."
+                  value={deletionReason}
+                  onChange={(e) => setDeletionReason(e.target.value)}
+                  className="border-[#D1D5DB]"
+                />
+              </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel 
               className="border border-[#D1D5DB] text-[#00141D] bg-transparent hover:bg-[#F9FAFB]"
               style={{ fontFamily: "Manrope, sans-serif" }}
+              onClick={() => setDeletionReason("")}
             >
               Cancelar
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
-              disabled={isDeleting}
-              className="bg-[#D32F2F] text-white hover:bg-[#B71C1C]"
+              disabled={isDeleting || !deletionReason.trim()}
+              className="bg-[#D32F2F] text-white hover:bg-[#B71C1C] disabled:opacity-50"
               style={{ fontFamily: "Manrope, sans-serif" }}
             >
-              {isDeleting ? "Excluindo..." : "Excluir"}
+              {isDeleting ? "Processando..." : "Confirmar Exclusão"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
