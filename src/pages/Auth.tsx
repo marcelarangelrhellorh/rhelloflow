@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { logLoginSuccess, logLoginFailure, logRoleAssign } from "@/lib/auditLog";
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -28,9 +29,15 @@ export default function Auth() {
           password,
         });
 
-        if (error) throw error;
+        if (error) {
+          // Log failed login attempt
+          await logLoginFailure(email, error.message);
+          throw error;
+        }
 
         if (data.user) {
+          // Log successful login
+          await logLoginSuccess(data.user.id, email);
           toast.success("Login realizado com sucesso!");
           navigate("/");
         }
@@ -56,6 +63,8 @@ export default function Auth() {
         if (error) throw error;
 
         if (data.user) {
+          // Log role assignment for new user
+          await logRoleAssign(data.user.id, fullName, role);
           toast.success("Cadastro realizado com sucesso!");
           navigate("/");
         }

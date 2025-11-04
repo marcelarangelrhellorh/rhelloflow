@@ -12,6 +12,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { logLogout } from "@/lib/auditLog";
 
 export function UserMenu() {
   const navigate = useNavigate();
@@ -44,12 +45,23 @@ export function UserMenu() {
   };
 
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        toast.error("Erro ao sair");
+      } else {
+        // Log logout event
+        if (user) {
+          await logLogout(user.id);
+        }
+        toast.success("Logout realizado com sucesso");
+        navigate("/login");
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
       toast.error("Erro ao sair");
-    } else {
-      toast.success("Logout realizado com sucesso");
-      navigate("/login");
     }
   };
 

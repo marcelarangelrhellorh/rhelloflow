@@ -1,0 +1,246 @@
+import { supabase } from "@/integrations/supabase/client";
+
+export type AuditAction =
+  | "LOGIN_SUCCESS"
+  | "LOGIN_FAILURE"
+  | "LOGOUT"
+  | "ROLE_ASSIGN"
+  | "ROLE_REVOKE"
+  | "ADMIN_PRIV_CHANGE"
+  | "CANDIDATE_VIEW"
+  | "CANDIDATE_EXPORT"
+  | "CANDIDATE_CREATE"
+  | "CANDIDATE_UPDATE"
+  | "CANDIDATE_DELETE"
+  | "FILE_DOWNLOAD"
+  | "JOB_CREATE"
+  | "JOB_UPDATE"
+  | "JOB_DELETE"
+  | "GDPR_ERASURE_REQUEST"
+  | "RECORD_REDACTED";
+
+export interface AuditActor {
+  id: string;
+  type: "user" | "system" | "anonymous";
+  display_name: string;
+  auth_method?: string;
+}
+
+export interface AuditResource {
+  type: string;
+  id?: string;
+  path?: string;
+}
+
+export interface AuditClient {
+  ip?: string;
+  user_agent: string;
+}
+
+export interface LogAuditEventParams {
+  action: AuditAction;
+  resource: AuditResource;
+  payload?: Record<string, any>;
+  correlationId?: string;
+}
+
+/**
+ * Get client metadata (IP and user agent)
+ */
+function getClientMetadata(): AuditClient {
+  return {
+    user_agent: navigator.userAgent,
+    // Note: IP will be captured server-side for accuracy
+  };
+}
+
+/**
+ * Get current actor information
+ */
+async function getCurrentActor(): Promise<AuditActor> {
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) {
+    return {
+      id: "anonymous",
+      type: "anonymous",
+      display_name: "Anonymous User",
+    };
+  }
+
+  // Try to get user profile for display name
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name")
+    .eq("id", user.id)
+    .single();
+
+  return {
+    id: user.id,
+    type: "user",
+    display_name: profile?.full_name || user.email || "Unknown User",
+    auth_method: user.app_metadata.provider || "email",
+  };
+}
+
+/**
+ * Log an audit event
+ */
+export async function logAuditEvent({
+  action,
+  resource,
+  payload,
+  correlationId,
+}: LogAuditEventParams): Promise<{ success: boolean; error?: string }> {
+  try {
+    const actor = await getCurrentActor();
+    const client = getClientMetadata();
+
+    const { error } = await supabase.rpc("log_audit_event", {
+      p_actor: actor as any,
+      p_action: action,
+      p_resource: resource as any,
+      p_correlation_id: correlationId || null,
+      p_payload: payload || null,
+      p_client: client as any,
+    });
+
+    if (error) {
+      console.error("Failed to log audit event:", error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (err) {
+    console.error("Failed to log audit event:", err);
+    return { success: false, error: String(err) };
+  }
+}
+
+/**
+ * Log authentication success
+ */
+export async function logLoginSuccess(userId: string, email: string) {
+  return logAuditEvent({
+    action: "LOGIN_SUCCESS",
+    resource: { type: "auth", id: userId, path: "/login" },
+    payload: { email },
+  });
+}
+
+/**
+ * Log authentication failure
+ */
+export async function logLoginFailure(email: string, reason: string) {
+  return logAuditEvent({
+    action: "LOGIN_FAILURE",
+    resource: { type: "auth", path: "/login" },
+    payload: { email, reason },
+  });
+}
+
+/**
+ * Log logout
+ */
+export async function logLogout(userId: string) {
+  return logAuditEvent({
+    action: "LOGOUT",
+    resource: { type: "auth", id: userId, path: "/logout" },
+  });
+}
+
+/**
+ * Log role assignment
+ */
+export async function logRoleAssign(
+  targetUserId: string,
+  targetUserName: string,
+  role: string
+) {
+  return logAuditEvent({
+    action: "ROLE_ASSIGN",
+    resource: { type: "user", id: targetUserId },
+    payload: {
+      target_user_name: targetUserName,
+      role_assigned: role,
+    },
+  });
+}
+
+/**
+ * Log role revocation
+ */
+export async function logRoleRevoke(
+  targetUserId: string,
+  targetUserName: string,
+  role: string
+) {
+  return logAuditEvent({
+    action: "ROLE_REVOKE",
+    resource: { type: "user", id: targetUserId },
+    payload: {
+      target_user_name: targetUserName,
+      role_revoked: role,
+    },
+  });
+}
+
+/**
+ * Log candidate view access
+ */
+export async function logCandidateView(candidateId: string, candidateName: string) {
+  return logAuditEvent({
+    action: "CANDIDATE_VIEW",
+    resource: { type: "candidate", id: candidateId },
+    payload: { candidate_name: candidateName },
+  });
+}
+
+/**
+ * Log candidate data export
+ */
+export async function logCandidateExport(candidateIds: string[], exportType: string) {
+  return logAuditEvent({
+    action: "CANDIDATE_EXPORT",
+    resource: { type: "candidate", path: "/export" },
+    payload: {
+      candidate_ids: candidateIds,
+      export_type: exportType,
+      count: candidateIds.length,
+    },
+  });
+}
+
+/**
+ * Log job create/update/delete
+ */
+export async function logJobChange(
+  action: "JOB_CREATE" | "JOB_UPDATE" | "JOB_DELETE",
+  jobId: string,
+  jobTitle: string,
+  changes?: { before?: any; after?: any }
+) {
+  return logAuditEvent({
+    action,
+    resource: { type: "job", id: jobId },
+    payload: {
+      job_title: jobTitle,
+      ...changes,
+    },
+  });
+}
+
+/**
+ * Log GDPR erasure request
+ */
+export async function logGDPRErasure(
+  resourceType: string,
+  resourceId: string,
+  reason: string
+) {
+  return logAuditEvent({
+    action: "GDPR_ERASURE_REQUEST",
+    resource: { type: resourceType, id: resourceId },
+    payload: { reason },
+  });
+}

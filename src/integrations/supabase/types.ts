@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_events: {
+        Row: {
+          action: string
+          actor: Json
+          client: Json | null
+          correlation_id: string
+          event_hash: string
+          id: string
+          payload: Json | null
+          prev_hash: string | null
+          resource: Json
+          signature_metadata: Json | null
+          timestamp_utc: string
+        }
+        Insert: {
+          action: string
+          actor: Json
+          client?: Json | null
+          correlation_id?: string
+          event_hash: string
+          id?: string
+          payload?: Json | null
+          prev_hash?: string | null
+          resource: Json
+          signature_metadata?: Json | null
+          timestamp_utc?: string
+        }
+        Update: {
+          action?: string
+          actor?: Json
+          client?: Json | null
+          correlation_id?: string
+          event_hash?: string
+          id?: string
+          payload?: Json | null
+          prev_hash?: string | null
+          resource?: Json
+          signature_metadata?: Json | null
+          timestamp_utc?: string
+        }
+        Relationships: []
+      }
       candidatos: {
         Row: {
           area: Database["public"]["Enums"]["area_candidato"] | null
@@ -627,6 +669,48 @@ export type Database = {
       }
     }
     Views: {
+      audit_events_recent: {
+        Row: {
+          action: string | null
+          actor: Json | null
+          client: Json | null
+          correlation_id: string | null
+          event_hash: string | null
+          id: string | null
+          payload: Json | null
+          prev_hash: string | null
+          resource: Json | null
+          signature_metadata: Json | null
+          timestamp_utc: string | null
+        }
+        Insert: {
+          action?: string | null
+          actor?: Json | null
+          client?: Json | null
+          correlation_id?: string | null
+          event_hash?: string | null
+          id?: string | null
+          payload?: Json | null
+          prev_hash?: string | null
+          resource?: Json | null
+          signature_metadata?: Json | null
+          timestamp_utc?: string | null
+        }
+        Update: {
+          action?: string | null
+          actor?: Json | null
+          client?: Json | null
+          correlation_id?: string | null
+          event_hash?: string | null
+          id?: string | null
+          payload?: Json | null
+          prev_hash?: string | null
+          resource?: Json | null
+          signature_metadata?: Json | null
+          timestamp_utc?: string | null
+        }
+        Relationships: []
+      }
       dashboard_last30: {
         Row: {
           feedbacks_pendentes: number | null
@@ -674,6 +758,20 @@ export type Database = {
         Args: { end_date: string; start_date: string }
         Returns: number
       }
+      compute_audit_event_hash: {
+        Args: {
+          p_action: string
+          p_actor: Json
+          p_client: Json
+          p_correlation_id: string
+          p_payload: Json
+          p_prev_hash: string
+          p_resource: Json
+          p_timestamp_utc: string
+        }
+        Returns: string
+      }
+      get_latest_audit_event_hash: { Args: never; Returns: string }
       get_user_role: { Args: { user_id: string }; Returns: string }
       has_role: {
         Args: {
@@ -681,6 +779,17 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      log_audit_event: {
+        Args: {
+          p_action: string
+          p_actor: Json
+          p_client?: Json
+          p_correlation_id?: string
+          p_payload?: Json
+          p_resource: Json
+        }
+        Returns: string
       }
       map_legacy_status_to_slug: {
         Args: { old_status: string }
@@ -694,6 +803,15 @@ export type Database = {
           start_date: string
         }
         Returns: Json
+      }
+      verify_audit_chain: {
+        Args: { p_from_timestamp?: string; p_to_timestamp?: string }
+        Returns: {
+          first_invalid_event_id: string
+          invalid_count: number
+          is_valid: boolean
+          total_events: number
+        }[]
       }
     }
     Enums: {
