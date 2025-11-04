@@ -104,11 +104,13 @@ export default function PublicVagaForm() {
         ].filter(Boolean).join("\n"),
       };
 
-      const { error } = await supabase
-        .from("vagas")
-        .insert([dataToSave]);
+      // Call edge function for secure, validated submission
+      const { data: result, error } = await supabase.functions.invoke('submit-public-job', {
+        body: dataToSave
+      });
 
       if (error) throw error;
+      if (!result?.success) throw new Error(result?.error || 'Erro ao enviar solicitação');
 
       setSubmitted(true);
       toast.success("Solicitação de vaga enviada com sucesso!");

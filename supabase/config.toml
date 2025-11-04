@@ -1,1 +1,4 @@
 project_id = "feclxfhohmovmxqxyexz"
+
+[functions.submit-public-job]
+verify_jwt = false

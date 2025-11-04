@@ -121,12 +121,8 @@ export default function CandidatoForm() {
 
     if (uploadError) throw uploadError;
 
-    // Get public URL
-    const { data } = supabase.storage
-      .from(bucket)
-      .getPublicUrl(filePath);
-
-    return data.publicUrl;
+    // Return file path instead of URL - will generate signed URL when needed
+    return filePath;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
