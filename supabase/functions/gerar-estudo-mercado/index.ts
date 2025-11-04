@@ -18,7 +18,6 @@ serve(async (req) => {
       localizacao,
       setor,
       porte,
-      fontes,
       observacoes,
       cliente,
     } = await req.json();
@@ -99,7 +98,6 @@ SENIORIDADE: ${senioridade}
 LOCALIZAÇÃO: ${localizacao.cidade} - ${localizacao.uf} (Modelo: ${localizacao.modelo})
 SETOR: ${setor}
 PORTE: ${porte}
-FONTES SOLICITADAS: ${fontes?.join(", ") || "Não especificadas"}
 OBSERVAÇÕES DISCOVERY: ${observacoes || "Nenhuma"}
 
 DADOS DO CLIENTE:
@@ -170,7 +168,6 @@ Com base nessas informações, gere o estudo de mercado completo seguindo o sche
         porte,
         salario_cliente: cliente?.salario,
         beneficios_cliente: cliente?.beneficios || [],
-        fontes_solicitadas: fontes || [],
         observacoes,
         resultado,
         periodo: new Date().toLocaleDateString("pt-BR", { month: "short", year: "numeric" }),

@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Checkbox } from "@/components/ui/checkbox";
+import { MultiSelect } from "@/components/ui/multi-select";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, EyeOff, TrendingUp, Users, Clock, Target } from "lucide-react";
@@ -46,12 +46,20 @@ const ESTADOS_BR = [
   "PA", "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO"
 ];
 
-const FONTES = [
-  "Base Rhello",
-  "Relatórios Oficiais",
-  "LinkedIn Salaries",
-  "Glassdoor",
-  "Vagas.com"
+const BENEFICIOS_OPTIONS = [
+  { label: "Vale Refeição", value: "vale_refeicao" },
+  { label: "Vale Alimentação", value: "vale_alimentacao" },
+  { label: "Vale Transporte", value: "vale_transporte" },
+  { label: "Plano de Saúde", value: "plano_saude" },
+  { label: "Plano Odontológico", value: "plano_odontologico" },
+  { label: "Auxílio Creche", value: "auxilio_creche" },
+  { label: "Seguro de Vida", value: "seguro_vida" },
+  { label: "Participação nos Lucros (PLR)", value: "plr" },
+  { label: "Gympass", value: "gympass" },
+  { label: "Day Off", value: "day_off" },
+  { label: "Home Office", value: "home_office" },
+  { label: "Auxílio Home Office", value: "auxilio_home_office" },
+  { label: "Convênios e Descontos", value: "convenios" },
 ];
 
 export default function EstudoMercado() {
@@ -66,10 +74,9 @@ export default function EstudoMercado() {
   const [modelo, setModelo] = useState("");
   const [setor, setSetor] = useState("");
   const [porte, setPorte] = useState("");
-  const [fontesSelecionadas, setFontesSelecionadas] = useState<string[]>([]);
   const [observacoes, setObservacoes] = useState("");
   const [salarioCliente, setSalarioCliente] = useState("");
-  const [beneficiosCliente, setBeneficiosCliente] = useState("");
+  const [beneficiosCliente, setBeneficiosCliente] = useState<string[]>([]);
 
   const handleGerarEstudo = async () => {
     if (!funcao || !cidade || !uf) {
@@ -86,12 +93,11 @@ export default function EstudoMercado() {
           localizacao: { cidade, uf, modelo },
           setor,
           porte,
-          fontes: fontesSelecionadas,
           observacoes,
           cliente: {
             salario: salarioCliente ? parseFloat(salarioCliente) : null,
             modelo,
-            beneficios: beneficiosCliente ? beneficiosCliente.split(",").map(b => b.trim()) : null,
+            beneficios: beneficiosCliente.map(b => BENEFICIOS_OPTIONS.find(opt => opt.value === b)?.label || b),
           },
         },
       });
@@ -246,36 +252,11 @@ export default function EstudoMercado() {
           </div>
 
           <div className="space-y-2">
-            <Label>Fontes Sugeridas</Label>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {FONTES.map((fonte) => (
-                <div key={fonte} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={fonte}
-                    checked={fontesSelecionadas.includes(fonte)}
-                    onCheckedChange={(checked) => {
-                      if (checked) {
-                        setFontesSelecionadas([...fontesSelecionadas, fonte]);
-                      } else {
-                        setFontesSelecionadas(fontesSelecionadas.filter((f) => f !== fonte));
-                      }
-                    }}
-                  />
-                  <Label htmlFor={fonte} className="cursor-pointer">
-                    {fonte}
-                  </Label>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="beneficiosCliente">Benefícios (Cliente) - separados por vírgula</Label>
-            <Input
-              id="beneficiosCliente"
-              placeholder="Ex: Vale transporte, Vale refeição, Plano de saúde"
+            <Label htmlFor="beneficiosCliente">Benefícios do Cliente</Label>
+            <MultiSelect
+              options={BENEFICIOS_OPTIONS}
               value={beneficiosCliente}
-              onChange={(e) => setBeneficiosCliente(e.target.value)}
+              onChange={setBeneficiosCliente}
             />
           </div>
 
@@ -513,7 +494,7 @@ export default function EstudoMercado() {
             <CardContent className="pt-6">
               <p className="text-sm text-muted-foreground">
                 <strong>Período:</strong> {estudo.metodologia?.periodo || "—"} |{" "}
-                <strong>Fontes:</strong> {estudo.metodologia?.fontes?.join(", ") || "—"} |{" "}
+                <strong>Fontes:</strong> {estudo.metodologia?.fontes?.filter(fonte => fonte.toLowerCase() !== "base rhello" && fonte.toLowerCase() !== "base de dados rhello").join(", ") || "—"} |{" "}
                 <strong>Obs.:</strong> {estudo.metodologia?.observacoes || "—"}
               </p>
             </CardContent>

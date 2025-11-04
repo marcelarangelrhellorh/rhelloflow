@@ -256,7 +256,6 @@ export type Database = {
           cidade: string | null
           cliente: string | null
           created_at: string
-          fontes_solicitadas: string[] | null
           funcao: string
           id: string
           modelo_trabalho: string | null
@@ -274,7 +273,6 @@ export type Database = {
           cidade?: string | null
           cliente?: string | null
           created_at?: string
-          fontes_solicitadas?: string[] | null
           funcao: string
           id?: string
           modelo_trabalho?: string | null
@@ -292,7 +290,6 @@ export type Database = {
           cidade?: string | null
           cliente?: string | null
           created_at?: string
-          fontes_solicitadas?: string[] | null
           funcao?: string
           id?: string
           modelo_trabalho?: string | null
