@@ -70,7 +70,7 @@ export default function AuditLog() {
       setEvents((data as any) || []);
     } catch (error) {
       console.error("Error loading audit events:", error);
-      toast.error("Failed to load audit events");
+      toast.error("Falha ao carregar eventos de auditoria");
     } finally {
       setLoading(false);
     }
@@ -91,16 +91,16 @@ export default function AuditLog() {
 
       const result = data[0];
       if (result.is_valid) {
-        toast.success(`Integrity verified: ${result.total_events} events checked successfully`);
+        toast.success(`Integridade verificada: ${result.total_events} eventos verificados com sucesso`);
       } else {
         toast.error(
-          `Integrity check failed: ${result.invalid_count} invalid events found`,
+          `Falha na verificação de integridade: ${result.invalid_count} eventos inválidos encontrados`,
           { duration: 5000 }
         );
       }
     } catch (error) {
       console.error("Error verifying integrity:", error);
-      toast.error("Failed to verify audit chain integrity");
+      toast.error("Falha ao verificar integridade da cadeia de auditoria");
     } finally {
       setVerifying(false);
     }
@@ -108,7 +108,7 @@ export default function AuditLog() {
 
   const exportAuditLog = () => {
     const csv = [
-      ["Timestamp", "Actor", "Action", "Resource Type", "Resource ID", "Details"],
+      ["Data/Hora", "Ator", "Ação", "Tipo de Recurso", "ID do Recurso", "Detalhes"],
       ...filteredEvents.map(e => [
         format(new Date(e.timestamp_utc), "yyyy-MM-dd HH:mm:ss"),
         e.actor.display_name,
@@ -129,7 +129,7 @@ export default function AuditLog() {
     a.click();
     URL.revokeObjectURL(url);
 
-    toast.success("Audit log exported");
+    toast.success("Log de auditoria exportado");
   };
 
   const filteredEvents = events.filter(event => {
@@ -163,9 +163,9 @@ export default function AuditLog() {
         <div className="flex items-center gap-3">
           <Shield className="h-8 w-8 text-primary" />
           <div>
-            <h1 className="text-3xl font-bold">Audit Log</h1>
+            <h1 className="text-3xl font-bold">Log de Auditoria</h1>
             <p className="text-muted-foreground">
-              Immutable security audit trail for all critical actions
+              Trilha de auditoria de segurança imutável para todas as ações críticas
             </p>
           </div>
         </div>
@@ -176,26 +176,26 @@ export default function AuditLog() {
             disabled={verifying}
           >
             <AlertTriangle className="mr-2 h-4 w-4" />
-            {verifying ? "Verifying..." : "Verify Integrity"}
+            {verifying ? "Verificando..." : "Verificar Integridade"}
           </Button>
           <Button onClick={exportAuditLog} disabled={filteredEvents.length === 0}>
             <Download className="mr-2 h-4 w-4" />
-            Export CSV
+            Exportar CSV
           </Button>
         </div>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Filter Events</CardTitle>
-          <CardDescription>Search and filter audit events</CardDescription>
+          <CardTitle>Filtrar Eventos</CardTitle>
+          <CardDescription>Pesquisar e filtrar eventos de auditoria</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search actor, action, resource..."
+                placeholder="Pesquisar ator, ação, recurso..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-9"
@@ -204,19 +204,19 @@ export default function AuditLog() {
 
             <Select value={actionFilter} onValueChange={setActionFilter}>
               <SelectTrigger>
-                <SelectValue placeholder="Filter by action" />
+                <SelectValue placeholder="Filtrar por ação" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Actions</SelectItem>
-                <SelectItem value="LOGIN_SUCCESS">Login Success</SelectItem>
-                <SelectItem value="LOGIN_FAILURE">Login Failure</SelectItem>
+                <SelectItem value="all">Todas as Ações</SelectItem>
+                <SelectItem value="LOGIN_SUCCESS">Login com Sucesso</SelectItem>
+                <SelectItem value="LOGIN_FAILURE">Falha no Login</SelectItem>
                 <SelectItem value="LOGOUT">Logout</SelectItem>
-                <SelectItem value="ROLE_ASSIGN">Role Assign</SelectItem>
-                <SelectItem value="CANDIDATE_VIEW">Candidate View</SelectItem>
-                <SelectItem value="CANDIDATE_EXPORT">Candidate Export</SelectItem>
-                <SelectItem value="JOB_CREATE">Job Create</SelectItem>
-                <SelectItem value="JOB_UPDATE">Job Update</SelectItem>
-                <SelectItem value="JOB_DELETE">Job Delete</SelectItem>
+                <SelectItem value="ROLE_ASSIGN">Atribuir Função</SelectItem>
+                <SelectItem value="CANDIDATE_VIEW">Visualizar Candidato</SelectItem>
+                <SelectItem value="CANDIDATE_EXPORT">Exportar Candidato</SelectItem>
+                <SelectItem value="JOB_CREATE">Criar Vaga</SelectItem>
+                <SelectItem value="JOB_UPDATE">Atualizar Vaga</SelectItem>
+                <SelectItem value="JOB_DELETE">Excluir Vaga</SelectItem>
               </SelectContent>
             </Select>
 
@@ -224,7 +224,7 @@ export default function AuditLog() {
               <PopoverTrigger asChild>
                 <Button variant="outline">
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {dateFrom ? format(dateFrom, "PP") : "From date"}
+                  {dateFrom ? format(dateFrom, "PP") : "Data inicial"}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0">
@@ -236,7 +236,7 @@ export default function AuditLog() {
               <PopoverTrigger asChild>
                 <Button variant="outline">
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {dateTo ? format(dateTo, "PP") : "To date"}
+                  {dateTo ? format(dateTo, "PP") : "Data final"}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0">
@@ -247,7 +247,7 @@ export default function AuditLog() {
 
           <div className="flex gap-2 mt-4">
             <Button onClick={loadAuditEvents} variant="secondary">
-              Apply Filters
+              Aplicar Filtros
             </Button>
             {(dateFrom || dateTo || searchTerm || actionFilter !== "all") && (
               <Button
@@ -260,7 +260,7 @@ export default function AuditLog() {
                 }}
                 variant="ghost"
               >
-                Clear Filters
+                Limpar Filtros
               </Button>
             )}
           </div>
@@ -270,7 +270,7 @@ export default function AuditLog() {
       <Card>
         <CardHeader>
           <CardTitle>
-            Audit Events ({filteredEvents.length} of {events.length})
+            Eventos de Auditoria ({filteredEvents.length} de {events.length})
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -280,7 +280,7 @@ export default function AuditLog() {
             </div>
           ) : filteredEvents.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              No audit events found
+              Nenhum evento de auditoria encontrado
             </div>
           ) : (
             <div className="space-y-4">
@@ -312,7 +312,7 @@ export default function AuditLog() {
                   {event.payload && Object.keys(event.payload).length > 0 && (
                     <details className="text-sm">
                       <summary className="cursor-pointer text-muted-foreground hover:text-foreground">
-                        View details
+                        Ver detalhes
                       </summary>
                       <pre className="mt-2 p-2 bg-muted rounded text-xs overflow-auto">
                         {JSON.stringify(event.payload, null, 2)}
