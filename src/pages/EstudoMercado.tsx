@@ -457,27 +457,6 @@ export default function EstudoMercado() {
             </CardContent>
           </Card>
 
-          {/* Recomendações */}
-          <Card className="border-amber-200 bg-amber-50/50">
-            <CardHeader className="flex flex-row items-center space-x-2">
-              <Target className="h-5 w-5 text-amber-600" />
-              <CardTitle className="text-amber-900">Recomendações Rhello</CardTitle>
-              <CardDescription className="text-amber-700">
-                Ações sugeridas com base na análise de mercado
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-3">
-                {estudo.recomendacoes.map((rec, idx) => (
-                  <li key={idx} className="flex items-start space-x-3 p-3 bg-white rounded-lg border border-amber-100">
-                    <span className="text-amber-600 font-bold text-lg mt-0.5">{idx + 1}.</span>
-                    <span className="text-gray-700">{rec}</span>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-
           {/* Tendências */}
           <Card>
             <CardHeader className="flex flex-row items-center space-x-2">
