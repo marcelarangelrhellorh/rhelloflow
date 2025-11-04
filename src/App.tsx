@@ -19,6 +19,7 @@ import Analises from "./pages/Analises";
 import Relatorios from "./pages/Relatorios";
 import GerenciarUsuarios from "./pages/GerenciarUsuarios";
 import AuditLog from "./pages/AuditLog";
+import EstudoMercado from "./pages/EstudoMercado";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -50,6 +51,7 @@ const App = () => (
             <Route path="/relatorios" element={<Relatorios />} />
             <Route path="/gerenciar-usuarios" element={<GerenciarUsuarios />} />
             <Route path="/audit-log" element={<AuditLog />} />
+            <Route path="/estudo-mercado" element={<EstudoMercado />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

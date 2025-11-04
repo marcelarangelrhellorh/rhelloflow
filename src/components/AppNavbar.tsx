@@ -16,6 +16,7 @@ const menuItems = [
   { title: "Candidatos", url: "/candidatos" },
   { title: "Funil de Candidatos", url: "/funil-candidatos" },
   { title: "Banco de Talentos", url: "/banco-talentos" },
+  { title: "Estudo de Mercado", url: "/estudo-mercado" },
   { title: "Relatórios", url: "/relatorios" },
 ];
 

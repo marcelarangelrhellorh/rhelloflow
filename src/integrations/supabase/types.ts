@@ -56,6 +56,35 @@ export type Database = {
         }
         Relationships: []
       }
+      beneficios_mercado: {
+        Row: {
+          diferenciais: string[] | null
+          estudo_id: string
+          id: string
+          recorrentes: string[] | null
+        }
+        Insert: {
+          diferenciais?: string[] | null
+          estudo_id: string
+          id?: string
+          recorrentes?: string[] | null
+        }
+        Update: {
+          diferenciais?: string[] | null
+          estudo_id?: string
+          id?: string
+          recorrentes?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "beneficios_mercado_estudo_id_fkey"
+            columns: ["estudo_id"]
+            isOneToOne: false
+            referencedRelation: "estudos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       candidatos: {
         Row: {
           area: Database["public"]["Enums"]["area_candidato"] | null
@@ -221,6 +250,101 @@ export type Database = {
         }
         Relationships: []
       }
+      estudos: {
+        Row: {
+          beneficios_cliente: string[] | null
+          cidade: string | null
+          cliente: string | null
+          created_at: string
+          fontes_solicitadas: string[] | null
+          funcao: string
+          id: string
+          modelo_trabalho: string | null
+          observacoes: string | null
+          periodo: string | null
+          porte: string | null
+          resultado: Json | null
+          salario_cliente: number | null
+          senioridade: string | null
+          setor: string | null
+          uf: string | null
+        }
+        Insert: {
+          beneficios_cliente?: string[] | null
+          cidade?: string | null
+          cliente?: string | null
+          created_at?: string
+          fontes_solicitadas?: string[] | null
+          funcao: string
+          id?: string
+          modelo_trabalho?: string | null
+          observacoes?: string | null
+          periodo?: string | null
+          porte?: string | null
+          resultado?: Json | null
+          salario_cliente?: number | null
+          senioridade?: string | null
+          setor?: string | null
+          uf?: string | null
+        }
+        Update: {
+          beneficios_cliente?: string[] | null
+          cidade?: string | null
+          cliente?: string | null
+          created_at?: string
+          fontes_solicitadas?: string[] | null
+          funcao?: string
+          id?: string
+          modelo_trabalho?: string | null
+          observacoes?: string | null
+          periodo?: string | null
+          porte?: string | null
+          resultado?: Json | null
+          salario_cliente?: number | null
+          senioridade?: string | null
+          setor?: string | null
+          uf?: string | null
+        }
+        Relationships: []
+      }
+      faixas_salariais: {
+        Row: {
+          estudo_id: string
+          fontes: string[] | null
+          id: string
+          nivel: string
+          salario_max: number | null
+          salario_med: number | null
+          salario_min: number | null
+        }
+        Insert: {
+          estudo_id: string
+          fontes?: string[] | null
+          id?: string
+          nivel: string
+          salario_max?: number | null
+          salario_med?: number | null
+          salario_min?: number | null
+        }
+        Update: {
+          estudo_id?: string
+          fontes?: string[] | null
+          id?: string
+          nivel?: string
+          salario_max?: number | null
+          salario_med?: number | null
+          salario_min?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "faixas_salariais_estudo_id_fkey"
+            columns: ["estudo_id"]
+            isOneToOne: false
+            referencedRelation: "estudos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       feedbacks: {
         Row: {
           atualizado_em: string
@@ -300,6 +424,41 @@ export type Database = {
             columns: ["vaga_id"]
             isOneToOne: false
             referencedRelation: "vagas_active"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fontes_consultadas: {
+        Row: {
+          estudo_id: string
+          id: string
+          nome: string
+          periodo: string | null
+          tipo: string | null
+          url: string | null
+        }
+        Insert: {
+          estudo_id: string
+          id?: string
+          nome: string
+          periodo?: string | null
+          tipo?: string | null
+          url?: string | null
+        }
+        Update: {
+          estudo_id?: string
+          id?: string
+          nome?: string
+          periodo?: string | null
+          tipo?: string | null
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fontes_consultadas_estudo_id_fkey"
+            columns: ["estudo_id"]
+            isOneToOne: false
+            referencedRelation: "estudos"
             referencedColumns: ["id"]
           },
         ]
@@ -1290,6 +1449,19 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      vw_benchmark_recorte: {
+        Row: {
+          cidade: string | null
+          funcao_norm: string | null
+          media_salario_pleno: number | null
+          porte: string | null
+          qtd_estudos: number | null
+          senioridade: string | null
+          setor: string | null
+          uf: string | null
+        }
+        Relationships: []
       }
       vw_candidato_rating: {
         Row: {
