@@ -357,6 +357,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       users: {
         Row: {
           active: boolean
@@ -654,6 +675,13 @@ export type Database = {
         Returns: number
       }
       get_user_role: { Args: { user_id: string }; Returns: string }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       map_legacy_status_to_slug: {
         Args: { old_status: string }
         Returns: string
@@ -669,6 +697,7 @@ export type Database = {
       }
     }
     Enums: {
+      app_role: "admin" | "recrutador" | "viewer"
       area_candidato:
         | "RH"
         | "Vendas"
@@ -844,6 +873,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "recrutador", "viewer"],
       area_candidato: [
         "RH",
         "Vendas",
