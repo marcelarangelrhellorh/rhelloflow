@@ -114,7 +114,7 @@ export default function EstudoMercado() {
   };
 
   const formatCurrency = (value: number | null) => {
-    if (value === null) return "—";
+    if (value === null) return <span className="text-muted-foreground italic">Não disponível</span>;
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",
       currency: "BRL",
@@ -317,6 +317,15 @@ export default function EstudoMercado() {
           <Card>
             <CardHeader>
               <CardTitle>Faixa Salarial</CardTitle>
+              {!estudo.faixa_salarial.junior?.min && !estudo.faixa_salarial.pleno?.min && !estudo.faixa_salarial.senior?.min && (
+                <CardDescription className="mt-2 flex items-start gap-2 text-amber-600">
+                  <EyeOff className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                  <span>
+                    Dados salariais específicos não disponíveis para esta combinação. 
+                    Consulte as recomendações abaixo para validar faixas com fontes externas.
+                  </span>
+                </CardDescription>
+              )}
             </CardHeader>
             <CardContent className="space-y-6">
               <Table>
@@ -468,17 +477,20 @@ export default function EstudoMercado() {
           </Card>
 
           {/* Recomendações */}
-          <Card>
+          <Card className="border-amber-200 bg-amber-50/50">
             <CardHeader className="flex flex-row items-center space-x-2">
-              <Target className="h-5 w-5 text-primary" />
-              <CardTitle>Recomendações Rhello</CardTitle>
+              <Target className="h-5 w-5 text-amber-600" />
+              <CardTitle className="text-amber-900">Recomendações Rhello</CardTitle>
+              <CardDescription className="text-amber-700">
+                Ações sugeridas com base na análise de mercado
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <ul className="space-y-2">
+              <ul className="space-y-3">
                 {estudo.recomendacoes.map((rec, idx) => (
-                  <li key={idx} className="flex items-start space-x-2">
-                    <span className="text-accent font-bold">•</span>
-                    <span>{rec}</span>
+                  <li key={idx} className="flex items-start space-x-3 p-3 bg-white rounded-lg border border-amber-100">
+                    <span className="text-amber-600 font-bold text-lg mt-0.5">{idx + 1}.</span>
+                    <span className="text-gray-700">{rec}</span>
                   </li>
                 ))}
               </ul>
