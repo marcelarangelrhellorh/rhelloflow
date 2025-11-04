@@ -108,7 +108,7 @@ export function UserMenu() {
         
         <DropdownMenuItem className="cursor-pointer" onClick={() => navigate("/audit-log")}>
           <FileText className="mr-2 h-4 w-4" />
-          <span>Audit Log</span>
+          <span>Auditoria</span>
         </DropdownMenuItem>
         
         <DropdownMenuItem className="cursor-pointer">
