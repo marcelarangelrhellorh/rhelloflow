@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { User, Settings, LogOut, Users } from "lucide-react";
+import { User, Settings, LogOut, Users, FileText } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -104,6 +104,11 @@ export function UserMenu() {
         <DropdownMenuItem className="cursor-pointer" onClick={() => navigate("/gerenciar-usuarios")}>
           <Users className="mr-2 h-4 w-4" />
           <span>Gerenciar Usuários</span>
+        </DropdownMenuItem>
+        
+        <DropdownMenuItem className="cursor-pointer" onClick={() => navigate("/audit-log")}>
+          <FileText className="mr-2 h-4 w-4" />
+          <span>Audit Log</span>
         </DropdownMenuItem>
         
         <DropdownMenuItem className="cursor-pointer">
