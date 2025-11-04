@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Briefcase, User, MoreVertical, Users, Calendar, Edit, Trash2, AlertTriangle } from "lucide-react";
+import { Briefcase, User, MoreVertical, Users, Calendar, Edit, Trash2, AlertTriangle, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { getBusinessDaysFromNow } from "@/lib/dateUtils";
 import { formatSalaryRange } from "@/lib/salaryUtils";
@@ -28,6 +28,7 @@ interface VagaCardProps {
     salario_min?: number | null;
     salario_max?: number | null;
     salario_modalidade?: string | null;
+    confidencial?: boolean | null;
   };
   draggable?: boolean;
   onDragStart?: () => void;
@@ -174,12 +175,30 @@ export function VagaCard({ vaga, draggable = false, onDragStart, onClick }: Vaga
       draggable={draggable}
       onDragStart={onDragStart}
       onClick={handleClick}
-      className="cursor-pointer hover-lift card-shadow bg-white border border-[#E5E7EB] overflow-hidden rounded-2xl"
+      className="relative cursor-pointer hover-lift card-shadow bg-white border border-gray-200 overflow-hidden rounded-xl shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.01]"
     >
+      {/* Confidential Indicator */}
+      {vaga.confidencial && (
+        <div 
+          className="absolute top-3 left-3 flex items-center gap-1.5 px-2 py-1 rounded-full border backdrop-blur-sm z-10"
+          style={{
+            backgroundColor: "rgba(254, 243, 242, 0.5)",
+            borderColor: "#FEE4E2",
+            color: "#B42318"
+          }}
+          title="Vaga confidencial"
+        >
+          <EyeOff className="h-3 w-3" />
+          <span className="text-xs font-medium hidden sm:inline" style={{ fontFamily: "Manrope, sans-serif" }}>
+            Confidencial
+          </span>
+        </div>
+      )}
+
       <CardContent className="p-5 space-y-4">
         {/* Header */}
         <div className="flex items-start justify-between">
-          <h3 className="text-lg font-bold text-[#00141D] leading-tight pr-2 line-clamp-2">
+          <h3 className="text-lg font-bold text-[#00141D] leading-tight pr-2 line-clamp-2" style={{ fontFamily: "Manrope, sans-serif" }}>
             {vaga.titulo}
           </h3>
           
@@ -266,10 +285,18 @@ export function VagaCard({ vaga, draggable = false, onDragStart, onClick }: Vaga
         {/* Progresso do Pipeline */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-semibold text-[#00141D]">Progresso do Pipeline</p>
-            <p className="text-sm font-bold text-[#00141D]">{progress}%</p>
+            <p className="text-sm font-semibold text-[#00141D]" style={{ fontFamily: "Manrope, sans-serif" }}>Progresso do Pipeline</p>
+            <p className="text-sm font-bold text-[#00141D]" style={{ fontFamily: "Manrope, sans-serif" }}>{progress}%</p>
           </div>
-          <Progress value={progress} className="h-3 bg-[#E5E7EB] [&>div]:bg-[#F9EC3F] [&>div]:transition-all [&>div]:duration-300" />
+          <div className="h-[3px] bg-gray-100 rounded-full overflow-hidden">
+            <div 
+              className="h-full transition-all duration-300 rounded-full"
+              style={{ 
+                width: `${progress}%`,
+                backgroundColor: "#F9EC3F" 
+              }}
+            />
+          </div>
         </div>
 
         {/* Métricas */}

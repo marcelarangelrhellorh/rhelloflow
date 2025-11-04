@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Users, Clock, Check } from "lucide-react";
+import { Users, Clock, Check, EyeOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Vaga {
@@ -102,32 +102,41 @@ export function JobCard({
         <Card
           className={cn(
             "relative cursor-pointer transition-all duration-200 group overflow-hidden",
-            "bg-white border border-gray-200 rounded-xl",
-            "hover:shadow-lg hover:-translate-y-0.5",
-            vaga.confidencial && "border-l-4 border-l-[#D32F2F]"
+            "bg-white border border-gray-200 rounded-xl shadow-sm",
+            "hover:shadow-md hover:scale-[1.01]"
           )}
           onClick={onView}
           style={{ minHeight: "44px" }}
         >
           <div className="relative p-4 space-y-3" {...attributes} {...listeners}>
+            {/* Confidential Indicator */}
+            {vaga.confidencial && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div 
+                    className="absolute top-3 left-3 flex items-center gap-1.5 px-2 py-1 rounded-full border backdrop-blur-sm"
+                    style={{
+                      backgroundColor: "rgba(254, 243, 242, 0.5)",
+                      borderColor: "#FEE4E2",
+                      color: "#B42318"
+                    }}
+                  >
+                    <EyeOff className="h-3 w-3" />
+                    <span className="text-xs font-medium hidden sm:inline" style={{ fontFamily: "Manrope, sans-serif" }}>
+                      Confidencial
+                    </span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Vaga confidencial</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
+
             {/* Header */}
             <div className="space-y-2">
               <div className="flex items-start justify-between gap-2">
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    {vaga.confidencial && (
-                      <Badge 
-                        className="text-[10px] font-semibold px-2 py-0.5 whitespace-nowrap"
-                        style={{ 
-                          backgroundColor: "rgba(211, 47, 47, 0.9)", 
-                          color: "#FFFFFF" 
-                        }}
-                      >
-                        Confidencial
-                      </Badge>
-                    )}
-                  </div>
-                  
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <h3 
@@ -169,12 +178,12 @@ export function JobCard({
 
             {/* Métricas rápidas */}
             <div className="flex items-center gap-3 text-[12px] font-semibold" style={{ fontFamily: "Manrope, sans-serif" }}>
-              <div className="flex items-center gap-1 text-[#6B7280]">
+              <div className="flex items-center gap-1 text-[#9AA6B2]">
                 <Users className="h-3.5 w-3.5" />
                 <span>{vaga.candidatos_count || 0}</span>
               </div>
               
-              <div className="flex items-center gap-1 text-[#6B7280]">
+              <div className="flex items-center gap-1 text-[#9AA6B2]">
                 <Clock className="h-3.5 w-3.5" />
                 <span>{diasEmAberto}d úteis</span>
               </div>
@@ -182,7 +191,7 @@ export function JobCard({
 
             {/* Progress bar */}
             <div className="space-y-1">
-              <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
+              <div className="h-[3px] bg-gray-100 rounded-full overflow-hidden">
                 <div 
                   className="h-full transition-all duration-300 rounded-full"
                   style={{ 
@@ -193,7 +202,7 @@ export function JobCard({
               </div>
               <div className="flex justify-end">
                 <span 
-                  className="text-[12px] font-semibold text-[#6B7280]"
+                  className="text-[12px] font-semibold text-[#9AA6B2]"
                   style={{ fontFamily: "Manrope, sans-serif" }}
                 >
                   {progresso}%
@@ -204,7 +213,7 @@ export function JobCard({
             {/* Rodapé - Chips de equipe */}
             <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-100">
               {vaga.recrutador && (
-                <div className="flex items-center gap-1.5 bg-gray-50 rounded-lg px-2 py-1">
+                <div className="flex items-center gap-1.5 rounded-lg px-2 py-1" style={{ backgroundColor: "#FFFDF6", border: "1px solid #E5E7EB" }}>
                   <Avatar className="h-5 w-5 bg-[#F9EC3F]">
                     <AvatarFallback 
                       className="text-[#00141D] text-[10px] font-bold"
@@ -223,7 +232,7 @@ export function JobCard({
               )}
               
               {vaga.cs_responsavel && (
-                <div className="flex items-center gap-1.5 bg-gray-50 rounded-lg px-2 py-1">
+                <div className="flex items-center gap-1.5 rounded-lg px-2 py-1" style={{ backgroundColor: "#FFFDF6", border: "1px solid #E5E7EB" }}>
                   <Avatar className="h-5 w-5 bg-[#00141D]">
                     <AvatarFallback 
                       className="text-[#F9EC3F] text-[10px] font-bold"
