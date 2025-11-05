@@ -47,8 +47,6 @@ interface ShareLinkData {
     salario_min: number | null;
     salario_max: number | null;
     salario_modalidade: string | null;
-    cidade: string | null;
-    estado: string | null;
   };
 }
 
@@ -102,6 +100,7 @@ export default function ShareJob() {
     }
 
     try {
+      console.log('Loading share link with token:', token);
       // Chamar edge function com token como query param
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-share-link?token=${token}`,
@@ -113,7 +112,9 @@ export default function ShareJob() {
         }
       );
 
+      console.log('Response status:', response.status);
       const data = await response.json();
+      console.log('Response data:', data);
 
       if (!response.ok || data.error) {
         setError(data.error || 'Erro ao carregar link');
@@ -280,12 +281,6 @@ export default function ShareJob() {
                   <Badge variant="secondary">
                     <Briefcase className="h-3 w-3 mr-1" />
                     {vaga.modelo_trabalho}
-                  </Badge>
-                )}
-                {(vaga.cidade || vaga.estado) && (
-                  <Badge variant="secondary">
-                    <MapPin className="h-3 w-3 mr-1" />
-                    {[vaga.cidade, vaga.estado].filter(Boolean).join(", ")}
                   </Badge>
                 )}
                 {vaga.salario_modalidade && vaga.salario_modalidade !== 'A_COMBINAR' && vaga.salario_min && (
