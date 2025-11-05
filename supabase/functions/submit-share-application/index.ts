@@ -217,6 +217,7 @@ serve(async (req) => {
       source_link_id: shareLink.id,
       utm: utm || null,
       status: 'Banco de Talentos',
+      origem: 'Link de Divulgação',
     };
 
     // Create candidate

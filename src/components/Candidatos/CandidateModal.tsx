@@ -38,7 +38,9 @@ export function CandidateModal({ open, onClose, candidatoId, onSave }: Candidate
     pretensao_salarial: "",
     status: "Banco de Talentos",
     feedback: "",
+    origem: "",
   });
+  const [hasSourceLink, setHasSourceLink] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -67,7 +69,9 @@ export function CandidateModal({ open, onClose, candidatoId, onSave }: Candidate
       pretensao_salarial: "",
       status: "Banco de Talentos",
       feedback: "",
+      origem: "",
     });
+    setHasSourceLink(false);
   };
 
   const loadVagas = async () => {
@@ -112,7 +116,9 @@ export function CandidateModal({ open, onClose, candidatoId, onSave }: Candidate
           pretensao_salarial: data.pretensao_salarial?.toString() || "",
           status: data.status || "Banco de Talentos",
           feedback: data.feedback || "",
+          origem: data.origem || "",
         });
+        setHasSourceLink(!!data.source_link_id);
       }
     } catch (error) {
       console.error("Erro ao carregar candidato:", error);
@@ -140,6 +146,7 @@ export function CandidateModal({ open, onClose, candidatoId, onSave }: Candidate
         pretensao_salarial: formData.pretensao_salarial ? parseFloat(formData.pretensao_salarial) : null,
         status: formData.status as any,
         feedback: formData.feedback || null,
+        origem: formData.origem || null,
       };
 
       if (candidatoId) {
@@ -326,6 +333,35 @@ export function CandidateModal({ open, onClose, candidatoId, onSave }: Candidate
                   value={formData.curriculo_link}
                   onChange={(e) => setFormData({ ...formData, curriculo_link: e.target.value })}
                 />
+              </div>
+
+              <div>
+                <Label htmlFor="origem">Origem do Candidato</Label>
+                <Select 
+                  value={formData.origem} 
+                  onValueChange={(value) => setFormData({ ...formData, origem: value })}
+                  disabled={hasSourceLink}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={hasSourceLink ? "Link de Divulgação" : "Selecione a origem"} />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover z-50">
+                    <SelectItem value="Link de Divulgação">Link de Divulgação</SelectItem>
+                    <SelectItem value="Pandapé">Pandapé</SelectItem>
+                    <SelectItem value="LinkedIn">LinkedIn</SelectItem>
+                    <SelectItem value="Gupy">Gupy</SelectItem>
+                    <SelectItem value="Indeed">Indeed</SelectItem>
+                    <SelectItem value="Catho">Catho</SelectItem>
+                    <SelectItem value="Indicação">Indicação</SelectItem>
+                    <SelectItem value="Site da Empresa">Site da Empresa</SelectItem>
+                    <SelectItem value="Outra">Outra</SelectItem>
+                  </SelectContent>
+                </Select>
+                {hasSourceLink && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Este candidato veio através de um link de divulgação
+                  </p>
+                )}
               </div>
             </CardContent>
           </Card>

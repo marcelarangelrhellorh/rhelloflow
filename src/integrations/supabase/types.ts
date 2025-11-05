@@ -105,6 +105,7 @@ export type Database = {
           linkedin: string | null
           nivel: Database["public"]["Enums"]["nivel_candidato"] | null
           nome_completo: string
+          origem: string | null
           parecer_final: string | null
           pontos_desenvolver: string | null
           pontos_fortes: string | null
@@ -138,6 +139,7 @@ export type Database = {
           linkedin?: string | null
           nivel?: Database["public"]["Enums"]["nivel_candidato"] | null
           nome_completo: string
+          origem?: string | null
           parecer_final?: string | null
           pontos_desenvolver?: string | null
           pontos_fortes?: string | null
@@ -171,6 +173,7 @@ export type Database = {
           linkedin?: string | null
           nivel?: Database["public"]["Enums"]["nivel_candidato"] | null
           nome_completo?: string
+          origem?: string | null
           parecer_final?: string | null
           pontos_desenvolver?: string | null
           pontos_fortes?: string | null
