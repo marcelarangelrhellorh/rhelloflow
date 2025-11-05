@@ -1,14 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Separator } from "@/components/ui/separator";
-import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent } from "@/components/ui/card";
 import { 
   MapPin, 
   Briefcase, 
@@ -17,11 +12,14 @@ import {
   CheckCircle, 
   AlertCircle,
   Loader2,
-  Building2,
-  Calendar
+  Calendar,
+  Users,
+  TrendingUp,
+  Award
 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 import { formatSalaryRange } from "@/lib/salaryUtils";
+import { ApplicationModal } from "@/components/ShareJob/ApplicationModal";
+import logoLight from "@/assets/logo-rhello-light.png";
 
 interface ShareLinkData {
   id: string;
@@ -30,6 +28,7 @@ interface ShareLinkData {
   max_submissions: number | null;
   submissions_count: number;
   requires_password: boolean;
+  created_at: string;
   vagas: {
     id: string;
     titulo: string;
@@ -47,39 +46,24 @@ interface ShareLinkData {
     salario_min: number | null;
     salario_max: number | null;
     salario_modalidade: string | null;
+    observacoes: string | null;
+    prioridade: string | null;
+    complexidade: string | null;
+    criado_em: string;
   };
 }
 
 export default function ShareJob() {
   const { token } = useParams<{ token: string }>();
   const [searchParams] = useSearchParams();
-  const { toast } = useToast();
   
   const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
   const [linkData, setLinkData] = useState<ShareLinkData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [protocol, setProtocol] = useState("");
-  
-  // Password state
-  const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
-  const [password, setPassword] = useState("");
-  
-  // Form state
-  const [formData, setFormData] = useState({
-    nome_completo: "",
-    email: "",
-    telefone: "",
-    cidade: "",
-    estado: "",
-    linkedin: "",
-    pretensao_salarial: "",
-    disponibilidade_mudanca: "",
-    curriculo_url: "",
-    portfolio_url: "",
-    mensagem: "",
-  });
+  const [modalOpen, setModalOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState("sobre");
 
   // UTM tracking
   const utm = {
@@ -100,8 +84,6 @@ export default function ShareJob() {
     }
 
     try {
-      console.log('Loading share link with token:', token);
-      // Chamar edge function com token como query param
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-share-link?token=${token}`,
         {
@@ -112,17 +94,14 @@ export default function ShareJob() {
         }
       );
 
-      console.log('Response status:', response.status);
       const data = await response.json();
-      console.log('Response data:', data);
 
       if (!response.ok || data.error) {
         setError(data.error || 'Erro ao carregar link');
       } else {
         setLinkData(data);
-        if (data.requires_password) {
-          setShowPasswordPrompt(true);
-        }
+        // Track page view
+        // TODO: Add analytics tracking
       }
     } catch (err) {
       console.error('Error loading share link:', err);
@@ -132,82 +111,41 @@ export default function ShareJob() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!token || !linkData) return;
-
-    // Validações básicas
-    if (!formData.nome_completo || !formData.email || !formData.telefone) {
-      toast({
-        title: "Campos obrigatórios",
-        description: "Por favor, preencha todos os campos obrigatórios",
-        variant: "destructive",
-      });
-      return;
+  const scrollToSection = (sectionId: string) => {
+    setActiveSection(sectionId);
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
+  };
 
-    setSubmitting(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('submit-share-application', {
-        body: {
-          token,
-          candidate: formData,
-          password: showPasswordPrompt ? password : undefined,
-          utm,
-        },
-      });
-
-      if (error) throw error;
-
-      if (data.error) {
-        toast({
-          title: "Erro",
-          description: data.error,
-          variant: "destructive",
-        });
-      } else {
-        setProtocol(data.protocol);
-        setSubmitted(true);
-        toast({
-          title: "Candidatura enviada!",
-          description: "Recebemos sua candidatura com sucesso",
-        });
-      }
-    } catch (err) {
-      console.error('Error submitting application:', err);
-      toast({
-        title: "Erro",
-        description: "Erro ao enviar candidatura. Tente novamente.",
-        variant: "destructive",
-      });
-    } finally {
-      setSubmitting(false);
-    }
+  const getDaysOpen = (createdAt: string) => {
+    const created = new Date(createdAt);
+    const now = new Date();
+    const diff = Math.floor((now.getTime() - created.getTime()) / (1000 * 60 * 60 * 24));
+    return diff;
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="min-h-screen bg-[#FFFDF6] flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-[#FFCD00]" />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <Card className="max-w-md w-full">
-          <CardHeader>
-            <div className="flex items-center gap-2 text-destructive">
+      <div className="min-h-screen bg-[#FFFDF6] flex items-center justify-center p-4">
+        <Card className="max-w-md w-full border-[#36404A]/20">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2 text-red-600 mb-4">
               <AlertCircle className="h-5 w-5" />
-              <CardTitle>Link Indisponível</CardTitle>
+              <h2 className="text-xl font-bold">Link Indisponível</h2>
             </div>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">{error}</p>
-            <p className="text-sm text-muted-foreground mt-4">
-              Se você recebeu este link recentemente, entre em contato com o recrutador responsável.
+            <p className="text-[#36404A] mb-4">{error}</p>
+            <p className="text-sm text-[#36404A]/70">
+              Esta vaga não está mais disponível ou o link expirou. Entre em contato com o recrutador responsável.
             </p>
           </CardContent>
         </Card>
@@ -217,23 +155,22 @@ export default function ShareJob() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <Card className="max-w-md w-full">
-          <CardHeader>
-            <div className="flex items-center gap-2 text-success">
+      <div className="min-h-screen bg-[#FFFDF6] flex items-center justify-center p-4">
+        <Card className="max-w-md w-full border-[#FFCD00]">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2 text-green-600 mb-4">
               <CheckCircle className="h-5 w-5" />
-              <CardTitle>Candidatura Enviada!</CardTitle>
+              <h2 className="text-xl font-bold text-[#00141D]">Candidatura Enviada!</h2>
             </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p>Recebemos sua candidatura com sucesso.</p>
-            <div className="p-4 bg-muted rounded-lg">
-              <p className="text-sm text-muted-foreground">Protocolo:</p>
-              <p className="font-mono font-bold text-lg">{protocol}</p>
+            <p className="text-[#36404A] mb-4">Recebemos sua candidatura com sucesso.</p>
+            <div className="p-4 bg-[#FFCD00]/10 rounded-lg border border-[#FFCD00]/30 mb-4">
+              <p className="text-sm text-[#36404A] font-medium">Protocolo:</p>
+              <p className="font-mono font-bold text-lg text-[#00141D]">{protocol}</p>
             </div>
-            <Alert>
-              <AlertDescription>
-                Aguarde o contato do nosso time de recrutamento. Analisaremos seu perfil e entraremos em contato em breve.
+            <Alert className="border-[#36404A]/20">
+              <AlertDescription className="text-[#36404A]">
+                Nosso time de recrutamento analisará seu perfil e entrará em contato em breve. 
+                Tempo estimado de retorno: <strong>até 5 dias úteis</strong>.
               </AlertDescription>
             </Alert>
           </CardContent>
@@ -245,286 +182,266 @@ export default function ShareJob() {
   if (!linkData) return null;
 
   const vaga = linkData.vagas;
+  const daysOpen = getDaysOpen(vaga.criado_em);
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header com identidade Rhello */}
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-primary rounded flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-xl">R</span>
+    <div className="min-h-screen bg-[#FFFDF6] font-['Manrope',system-ui,sans-serif]">
+      {/* Header */}
+      <header className="bg-white border-b border-[#36404A]/10 sticky top-0 z-40">
+        <div className="max-w-6xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <img src={logoLight} alt="Rhello" className="h-8" />
             </div>
-            <div>
-              <h1 className="font-bold text-xl">Rhello</h1>
-              <p className="text-xs text-muted-foreground">Recrutamento & Seleção</p>
-            </div>
+            <Button
+              onClick={() => setModalOpen(true)}
+              className="hidden md:flex bg-[#FFCD00] hover:bg-[#FAEC3E] text-[#00141D] font-bold rounded-full px-6"
+            >
+              Candidatar-se
+            </Button>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8 max-w-4xl">
-        {/* Informações da Vaga */}
-        <Card className="mb-8">
-          <CardHeader>
-            <div className="space-y-3">
+      {/* Hero Section */}
+      <section className="bg-white border-b border-[#36404A]/10">
+        <div className="max-w-6xl mx-auto px-4 py-8">
+          <div className="flex flex-col md:flex-row md:items-start gap-6">
+            {/* Content */}
+            <div className="flex-1 space-y-4">
               <div>
-                <CardTitle className="text-3xl mb-2">{vaga.titulo}</CardTitle>
-                <CardDescription className="flex items-center gap-2 text-base">
-                  <Building2 className="h-4 w-4" />
+                <h1 className="text-3xl md:text-4xl font-extrabold text-[#00141D] mb-2">
+                  {vaga.titulo}
+                </h1>
+                <p className="text-lg text-[#36404A]">
                   {vaga.confidencial ? "Empresa Confidencial" : vaga.empresa}
-                </CardDescription>
+                </p>
               </div>
-              
+
+              {/* Badges */}
               <div className="flex flex-wrap gap-2">
                 {vaga.modelo_trabalho && (
-                  <Badge variant="secondary">
+                  <Badge className="bg-[#FFCD00]/20 text-[#00141D] border-[#FFCD00]/40 hover:bg-[#FFCD00]/30">
                     <Briefcase className="h-3 w-3 mr-1" />
                     {vaga.modelo_trabalho}
                   </Badge>
                 )}
                 {vaga.salario_modalidade && vaga.salario_modalidade !== 'A_COMBINAR' && vaga.salario_min && (
-                  <Badge variant="secondary">
+                  <Badge className="bg-[#FAEC3E]/20 text-[#00141D] border-[#FAEC3E]/40 hover:bg-[#FAEC3E]/30">
                     <DollarSign className="h-3 w-3 mr-1" />
                     {formatSalaryRange(vaga.salario_min, vaga.salario_max, vaga.salario_modalidade)}
                   </Badge>
                 )}
+                {vaga.prioridade && (
+                  <Badge variant="outline" className="border-[#36404A]/20">
+                    <TrendingUp className="h-3 w-3 mr-1" />
+                    {vaga.prioridade}
+                  </Badge>
+                )}
+                {vaga.complexidade && (
+                  <Badge variant="outline" className="border-[#36404A]/20">
+                    <Award className="h-3 w-3 mr-1" />
+                    {vaga.complexidade}
+                  </Badge>
+                )}
+              </div>
+
+              {/* Quick Stats */}
+              <div className="flex flex-wrap gap-4 text-sm text-[#36404A]">
+                <span className="flex items-center gap-1.5 px-3 py-1.5 bg-[#FFFDF6] rounded-md border border-[#36404A]/10">
+                  <Clock className="h-4 w-4" />
+                  {daysOpen} dias no ar
+                </span>
+                <span className="flex items-center gap-1.5 px-3 py-1.5 bg-[#FFFDF6] rounded-md border border-[#36404A]/10">
+                  <Users className="h-4 w-4" />
+                  {linkData.submissions_count} candidatos
+                </span>
               </div>
             </div>
-          </CardHeader>
-          
-          <CardContent className="space-y-6">
-            {vaga.responsabilidades && (
-              <div>
-                <h3 className="font-semibold text-lg mb-2">Responsabilidades</h3>
-                <p className="text-muted-foreground whitespace-pre-wrap">{vaga.responsabilidades}</p>
-              </div>
-            )}
 
-            {vaga.requisitos_obrigatorios && (
-              <div>
-                <h3 className="font-semibold text-lg mb-2">Requisitos Obrigatórios</h3>
-                <p className="text-muted-foreground whitespace-pre-wrap">{vaga.requisitos_obrigatorios}</p>
-              </div>
-            )}
+            {/* CTA Desktop */}
+            <div className="hidden md:block flex-shrink-0">
+              <Button
+                onClick={() => setModalOpen(true)}
+                size="lg"
+                className="bg-[#FFCD00] hover:bg-[#FAEC3E] text-[#00141D] font-bold rounded-full px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all"
+              >
+                Candidatar-se
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
 
-            {vaga.requisitos_desejaveis && (
-              <div>
-                <h3 className="font-semibold text-lg mb-2">Requisitos Desejáveis</h3>
-                <p className="text-muted-foreground whitespace-pre-wrap">{vaga.requisitos_desejaveis}</p>
-              </div>
-            )}
+      {/* Navigation Tabs */}
+      <nav className="bg-white border-b border-[#36404A]/10 sticky top-[73px] z-30">
+        <div className="max-w-6xl mx-auto px-4">
+          <ul className="flex gap-8 overflow-x-auto">
+            {[
+              { id: "sobre", label: "Sobre a vaga" },
+              { id: "responsabilidades", label: "Responsabilidades" },
+              { id: "requisitos", label: "Requisitos" },
+              { id: "beneficios", label: "Benefícios" },
+              { id: "horario", label: "Horário" },
+            ].map((section) => (
+              <li key={section.id}>
+                <button
+                  onClick={() => scrollToSection(section.id)}
+                  className={`py-4 px-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
+                    activeSection === section.id
+                      ? "border-[#FFCD00] text-[#00141D]"
+                      : "border-transparent text-[#36404A] hover:text-[#00141D]"
+                  }`}
+                >
+                  {section.label}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </nav>
 
-            {(vaga.beneficios && vaga.beneficios.length > 0) && (
-              <div>
-                <h3 className="font-semibold text-lg mb-2">Benefícios</h3>
-                <div className="flex flex-wrap gap-2">
+      {/* Main Content */}
+      <main className="max-w-6xl mx-auto px-4 py-8 space-y-8">
+        {/* Sobre a vaga */}
+        <section id="sobre" className="scroll-mt-32">
+          <Card className="border-[#36404A]/20">
+            <CardContent className="p-6">
+              <h2 className="text-2xl font-bold text-[#00141D] mb-4">Sobre a vaga</h2>
+              <div className="prose prose-sm max-w-none text-[#36404A]">
+                <p>
+                  {vaga.observacoes || "Estamos em busca de um profissional qualificado para integrar nossa equipe e contribuir para o crescimento da empresa."}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+
+        {/* Responsabilidades */}
+        {vaga.responsabilidades && (
+          <section id="responsabilidades" className="scroll-mt-32">
+            <Card className="border-[#36404A]/20">
+              <CardContent className="p-6">
+                <h2 className="text-2xl font-bold text-[#00141D] mb-4">Responsabilidades</h2>
+                <div className="prose prose-sm max-w-none text-[#36404A] whitespace-pre-wrap">
+                  {vaga.responsabilidades}
+                </div>
+              </CardContent>
+            </Card>
+          </section>
+        )}
+
+        {/* Requisitos */}
+        <section id="requisitos" className="scroll-mt-32">
+          <Card className="border-[#36404A]/20">
+            <CardContent className="p-6 space-y-6">
+              {vaga.requisitos_obrigatorios && (
+                <div>
+                  <h3 className="text-xl font-bold text-[#00141D] mb-3">Requisitos Obrigatórios</h3>
+                  <div className="prose prose-sm max-w-none text-[#36404A] whitespace-pre-wrap">
+                    {vaga.requisitos_obrigatorios}
+                  </div>
+                </div>
+              )}
+              {vaga.requisitos_desejaveis && (
+                <div>
+                  <h3 className="text-xl font-bold text-[#00141D] mb-3">Requisitos Desejáveis</h3>
+                  <div className="prose prose-sm max-w-none text-[#36404A] whitespace-pre-wrap">
+                    {vaga.requisitos_desejaveis}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </section>
+
+        {/* Benefícios */}
+        {vaga.beneficios && vaga.beneficios.length > 0 && (
+          <section id="beneficios" className="scroll-mt-32">
+            <Card className="border-[#36404A]/20">
+              <CardContent className="p-6">
+                <h2 className="text-2xl font-bold text-[#00141D] mb-4">Benefícios</h2>
+                <div className="flex flex-wrap gap-2 mb-4">
                   {vaga.beneficios.map((beneficio) => (
-                    <Badge key={beneficio} variant="outline">{beneficio}</Badge>
+                    <Badge 
+                      key={beneficio}
+                      className="bg-[#FFCD00]/20 text-[#00141D] border-[#FFCD00]/40 hover:bg-[#FFCD00]/30"
+                    >
+                      {beneficio}
+                    </Badge>
                   ))}
                 </div>
                 {vaga.beneficios_outros && (
-                  <p className="text-sm text-muted-foreground mt-2">{vaga.beneficios_outros}</p>
+                  <p className="text-sm text-[#36404A] mt-3">{vaga.beneficios_outros}</p>
                 )}
-              </div>
-            )}
+              </CardContent>
+            </Card>
+          </section>
+        )}
 
-            {(vaga.horario_inicio || vaga.dias_semana) && (
-              <div>
-                <h3 className="font-semibold text-lg mb-2">Horário de Trabalho</h3>
-                <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+        {/* Horário */}
+        {(vaga.horario_inicio || vaga.dias_semana) && (
+          <section id="horario" className="scroll-mt-32">
+            <Card className="border-[#36404A]/20">
+              <CardContent className="p-6">
+                <h2 className="text-2xl font-bold text-[#00141D] mb-4">Horário de Trabalho</h2>
+                <div className="flex flex-wrap gap-4 text-[#36404A]">
                   {vaga.horario_inicio && vaga.horario_fim && (
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4" />
-                      {vaga.horario_inicio} - {vaga.horario_fim}
+                    <div className="flex items-center gap-2 px-4 py-2 bg-[#FFFDF6] rounded-lg border border-[#36404A]/10">
+                      <Clock className="h-5 w-5" />
+                      <span className="font-medium">{vaga.horario_inicio} - {vaga.horario_fim}</span>
                     </div>
                   )}
                   {vaga.dias_semana && vaga.dias_semana.length > 0 && (
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4" />
-                      {vaga.dias_semana.join(", ")}
+                    <div className="flex items-center gap-2 px-4 py-2 bg-[#FFFDF6] rounded-lg border border-[#36404A]/10">
+                      <Calendar className="h-5 w-5" />
+                      <span className="font-medium">{vaga.dias_semana.join(", ")}</span>
                     </div>
                   )}
                 </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Formulário de Candidatura */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Candidate-se</CardTitle>
-            <CardDescription>
-              Preencha o formulário abaixo para se candidatar a esta vaga
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="nome_completo">Nome Completo *</Label>
-                  <Input
-                    id="nome_completo"
-                    required
-                    value={formData.nome_completo}
-                    onChange={(e) => setFormData({ ...formData, nome_completo: e.target.value })}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="email">E-mail *</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    required
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="telefone">Telefone *</Label>
-                  <Input
-                    id="telefone"
-                    type="tel"
-                    required
-                    placeholder="(00) 00000-0000"
-                    value={formData.telefone}
-                    onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="cidade">Cidade</Label>
-                  <Input
-                    id="cidade"
-                    value={formData.cidade}
-                    onChange={(e) => setFormData({ ...formData, cidade: e.target.value })}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="estado">Estado</Label>
-                  <Input
-                    id="estado"
-                    maxLength={2}
-                    placeholder="SP"
-                    value={formData.estado}
-                    onChange={(e) => setFormData({ ...formData, estado: e.target.value.toUpperCase() })}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="linkedin">LinkedIn</Label>
-                  <Input
-                    id="linkedin"
-                    placeholder="https://linkedin.com/in/..."
-                    value={formData.linkedin}
-                    onChange={(e) => setFormData({ ...formData, linkedin: e.target.value })}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="pretensao_salarial">Pretensão Salarial (R$)</Label>
-                  <Input
-                    id="pretensao_salarial"
-                    type="number"
-                    placeholder="0.00"
-                    value={formData.pretensao_salarial}
-                    onChange={(e) => setFormData({ ...formData, pretensao_salarial: e.target.value })}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="curriculo_url">Link do Currículo</Label>
-                  <Input
-                    id="curriculo_url"
-                    placeholder="https://..."
-                    value={formData.curriculo_url}
-                    onChange={(e) => setFormData({ ...formData, curriculo_url: e.target.value })}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="portfolio_url">Portfólio (opcional)</Label>
-                  <Input
-                    id="portfolio_url"
-                    placeholder="https://..."
-                    value={formData.portfolio_url}
-                    onChange={(e) => setFormData({ ...formData, portfolio_url: e.target.value })}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="disponibilidade_mudanca">Disponibilidade para Mudança</Label>
-                <Input
-                  id="disponibilidade_mudanca"
-                  placeholder="Ex: Disponível para mudança nacional"
-                  value={formData.disponibilidade_mudanca}
-                  onChange={(e) => setFormData({ ...formData, disponibilidade_mudanca: e.target.value })}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="mensagem">Mensagem (opcional)</Label>
-                <Textarea
-                  id="mensagem"
-                  rows={4}
-                  placeholder="Conte-nos mais sobre você e por que se interessa por esta vaga..."
-                  value={formData.mensagem}
-                  onChange={(e) => setFormData({ ...formData, mensagem: e.target.value })}
-                />
-              </div>
-
-              {showPasswordPrompt && (
-                <div className="space-y-2">
-                  <Label htmlFor="password">Senha *</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    required
-                    placeholder="Digite a senha fornecida"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Esta vaga requer uma senha. Se você não possui a senha, entre em contato com o recrutador.
-                  </p>
-                </div>
-              )}
-
-              <Separator />
-
-              <div className="flex items-start gap-2">
-                <input type="checkbox" id="privacy" required className="mt-1" />
-                <Label htmlFor="privacy" className="text-sm text-muted-foreground cursor-pointer">
-                  Concordo com o tratamento dos meus dados pessoais conforme a LGPD e autorizo o contato para fins de recrutamento.
-                </Label>
-              </div>
-
-              <Button type="submit" disabled={submitting} className="w-full">
-                {submitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Enviando...
-                  </>
-                ) : (
-                  "Enviar Candidatura"
-                )}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          </section>
+        )}
       </main>
 
+      {/* Fixed Bottom CTA (Mobile) */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-[#36404A]/10 p-4 shadow-lg z-40">
+        <Button
+          onClick={() => setModalOpen(true)}
+          className="w-full bg-[#FFCD00] hover:bg-[#FAEC3E] text-[#00141D] font-bold rounded-full py-6 text-lg"
+        >
+          Candidatar-se
+        </Button>
+      </div>
+
       {/* Footer */}
-      <footer className="border-t mt-12 py-6">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} Rhello - Todos os direitos reservados</p>
+      <footer className="bg-[#00141D] text-white py-8 mt-16">
+        <div className="max-w-6xl mx-auto px-4 text-center text-sm">
+          <p className="text-[#FFFDF6]/70">
+            © {new Date().getFullYear()} Rhello Recrutamento & Seleção. Todos os direitos reservados.
+          </p>
+          <p className="text-[#FFFDF6]/50 mt-2 text-xs">
+            Ao enviar sua candidatura, seus dados serão tratados conforme a LGPD.
+          </p>
         </div>
       </footer>
+
+      {/* Application Modal */}
+      <ApplicationModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        vagaId={vaga.id}
+        vagaTitulo={vaga.titulo}
+        empresaNome={vaga.confidencial ? "Empresa Confidencial" : vaga.empresa}
+        token={token!}
+        requiresPassword={linkData.requires_password}
+        onSuccess={(protocol) => {
+          setProtocol(protocol);
+          setSubmitted(true);
+          setModalOpen(false);
+        }}
+      />
     </div>
   );
 }
