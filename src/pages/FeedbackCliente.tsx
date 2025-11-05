@@ -193,14 +193,15 @@ export default function FeedbackCliente() {
                 <img src={logoLight} alt="Rhello" className="h-10" />
               </picture>
             </div>
-            <CardTitle className="text-center">Deixe seu feedback sobre o candidato</CardTitle>
-            <CardDescription className="text-center">
-              <div className="space-y-1 mt-2">
-                <p><strong>Candidato:</strong> {requestData?.candidate_name}</p>
+            <CardTitle className="text-center text-2xl">Avaliação de Candidato</CardTitle>
+            <div className="mt-6 p-4 rounded-lg bg-primary/5 border border-primary/20">
+              <p className="text-sm text-muted-foreground text-center mb-2">Candidato avaliado</p>
+              <p className="text-2xl font-bold text-center text-primary">{requestData?.candidate_name || 'Carregando...'}</p>
+              <div className="mt-4 space-y-1 text-center text-sm">
                 <p><strong>Vaga:</strong> {requestData?.vacancy_title}</p>
                 {requestData?.company_name && <p><strong>Empresa:</strong> {requestData.company_name}</p>}
               </div>
-            </CardDescription>
+            </div>
           </CardHeader>
 
           <CardContent>

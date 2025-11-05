@@ -27,12 +27,12 @@ Deno.serve(async (req) => {
         candidato_id,
         allow_multiple,
         expires_at,
-        vagas:vaga_id (
+        vagas!feedback_requests_vaga_id_fkey (
           id,
           titulo,
           empresa
         ),
-        candidatos:candidato_id (
+        candidatos!feedback_requests_candidato_id_fkey (
           id,
           nome_completo
         )
@@ -82,10 +82,15 @@ Deno.serve(async (req) => {
       }
     }
 
-    console.log('Token validado com sucesso:', { request_id: request.id });
-
     const candidato = Array.isArray(request.candidatos) ? request.candidatos[0] : request.candidatos;
     const vaga = Array.isArray(request.vagas) ? request.vagas[0] : request.vagas;
+
+    console.log('Token validado com sucesso:', { 
+      request_id: request.id,
+      candidato: candidato,
+      vaga: vaga,
+      candidate_name: candidato?.nome_completo 
+    });
 
     return new Response(
       JSON.stringify({
