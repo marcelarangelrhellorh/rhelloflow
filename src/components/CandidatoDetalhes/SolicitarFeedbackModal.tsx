@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,10 +24,57 @@ export function SolicitarFeedbackModal({
   candidatoNome 
 }: SolicitarFeedbackModalProps) {
   const [loading, setLoading] = useState(false);
+  const [checkingExisting, setCheckingExisting] = useState(true);
   const [feedbackLink, setFeedbackLink] = useState<string | null>(null);
+  const [existingRequestId, setExistingRequestId] = useState<string | null>(null);
+  const [expiresAt, setExpiresAt] = useState<string | null>(null);
   const [expiresInDays, setExpiresInDays] = useState(14);
   const [allowMultiple, setAllowMultiple] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [showNewLinkForm, setShowNewLinkForm] = useState(false);
+
+  useEffect(() => {
+    if (open && vagaId) {
+      checkExistingLink();
+    }
+  }, [open, vagaId, candidatoId]);
+
+  const checkExistingLink = async () => {
+    if (!vagaId) return;
+
+    setCheckingExisting(true);
+    try {
+      // Buscar link ativo existente
+      const { data, error } = await supabase
+        .from('feedback_requests')
+        .select('id, token, expires_at, allow_multiple')
+        .eq('vaga_id', vagaId)
+        .eq('candidato_id', candidatoId)
+        .gt('expires_at', new Date().toISOString())
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (error && error.code !== 'PGRST116') throw error;
+
+      if (data) {
+        // Link existente encontrado
+        const baseUrl = window.location.origin;
+        setFeedbackLink(`${baseUrl}/feedback/${data.token}`);
+        setExistingRequestId(data.id);
+        setExpiresAt(data.expires_at);
+        setAllowMultiple(data.allow_multiple);
+      } else {
+        // Nenhum link ativo, mostrar formulário
+        setShowNewLinkForm(true);
+      }
+    } catch (error) {
+      console.error("Erro ao verificar link existente:", error);
+      setShowNewLinkForm(true);
+    } finally {
+      setCheckingExisting(false);
+    }
+  };
 
   const handleGenerate = async () => {
     if (!vagaId) {
@@ -49,6 +96,8 @@ export function SolicitarFeedbackModal({
       if (error) throw error;
 
       setFeedbackLink(data.feedback_link);
+      setExpiresAt(data.expires_at);
+      setShowNewLinkForm(false);
       toast.success("Link de feedback gerado com sucesso!");
     } catch (error) {
       console.error("Erro ao gerar link:", error);
@@ -69,8 +118,29 @@ export function SolicitarFeedbackModal({
 
   const handleClose = () => {
     setFeedbackLink(null);
+    setExistingRequestId(null);
+    setExpiresAt(null);
+    setShowNewLinkForm(false);
     setCopied(false);
+    setCheckingExisting(true);
     onOpenChange(false);
+  };
+
+  const handleGenerateNew = () => {
+    setFeedbackLink(null);
+    setExistingRequestId(null);
+    setShowNewLinkForm(true);
+  };
+
+  const formatExpirationDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pt-BR', { 
+      day: '2-digit', 
+      month: 'long', 
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   return (
@@ -79,11 +149,21 @@ export function SolicitarFeedbackModal({
         <DialogHeader>
           <DialogTitle>Solicitar Feedback do Cliente</DialogTitle>
           <DialogDescription>
-            Gere um link seguro para o cliente enviar feedback sobre {candidatoNome}
+            {feedbackLink && !showNewLinkForm 
+              ? `Link ativo para feedback sobre ${candidatoNome}`
+              : `Gere um link seguro para o cliente enviar feedback sobre ${candidatoNome}`
+            }
           </DialogDescription>
         </DialogHeader>
 
-        {!feedbackLink ? (
+        {checkingExisting ? (
+          <div className="flex items-center justify-center py-8">
+            <div className="flex flex-col items-center gap-3">
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+              <p className="text-sm text-muted-foreground">Verificando links existentes...</p>
+            </div>
+          </div>
+        ) : !feedbackLink && showNewLinkForm ? (
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="expires">Validade do link (dias)</Label>
@@ -106,11 +186,13 @@ export function SolicitarFeedbackModal({
               />
             </div>
           </div>
-        ) : (
+        ) : feedbackLink ? (
           <div className="space-y-4 py-4">
             <div className="flex items-center gap-2 p-3 bg-success/10 border border-success/20 rounded-md">
               <CheckCircle2 className="h-5 w-5 text-success" />
-              <p className="text-sm text-success font-medium">Link gerado com sucesso!</p>
+              <p className="text-sm text-success font-medium">
+                {existingRequestId ? "Link ativo encontrado!" : "Link gerado com sucesso!"}
+              </p>
             </div>
 
             <div className="space-y-2">
@@ -136,14 +218,31 @@ export function SolicitarFeedbackModal({
               </div>
             </div>
 
-            <p className="text-sm text-muted-foreground">
-              Válido por {expiresInDays} dias. {allowMultiple ? "Permite múltiplas respostas." : "Permite apenas uma resposta."}
-            </p>
+            {expiresAt && (
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">
+                  <strong>Válido até:</strong> {formatExpirationDate(expiresAt)}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {allowMultiple ? "✓ Permite múltiplas respostas" : "• Permite apenas uma resposta"}
+                </p>
+              </div>
+            )}
+
+            {existingRequestId && (
+              <Button
+                variant="outline"
+                onClick={handleGenerateNew}
+                className="w-full"
+              >
+                Gerar novo link
+              </Button>
+            )}
           </div>
-        )}
+        ) : null}
 
         <DialogFooter>
-          {!feedbackLink ? (
+          {checkingExisting ? null : !feedbackLink && showNewLinkForm ? (
             <>
               <Button variant="outline" onClick={handleClose}>
                 Cancelar
@@ -152,7 +251,7 @@ export function SolicitarFeedbackModal({
                 {loading ? "Gerando..." : "Gerar Link"}
               </Button>
             </>
-          ) : (
+          ) : feedbackLink ? (
             <>
               <Button variant="outline" onClick={handleClose}>
                 Fechar
@@ -162,7 +261,7 @@ export function SolicitarFeedbackModal({
                 Abrir Link
               </Button>
             </>
-          )}
+          ) : null}
         </DialogFooter>
       </DialogContent>
     </Dialog>
