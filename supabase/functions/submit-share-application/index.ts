@@ -216,7 +216,7 @@ serve(async (req) => {
       vaga_relacionada_id: shareLink.vaga_id,
       source_link_id: shareLink.id,
       utm: utm || null,
-      status: 'Banco de Talentos',
+      status: 'Selecionado',
       origem: 'Link de Divulgação',
     };
 
