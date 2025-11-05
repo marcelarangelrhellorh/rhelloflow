@@ -222,9 +222,9 @@ export default function FeedbackCliente() {
                     <SelectValue placeholder="Selecione (opcional)" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Aprovado">✅ Aprovado</SelectItem>
-                    <SelectItem value="Reprovado">❌ Reprovado</SelectItem>
-                    <SelectItem value="Neutro">⚪ Neutro</SelectItem>
+                    <SelectItem value="aprovado">✅ Aprovado</SelectItem>
+                    <SelectItem value="reprovado">❌ Reprovado</SelectItem>
+                    <SelectItem value="neutro">⚪ Neutro</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
