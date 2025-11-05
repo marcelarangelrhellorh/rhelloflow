@@ -254,7 +254,6 @@ export default function FeedbackCliente() {
                   <SelectContent>
                     <SelectItem value="aprovado">✅ Aprovado</SelectItem>
                     <SelectItem value="reprovado">❌ Reprovado</SelectItem>
-                    <SelectItem value="neutro">⚪ Neutro</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
