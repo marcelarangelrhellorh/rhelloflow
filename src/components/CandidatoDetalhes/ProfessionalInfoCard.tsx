@@ -20,6 +20,7 @@ interface ProfessionalInfoCardProps {
   pontosFortes: string | null;
   pontosDesenvolver: string | null;
   parecerFinal: string | null;
+  origem: string | null;
   onVagaClick?: () => void;
 }
 
@@ -38,6 +39,7 @@ export function ProfessionalInfoCard({
   pontosFortes,
   pontosDesenvolver,
   parecerFinal,
+  origem,
   onVagaClick,
 }: ProfessionalInfoCardProps) {
   const formatCurrency = (value: number | null) => {
@@ -174,6 +176,19 @@ export function ProfessionalInfoCard({
             </p>
             <p className="text-base font-medium text-card-foreground">{formatDate(dataCadastro)}</p>
           </div>
+
+          {/* Origem */}
+          {origem && (
+            <div className="sm:col-span-2">
+              <p className="text-sm text-muted-foreground mb-1 flex items-center gap-1">
+                <ExternalLink className="h-3.5 w-3.5" />
+                Origem do Candidato
+              </p>
+              <Badge variant="outline" className="font-medium">
+                {origem}
+              </Badge>
+            </div>
+          )}
         </div>
 
         <Separator />

@@ -38,6 +38,7 @@ type Candidato = {
   parecer_final: string | null;
   feedback: string | null;
   criado_em: string;
+  origem: string | null;
 };
 
 type Vaga = {
@@ -385,6 +386,7 @@ export default function CandidatoDetalhes() {
             pontosFortes={candidato.pontos_fortes}
             pontosDesenvolver={candidato.pontos_desenvolver}
             parecerFinal={candidato.parecer_final}
+            origem={candidato.origem}
             onVagaClick={() => vaga && navigate(`/vagas/${vaga.id}`)}
           />
         </div>
