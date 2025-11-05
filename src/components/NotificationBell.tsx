@@ -129,9 +129,12 @@ export function NotificationBell() {
       vaga: "💼",
       candidato: "👤",
       feedback: "💬",
+      feedback_cliente: "👤💬",
       sistema: "🔔",
       stage_age_threshold: "⚠️",
-      no_activity: "📅"
+      no_activity: "📅",
+      candidatura_externa: "📨",
+      etapa_vaga: "📋"
     };
     return icons[kind as keyof typeof icons] || "🔔";
   };
@@ -157,7 +160,7 @@ export function NotificationBell() {
         <Button 
           variant="ghost" 
           size="icon" 
-          className="relative shrink-0"
+          className="relative shrink-0 text-white hover:text-[#F9EC3F] hover:bg-white/10"
           title="Notificações"
         >
           <Bell className="h-5 w-5" />
