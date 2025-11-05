@@ -26,6 +26,7 @@ interface CandidateCardProps {
   onEdit: () => void;
   onDelete: () => void;
   onLinkJob: () => void;
+  viewMode?: "grid" | "list";
 }
 
 const statusColors: Record<string, string> = {
@@ -52,7 +53,7 @@ const statusIcons: Record<string, string> = {
   "Contratado": "✅",
 };
 
-export function CandidateCard({ candidato, onView, onEdit, onDelete, onLinkJob }: CandidateCardProps) {
+export function CandidateCard({ candidato, onView, onEdit, onDelete, onLinkJob, viewMode = "grid" }: CandidateCardProps) {
   const getInitials = (name: string) => {
     const parts = name.split(" ");
     return parts.length >= 2
