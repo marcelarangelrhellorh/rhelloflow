@@ -8,6 +8,7 @@ import { JOB_STAGES, getStageIndex, calculateProgress } from "@/lib/jobStages";
 import { getEventoIcon, getEventoColor, type TipoEvento, logVagaEvento } from "@/lib/vagaEventos";
 import { formatSalaryRange } from "@/lib/salaryUtils";
 import { ExternalJobBanner } from "@/components/ExternalJobBanner";
+import { ShareJobModal } from "@/components/ShareJobModal";
 import { toast } from "@/hooks/use-toast";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Progress } from "@/components/ui/progress";
@@ -81,6 +82,7 @@ export default function VagaDetalhes() {
   const [candidatoContratado, setCandidatoContratado] = useState<Candidato | null>(null);
   const [eventos, setEventos] = useState<VagaEvento[]>([]);
   const [loading, setLoading] = useState(true);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -379,19 +381,35 @@ export default function VagaDetalhes() {
           )}
 
           {/* Title Section */}
-          <div className="mb-8">
-            <h1 className="text-primary-text-light dark:text-primary-text-dark text-4xl font-black tracking-tight">
-              Status da Contratação: {vaga.titulo}
-            </h1>
+          <div className="mb-8 flex justify-between items-start">
+            <div>
+              <h1 className="text-primary-text-light dark:text-primary-text-dark text-4xl font-black tracking-tight">
+                Status da Contratação: {vaga.titulo}
+              </h1>
             <p className="text-secondary-text-light dark:text-secondary-text-dark text-base font-normal mt-2">
               Acompanhe o progresso do processo de contratação para a vaga de {vaga.titulo}, {vaga.empresa}.
             </p>
-            {(vaga.salario_min || vaga.salario_max || vaga.salario_modalidade) && (
-              <p className="text-secondary-text-light dark:text-secondary-text-dark text-sm font-medium mt-1">
-                Faixa Salarial: {formatSalaryRange(vaga.salario_min, vaga.salario_max, vaga.salario_modalidade)}
-              </p>
-            )}
+              {(vaga.salario_min || vaga.salario_max || vaga.salario_modalidade) && (
+                <p className="text-secondary-text-light dark:text-secondary-text-dark text-sm font-medium mt-1">
+                  Faixa Salarial: {formatSalaryRange(vaga.salario_min, vaga.salario_max, vaga.salario_modalidade)}
+                </p>
+              )}
+            </div>
+            <button
+              onClick={() => setShareModalOpen(true)}
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors flex items-center gap-2"
+            >
+              <span className="material-symbols-outlined text-xl">share</span>
+              Compartilhar Vaga
+            </button>
           </div>
+
+          <ShareJobModal 
+            open={shareModalOpen}
+            onOpenChange={setShareModalOpen}
+            vagaId={vaga.id}
+            vagaTitulo={vaga.titulo}
+          />
 
           {/* KPI Cards Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">

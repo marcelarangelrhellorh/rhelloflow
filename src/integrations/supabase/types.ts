@@ -111,10 +111,12 @@ export type Database = {
           portfolio_url: string | null
           pretensao_salarial: number | null
           recrutador: string | null
+          source_link_id: string | null
           status: Database["public"]["Enums"]["status_candidato"] | null
           telefone: string | null
           total_feedbacks: number
           ultimo_feedback: string | null
+          utm: Json | null
           vaga_relacionada_id: string | null
         }
         Insert: {
@@ -142,10 +144,12 @@ export type Database = {
           portfolio_url?: string | null
           pretensao_salarial?: number | null
           recrutador?: string | null
+          source_link_id?: string | null
           status?: Database["public"]["Enums"]["status_candidato"] | null
           telefone?: string | null
           total_feedbacks?: number
           ultimo_feedback?: string | null
+          utm?: Json | null
           vaga_relacionada_id?: string | null
         }
         Update: {
@@ -173,13 +177,22 @@ export type Database = {
           portfolio_url?: string | null
           pretensao_salarial?: number | null
           recrutador?: string | null
+          source_link_id?: string | null
           status?: Database["public"]["Enums"]["status_candidato"] | null
           telefone?: string | null
           total_feedbacks?: number
           ultimo_feedback?: string | null
+          utm?: Json | null
           vaga_relacionada_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "candidatos_source_link_id_fkey"
+            columns: ["source_link_id"]
+            isOneToOne: false
+            referencedRelation: "share_links"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "candidatos_vaga_relacionada_id_fkey"
             columns: ["vaga_relacionada_id"]
@@ -727,6 +740,110 @@ export type Database = {
           role?: string | null
         }
         Relationships: []
+      }
+      share_link_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          ip_address: string | null
+          metadata: Json | null
+          share_link_id: string
+          user_agent: string | null
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          share_link_id: string
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          share_link_id?: string
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "share_link_events_share_link_id_fkey"
+            columns: ["share_link_id"]
+            isOneToOne: false
+            referencedRelation: "share_links"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      share_links: {
+        Row: {
+          active: boolean
+          created_at: string
+          created_by: string | null
+          expires_at: string | null
+          id: string
+          max_submissions: number | null
+          password_hash: string | null
+          submissions_count: number
+          token: string
+          updated_at: string
+          vaga_id: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          max_submissions?: number | null
+          password_hash?: string | null
+          submissions_count?: number
+          token: string
+          updated_at?: string
+          vaga_id: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          max_submissions?: number | null
+          password_hash?: string | null
+          submissions_count?: number
+          token?: string
+          updated_at?: string
+          vaga_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "share_links_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vagas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "share_links_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vagas_active"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
