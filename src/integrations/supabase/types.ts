@@ -358,6 +358,68 @@ export type Database = {
           },
         ]
       }
+      feedback_requests: {
+        Row: {
+          allow_multiple: boolean | null
+          candidato_id: string
+          created_at: string | null
+          expires_at: string
+          id: string
+          recrutador_id: string
+          token: string
+          vaga_id: string
+        }
+        Insert: {
+          allow_multiple?: boolean | null
+          candidato_id: string
+          created_at?: string | null
+          expires_at: string
+          id?: string
+          recrutador_id: string
+          token: string
+          vaga_id: string
+        }
+        Update: {
+          allow_multiple?: boolean | null
+          candidato_id?: string
+          created_at?: string | null
+          expires_at?: string
+          id?: string
+          recrutador_id?: string
+          token?: string
+          vaga_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_requests_candidato_id_fkey"
+            columns: ["candidato_id"]
+            isOneToOne: false
+            referencedRelation: "candidatos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_requests_candidato_id_fkey"
+            columns: ["candidato_id"]
+            isOneToOne: false
+            referencedRelation: "candidatos_active"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_requests_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vagas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_requests_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vagas_active"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       feedbacks: {
         Row: {
           atualizado_em: string
@@ -373,7 +435,14 @@ export type Database = {
           disposicao: string | null
           etapa: string | null
           id: string
+          ip_address: string | null
+          origem: string | null
+          quick_tags: string[] | null
+          request_id: string | null
+          sender_email: string | null
+          sender_name: string | null
           tipo: string
+          user_agent: string | null
           vaga_id: string | null
         }
         Insert: {
@@ -390,7 +459,14 @@ export type Database = {
           disposicao?: string | null
           etapa?: string | null
           id?: string
+          ip_address?: string | null
+          origem?: string | null
+          quick_tags?: string[] | null
+          request_id?: string | null
+          sender_email?: string | null
+          sender_name?: string | null
           tipo: string
+          user_agent?: string | null
           vaga_id?: string | null
         }
         Update: {
@@ -407,7 +483,14 @@ export type Database = {
           disposicao?: string | null
           etapa?: string | null
           id?: string
+          ip_address?: string | null
+          origem?: string | null
+          quick_tags?: string[] | null
+          request_id?: string | null
+          sender_email?: string | null
+          sender_name?: string | null
           tipo?: string
+          user_agent?: string | null
           vaga_id?: string | null
         }
         Relationships: [
@@ -423,6 +506,13 @@ export type Database = {
             columns: ["candidato_id"]
             isOneToOne: false
             referencedRelation: "candidatos_active"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedbacks_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_requests"
             referencedColumns: ["id"]
           },
           {

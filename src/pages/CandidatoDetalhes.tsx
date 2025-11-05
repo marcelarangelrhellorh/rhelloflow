@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { CandidateHeader } from "@/components/CandidatoDetalhes/CandidateHeader";
@@ -11,6 +11,7 @@ import { ContactCard } from "@/components/CandidatoDetalhes/ContactCard";
 import { ProfessionalInfoCard } from "@/components/CandidatoDetalhes/ProfessionalInfoCard";
 import { FeedbackList } from "@/components/CandidatoDetalhes/FeedbackList";
 import { FeedbackModal } from "@/components/CandidatoDetalhes/FeedbackModal";
+import { SolicitarFeedbackModal } from "@/components/CandidatoDetalhes/SolicitarFeedbackModal";
 import { HistoryTimeline } from "@/components/CandidatoDetalhes/HistoryTimeline";
 import { LinkToJobModal } from "@/components/BancoTalentos/LinkToJobModal";
 
@@ -78,6 +79,7 @@ export default function CandidatoDetalhes() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [relocateModalOpen, setRelocateModalOpen] = useState(false);
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
+  const [solicitarFeedbackModalOpen, setSolicitarFeedbackModalOpen] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -394,10 +396,18 @@ export default function CandidatoDetalhes() {
         </div>
 
         {/* Feedbacks */}
-        <FeedbackList
-          candidatoId={id!}
-          onAddFeedback={() => setFeedbackModalOpen(true)}
-        />
+        <div className="space-y-4">
+          <div className="flex justify-end">
+            <Button onClick={() => setSolicitarFeedbackModalOpen(true)} size="sm" variant="outline">
+              <ExternalLink className="h-4 w-4 mr-2" />
+              Solicitar Feedback do Cliente
+            </Button>
+          </div>
+          <FeedbackList
+            candidatoId={id!}
+            onAddFeedback={() => setFeedbackModalOpen(true)}
+          />
+        </div>
 
         {/* History Timeline */}
         <HistoryTimeline
@@ -447,6 +457,15 @@ export default function CandidatoDetalhes() {
         onSuccess={() => {
           loadCandidato();
         }}
+      />
+
+      {/* Solicitar Feedback Modal */}
+      <SolicitarFeedbackModal
+        open={solicitarFeedbackModalOpen}
+        onOpenChange={setSolicitarFeedbackModalOpen}
+        candidatoId={id!}
+        vagaId={candidato.vaga_relacionada_id}
+        candidatoNome={candidato.nome_completo}
       />
     </div>
   );

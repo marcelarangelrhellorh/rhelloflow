@@ -10,6 +10,7 @@ import VagaForm from "./pages/VagaForm";
 import PublicVagaForm from "./pages/PublicVagaForm";
 import VagaDetalhes from "./pages/VagaDetalhes";
 import ShareJob from "./pages/ShareJob";
+import FeedbackCliente from "./pages/FeedbackCliente";
 import FunilVagas from "./pages/FunilVagas";
 import Candidatos from "./pages/Candidatos";
 import CandidatoForm from "./pages/CandidatoForm";
@@ -36,6 +37,7 @@ const App = () => (
           <Route path="/login" element={<Auth />} />
           <Route path="/solicitar-vaga" element={<PublicVagaForm />} />
           <Route path="/share/:token" element={<ShareJob />} />
+          <Route path="/feedback/:token" element={<FeedbackCliente />} />
           <Route element={<Layout />}>
             <Route path="/" element={<Dashboard />} />
             <Route path="/vagas" element={<Vagas />} />

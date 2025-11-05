@@ -15,6 +15,9 @@ interface Feedback {
   disposicao?: "aprovado" | "reprovado" | "neutro" | null;
   avaliacao?: number | null;
   author_user_id: string;
+  origem?: string;
+  sender_name?: string;
+  quick_tags?: string[];
 }
 
 interface FeedbackListProps {
@@ -189,13 +192,21 @@ export function FeedbackList({ candidatoId, onAddFeedback }: FeedbackListProps) 
                     <Badge
                       variant="outline"
                       className={
-                        feedback.tipo === "interno"
+                        feedback.origem === "cliente"
+                          ? "bg-blue-500/10 text-blue-500 border-blue-500/20"
+                          : feedback.tipo === "interno"
                           ? "bg-muted/10 text-muted-foreground border-muted"
                           : "bg-primary/10 text-primary border-primary/20"
                       }
                     >
-                      {feedback.tipo === "interno" ? "💬 Interno" : "📋 Cliente"}
+                      {feedback.origem === "cliente" ? "👤 Feedback do Cliente" : feedback.tipo === "interno" ? "💬 Interno" : "📋 Cliente"}
                     </Badge>
+
+                    {feedback.sender_name && (
+                      <span className="text-xs text-muted-foreground">
+                        por {feedback.sender_name}
+                      </span>
+                    )}
                     
                     {feedback.disposicao && (
                       <Badge
@@ -216,6 +227,16 @@ export function FeedbackList({ candidatoId, onAddFeedback }: FeedbackListProps) 
                       <Badge variant="outline" className="text-xs">
                         {feedback.avaliacao} <Star className="ml-1 h-3 w-3 fill-current" />
                       </Badge>
+                    )}
+
+                    {feedback.quick_tags && feedback.quick_tags.length > 0 && (
+                      <div className="flex gap-1 flex-wrap">
+                        {feedback.quick_tags.map((tag, idx) => (
+                          <Badge key={idx} variant="outline" className="text-xs">
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
                     )}
                   </div>
 
