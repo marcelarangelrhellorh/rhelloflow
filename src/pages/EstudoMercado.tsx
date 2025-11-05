@@ -24,7 +24,7 @@ interface EstudoMercado {
   beneficios: string[];
   demanda: "Alta" | "Média" | "Baixa";
   tendencia_short: string | null;
-  fontes: string[];
+  fontes: Array<{ nome: string; url: string }>;
   observacoes: string;
   raw?: object;
 }
@@ -366,9 +366,20 @@ export default function EstudoMercado() {
                 <p className="text-sm text-muted-foreground mb-2">Fontes Consultadas:</p>
                 <div className="flex flex-wrap gap-2">
                   {estudo.fontes.map((fonte, index) => (
-                    <Badge key={index} variant="outline">
-                      {fonte}
-                    </Badge>
+                    <a
+                      key={index}
+                      href={fonte.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block"
+                    >
+                      <Badge 
+                        variant="outline" 
+                        className="cursor-pointer hover:bg-primary/10 transition-colors"
+                      >
+                        {fonte.nome} →
+                      </Badge>
+                    </a>
                   ))}
                 </div>
               </div>

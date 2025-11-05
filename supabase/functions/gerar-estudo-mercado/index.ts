@@ -27,7 +27,7 @@ SCHEMA DE SAÍDA OBRIGATÓRIO (RETORNE APENAS ESTE JSON):
   "beneficios": string[],
   "demanda": "Alta" | "Média" | "Baixa",
   "tendencia_short": string|null,
-  "fontes": string[],
+  "fontes": Array<{nome: string, url: string}>,
   "observacoes": string,
   "raw": object
 }
@@ -45,9 +45,14 @@ REGRAS DE CÁLCULO / DECISÕES:
 
 - Benefícios: liste até 6 itens mais frequentes; se nenhum dado, retorne array vazio.
 
+- Fontes: SEMPRE retorne um array de objetos com "nome" e "url". Para cada fonte consultada, forneça o link direto da página onde os dados foram encontrados. Exemplos:
+  - {"nome": "Glassdoor", "url": "https://www.glassdoor.com.br/Salários/[cargo]-sls-[codigo].htm"}
+  - {"nome": "Salario.com.br", "url": "https://www.salario.com.br/profissao/[cargo]"}
+  - Se não houver URL disponível, use a home page da fonte.
+
 IMPORTANTE:
 - RETORNE somente o JSON (sem comentários, sem texto extra).
-- Cite em "fontes" apenas as fontes realmente consultadas.`;
+- Cite em "fontes" apenas as fontes realmente consultadas COM SEUS LINKS DIRETOS.`;
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
