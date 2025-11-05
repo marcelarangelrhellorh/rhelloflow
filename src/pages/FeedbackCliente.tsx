@@ -31,6 +31,7 @@ interface RequestData {
   company_name: string;
   expires_at: string;
   allow_multiple: boolean;
+  already_submitted?: boolean;
 }
 
 export default function FeedbackCliente() {
@@ -156,7 +157,7 @@ export default function FeedbackCliente() {
     );
   }
 
-  if (submitted) {
+  if (submitted || requestData?.already_submitted) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
         <Card className="max-w-md w-full">
@@ -174,7 +175,10 @@ export default function FeedbackCliente() {
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground">
-              Obrigado pelo seu feedback sobre {requestData?.candidate_name}. O recrutador será notificado.
+              {submitted 
+                ? `Obrigado pelo seu feedback sobre ${requestData?.candidate_name}. O recrutador será notificado.`
+                : 'Este link já foi utilizado para enviar feedback. Obrigado!'
+              }
             </p>
           </CardContent>
         </Card>

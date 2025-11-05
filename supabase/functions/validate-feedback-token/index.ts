@@ -71,6 +71,7 @@ Deno.serve(async (req) => {
     }
 
     // Verificar se já foi enviado feedback (se allow_multiple = false)
+    let already_submitted = false;
     if (!request.allow_multiple) {
       const { data: existingFeedback } = await supabase
         .from('feedbacks')
@@ -78,22 +79,15 @@ Deno.serve(async (req) => {
         .eq('request_id', request.id)
         .maybeSingle();
 
-      if (existingFeedback) {
-        return new Response(
-          JSON.stringify({ error: 'Feedback já enviado para este link.' }),
-          {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            status: 409,
-          }
-        );
-      }
+      already_submitted = !!existingFeedback;
     }
 
     console.log('Token validado com sucesso:', { 
       request_id: request.id,
       candidato: candidato,
       vaga: vaga,
-      candidate_name: candidato?.nome_completo 
+      candidate_name: candidato?.nome_completo,
+      already_submitted 
     });
 
     return new Response(
@@ -104,6 +98,7 @@ Deno.serve(async (req) => {
         company_name: vaga?.empresa || '',
         expires_at: request.expires_at,
         allow_multiple: request.allow_multiple,
+        already_submitted,
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
