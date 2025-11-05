@@ -335,32 +335,49 @@ export function CandidateModal({ open, onClose, candidatoId, onSave }: Candidate
                 />
               </div>
 
+            </CardContent>
+          </Card>
+
+          {/* Origem do Candidato - Seção separada mais visível */}
+          <Card className="border-primary/20">
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                <span>📍</span> Origem do Candidato
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
               <div>
-                <Label htmlFor="origem">Origem do Candidato</Label>
+                <Label htmlFor="origem">Como este candidato chegou até nós? *</Label>
                 <Select 
                   value={formData.origem} 
                   onValueChange={(value) => setFormData({ ...formData, origem: value })}
                   disabled={hasSourceLink}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="mt-2">
                     <SelectValue placeholder={hasSourceLink ? "Link de Divulgação" : "Selecione a origem"} />
                   </SelectTrigger>
                   <SelectContent className="bg-popover z-50">
-                    <SelectItem value="Link de Divulgação">Link de Divulgação</SelectItem>
-                    <SelectItem value="Pandapé">Pandapé</SelectItem>
-                    <SelectItem value="LinkedIn">LinkedIn</SelectItem>
-                    <SelectItem value="Gupy">Gupy</SelectItem>
-                    <SelectItem value="Indeed">Indeed</SelectItem>
-                    <SelectItem value="Catho">Catho</SelectItem>
-                    <SelectItem value="Indicação">Indicação</SelectItem>
-                    <SelectItem value="Site da Empresa">Site da Empresa</SelectItem>
-                    <SelectItem value="Outra">Outra</SelectItem>
+                    <SelectItem value="Link de Divulgação">🔗 Link de Divulgação</SelectItem>
+                    <SelectItem value="Pandapé">🐼 Pandapé</SelectItem>
+                    <SelectItem value="LinkedIn">💼 LinkedIn</SelectItem>
+                    <SelectItem value="Gupy">🎯 Gupy</SelectItem>
+                    <SelectItem value="Indeed">📋 Indeed</SelectItem>
+                    <SelectItem value="Catho">📊 Catho</SelectItem>
+                    <SelectItem value="Indicação">👥 Indicação</SelectItem>
+                    <SelectItem value="Site da Empresa">🌐 Site da Empresa</SelectItem>
+                    <SelectItem value="Instagram">📸 Instagram</SelectItem>
+                    <SelectItem value="WhatsApp">💬 WhatsApp</SelectItem>
+                    <SelectItem value="E-mail Direto">✉️ E-mail Direto</SelectItem>
+                    <SelectItem value="Outra">➕ Outra</SelectItem>
                   </SelectContent>
                 </Select>
                 {hasSourceLink && (
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Este candidato veio através de um link de divulgação
-                  </p>
+                  <div className="mt-3 p-3 bg-primary/5 border border-primary/20 rounded-lg">
+                    <p className="text-sm text-muted-foreground flex items-center gap-2">
+                      <span className="text-primary">ℹ️</span>
+                      Este candidato se inscreveu através de um link público de divulgação da vaga
+                    </p>
+                  </div>
                 )}
               </div>
             </CardContent>

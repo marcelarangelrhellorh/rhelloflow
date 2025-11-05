@@ -177,18 +177,20 @@ export function ProfessionalInfoCard({
             <p className="text-base font-medium text-card-foreground">{formatDate(dataCadastro)}</p>
           </div>
 
-          {/* Origem */}
-          {origem && (
-            <div className="sm:col-span-2">
-              <p className="text-sm text-muted-foreground mb-1 flex items-center gap-1">
-                <ExternalLink className="h-3.5 w-3.5" />
-                Origem do Candidato
-              </p>
-              <Badge variant="outline" className="font-medium">
-                {origem}
+          {/* Origem - Mais visível */}
+          <div className="sm:col-span-2">
+            <p className="text-sm text-muted-foreground mb-2 flex items-center gap-1.5 font-medium">
+              <ExternalLink className="h-4 w-4" />
+              Origem do Candidato
+            </p>
+            {origem ? (
+              <Badge className="bg-primary/10 text-primary border-primary/20 px-3 py-1.5 text-sm font-semibold">
+                📍 {origem}
               </Badge>
-            </div>
-          )}
+            ) : (
+              <p className="text-sm text-muted-foreground italic">Não informado</p>
+            )}
+          </div>
         </div>
 
         <Separator />
