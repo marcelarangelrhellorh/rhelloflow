@@ -3,64 +3,29 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { MultiSelect } from "@/components/ui/multi-select";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, EyeOff, TrendingUp, Users, Clock, Target } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { Loader2, TrendingUp, TrendingDown, Minus, AlertCircle } from "lucide-react";
 
 interface EstudoMercado {
-  faixa_salarial: {
-    junior: { min: number | null; med: number | null; max: number | null; fontes: string[] };
-    pleno: { min: number | null; med: number | null; max: number | null; fontes: string[] };
-    senior: { min: number | null; med: number | null; max: number | null; fontes: string[] };
-  };
-  beneficios: {
-    recorrentes: string[];
-    diferenciais: string[];
-  };
-  concorrencia: "Alta" | "Média" | "Baixa";
-  tendencias: string[];
-  dificuldade: {
-    nivel: "Alta" | "Média" | "Baixa";
-    tempo_medio_dias: number | null;
-  };
-  comparativo: {
-    cliente: { salario: number | null; modelo: string | null; beneficios: string[] | null };
-    mercado: { salario_med_pleno: number | null; modelo_pred: string | null; beneficios_mais_comuns: string[] | null };
-    atratividade: "Alta" | "Média" | "Baixa";
-  };
-  recomendacoes: string[];
-  metodologia: {
-    periodo: string;
-    fontes: string[];
-    observacoes: string;
-  };
+  funcao: string;
+  regiao: string;
+  tipo_contratacao: string | null;
+  jornada: string | null;
+  salario_media: number | null;
+  salario_min: number | null;
+  salario_max: number | null;
+  salario_ofertado: number | null;
+  comparacao_oferta: "Abaixo" | "Dentro" | "Acima" | "Sem dado";
+  beneficios: string[];
+  demanda: "Alta" | "Média" | "Baixa";
+  tendencia_short: string | null;
+  fontes: string[];
+  observacoes: string;
+  raw?: object;
 }
-
-const ESTADOS_BR = [
-  "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS", "MG",
-  "PA", "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO"
-];
-
-const BENEFICIOS_OPTIONS = [
-  { label: "Vale Refeição", value: "vale_refeicao" },
-  { label: "Vale Alimentação", value: "vale_alimentacao" },
-  { label: "Vale Transporte", value: "vale_transporte" },
-  { label: "Plano de Saúde", value: "plano_saude" },
-  { label: "Plano Odontológico", value: "plano_odontologico" },
-  { label: "Auxílio Creche", value: "auxilio_creche" },
-  { label: "Seguro de Vida", value: "seguro_vida" },
-  { label: "Participação nos Lucros (PLR)", value: "plr" },
-  { label: "Gympass", value: "gympass" },
-  { label: "Day Off", value: "day_off" },
-  { label: "Home Office", value: "home_office" },
-  { label: "Auxílio Home Office", value: "auxilio_home_office" },
-  { label: "Convênios e Descontos", value: "convenios" },
-];
 
 export default function EstudoMercado() {
   const [loading, setLoading] = useState(false);
@@ -68,19 +33,14 @@ export default function EstudoMercado() {
   
   // Form state
   const [funcao, setFuncao] = useState("");
-  const [senioridade, setSenioridade] = useState("");
-  const [cidade, setCidade] = useState("");
-  const [uf, setUf] = useState("");
-  const [modelo, setModelo] = useState("");
-  const [setor, setSetor] = useState("");
-  const [porte, setPorte] = useState("");
-  const [observacoes, setObservacoes] = useState("");
-  const [salarioCliente, setSalarioCliente] = useState("");
-  const [beneficiosCliente, setBeneficiosCliente] = useState<string[]>([]);
+  const [regiao, setRegiao] = useState("");
+  const [tipoContratacao, setTipoContratacao] = useState("");
+  const [jornada, setJornada] = useState("");
+  const [salarioOfertado, setSalarioOfertado] = useState("");
 
   const handleGerarEstudo = async () => {
-    if (!funcao || !cidade || !uf) {
-      toast.error("Preencha os campos obrigatórios: Função, Cidade e Estado");
+    if (!funcao || !regiao) {
+      toast.error("Preencha os campos obrigatórios: Função e Região");
       return;
     }
 
@@ -89,16 +49,10 @@ export default function EstudoMercado() {
       const { data, error } = await supabase.functions.invoke("gerar-estudo-mercado", {
         body: {
           funcao,
-          senioridade,
-          localizacao: { cidade, uf, modelo },
-          setor,
-          porte,
-          observacoes,
-          cliente: {
-            salario: salarioCliente ? parseFloat(salarioCliente) : null,
-            modelo,
-            beneficios: beneficiosCliente.map(b => BENEFICIOS_OPTIONS.find(opt => opt.value === b)?.label || b),
-          },
+          regiao,
+          tipo_contratacao: tipoContratacao || null,
+          jornada: jornada || null,
+          salario_ofertado: salarioOfertado ? parseFloat(salarioOfertado) : null,
         },
       });
 
@@ -113,38 +67,68 @@ export default function EstudoMercado() {
       toast.success("Estudo de mercado gerado com sucesso!");
     } catch (error: any) {
       console.error("Erro ao gerar estudo:", error);
-      toast.error("Erro ao gerar estudo de mercado");
+      toast.error(error.message || "Erro ao gerar estudo de mercado");
     } finally {
       setLoading(false);
     }
   };
 
   const formatCurrency = (value: number | null) => {
-    if (value === null) return <span className="text-muted-foreground italic">Não disponível</span>;
+    if (value === null) return "—";
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",
       currency: "BRL",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
     }).format(value);
   };
 
+  const getComparacaoIcon = (comparacao: string) => {
+    switch (comparacao) {
+      case "Abaixo":
+        return <TrendingDown className="h-5 w-5 text-red-500" />;
+      case "Acima":
+        return <TrendingUp className="h-5 w-5 text-green-500" />;
+      case "Dentro":
+        return <Minus className="h-5 w-5 text-blue-500" />;
+      default:
+        return <AlertCircle className="h-5 w-5 text-gray-500" />;
+    }
+  };
+
+  const getDemandaColor = (demanda: string) => {
+    switch (demanda) {
+      case "Alta":
+        return "bg-red-100 text-red-800 border-red-300";
+      case "Média":
+        return "bg-yellow-100 text-yellow-800 border-yellow-300";
+      case "Baixa":
+        return "bg-green-100 text-green-800 border-green-300";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-300";
+    }
+  };
+
   return (
-    <div className="container mx-auto p-6 space-y-8">
+    <div className="container mx-auto p-6 space-y-8 max-w-5xl">
       {/* Header */}
       <div className="text-center space-y-2">
-        <h1 className="text-4xl font-bold text-primary">📘 Estudo de Mercado – Rhello RH</h1>
-        <p className="text-muted-foreground">Gere insights de mercado com base no Discovery</p>
+        <h1 className="text-4xl font-bold text-primary">📘 Estudo de Mercado</h1>
+        <p className="text-muted-foreground">Análise objetiva baseada em fontes de mercado</p>
       </div>
 
       {/* Formulário */}
       <Card>
         <CardHeader>
-          <CardTitle>Informações da Vaga</CardTitle>
+          <CardTitle>Informações da Consulta</CardTitle>
           <CardDescription>Preencha os dados para gerar o estudo de mercado</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="funcao">Função *</Label>
+              <Label htmlFor="funcao">
+                Função <span className="text-red-500">*</span>
+              </Label>
               <Input
                 id="funcao"
                 placeholder="Ex: Analista de Customer Success"
@@ -154,121 +138,56 @@ export default function EstudoMercado() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="senioridade">Senioridade</Label>
-              <Select value={senioridade} onValueChange={setSenioridade}>
-                <SelectTrigger id="senioridade">
-                  <SelectValue placeholder="Selecione" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Junior">Junior</SelectItem>
-                  <SelectItem value="Pleno">Pleno</SelectItem>
-                  <SelectItem value="Senior">Senior</SelectItem>
-                  <SelectItem value="Coordenacao">Coordenação</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="cidade">Cidade *</Label>
+              <Label htmlFor="regiao">
+                Região <span className="text-red-500">*</span>
+              </Label>
               <Input
-                id="cidade"
-                placeholder="Ex: São Paulo"
-                value={cidade}
-                onChange={(e) => setCidade(e.target.value)}
+                id="regiao"
+                placeholder="Ex: São Paulo - SP"
+                value={regiao}
+                onChange={(e) => setRegiao(e.target.value)}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="uf">Estado *</Label>
-              <Select value={uf} onValueChange={setUf}>
-                <SelectTrigger id="uf">
-                  <SelectValue placeholder="Selecione" />
+              <Label htmlFor="tipoContratacao">Tipo de Contratação</Label>
+              <Select value={tipoContratacao} onValueChange={setTipoContratacao}>
+                <SelectTrigger id="tipoContratacao">
+                  <SelectValue placeholder="Selecione (opcional)" />
                 </SelectTrigger>
                 <SelectContent>
-                  {ESTADOS_BR.map((estado) => (
-                    <SelectItem key={estado} value={estado}>
-                      {estado}
-                    </SelectItem>
-                  ))}
+                  <SelectItem value="CLT">CLT</SelectItem>
+                  <SelectItem value="PJ">PJ</SelectItem>
+                  <SelectItem value="Temporário">Temporário</SelectItem>
+                  <SelectItem value="Estágio">Estágio</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="modelo">Modelo de Trabalho</Label>
-              <Select value={modelo} onValueChange={setModelo}>
-                <SelectTrigger id="modelo">
-                  <SelectValue placeholder="Selecione" />
+              <Label htmlFor="jornada">Modelo de Trabalho</Label>
+              <Select value={jornada} onValueChange={setJornada}>
+                <SelectTrigger id="jornada">
+                  <SelectValue placeholder="Selecione (opcional)" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Presencial">Presencial</SelectItem>
-                  <SelectItem value="Hibrido">Híbrido</SelectItem>
+                  <SelectItem value="Híbrido">Híbrido</SelectItem>
                   <SelectItem value="Remoto">Remoto</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="setor">Setor de Atuação</Label>
-              <Select value={setor} onValueChange={setSetor}>
-                <SelectTrigger id="setor">
-                  <SelectValue placeholder="Selecione" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Tecnologia">Tecnologia</SelectItem>
-                  <SelectItem value="Industria">Indústria</SelectItem>
-                  <SelectItem value="Servicos">Serviços</SelectItem>
-                  <SelectItem value="Educacao">Educação</SelectItem>
-                  <SelectItem value="Varejo">Varejo</SelectItem>
-                  <SelectItem value="Outros">Outros</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="porte">Porte da Empresa</Label>
-              <Select value={porte} onValueChange={setPorte}>
-                <SelectTrigger id="porte">
-                  <SelectValue placeholder="Selecione" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Startup">Startup</SelectItem>
-                  <SelectItem value="PME">PME</SelectItem>
-                  <SelectItem value="Corporativo">Corporativo</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="salarioCliente">Salário Proposto (Cliente)</Label>
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="salarioOfertado">Salário Ofertado (opcional)</Label>
               <Input
-                id="salarioCliente"
+                id="salarioOfertado"
                 type="number"
                 placeholder="Ex: 5000"
-                value={salarioCliente}
-                onChange={(e) => setSalarioCliente(e.target.value)}
+                value={salarioOfertado}
+                onChange={(e) => setSalarioOfertado(e.target.value)}
               />
             </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="beneficiosCliente">Benefícios do Cliente</Label>
-            <MultiSelect
-              options={BENEFICIOS_OPTIONS}
-              value={beneficiosCliente}
-              onChange={setBeneficiosCliente}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="observacoes">Observações Discovery</Label>
-            <Textarea
-              id="observacoes"
-              placeholder="Ex: Cliente quer perfil B2B, experiência com Salesforce e autonomia alta"
-              value={observacoes}
-              onChange={(e) => setObservacoes(e.target.value)}
-              rows={3}
-            />
           </div>
 
           <Button
@@ -292,203 +211,146 @@ export default function EstudoMercado() {
       {/* Resultados */}
       {estudo && (
         <div className="space-y-6 animate-in fade-in duration-500">
-          <h2 className="text-2xl font-bold text-primary">📊 Resultado do Estudo de Mercado</h2>
+          <h2 className="text-2xl font-bold text-primary">📊 Resultado do Estudo</h2>
+
+          {/* Informações Básicas */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Informações Gerais</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">Função</p>
+                  <p className="font-semibold">{estudo.funcao}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Região</p>
+                  <p className="font-semibold">{estudo.regiao}</p>
+                </div>
+                {estudo.tipo_contratacao && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">Tipo de Contratação</p>
+                    <p className="font-semibold">{estudo.tipo_contratacao}</p>
+                  </div>
+                )}
+                {estudo.jornada && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">Modelo de Trabalho</p>
+                    <p className="font-semibold">{estudo.jornada}</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Faixa Salarial */}
           <Card>
             <CardHeader>
               <CardTitle>Faixa Salarial</CardTitle>
-              {!estudo.faixa_salarial.junior?.min && !estudo.faixa_salarial.pleno?.min && !estudo.faixa_salarial.senior?.min && (
-                <CardDescription className="mt-2 flex items-start gap-2 text-amber-600">
-                  <EyeOff className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                  <span>
-                    Dados salariais específicos não disponíveis para esta combinação. 
-                    Consulte as recomendações abaixo para validar faixas com fontes externas.
-                  </span>
-                </CardDescription>
-              )}
             </CardHeader>
-            <CardContent className="space-y-6">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nível</TableHead>
-                    <TableHead>Mínimo</TableHead>
-                    <TableHead>Média</TableHead>
-                    <TableHead>Máximo</TableHead>
-                    <TableHead>Fontes</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  <TableRow>
-                    <TableCell className="font-medium">Júnior</TableCell>
-                    <TableCell>{formatCurrency(estudo.faixa_salarial.junior?.min)}</TableCell>
-                    <TableCell>{formatCurrency(estudo.faixa_salarial.junior?.med)}</TableCell>
-                    <TableCell>{formatCurrency(estudo.faixa_salarial.junior?.max)}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {estudo.faixa_salarial.junior?.fontes?.join(", ") || "—"}
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">Pleno</TableCell>
-                    <TableCell>{formatCurrency(estudo.faixa_salarial.pleno?.min)}</TableCell>
-                    <TableCell>{formatCurrency(estudo.faixa_salarial.pleno?.med)}</TableCell>
-                    <TableCell>{formatCurrency(estudo.faixa_salarial.pleno?.max)}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {estudo.faixa_salarial.pleno?.fontes?.join(", ") || "—"}
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">Sênior</TableCell>
-                    <TableCell>{formatCurrency(estudo.faixa_salarial.senior?.min)}</TableCell>
-                    <TableCell>{formatCurrency(estudo.faixa_salarial.senior?.med)}</TableCell>
-                    <TableCell>{formatCurrency(estudo.faixa_salarial.senior?.max)}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {estudo.faixa_salarial.senior?.fontes?.join(", ") || "—"}
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="text-center p-4 bg-muted rounded-lg">
+                  <p className="text-sm text-muted-foreground mb-1">Mínimo</p>
+                  <p className="text-2xl font-bold">{formatCurrency(estudo.salario_min)}</p>
+                </div>
+                <div className="text-center p-4 bg-primary/10 rounded-lg">
+                  <p className="text-sm text-muted-foreground mb-1">Média</p>
+                  <p className="text-2xl font-bold text-primary">{formatCurrency(estudo.salario_media)}</p>
+                </div>
+                <div className="text-center p-4 bg-muted rounded-lg">
+                  <p className="text-sm text-muted-foreground mb-1">Máximo</p>
+                  <p className="text-2xl font-bold">{formatCurrency(estudo.salario_max)}</p>
+                </div>
+              </div>
 
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart
-                  data={[
-                    {
-                      nivel: "Júnior",
-                      Mínimo: estudo.faixa_salarial.junior?.min || 0,
-                      Média: estudo.faixa_salarial.junior?.med || 0,
-                      Máximo: estudo.faixa_salarial.junior?.max || 0,
-                    },
-                    {
-                      nivel: "Pleno",
-                      Mínimo: estudo.faixa_salarial.pleno?.min || 0,
-                      Média: estudo.faixa_salarial.pleno?.med || 0,
-                      Máximo: estudo.faixa_salarial.pleno?.max || 0,
-                    },
-                    {
-                      nivel: "Sênior",
-                      Mínimo: estudo.faixa_salarial.senior?.min || 0,
-                      Média: estudo.faixa_salarial.senior?.med || 0,
-                      Máximo: estudo.faixa_salarial.senior?.max || 0,
-                    },
-                  ]}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="nivel" />
-                  <YAxis />
-                  <Tooltip formatter={(value) => formatCurrency(value as number)} />
-                  <Legend />
-                  <Bar dataKey="Mínimo" fill="hsl(var(--primary))" />
-                  <Bar dataKey="Média" fill="hsl(var(--accent))" />
-                  <Bar dataKey="Máximo" fill="hsl(var(--secondary))" />
-                </BarChart>
-              </ResponsiveContainer>
+              {estudo.salario_ofertado && (
+                <div className="mt-6 p-4 border rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Salário Ofertado</p>
+                      <p className="text-xl font-bold">{formatCurrency(estudo.salario_ofertado)}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {getComparacaoIcon(estudo.comparacao_oferta)}
+                      <span className="font-semibold">{estudo.comparacao_oferta}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
 
-          {/* Concorrência e Dificuldade */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Demanda e Tendência */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card>
-              <CardHeader className="flex flex-row items-center space-x-2">
-                <Users className="h-5 w-5 text-primary" />
-                <CardTitle>Concorrência no Mercado</CardTitle>
+              <CardHeader>
+                <CardTitle>Demanda no Mercado</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-3xl font-bold">{estudo.concorrencia}</p>
+                <Badge className={`text-lg px-4 py-2 ${getDemandaColor(estudo.demanda)}`}>
+                  {estudo.demanda}
+                </Badge>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center space-x-2">
-                <Clock className="h-5 w-5 text-primary" />
-                <CardTitle>Dificuldade de Contratação</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-3xl font-bold">{estudo.dificuldade.nivel}</p>
-                <p className="text-sm text-muted-foreground mt-2">
-                  Tempo médio: {estudo.dificuldade.tempo_medio_dias || "—"} dias
-                </p>
-              </CardContent>
-            </Card>
+            {estudo.tendencia_short && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Tendência</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm">{estudo.tendencia_short}</p>
+                </CardContent>
+              </Card>
+            )}
           </div>
 
-          {/* Comparativo Cliente × Mercado */}
+          {/* Benefícios */}
+          {estudo.beneficios.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Benefícios Mais Comuns</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-2">
+                  {estudo.beneficios.map((beneficio, index) => (
+                    <Badge key={index} variant="secondary">
+                      {beneficio}
+                    </Badge>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Fontes e Observações */}
           <Card>
             <CardHeader>
-              <CardTitle>Comparativo Cliente × Mercado</CardTitle>
+              <CardTitle>Fontes e Observações</CardTitle>
             </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Elemento</TableHead>
-                    <TableHead>Vaga Cliente</TableHead>
-                    <TableHead>Mercado</TableHead>
-                    <TableHead>Observações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  <TableRow>
-                    <TableCell className="font-medium">Faixa (Pleno/média)</TableCell>
-                    <TableCell>{formatCurrency(estudo.comparativo.cliente?.salario)}</TableCell>
-                    <TableCell>{formatCurrency(estudo.comparativo.mercado?.salario_med_pleno)}</TableCell>
-                    <TableCell>—</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">Modelo de trabalho</TableCell>
-                    <TableCell>{estudo.comparativo.cliente?.modelo || "—"}</TableCell>
-                    <TableCell>{estudo.comparativo.mercado?.modelo_pred || "—"}</TableCell>
-                    <TableCell>—</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">Benefícios</TableCell>
-                    <TableCell>{estudo.comparativo.cliente?.beneficios?.join(", ") || "—"}</TableCell>
-                    <TableCell>{estudo.comparativo.mercado?.beneficios_mais_comuns?.join(", ") || "—"}</TableCell>
-                    <TableCell>—</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">Atratividade</TableCell>
-                    <TableCell>—</TableCell>
-                    <TableCell>—</TableCell>
-                    <TableCell className="font-semibold">{estudo.comparativo.atratividade}</TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-
-          {/* Tendências */}
-          <Card>
-            <CardHeader className="flex flex-row items-center space-x-2">
-              <TrendingUp className="h-5 w-5 text-primary" />
-              <CardTitle>Tendências e Insights</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">{estudo.tendencias.join(" • ")}</p>
-            </CardContent>
-          </Card>
-
-          {/* Metodologia */}
-          <Card>
-            <CardContent className="pt-6">
-              <p className="text-sm text-muted-foreground">
-                <strong>Período:</strong> {estudo.metodologia?.periodo || "—"} |{" "}
-                <strong>Fontes:</strong> {estudo.metodologia?.fontes?.filter(fonte => fonte.toLowerCase() !== "base rhello" && fonte.toLowerCase() !== "base de dados rhello").join(", ") || "—"} |{" "}
-                <strong>Obs.:</strong> {estudo.metodologia?.observacoes || "—"}
-              </p>
+            <CardContent className="space-y-4">
+              <div>
+                <p className="text-sm text-muted-foreground mb-2">Fontes Consultadas:</p>
+                <div className="flex flex-wrap gap-2">
+                  {estudo.fontes.map((fonte, index) => (
+                    <Badge key={index} variant="outline">
+                      {fonte}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+              
+              {estudo.observacoes && (
+                <div>
+                  <p className="text-sm text-muted-foreground mb-2">Observações:</p>
+                  <p className="text-sm bg-muted p-3 rounded-lg">{estudo.observacoes}</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
-      )}
-
-      {!estudo && !loading && (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <p className="text-muted-foreground">
-              Preencha as informações acima e clique em Gerar Estudo para visualizar os dados de mercado.
-            </p>
-          </CardContent>
-        </Card>
       )}
     </div>
   );
