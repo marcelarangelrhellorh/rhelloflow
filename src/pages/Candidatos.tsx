@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, MessageSquare, X, AlertTriangle } from "lucide-react";
+import { Plus, MessageSquare, X, AlertTriangle, Grid3x3, List } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -38,6 +38,7 @@ export default function Candidatos() {
   const [areaFilter, setAreaFilter] = useState<string>("all");
   const [nivelFilter, setNivelFilter] = useState<string>("all");
   const [disponibilidadeFilter, setDisponibilidadeFilter] = useState<string>("disponível");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deletionReason, setDeletionReason] = useState("");
   const [requiresApproval, setRequiresApproval] = useState(false);
@@ -215,7 +216,7 @@ export default function Candidatos() {
           )}
 
           {/* Filters */}
-          <div className="mt-3">
+          <div className="mt-3 flex items-center gap-2">
             <FilterBar
               searchTerm={searchTerm}
               onSearchChange={setSearchTerm}
@@ -233,6 +234,25 @@ export default function Candidatos() {
               areas={areas}
               niveis={niveis}
             />
+            
+            <div className="flex gap-2">
+              <Button
+                variant={viewMode === "grid" ? "default" : "outline"}
+                size="icon"
+                onClick={() => setViewMode("grid")}
+                className={viewMode === "grid" ? "bg-[#F9EC3F] text-[#00141D] hover:bg-[#E5D72E]" : ""}
+              >
+                <Grid3x3 className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === "list" ? "default" : "outline"}
+                size="icon"
+                onClick={() => setViewMode("list")}
+                className={viewMode === "list" ? "bg-[#F9EC3F] text-[#00141D] hover:bg-[#E5D72E]" : ""}
+              >
+                <List className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -259,7 +279,7 @@ export default function Candidatos() {
             </Button>
           </div>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className={viewMode === "grid" ? "grid gap-4 md:grid-cols-2 lg:grid-cols-3" : "space-y-4"}>
             {filteredCandidatos.map((candidato) => (
               <CandidateCard
                 key={candidato.id}
@@ -268,6 +288,7 @@ export default function Candidatos() {
                 onEdit={() => navigate(`/candidatos/${candidato.id}/editar`)}
                 onDelete={() => setDeletingId(candidato.id)}
                 onLinkJob={() => setLinkingJobId(candidato.id)}
+                viewMode={viewMode}
               />
             ))}
           </div>
