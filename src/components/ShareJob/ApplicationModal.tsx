@@ -83,39 +83,14 @@ export function ApplicationModal({
     }
   };
 
-  const uploadFile = async (file: File): Promise<string | null> => {
-    try {
-      setUploadProgress(0);
-      
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${vagaId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-      
-      const { data, error } = await supabase.storage
-        .from('curriculos')
-        .upload(fileName, file, {
-          cacheControl: '3600',
-          upsert: false,
-        });
-
-      if (error) throw error;
-      
-      setUploadProgress(100);
-      
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('curriculos')
-        .getPublicUrl(data.path);
-      
-      return publicUrl;
-    } catch (error) {
-      console.error('Error uploading file:', error);
-      toast({
-        title: "Erro no upload",
-        description: "Não foi possível fazer upload do arquivo",
-        variant: "destructive"
-      });
-      return null;
-    }
+  // Convert file to base64 for sending to edge function
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -143,24 +118,29 @@ export function ApplicationModal({
     setSubmitting(true);
 
     try {
-      // 1. Upload do arquivo
-      const curriculoUrl = await uploadFile(file);
-      if (!curriculoUrl) {
-        setSubmitting(false);
-        return;
-      }
+      // Convert file to base64
+      setUploadProgress(10);
+      const fileBase64 = await fileToBase64(file);
+      setUploadProgress(50);
 
-      // 2. Submeter candidatura
+      // Submit application with file
       const { data, error } = await supabase.functions.invoke('submit-share-application', {
         body: {
           token,
           candidate: {
             ...formData,
-            curriculo_url: curriculoUrl,
           },
           password: requiresPassword ? formData.password : undefined,
+          files: {
+            resume: {
+              data: fileBase64,
+              name: file.name,
+            },
+          },
         },
       });
+
+      setUploadProgress(90);
 
       if (error) throw error;
 
@@ -171,6 +151,7 @@ export function ApplicationModal({
           variant: "destructive"
         });
       } else {
+        setUploadProgress(100);
         onSuccess(data.protocol);
         toast({
           title: "Candidatura enviada!",

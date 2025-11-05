@@ -47,7 +47,7 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const { token, candidate, password, utm } = await req.json();
+    const { token, candidate, password, utm, files } = await req.json();
 
     if (!token || !candidate) {
       return new Response(
@@ -137,6 +137,67 @@ serve(async (req) => {
       );
     }
 
+    // Handle file uploads if present
+    let curriculo_url = null;
+    let portfolio_url = null;
+
+    if (files?.resume) {
+      try {
+        // Extract base64 data and decode
+        const base64Data = files.resume.data.split(',')[1];
+        const fileBuffer = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
+        
+        const fileExt = files.resume.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const filePath = `${shareLink.vaga_id}/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('curriculos')
+          .upload(filePath, fileBuffer, {
+            contentType: files.resume.data.split(';')[0].split(':')[1],
+            upsert: false,
+          });
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('curriculos')
+          .getPublicUrl(filePath);
+
+        curriculo_url = publicUrl;
+      } catch (error) {
+        console.error('Error uploading resume:', error);
+      }
+    }
+
+    if (files?.portfolio) {
+      try {
+        const base64Data = files.portfolio.data.split(',')[1];
+        const fileBuffer = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
+        
+        const fileExt = files.portfolio.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const filePath = `${shareLink.vaga_id}/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('portfolios')
+          .upload(filePath, fileBuffer, {
+            contentType: files.portfolio.data.split(';')[0].split(':')[1],
+            upsert: false,
+          });
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('portfolios')
+          .getPublicUrl(filePath);
+
+        portfolio_url = publicUrl;
+      } catch (error) {
+        console.error('Error uploading portfolio:', error);
+      }
+    }
+
     // Sanitize inputs
     const sanitizedCandidate = {
       nome_completo: sanitizeText(candidate.nome_completo).substring(0, 255),
@@ -149,8 +210,8 @@ serve(async (req) => {
       area: candidate.area || null,
       nivel: candidate.nivel || null,
       disponibilidade_mudanca: sanitizeText(candidate.disponibilidade_mudanca || '').substring(0, 500),
-      curriculo_url: candidate.curriculo_url || null,
-      portfolio_url: candidate.portfolio_url || null,
+      curriculo_url,
+      portfolio_url,
       feedback: sanitizeText(candidate.mensagem || '').substring(0, 2000),
       vaga_relacionada_id: shareLink.vaga_id,
       source_link_id: shareLink.id,
