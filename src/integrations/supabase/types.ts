@@ -843,6 +843,7 @@ export type Database = {
           revoked: boolean | null
           revoked_at: string | null
           revoked_by: string | null
+          share_config: Json | null
           submissions_count: number
           token: string
           updated_at: string
@@ -864,6 +865,7 @@ export type Database = {
           revoked?: boolean | null
           revoked_at?: string | null
           revoked_by?: string | null
+          share_config?: Json | null
           submissions_count?: number
           token: string
           updated_at?: string
@@ -885,6 +887,7 @@ export type Database = {
           revoked?: boolean | null
           revoked_at?: string | null
           revoked_by?: string | null
+          share_config?: Json | null
           submissions_count?: number
           token?: string
           updated_at?: string

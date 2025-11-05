@@ -5,11 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Copy, QrCode, ExternalLink, Plus } from "lucide-react";
+import { Copy, QrCode, ExternalLink, Plus, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import QRCode from "qrcode";
 import { ShareLinkManager } from "@/components/ShareLinkManager";
+import { ShareConfigStep, ShareConfig } from "@/components/ShareJob/ShareConfigStep";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -38,6 +39,8 @@ export function ShareJobModal({ open, onOpenChange, vagaId, vagaTitulo }: ShareJ
   const [shareLink, setShareLink] = useState<string>("");
   const [linkId, setLinkId] = useState<string>("");
   const [qrCodeUrl, setQrCodeUrl] = useState<string>("");
+  const [currentStep, setCurrentStep] = useState<'config' | 'settings'>('config');
+  const [vagaData, setVagaData] = useState<any>(null);
   
   // Configurações do link
   const [password, setPassword] = useState("");
@@ -46,12 +49,50 @@ export function ShareJobModal({ open, onOpenChange, vagaId, vagaTitulo }: ShareJ
   const [usePassword, setUsePassword] = useState(false);
   const [useExpiration, setUseExpiration] = useState(true);
   const [useMaxSubmissions, setUseMaxSubmissions] = useState(false);
+  
+  // Configurações de visibilidade
+  const [shareConfig, setShareConfig] = useState<ShareConfig>({
+    exibir_sobre: true,
+    exibir_responsabilidades: true,
+    exibir_requisitos: true,
+    exibir_beneficios: true,
+    exibir_localizacao: true,
+    exibir_salario: true,
+    empresa_confidencial: false,
+    exibir_observacoes: true,
+    texto_sobre_customizado: null,
+    responsabilidades_customizadas: null,
+    requisitos_customizados: null,
+  });
 
   useEffect(() => {
     if (open) {
       loadExistingLinks();
+      loadVagaData();
+      setCurrentStep('config');
     }
   }, [open, vagaId]);
+
+  const loadVagaData = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('vagas')
+        .select('*')
+        .eq('id', vagaId)
+        .single();
+
+      if (error) throw error;
+      setVagaData(data);
+      
+      // Set empresa_confidencial based on vaga data
+      setShareConfig(prev => ({
+        ...prev,
+        empresa_confidencial: data.confidencial || false
+      }));
+    } catch (error) {
+      console.error('Error loading vaga data:', error);
+    }
+  };
 
   const loadExistingLinks = async () => {
     try {
@@ -94,6 +135,7 @@ export function ShareJobModal({ open, onOpenChange, vagaId, vagaTitulo }: ShareJ
           password: usePassword ? password : null,
           expires_in_days: useExpiration ? expiresInDays : null,
           max_submissions: useMaxSubmissions ? maxSubmissions : null,
+          share_config: shareConfig,
         },
         headers: {
           Authorization: `Bearer ${session.access_token}`,
@@ -147,7 +189,16 @@ export function ShareJobModal({ open, onOpenChange, vagaId, vagaTitulo }: ShareJ
       setConfirmDialogOpen(true);
     } else {
       setShowCreateNew(true);
+      setCurrentStep('config');
     }
+  };
+
+  const handleConfigNext = () => {
+    setCurrentStep('settings');
+  };
+
+  const handleConfigBack = () => {
+    setCurrentStep('config');
   };
 
   return (
@@ -187,95 +238,136 @@ export function ShareJobModal({ open, onOpenChange, vagaId, vagaTitulo }: ShareJ
             </Button>
           )}
 
-          {/* Create New Link Form */}
-          {showCreateNew && !shareLink && (
-          <div className="space-y-4">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="use-expiration">Definir data de expiração</Label>
-                <Switch
-                  id="use-expiration"
-                  checked={useExpiration}
-                  onCheckedChange={setUseExpiration}
-                />
+          {/* Create New Link Form - Step 1: Config */}
+          {showCreateNew && !shareLink && currentStep === 'config' && vagaData && (
+            <div className="space-y-4">
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold mb-2">Configurar Informações Públicas</h3>
+                <p className="text-sm text-muted-foreground">
+                  Escolha quais informações da vaga serão exibidas na página pública
+                </p>
               </div>
-              {useExpiration && (
-                <div>
-                  <Label htmlFor="expiration">Expira em (dias)</Label>
-                  <Input
-                    id="expiration"
-                    type="number"
-                    min="1"
-                    max="365"
-                    value={expiresInDays}
-                    onChange={(e) => setExpiresInDays(parseInt(e.target.value))}
+              
+              <ShareConfigStep
+                vaga={vagaData}
+                config={shareConfig}
+                onChange={setShareConfig}
+              />
+
+              <div className="flex gap-2">
+                <Button onClick={handleConfigNext} className="flex-1">
+                  Próximo: Configurações de Segurança
+                </Button>
+                {existingLinks.length > 0 && (
+                  <Button 
+                    onClick={() => {
+                      setShowCreateNew(false);
+                      setCurrentStep('config');
+                    }} 
+                    variant="outline"
+                  >
+                    Cancelar
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Create New Link Form - Step 2: Settings */}
+          {showCreateNew && !shareLink && currentStep === 'settings' && (
+            <div className="space-y-4">
+              <div className="mb-4">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleConfigBack}
+                  className="mb-2"
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Voltar
+                </Button>
+                <h3 className="text-lg font-semibold mb-2">Configurações de Segurança</h3>
+                <p className="text-sm text-muted-foreground">
+                  Configure senha, expiração e limite de inscrições
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="use-expiration">Definir data de expiração</Label>
+                  <Switch
+                    id="use-expiration"
+                    checked={useExpiration}
+                    onCheckedChange={setUseExpiration}
                   />
                 </div>
-              )}
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="use-password">Proteger com senha</Label>
-                <Switch
-                  id="use-password"
-                  checked={usePassword}
-                  onCheckedChange={setUsePassword}
-                />
+                {useExpiration && (
+                  <div>
+                    <Label htmlFor="expiration">Expira em (dias)</Label>
+                    <Input
+                      id="expiration"
+                      type="number"
+                      min="1"
+                      max="365"
+                      value={expiresInDays}
+                      onChange={(e) => setExpiresInDays(parseInt(e.target.value))}
+                    />
+                  </div>
+                )}
               </div>
-              {usePassword && (
-                <div>
-                  <Label htmlFor="password">Senha</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="Digite uma senha"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="use-password">Proteger com senha</Label>
+                  <Switch
+                    id="use-password"
+                    checked={usePassword}
+                    onCheckedChange={setUsePassword}
                   />
                 </div>
-              )}
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="use-max">Limitar número de inscrições</Label>
-                <Switch
-                  id="use-max"
-                  checked={useMaxSubmissions}
-                  onCheckedChange={setUseMaxSubmissions}
-                />
+                {usePassword && (
+                  <div>
+                    <Label htmlFor="password">Senha</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder="Digite uma senha"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                    />
+                  </div>
+                )}
               </div>
-              {useMaxSubmissions && (
-                <div>
-                  <Label htmlFor="max-submissions">Máximo de inscrições</Label>
-                  <Input
-                    id="max-submissions"
-                    type="number"
-                    min="1"
-                    placeholder="Ex: 100"
-                    value={maxSubmissions || ''}
-                    onChange={(e) => setMaxSubmissions(parseInt(e.target.value))}
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="use-max">Limitar número de inscrições</Label>
+                  <Switch
+                    id="use-max"
+                    checked={useMaxSubmissions}
+                    onCheckedChange={setUseMaxSubmissions}
                   />
                 </div>
-              )}
-            </div>
+                {useMaxSubmissions && (
+                  <div>
+                    <Label htmlFor="max-submissions">Máximo de inscrições</Label>
+                    <Input
+                      id="max-submissions"
+                      type="number"
+                      min="1"
+                      placeholder="Ex: 100"
+                      value={maxSubmissions || ''}
+                      onChange={(e) => setMaxSubmissions(parseInt(e.target.value))}
+                    />
+                  </div>
+                )}
+              </div>
 
-            <Button onClick={generateLink} disabled={loading} className="w-full">
-              {loading ? "Gerando..." : "Gerar Link de Compartilhamento"}
-            </Button>
-
-            {existingLinks.length > 0 && (
-              <Button 
-                onClick={() => setShowCreateNew(false)} 
-                variant="outline" 
-                className="w-full"
-              >
-                Cancelar
+              <Button onClick={generateLink} disabled={loading} className="w-full">
+                {loading ? "Gerando..." : "Gerar Link de Compartilhamento"}
               </Button>
-            )}
-          </div>
-        )}
+            </div>
+          )}
 
         {/* Link Generated - Show QR Code */}
         {shareLink && (

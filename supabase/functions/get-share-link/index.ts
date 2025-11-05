@@ -99,9 +99,22 @@ serve(async (req) => {
     // Return sanitized data (no password_hash)
     const { password_hash, ...safeLinkData } = shareLink;
 
+    // Ensure share_config has default values if not set
+    const finalShareConfig = safeLinkData.share_config || {
+      exibir_sobre: true,
+      exibir_responsabilidades: true,
+      exibir_requisitos: true,
+      exibir_beneficios: true,
+      exibir_localizacao: true,
+      exibir_salario: true,
+      empresa_confidencial: false,
+      exibir_observacoes: true,
+    };
+
     return new Response(
       JSON.stringify({ 
         ...safeLinkData,
+        share_config: finalShareConfig,
         requires_password: !!password_hash 
       }), 
       { 

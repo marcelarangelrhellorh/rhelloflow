@@ -46,7 +46,7 @@ serve(async (req) => {
       );
     }
 
-    const { vaga_id, password, expires_in_days, max_submissions } = await req.json();
+    const { vaga_id, password, expires_in_days, max_submissions, share_config } = await req.json();
 
     if (!vaga_id) {
       return new Response(
@@ -103,6 +103,16 @@ serve(async (req) => {
         max_submissions: max_submissions || null,
         created_by: user.id,
         active: true,
+        share_config: share_config || {
+          exibir_sobre: true,
+          exibir_responsabilidades: true,
+          exibir_requisitos: true,
+          exibir_beneficios: true,
+          exibir_localizacao: true,
+          exibir_salario: true,
+          empresa_confidencial: false,
+          exibir_observacoes: true,
+        },
       })
       .select()
       .single();

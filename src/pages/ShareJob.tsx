@@ -64,6 +64,7 @@ export default function ShareJob() {
   const [protocol, setProtocol] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("sobre");
+  const [shareConfig, setShareConfig] = useState<any>(null);
 
   // UTM tracking
   const utm = {
@@ -100,6 +101,16 @@ export default function ShareJob() {
         setError(data.error || 'Erro ao carregar link');
       } else {
         setLinkData(data);
+        setShareConfig(data.share_config || {
+          exibir_sobre: true,
+          exibir_responsabilidades: true,
+          exibir_requisitos: true,
+          exibir_beneficios: true,
+          exibir_localizacao: true,
+          exibir_salario: true,
+          empresa_confidencial: false,
+          exibir_observacoes: true,
+        });
         // Track page view
         // TODO: Add analytics tracking
       }
@@ -126,7 +137,7 @@ export default function ShareJob() {
     return diff;
   };
 
-  if (loading) {
+  if (loading || !shareConfig) {
     return (
       <div className="min-h-screen bg-[#FFFDF6] flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-[#FFCD00]" />
@@ -214,19 +225,19 @@ export default function ShareJob() {
                   {vaga.titulo}
                 </h1>
                 <p className="text-lg text-[#36404A]">
-                  {vaga.confidencial ? "Empresa Confidencial" : vaga.empresa}
+                  {shareConfig.empresa_confidencial ? "Empresa Confidencial" : vaga.empresa}
                 </p>
               </div>
 
               {/* Badges */}
               <div className="flex flex-wrap gap-2">
-                {vaga.modelo_trabalho && (
+                {shareConfig.exibir_localizacao && vaga.modelo_trabalho && (
                   <Badge className="bg-[#FFCD00]/20 text-[#00141D] border-[#FFCD00]/40 hover:bg-[#FFCD00]/30">
                     <Briefcase className="h-3 w-3 mr-1" />
                     {vaga.modelo_trabalho}
                   </Badge>
                 )}
-                {vaga.salario_modalidade && vaga.salario_modalidade !== 'A_COMBINAR' && vaga.salario_min && (
+                {shareConfig.exibir_salario && vaga.salario_modalidade && vaga.salario_modalidade !== 'A_COMBINAR' && vaga.salario_min && (
                   <Badge className="bg-[#FAEC3E]/20 text-[#00141D] border-[#FAEC3E]/40 hover:bg-[#FAEC3E]/30">
                     <DollarSign className="h-3 w-3 mr-1" />
                     {formatSalaryRange(vaga.salario_min, vaga.salario_max, vaga.salario_modalidade)}
@@ -278,12 +289,12 @@ export default function ShareJob() {
         <div className="max-w-6xl mx-auto px-4">
           <ul className="flex gap-8 overflow-x-auto">
             {[
-              { id: "sobre", label: "Sobre a vaga" },
-              { id: "responsabilidades", label: "Responsabilidades" },
-              { id: "requisitos", label: "Requisitos" },
-              { id: "beneficios", label: "Benefícios" },
-              { id: "horario", label: "Horário" },
-            ].map((section) => (
+              shareConfig.exibir_sobre && { id: "sobre", label: "Sobre a vaga" },
+              shareConfig.exibir_responsabilidades && { id: "responsabilidades", label: "Responsabilidades" },
+              shareConfig.exibir_requisitos && { id: "requisitos", label: "Requisitos" },
+              shareConfig.exibir_beneficios && { id: "beneficios", label: "Benefícios" },
+              (vaga.horario_inicio || vaga.dias_semana) && { id: "horario", label: "Horário" },
+            ].filter(Boolean).map((section: any) => (
               <li key={section.id}>
                 <button
                   onClick={() => scrollToSection(section.id)}
@@ -304,27 +315,27 @@ export default function ShareJob() {
       {/* Main Content */}
       <main className="max-w-6xl mx-auto px-4 py-8 space-y-8">
         {/* Sobre a vaga */}
-        <section id="sobre" className="scroll-mt-32">
-          <Card className="border-[#36404A]/20">
-            <CardContent className="p-6">
-              <h2 className="text-2xl font-bold text-[#00141D] mb-4">Sobre a vaga</h2>
-              <div className="prose prose-sm max-w-none text-[#36404A]">
-                <p>
-                  {vaga.observacoes || "Estamos em busca de um profissional qualificado para integrar nossa equipe e contribuir para o crescimento da empresa."}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </section>
+        {shareConfig.exibir_sobre && (
+          <section id="sobre" className="scroll-mt-32">
+            <Card className="border-[#36404A]/20">
+              <CardContent className="p-6">
+                <h2 className="text-2xl font-bold text-[#00141D] mb-4">Sobre a vaga</h2>
+                <div className="prose prose-sm max-w-none text-[#36404A] whitespace-pre-wrap">
+                  {shareConfig.texto_sobre_customizado || vaga.observacoes || "Estamos em busca de um profissional qualificado para integrar nossa equipe e contribuir para o crescimento da empresa."}
+                </div>
+              </CardContent>
+            </Card>
+          </section>
+        )}
 
         {/* Responsabilidades */}
-        {vaga.responsabilidades && (
+        {shareConfig.exibir_responsabilidades && vaga.responsabilidades && (
           <section id="responsabilidades" className="scroll-mt-32">
             <Card className="border-[#36404A]/20">
               <CardContent className="p-6">
                 <h2 className="text-2xl font-bold text-[#00141D] mb-4">Responsabilidades</h2>
                 <div className="prose prose-sm max-w-none text-[#36404A] whitespace-pre-wrap">
-                  {vaga.responsabilidades}
+                  {shareConfig.responsabilidades_customizadas || vaga.responsabilidades}
                 </div>
               </CardContent>
             </Card>
@@ -332,31 +343,33 @@ export default function ShareJob() {
         )}
 
         {/* Requisitos */}
-        <section id="requisitos" className="scroll-mt-32">
-          <Card className="border-[#36404A]/20">
-            <CardContent className="p-6 space-y-6">
-              {vaga.requisitos_obrigatorios && (
-                <div>
-                  <h3 className="text-xl font-bold text-[#00141D] mb-3">Requisitos Obrigatórios</h3>
-                  <div className="prose prose-sm max-w-none text-[#36404A] whitespace-pre-wrap">
-                    {vaga.requisitos_obrigatorios}
+        {shareConfig.exibir_requisitos && (
+          <section id="requisitos" className="scroll-mt-32">
+            <Card className="border-[#36404A]/20">
+              <CardContent className="p-6 space-y-6">
+                {vaga.requisitos_obrigatorios && (
+                  <div>
+                    <h3 className="text-xl font-bold text-[#00141D] mb-3">Requisitos Obrigatórios</h3>
+                    <div className="prose prose-sm max-w-none text-[#36404A] whitespace-pre-wrap">
+                      {shareConfig.requisitos_customizados || vaga.requisitos_obrigatorios}
+                    </div>
                   </div>
-                </div>
-              )}
-              {vaga.requisitos_desejaveis && (
-                <div>
-                  <h3 className="text-xl font-bold text-[#00141D] mb-3">Requisitos Desejáveis</h3>
-                  <div className="prose prose-sm max-w-none text-[#36404A] whitespace-pre-wrap">
-                    {vaga.requisitos_desejaveis}
+                )}
+                {vaga.requisitos_desejaveis && (
+                  <div>
+                    <h3 className="text-xl font-bold text-[#00141D] mb-3">Requisitos Desejáveis</h3>
+                    <div className="prose prose-sm max-w-none text-[#36404A] whitespace-pre-wrap">
+                      {vaga.requisitos_desejaveis}
+                    </div>
                   </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </section>
+                )}
+              </CardContent>
+            </Card>
+          </section>
+        )}
 
         {/* Benefícios */}
-        {vaga.beneficios && vaga.beneficios.length > 0 && (
+        {shareConfig.exibir_beneficios && vaga.beneficios && vaga.beneficios.length > 0 && (
           <section id="beneficios" className="scroll-mt-32">
             <Card className="border-[#36404A]/20">
               <CardContent className="p-6">
@@ -433,7 +446,7 @@ export default function ShareJob() {
         onClose={() => setModalOpen(false)}
         vagaId={vaga.id}
         vagaTitulo={vaga.titulo}
-        empresaNome={vaga.confidencial ? "Empresa Confidencial" : vaga.empresa}
+        empresaNome={shareConfig.empresa_confidencial ? "Empresa Confidencial" : vaga.empresa}
         token={token!}
         requiresPassword={linkData.requires_password}
         onSuccess={(protocol) => {
