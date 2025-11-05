@@ -102,14 +102,21 @@ export default function ShareJob() {
     }
 
     try {
-      const { data, error } = await supabase.functions.invoke('get-share-link', {
-        body: { token },
-      });
+      // Chamar edge function com token como query param
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-share-link?token=${token}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
 
-      if (error) throw error;
+      const data = await response.json();
 
-      if (data.error) {
-        setError(data.error);
+      if (!response.ok || data.error) {
+        setError(data.error || 'Erro ao carregar link');
       } else {
         setLinkData(data);
         if (data.requires_password) {
