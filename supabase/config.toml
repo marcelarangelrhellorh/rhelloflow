@@ -8,3 +8,21 @@ verify_jwt = false
 
 [functions.submit-share-application]
 verify_jwt = false
+
+[functions.get-existing-link]
+verify_jwt = true
+
+[functions.edit-share-link]
+verify_jwt = true
+
+[functions.regenerate-share-link]
+verify_jwt = true
+
+[functions.toggle-share-link]
+verify_jwt = true
+
+[functions.delete-share-link]
+verify_jwt = true
+
+[functions.get-share-link-history]
+verify_jwt = true

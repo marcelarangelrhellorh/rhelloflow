@@ -741,6 +741,44 @@ export type Database = {
         }
         Relationships: []
       }
+      share_link_audit: {
+        Row: {
+          action: string
+          changes: Json | null
+          id: string
+          ip_address: string | null
+          performed_at: string | null
+          performed_by: string | null
+          share_link_id: string | null
+        }
+        Insert: {
+          action: string
+          changes?: Json | null
+          id?: string
+          ip_address?: string | null
+          performed_at?: string | null
+          performed_by?: string | null
+          share_link_id?: string | null
+        }
+        Update: {
+          action?: string
+          changes?: Json | null
+          id?: string
+          ip_address?: string | null
+          performed_at?: string | null
+          performed_by?: string | null
+          share_link_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "share_link_audit_share_link_id_fkey"
+            columns: ["share_link_id"]
+            isOneToOne: false
+            referencedRelation: "share_links"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       share_link_events: {
         Row: {
           created_at: string
@@ -793,10 +831,18 @@ export type Database = {
           active: boolean
           created_at: string
           created_by: string | null
+          deleted: boolean | null
+          deleted_at: string | null
+          deleted_by: string | null
           expires_at: string | null
           id: string
+          last_used_at: string | null
           max_submissions: number | null
+          note: string | null
           password_hash: string | null
+          revoked: boolean | null
+          revoked_at: string | null
+          revoked_by: string | null
           submissions_count: number
           token: string
           updated_at: string
@@ -806,10 +852,18 @@ export type Database = {
           active?: boolean
           created_at?: string
           created_by?: string | null
+          deleted?: boolean | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           expires_at?: string | null
           id?: string
+          last_used_at?: string | null
           max_submissions?: number | null
+          note?: string | null
           password_hash?: string | null
+          revoked?: boolean | null
+          revoked_at?: string | null
+          revoked_by?: string | null
           submissions_count?: number
           token: string
           updated_at?: string
@@ -819,10 +873,18 @@ export type Database = {
           active?: boolean
           created_at?: string
           created_by?: string | null
+          deleted?: boolean | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           expires_at?: string | null
           id?: string
+          last_used_at?: string | null
           max_submissions?: number | null
+          note?: string | null
           password_hash?: string | null
+          revoked?: boolean | null
+          revoked_at?: string | null
+          revoked_by?: string | null
           submissions_count?: number
           token?: string
           updated_at?: string

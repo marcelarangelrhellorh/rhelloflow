@@ -1,14 +1,25 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Copy, QrCode, Link2, ExternalLink } from "lucide-react";
+import { Copy, QrCode, ExternalLink, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import QRCode from "qrcode";
+import { ShareLinkManager } from "@/components/ShareLinkManager";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface ShareJobModalProps {
   open: boolean;
@@ -20,6 +31,10 @@ interface ShareJobModalProps {
 export function ShareJobModal({ open, onOpenChange, vagaId, vagaTitulo }: ShareJobModalProps) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [existingLinks, setExistingLinks] = useState<any[]>([]);
+  const [hasExistingLinks, setHasExistingLinks] = useState(false);
+  const [showCreateNew, setShowCreateNew] = useState(false);
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [shareLink, setShareLink] = useState<string>("");
   const [linkId, setLinkId] = useState<string>("");
   const [qrCodeUrl, setQrCodeUrl] = useState<string>("");
@@ -31,6 +46,38 @@ export function ShareJobModal({ open, onOpenChange, vagaId, vagaTitulo }: ShareJ
   const [usePassword, setUsePassword] = useState(false);
   const [useExpiration, setUseExpiration] = useState(true);
   const [useMaxSubmissions, setUseMaxSubmissions] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      loadExistingLinks();
+    }
+  }, [open, vagaId]);
+
+  const loadExistingLinks = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const { data, error } = await supabase.functions.invoke('get-existing-link', {
+        body: { vaga_id: vagaId },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+
+      if (error) throw error;
+      
+      const links = data.links || [];
+      setExistingLinks(links);
+      
+      // Check if there are any active links
+      const activeLinks = links.filter((l: any) => l.active && !l.revoked && !l.deleted);
+      setHasExistingLinks(activeLinks.length > 0);
+      setShowCreateNew(activeLinks.length === 0);
+    } catch (error) {
+      console.error('Error loading existing links:', error);
+    }
+  };
 
   const generateLink = async () => {
     setLoading(true);
@@ -95,17 +142,53 @@ export function ShareJobModal({ open, onOpenChange, vagaId, vagaTitulo }: ShareJ
     toast({ title: "QR Code baixado!", description: "QR Code salvo com sucesso" });
   };
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Compartilhar Vaga</DialogTitle>
-          <DialogDescription>
-            Crie um link público para compartilhar esta vaga com candidatos
-          </DialogDescription>
-        </DialogHeader>
+  const handleCreateNewClick = () => {
+    if (hasExistingLinks) {
+      setConfirmDialogOpen(true);
+    } else {
+      setShowCreateNew(true);
+    }
+  };
 
-        {!shareLink ? (
+  return (
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Compartilhar Vaga</DialogTitle>
+            <DialogDescription>
+              Gerencie os links de compartilhamento desta vaga
+            </DialogDescription>
+          </DialogHeader>
+
+          {/* Existing Links Manager */}
+          {existingLinks.length > 0 && (
+            <div className="mb-6">
+              <ShareLinkManager 
+                vagaId={vagaId} 
+                onLinkCreated={(newLink) => {
+                  setShareLink(newLink.url || "");
+                  setLinkId(newLink.id);
+                  loadExistingLinks();
+                }}
+              />
+            </div>
+          )}
+
+          {/* Create New Link Button */}
+          {!showCreateNew && (
+            <Button 
+              onClick={handleCreateNewClick} 
+              className="w-full"
+              variant="outline"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Gerar Novo Link de Compartilhamento
+            </Button>
+          )}
+
+          {/* Create New Link Form */}
+          {showCreateNew && !shareLink && (
           <div className="space-y-4">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
@@ -181,8 +264,21 @@ export function ShareJobModal({ open, onOpenChange, vagaId, vagaTitulo }: ShareJ
             <Button onClick={generateLink} disabled={loading} className="w-full">
               {loading ? "Gerando..." : "Gerar Link de Compartilhamento"}
             </Button>
+
+            {existingLinks.length > 0 && (
+              <Button 
+                onClick={() => setShowCreateNew(false)} 
+                variant="outline" 
+                className="w-full"
+              >
+                Cancelar
+              </Button>
+            )}
           </div>
-        ) : (
+        )}
+
+        {/* Link Generated - Show QR Code */}
+        {shareLink && (
           <Tabs defaultValue="link" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="link">Link</TabsTrigger>
@@ -220,7 +316,39 @@ export function ShareJobModal({ open, onOpenChange, vagaId, vagaTitulo }: ShareJ
 
           </Tabs>
         )}
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+
+      {/* Confirmation Dialog for Creating New Link */}
+      <AlertDialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Criar Novo Link de Compartilhamento</AlertDialogTitle>
+            <AlertDialogDescription>
+              Já existe um link ativo para esta vaga. Deseja:
+              <br /><br />
+              • <strong>Usar o link existente</strong> - Continue usando o link atual
+              <br />
+              • <strong>Editar o link existente</strong> - Altere as configurações do link atual
+              <br />
+              • <strong>Gerar novo link</strong> - Crie um novo link (o anterior continuará funcionando)
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+            <AlertDialogCancel onClick={() => setConfirmDialogOpen(false)}>
+              Usar Link Existente
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setConfirmDialogOpen(false);
+                setShowCreateNew(true);
+              }}
+            >
+              Gerar Novo Link
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
