@@ -3,6 +3,15 @@ project_id = "feclxfhohmovmxqxyexz"
 [functions.submit-public-job]
 verify_jwt = false
 
+[functions.validate-feedback-token]
+verify_jwt = false
+
+[functions.submit-client-feedback]
+verify_jwt = false
+
+[functions.generate-feedback-link]
+verify_jwt = true
+
 [functions.get-share-link]
 verify_jwt = false
 
