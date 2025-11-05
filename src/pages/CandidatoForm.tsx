@@ -43,7 +43,9 @@ export default function CandidatoForm() {
     parecer_final: "",
     status: "Banco de Talentos",
     feedback: "",
+    origem: "",
   });
+  const [hasSourceLink, setHasSourceLink] = useState(false);
 
   useEffect(() => {
     loadVagas();
@@ -99,7 +101,9 @@ export default function CandidatoForm() {
           parecer_final: data.parecer_final || "",
           status: data.status || "Banco de Talentos",
           feedback: data.feedback || "",
+          origem: data.origem || "",
         });
+        setHasSourceLink(!!data.source_link_id);
       }
     } catch (error) {
       console.error("Erro ao carregar candidato:", error);
@@ -203,6 +207,7 @@ export default function CandidatoForm() {
         parecer_final: formData.parecer_final || null,
         status: formData.status as any,
         feedback: formData.feedback || null,
+        origem: formData.origem || null,
       };
 
       const { error } = await supabase
@@ -584,6 +589,51 @@ export default function CandidatoForm() {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Origem do Candidato */}
+          <Card className="border-primary/20">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <span>📍</span> Origem do Candidato
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div>
+                <Label htmlFor="origem">Como este candidato chegou até nós?</Label>
+                <Select 
+                  value={formData.origem} 
+                  onValueChange={(value) => setFormData({ ...formData, origem: value })}
+                  disabled={hasSourceLink}
+                >
+                  <SelectTrigger className="mt-2">
+                    <SelectValue placeholder={hasSourceLink ? "Link de Divulgação" : "Selecione a origem"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Link de Divulgação">🔗 Link de Divulgação</SelectItem>
+                    <SelectItem value="Pandapé">🐼 Pandapé</SelectItem>
+                    <SelectItem value="LinkedIn">💼 LinkedIn</SelectItem>
+                    <SelectItem value="Gupy">🎯 Gupy</SelectItem>
+                    <SelectItem value="Indeed">📋 Indeed</SelectItem>
+                    <SelectItem value="Catho">📊 Catho</SelectItem>
+                    <SelectItem value="Indicação">👥 Indicação</SelectItem>
+                    <SelectItem value="Site da Empresa">🌐 Site da Empresa</SelectItem>
+                    <SelectItem value="Instagram">📸 Instagram</SelectItem>
+                    <SelectItem value="WhatsApp">💬 WhatsApp</SelectItem>
+                    <SelectItem value="E-mail Direto">✉️ E-mail Direto</SelectItem>
+                    <SelectItem value="Outra">➕ Outra</SelectItem>
+                  </SelectContent>
+                </Select>
+                {hasSourceLink && (
+                  <div className="mt-3 p-3 bg-primary/5 border border-primary/20 rounded-lg">
+                    <p className="text-sm text-muted-foreground flex items-center gap-2">
+                      <span className="text-primary">ℹ️</span>
+                      Este candidato se inscreveu através de um link público de divulgação da vaga
+                    </p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
