@@ -199,17 +199,8 @@ serve(async (req) => {
       metadata: { candidate_id: newCandidate.id },
     });
 
-    // Create notification
-    if (shareLink.vagas?.recrutador_id || shareLink.vagas?.cs_id) {
-      const notificationData = {
-        tipo: 'candidatura_externa',
-        titulo: 'Nova candidatura recebida',
-        mensagem: `${newCandidate.nome_completo} se candidatou para ${shareLink.vagas.titulo} via link de divulgação`,
-        vaga_id: shareLink.vaga_id,
-      };
-      
-      await supabase.from('notificacoes').insert(notificationData);
-    }
+    // Notifications are now handled by database trigger
+    // notify_new_share_application() trigger will create notifications automatically
 
     const protocol = generateProtocol();
 

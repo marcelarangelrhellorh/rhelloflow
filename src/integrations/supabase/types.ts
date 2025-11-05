@@ -1624,6 +1624,26 @@ export type Database = {
         }
         Returns: string
       }
+      create_notification: {
+        Args: {
+          p_body?: string
+          p_job_id?: string
+          p_kind: string
+          p_title: string
+          p_user_id: string
+        }
+        Returns: string
+      }
+      create_notifications_for_users: {
+        Args: {
+          p_body?: string
+          p_job_id?: string
+          p_kind: string
+          p_title: string
+          p_user_ids: string[]
+        }
+        Returns: number
+      }
       create_pre_delete_snapshot: {
         Args: {
           p_correlation_id: string
