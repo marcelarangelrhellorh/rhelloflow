@@ -387,6 +387,8 @@ export default function CandidatoDetalhes() {
             pontosDesenvolver={candidato.pontos_desenvolver}
             parecerFinal={candidato.parecer_final}
             origem={candidato.origem}
+            candidatoId={id!}
+            onUpdate={loadCandidato}
             onVagaClick={() => vaga && navigate(`/vagas/${vaga.id}`)}
           />
         </div>

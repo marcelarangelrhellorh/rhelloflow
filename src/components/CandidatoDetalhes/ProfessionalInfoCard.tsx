@@ -2,8 +2,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { User, Briefcase, DollarSign, Calendar, ExternalLink, FileText, MapPin, CheckCircle2, XCircle } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+
+const RECRUTADORES = ["Ítalo", "Bianca Marques", "Victor", "Mariana", "Isabella"];
 
 interface ProfessionalInfoCardProps {
   recrutador: string | null;
@@ -21,6 +25,8 @@ interface ProfessionalInfoCardProps {
   pontosDesenvolver: string | null;
   parecerFinal: string | null;
   origem: string | null;
+  candidatoId: string;
+  onUpdate?: () => void;
   onVagaClick?: () => void;
 }
 
@@ -40,6 +46,8 @@ export function ProfessionalInfoCard({
   pontosDesenvolver,
   parecerFinal,
   origem,
+  candidatoId,
+  onUpdate,
   onVagaClick,
 }: ProfessionalInfoCardProps) {
   const formatCurrency = (value: number | null) => {
@@ -66,6 +74,38 @@ export function ProfessionalInfoCard({
     }
   };
 
+  const handleRecrutadorChange = async (newRecrutador: string) => {
+    try {
+      const { error } = await supabase
+        .from("candidatos")
+        .update({ recrutador: newRecrutador })
+        .eq("id", candidatoId);
+
+      if (error) throw error;
+      toast.success("Recrutador atualizado com sucesso!");
+      onUpdate?.();
+    } catch (error) {
+      console.error("Erro ao atualizar recrutador:", error);
+      toast.error("Erro ao atualizar recrutador");
+    }
+  };
+
+  const handleDisponibilidadeChange = async (newDisponibilidade: string) => {
+    try {
+      const { error } = await supabase
+        .from("candidatos")
+        .update({ disponibilidade_status: newDisponibilidade })
+        .eq("id", candidatoId);
+
+      if (error) throw error;
+      toast.success("Disponibilidade atualizada com sucesso!");
+      onUpdate?.();
+    } catch (error) {
+      console.error("Erro ao atualizar disponibilidade:", error);
+      toast.error("Erro ao atualizar disponibilidade");
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -74,19 +114,22 @@ export function ProfessionalInfoCard({
       <CardContent className="space-y-6">
         {/* Grid Layout */}
         <div className="grid gap-4 sm:grid-cols-2">
-          {/* Recrutador */}
+          {/* Recrutador - Editável */}
           <div>
-            <p className="text-sm text-muted-foreground mb-1 flex items-center gap-1">
+            <p className="text-sm text-muted-foreground mb-2 flex items-center gap-1">
               <User className="h-3.5 w-3.5" />
               Recrutador Responsável
             </p>
-            {recrutador ? (
-              <Badge variant="secondary" className="font-medium">
-                {recrutador}
-              </Badge>
-            ) : (
-              <p className="text-sm text-muted-foreground">Não atribuído</p>
-            )}
+            <Select value={recrutador || ""} onValueChange={handleRecrutadorChange}>
+              <SelectTrigger className="w-full bg-background">
+                <SelectValue placeholder="Não atribuído" />
+              </SelectTrigger>
+              <SelectContent className="bg-popover z-50">
+                {RECRUTADORES.map((rec) => (
+                  <SelectItem key={rec} value={rec}>{rec}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Pretensão Salarial */}
@@ -116,25 +159,24 @@ export function ProfessionalInfoCard({
             </div>
           )}
 
-          {/* Disponibilidade do candidato */}
+          {/* Disponibilidade do candidato - Editável */}
           <div className="sm:col-span-2">
-            <p className="text-sm text-muted-foreground mb-1 flex items-center gap-1">
+            <p className="text-sm text-muted-foreground mb-2 flex items-center gap-1">
               <User className="h-3.5 w-3.5" />
               Disponibilidade do Candidato
             </p>
-            <div className="flex items-center gap-2">
-              {disponibilidadeStatus === "disponível" ? (
-                <Badge className="bg-[#C9F4C7] text-[#1B5E20] hover:bg-[#C9F4C7]/90">
-                  ✅ Disponível
-                </Badge>
-              ) : disponibilidadeStatus === "não_disponível" ? (
-                <Badge className="bg-[#FFD6D6] text-[#B71C1C] hover:bg-[#FFD6D6]/90">
-                  ❌ Não disponível
-                </Badge>
-              ) : (
-                <span className="text-base font-medium text-muted-foreground">Não informado</span>
-              )}
-            </div>
+            <Select 
+              value={disponibilidadeStatus || "disponível"} 
+              onValueChange={handleDisponibilidadeChange}
+            >
+              <SelectTrigger className="w-full sm:w-64 bg-background">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-popover z-50">
+                <SelectItem value="disponível">✅ Disponível</SelectItem>
+                <SelectItem value="não_disponível">❌ Não disponível</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Disponibilidade para mudança */}
