@@ -36,10 +36,9 @@ serve(async (req) => {
       );
     }
 
-    const url = new URL(req.url);
-    const vagaId = url.searchParams.get('vaga_id');
+    const { vaga_id } = await req.json();
 
-    if (!vagaId) {
+    if (!vaga_id) {
       return new Response(
         JSON.stringify({ error: 'vaga_id is required' }), 
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -50,7 +49,7 @@ serve(async (req) => {
     const { data: shareLinks, error: fetchError } = await supabase
       .from('share_links')
       .select('*')
-      .eq('vaga_id', vagaId)
+      .eq('vaga_id', vaga_id)
       .eq('deleted', false)
       .order('created_at', { ascending: false });
 

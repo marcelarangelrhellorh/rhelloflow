@@ -35,10 +35,9 @@ serve(async (req) => {
       );
     }
 
-    const url = new URL(req.url);
-    const linkId = url.searchParams.get('link_id');
+    const { link_id } = await req.json();
 
-    if (!linkId) {
+    if (!link_id) {
       return new Response(
         JSON.stringify({ error: 'link_id is required' }), 
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -52,7 +51,7 @@ serve(async (req) => {
         *,
         performer:users!share_link_audit_performed_by_fkey(name, email)
       `)
-      .eq('share_link_id', linkId)
+      .eq('share_link_id', link_id)
       .order('performed_at', { ascending: false });
 
     if (fetchError) {
