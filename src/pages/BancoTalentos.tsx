@@ -59,12 +59,7 @@ export default function BancoTalentos() {
       setLoading(true);
       const { data, error } = await supabase
         .from("candidatos")
-        .select(`
-          *,
-          profiles:recruiter_id (
-            full_name
-          )
-        `)
+        .select("*")
         .eq("status", "Banco de Talentos")
         .order("criado_em", { ascending: false });
 
