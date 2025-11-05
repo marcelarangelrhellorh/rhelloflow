@@ -14,7 +14,6 @@ import { FeedbackModal } from "@/components/CandidatoDetalhes/FeedbackModal";
 import { SolicitarFeedbackModal } from "@/components/CandidatoDetalhes/SolicitarFeedbackModal";
 import { HistoryTimeline } from "@/components/CandidatoDetalhes/HistoryTimeline";
 import { LinkToJobModal } from "@/components/BancoTalentos/LinkToJobModal";
-import { VagaRelacionadaCard } from "@/components/CandidatoDetalhes/VagaRelacionadaCard";
 
 type Candidato = {
   id: string;
@@ -365,23 +364,14 @@ export default function CandidatoDetalhes() {
 
         {/* Two Column Layout */}
         <div className="grid gap-6 lg:grid-cols-2">
-          <div className="space-y-6">
-            <ContactCard
-              email={candidato.email}
-              telefone={candidato.telefone}
-              cidade={candidato.cidade}
-              estado={candidato.estado}
-              linkedin={candidato.linkedin}
-              curriculoLink={candidato.curriculo_link}
-            />
-            
-            <VagaRelacionadaCard
-              candidatoId={id!}
-              vagaAtualId={candidato.vaga_relacionada_id}
-              vagaAtualTitulo={vaga?.titulo}
-              onUpdate={loadCandidato}
-            />
-          </div>
+          <ContactCard
+            email={candidato.email}
+            telefone={candidato.telefone}
+            cidade={candidato.cidade}
+            estado={candidato.estado}
+            linkedin={candidato.linkedin}
+            curriculoLink={candidato.curriculo_link}
+          />
 
           <ProfessionalInfoCard
             recrutador={candidato.recrutador}

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, Link2, Copy, AlertTriangle, ExternalLink, Grid3x3, List } from "lucide-react";
+import { Plus, Search, Link2, Copy, AlertTriangle, ExternalLink } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
@@ -43,9 +43,6 @@ export default function Vagas() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [recrutadorFilter, setRecrutadorFilter] = useState<string>("all");
-  const [clienteFilter, setClienteFilter] = useState<string>("all");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   
   // Verificar se há filtro de atenção pela URL
   const searchParams = new URLSearchParams(window.location.search);
@@ -115,14 +112,9 @@ export default function Vagas() {
     const matchesSearch = vaga.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          vaga.empresa.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || vaga.status === statusFilter;
-    const matchesRecrutador = recrutadorFilter === "all" || vaga.recrutador === recrutadorFilter;
-    const matchesCliente = clienteFilter === "all" || vaga.empresa === clienteFilter;
     const matchesAttention = attentionFilter !== 'out_of_sla' || attentionIds.includes(vaga.id);
-    return matchesSearch && matchesStatus && matchesRecrutador && matchesCliente && matchesAttention;
+    return matchesSearch && matchesStatus && matchesAttention;
   });
-
-  const recrutadores = Array.from(new Set(vagas.map(v => v.recrutador).filter(Boolean))) as string[];
-  const clientes = Array.from(new Set(vagas.map(v => v.empresa).filter(Boolean))) as string[];
   
   const hasActiveFilter = attentionFilter === 'out_of_sla';
   
@@ -207,8 +199,8 @@ export default function Vagas() {
         </div>
       )}
 
-      <div className="mb-6 flex gap-4 flex-wrap">
-        <div className="relative flex-1 min-w-[250px]">
+      <div className="mb-6 flex gap-4">
+        <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Buscar vagas..."
@@ -217,7 +209,6 @@ export default function Vagas() {
             className="pl-10"
           />
         </div>
-        
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-[200px]">
             <SelectValue placeholder="Filtrar por status" />
@@ -231,58 +222,11 @@ export default function Vagas() {
             ))}
           </SelectContent>
         </Select>
-
-        <Select value={recrutadorFilter} onValueChange={setRecrutadorFilter}>
-          <SelectTrigger className="w-[200px]">
-            <SelectValue placeholder="Recrutador" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos recrutadores</SelectItem>
-            {recrutadores.map((rec) => (
-              <SelectItem key={rec} value={rec}>
-                {rec}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Select value={clienteFilter} onValueChange={setClienteFilter}>
-          <SelectTrigger className="w-[200px]">
-            <SelectValue placeholder="Cliente" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos clientes</SelectItem>
-            {clientes.map((cli) => (
-              <SelectItem key={cli} value={cli}>
-                {cli}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <div className="flex gap-2">
-          <Button
-            variant={viewMode === "grid" ? "default" : "outline"}
-            size="icon"
-            onClick={() => setViewMode("grid")}
-            className={viewMode === "grid" ? "bg-[#F9EC3F] text-[#00141D] hover:bg-[#E5D72E]" : ""}
-          >
-            <Grid3x3 className="h-4 w-4" />
-          </Button>
-          <Button
-            variant={viewMode === "list" ? "default" : "outline"}
-            size="icon"
-            onClick={() => setViewMode("list")}
-            className={viewMode === "list" ? "bg-[#F9EC3F] text-[#00141D] hover:bg-[#E5D72E]" : ""}
-          >
-            <List className="h-4 w-4" />
-          </Button>
-        </div>
       </div>
 
-      <div className={viewMode === "grid" ? "grid gap-6 md:grid-cols-2 lg:grid-cols-3" : "space-y-4"}>
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {filteredVagas.map((vaga) => (
-          <VagaCard key={vaga.id} vaga={vaga} viewMode={viewMode} />
+          <VagaCard key={vaga.id} vaga={vaga} />
         ))}
       </div>
 

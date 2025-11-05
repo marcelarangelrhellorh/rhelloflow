@@ -33,7 +33,6 @@ interface VagaCardProps {
   draggable?: boolean;
   onDragStart?: () => void;
   onClick?: () => void;
-  viewMode?: "grid" | "list";
 }
 
 const statusProgressMap: Record<string, number> = {
@@ -62,7 +61,7 @@ const getStatusIndicator = (status: string) => {
   return "🟢";
 };
 
-export function VagaCard({ vaga, draggable = false, onDragStart, onClick, viewMode = "grid" }: VagaCardProps) {
+export function VagaCard({ vaga, draggable = false, onDragStart, onClick }: VagaCardProps) {
   const navigate = useNavigate();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
