@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +10,12 @@ import { supabase } from "@/integrations/supabase/client";
 
 const RECRUTADORES = ["Ítalo", "Bianca Marques", "Victor", "Mariana", "Isabella"];
 const ORIGENS = ["Indicação", "LinkedIn", "Gupy", "Site da empresa", "Redes sociais", "Outros"];
+
+interface Vaga {
+  id: string;
+  titulo: string;
+  empresa: string;
+}
 
 interface ProfessionalInfoCardProps {
   recrutador: string | null;
@@ -51,6 +58,31 @@ export function ProfessionalInfoCard({
   onUpdate,
   onVagaClick,
 }: ProfessionalInfoCardProps) {
+  const [vagas, setVagas] = useState<Vaga[]>([]);
+  const [loadingVagas, setLoadingVagas] = useState(false);
+
+  useEffect(() => {
+    loadVagas();
+  }, []);
+
+  const loadVagas = async () => {
+    setLoadingVagas(true);
+    try {
+      const { data, error } = await supabase
+        .from("vagas")
+        .select("id, titulo, empresa")
+        .neq("status", "Concluído")
+        .neq("status", "Cancelada")
+        .order("titulo");
+
+      if (error) throw error;
+      setVagas(data || []);
+    } catch (error: any) {
+      console.error("Erro ao carregar vagas:", error);
+    } finally {
+      setLoadingVagas(false);
+    }
+  };
   const formatCurrency = (value: number | null) => {
     if (!value) return "—";
     return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
@@ -120,6 +152,25 @@ export function ProfessionalInfoCard({
     } catch (error) {
       console.error("Erro ao atualizar origem:", error);
       toast.error("Erro ao atualizar origem");
+    }
+  };
+
+  const handleVagaChange = async (newVagaId: string) => {
+    try {
+      const { error } = await supabase
+        .from("candidatos")
+        .update({ 
+          vaga_relacionada_id: newVagaId || null,
+          status: newVagaId ? "Selecionado" : "Banco de Talentos"
+        })
+        .eq("id", candidatoId);
+
+      if (error) throw error;
+      toast.success("Vaga relacionada atualizada!");
+      onUpdate?.();
+    } catch (error: any) {
+      console.error("Erro ao atualizar vaga:", error);
+      toast.error("Erro ao atualizar vaga relacionada");
     }
   };
 
@@ -300,25 +351,41 @@ export function ProfessionalInfoCard({
 
         <Separator />
 
-        {/* Vaga Relacionada */}
+        {/* Vaga Relacionada - Editável */}
         <div>
           <p className="text-sm text-muted-foreground mb-2 flex items-center gap-1">
             <Briefcase className="h-3.5 w-3.5" />
             Vaga Relacionada
           </p>
-          {vagaTitulo && vagaId ? (
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full justify-between"
-              onClick={onVagaClick}
+          <div className="flex gap-2">
+            <Select 
+              value={vagaId || ""} 
+              onValueChange={handleVagaChange}
+              disabled={loadingVagas}
             >
-              <span className="truncate">{vagaTitulo}</span>
-              <ExternalLink className="h-4 w-4 ml-2 flex-shrink-0" />
-            </Button>
-          ) : (
-            <p className="text-sm text-muted-foreground italic">Nenhuma vaga relacionada</p>
-          )}
+              <SelectTrigger className="w-full bg-background">
+                <SelectValue placeholder="Selecione uma vaga" />
+              </SelectTrigger>
+              <SelectContent className="bg-popover z-50">
+                <SelectItem value="">Nenhuma vaga</SelectItem>
+                {vagas.map((vaga) => (
+                  <SelectItem key={vaga.id} value={vaga.id}>
+                    {vaga.titulo} - {vaga.empresa}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {vagaId && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onVagaClick}
+                className="flex-shrink-0"
+              >
+                <ExternalLink className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Avaliação */}

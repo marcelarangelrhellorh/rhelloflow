@@ -14,7 +14,7 @@ import { FeedbackModal } from "@/components/CandidatoDetalhes/FeedbackModal";
 import { SolicitarFeedbackModal } from "@/components/CandidatoDetalhes/SolicitarFeedbackModal";
 import { HistoryTimeline } from "@/components/CandidatoDetalhes/HistoryTimeline";
 import { LinkToJobModal } from "@/components/BancoTalentos/LinkToJobModal";
-import { VagaRelacionadaCard } from "@/components/CandidatoDetalhes/VagaRelacionadaCard";
+
 
 type Candidato = {
   id: string;
@@ -365,44 +365,37 @@ export default function CandidatoDetalhes() {
 
         {/* Two Column Layout */}
         <div className="grid gap-6 lg:grid-cols-2">
+          <ContactCard
+            email={candidato.email}
+            telefone={candidato.telefone}
+            cidade={candidato.cidade}
+            estado={candidato.estado}
+            linkedin={candidato.linkedin}
+            curriculoLink={candidato.curriculo_link}
+          />
+
           <div className="space-y-6">
-            <ContactCard
-              email={candidato.email}
-              telefone={candidato.telefone}
-              cidade={candidato.cidade}
-              estado={candidato.estado}
-              linkedin={candidato.linkedin}
-              curriculoLink={candidato.curriculo_link}
-            />
-            
-            <VagaRelacionadaCard
+            <ProfessionalInfoCard
+              recrutador={candidato.recrutador}
+              pretensaoSalarial={candidato.pretensao_salarial}
+              vagaTitulo={vaga?.titulo || null}
+              vagaId={candidato.vaga_relacionada_id}
+              dataCadastro={candidato.criado_em}
+              nivel={candidato.nivel}
+              area={candidato.area}
+              curriculoUrl={candidato.curriculo_url}
+              portfolioUrl={candidato.portfolio_url}
+              disponibilidadeMudanca={candidato.disponibilidade_mudanca}
+              disponibilidadeStatus={candidato.disponibilidade_status}
+              pontosFortes={candidato.pontos_fortes}
+              pontosDesenvolver={candidato.pontos_desenvolver}
+              parecerFinal={candidato.parecer_final}
+              origem={candidato.origem}
               candidatoId={id!}
-              vagaAtualId={candidato.vaga_relacionada_id}
-              vagaAtualTitulo={vaga?.titulo}
               onUpdate={loadCandidato}
+              onVagaClick={() => vaga && navigate(`/vagas/${vaga.id}`)}
             />
           </div>
-
-          <ProfessionalInfoCard
-            recrutador={candidato.recrutador}
-            pretensaoSalarial={candidato.pretensao_salarial}
-            vagaTitulo={vaga?.titulo || null}
-            vagaId={candidato.vaga_relacionada_id}
-            dataCadastro={candidato.criado_em}
-            nivel={candidato.nivel}
-            area={candidato.area}
-            curriculoUrl={candidato.curriculo_url}
-            portfolioUrl={candidato.portfolio_url}
-            disponibilidadeMudanca={candidato.disponibilidade_mudanca}
-            disponibilidadeStatus={candidato.disponibilidade_status}
-            pontosFortes={candidato.pontos_fortes}
-            pontosDesenvolver={candidato.pontos_desenvolver}
-            parecerFinal={candidato.parecer_final}
-            origem={candidato.origem}
-            candidatoId={id!}
-            onUpdate={loadCandidato}
-            onVagaClick={() => vaga && navigate(`/vagas/${vaga.id}`)}
-          />
         </div>
 
         {/* Feedbacks */}
