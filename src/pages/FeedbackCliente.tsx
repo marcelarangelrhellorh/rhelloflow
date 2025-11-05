@@ -157,7 +157,33 @@ export default function FeedbackCliente() {
     );
   }
 
-  if (submitted || requestData?.already_submitted) {
+  if (requestData?.already_submitted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <Card className="max-w-md w-full">
+          <CardHeader>
+            <div className="flex justify-center mb-4">
+              <picture>
+                <source srcSet={logoDark} media="(prefers-color-scheme: dark)" />
+                <img src={logoLight} alt="Rhello" className="h-8" />
+              </picture>
+            </div>
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <AlertCircle className="h-5 w-5" />
+              <CardTitle>Link Já Utilizado</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground">
+              Este formulário permite apenas 1 envio e o feedback já foi registrado anteriormente. Se precisar enviar um novo feedback, solicite um novo link ao recrutador.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (submitted) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
         <Card className="max-w-md w-full">
