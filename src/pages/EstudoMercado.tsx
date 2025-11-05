@@ -8,11 +8,13 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, TrendingUp, TrendingDown, Minus, AlertCircle } from "lucide-react";
+import { MultiSelect } from "@/components/ui/multi-select";
 
 interface EstudoMercado {
   funcao: string;
   regiao: string;
-  tipo_contratacao: string | null;
+  senioridade: string | null;
+  tipos_contratacao: string[];
   jornada: string | null;
   salario_media: number | null;
   salario_min: number | null;
@@ -34,7 +36,8 @@ export default function EstudoMercado() {
   // Form state
   const [funcao, setFuncao] = useState("");
   const [regiao, setRegiao] = useState("");
-  const [tipoContratacao, setTipoContratacao] = useState("");
+  const [senioridade, setSenioridade] = useState("");
+  const [tiposContratacao, setTiposContratacao] = useState<string[]>([]);
   const [jornada, setJornada] = useState("");
   const [salarioOfertado, setSalarioOfertado] = useState("");
 
@@ -50,7 +53,8 @@ export default function EstudoMercado() {
         body: {
           funcao,
           regiao,
-          tipo_contratacao: tipoContratacao || null,
+          senioridade: senioridade || null,
+          tipos_contratacao: tiposContratacao,
           jornada: jornada || null,
           salario_ofertado: salarioOfertado ? parseFloat(salarioOfertado) : null,
         },
@@ -150,16 +154,16 @@ export default function EstudoMercado() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="tipoContratacao">Tipo de Contratação</Label>
-              <Select value={tipoContratacao} onValueChange={setTipoContratacao}>
-                <SelectTrigger id="tipoContratacao">
+              <Label htmlFor="senioridade">Senioridade</Label>
+              <Select value={senioridade} onValueChange={setSenioridade}>
+                <SelectTrigger id="senioridade">
                   <SelectValue placeholder="Selecione (opcional)" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="CLT">CLT</SelectItem>
-                  <SelectItem value="PJ">PJ</SelectItem>
-                  <SelectItem value="Temporário">Temporário</SelectItem>
-                  <SelectItem value="Estágio">Estágio</SelectItem>
+                  <SelectItem value="Júnior">Júnior</SelectItem>
+                  <SelectItem value="Pleno">Pleno</SelectItem>
+                  <SelectItem value="Sênior">Sênior</SelectItem>
+                  <SelectItem value="Especialista">Especialista</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -176,6 +180,21 @@ export default function EstudoMercado() {
                   <SelectItem value="Remoto">Remoto</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="tiposContratacao">Tipos de Contratação</Label>
+              <MultiSelect
+                options={[
+                  { label: "CLT", value: "CLT" },
+                  { label: "PJ", value: "PJ" },
+                  { label: "Temporário", value: "Temporário" },
+                  { label: "Estágio", value: "Estágio" },
+                ]}
+                value={tiposContratacao}
+                onChange={setTiposContratacao}
+                placeholder="Selecione um ou mais tipos (opcional)"
+              />
             </div>
 
             <div className="space-y-2 md:col-span-2">
@@ -228,10 +247,22 @@ export default function EstudoMercado() {
                   <p className="text-sm text-muted-foreground">Região</p>
                   <p className="font-semibold">{estudo.regiao}</p>
                 </div>
-                {estudo.tipo_contratacao && (
+                {estudo.senioridade && (
                   <div>
-                    <p className="text-sm text-muted-foreground">Tipo de Contratação</p>
-                    <p className="font-semibold">{estudo.tipo_contratacao}</p>
+                    <p className="text-sm text-muted-foreground">Senioridade</p>
+                    <p className="font-semibold">{estudo.senioridade}</p>
+                  </div>
+                )}
+                {estudo.tipos_contratacao.length > 0 && (
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-2">Tipos de Contratação</p>
+                    <div className="flex flex-wrap gap-2">
+                      {estudo.tipos_contratacao.map((tipo, index) => (
+                        <Badge key={index} variant="outline">
+                          {tipo}
+                        </Badge>
+                      ))}
+                    </div>
                   </div>
                 )}
                 {estudo.jornada && (

@@ -16,7 +16,8 @@ SCHEMA DE SAÍDA OBRIGATÓRIO (RETORNE APENAS ESTE JSON):
 {
   "funcao": string,
   "regiao": string,
-  "tipo_contratacao": string|null,
+  "senioridade": string|null,
+  "tipos_contratacao": string[],
   "jornada": string|null,
   "salario_media": number|null,
   "salario_min": number|null,
@@ -83,7 +84,8 @@ Deno.serve(async (req) => {
     const aiInput = {
       funcao: body.funcao,
       regiao: body.regiao,
-      tipo_contratacao: body.tipo_contratacao || null,
+      senioridade: body.senioridade || null,
+      tipos_contratacao: body.tipos_contratacao || [],
       jornada: body.jornada || null,
       salario_ofertado: body.salario_ofertado || null,
       vagasContext: body.vagasContext || { vaga_id: null, origem_pagina: null },
