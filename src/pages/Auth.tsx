@@ -5,81 +5,45 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 import { toast } from "sonner";
 import { logLoginSuccess, logLoginFailure, logRoleAssign } from "@/lib/auditLog";
 
 export default function Auth() {
   const navigate = useNavigate();
-  const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [role, setRole] = useState<"recruiter" | "cs" | "admin">("recruiter");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      if (isLogin) {
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-        if (error) {
-          // Log failed login attempt
-          await logLoginFailure(email, error.message);
-          throw error;
-        }
+      if (error) {
+        // Log failed login attempt
+        await logLoginFailure(email, error.message);
+        throw error;
+      }
 
-        if (data.user) {
-          // Log successful login
-          await logLoginSuccess(data.user.id, email);
-          toast.success("Login realizado com sucesso!");
-          navigate("/");
-        }
-      } else {
-        if (!fullName.trim()) {
-          toast.error("Por favor, preencha seu nome completo");
-          setLoading(false);
-          return;
-        }
-
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: {
-              full_name: fullName,
-              role: role,
-            },
-            emailRedirectTo: `${window.location.origin}/`,
-          },
-        });
-
-        if (error) throw error;
-
-        if (data.user) {
-          // Log role assignment for new user
-          await logRoleAssign(data.user.id, fullName, role);
-          toast.success("Cadastro realizado com sucesso!");
-          navigate("/");
-        }
+      if (data.user) {
+        // Log successful login
+        await logLoginSuccess(data.user.id, email);
+        toast.success("Login realizado com sucesso!");
+        navigate("/");
       }
     } catch (error: any) {
       console.error("Erro na autenticação:", error);
       
       if (error.message?.includes("Invalid login credentials")) {
-        toast.error("Email ou senha incorretos");
-      } else if (error.message?.includes("User already registered")) {
-        toast.error("Este email já está cadastrado");
-      } else if (error.message?.includes("Password should be at least")) {
-        toast.error("A senha deve ter pelo menos 6 caracteres");
+        toast.error("Credenciais inválidas");
       } else {
-        toast.error(error.message || "Erro ao realizar autenticação");
+        toast.error("Erro ao realizar autenticação");
       }
     } finally {
       setLoading(false);
@@ -96,43 +60,13 @@ export default function Auth() {
             </div>
             <span className="text-2xl font-bold">Rhello RH</span>
           </div>
-          <CardTitle>{isLogin ? "Entrar" : "Criar Conta"}</CardTitle>
+          <CardTitle>Entrar</CardTitle>
           <CardDescription>
-            {isLogin
-              ? "Entre com suas credenciais para acessar o sistema"
-              : "Preencha os dados para criar sua conta"}
+            Entre com suas credenciais para acessar o sistema
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            {!isLogin && (
-              <>
-                <div className="space-y-2">
-                  <Label htmlFor="fullName">Nome Completo</Label>
-                  <Input
-                    id="fullName"
-                    type="text"
-                    placeholder="João Silva"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="role">Função</Label>
-                  <Select value={role} onValueChange={(value) => setRole(value as any)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="recruiter">Recrutador</SelectItem>
-                      <SelectItem value="cs">Customer Success</SelectItem>
-                      <SelectItem value="admin">Administrador</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </>
-            )}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -161,26 +95,9 @@ export default function Auth() {
               className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
               disabled={loading}
             >
-              {loading ? "Processando..." : isLogin ? "Entrar" : "Criar Conta"}
+              {loading ? "Processando..." : "Entrar"}
             </Button>
           </form>
-
-          <div className="mt-4 text-center text-sm">
-            <button
-              type="button"
-              onClick={() => {
-                setIsLogin(!isLogin);
-                setEmail("");
-                setPassword("");
-                setFullName("");
-              }}
-              className="text-primary hover:underline"
-            >
-              {isLogin
-                ? "Não tem uma conta? Cadastre-se"
-                : "Já tem uma conta? Faça login"}
-            </button>
-          </div>
         </CardContent>
       </Card>
     </div>
