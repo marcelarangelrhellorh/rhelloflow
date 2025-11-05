@@ -157,11 +157,12 @@ export function ProfessionalInfoCard({
 
   const handleVagaChange = async (newVagaId: string) => {
     try {
+      const vagaIdToSet = newVagaId === "none" ? null : newVagaId;
       const { error } = await supabase
         .from("candidatos")
         .update({ 
-          vaga_relacionada_id: newVagaId || null,
-          status: newVagaId ? "Selecionado" : "Banco de Talentos"
+          vaga_relacionada_id: vagaIdToSet,
+          status: vagaIdToSet ? "Selecionado" : "Banco de Talentos"
         })
         .eq("id", candidatoId);
 
@@ -359,7 +360,7 @@ export function ProfessionalInfoCard({
           </p>
           <div className="flex gap-2">
             <Select 
-              value={vagaId || ""} 
+              value={vagaId || "none"} 
               onValueChange={handleVagaChange}
               disabled={loadingVagas}
             >
@@ -367,7 +368,7 @@ export function ProfessionalInfoCard({
                 <SelectValue placeholder="Selecione uma vaga" />
               </SelectTrigger>
               <SelectContent className="bg-popover z-50">
-                <SelectItem value="">Nenhuma vaga</SelectItem>
+                <SelectItem value="none">Nenhuma vaga</SelectItem>
                 {vagas.map((vaga) => (
                   <SelectItem key={vaga.id} value={vaga.id}>
                     {vaga.titulo} - {vaga.empresa}
