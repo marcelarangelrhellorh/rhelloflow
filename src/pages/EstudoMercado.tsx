@@ -10,16 +10,22 @@ import { supabase } from "@/integrations/supabase/client";
 import { Loader2, TrendingUp, TrendingDown, Minus, AlertCircle } from "lucide-react";
 import { MultiSelect } from "@/components/ui/multi-select";
 
+interface FaixaSalarial {
+  tipo_contratacao: string;
+  salario_media: number | null;
+  salario_min: number | null;
+  salario_max: number | null;
+}
+
 interface EstudoMercado {
   funcao: string;
   regiao: string;
   senioridade: string | null;
   tipos_contratacao: string[];
   jornada: string | null;
-  salario_media: number | null;
-  salario_min: number | null;
-  salario_max: number | null;
+  faixas_salariais: FaixaSalarial[];
   salario_ofertado: number | null;
+  tipo_contratacao_ofertado: string | null;
   comparacao_oferta: "Abaixo" | "Dentro" | "Acima" | "Sem dado";
   beneficios: string[];
   demanda: "Alta" | "Média" | "Baixa";
@@ -40,6 +46,7 @@ export default function EstudoMercado() {
   const [tiposContratacao, setTiposContratacao] = useState<string[]>([]);
   const [jornada, setJornada] = useState("");
   const [salarioOfertado, setSalarioOfertado] = useState("");
+  const [tipoContratacaoOfertado, setTipoContratacaoOfertado] = useState("");
 
   const handleGerarEstudo = async () => {
     if (!funcao || !regiao) {
@@ -57,6 +64,7 @@ export default function EstudoMercado() {
           tipos_contratacao: tiposContratacao,
           jornada: jornada || null,
           salario_ofertado: salarioOfertado ? parseFloat(salarioOfertado) : null,
+          tipo_contratacao_ofertado: tipoContratacaoOfertado || null,
         },
       });
 
@@ -199,13 +207,30 @@ export default function EstudoMercado() {
 
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="salarioOfertado">Salário Ofertado (opcional)</Label>
-              <Input
-                id="salarioOfertado"
-                type="number"
-                placeholder="Ex: 5000"
-                value={salarioOfertado}
-                onChange={(e) => setSalarioOfertado(e.target.value)}
-              />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Input
+                  id="salarioOfertado"
+                  type="number"
+                  placeholder="Ex: 5000"
+                  value={salarioOfertado}
+                  onChange={(e) => setSalarioOfertado(e.target.value)}
+                />
+                <Select 
+                  value={tipoContratacaoOfertado} 
+                  onValueChange={setTipoContratacaoOfertado}
+                  disabled={!salarioOfertado}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Tipo de contratação" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="CLT">CLT</SelectItem>
+                    <SelectItem value="PJ">PJ</SelectItem>
+                    <SelectItem value="Temporário">Temporário</SelectItem>
+                    <SelectItem value="Estágio">Estágio</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
 
@@ -280,27 +305,37 @@ export default function EstudoMercado() {
             <CardHeader>
               <CardTitle>Faixa Salarial</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="text-center p-4 bg-muted rounded-lg">
-                  <p className="text-sm text-muted-foreground mb-1">Mínimo</p>
-                  <p className="text-2xl font-bold">{formatCurrency(estudo.salario_min)}</p>
+            <CardContent className="space-y-6">
+              {estudo.faixas_salariais.map((faixa, index) => (
+                <div key={index}>
+                  {estudo.faixas_salariais.length > 1 && (
+                    <h3 className="font-semibold text-lg mb-3">{faixa.tipo_contratacao}</h3>
+                  )}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="text-center p-4 bg-muted rounded-lg">
+                      <p className="text-sm text-muted-foreground mb-1">Mínimo</p>
+                      <p className="text-2xl font-bold">{formatCurrency(faixa.salario_min)}</p>
+                    </div>
+                    <div className="text-center p-4 bg-primary/10 rounded-lg">
+                      <p className="text-sm text-muted-foreground mb-1">Média</p>
+                      <p className="text-2xl font-bold text-primary">{formatCurrency(faixa.salario_media)}</p>
+                    </div>
+                    <div className="text-center p-4 bg-muted rounded-lg">
+                      <p className="text-sm text-muted-foreground mb-1">Máximo</p>
+                      <p className="text-2xl font-bold">{formatCurrency(faixa.salario_max)}</p>
+                    </div>
+                  </div>
+                  {index < estudo.faixas_salariais.length - 1 && (
+                    <div className="border-t my-4" />
+                  )}
                 </div>
-                <div className="text-center p-4 bg-primary/10 rounded-lg">
-                  <p className="text-sm text-muted-foreground mb-1">Média</p>
-                  <p className="text-2xl font-bold text-primary">{formatCurrency(estudo.salario_media)}</p>
-                </div>
-                <div className="text-center p-4 bg-muted rounded-lg">
-                  <p className="text-sm text-muted-foreground mb-1">Máximo</p>
-                  <p className="text-2xl font-bold">{formatCurrency(estudo.salario_max)}</p>
-                </div>
-              </div>
+              ))}
 
               {estudo.salario_ofertado && (
                 <div className="mt-6 p-4 border rounded-lg">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-muted-foreground">Salário Ofertado</p>
+                      <p className="text-sm text-muted-foreground">Salário Ofertado{estudo.tipo_contratacao_ofertado ? ` (${estudo.tipo_contratacao_ofertado})` : ''}</p>
                       <p className="text-xl font-bold">{formatCurrency(estudo.salario_ofertado)}</p>
                     </div>
                     <div className="flex items-center gap-2">

@@ -19,10 +19,14 @@ SCHEMA DE SAÍDA OBRIGATÓRIO (RETORNE APENAS ESTE JSON):
   "senioridade": string|null,
   "tipos_contratacao": string[],
   "jornada": string|null,
-  "salario_media": number|null,
-  "salario_min": number|null,
-  "salario_max": number|null,
+  "faixas_salariais": Array<{
+    tipo_contratacao: string,
+    salario_media: number|null,
+    salario_min: number|null,
+    salario_max: number|null
+  }>,
   "salario_ofertado": number|null,
+  "tipo_contratacao_ofertado": string|null,
   "comparacao_oferta": "Abaixo" | "Dentro" | "Acima" | "Sem dado",
   "beneficios": string[],
   "demanda": "Alta" | "Média" | "Baixa",
@@ -33,10 +37,16 @@ SCHEMA DE SAÍDA OBRIGATÓRIO (RETORNE APENAS ESTE JSON):
 }
 
 REGRAS DE CÁLCULO / DECISÕES:
+- faixas_salariais: 
+  - Se tipos_contratacao tiver mais de 1 item, retorne uma faixa salarial para CADA tipo
+  - Se tipos_contratacao estiver vazio ou tiver 1 item, retorne pelo menos uma faixa (pode usar "Geral" como tipo)
+  - Exemplo com múltiplos tipos: [{"tipo_contratacao":"CLT","salario_media":5000,"salario_min":4000,"salario_max":6000}, {"tipo_contratacao":"PJ","salario_media":7000,"salario_min":5500,"salario_max":9000}]
+
 - comparacao_oferta: 
   - Se salario_ofertado == null → "Sem dado".
-  - Caso contrário, se salario_media == null → "Sem dado" (e explique em observacoes).
-  - Use tolerância de ±7% em relação à salario_media para considerar "Dentro".
+  - Caso contrário, busque a faixa salarial correspondente ao tipo_contratacao_ofertado
+  - Se não houver faixa ou salario_media == null → "Sem dado" (e explique em observacoes).
+  - Use tolerância de ±7% em relação à salario_media da faixa correspondente para considerar "Dentro".
   - Se salario_ofertado < salario_media * 0.93 → "Abaixo".
   - Se salario_ofertado > salario_media * 1.07 → "Acima".
   - Caso contrário → "Dentro".
@@ -93,6 +103,7 @@ Deno.serve(async (req) => {
       tipos_contratacao: body.tipos_contratacao || [],
       jornada: body.jornada || null,
       salario_ofertado: body.salario_ofertado || null,
+      tipo_contratacao_ofertado: body.tipo_contratacao_ofertado || null,
       vagasContext: body.vagasContext || { vaga_id: null, origem_pagina: null },
       fontes_preferenciais: ['Glassdoor', 'Salario.com.br']
     };
