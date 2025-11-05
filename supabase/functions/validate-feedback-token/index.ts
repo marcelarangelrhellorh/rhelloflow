@@ -18,25 +18,10 @@ Deno.serve(async (req) => {
       throw new Error('Token não fornecido');
     }
 
-    // Buscar feedback request com informações da vaga e candidato
+    // Buscar feedback request
     const { data: request, error: requestError } = await supabase
       .from('feedback_requests')
-      .select(`
-        id,
-        vaga_id,
-        candidato_id,
-        allow_multiple,
-        expires_at,
-        vagas!feedback_requests_vaga_id_fkey (
-          id,
-          titulo,
-          empresa
-        ),
-        candidatos!feedback_requests_candidato_id_fkey (
-          id,
-          nome_completo
-        )
-      `)
+      .select('id, vaga_id, candidato_id, allow_multiple, expires_at')
       .eq('token', token)
       .single();
 
@@ -49,6 +34,28 @@ Deno.serve(async (req) => {
           status: 400,
         }
       );
+    }
+
+    // Buscar dados do candidato
+    const { data: candidato, error: candidatoError } = await supabase
+      .from('candidatos')
+      .select('id, nome_completo')
+      .eq('id', request.candidato_id)
+      .single();
+
+    if (candidatoError) {
+      console.error('Erro ao buscar candidato:', candidatoError);
+    }
+
+    // Buscar dados da vaga
+    const { data: vaga, error: vagaError } = await supabase
+      .from('vagas')
+      .select('id, titulo, empresa')
+      .eq('id', request.vaga_id)
+      .single();
+
+    if (vagaError) {
+      console.error('Erro ao buscar vaga:', vagaError);
     }
 
     // Verificar expiração
@@ -82,9 +89,6 @@ Deno.serve(async (req) => {
       }
     }
 
-    const candidato = Array.isArray(request.candidatos) ? request.candidatos[0] : request.candidatos;
-    const vaga = Array.isArray(request.vagas) ? request.vagas[0] : request.vagas;
-
     console.log('Token validado com sucesso:', { 
       request_id: request.id,
       candidato: candidato,
@@ -95,9 +99,9 @@ Deno.serve(async (req) => {
     return new Response(
       JSON.stringify({
         request_id: request.id,
-        candidate_name: candidato?.nome_completo,
-        vacancy_title: vaga?.titulo,
-        company_name: vaga?.empresa,
+        candidate_name: candidato?.nome_completo || 'Candidato não identificado',
+        vacancy_title: vaga?.titulo || 'Vaga não identificada',
+        company_name: vaga?.empresa || '',
         expires_at: request.expires_at,
         allow_multiple: request.allow_multiple,
       }),
