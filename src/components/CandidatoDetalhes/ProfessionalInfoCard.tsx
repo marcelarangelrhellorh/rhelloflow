@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 const RECRUTADORES = ["Ítalo", "Bianca Marques", "Victor", "Mariana", "Isabella"];
+const ORIGENS = ["Indicação", "LinkedIn", "Gupy", "Site da empresa", "Redes sociais", "Outros"];
 
 interface ProfessionalInfoCardProps {
   recrutador: string | null;
@@ -103,6 +104,22 @@ export function ProfessionalInfoCard({
     } catch (error) {
       console.error("Erro ao atualizar disponibilidade:", error);
       toast.error("Erro ao atualizar disponibilidade");
+    }
+  };
+
+  const handleOrigemChange = async (newOrigem: string) => {
+    try {
+      const { error } = await supabase
+        .from("candidatos")
+        .update({ origem: newOrigem })
+        .eq("id", candidatoId);
+
+      if (error) throw error;
+      toast.success("Origem atualizada com sucesso!");
+      onUpdate?.();
+    } catch (error) {
+      console.error("Erro ao atualizar origem:", error);
+      toast.error("Erro ao atualizar origem");
     }
   };
 
@@ -219,19 +236,22 @@ export function ProfessionalInfoCard({
             <p className="text-base font-medium text-card-foreground">{formatDate(dataCadastro)}</p>
           </div>
 
-          {/* Origem - Mais visível */}
+          {/* Origem - Editável */}
           <div className="sm:col-span-2">
             <p className="text-sm text-muted-foreground mb-2 flex items-center gap-1.5 font-medium">
               <ExternalLink className="h-4 w-4" />
               Origem do Candidato
             </p>
-            {origem ? (
-              <Badge className="bg-primary/10 text-primary border-primary/20 px-3 py-1.5 text-sm font-semibold">
-                📍 {origem}
-              </Badge>
-            ) : (
-              <p className="text-sm text-muted-foreground italic">Não informado</p>
-            )}
+            <Select value={origem || ""} onValueChange={handleOrigemChange}>
+              <SelectTrigger className="w-full sm:w-64 bg-background">
+                <SelectValue placeholder="Selecione a origem" />
+              </SelectTrigger>
+              <SelectContent className="bg-popover z-50">
+                {ORIGENS.map((org) => (
+                  <SelectItem key={org} value={org}>📍 {org}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
