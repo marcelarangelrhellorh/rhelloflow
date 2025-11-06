@@ -18,6 +18,7 @@ import CandidatoDetalhes from "./pages/CandidatoDetalhes";
 import FunilCandidatos from "./pages/FunilCandidatos";
 import BancoTalentos from "./pages/BancoTalentos";
 import Scorecards from "./pages/Scorecards";
+import ScorecardForm from "./pages/ScorecardForm";
 import Analises from "./pages/Analises";
 import GerenciarUsuarios from "./pages/GerenciarUsuarios";
 import GerenciarExclusoes from "./pages/GerenciarExclusoes";
@@ -53,6 +54,8 @@ const App = () => (
             <Route path="/funil-candidatos" element={<FunilCandidatos />} />
             <Route path="/banco-talentos" element={<BancoTalentos />} />
             <Route path="/scorecards" element={<Scorecards />} />
+            <Route path="/scorecards/novo" element={<ScorecardForm />} />
+            <Route path="/scorecards/:id/editar" element={<ScorecardForm />} />
             <Route path="/analises" element={<Analises />} />
             <Route path="/gerenciar-usuarios" element={<GerenciarUsuarios />} />
             <Route path="/gerenciar-exclusoes" element={<GerenciarExclusoes />} />

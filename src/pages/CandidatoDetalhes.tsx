@@ -12,6 +12,8 @@ import { ProfessionalInfoCard } from "@/components/CandidatoDetalhes/Professiona
 import { FeedbackList } from "@/components/CandidatoDetalhes/FeedbackList";
 import { FeedbackModal } from "@/components/CandidatoDetalhes/FeedbackModal";
 import { SolicitarFeedbackModal } from "@/components/CandidatoDetalhes/SolicitarFeedbackModal";
+import { ScorecardEvaluation } from "@/components/CandidatoDetalhes/ScorecardEvaluation";
+import { ScorecardHistory } from "@/components/CandidatoDetalhes/ScorecardHistory";
 import { HistoryTimeline } from "@/components/CandidatoDetalhes/HistoryTimeline";
 import { LinkToJobModal } from "@/components/BancoTalentos/LinkToJobModal";
 import { CandidateTagsCard } from "@/components/CandidatoDetalhes/CandidateTagsCard";
@@ -421,6 +423,16 @@ export default function CandidatoDetalhes() {
             onAddFeedback={() => setFeedbackModalOpen(true)}
           />
         </div>
+
+        {/* Scorecard Evaluation */}
+        <ScorecardEvaluation
+          candidateId={id!}
+          candidateName={candidato.nome_completo}
+          vagaId={candidato.vaga_relacionada_id}
+        />
+
+        {/* Scorecard History */}
+        <ScorecardHistory candidateId={id!} />
 
         {/* History Timeline */}
         <HistoryTimeline
