@@ -313,7 +313,7 @@ export default function ScorecardForm() {
 
       <div className="px-6 py-6 max-w-4xl mx-auto space-y-6">
         {/* Template Info */}
-        <Card className="bg-white/95 backdrop-blur-sm">
+        <Card>
           <CardHeader>
             <CardTitle>Informações do Template</CardTitle>
             <CardDescription>
@@ -345,7 +345,7 @@ export default function ScorecardForm() {
         </Card>
 
         {/* Criteria */}
-        <Card className="bg-white/95 backdrop-blur-sm">
+        <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
@@ -364,7 +364,7 @@ export default function ScorecardForm() {
           </CardHeader>
           <CardContent className="space-y-4">
             {criteria.map((criterion, index) => (
-              <Card key={index} className="border-2 bg-white">
+              <Card key={index} className="border-2">
                 <CardContent className="pt-6 space-y-4">
                   <div className="flex items-start gap-4">
                     {/* Drag Handle */}
