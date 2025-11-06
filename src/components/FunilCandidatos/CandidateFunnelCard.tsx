@@ -76,7 +76,7 @@ export function CandidateFunnelCard({ candidato, onDragStart, isDragging }: Cand
         isFinalStage && "opacity-60 hover:opacity-70"
       )}
     >
-      <CardHeader className="p-4 pb-2">
+      <CardHeader className="p-3 pb-2">
         <CardTitle className="text-base font-bold text-card-foreground line-clamp-2">
           {candidato.nome_completo}
         </CardTitle>
@@ -88,9 +88,9 @@ export function CandidateFunnelCard({ candidato, onDragStart, isDragging }: Cand
         )}
       </CardHeader>
       
-      <CardContent className="p-4 pt-2 space-y-3">
+      <CardContent className="p-3 pt-1 space-y-2.5">
         {/* Contact Info */}
-        <div className="space-y-1.5">
+        <div className="space-y-1">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Mail className="h-4 w-4 flex-shrink-0" />
             <span className="truncate font-semibold">{candidato.email}</span>
@@ -122,7 +122,7 @@ export function CandidateFunnelCard({ candidato, onDragStart, isDragging }: Cand
 
         {/* Quick Actions */}
         <TooltipProvider>
-          <div className="flex gap-1 pt-2 border-t border-border">
+          <div className="flex gap-1 pt-1.5 border-t border-border">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
