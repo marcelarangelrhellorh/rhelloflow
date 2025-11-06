@@ -7,8 +7,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, TrendingUp, TrendingDown, Minus, AlertCircle } from "lucide-react";
+import { Loader2, TrendingUp, TrendingDown, Minus, AlertCircle, FileDown } from "lucide-react";
 import { MultiSelect } from "@/components/ui/multi-select";
+import jsPDF from "jspdf";
 
 interface FaixaSalarial {
   tipo_contratacao: string;
@@ -118,6 +119,166 @@ export default function EstudoMercado() {
         return "bg-green-100 text-green-800 border-green-300";
       default:
         return "bg-gray-100 text-gray-800 border-gray-300";
+    }
+  };
+
+  const handleExportarPDF = () => {
+    if (!estudo) return;
+
+    try {
+      const doc = new jsPDF();
+      let yPos = 20;
+
+      // Título
+      doc.setFontSize(20);
+      doc.setFont("helvetica", "bold");
+      doc.text("Estudo de Mercado", 20, yPos);
+      yPos += 15;
+
+      // Informações Gerais
+      doc.setFontSize(14);
+      doc.text("Informações Gerais", 20, yPos);
+      yPos += 10;
+      
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      doc.text(`Função: ${estudo.funcao}`, 20, yPos);
+      yPos += 7;
+      doc.text(`Região: ${estudo.regiao}`, 20, yPos);
+      yPos += 7;
+      
+      if (estudo.senioridade) {
+        doc.text(`Senioridade: ${estudo.senioridade}`, 20, yPos);
+        yPos += 7;
+      }
+      
+      if (estudo.tipos_contratacao.length > 0) {
+        doc.text(`Tipos de Contratação: ${estudo.tipos_contratacao.join(", ")}`, 20, yPos);
+        yPos += 7;
+      }
+      
+      if (estudo.jornada) {
+        doc.text(`Modelo de Trabalho: ${estudo.jornada}`, 20, yPos);
+        yPos += 7;
+      }
+      
+      yPos += 5;
+
+      // Faixa Salarial
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text("Faixa Salarial", 20, yPos);
+      yPos += 10;
+      
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      
+      estudo.faixas_salariais.forEach((faixa) => {
+        if (estudo.faixas_salariais.length > 1) {
+          doc.setFont("helvetica", "bold");
+          doc.text(faixa.tipo_contratacao, 20, yPos);
+          yPos += 7;
+          doc.setFont("helvetica", "normal");
+        }
+        
+        doc.text(`Mínimo: ${formatCurrency(faixa.salario_min)}`, 30, yPos);
+        yPos += 7;
+        doc.text(`Média: ${formatCurrency(faixa.salario_media)}`, 30, yPos);
+        yPos += 7;
+        doc.text(`Máximo: ${formatCurrency(faixa.salario_max)}`, 30, yPos);
+        yPos += 10;
+      });
+
+      if (estudo.salario_ofertado) {
+        doc.text(`Salário Ofertado${estudo.tipo_contratacao_ofertado ? ` (${estudo.tipo_contratacao_ofertado})` : ""}: ${formatCurrency(estudo.salario_ofertado)}`, 20, yPos);
+        yPos += 7;
+        doc.text(`Comparação: ${estudo.comparacao_oferta}`, 20, yPos);
+        yPos += 10;
+      }
+
+      // Demanda
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text("Demanda no Mercado", 20, yPos);
+      yPos += 10;
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      doc.text(estudo.demanda, 20, yPos);
+      yPos += 10;
+
+      // Tendência
+      if (estudo.tendencia_short) {
+        doc.setFontSize(14);
+        doc.setFont("helvetica", "bold");
+        doc.text("Tendência", 20, yPos);
+        yPos += 10;
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+        const tendenciaLines = doc.splitTextToSize(estudo.tendencia_short, 170);
+        doc.text(tendenciaLines, 20, yPos);
+        yPos += tendenciaLines.length * 7 + 5;
+      }
+
+      // Benefícios
+      if (estudo.beneficios.length > 0) {
+        doc.setFontSize(14);
+        doc.setFont("helvetica", "bold");
+        doc.text("Benefícios Mais Comuns", 20, yPos);
+        yPos += 10;
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+        doc.text(estudo.beneficios.join(", "), 20, yPos);
+        yPos += 10;
+      }
+
+      // Nova página se necessário
+      if (yPos > 250) {
+        doc.addPage();
+        yPos = 20;
+      }
+
+      // Fontes
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text("Fontes Consultadas", 20, yPos);
+      yPos += 10;
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      
+      estudo.fontes.forEach((fonte) => {
+        if (yPos > 270) {
+          doc.addPage();
+          yPos = 20;
+        }
+        doc.text(`• ${fonte.nome}`, 20, yPos);
+        yPos += 7;
+      });
+
+      // Observações
+      if (estudo.observacoes) {
+        yPos += 5;
+        if (yPos > 250) {
+          doc.addPage();
+          yPos = 20;
+        }
+        doc.setFontSize(14);
+        doc.setFont("helvetica", "bold");
+        doc.text("Observações", 20, yPos);
+        yPos += 10;
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+        const obsLines = doc.splitTextToSize(estudo.observacoes, 170);
+        doc.text(obsLines, 20, yPos);
+      }
+
+      // Salvar PDF
+      const fileName = `estudo-mercado-${estudo.funcao.replace(/\s+/g, "-").toLowerCase()}-${new Date().toISOString().split("T")[0]}.pdf`;
+      doc.save(fileName);
+      
+      toast.success("PDF exportado com sucesso!");
+    } catch (error) {
+      console.error("Erro ao exportar PDF:", error);
+      toast.error("Erro ao exportar PDF");
     }
   };
 
@@ -256,7 +417,13 @@ export default function EstudoMercado() {
       {/* Resultados */}
       {estudo && (
         <div className="space-y-6 animate-in fade-in duration-500">
-          <h2 className="text-2xl font-bold text-primary">📊 Resultado do Estudo</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold text-primary">📊 Resultado do Estudo</h2>
+            <Button onClick={handleExportarPDF} variant="outline" size="lg">
+              <FileDown className="mr-2 h-5 w-5" />
+              Exportar PDF
+            </Button>
+          </div>
 
           {/* Informações Básicas */}
           <Card>
