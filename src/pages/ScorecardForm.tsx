@@ -271,14 +271,14 @@ export default function ScorecardForm() {
 
   if (loading && isEditing) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-secondary/30">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      <div className="flex items-center justify-center min-h-screen bg-[#00141D]">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#FFCD00] border-t-transparent" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "#FFFDF6" }}>
+    <div className="min-h-screen bg-[#00141D]">
       {/* Header */}
       <div className="sticky top-0 z-20 bg-white border-b border-gray-200 shadow-sm">
         <div className="px-6 py-4">
@@ -313,7 +313,7 @@ export default function ScorecardForm() {
 
       <div className="px-6 py-6 max-w-4xl mx-auto space-y-6">
         {/* Template Info */}
-        <Card>
+        <Card className="bg-white/95 backdrop-blur-sm">
           <CardHeader>
             <CardTitle>Informações do Template</CardTitle>
             <CardDescription>
@@ -345,7 +345,7 @@ export default function ScorecardForm() {
         </Card>
 
         {/* Criteria */}
-        <Card>
+        <Card className="bg-white/95 backdrop-blur-sm">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
@@ -364,7 +364,7 @@ export default function ScorecardForm() {
           </CardHeader>
           <CardContent className="space-y-4">
             {criteria.map((criterion, index) => (
-              <Card key={index} className="border-2">
+              <Card key={index} className="border-2 bg-white">
                 <CardContent className="pt-6 space-y-4">
                   <div className="flex items-start gap-4">
                     {/* Drag Handle */}
