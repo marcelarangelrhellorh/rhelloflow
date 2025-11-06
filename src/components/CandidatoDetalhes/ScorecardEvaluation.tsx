@@ -235,26 +235,26 @@ export function ScorecardEvaluation({ candidateId, candidateName, vagaId }: Scor
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Nova Avaliação - Scorecard</CardTitle>
-        <CardDescription>
-          Avalie {candidateName} de forma estruturada
+        <CardTitle className="text-xl font-bold">Nova Avaliação - Scorecard</CardTitle>
+        <CardDescription className="text-base">
+          Avalie <span className="font-semibold">{candidateName}</span> de forma estruturada
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Template Selection */}
         <div className="space-y-2">
-          <Label>Template de Avaliação</Label>
+          <Label className="text-base font-semibold">Template de Avaliação</Label>
           <Select value={selectedTemplateId} onValueChange={setSelectedTemplateId}>
-            <SelectTrigger>
+            <SelectTrigger className="text-base">
               <SelectValue placeholder="Selecione um template" />
             </SelectTrigger>
             <SelectContent>
               {templates.map((template) => (
                 <SelectItem key={template.id} value={template.id}>
                   <div>
-                    <div className="font-medium">{template.name}</div>
+                    <div className="font-semibold text-base">{template.name}</div>
                     {template.description && (
-                      <div className="text-xs text-muted-foreground">
+                      <div className="text-sm text-muted-foreground">
                         {template.description}
                       </div>
                     )}
@@ -276,10 +276,10 @@ export function ScorecardEvaluation({ candidateId, candidateName, vagaId }: Scor
           <>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold">Critérios de Avaliação</h3>
+                <h3 className="text-lg font-bold">Critérios de Avaliação</h3>
                 {allScoresSet && (
-                  <Badge variant="default" className="gap-1">
-                    <Check className="h-3 w-3" />
+                  <Badge variant="default" className="gap-1 text-sm">
+                    <Check className="h-4 w-4" />
                     Completo
                   </Badge>
                 )}
@@ -297,15 +297,15 @@ export function ScorecardEvaluation({ candidateId, candidateName, vagaId }: Scor
                           <div className="flex items-center gap-2 mb-1">
                             <Badge
                               variant="outline"
-                              className={cn("text-xs", categoryColors[criterion.category])}
+                              className={cn("text-sm font-medium", categoryColors[criterion.category])}
                             >
                               {categoryLabels[criterion.category]}
                             </Badge>
-                            <span className="text-xs text-muted-foreground">
-                              Peso: {criterion.weight}%
+                            <span className="text-sm font-medium text-muted-foreground">
+                              Peso: <span className="font-bold">{criterion.weight}%</span>
                             </span>
                           </div>
-                          <h4 className="font-semibold">{criterion.name}</h4>
+                          <h4 className="text-base font-bold">{criterion.name}</h4>
                           {criterion.description && (
                             <p className="text-sm text-muted-foreground mt-1">
                               {criterion.description}
@@ -316,7 +316,7 @@ export function ScorecardEvaluation({ candidateId, candidateName, vagaId }: Scor
 
                       {/* Rating */}
                       <div className="space-y-2">
-                        <Label className="text-xs">Pontuação</Label>
+                        <Label className="text-sm font-semibold">Pontuação</Label>
                         <div className="flex gap-2">
                           {[1, 2, 3, 4, 5].map((score) => (
                             <TooltipProvider key={score}>
@@ -358,7 +358,7 @@ export function ScorecardEvaluation({ candidateId, candidateName, vagaId }: Scor
 
                       {/* Notes */}
                       <div className="space-y-2">
-                        <Label className="text-xs">Observações (opcional)</Label>
+                        <Label className="text-sm font-semibold">Observações (opcional)</Label>
                         <Textarea
                           value={evaluation.notes}
                           onChange={(e) =>
@@ -382,14 +382,14 @@ export function ScorecardEvaluation({ candidateId, candidateName, vagaId }: Scor
                   <div className="space-y-4">
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium">Match Score</span>
-                        <span className="text-2xl font-bold">{percentage}%</span>
+                        <span className="text-base font-bold">Match Score</span>
+                        <span className="text-3xl font-bold">{percentage}%</span>
                       </div>
                       <Progress value={percentage} className="h-3" />
                     </div>
 
-                    <div className="text-xs text-muted-foreground">
-                      Score ponderado: {total} / 100
+                    <div className="text-sm text-muted-foreground">
+                      Score ponderado: <span className="font-semibold">{total} / 100</span>
                     </div>
                   </div>
                 </CardContent>
@@ -398,7 +398,7 @@ export function ScorecardEvaluation({ candidateId, candidateName, vagaId }: Scor
 
             {/* Recommendation */}
             <div className="space-y-2">
-              <Label>Recomendação Final *</Label>
+              <Label className="text-base font-semibold">Recomendação Final *</Label>
               <Select value={recommendation} onValueChange={setRecommendation}>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione sua recomendação" />
@@ -418,7 +418,7 @@ export function ScorecardEvaluation({ candidateId, candidateName, vagaId }: Scor
 
             {/* Comments */}
             <div className="space-y-2">
-              <Label>Comentários Gerais</Label>
+              <Label className="text-base font-semibold">Comentários Gerais</Label>
               <Textarea
                 value={comments}
                 onChange={(e) => setComments(e.target.value)}

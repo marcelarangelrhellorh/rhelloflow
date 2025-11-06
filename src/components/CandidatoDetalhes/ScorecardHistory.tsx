@@ -188,14 +188,14 @@ export function ScorecardHistory({ candidateId }: ScorecardHistoryProps) {
       <CardHeader>
         <div className="flex items-start justify-between">
           <div>
-            <CardTitle>Histórico de Avaliações</CardTitle>
-            <CardDescription>
-              {scorecards.length} {scorecards.length === 1 ? "avaliação" : "avaliações"} recebidas
+            <CardTitle className="text-xl font-bold">Histórico de Avaliações</CardTitle>
+            <CardDescription className="text-base">
+              <span className="font-semibold">{scorecards.length}</span> {scorecards.length === 1 ? "avaliação" : "avaliações"} recebidas
             </CardDescription>
           </div>
           <div className="text-right">
-            <div className="text-2xl font-bold">{Math.round(averageScore)}%</div>
-            <p className="text-xs text-muted-foreground">Match médio</p>
+            <div className="text-3xl font-bold">{Math.round(averageScore)}%</div>
+            <p className="text-sm font-medium text-muted-foreground">Match médio</p>
           </div>
         </div>
       </CardHeader>
@@ -220,16 +220,16 @@ export function ScorecardHistory({ candidateId }: ScorecardHistoryProps) {
                       </Avatar>
 
                       <div className="flex-1 text-left">
-                        <div className="font-semibold text-sm">
+                        <div className="font-bold text-base">
                           {scorecard.template_name}
                         </div>
-                        <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
-                          <User className="h-3 w-3" />
-                          <span>{scorecard.evaluator_name}</span>
+                        <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
+                          <User className="h-4 w-4" />
+                          <span className="font-medium">{scorecard.evaluator_name}</span>
                         </div>
                         {scorecard.vaga_titulo && (
                           <div className="flex items-center gap-2 mt-1">
-                            <Badge variant="outline" className="text-xs">
+                            <Badge variant="outline" className="text-sm font-medium">
                               {scorecard.vaga_titulo}
                             </Badge>
                           </div>
@@ -238,19 +238,21 @@ export function ScorecardHistory({ candidateId }: ScorecardHistoryProps) {
                     </div>
 
                     <div className="flex items-center gap-4 shrink-0">
-                      <Badge className={cn("text-xs", recConfig.color)}>
+                      <Badge className={cn("text-sm font-semibold", recConfig.color)}>
                         {recConfig.label}
                       </Badge>
 
                       <div className="text-right">
-                        <div className="text-lg font-bold">
+                        <div className="text-2xl font-bold">
                           {scorecard.match_percentage}%
                         </div>
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <Calendar className="h-3 w-3" />
-                          {format(new Date(scorecard.created_at), "dd MMM yyyy", {
-                            locale: ptBR,
-                          })}
+                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                          <Calendar className="h-4 w-4" />
+                          <span className="font-medium">
+                            {format(new Date(scorecard.created_at), "dd MMM yyyy", {
+                              locale: ptBR,
+                            })}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -261,9 +263,9 @@ export function ScorecardHistory({ candidateId }: ScorecardHistoryProps) {
                   <div className="space-y-4 pt-2">
                     {/* Progress Bar */}
                     <div className="space-y-2">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">Match Score</span>
-                        <span className="font-semibold">
+                      <div className="flex items-center justify-between">
+                        <span className="text-base font-semibold text-muted-foreground">Match Score</span>
+                        <span className="text-lg font-bold">
                           {scorecard.match_percentage}%
                         </span>
                       </div>
@@ -273,7 +275,7 @@ export function ScorecardHistory({ candidateId }: ScorecardHistoryProps) {
                     {/* Comments */}
                     {scorecard.comments && (
                       <div className="bg-muted p-3 rounded-lg">
-                        <p className="text-sm font-medium mb-1">Comentários Gerais:</p>
+                        <p className="text-base font-bold mb-1">Comentários Gerais:</p>
                         <p className="text-sm text-muted-foreground">
                           {scorecard.comments}
                         </p>
@@ -282,7 +284,7 @@ export function ScorecardHistory({ candidateId }: ScorecardHistoryProps) {
 
                     {/* Evaluations */}
                     <div className="space-y-3">
-                      <p className="text-sm font-semibold">Detalhes por Critério:</p>
+                      <p className="text-base font-bold">Detalhes por Critério:</p>
                       {scorecard.evaluations.map((evaluation, index) => (
                         <div
                           key={index}
@@ -294,17 +296,17 @@ export function ScorecardHistory({ candidateId }: ScorecardHistoryProps) {
                                 <Badge
                                   variant="outline"
                                   className={cn(
-                                    "text-xs",
+                                    "text-sm font-medium",
                                     categoryColors[evaluation.criteria_category]
                                   )}
                                 >
                                   {categoryLabels[evaluation.criteria_category]}
                                 </Badge>
-                                <span className="text-xs text-muted-foreground">
-                                  Peso: {evaluation.criteria_weight}%
+                                <span className="text-sm font-medium text-muted-foreground">
+                                  Peso: <span className="font-bold">{evaluation.criteria_weight}%</span>
                                 </span>
                               </div>
-                              <p className="font-medium text-sm">
+                              <p className="font-bold text-base">
                                 {evaluation.criteria_name}
                               </p>
                             </div>
