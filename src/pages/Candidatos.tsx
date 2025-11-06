@@ -172,14 +172,14 @@ export default function Candidatos() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-secondary/30">
+      <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: '#FFFBF0' }}>
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background-light">
+    <div className="min-h-screen" style={{ backgroundColor: '#FFFBF0' }}>
       {/* Header - Fixed */}
       <div className="sticky top-0 z-20 bg-background border-b border-border shadow-sm">
         <div className="px-6 py-4">

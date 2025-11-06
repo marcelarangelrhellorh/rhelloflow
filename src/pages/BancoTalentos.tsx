@@ -178,7 +178,7 @@ export default function BancoTalentos() {
   }
 
   return (
-    <div className="min-h-screen bg-background-light p-8">
+    <div className="min-h-screen p-8" style={{ backgroundColor: '#FFFBF0' }}>
       {/* Cabeçalho */}
       <div className="mb-8 flex items-start justify-between">
         <div>
