@@ -41,3 +41,6 @@ verify_jwt = true
 
 [functions.generate-comparison-summary]
 verify_jwt = true
+
+[functions.process-pdf-import]
+verify_jwt = true
