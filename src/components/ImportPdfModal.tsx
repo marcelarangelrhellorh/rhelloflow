@@ -82,6 +82,12 @@ export function ImportPdfModal({ open, onOpenChange, sourceType, vagaId, onSucce
     setProgress(10);
 
     try {
+      // Obter sessão atual para passar token
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('Usuário não autenticado');
+      }
+
       const formData = new FormData();
       formData.append('file', file);
       formData.append('source_type', sourceType);
@@ -89,11 +95,22 @@ export function ImportPdfModal({ open, onOpenChange, sourceType, vagaId, onSucce
 
       setProgress(30);
 
-      const { data, error } = await supabase.functions.invoke('process-pdf-import', {
+      // Fazer chamada HTTP direta com token
+      const functionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/process-pdf-import`;
+      const response = await fetch(functionUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+        },
         body: formData,
       });
 
-      if (error) throw error;
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Erro desconhecido' }));
+        throw new Error(errorData.error || 'Erro ao processar PDF');
+      }
+
+      const data = await response.json();
 
       setProgress(90);
 
