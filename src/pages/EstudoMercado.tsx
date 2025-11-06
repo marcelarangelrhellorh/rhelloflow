@@ -122,7 +122,7 @@ export default function EstudoMercado() {
   };
 
   const handleExportarPDF = () => {
-    toast.info("Funcionalidade em desenvolvimento");
+    window.print();
   };
 
   return (
@@ -135,7 +135,7 @@ export default function EstudoMercado() {
         </div>
 
       {/* Formulário */}
-      <Card>
+      <Card className="no-print">
         <CardHeader>
           <CardTitle>Informações da Consulta</CardTitle>
           <CardDescription>Preencha os dados para gerar o estudo de mercado</CardDescription>
@@ -259,10 +259,10 @@ export default function EstudoMercado() {
 
       {/* Resultados */}
       {estudo && (
-        <div className="space-y-6 animate-in fade-in duration-500">
-          <div className="flex items-center justify-between">
+        <div className="space-y-6 animate-in fade-in duration-500 print-section">
+          <div className="flex items-center justify-between no-print">
             <h2 className="text-2xl font-bold text-primary">📊 Resultado do Estudo</h2>
-            <Button onClick={handleExportarPDF} variant="outline" size="lg" disabled>
+            <Button onClick={handleExportarPDF} variant="outline" size="lg">
               <FileDown className="mr-2 h-5 w-5" />
               Exportar PDF
             </Button>
