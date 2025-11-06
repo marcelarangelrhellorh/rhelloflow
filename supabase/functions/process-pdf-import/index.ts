@@ -12,21 +12,29 @@ serve(async (req) => {
   }
 
   try {
+    // Extrair user ID do JWT (já verificado pelo gateway com verify_jwt=true)
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      throw new Error('Não autenticado');
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const userId = payload.sub;
+
+    if (!userId) {
+      throw new Error('Não autenticado');
+    }
+
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
       {
         global: {
-          headers: { Authorization: req.headers.get('Authorization')! },
+          headers: { Authorization: authHeader },
         },
       }
     );
-
-    // Verificar autenticação
-    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
-    if (authError || !user) {
-      throw new Error('Não autenticado');
-    }
 
     const formData = await req.formData();
     const file = formData.get('file') as File;
@@ -57,7 +65,7 @@ serve(async (req) => {
     const { data: importRecord, error: importError } = await supabaseClient
       .from('pdf_imports')
       .insert({
-        created_by: user.id,
+        created_by: userId,
         file_name: file.name,
         file_hash: fileHash,
         source_type: sourceType,
@@ -71,7 +79,7 @@ serve(async (req) => {
     if (importError) throw importError;
 
     // Upload para storage temporário
-    const storagePath = `${user.id}/${importRecord.id}/${file.name}`;
+    const storagePath = `${userId}/${importRecord.id}/${file.name}`;
     const { error: uploadError } = await supabaseClient.storage
       .from('pdf-imports')
       .upload(storagePath, arrayBuffer, {
