@@ -131,10 +131,19 @@ export default function ShareJob() {
   };
 
   const getDaysOpen = (createdAt: string) => {
-    const created = new Date(createdAt);
-    const now = new Date();
-    const diff = Math.floor((now.getTime() - created.getTime()) / (1000 * 60 * 60 * 24));
-    return diff;
+    if (!createdAt) return 0;
+    
+    try {
+      const created = new Date(createdAt);
+      // Verificar se a data é válida
+      if (isNaN(created.getTime())) return 0;
+      
+      const now = new Date();
+      const diff = Math.floor((now.getTime() - created.getTime()) / (1000 * 60 * 60 * 24));
+      return Math.max(0, diff); // Garantir que não retorne número negativo
+    } catch {
+      return 0;
+    }
   };
 
   if (loading || !shareConfig) {

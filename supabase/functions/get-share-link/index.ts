@@ -47,7 +47,11 @@ serve(async (req) => {
           dias_semana,
           salario_min,
           salario_max,
-          salario_modalidade
+          salario_modalidade,
+          observacoes,
+          prioridade,
+          complexidade,
+          criado_em
         )
       `)
       .eq('token', token)
