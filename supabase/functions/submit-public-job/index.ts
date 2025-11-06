@@ -96,13 +96,24 @@ Deno.serve(async (req) => {
       throw new Error('Nome de contato inválido (deve ter entre 2 e 100 caracteres)');
     }
 
+    // Build contact info for observacoes
+    const contactInfo = [
+      '\n\n=== Dados de Contato do Solicitante ===',
+      `Nome: ${sanitizeText(payload.contato_nome)}`,
+      `Email: ${sanitizeText(payload.contato_email)}`,
+      payload.contato_telefone ? `Telefone: ${sanitizeText(payload.contato_telefone)}` : null,
+    ].filter(Boolean).join('\n');
+
+    // Build full observacoes with contact info
+    const observacoesCompletas = [
+      payload.observacoes ? sanitizeText(payload.observacoes).substring(0, 2000) : null,
+      contactInfo
+    ].filter(Boolean).join('\n');
+
     // Sanitize all text inputs
     const sanitizedData = {
       titulo: sanitizeText(payload.titulo).substring(0, 200),
       empresa: sanitizeText(payload.empresa).substring(0, 200),
-      contato_nome: sanitizeText(payload.contato_nome).substring(0, 100),
-      contato_email: sanitizeText(payload.contato_email).substring(0, 255),
-      contato_telefone: payload.contato_telefone ? sanitizeText(payload.contato_telefone).substring(0, 50) : null,
       salario_min: payload.salario_min || null,
       salario_max: payload.salario_max || null,
       salario_modalidade: payload.salario_modalidade || 'FAIXA',
@@ -115,7 +126,7 @@ Deno.serve(async (req) => {
       requisitos_obrigatorios: payload.requisitos_obrigatorios ? sanitizeText(payload.requisitos_obrigatorios).substring(0, 5000) : null,
       requisitos_desejaveis: payload.requisitos_desejaveis ? sanitizeText(payload.requisitos_desejaveis).substring(0, 5000) : null,
       responsabilidades: payload.responsabilidades ? sanitizeText(payload.responsabilidades).substring(0, 5000) : null,
-      observacoes: payload.observacoes ? sanitizeText(payload.observacoes).substring(0, 2000) : null,
+      observacoes: observacoesCompletas.substring(0, 5000),
       confidencial: payload.confidencial || false,
       motivo_confidencial: payload.motivo_confidencial ? sanitizeText(payload.motivo_confidencial).substring(0, 500) : null,
       source: 'externo',
