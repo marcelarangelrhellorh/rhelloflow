@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Plus, Grid3x3, List, Star, Tag } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MultiSelect } from "@/components/ui/multi-select";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { CandidateCard } from "@/components/BancoTalentos/CandidateCard";
@@ -46,7 +45,7 @@ export default function BancoTalentos() {
   const [nivelFilter, setNivelFilter] = useState<string>("all");
   const [cidadeFilter, setCidadeFilter] = useState<string>("");
   const [avaliacaoFilter, setAvaliacaoFilter] = useState<string>("all");
-  const [tagFilter, setTagFilter] = useState<string[]>([]);
+  const [tagFilter, setTagFilter] = useState<string>("all");
   const [availableTags, setAvailableTags] = useState<Array<{ label: string; value: string }>>([]);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [selectedCandidate, setSelectedCandidate] = useState<Candidato | null>(null);
@@ -143,13 +142,11 @@ export default function BancoTalentos() {
       matchesAvaliacao = (candidato.mediaRating ?? 0) >= minRating;
     }
 
-    // Filtro de tags (candidato deve ter TODAS as tags selecionadas)
+    // Filtro de tags
     let matchesTags = true;
-    if (tagFilter.length > 0) {
+    if (tagFilter !== "all") {
       const candidateTags = (candidato as any).tags || [];
-      matchesTags = tagFilter.every((selectedTagId) =>
-        candidateTags.some((ct: any) => ct.tag_id === selectedTagId)
-      );
+      matchesTags = candidateTags.some((ct: any) => ct.tag_id === tagFilter);
     }
     
     return matchesSearch && matchesArea && matchesNivel && matchesCidade && matchesAvaliacao && matchesTags;
@@ -159,7 +156,7 @@ export default function BancoTalentos() {
     return differenceInDays(new Date(), new Date(dateString));
   };
 
-  const hasActiveFilters = areaFilter !== "all" || nivelFilter !== "all" || cidadeFilter !== "" || avaliacaoFilter !== "all" || tagFilter.length > 0;
+  const hasActiveFilters = areaFilter !== "all" || nivelFilter !== "all" || cidadeFilter !== "" || avaliacaoFilter !== "all" || tagFilter !== "all";
 
   const handleViewProfile = (candidato: Candidato) => {
     setSelectedCandidate(candidato);
@@ -279,15 +276,19 @@ export default function BancoTalentos() {
             className={`w-[180px] ${cidadeFilter ? 'border-2 border-primary' : ''}`}
           />
 
-          <div className="w-[280px]">
-            <MultiSelect
-              options={availableTags}
-              value={tagFilter}
-              onChange={setTagFilter}
-              placeholder="Filtrar por tags..."
-              className={tagFilter.length > 0 ? 'border-2 border-primary' : ''}
-            />
-          </div>
+          <Select value={tagFilter} onValueChange={setTagFilter}>
+            <SelectTrigger className={`w-[250px] ${tagFilter !== 'all' ? 'border-2 border-primary' : ''}`}>
+              <SelectValue placeholder="Filtrar por tags" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas as tags</SelectItem>
+              {availableTags.map((tag) => (
+                <SelectItem key={tag.value} value={tag.value}>
+                  {tag.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
           <div className="flex gap-2 ml-auto">
             <Button
@@ -322,6 +323,7 @@ export default function BancoTalentos() {
                 setNivelFilter("all");
                 setCidadeFilter("");
                 setAvaliacaoFilter("all");
+                setTagFilter("all");
                 setSearchTerm("");
               }}
               className="text-muted-foreground hover:text-foreground"
