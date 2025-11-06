@@ -141,10 +141,10 @@ Deno.serve(async (req) => {
       );
     }
     
-    // Timing check - submission should take at least 3 seconds
+    // Timing check - submission should take at least 2 seconds
     if (payload.formStartTime) {
       const submissionTime = Date.now() - payload.formStartTime;
-      if (submissionTime < 3000) {
+      if (submissionTime < 2000) {
         console.log(`Suspicious fast submission from IP: ${clientIp}, time: ${submissionTime}ms`);
         return new Response(
           JSON.stringify({ 

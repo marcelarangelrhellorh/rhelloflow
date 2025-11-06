@@ -136,7 +136,7 @@ serve(async (req) => {
     // Timing check
     if (formStartTime) {
       const submissionTime = Date.now() - formStartTime;
-      if (submissionTime < 5000) {
+      if (submissionTime < 3000) {
         console.log(`Suspicious fast submission, time: ${submissionTime}ms`);
         return new Response(
           JSON.stringify({ error: 'Submissão muito rápida. Por favor, revise seus dados.' }), 
