@@ -45,7 +45,6 @@ export default function CandidatoForm() {
     feedback: "",
     origem: "",
   });
-  const [hasSourceLink, setHasSourceLink] = useState(false);
 
   useEffect(() => {
     loadVagas();
@@ -103,7 +102,6 @@ export default function CandidatoForm() {
           feedback: data.feedback || "",
           origem: data.origem || "",
         });
-        setHasSourceLink(!!data.source_link_id);
       }
     } catch (error) {
       console.error("Erro ao carregar candidato:", error);
@@ -606,10 +604,9 @@ export default function CandidatoForm() {
                 <Select 
                   value={formData.origem} 
                   onValueChange={(value) => setFormData({ ...formData, origem: value })}
-                  disabled={hasSourceLink}
                 >
                   <SelectTrigger className="mt-2">
-                    <SelectValue placeholder={hasSourceLink ? "Link de Divulgação" : "Selecione a origem"} />
+                    <SelectValue placeholder="Selecione a origem" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Link de Divulgação">🔗 Link de Divulgação</SelectItem>
@@ -626,66 +623,9 @@ export default function CandidatoForm() {
                     <SelectItem value="Outra">➕ Outra</SelectItem>
                   </SelectContent>
                 </Select>
-                {hasSourceLink && (
-                  <div className="mt-3 p-3 bg-primary/5 border border-primary/20 rounded-lg">
-                    <p className="text-sm text-muted-foreground flex items-center gap-2">
-                      <span className="text-primary">ℹ️</span>
-                      Este candidato se inscreveu através de um link público de divulgação da vaga
-                    </p>
-                  </div>
-                )}
               </div>
             </CardContent>
           </Card>
-
-          {/* Seção de dados da candidatura (quando vier de link público) */}
-          {hasSourceLink && (
-            <Card className="border-primary/30 bg-primary/5">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <span>📝</span> Dados da Candidatura
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Este candidato se inscreveu através de um link público de divulgação de vaga. 
-                  As informações abaixo foram preenchidas pelo próprio candidato.
-                </p>
-                <div className="space-y-3 p-4 bg-card rounded-lg">
-                  {formData.nome_completo && (
-                    <div>
-                      <span className="text-sm font-medium text-muted-foreground">Nome:</span>
-                      <p className="text-sm">{formData.nome_completo}</p>
-                    </div>
-                  )}
-                  {formData.email && (
-                    <div>
-                      <span className="text-sm font-medium text-muted-foreground">E-mail:</span>
-                      <p className="text-sm">{formData.email}</p>
-                    </div>
-                  )}
-                  {formData.telefone && (
-                    <div>
-                      <span className="text-sm font-medium text-muted-foreground">Telefone:</span>
-                      <p className="text-sm">{formData.telefone}</p>
-                    </div>
-                  )}
-                  {(formData.cidade || formData.estado) && (
-                    <div>
-                      <span className="text-sm font-medium text-muted-foreground">Localização:</span>
-                      <p className="text-sm">{formData.cidade}{formData.cidade && formData.estado && ', '}{formData.estado}</p>
-                    </div>
-                  )}
-                  {formData.linkedin && (
-                    <div>
-                      <span className="text-sm font-medium text-muted-foreground">LinkedIn:</span>
-                      <p className="text-sm">{formData.linkedin}</p>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          )}
 
           <div className="flex gap-4">
             <Button type="submit" disabled={loading || uploading}>
