@@ -329,30 +329,30 @@ export function VagaCard({ vaga, draggable = false, onDragStart, onClick, viewMo
               <AlertTriangle className="h-5 w-5 text-[#D32F2F]" />
               Excluir vaga
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-[#6B7280] space-y-4" style={{ fontFamily: "Manrope, sans-serif" }}>
-              <p>Tem certeza de que deseja excluir esta vaga?</p>
-              <div className="bg-[#FFF3CD] border border-[#FFE69C] rounded-lg p-3 text-[#856404]">
-                <p className="text-sm font-semibold mb-1">⚠️ Atenção:</p>
-                <ul className="text-sm space-y-1 list-disc list-inside">
-                  <li>Vagas com candidatos ativos requerem aprovação de admin</li>
-                  <li>Todos os dados serão preservados para auditoria</li>
-                  <li>Esta ação pode ser revertida por administradores</li>
-                </ul>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="deletion-reason" className="text-[#00141D] font-medium">
-                  Motivo da exclusão *
-                </Label>
-                <Input
-                  id="deletion-reason"
-                  placeholder="Ex: Vaga cancelada pelo cliente, duplicada, preenchida externamente..."
-                  value={deletionReason}
-                  onChange={(e) => setDeletionReason(e.target.value)}
-                  className="border-[#D1D5DB]"
-                />
-              </div>
-            </AlertDialogDescription>
           </AlertDialogHeader>
+          <div className="text-[#6B7280] space-y-4" style={{ fontFamily: "Manrope, sans-serif" }}>
+            <p>Tem certeza de que deseja excluir esta vaga?</p>
+            <div className="bg-[#FFF3CD] border border-[#FFE69C] rounded-lg p-3 text-[#856404]">
+              <p className="text-sm font-semibold mb-1">⚠️ Atenção:</p>
+              <ul className="text-sm space-y-1 list-disc list-inside">
+                <li>Vagas com candidatos ativos requerem aprovação de admin</li>
+                <li>Todos os dados serão preservados para auditoria</li>
+                <li>Esta ação pode ser revertida por administradores</li>
+              </ul>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="deletion-reason" className="text-[#00141D] font-medium">
+                Motivo da exclusão *
+              </Label>
+              <Input
+                id="deletion-reason"
+                placeholder="Ex: Vaga cancelada pelo cliente, duplicada, preenchida externamente..."
+                value={deletionReason}
+                onChange={(e) => setDeletionReason(e.target.value)}
+                className="border-[#D1D5DB]"
+              />
+            </div>
+          </div>
           <AlertDialogFooter>
             <AlertDialogCancel 
               className="border border-[#D1D5DB] text-[#00141D] bg-transparent hover:bg-[#F9FAFB]"
