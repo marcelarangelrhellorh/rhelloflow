@@ -85,6 +85,76 @@ export type Database = {
           },
         ]
       }
+      candidate_tags: {
+        Row: {
+          added_at: string | null
+          added_by: string | null
+          added_reason: string | null
+          candidate_id: string
+          id: string
+          tag_id: string
+        }
+        Insert: {
+          added_at?: string | null
+          added_by?: string | null
+          added_reason?: string | null
+          candidate_id: string
+          id?: string
+          tag_id: string
+        }
+        Update: {
+          added_at?: string | null
+          added_by?: string | null
+          added_reason?: string | null
+          candidate_id?: string
+          id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_tags_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates_with_tags"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidate_tags_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidatos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidate_tags_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidatos_active"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidate_tags_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "view_candidate_tags"
+            referencedColumns: ["candidate_id"]
+          },
+          {
+            foreignKeyName: "candidate_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "tags"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidate_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "view_candidate_tags"
+            referencedColumns: ["tag_id"]
+          },
+        ]
+      }
       candidatos: {
         Row: {
           area: Database["public"]["Enums"]["area_candidato"] | null
@@ -394,6 +464,13 @@ export type Database = {
             foreignKeyName: "feedback_requests_candidato_id_fkey"
             columns: ["candidato_id"]
             isOneToOne: false
+            referencedRelation: "candidates_with_tags"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_requests_candidato_id_fkey"
+            columns: ["candidato_id"]
+            isOneToOne: false
             referencedRelation: "candidatos"
             referencedColumns: ["id"]
           },
@@ -403,6 +480,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "candidatos_active"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_requests_candidato_id_fkey"
+            columns: ["candidato_id"]
+            isOneToOne: false
+            referencedRelation: "view_candidate_tags"
+            referencedColumns: ["candidate_id"]
           },
           {
             foreignKeyName: "feedback_requests_vaga_id_fkey"
@@ -498,6 +582,13 @@ export type Database = {
             foreignKeyName: "feedbacks_candidato_id_fkey"
             columns: ["candidato_id"]
             isOneToOne: false
+            referencedRelation: "candidates_with_tags"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedbacks_candidato_id_fkey"
+            columns: ["candidato_id"]
+            isOneToOne: false
             referencedRelation: "candidatos"
             referencedColumns: ["id"]
           },
@@ -507,6 +598,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "candidatos_active"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedbacks_candidato_id_fkey"
+            columns: ["candidato_id"]
+            isOneToOne: false
+            referencedRelation: "view_candidate_tags"
+            referencedColumns: ["candidate_id"]
           },
           {
             foreignKeyName: "feedbacks_request_id_fkey"
@@ -599,6 +697,13 @@ export type Database = {
             foreignKeyName: "historico_candidatos_candidato_id_fkey"
             columns: ["candidato_id"]
             isOneToOne: false
+            referencedRelation: "candidates_with_tags"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "historico_candidatos_candidato_id_fkey"
+            columns: ["candidato_id"]
+            isOneToOne: false
             referencedRelation: "candidatos"
             referencedColumns: ["id"]
           },
@@ -608,6 +713,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "candidatos_active"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "historico_candidatos_candidato_id_fkey"
+            columns: ["candidato_id"]
+            isOneToOne: false
+            referencedRelation: "view_candidate_tags"
+            referencedColumns: ["candidate_id"]
           },
           {
             foreignKeyName: "historico_candidatos_vaga_id_fkey"
@@ -1003,6 +1115,36 @@ export type Database = {
           },
         ]
       }
+      tags: {
+        Row: {
+          active: boolean | null
+          category: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          label: string
+          slug: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          category: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          label: string
+          slug?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          category?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          label?: string
+          slug?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null
@@ -1050,6 +1192,59 @@ export type Database = {
           role?: string
         }
         Relationships: []
+      }
+      vacancy_tags: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          id: string
+          tag_id: string
+          vacancy_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          tag_id: string
+          vacancy_id: string
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          tag_id?: string
+          vacancy_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vacancy_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "tags"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vacancy_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "view_candidate_tags"
+            referencedColumns: ["tag_id"]
+          },
+          {
+            foreignKeyName: "vacancy_tags_vacancy_id_fkey"
+            columns: ["vacancy_id"]
+            isOneToOne: false
+            referencedRelation: "vagas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vacancy_tags_vacancy_id_fkey"
+            columns: ["vacancy_id"]
+            isOneToOne: false
+            referencedRelation: "vagas_active"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       vaga_eventos: {
         Row: {
@@ -1334,6 +1529,66 @@ export type Database = {
         }
         Relationships: []
       }
+      candidates_with_tags: {
+        Row: {
+          area: Database["public"]["Enums"]["area_candidato"] | null
+          cidade: string | null
+          criado_em: string | null
+          curriculo_link: string | null
+          curriculo_url: string | null
+          deleted_at: string | null
+          deleted_by: string | null
+          deleted_reason: string | null
+          deletion_type: string | null
+          disponibilidade_mudanca: string | null
+          disponibilidade_status: string | null
+          email: string | null
+          estado: string | null
+          feedback: string | null
+          id: string | null
+          linkedin: string | null
+          nivel: Database["public"]["Enums"]["nivel_candidato"] | null
+          nome_completo: string | null
+          origem: string | null
+          parecer_final: string | null
+          pontos_desenvolver: string | null
+          pontos_fortes: string | null
+          portfolio_url: string | null
+          pretensao_salarial: number | null
+          recrutador: string | null
+          source_link_id: string | null
+          status: Database["public"]["Enums"]["status_candidato"] | null
+          tags: Json | null
+          telefone: string | null
+          total_feedbacks: number | null
+          ultimo_feedback: string | null
+          utm: Json | null
+          vaga_relacionada_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidatos_source_link_id_fkey"
+            columns: ["source_link_id"]
+            isOneToOne: false
+            referencedRelation: "share_links"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidatos_vaga_relacionada_id_fkey"
+            columns: ["vaga_relacionada_id"]
+            isOneToOne: false
+            referencedRelation: "vagas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidatos_vaga_relacionada_id_fkey"
+            columns: ["vaga_relacionada_id"]
+            isOneToOne: false
+            referencedRelation: "vagas_active"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       candidatos_active: {
         Row: {
           area: Database["public"]["Enums"]["area_candidato"] | null
@@ -1526,6 +1781,13 @@ export type Database = {
             foreignKeyName: "feedbacks_candidato_id_fkey"
             columns: ["candidato_id"]
             isOneToOne: false
+            referencedRelation: "candidates_with_tags"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedbacks_candidato_id_fkey"
+            columns: ["candidato_id"]
+            isOneToOne: false
             referencedRelation: "candidatos"
             referencedColumns: ["id"]
           },
@@ -1535,6 +1797,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "candidatos_active"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedbacks_candidato_id_fkey"
+            columns: ["candidato_id"]
+            isOneToOne: false
+            referencedRelation: "view_candidate_tags"
+            referencedColumns: ["candidate_id"]
           },
           {
             foreignKeyName: "feedbacks_vaga_id_fkey"
@@ -1722,6 +1991,18 @@ export type Database = {
           },
         ]
       }
+      view_candidate_tags: {
+        Row: {
+          added_at: string | null
+          added_by: string | null
+          added_reason: string | null
+          candidate_id: string | null
+          category: string | null
+          label: string | null
+          tag_id: string | null
+        }
+        Relationships: []
+      }
       vw_benchmark_recorte: {
         Row: {
           cidade: string | null
@@ -1747,6 +2028,13 @@ export type Database = {
             foreignKeyName: "feedbacks_candidato_id_fkey"
             columns: ["candidato_id"]
             isOneToOne: false
+            referencedRelation: "candidates_with_tags"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedbacks_candidato_id_fkey"
+            columns: ["candidato_id"]
+            isOneToOne: false
             referencedRelation: "candidatos"
             referencedColumns: ["id"]
           },
@@ -1756,6 +2044,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "candidatos_active"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedbacks_candidato_id_fkey"
+            columns: ["candidato_id"]
+            isOneToOne: false
+            referencedRelation: "view_candidate_tags"
+            referencedColumns: ["candidate_id"]
           },
         ]
       }
