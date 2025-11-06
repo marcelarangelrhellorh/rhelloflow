@@ -1832,16 +1832,19 @@ export type Database = {
           linkedin: string | null
           nivel: Database["public"]["Enums"]["nivel_candidato"] | null
           nome_completo: string | null
+          origem: string | null
           parecer_final: string | null
           pontos_desenvolver: string | null
           pontos_fortes: string | null
           portfolio_url: string | null
           pretensao_salarial: number | null
           recrutador: string | null
+          source_link_id: string | null
           status: Database["public"]["Enums"]["status_candidato"] | null
           telefone: string | null
           total_feedbacks: number | null
           ultimo_feedback: string | null
+          utm: Json | null
           vaga_relacionada_id: string | null
         }
         Insert: {
@@ -1863,16 +1866,19 @@ export type Database = {
           linkedin?: string | null
           nivel?: Database["public"]["Enums"]["nivel_candidato"] | null
           nome_completo?: string | null
+          origem?: string | null
           parecer_final?: string | null
           pontos_desenvolver?: string | null
           pontos_fortes?: string | null
           portfolio_url?: string | null
           pretensao_salarial?: number | null
           recrutador?: string | null
+          source_link_id?: string | null
           status?: Database["public"]["Enums"]["status_candidato"] | null
           telefone?: string | null
           total_feedbacks?: number | null
           ultimo_feedback?: string | null
+          utm?: Json | null
           vaga_relacionada_id?: string | null
         }
         Update: {
@@ -1894,19 +1900,29 @@ export type Database = {
           linkedin?: string | null
           nivel?: Database["public"]["Enums"]["nivel_candidato"] | null
           nome_completo?: string | null
+          origem?: string | null
           parecer_final?: string | null
           pontos_desenvolver?: string | null
           pontos_fortes?: string | null
           portfolio_url?: string | null
           pretensao_salarial?: number | null
           recrutador?: string | null
+          source_link_id?: string | null
           status?: Database["public"]["Enums"]["status_candidato"] | null
           telefone?: string | null
           total_feedbacks?: number | null
           ultimo_feedback?: string | null
+          utm?: Json | null
           vaga_relacionada_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "candidatos_source_link_id_fkey"
+            columns: ["source_link_id"]
+            isOneToOne: false
+            referencedRelation: "share_links"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "candidatos_vaga_relacionada_id_fkey"
             columns: ["vaga_relacionada_id"]
@@ -1962,7 +1978,14 @@ export type Database = {
           disposicao: string | null
           etapa: string | null
           id: string | null
+          ip_address: string | null
+          origem: string | null
+          quick_tags: string[] | null
+          request_id: string | null
+          sender_email: string | null
+          sender_name: string | null
           tipo: string | null
+          user_agent: string | null
           vaga_id: string | null
         }
         Insert: {
@@ -1979,7 +2002,14 @@ export type Database = {
           disposicao?: string | null
           etapa?: string | null
           id?: string | null
+          ip_address?: string | null
+          origem?: string | null
+          quick_tags?: string[] | null
+          request_id?: string | null
+          sender_email?: string | null
+          sender_name?: string | null
           tipo?: string | null
+          user_agent?: string | null
           vaga_id?: string | null
         }
         Update: {
@@ -1996,7 +2026,14 @@ export type Database = {
           disposicao?: string | null
           etapa?: string | null
           id?: string | null
+          ip_address?: string | null
+          origem?: string | null
+          quick_tags?: string[] | null
+          request_id?: string | null
+          sender_email?: string | null
+          sender_name?: string | null
           tipo?: string | null
+          user_agent?: string | null
           vaga_id?: string | null
         }
         Relationships: [
@@ -2027,6 +2064,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "view_candidate_tags"
             referencedColumns: ["candidate_id"]
+          },
+          {
+            foreignKeyName: "feedbacks_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_requests"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "feedbacks_vaga_id_fkey"
@@ -2076,11 +2120,15 @@ export type Database = {
           salario_max: number | null
           salario_min: number | null
           salario_modalidade: string | null
+          solicitante_email: string | null
+          solicitante_nome: string | null
+          solicitante_telefone: string | null
           source: string | null
           status: Database["public"]["Enums"]["status_vaga"] | null
           status_changed_at: string | null
           status_order: number | null
           status_slug: string | null
+          tipo_contratacao: string | null
           titulo: string | null
           updated_at: string | null
           updated_by: string | null
@@ -2118,11 +2166,15 @@ export type Database = {
           salario_max?: number | null
           salario_min?: number | null
           salario_modalidade?: string | null
+          solicitante_email?: string | null
+          solicitante_nome?: string | null
+          solicitante_telefone?: string | null
           source?: string | null
           status?: Database["public"]["Enums"]["status_vaga"] | null
           status_changed_at?: string | null
           status_order?: number | null
           status_slug?: string | null
+          tipo_contratacao?: string | null
           titulo?: string | null
           updated_at?: string | null
           updated_by?: string | null
@@ -2160,11 +2212,15 @@ export type Database = {
           salario_max?: number | null
           salario_min?: number | null
           salario_modalidade?: string | null
+          solicitante_email?: string | null
+          solicitante_nome?: string | null
+          solicitante_telefone?: string | null
           source?: string | null
           status?: Database["public"]["Enums"]["status_vaga"] | null
           status_changed_at?: string | null
           status_order?: number | null
           status_slug?: string | null
+          tipo_contratacao?: string | null
           titulo?: string | null
           updated_at?: string | null
           updated_by?: string | null
@@ -2288,6 +2344,7 @@ export type Database = {
         Returns: number
       }
       can_manage_user_roles: { Args: never; Returns: boolean }
+      can_view_analytics: { Args: never; Returns: boolean }
       compute_audit_event_hash: {
         Args: {
           p_action: string
@@ -2330,6 +2387,129 @@ export type Database = {
           p_snapshot_data: Json
         }
         Returns: string
+      }
+      get_candidates_with_tags: {
+        Args: never
+        Returns: {
+          area: Database["public"]["Enums"]["area_candidato"] | null
+          cidade: string | null
+          criado_em: string | null
+          curriculo_link: string | null
+          curriculo_url: string | null
+          deleted_at: string | null
+          deleted_by: string | null
+          deleted_reason: string | null
+          deletion_type: string | null
+          disponibilidade_mudanca: string | null
+          disponibilidade_status: string | null
+          email: string | null
+          estado: string | null
+          feedback: string | null
+          id: string | null
+          linkedin: string | null
+          nivel: Database["public"]["Enums"]["nivel_candidato"] | null
+          nome_completo: string | null
+          origem: string | null
+          parecer_final: string | null
+          pontos_desenvolver: string | null
+          pontos_fortes: string | null
+          portfolio_url: string | null
+          pretensao_salarial: number | null
+          recrutador: string | null
+          source_link_id: string | null
+          status: Database["public"]["Enums"]["status_candidato"] | null
+          tags: Json | null
+          telefone: string | null
+          total_feedbacks: number | null
+          ultimo_feedback: string | null
+          utm: Json | null
+          vaga_relacionada_id: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "candidates_with_tags"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      get_candidatos_active: {
+        Args: never
+        Returns: {
+          area: Database["public"]["Enums"]["area_candidato"] | null
+          cidade: string | null
+          criado_em: string | null
+          curriculo_link: string | null
+          curriculo_url: string | null
+          deleted_at: string | null
+          deleted_by: string | null
+          deleted_reason: string | null
+          deletion_type: string | null
+          disponibilidade_mudanca: string | null
+          disponibilidade_status: string | null
+          email: string | null
+          estado: string | null
+          feedback: string | null
+          id: string | null
+          linkedin: string | null
+          nivel: Database["public"]["Enums"]["nivel_candidato"] | null
+          nome_completo: string | null
+          origem: string | null
+          parecer_final: string | null
+          pontos_desenvolver: string | null
+          pontos_fortes: string | null
+          portfolio_url: string | null
+          pretensao_salarial: number | null
+          recrutador: string | null
+          source_link_id: string | null
+          status: Database["public"]["Enums"]["status_candidato"] | null
+          telefone: string | null
+          total_feedbacks: number | null
+          ultimo_feedback: string | null
+          utm: Json | null
+          vaga_relacionada_id: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "candidatos_active"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      get_dashboard_last30: {
+        Args: never
+        Returns: {
+          feedbacks_pendentes: number | null
+          taxa_aprovacao_percent: number | null
+          tempo_medio_corridos: number | null
+          tempo_medio_uteis: number | null
+          total_aprovados: number | null
+          total_finalizados: number | null
+          vagas_reabertas: number | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "dashboard_last30"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      get_dashboard_overview: {
+        Args: never
+        Returns: {
+          candidatos_ativos: number | null
+          feedbacks_pendentes: number | null
+          ids_vagas_atencao: string[] | null
+          media_dias_fechamento: number | null
+          taxa_aprovacao: number | null
+          vagas_abertas: number | null
+          vagas_atencao: number | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "dashboard_overview"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       get_latest_audit_event_hash: { Args: never; Returns: string }
       get_user_role: { Args: { user_id: string }; Returns: string }
