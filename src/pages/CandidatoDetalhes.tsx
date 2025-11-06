@@ -307,7 +307,7 @@ export default function CandidatoDetalhes() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background-light">
+      <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: '#FFFBF0' }}>
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
       </div>
     );
@@ -315,7 +315,7 @@ export default function CandidatoDetalhes() {
 
   if (!candidato) {
     return (
-      <div className="min-h-screen bg-background-light p-8">
+      <div className="min-h-screen p-8" style={{ backgroundColor: '#FFFBF0' }}>
         <div className="text-center">
           <p className="text-muted-foreground mb-4">Candidato não encontrado</p>
           <Button onClick={() => navigate("/candidatos")}>
@@ -328,9 +328,9 @@ export default function CandidatoDetalhes() {
   }
 
   return (
-    <div className="relative flex min-h-screen w-full flex-col font-display bg-background-light dark:bg-background-dark">
+    <div className="relative flex min-h-screen w-full flex-col font-display" style={{ backgroundColor: '#FFFBF0' }}>
       {/* Breadcrumb / Back Button */}
-      <div className="sticky top-0 z-10 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-sm border-b border-gray-200 dark:border-secondary-text-light/20">
+      <div className="sticky top-0 z-10 backdrop-blur-sm border-b border-gray-200 dark:border-secondary-text-light/20" style={{ backgroundColor: 'rgba(255, 251, 240, 0.95)' }}>
         <div className="px-6 sm:px-10 lg:px-20 py-4">
           <Button variant="ghost" size="sm" onClick={() => navigate("/candidatos")} className="text-secondary-text-light dark:text-secondary-text-dark">
             <ArrowLeft className="mr-2 h-4 w-4" />
