@@ -105,7 +105,7 @@ export function JobCard({
         <Card
           className={cn(
             "relative cursor-pointer transition-all duration-200 group overflow-hidden",
-            "bg-white border border-gray-200 rounded-xl shadow-sm",
+            "bg-card border-border rounded-xl shadow-sm",
             "hover:shadow-md hover:scale-[1.01]"
           )}
           onClick={onView}
@@ -117,15 +117,10 @@ export function JobCard({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div 
-                    className="absolute top-3 left-3 flex items-center gap-1.5 px-2 py-1 rounded-full border backdrop-blur-sm"
-                    style={{
-                      backgroundColor: "rgba(254, 243, 242, 0.5)",
-                      borderColor: "#FEE4E2",
-                      color: "#B42318"
-                    }}
+                    className="absolute top-3 left-3 flex items-center gap-1.5 px-2 py-1 rounded-full border border-destructive/20 bg-destructive/10 text-destructive backdrop-blur-sm"
                   >
                     <EyeOff className="h-3 w-3" />
-                    <span className="text-xs font-medium hidden sm:inline" style={{ fontFamily: "Manrope, sans-serif" }}>
+                    <span className="text-xs font-medium hidden sm:inline">
                       Confidencial
                     </span>
                   </div>
@@ -143,8 +138,7 @@ export function JobCard({
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <h3 
-                        className="font-bold text-[16px] text-[#00141D] truncate leading-tight"
-                        style={{ fontFamily: "Manrope, sans-serif" }}
+                        className="font-bold text-sm text-card-foreground truncate leading-tight"
                       >
                         {vaga.titulo}
                       </h3>
@@ -156,7 +150,7 @@ export function JobCard({
                 </div>
 
                 <Badge
-                  className="text-[11px] font-semibold whitespace-nowrap px-2 py-1 flex items-center gap-1 shrink-0"
+                  className="text-xs font-semibold whitespace-nowrap px-2 py-1 flex items-center gap-1 shrink-0"
                   style={{
                     backgroundColor: statusColor.bg,
                     color: statusColor.text,
@@ -170,8 +164,7 @@ export function JobCard({
               {/* Subheader - Cliente/Área */}
               <div className="flex items-center gap-2">
                 <p 
-                  className="text-[14px] font-semibold text-[#36404A] truncate"
-                  style={{ fontFamily: "Manrope, sans-serif" }}
+                  className="text-xs text-muted-foreground truncate"
                 >
                   {vaga.empresa}
                   {vaga.area && ` • ${vaga.area}`}
@@ -180,17 +173,17 @@ export function JobCard({
             </div>
 
             {/* Métricas rápidas */}
-            <div className="flex items-center gap-4 text-[13px] font-bold" style={{ fontFamily: "Manrope, sans-serif" }}>
-              <div className="flex items-center gap-1.5 text-[#36404A]">
-                <Users className="h-4 w-4 text-[#00141D]" />
+            <div className="flex items-center gap-4 text-xs">
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <Users className="h-3.5 w-3.5" />
                 <span>{vaga.candidatos_count || 0} candidatos</span>
               </div>
               
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <div className="flex items-center gap-1.5 text-[#36404A]">
-                      <Clock className="h-4 w-4 text-[#00141D]" />
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <Clock className="h-3.5 w-3.5" />
                       <span>{diasEtapaAtual}d nesta etapa</span>
                     </div>
                   </TooltipTrigger>
@@ -203,19 +196,15 @@ export function JobCard({
 
             {/* Progress bar */}
             <div className="space-y-1.5">
-              <div className="h-[4px] bg-gray-200 rounded-full overflow-hidden">
+              <div className="h-1 bg-muted rounded-full overflow-hidden">
                 <div 
-                  className="h-full transition-all duration-300 rounded-full"
-                  style={{ 
-                    width: `${progresso}%`,
-                    backgroundColor: "#FFCD00" 
-                  }}
+                  className="h-full transition-all duration-300 rounded-full bg-[#FFCD00]"
+                  style={{ width: `${progresso}%` }}
                 />
               </div>
               <div className="flex justify-end">
                 <span 
-                  className="text-[13px] font-bold text-[#36404A]"
-                  style={{ fontFamily: "Manrope, sans-serif" }}
+                  className="text-xs text-muted-foreground"
                 >
                   {progresso}% concluído
                 </span>
@@ -223,43 +212,31 @@ export function JobCard({
             </div>
 
             {/* Rodapé - Chips de equipe */}
-            <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-200">
+            <div className="flex flex-wrap gap-2 pt-2 border-t border-border">
               {vaga.recrutador && (
-                <div className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5" style={{ backgroundColor: "#FFF9E6", border: "1.5px solid #FFCD00" }}>
-                  <Avatar className="h-5 w-5 bg-[#FFCD00]">
+                <Badge variant="outline" className="text-xs gap-1.5">
+                  <Avatar className="h-4 w-4 bg-[#FFCD00]">
                     <AvatarFallback 
-                      className="text-[#00141D] text-[10px] font-bold"
-                      style={{ fontFamily: "Manrope, sans-serif" }}
+                      className="text-[#00141D] text-[9px] font-bold"
                     >
                       {getInitials(vaga.recrutador)}
                     </AvatarFallback>
                   </Avatar>
-                  <span 
-                    className="text-[12px] font-bold text-[#00141D]"
-                    style={{ fontFamily: "Manrope, sans-serif" }}
-                  >
-                    {vaga.recrutador.split(" ")[0]}
-                  </span>
-                </div>
+                  <span>{vaga.recrutador.split(" ")[0]}</span>
+                </Badge>
               )}
               
               {vaga.cs_responsavel && (
-                <div className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5" style={{ backgroundColor: "#F5F5F5", border: "1.5px solid #00141D" }}>
-                  <Avatar className="h-5 w-5 bg-[#00141D]">
+                <Badge variant="outline" className="text-xs gap-1.5">
+                  <Avatar className="h-4 w-4 bg-foreground">
                     <AvatarFallback 
-                      className="text-[#FFCD00] text-[10px] font-bold"
-                      style={{ fontFamily: "Manrope, sans-serif" }}
+                      className="text-background text-[9px] font-bold"
                     >
                       {getInitials(vaga.cs_responsavel)}
                     </AvatarFallback>
                   </Avatar>
-                  <span 
-                    className="text-[12px] font-bold text-[#00141D]"
-                    style={{ fontFamily: "Manrope, sans-serif" }}
-                  >
-                    {vaga.cs_responsavel.split(" ")[0]}
-                  </span>
-                </div>
+                  <span>{vaga.cs_responsavel.split(" ")[0]}</span>
+                </Badge>
               )}
             </div>
           </div>
