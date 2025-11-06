@@ -139,42 +139,110 @@ serve(async (req) => {
       throw new Error('LOVABLE_API_KEY não configurada');
     }
 
-    const extractionPrompt = `Você é um extrator de dados de perfis profissionais. Abaixo está o texto extraído de um PDF (perfil LinkedIn / CV). Retorne APENAS um JSON válido com os campos descritos no schema. Para cada campo, inclua: value, confidence (0.0–1.0) e evidence (trecho do texto que suportou a extração, máximo 200 caracteres). Se não encontrar um campo, coloque null. Não invente valores.
+    const extractionPrompt = `Você é um especialista em extração de dados de currículos brasileiros. Analise o texto abaixo extraído de um PDF de currículo e extraia as informações estruturadas.
 
-ORIENTAÇÕES ESPECÍFICAS DE LOCALIZAÇÃO:
-- Nome completo: Geralmente encontra-se na PARTE SUPERIOR do documento, em FONTE GRANDE ou destacada
-- Telefone: Quando presente, normalmente está ACIMA da informação de e-mail, na seção de contato/cabeçalho
-- E-mail: Geralmente no topo do documento, na seção de contato
-- LinkedIn: Procure por URLs do LinkedIn (linkedin.com/in/...) no cabeçalho ou seção de contato
-- Cidade/Estado: Normalmente no cabeçalho, próximo ao nome ou contato
-- Área de Especialização: Pode estar em "Resumo", "Sobre", "Objetivo" ou logo após o nome
-- Senioridade: Inferir dos títulos de cargo (Júnior, Pleno, Sênior, Gerente, Diretor, etc.)
-- Pretensão Salarial: Procure por valores monetários com "R$", "salário", "pretensão"
-- Habilidades/Skills: Procure em seções "Competências", "Habilidades", "Skills", "Tecnologias"
-- Formação/Educação: Procure em seções "Formação", "Educação", "Academic Background", "Education"
-- Experiência Profissional: Procure em seções "Experiência", "Histórico Profissional", "Work Experience", "Experience"
-- Portfólio: URLs de sites pessoais, GitHub, Behance, Dribbble, etc.
+IMPORTANTE: Seja AGRESSIVO na busca de informações. Procure padrões, variações e sinônimos. O texto pode estar mal formatado devido à extração do PDF.
 
-Schema de saída (exemplo):
+EXEMPLOS REAIS DE COMO AS INFORMAÇÕES APARECEM:
+
+📝 NOME COMPLETO:
+- Geralmente é o PRIMEIRO texto do documento, em fonte maior
+- Exemplos: "MARIA SILVA SANTOS", "João Pedro Oliveira", "Ana Costa"
+- Busque por nomes próprios no início do texto
+- Se houver múltiplos nomes, pegue o que parece mais completo
+
+📧 EMAIL:
+- Padrões: nome@email.com, nome.sobrenome@empresa.com.br
+- Procure por "@" no texto
+- Exemplos: maria.silva@gmail.com, joao.pedro@hotmail.com
+
+📱 TELEFONE:
+- Geralmente ACIMA ou PRÓXIMO ao email
+- Padrões brasileiros: 
+  * (11) 98765-4321
+  * 11 98765-4321
+  * +55 11 98765-4321
+  * 11987654321
+- Procure por sequências de números com 10-11 dígitos
+- Pode ter DDD entre parênteses ou não
+
+🔗 LINKEDIN:
+- URLs começando com: linkedin.com/in/, br.linkedin.com/in/, www.linkedin.com/in/
+- Exemplo: linkedin.com/in/maria-silva-santos
+
+📍 LOCALIZAÇÃO:
+- Geralmente no cabeçalho após nome/contato
+- Formatos: "São Paulo, SP", "Rio de Janeiro - RJ", "Belo Horizonte/MG"
+- Separe cidade e estado (estado com 2 letras)
+
+💼 ÁREA E SENIORIDADE:
+- Área: geralmente em "Objetivo", "Resumo" ou título após o nome
+- Exemplos: "Analista de Dados", "Desenvolvedor Backend", "Designer UX/UI"
+- Senioridade: inferir de:
+  * Títulos: "Analista Jr", "Analista Pleno", "Analista Sênior", "Gerente", "Coordenador", "Diretor"
+  * Anos de experiência: 0-2 anos = Júnior, 2-5 anos = Pleno, 5+ anos = Sênior
+  * Se tiver cargo de gestão = Liderança
+
+💰 SALÁRIO:
+- Procure: "Pretensão salarial:", "Expectativa:", "Salário:"
+- Formatos: "R$ 5.000,00", "R$ 5000", "A combinar", "Negociável"
+
+🎓 FORMAÇÃO:
+- Seções: "Formação", "Educação", "Formação Acadêmica"
+- Informações típicas:
+  * Grau: Técnico, Tecnólogo, Bacharel, Licenciatura, Especialização, MBA, Mestrado, Doutorado
+  * Curso: Engenharia da Computação, Administração, Design Gráfico
+  * Instituição: USP, UFRJ, FGV, Uninove, SENAC
+  * Período: 2018-2022, 2020-atual, Jan/2019 - Dez/2022
+
+💼 EXPERIÊNCIA PROFISSIONAL:
+- Seções: "Experiência", "Experiência Profissional", "Histórico"
+- Para cada experiência extraia:
+  * Cargo: "Analista de Marketing", "Desenvolvedor Front-end"
+  * Empresa: Nome da empresa
+  * Período: "Jan/2020 - Atual", "2018-2020", "Mar/2019 a Set/2021"
+  * Descrição: Resumo das atividades (pode ter bullets/lista)
+- Para work_history: Compile TODA a seção de experiência em texto formatado
+
+🛠️ HABILIDADES:
+- Seções: "Habilidades", "Competências", "Skills", "Tecnologias"
+- Podem estar em lista ou separadas por vírgula
+- Exemplos: Python, SQL, React, Excel, Photoshop, Inglês Avançado
+
+REGRAS DE CONFIANÇA:
+- Alta (0.85-1.0): Informação clara e bem formatada
+- Média (0.6-0.84): Informação encontrada mas formatação inconsistente
+- Baixa (0.0-0.59): Inferência ou informação incerta
+
+SCHEMA DE SAÍDA (JSON):
 {
- "full_name": {"value": "...", "confidence": 0.0, "evidence": "..."},
- "email": {"value": "...", "confidence": 0.0, "evidence": "..."},
- "phone": {"value": "...", "confidence": 0.0, "evidence": "..."},
- "linkedin_url": {"value": "...", "confidence": 0.0, "evidence": "..."},
- "city": {"value":"...", "confidence":0.0, "evidence":"..."},
- "state": {"value":"...", "confidence":0.0, "evidence":"..."},
- "area_of_expertise": {"value":"...", "confidence":0.0, "evidence":"..."},
- "desired_role": {"value":"...", "confidence":0.0, "evidence":"..."},
- "seniority": {"value":"Júnior|Pleno|Sênior|Liderança|null", "confidence":0.0, "evidence":"..."},
- "salary_expectation": {"value":"R$ ... or 'A combinar' or null", "confidence":0.0, "evidence":"..."},
- "skills": [{"value":"SQL","confidence":0.0,"evidence":"..."}, ...],
- "education": [{"degree":"Bacharel em Engenharia","institution":"...", "years":"2016-2020","confidence":0.0,"evidence":"..."}],
- "work_experience": [{"title":"Analista de Dados","company":"Empresa X","from":"2021-01","to":"2023-06","summary":"...","confidence":0.0,"evidence":"..."}],
- "work_history": {"value": "Histórico completo de experiência profissional formatado de forma estruturada", "confidence": 0.0, "evidence": "..."},
- "portfolio_url": {"value":"...", "confidence":0.0, "evidence":"..."}
+ "full_name": {"value": "...", "confidence": 0.95, "evidence": "Texto do topo do documento"},
+ "email": {"value": "...", "confidence": 0.95, "evidence": "maria@email.com encontrado"},
+ "phone": {"value": "...", "confidence": 0.90, "evidence": "(11) 98765-4321"},
+ "linkedin_url": {"value": "...", "confidence": 0.90, "evidence": "linkedin.com/in/..."},
+ "city": {"value":"São Paulo", "confidence":0.85, "evidence":"São Paulo, SP"},
+ "state": {"value":"SP", "confidence":0.85, "evidence":"SP após cidade"},
+ "area_of_expertise": {"value":"Desenvolvimento de Software", "confidence":0.80, "evidence":"Objetivo: Desenvolvedor..."},
+ "desired_role": {"value":"Desenvolvedor Full Stack", "confidence":0.75, "evidence":"Buscando posição como..."},
+ "seniority": {"value":"Pleno", "confidence":0.80, "evidence":"Analista Pleno no cargo atual"},
+ "salary_expectation": {"value":"R$ 8.000,00", "confidence":0.85, "evidence":"Pretensão: R$ 8000"},
+ "skills": [
+   {"value":"Python","confidence":0.90,"evidence":"Habilidades: Python, SQL..."},
+   {"value":"SQL","confidence":0.90,"evidence":"Python, SQL, React"}
+ ],
+ "education": [
+   {"degree":"Bacharel","institution":"USP","years":"2015-2019","confidence":0.90,"evidence":"Bacharelado em Ciência da Computação - USP"}
+ ],
+ "work_experience": [
+   {"title":"Desenvolvedor Pleno","company":"Tech Corp","from":"2020-01","to":"2024-06","summary":"Desenvolvimento de APIs REST...","confidence":0.85,"evidence":"Tech Corp (Jan/2020 - Jun/2024)"}
+ ],
+ "work_history": {"value": "Desenvolvedor Pleno na Tech Corp (2020-2024): APIs REST, microsserviços...\n\nDesenvolvedor Júnior na StartupXYZ (2018-2020): Front-end React...", "confidence": 0.85, "evidence": "Seção Experiência completa"},
+ "portfolio_url": {"value":"github.com/usuario", "confidence":0.90,"evidence":"Portfolio: github.com/usuario"}
 }
 
-Texto extraído do PDF:
+Se NÃO encontrar um campo, retorne null. NÃO INVENTE dados.
+
+=== TEXTO DO CURRÍCULO ===
 ${extractedText.substring(0, 15000)}`;
 
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
