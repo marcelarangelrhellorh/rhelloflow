@@ -123,7 +123,7 @@ export default function GerenciarUsuarios() {
           .insert(
             selectedRoles.map(role => ({
               user_id: userId,
-              role: role as any // Cast necessário até tipos serem regerados
+              role: role
             }))
           );
 
