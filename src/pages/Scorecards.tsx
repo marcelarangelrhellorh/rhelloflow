@@ -198,20 +198,20 @@ export default function Scorecards() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#FFFDF6" }}>
       {/* Header */}
-      <div className="sticky top-0 z-20 bg-gradient-to-r from-[hsl(var(--primary))]/10 to-[hsl(var(--accent))]/10 border-b border-[hsl(var(--border))] shadow-sm">
-        <div className="px-6 py-5">
+      <div className="sticky top-0 z-20 bg-white border-b border-gray-200 shadow-sm">
+        <div className="px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-[hsl(var(--foreground))]">Scorecards</h1>
-              <p className="text-base text-[hsl(var(--muted-foreground))] mt-1.5">
+              <h1 className="text-2xl font-bold text-[#00141D]">Scorecards</h1>
+              <p className="text-sm text-[#36404A] mt-1">
                 Gerencie templates de avaliação de candidatos
               </p>
             </div>
             <Button
               onClick={() => navigate("/scorecards/novo")}
-              className="bg-[hsl(var(--primary))] hover:bg-[hsl(var(--accent))] text-[hsl(var(--primary-foreground))] font-semibold"
+              className="bg-[#FFCD00] hover:bg-[#FAEC3E] text-[#00141D]"
             >
-              <Plus className="mr-2 h-5 w-5" />
+              <Plus className="mr-2 h-4 w-4" />
               Novo Template
             </Button>
           </div>
