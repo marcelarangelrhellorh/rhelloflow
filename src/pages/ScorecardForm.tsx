@@ -292,10 +292,10 @@ export default function ScorecardForm() {
                 <ArrowLeft className="h-5 w-5" />
               </Button>
               <div>
-                <h1 className="text-2xl font-bold text-[#00141D]">
+                <h1 className="text-3xl font-bold text-[#00141D]">
                   {isEditing ? "Editar Template" : "Novo Template"}
                 </h1>
-                <p className="text-sm text-[#36404A] mt-1">
+                <p className="text-base text-[#36404A] mt-1">
                   Configure os critérios de avaliação
                 </p>
               </div>
@@ -315,30 +315,32 @@ export default function ScorecardForm() {
         {/* Template Info */}
         <Card>
           <CardHeader>
-            <CardTitle>Informações do Template</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-xl">Informações do Template</CardTitle>
+            <CardDescription className="text-base">
               Defina o nome e descrição do template de avaliação
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Nome do Template *</Label>
+              <Label htmlFor="name" className="text-base">Nome do Template *</Label>
               <Input
                 id="name"
                 value={templateName}
                 onChange={(e) => setTemplateName(e.target.value)}
                 placeholder="Ex: Avaliação Técnica Geral"
+                className="text-base"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">Descrição</Label>
+              <Label htmlFor="description" className="text-base">Descrição</Label>
               <Textarea
                 id="description"
                 value={templateDescription}
                 onChange={(e) => setTemplateDescription(e.target.value)}
                 placeholder="Descreva quando e como este template deve ser usado"
                 rows={3}
+                className="text-base"
               />
             </div>
           </CardContent>
@@ -349,14 +351,14 @@ export default function ScorecardForm() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle>Critérios de Avaliação</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-xl">Critérios de Avaliação</CardTitle>
+                <CardDescription className="text-base">
                   Defina os critérios que serão avaliados (peso total deve somar 100%)
                 </CardDescription>
               </div>
               <Badge
                 variant={totalWeight === 100 ? "default" : "destructive"}
-                className="text-sm"
+                className="text-base px-3 py-1"
               >
                 Total: {totalWeight}%
               </Badge>
@@ -391,14 +393,14 @@ export default function ScorecardForm() {
                       {/* Category and Weight */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label>Categoria</Label>
+                          <Label className="text-base">Categoria</Label>
                           <Select
                             value={criterion.category}
                             onValueChange={(value) =>
                               updateCriterion(index, "category", value)
                             }
                           >
-                            <SelectTrigger>
+                            <SelectTrigger className="text-base">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
@@ -417,7 +419,7 @@ export default function ScorecardForm() {
                         </div>
 
                         <div className="space-y-2">
-                          <Label>Peso (%)</Label>
+                          <Label className="text-base">Peso (%)</Label>
                           <Input
                             type="number"
                             min="0"
@@ -430,25 +432,27 @@ export default function ScorecardForm() {
                                 parseInt(e.target.value) || 0
                               )
                             }
+                            className="text-base"
                           />
                         </div>
                       </div>
 
                       {/* Name */}
                       <div className="space-y-2">
-                        <Label>Nome do Critério *</Label>
+                        <Label className="text-base">Nome do Critério *</Label>
                         <Input
                           value={criterion.name}
                           onChange={(e) =>
                             updateCriterion(index, "name", e.target.value)
                           }
                           placeholder="Ex: Conhecimento Técnico"
+                          className="text-base"
                         />
                       </div>
 
                       {/* Description */}
                       <div className="space-y-2">
-                        <Label>Descrição</Label>
+                        <Label className="text-base">Descrição</Label>
                         <Textarea
                           value={criterion.description}
                           onChange={(e) =>
@@ -456,6 +460,7 @@ export default function ScorecardForm() {
                           }
                           placeholder="Explique o que deve ser avaliado neste critério"
                           rows={2}
+                          className="text-base"
                         />
                       </div>
                     </div>
@@ -478,19 +483,19 @@ export default function ScorecardForm() {
             <Button
               variant="outline"
               onClick={addCriterion}
-              className="w-full"
+              className="w-full text-base"
             >
-              <Plus className="mr-2 h-4 w-4" />
+              <Plus className="mr-2 h-5 w-5" />
               Adicionar Critério
             </Button>
 
             {/* Scale Info */}
             <div className="bg-muted p-4 rounded-lg">
-              <h4 className="text-sm font-semibold mb-2">Escala de Avaliação</h4>
-              <p className="text-sm text-muted-foreground">
+              <h4 className="text-base font-semibold mb-2">Escala de Avaliação</h4>
+              <p className="text-base text-muted-foreground">
                 Todos os critérios utilizam escala de 1 a 5:
               </p>
-              <ul className="text-sm text-muted-foreground mt-2 space-y-1">
+              <ul className="text-base text-muted-foreground mt-2 space-y-1">
                 <li>• 1 = Não atende às expectativas</li>
                 <li>• 2 = Atende parcialmente</li>
                 <li>• 3 = Atende às expectativas</li>
