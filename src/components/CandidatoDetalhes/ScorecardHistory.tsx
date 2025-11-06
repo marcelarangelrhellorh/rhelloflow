@@ -111,11 +111,11 @@ export function ScorecardHistory({ candidateId }: ScorecardHistoryProps) {
               scorecard_criteria!inner(
                 name,
                 category,
-                weight
+                weight,
+                display_order
               )
             `)
-            .eq("scorecard_id", scorecard.id)
-            .order("scorecard_criteria(display_order)");
+            .eq("scorecard_id", scorecard.id);
 
           if (evaluationsError) {
             console.error("Error loading evaluations:", evaluationsError);
@@ -124,6 +124,11 @@ export function ScorecardHistory({ candidateId }: ScorecardHistoryProps) {
               evaluations: [],
             };
           }
+
+          // Ordenar manualmente após carregar
+          const sortedEvaluations = (evaluationsData || []).sort((a: any, b: any) => {
+            return (a.scorecard_criteria?.display_order || 0) - (b.scorecard_criteria?.display_order || 0);
+          });
 
           return {
             id: scorecard.id,
@@ -135,7 +140,7 @@ export function ScorecardHistory({ candidateId }: ScorecardHistoryProps) {
             match_percentage: scorecard.match_percentage,
             created_at: scorecard.created_at,
             vaga_titulo: scorecard.vagas?.titulo || null,
-            evaluations: evaluationsData.map((ev: any) => ({
+            evaluations: sortedEvaluations.map((ev: any) => ({
               criteria_name: ev.scorecard_criteria.name,
               criteria_category: ev.scorecard_criteria.category,
               criteria_weight: ev.scorecard_criteria.weight,
