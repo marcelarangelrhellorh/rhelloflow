@@ -135,22 +135,10 @@ export const JOB_STAGES = [
     },
   },
   {
-    id: "pausada",
-    slug: "pausada",
-    name: "Pausada",
-    order: 12,
-    kind: "paused" as const,
-    color: {
-      bg: "#E5E7EB",
-      text: "#374151",
-      columnBg: "#F9FAFB",
-    },
-  },
-  {
     id: "cancelada",
     slug: "cancelada",
     name: "Cancelada",
-    order: 13,
+    order: 12,
     kind: "canceled" as const,
     color: {
       bg: "#EF4444",
@@ -160,7 +148,7 @@ export const JOB_STAGES = [
   },
 ];
 
-export type JobStageKind = "normal" | "final" | "frozen" | "paused" | "canceled";
+export type JobStageKind = "normal" | "final" | "frozen" | "canceled";
 
 export type JobStage = (typeof JOB_STAGES)[number];
 
