@@ -189,14 +189,14 @@ export default function Scorecards() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-secondary/30">
+      <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: '#FFFBF0' }}>
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "#FFFDF6" }}>
+    <div className="min-h-screen" style={{ backgroundColor: '#FFFBF0' }}>
       {/* Header */}
       <div className="sticky top-0 z-20 bg-white border-b border-gray-200 shadow-sm">
         <div className="px-6 py-4">
