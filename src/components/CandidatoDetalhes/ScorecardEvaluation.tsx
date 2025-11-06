@@ -56,10 +56,10 @@ const categoryColors: Record<string, string> = {
 };
 
 const recommendations = [
-  { value: "strong_yes", label: "Strong Yes", color: "bg-green-600" },
-  { value: "yes", label: "Yes", color: "bg-green-400" },
-  { value: "maybe", label: "Maybe", color: "bg-yellow-500" },
-  { value: "no", label: "No", color: "bg-red-500" },
+  { value: "strong_yes", label: "Fortemente Recomendado", color: "bg-green-600" },
+  { value: "yes", label: "Recomendado", color: "bg-green-400" },
+  { value: "maybe", label: "Talvez", color: "bg-yellow-500" },
+  { value: "no", label: "Não Recomendado", color: "bg-red-500" },
 ];
 
 export function ScorecardEvaluation({ candidateId, candidateName, vagaId }: ScorecardEvaluationProps) {

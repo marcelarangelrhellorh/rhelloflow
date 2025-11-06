@@ -49,10 +49,10 @@ const categoryColors: Record<string, string> = {
 };
 
 const recommendationConfig: Record<string, { label: string; color: string }> = {
-  strong_yes: { label: "Strong Yes", color: "bg-green-600 text-white" },
-  yes: { label: "Yes", color: "bg-green-400 text-white" },
-  maybe: { label: "Maybe", color: "bg-yellow-500 text-white" },
-  no: { label: "No", color: "bg-red-500 text-white" },
+  strong_yes: { label: "Fortemente Recomendado", color: "bg-green-600 text-white" },
+  yes: { label: "Recomendado", color: "bg-green-400 text-white" },
+  maybe: { label: "Talvez", color: "bg-yellow-500 text-white" },
+  no: { label: "Não Recomendado", color: "bg-red-500 text-white" },
 };
 
 function getInitials(name: string | undefined): string {
