@@ -198,20 +198,20 @@ export default function Scorecards() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#FFFDF6" }}>
       {/* Header */}
-      <div className="sticky top-0 z-20 bg-white border-b border-gray-200 shadow-sm">
-        <div className="px-6 py-4">
+      <div className="sticky top-0 z-20 bg-gradient-to-r from-[hsl(var(--primary))]/10 to-[hsl(var(--accent))]/10 border-b border-[hsl(var(--border))] shadow-sm">
+        <div className="px-6 py-5">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-[#00141D]">Scorecards</h1>
-              <p className="text-sm text-[#36404A] mt-1">
+              <h1 className="text-3xl font-bold text-[hsl(var(--foreground))]">Scorecards</h1>
+              <p className="text-base text-[hsl(var(--muted-foreground))] mt-1.5">
                 Gerencie templates de avaliação de candidatos
               </p>
             </div>
             <Button
               onClick={() => navigate("/scorecards/novo")}
-              className="bg-[#FFCD00] hover:bg-[#FAEC3E] text-[#00141D]"
+              className="bg-[hsl(var(--primary))] hover:bg-[hsl(var(--accent))] text-[hsl(var(--primary-foreground))] font-semibold"
             >
-              <Plus className="mr-2 h-4 w-4" />
+              <Plus className="mr-2 h-5 w-5" />
               Novo Template
             </Button>
           </div>
@@ -220,104 +220,113 @@ export default function Scorecards() {
 
       <div className="px-6 py-6 space-y-6">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total de Templates</CardTitle>
-              <Target className="h-4 w-4 text-muted-foreground" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <Card className="bg-gradient-to-br from-[hsl(var(--primary))]/15 to-[hsl(var(--accent))]/10 border-[hsl(var(--primary))]/30">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-base font-semibold text-[hsl(var(--foreground))]">Total de Templates</CardTitle>
+              <div className="h-10 w-10 rounded-full bg-[hsl(var(--primary))]/20 flex items-center justify-center">
+                <Target className="h-5 w-5 text-[hsl(var(--primary-foreground))]" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.totalTemplates}</div>
-              <p className="text-xs text-muted-foreground">Templates ativos</p>
+              <div className="text-3xl font-bold text-[hsl(var(--foreground))]">{stats.totalTemplates}</div>
+              <p className="text-sm text-[hsl(var(--muted-foreground))] mt-1">Templates ativos</p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Avaliações Realizadas</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
+          <Card className="bg-gradient-to-br from-[hsl(var(--accent))]/15 to-[hsl(var(--primary))]/10 border-[hsl(var(--accent))]/30">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-base font-semibold text-[hsl(var(--foreground))]">Avaliações Realizadas</CardTitle>
+              <div className="h-10 w-10 rounded-full bg-[hsl(var(--accent))]/20 flex items-center justify-center">
+                <Users className="h-5 w-5 text-[hsl(var(--primary-foreground))]" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.totalEvaluations}</div>
-              <p className="text-xs text-muted-foreground">Candidatos avaliados</p>
+              <div className="text-3xl font-bold text-[hsl(var(--foreground))]">{stats.totalEvaluations}</div>
+              <p className="text-sm text-[hsl(var(--muted-foreground))] mt-1">Candidatos avaliados</p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Score Médio</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          <Card className="bg-gradient-to-br from-[hsl(var(--primary))]/15 to-[hsl(var(--accent))]/10 border-[hsl(var(--primary))]/30">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-base font-semibold text-[hsl(var(--foreground))]">Score Médio</CardTitle>
+              <div className="h-10 w-10 rounded-full bg-[hsl(var(--primary))]/20 flex items-center justify-center">
+                <TrendingUp className="h-5 w-5 text-[hsl(var(--primary-foreground))]" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.averageScore}%</div>
-              <p className="text-xs text-muted-foreground">Match geral</p>
+              <div className="text-3xl font-bold text-[hsl(var(--foreground))]">{stats.averageScore}%</div>
+              <p className="text-sm text-[hsl(var(--muted-foreground))] mt-1">Match geral</p>
             </CardContent>
           </Card>
         </div>
 
         {/* Templates List */}
         <div>
-          <h2 className="text-lg font-semibold mb-4">Templates de Avaliação</h2>
+          <h2 className="text-xl font-bold mb-5 text-[hsl(var(--foreground))]">Templates de Avaliação</h2>
           
           {templates.length === 0 ? (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <Target className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Nenhum template criado</h3>
-                <p className="text-sm text-muted-foreground mb-4">
+            <Card className="bg-gradient-to-br from-[hsl(var(--primary))]/5 to-[hsl(var(--accent))]/5 border-[hsl(var(--border))]">
+              <CardContent className="flex flex-col items-center justify-center py-16">
+                <div className="h-16 w-16 rounded-full bg-[hsl(var(--primary))]/10 flex items-center justify-center mb-5">
+                  <Target className="h-10 w-10 text-[hsl(var(--primary-foreground))]" />
+                </div>
+                <h3 className="text-xl font-bold mb-2 text-[hsl(var(--foreground))]">Nenhum template criado</h3>
+                <p className="text-base text-[hsl(var(--muted-foreground))] mb-6">
                   Crie seu primeiro template de scorecard para começar
                 </p>
-                <Button onClick={() => navigate("/scorecards/novo")}>
-                  <Plus className="mr-2 h-4 w-4" />
+                <Button onClick={() => navigate("/scorecards/novo")} className="bg-[hsl(var(--primary))] hover:bg-[hsl(var(--accent))] text-[hsl(var(--primary-foreground))] font-semibold">
+                  <Plus className="mr-2 h-5 w-5" />
                   Criar Template
                 </Button>
               </CardContent>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {templates.map((template) => (
-                <Card key={template.id} className="hover:shadow-md transition-shadow">
+                <Card key={template.id} className="hover:shadow-lg transition-all duration-200 bg-gradient-to-br from-white to-[hsl(var(--background))] border-[hsl(var(--border))]">
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <CardTitle className="text-base">{template.name}</CardTitle>
-                        <CardDescription className="mt-1">
+                        <CardTitle className="text-lg font-bold text-[hsl(var(--foreground))]">{template.name}</CardTitle>
+                        <CardDescription className="mt-1.5 text-base">
                           {template.description || "Sem descrição"}
                         </CardDescription>
                       </div>
                       {template.active && (
-                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                        <Badge variant="outline" className="bg-[hsl(var(--success))]/10 text-[hsl(var(--success))] border-[hsl(var(--success))]/30 font-medium">
                           Ativo
                         </Badge>
                       )}
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Critérios:</span>
-                      <span className="font-semibold">{template.criteria_count}</span>
+                    <div className="flex items-center justify-between text-base">
+                      <span className="text-[hsl(var(--muted-foreground))]">Critérios:</span>
+                      <span className="font-bold text-[hsl(var(--foreground))]">{template.criteria_count}</span>
                     </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Usado em:</span>
-                      <span className="font-semibold">{template.usage_count} avaliações</span>
+                    <div className="flex items-center justify-between text-base">
+                      <span className="text-[hsl(var(--muted-foreground))]">Usado em:</span>
+                      <span className="font-bold text-[hsl(var(--foreground))]">{template.usage_count} avaliações</span>
                     </div>
                     
-                    <div className="flex gap-2 pt-2 border-t">
+                    <div className="flex gap-2 pt-3 border-t border-[hsl(var(--border))]">
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => navigate(`/scorecards/${template.id}/editar`)}
-                        className="flex-1"
+                        className="flex-1 hover:bg-[hsl(var(--primary))]/10 hover:border-[hsl(var(--primary))]/30"
                       >
-                        <Edit className="mr-2 h-3 w-3" />
+                        <Edit className="mr-2 h-4 w-4" />
                         Editar
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => handleDuplicate(template.id)}
+                        className="hover:bg-[hsl(var(--accent))]/10 hover:border-[hsl(var(--accent))]/30"
                       >
-                        <Copy className="h-3 w-3" />
+                        <Copy className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="outline"
@@ -325,7 +334,7 @@ export default function Scorecards() {
                         onClick={() => setDeleteTemplateId(template.id)}
                         className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
                       >
-                        <Trash className="h-3 w-3" />
+                        <Trash className="h-4 w-4" />
                       </Button>
                     </div>
                   </CardContent>
