@@ -83,7 +83,7 @@ export function CandidateFunnelCard({ candidato, onDragStart, isDragging }: Cand
         {timeInStage && (
           <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
             <Clock className="h-4 w-4" />
-            <span>há {timeInStage}</span>
+            <span className="font-semibold">há {timeInStage}</span>
           </div>
         )}
       </CardHeader>
@@ -93,20 +93,20 @@ export function CandidateFunnelCard({ candidato, onDragStart, isDragging }: Cand
         <div className="space-y-1.5">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Mail className="h-4 w-4 flex-shrink-0" />
-            <span className="truncate">{candidato.email}</span>
+            <span className="truncate font-semibold">{candidato.email}</span>
           </div>
           
           {candidato.telefone && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Phone className="h-4 w-4 flex-shrink-0" />
-              <span className="truncate">{candidato.telefone}</span>
+              <span className="truncate font-semibold">{candidato.telefone}</span>
             </div>
           )}
           
           {(candidato.cidade || candidato.estado) && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <MapPin className="h-4 w-4 flex-shrink-0" />
-              <span className="truncate">
+              <span className="truncate font-semibold">
                 {[candidato.cidade, candidato.estado].filter(Boolean).join(" - ")}
               </span>
             </div>
@@ -115,7 +115,7 @@ export function CandidateFunnelCard({ candidato, onDragStart, isDragging }: Cand
 
         {/* Recruiter Badge */}
         {candidato.recrutador && (
-          <Badge variant="outline" className="text-sm font-medium">
+          <Badge variant="outline" className="text-sm font-bold">
             {candidato.recrutador}
           </Badge>
         )}
