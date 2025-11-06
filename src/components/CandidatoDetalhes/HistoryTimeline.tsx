@@ -66,66 +66,88 @@ export function HistoryTimeline({ historico, onVagaClick }: HistoryTimelineProps
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {historico.map((item, index) => (
-              <div key={item.id} className="rounded-lg border border-border bg-card p-4 transition-shadow hover:shadow-md">
-                <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
-                  <div>
-                    <Badge
-                      variant="outline"
-                      className={`${
-                        resultadoColors[item.resultado] || resultadoColors["Banco de Talentos"]
-                      } border font-bold rounded-lg px-4 py-2 text-sm`}
-                    >
-                      <span className="mr-2 text-base">{resultadoIcons[item.resultado] || "⚪"}</span>
-                      {item.resultado}
-                    </Badge>
-                  </div>
-                  {item.data && (
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Calendar className="h-3 w-3" />
-                      {formatDate(item.data)}
+          <div className="relative">
+            {/* Timeline Line - Vertical connecting all items */}
+            <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary via-primary/50 to-muted hidden md:block" />
+            
+            <div className="space-y-8">
+              {[...historico].reverse().map((item, index) => {
+                const reversedIndex = historico.length - 1 - index;
+                const isEven = index % 2 === 0;
+                
+                return (
+                  <div key={item.id} className="relative">
+                    {/* Timeline dot in center */}
+                    <div className="absolute left-1/2 top-8 -translate-x-1/2 -translate-y-1/2 z-10 hidden md:flex">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full border-4 border-background bg-primary shadow-lg">
+                        <div className="h-4 w-4 rounded-full bg-background" />
+                      </div>
                     </div>
-                  )}
-                </div>
 
-                {/* Vaga Info */}
-                {item.vaga_id && (
-                  <Button
-                    variant="link"
-                    size="sm"
-                    className="h-auto p-0 mb-2 text-info hover:text-info/80"
-                    onClick={() => onVagaClick?.(item.vaga_id!)}
-                  >
-                    <Briefcase className="mr-1 h-3.5 w-3.5" />
-                    <span className="text-sm">Ver vaga relacionada</span>
-                    <ExternalLink className="ml-1 h-3 w-3" />
-                  </Button>
-                )}
+                    {/* Card - alternating sides on desktop, full width on mobile */}
+                    <div className={`md:w-[calc(50%-2rem)] ${isEven ? 'md:ml-0' : 'md:ml-auto'}`}>
+                      <div className="rounded-lg border border-border bg-card p-4 transition-all hover:shadow-md hover:border-primary/50">
+                        {/* Badge and Date Header */}
+                        <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
+                          <Badge
+                            variant="outline"
+                            className={`${
+                              resultadoColors[item.resultado] || resultadoColors["Banco de Talentos"]
+                            } border font-bold rounded-lg px-4 py-2 text-sm`}
+                          >
+                            <span className="mr-2 text-base">{resultadoIcons[item.resultado] || "⚪"}</span>
+                            {item.resultado}
+                          </Badge>
+                          {item.data && (
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <Calendar className="h-3 w-3" />
+                              {formatDate(item.data)}
+                            </div>
+                          )}
+                        </div>
 
-                {/* Recruiter */}
-                {item.recrutador && (
-                  <div className="flex items-center gap-1 text-sm text-muted-foreground mb-2">
-                    <User className="h-3.5 w-3.5" />
-                    <span>{item.recrutador}</span>
+                        {/* Vaga Info */}
+                        {item.vaga_id && (
+                          <Button
+                            variant="link"
+                            size="sm"
+                            className="h-auto p-0 mb-2 text-info hover:text-info/80"
+                            onClick={() => onVagaClick?.(item.vaga_id!)}
+                          >
+                            <Briefcase className="mr-1 h-3.5 w-3.5" />
+                            <span className="text-sm">Ver vaga relacionada</span>
+                            <ExternalLink className="ml-1 h-3 w-3" />
+                          </Button>
+                        )}
+
+                        {/* Recruiter */}
+                        {item.recrutador && (
+                          <div className="flex items-center gap-1 text-sm text-muted-foreground mb-2">
+                            <User className="h-3.5 w-3.5" />
+                            <span>{item.recrutador}</span>
+                          </div>
+                        )}
+
+                        {/* Feedback */}
+                        {item.feedback && (
+                          <p className="text-sm text-card-foreground bg-muted/20 rounded p-2 mt-2">
+                            {item.feedback}
+                          </p>
+                        )}
+
+                        {/* Duration */}
+                        {reversedIndex < historico.length - 1 && item.data && historico[reversedIndex + 1].data && (
+                          <p className="text-xs text-primary font-medium mt-2 flex items-center gap-1">
+                            <span className="inline-block h-1 w-1 rounded-full bg-primary"></span>
+                            Duração: {calculateDuration(historico[reversedIndex + 1].data, item.data)}
+                          </p>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                )}
-
-                {/* Feedback */}
-                {item.feedback && (
-                  <p className="text-sm text-card-foreground bg-muted/20 rounded p-2 mt-2">
-                    {item.feedback}
-                  </p>
-                )}
-
-                {/* Duration (if we have date ranges) */}
-                {index < historico.length - 1 && item.data && historico[index + 1].data && (
-                  <p className="text-xs text-muted-foreground mt-2">
-                    Duração: {calculateDuration(historico[index + 1].data, item.data)}
-                  </p>
-                )}
-              </div>
-            ))}
+                );
+              })}
+            </div>
           </div>
         )}
       </CardContent>
