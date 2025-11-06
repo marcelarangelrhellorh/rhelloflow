@@ -1836,15 +1836,6 @@ export type Database = {
         Args: { old_status: string }
         Returns: string
       }
-      reports_overview: {
-        Args: {
-          cliente_param?: string
-          end_date: string
-          recrutador_param?: string
-          start_date: string
-        }
-        Returns: Json
-      }
       verify_audit_chain: {
         Args: { p_from_timestamp?: string; p_to_timestamp?: string }
         Returns: {
