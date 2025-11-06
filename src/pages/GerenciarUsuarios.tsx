@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useUsers } from "@/hooks/useUsers";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,9 +8,13 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { Users, UserPlus, Mail, UserCircle, Shield } from "lucide-react";
+import { Users, UserPlus, Mail, UserCircle, Shield, Edit } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+
+type AppRole = "recrutador" | "cs" | "viewer" | "admin";
 
 export default function GerenciarUsuarios() {
   const navigate = useNavigate();
@@ -19,9 +23,37 @@ export default function GerenciarUsuarios() {
   const [formData, setFormData] = useState({
     email: "",
     name: "",
-    role: "recrutador" as "recrutador" | "cs" | "viewer" | "admin",
+    role: "recrutador" as AppRole,
     password: ""
   });
+  const [editingUser, setEditingUser] = useState<any>(null);
+  const [userRoles, setUserRoles] = useState<Record<string, AppRole[]>>({});
+
+  useEffect(() => {
+    loadUserRoles();
+  }, [users]);
+
+  const loadUserRoles = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("user_roles")
+        .select("user_id, role");
+
+      if (error) throw error;
+
+      const rolesMap: Record<string, AppRole[]> = {};
+      data?.forEach((ur) => {
+        if (!rolesMap[ur.user_id]) {
+          rolesMap[ur.user_id] = [];
+        }
+        rolesMap[ur.user_id].push(ur.role as AppRole);
+      });
+
+      setUserRoles(rolesMap);
+    } catch (error) {
+      console.error("Erro ao carregar roles:", error);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,6 +83,49 @@ export default function GerenciarUsuarios() {
     }
   };
 
+  const handleUpdateRoles = async (userId: string, selectedRoles: AppRole[]) => {
+    try {
+      // Remove todas as roles atuais
+      const { error: deleteError } = await supabase
+        .from("user_roles")
+        .delete()
+        .eq("user_id", userId);
+
+      if (deleteError) throw deleteError;
+
+      // Adiciona as novas roles selecionadas
+      if (selectedRoles.length > 0) {
+        const { error: insertError } = await supabase
+          .from("user_roles")
+          .insert(
+            selectedRoles.map(role => ({
+              user_id: userId,
+              role: role as any // Cast necessário até tipos serem regerados
+            }))
+          );
+
+        if (insertError) throw insertError;
+      }
+
+      // Atualiza a tabela users com a role principal (primeira selecionada)
+      const mainRole = selectedRoles[0] || "viewer";
+      const { error: updateError } = await supabase
+        .from("users")
+        .update({ role: mainRole })
+        .eq("id", userId);
+
+      if (updateError) throw updateError;
+
+      toast.success("✅ Permissões atualizadas com sucesso!");
+      setEditingUser(null);
+      reload();
+      loadUserRoles();
+    } catch (error: any) {
+      console.error("Erro ao atualizar roles:", error);
+      toast.error(`❌ Erro ao atualizar permissões: ${error.message}`);
+    }
+  };
+
   const toggleUserStatus = async (userId: string, currentStatus: boolean) => {
     try {
       const { error } = await supabase
@@ -76,6 +151,103 @@ export default function GerenciarUsuarios() {
       viewer: <Badge variant="outline">Visualizador</Badge>
     };
     return badges[role as keyof typeof badges] || <Badge>{role}</Badge>;
+  };
+
+  const RoleEditDialog = ({ user }: { user: any }) => {
+    const currentRoles = userRoles[user.id] || [user.role as AppRole];
+    const [selectedRoles, setSelectedRoles] = useState<AppRole[]>(currentRoles);
+
+    const toggleRole = (role: AppRole) => {
+      setSelectedRoles(prev => 
+        prev.includes(role) 
+          ? prev.filter(r => r !== role)
+          : [...prev, role]
+      );
+    };
+
+    return (
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button variant="ghost" size="sm">
+            <Edit className="h-4 w-4" />
+          </Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar Permissões - {user.name}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-sm text-muted-foreground">
+              Selecione todas as funções que este usuário deve ter:
+            </p>
+            
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id={`role-admin-${user.id}`}
+                  checked={selectedRoles.includes("admin")}
+                  onCheckedChange={() => toggleRole("admin")}
+                />
+                <Label htmlFor={`role-admin-${user.id}`} className="flex items-center gap-2">
+                  {getRoleBadge("admin")}
+                  <span className="text-sm">- Acesso total ao sistema</span>
+                </Label>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id={`role-recrutador-${user.id}`}
+                  checked={selectedRoles.includes("recrutador")}
+                  onCheckedChange={() => toggleRole("recrutador")}
+                />
+                <Label htmlFor={`role-recrutador-${user.id}`} className="flex items-center gap-2">
+                  {getRoleBadge("recrutador")}
+                  <span className="text-sm">- Gerencia vagas e candidatos</span>
+                </Label>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id={`role-cs-${user.id}`}
+                  checked={selectedRoles.includes("cs")}
+                  onCheckedChange={() => toggleRole("cs")}
+                />
+                <Label htmlFor={`role-cs-${user.id}`} className="flex items-center gap-2">
+                  {getRoleBadge("cs")}
+                  <span className="text-sm">- Gestão de clientes (mesmos acessos que recrutador)</span>
+                </Label>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id={`role-viewer-${user.id}`}
+                  checked={selectedRoles.includes("viewer")}
+                  onCheckedChange={() => toggleRole("viewer")}
+                />
+                <Label htmlFor={`role-viewer-${user.id}`} className="flex items-center gap-2">
+                  {getRoleBadge("viewer")}
+                  <span className="text-sm">- Apenas visualização</span>
+                </Label>
+              </div>
+            </div>
+
+            {selectedRoles.length === 0 && (
+              <p className="text-sm text-destructive">
+                ⚠️ Selecione pelo menos uma função
+              </p>
+            )}
+
+            <Button 
+              onClick={() => handleUpdateRoles(user.id, selectedRoles)}
+              disabled={selectedRoles.length === 0}
+              className="w-full"
+            >
+              Salvar Permissões
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
   };
 
   return (
@@ -206,9 +378,11 @@ export default function GerenciarUsuarios() {
                         <UserCircle className="h-6 w-6 text-primary" />
                       </div>
                       <div className="flex-1">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <h3 className="font-semibold">{user.name}</h3>
-                          {getRoleBadge(user.role)}
+                          {(userRoles[user.id] || [user.role]).map((role) => (
+                            <span key={role}>{getRoleBadge(role)}</span>
+                          ))}
                         </div>
                         <div className="flex items-center gap-1 text-sm text-muted-foreground">
                           <Mail className="h-3 w-3" />
@@ -218,6 +392,7 @@ export default function GerenciarUsuarios() {
                     </div>
 
                     <div className="flex items-center gap-4">
+                      <RoleEditDialog user={user} />
                       <div className="flex items-center gap-2">
                         <Label htmlFor={`active-${user.id}`} className="text-sm">
                           {user.active ? "Ativo" : "Inativo"}
@@ -245,10 +420,14 @@ export default function GerenciarUsuarios() {
                 <p className="font-semibold text-blue-500">Sobre as Funções:</p>
                 <ul className="space-y-1 text-muted-foreground">
                   <li><strong>Recrutador:</strong> Pode gerenciar vagas e candidatos atribuídos a si</li>
-                  <li><strong>CS:</strong> Atua como responsável pelo relacionamento com clientes</li>
+                  <li><strong>CS (Customer Success):</strong> Mesmos acessos que recrutador + foco em clientes</li>
                   <li><strong>Visualizador:</strong> Acesso apenas para visualização</li>
                   <li><strong>Administrador:</strong> Acesso completo ao sistema</li>
                 </ul>
+                <p className="mt-3 text-sm font-semibold text-blue-500">💡 Múltiplas Funções:</p>
+                <p className="text-sm text-muted-foreground">
+                  Um usuário pode ter várias funções simultaneamente. Por exemplo, um CS pode também ser Admin, tendo todos os privilégios de ambas as funções.
+                </p>
               </div>
             </div>
           </CardContent>
