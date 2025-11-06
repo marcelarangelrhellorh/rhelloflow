@@ -214,47 +214,52 @@ export function ScorecardHistory({ candidateId }: ScorecardHistoryProps) {
             return (
               <div
                 key={scorecard.id}
-                className="border rounded-lg p-6 space-y-6 hover:shadow-md transition-shadow"
+                className="border rounded-lg p-8 space-y-6 hover:shadow-md transition-shadow"
               >
-                {/* Header */}
-                <div className="flex items-start justify-between gap-6">
-                  <div className="flex items-start gap-4 flex-1">
-                    <Avatar className="h-12 w-12 bg-primary/10 shrink-0">
-                      <AvatarFallback className="text-sm font-bold">
+                {/* Header com título e pontuação */}
+                <div className="flex items-start justify-between gap-6 pb-4 border-b">
+                  <div className="space-y-1">
+                    <h3 className="font-bold text-xl">
+                      {scorecard.template_name}
+                    </h3>
+                    {scorecard.vaga_titulo && (
+                      <Badge variant="outline" className="text-sm font-medium mt-2">
+                        {scorecard.vaga_titulo}
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="text-right shrink-0">
+                    <div className="text-4xl font-bold text-primary">
+                      {scorecard.match_percentage}%
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">Match Score</p>
+                  </div>
+                </div>
+
+                {/* Informações do avaliador e data */}
+                <div className="flex items-center justify-between gap-6 py-2">
+                  <div className="flex items-center gap-4">
+                    <Avatar className="h-14 w-14 bg-primary/10 shrink-0">
+                      <AvatarFallback className="text-base font-bold">
                         {getInitials(scorecard.evaluator_name)}
                       </AvatarFallback>
                     </Avatar>
-
-                    <div className="flex-1 space-y-2">
-                      <div className="font-bold text-lg">
-                        {scorecard.template_name}
-                      </div>
+                    <div className="space-y-1">
+                      <p className="font-semibold text-base">{scorecard.evaluator_name}</p>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <User className="h-4 w-4" />
-                        <span className="font-medium">{scorecard.evaluator_name}</span>
+                        <span>Avaliador</span>
                       </div>
-                      {scorecard.vaga_titulo && (
-                        <div className="flex items-center gap-2 mt-2">
-                          <Badge variant="outline" className="text-sm font-medium">
-                            {scorecard.vaga_titulo}
-                          </Badge>
-                        </div>
-                      )}
                     </div>
                   </div>
 
-                  <div className="text-right shrink-0 space-y-2">
-                    <div className="text-3xl font-bold">
-                      {scorecard.match_percentage}%
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Calendar className="h-4 w-4" />
-                      <span className="font-medium">
-                        {format(new Date(scorecard.created_at), "dd MMM yyyy", {
-                          locale: ptBR,
-                        })}
-                      </span>
-                    </div>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground shrink-0">
+                    <Calendar className="h-4 w-4" />
+                    <span className="font-medium">
+                      {format(new Date(scorecard.created_at), "dd MMM yyyy", {
+                        locale: ptBR,
+                      })}
+                    </span>
                   </div>
                 </div>
 
