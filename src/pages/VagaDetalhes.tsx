@@ -455,10 +455,21 @@ export default function VagaDetalhes() {
           <Sheet open={detailsDrawerOpen} onOpenChange={setDetailsDrawerOpen}>
             <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto">
               <SheetHeader className="mb-6">
-                <SheetTitle className="text-2xl font-bold">Detalhes da Vaga</SheetTitle>
-                <SheetDescription>
-                  Informações completas sobre a vaga
-                </SheetDescription>
+                <div className="flex items-start justify-between">
+                  <div>
+                    <SheetTitle className="text-2xl font-bold">Detalhes da Vaga</SheetTitle>
+                    <SheetDescription>
+                      Informações completas sobre a vaga
+                    </SheetDescription>
+                  </div>
+                  <button
+                    onClick={() => navigate(`/vagas/editar/${vaga.id}`)}
+                    className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors flex items-center gap-2 font-bold"
+                  >
+                    <span className="material-symbols-outlined text-xl">edit</span>
+                    Editar Vaga
+                  </button>
+                </div>
               </SheetHeader>
 
               <div className="space-y-6">
