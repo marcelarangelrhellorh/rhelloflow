@@ -70,8 +70,11 @@ export default function Auth() {
               className="h-16 w-auto"
             />
             <span 
-              className="text-4xl font-bold tracking-tight" 
-              style={{ color: 'hsl(var(--background-dark))' }}
+              className="text-6xl font-black leading-none"
+              style={{ 
+                color: 'hsl(var(--background-dark))',
+                fontFamily: 'Manrope, sans-serif'
+              }}
             >
               Flow
             </span>
