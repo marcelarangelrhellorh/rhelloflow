@@ -1387,7 +1387,6 @@ export type Database = {
           email: string
           id: string
           name: string
-          role: string
         }
         Insert: {
           active?: boolean
@@ -1395,7 +1394,6 @@ export type Database = {
           email: string
           id: string
           name: string
-          role: string
         }
         Update: {
           active?: boolean
@@ -1403,7 +1401,6 @@ export type Database = {
           email?: string
           id?: string
           name?: string
-          role?: string
         }
         Relationships: []
       }
@@ -2336,6 +2333,10 @@ export type Database = {
       }
       get_latest_audit_event_hash: { Args: never; Returns: string }
       get_user_role: { Args: { user_id: string }; Returns: string }
+      get_user_roles: {
+        Args: { user_id: string }
+        Returns: Database["public"]["Enums"]["app_role"][]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
