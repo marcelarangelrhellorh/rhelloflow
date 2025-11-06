@@ -44,7 +44,7 @@ export function ShareConfigStep({ vaga, config, onChange }: ShareConfigStepProps
       configKey: 'exibir_sobre' as keyof ShareConfig,
       hasCustomText: true,
       customTextKey: 'texto_sobre_customizado',
-      defaultText: vaga.responsabilidades || '',
+      defaultText: '',
       description: 'Descrição geral da vaga e suas principais características'
     },
     {
@@ -53,7 +53,7 @@ export function ShareConfigStep({ vaga, config, onChange }: ShareConfigStepProps
       configKey: 'exibir_responsabilidades' as keyof ShareConfig,
       hasCustomText: true,
       customTextKey: 'responsabilidades_customizadas',
-      defaultText: vaga.responsabilidades || '',
+      defaultText: '',
       description: 'Atividades e responsabilidades do cargo'
     },
     {
@@ -62,7 +62,7 @@ export function ShareConfigStep({ vaga, config, onChange }: ShareConfigStepProps
       configKey: 'exibir_requisitos' as keyof ShareConfig,
       hasCustomText: true,
       customTextKey: 'requisitos_customizados',
-      defaultText: `Obrigatórios:\n${vaga.requisitos_obrigatorios || ''}\n\nDesejáveis:\n${vaga.requisitos_desejaveis || ''}`,
+      defaultText: '',
       description: 'Requisitos obrigatórios e desejáveis para a vaga'
     },
     {
@@ -98,21 +98,21 @@ export function ShareConfigStep({ vaga, config, onChange }: ShareConfigStepProps
   return (
     <div className="space-y-6">
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <p className="text-sm text-blue-900">
-          <strong>Escolha quais informações deseja tornar públicas.</strong><br />
+        <p className="text-base text-blue-900">
+          <strong className="text-lg">Escolha quais informações deseja tornar públicas.</strong><br />
           Os dados não selecionados permanecerão visíveis apenas internamente.
         </p>
       </div>
 
       {/* Confidencialidade da Empresa */}
-      <Card className="p-4">
+      <Card className="p-5">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              {config.empresa_confidencial ? <EyeOff className="h-4 w-4 text-muted-foreground" /> : <Eye className="h-4 w-4 text-muted-foreground" />}
-              <Label className="font-semibold">Nome da Empresa</Label>
+            <div className="flex items-center gap-2 mb-2">
+              {config.empresa_confidencial ? <EyeOff className="h-5 w-5 text-muted-foreground" /> : <Eye className="h-5 w-5 text-muted-foreground" />}
+              <Label className="font-semibold text-base">Nome da Empresa</Label>
             </div>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-base text-muted-foreground">
               {config.empresa_confidencial 
                 ? 'Será exibido como "Empresa Confidencial"' 
                 : `Será exibido: "${vaga.empresa}"`}
@@ -123,26 +123,26 @@ export function ShareConfigStep({ vaga, config, onChange }: ShareConfigStepProps
             onCheckedChange={(checked) => updateConfig('empresa_confidencial', checked)}
           />
         </div>
-        <div className="mt-2 text-xs text-muted-foreground">
+        <div className="mt-2 text-sm text-muted-foreground">
           {config.empresa_confidencial ? '🔒 Confidencial' : '👁️ Visível'}
         </div>
       </Card>
 
       {/* Seções Configuráveis */}
       <div className="space-y-3">
-        <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
+        <h3 className="font-semibold text-base text-muted-foreground uppercase tracking-wide">
           Seções da Vaga
         </h3>
         
         {configSections.map((section) => (
-          <Card key={section.key} className="p-4">
+          <Card key={section.key} className="p-5">
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  {config[section.configKey] ? <Eye className="h-4 w-4 text-muted-foreground" /> : <EyeOff className="h-4 w-4 text-muted-foreground" />}
-                  <Label className="font-semibold">{section.label}</Label>
+                <div className="flex items-center gap-2 mb-2">
+                  {config[section.configKey] ? <Eye className="h-5 w-5 text-muted-foreground" /> : <EyeOff className="h-5 w-5 text-muted-foreground" />}
+                  <Label className="font-semibold text-base">{section.label}</Label>
                 </div>
-                <p className="text-sm text-muted-foreground">{section.description}</p>
+                <p className="text-base text-muted-foreground">{section.description}</p>
               </div>
               <div className="flex items-center gap-2">
                 {section.hasCustomText && config[section.configKey] && (
@@ -151,7 +151,7 @@ export function ShareConfigStep({ vaga, config, onChange }: ShareConfigStepProps
                     size="sm"
                     onClick={() => toggleSection(section.key)}
                   >
-                    {expandedSections[section.key] ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    {expandedSections[section.key] ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
                   </Button>
                 )}
                 <Switch
@@ -164,20 +164,20 @@ export function ShareConfigStep({ vaga, config, onChange }: ShareConfigStepProps
             {/* Custom text editor */}
             {section.hasCustomText && config[section.configKey] && expandedSections[section.key] && (
               <div className="mt-4 space-y-2">
-                <Label className="text-xs text-muted-foreground">
+                <Label className="text-sm text-muted-foreground">
                   Personalizar texto (opcional - deixe em branco para usar o padrão)
                 </Label>
                 <Textarea
-                  placeholder={section.defaultText}
+                  placeholder={section.defaultText || "Digite o texto personalizado..."}
                   value={(config[section.customTextKey as keyof ShareConfig] as string) || ''}
                   onChange={(e) => updateConfig(section.customTextKey as keyof ShareConfig, e.target.value || null)}
                   rows={5}
-                  className="text-sm"
+                  className="text-base"
                 />
               </div>
             )}
 
-            <div className="mt-2 text-xs text-muted-foreground">
+            <div className="mt-2 text-sm text-muted-foreground">
               {config[section.configKey] ? '👁️ Será exibido' : '🔒 Oculto'}
             </div>
           </Card>
