@@ -12,8 +12,6 @@ import { ArrowLeft, Save, Upload, FileText, X } from "lucide-react";
 import { toast } from "sonner";
 import { Constants } from "@/integrations/supabase/types";
 
-const RECRUTADORES = ["Ítalo", "Bianca Marques", "Victor", "Mariana", "Isabella"];
-
 export default function CandidatoForm() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -33,7 +31,6 @@ export default function CandidatoForm() {
     portfolio_url: "",
     nivel: "",
     area: "",
-    recrutador: "",
     vaga_relacionada_id: "",
     pretensao_salarial: "",
     disponibilidade_mudanca: "",
@@ -88,7 +85,6 @@ export default function CandidatoForm() {
           portfolio_url: data.portfolio_url || "",
           nivel: data.nivel || "",
           area: data.area || "",
-          recrutador: data.recrutador || "",
           vaga_relacionada_id: data.vaga_relacionada_id || "",
           pretensao_salarial: data.pretensao_salarial 
             ? `R$ ${data.pretensao_salarial.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
@@ -193,7 +189,6 @@ export default function CandidatoForm() {
         portfolio_url: portfolioUrl || null,
         nivel: (formData.nivel || null) as any,
         area: (formData.area || null) as any,
-        recrutador: formData.recrutador || null,
         vaga_relacionada_id: formData.vaga_relacionada_id || null,
         pretensao_salarial: formData.pretensao_salarial 
           ? parseFloat(formData.pretensao_salarial.replace(/[R$\s.]/g, '').replace(',', '.'))
@@ -559,20 +554,6 @@ export default function CandidatoForm() {
                 <p className="text-xs text-muted-foreground mt-1">
                   Digite apenas números. Ex: 5000 = R$ 5.000,00
                 </p>
-              </div>
-
-              <div>
-                <Label htmlFor="recrutador">Recrutador</Label>
-                <Select value={formData.recrutador} onValueChange={(value) => setFormData({ ...formData, recrutador: value })}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione um recrutador" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {RECRUTADORES.map((rec) => (
-                      <SelectItem key={rec} value={rec}>{rec}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
               </div>
 
               <div>
