@@ -10,6 +10,7 @@ import { PipelineBoard } from "@/components/FunilVagas/PipelineBoard";
 import { JobDrawer } from "@/components/FunilVagas/JobDrawer";
 import { JOB_STAGES, calculateProgress } from "@/lib/jobStages";
 import { logVagaEvento } from "@/lib/vagaEventos";
+import { getBusinessDaysFromNow } from "@/lib/dateUtils";
 
 interface Vaga {
   id: string;
@@ -41,6 +42,11 @@ export default function FunilVagas() {
   const [loading, setLoading] = useState(true);
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  
+  // Stats
+  const [mediaDiasAbertos, setMediaDiasAbertos] = useState(0);
+  const [vagasForaPrazo, setVagasForaPrazo] = useState(0);
+  const [totalCandidatosAtivos, setTotalCandidatosAtivos] = useState(0);
   
   // Filters
   const [searchTerm, setSearchTerm] = useState("");
@@ -113,6 +119,9 @@ export default function FunilVagas() {
 
       setJobs(jobsWithCounts as any);
 
+      // Calcular métricas
+      calculateStats(jobsWithCounts);
+
       // Extract unique filter options
       const uniqueRecrutadores = Array.from(
         new Set(jobsWithCounts.map((j: any) => j.recrutador).filter(Boolean))
@@ -133,6 +142,37 @@ export default function FunilVagas() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const calculateStats = (jobsData: any[]) => {
+    // Filtrar apenas vagas abertas (não concluídas)
+    const vagasAbertas = jobsData.filter(
+      (job) => job.status_slug !== "concluida" && job.status_slug !== "cancelada"
+    );
+
+    // Calcular média de dias úteis em aberto
+    if (vagasAbertas.length > 0) {
+      const totalDias = vagasAbertas.reduce((sum, job) => {
+        const dias = getBusinessDaysFromNow(job.criado_em);
+        return sum + dias;
+      }, 0);
+      setMediaDiasAbertos(Math.round(totalDias / vagasAbertas.length));
+    } else {
+      setMediaDiasAbertos(0);
+    }
+
+    // Contar vagas fora do prazo (>30 dias úteis)
+    const foraPrazo = vagasAbertas.filter((job) => {
+      const dias = getBusinessDaysFromNow(job.criado_em);
+      return dias > 30;
+    }).length;
+    setVagasForaPrazo(foraPrazo);
+
+    // Contar total de candidatos ativos
+    const totalCandidatos = jobsData.reduce((sum, job) => {
+      return sum + (job.candidatos_count || 0);
+    }, 0);
+    setTotalCandidatosAtivos(totalCandidatos);
   };
 
   const handleJobMove = async (jobId: string, fromSlug: string, toSlug: string) => {
@@ -278,9 +318,9 @@ export default function FunilVagas() {
           <div className="mb-4">
             <StatsHeader
               totalVagasAbertas={totalJobs}
-              mediaDiasAbertos={0}
-              vagasEmAtencao={0}
-              totalCandidatosAtivos={0}
+              mediaDiasAbertos={mediaDiasAbertos}
+              vagasEmAtencao={vagasForaPrazo}
+              totalCandidatosAtivos={totalCandidatosAtivos}
             />
           </div>
 
