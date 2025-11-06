@@ -31,6 +31,28 @@ export default function GerenciarUsuarios() {
   const [editingUser, setEditingUser] = useState<any>(null);
   const [userRoles, setUserRoles] = useState<Record<string, AppRole[]>>({});
 
+  const loadUserRoles = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("user_roles")
+        .select("user_id, role");
+
+      if (error) throw error;
+
+      const rolesMap: Record<string, AppRole[]> = {};
+      data?.forEach((ur) => {
+        if (!rolesMap[ur.user_id]) {
+          rolesMap[ur.user_id] = [];
+        }
+        rolesMap[ur.user_id].push(ur.role as AppRole);
+      });
+
+      setUserRoles(rolesMap);
+    } catch (error) {
+      console.error("Erro ao carregar roles:", error);
+    }
+  };
+
   // Verifica se é admin antes de carregar a página
   useEffect(() => {
     if (!roleLoading && !isAdmin) {
@@ -55,28 +77,6 @@ export default function GerenciarUsuarios() {
   if (!isAdmin) {
     return null;
   }
-
-  const loadUserRoles = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("user_roles")
-        .select("user_id, role");
-
-      if (error) throw error;
-
-      const rolesMap: Record<string, AppRole[]> = {};
-      data?.forEach((ur) => {
-        if (!rolesMap[ur.user_id]) {
-          rolesMap[ur.user_id] = [];
-        }
-        rolesMap[ur.user_id].push(ur.role as AppRole);
-      });
-
-      setUserRoles(rolesMap);
-    } catch (error) {
-      console.error("Erro ao carregar roles:", error);
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
