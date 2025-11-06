@@ -1561,6 +1561,9 @@ export type Database = {
           salario_max: number | null
           salario_min: number | null
           salario_modalidade: string | null
+          solicitante_email: string | null
+          solicitante_nome: string | null
+          solicitante_telefone: string | null
           source: string | null
           status: Database["public"]["Enums"]["status_vaga"] | null
           status_changed_at: string | null
@@ -1604,6 +1607,9 @@ export type Database = {
           salario_max?: number | null
           salario_min?: number | null
           salario_modalidade?: string | null
+          solicitante_email?: string | null
+          solicitante_nome?: string | null
+          solicitante_telefone?: string | null
           source?: string | null
           status?: Database["public"]["Enums"]["status_vaga"] | null
           status_changed_at?: string | null
@@ -1647,6 +1653,9 @@ export type Database = {
           salario_max?: number | null
           salario_min?: number | null
           salario_modalidade?: string | null
+          solicitante_email?: string | null
+          solicitante_nome?: string | null
+          solicitante_telefone?: string | null
           source?: string | null
           status?: Database["public"]["Enums"]["status_vaga"] | null
           status_changed_at?: string | null

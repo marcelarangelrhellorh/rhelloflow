@@ -42,6 +42,9 @@ type Vaga = {
   criado_em: string;
   confidencial: boolean | null;
   motivo_confidencial: string | null;
+  solicitante_nome: string | null;
+  solicitante_email: string | null;
+  solicitante_telefone: string | null;
   recrutador: string | null;
   cs_responsavel: string | null;
   complexidade: string | null;
@@ -504,6 +507,45 @@ export default function VagaDetalhes() {
                       <div>
                         <p className="text-sm font-medium text-muted-foreground mb-1">CS Responsável</p>
                         <p className="text-base">👥 {vaga.cs_responsavel}</p>
+                      </div>
+                    )}
+
+                    {vaga.solicitante_nome && (
+                      <div className="pt-4 border-t space-y-3">
+                        <h4 className="text-base font-semibold">📞 Contato do Solicitante</h4>
+                        
+                        <div>
+                          <p className="text-sm font-medium text-muted-foreground mb-1">Nome</p>
+                          <p className="text-base">{vaga.solicitante_nome}</p>
+                        </div>
+                        
+                        {vaga.solicitante_email && (
+                          <div>
+                            <p className="text-sm font-medium text-muted-foreground mb-1">E-mail</p>
+                            <p className="text-base">
+                              <a 
+                                href={`mailto:${vaga.solicitante_email}`}
+                                className="text-primary hover:underline"
+                              >
+                                {vaga.solicitante_email}
+                              </a>
+                            </p>
+                          </div>
+                        )}
+                        
+                        {vaga.solicitante_telefone && (
+                          <div>
+                            <p className="text-sm font-medium text-muted-foreground mb-1">Telefone</p>
+                            <p className="text-base">
+                              <a 
+                                href={`tel:${vaga.solicitante_telefone}`}
+                                className="text-primary hover:underline"
+                              >
+                                {vaga.solicitante_telefone}
+                              </a>
+                            </p>
+                          </div>
+                        )}
                       </div>
                     )}
 
