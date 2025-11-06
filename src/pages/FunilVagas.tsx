@@ -315,15 +315,16 @@ export default function FunilVagas() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-[#FFFDF6]">
-      {/* Header */}
-      <div className="border-b border-gray-200 bg-white">
-        <div className="px-4 py-4">
-          <div className="flex items-center justify-between mb-4">
+    <div className="min-h-screen" style={{ backgroundColor: "#FFFDF6" }}>
+      {/* Header - Compact */}
+      <div className="sticky top-0 z-20 bg-white border-b border-gray-200 shadow-sm">
+        <div className="px-6 py-4 space-y-3">
+          {/* Title */}
+          <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-[#00141D]">Funil de Vagas</h1>
-              <p className="text-sm text-[#36404A] mt-0.5">
-                Gerencie o pipeline de recrutamento
+              <p className="text-sm text-[#36404A] mt-1">
+                {totalJobs} {totalJobs === 1 ? 'vaga' : 'vagas'} no pipeline
               </p>
             </div>
             <Button onClick={() => navigate("/vagas/nova")} className="h-9 rounded-lg bg-[#FFCD00] hover:bg-[#FAEC3E] text-[#00141D] font-medium">
@@ -333,14 +334,12 @@ export default function FunilVagas() {
           </div>
 
           {/* Stats */}
-          <div className="mb-4">
-            <StatsHeader
-              totalVagasAbertas={totalJobs}
-              mediaDiasAbertos={mediaDiasAbertos}
-              vagasEmAtencao={vagasForaPrazo}
-              totalCandidatosAtivos={totalCandidatosAtivos}
-            />
-          </div>
+          <StatsHeader
+            totalVagasAbertas={totalJobs}
+            mediaDiasAbertos={mediaDiasAbertos}
+            vagasEmAtencao={vagasForaPrazo}
+            totalCandidatosAtivos={totalCandidatosAtivos}
+          />
 
           {/* Filters */}
           <FilterBar
@@ -365,18 +364,20 @@ export default function FunilVagas() {
       </div>
 
       {/* Pipeline Board */}
-      <div className="flex-1 overflow-hidden p-4">
-        <PipelineBoard
-          jobs={filteredJobs}
-          stages={JOB_STAGES}
-          progresso={calculateProgress}
-          onJobMove={handleJobMove}
-          onJobClick={handleJobClick}
-          onJobEdit={handleJobEdit}
-          onJobMoveStage={handleJobMoveStage}
-          onJobDuplicate={handleJobDuplicate}
-          onJobClose={handleJobClose}
-        />
+      <div className="overflow-x-auto pb-4">
+        <div className="px-6 py-4">
+          <PipelineBoard
+            jobs={filteredJobs}
+            stages={JOB_STAGES}
+            progresso={calculateProgress}
+            onJobMove={handleJobMove}
+            onJobClick={handleJobClick}
+            onJobEdit={handleJobEdit}
+            onJobMoveStage={handleJobMoveStage}
+            onJobDuplicate={handleJobDuplicate}
+            onJobClose={handleJobClose}
+          />
+        </div>
       </div>
 
       {/* Job Details Drawer */}

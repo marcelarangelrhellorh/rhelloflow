@@ -7,7 +7,6 @@ interface StageColumnProps {
   status: string;
   count: number;
   colorClass: string;
-  icon: string;
   children: ReactNode;
   isOver?: boolean;
   onDragOver?: () => void;
@@ -18,7 +17,6 @@ export function StageColumn({
   status,
   count,
   colorClass,
-  icon,
   children,
   isOver,
   onDragOver,
@@ -29,23 +27,27 @@ export function StageColumn({
   });
 
   return (
-    <div className="flex flex-col w-[300px] flex-shrink-0">
+    <div
+      ref={setNodeRef}
+      className={cn(
+        "flex flex-col min-w-[320px] h-full rounded-lg transition-all duration-200",
+        "border border-gray-200 shadow-sm bg-white",
+        isOver && "border-2 border-[#FFCD00] ring-2 ring-[#FFCD00]/20"
+      )}
+    >
       {/* Column Header */}
-      <div className="mb-3 pb-3 border-b border-border sticky top-0 bg-background z-10">
-        <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-sm text-foreground line-clamp-1 flex items-center gap-1">
-            <span>{icon}</span>
-            <span>{status}</span>
-          </h3>
-          <Badge className={cn("text-xs font-medium", colorClass)}>
-            {count}
-          </Badge>
-        </div>
+      <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white/50 backdrop-blur-sm rounded-t-lg">
+        <h3 className="font-semibold text-sm text-foreground">{status}</h3>
+        <Badge
+          variant="secondary"
+          className={cn("text-xs font-medium", colorClass)}
+        >
+          {count}
+        </Badge>
       </div>
 
-      {/* Droppable Area */}
+      {/* Column Content */}
       <div
-        ref={setNodeRef}
         onDragOver={(e) => {
           e.preventDefault();
           onDragOver?.();
@@ -53,10 +55,7 @@ export function StageColumn({
         onDragLeave={() => {
           onDragLeave?.();
         }}
-        className={cn(
-          "flex-1 bg-muted/20 rounded-lg p-3 min-h-[600px] space-y-3 transition-all duration-200",
-          isOver && "ring-2 ring-primary bg-primary/5"
-        )}
+        className="flex-1 overflow-y-auto p-3 space-y-2"
       >
         {children}
       </div>

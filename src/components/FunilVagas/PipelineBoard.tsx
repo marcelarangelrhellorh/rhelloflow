@@ -116,7 +116,7 @@ export function PipelineBoard({
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <div className="flex gap-4 h-full overflow-x-auto pb-4">
+      <div className="flex gap-4" style={{ minWidth: 'max-content' }}>
         {stages.map((stage) => (
           <Column
             key={stage.id}
@@ -134,7 +134,7 @@ export function PipelineBoard({
 
       <DragOverlay>
         {activeJob && activeStage ? (
-          <div className="rotate-3 w-[320px]">
+          <div className="w-[320px]">
             <JobCard
               vaga={activeJob}
               stageColor={activeStage.color}
