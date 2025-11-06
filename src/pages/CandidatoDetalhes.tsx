@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ExternalLink } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { CandidateHeader } from "@/components/CandidatoDetalhes/CandidateHeader";
@@ -408,21 +408,11 @@ export default function CandidatoDetalhes() {
         </div>
 
         {/* Feedbacks */}
-        <div className="space-y-4">
-          <div className="flex justify-end">
-            <Button 
-              onClick={() => setSolicitarFeedbackModalOpen(true)} 
-              className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold"
-            >
-              <ExternalLink className="h-5 w-5 mr-2" />
-              Solicitar Feedback do Cliente
-            </Button>
-          </div>
-          <FeedbackList
-            candidatoId={id!}
-            onAddFeedback={() => setFeedbackModalOpen(true)}
-          />
-        </div>
+        <FeedbackList
+          candidatoId={id!}
+          onAddFeedback={() => setFeedbackModalOpen(true)}
+          onSolicitarFeedback={() => setSolicitarFeedbackModalOpen(true)}
+        />
 
         {/* Scorecard Evaluation */}
         <ScorecardEvaluation

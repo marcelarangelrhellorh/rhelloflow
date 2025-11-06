@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, MessageSquare, Trash2, Star } from "lucide-react";
+import { Plus, MessageSquare, Trash2, Star, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useEffect, useState } from "react";
@@ -23,6 +23,7 @@ interface Feedback {
 interface FeedbackListProps {
   candidatoId: string;
   onAddFeedback: () => void;
+  onSolicitarFeedback?: () => void;
 }
 
 const disposicaoColors = {
@@ -37,7 +38,7 @@ const disposicaoIcons = {
   neutro: "⚪",
 };
 
-export function FeedbackList({ candidatoId, onAddFeedback }: FeedbackListProps) {
+export function FeedbackList({ candidatoId, onAddFeedback, onSolicitarFeedback }: FeedbackListProps) {
   const { toast } = useToast();
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -153,13 +154,21 @@ export function FeedbackList({ candidatoId, onAddFeedback }: FeedbackListProps) 
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">
-            Feedbacks ({feedbacks.length})
+          <CardTitle className="text-xl font-bold">
+            Feedbacks <span className="font-normal text-muted-foreground">({feedbacks.length})</span>
           </CardTitle>
-          <Button onClick={onAddFeedback} size="sm">
-            <Plus className="mr-2 h-4 w-4" />
-            Novo Feedback
-          </Button>
+          <div className="flex gap-2">
+            {onSolicitarFeedback && (
+              <Button onClick={onSolicitarFeedback} size="sm" variant="outline">
+                <Send className="mr-2 h-4 w-4" />
+                Solicitar Feedback
+              </Button>
+            )}
+            <Button onClick={onAddFeedback} size="sm">
+              <Plus className="mr-2 h-4 w-4" />
+              Novo Feedback
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
@@ -185,63 +194,41 @@ export function FeedbackList({ candidatoId, onAddFeedback }: FeedbackListProps) 
             {feedbacks.map((feedback) => (
               <div
                 key={feedback.id}
-                className="group rounded-lg border border-border bg-card p-4 transition-shadow hover:shadow-md"
+                className="group rounded-lg border-2 border-border bg-card p-5 transition-all hover:shadow-lg hover:border-primary/20"
               >
-                <div className="mb-3 flex items-start justify-between">
-                  <div className="flex flex-wrap items-center gap-2">
+                {/* Header com tipo e data */}
+                <div className="mb-4 flex items-start justify-between gap-4">
+                  <div className="flex items-center gap-3 flex-wrap">
                     <Badge
-                      variant="outline"
                       className={
                         feedback.origem === "cliente"
-                          ? "bg-blue-500/10 text-blue-500 border-blue-500/20"
+                          ? "bg-blue-500 text-white text-sm font-semibold"
                           : feedback.tipo === "interno"
-                          ? "bg-muted/10 text-muted-foreground border-muted"
-                          : "bg-primary/10 text-primary border-primary/20"
+                          ? "bg-muted text-muted-foreground text-sm font-semibold"
+                          : "bg-primary text-primary-foreground text-sm font-semibold"
                       }
                     >
-                      {feedback.origem === "cliente" ? "👤 Feedback do Cliente" : feedback.tipo === "interno" ? "💬 Interno" : "📋 Cliente"}
+                      {feedback.origem === "cliente" ? "👤 Cliente" : feedback.tipo === "interno" ? "💬 Interno" : "📋 Cliente"}
                     </Badge>
 
-                    {feedback.sender_name && (
-                      <span className="text-xs text-muted-foreground">
-                        por {feedback.sender_name}
-                      </span>
-                    )}
-                    
                     {feedback.disposicao && (
                       <Badge
-                        variant="outline"
-                        className={disposicaoColors[feedback.disposicao]}
+                        className={disposicaoColors[feedback.disposicao] + " text-sm font-semibold"}
                       >
                         {disposicaoIcons[feedback.disposicao]} {feedback.disposicao}
                       </Badge>
                     )}
 
-                    {feedback.etapa && (
-                      <Badge variant="outline" className="text-xs">
-                        {feedback.etapa}
-                      </Badge>
-                    )}
-
                     {feedback.avaliacao && (
-                      <Badge variant="outline" className="text-xs">
-                        {feedback.avaliacao} <Star className="ml-1 h-3 w-3 fill-current" />
+                      <Badge variant="outline" className="text-sm font-semibold gap-1">
+                        <Star className="h-4 w-4 fill-[#FFCD00] text-[#FFCD00]" />
+                        {feedback.avaliacao}
                       </Badge>
-                    )}
-
-                    {feedback.quick_tags && feedback.quick_tags.length > 0 && (
-                      <div className="flex gap-1 flex-wrap">
-                        {feedback.quick_tags.map((tag, idx) => (
-                          <Badge key={idx} variant="outline" className="text-xs">
-                            {tag}
-                          </Badge>
-                        ))}
-                      </div>
                     )}
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground">
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-sm font-medium text-muted-foreground">
                       {formatDate(feedback.criado_em)}
                     </span>
                     <Button
@@ -255,13 +242,41 @@ export function FeedbackList({ candidatoId, onAddFeedback }: FeedbackListProps) 
                   </div>
                 </div>
 
-                <p className="text-sm font-medium text-card-foreground mb-2">
-                  {profiles[feedback.author_user_id] || "Carregando..."}
-                </p>
+                {/* Autor */}
+                <div className="mb-3">
+                  <p className="text-base font-bold text-card-foreground">
+                    {profiles[feedback.author_user_id] || "Carregando..."}
+                    {feedback.sender_name && (
+                      <span className="text-sm font-normal text-muted-foreground ml-2">
+                        via {feedback.sender_name}
+                      </span>
+                    )}
+                  </p>
+                </div>
 
-                <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                {/* Conteúdo */}
+                <p className="text-base text-card-foreground whitespace-pre-wrap leading-relaxed mb-3">
                   {feedback.conteudo}
                 </p>
+
+                {/* Tags e etapa na parte inferior */}
+                {(feedback.etapa || (feedback.quick_tags && feedback.quick_tags.length > 0)) && (
+                  <div className="flex gap-2 flex-wrap pt-3 border-t border-border">
+                    {feedback.etapa && (
+                      <Badge variant="outline" className="text-sm">
+                        📍 {feedback.etapa}
+                      </Badge>
+                    )}
+
+                    {feedback.quick_tags && feedback.quick_tags.length > 0 && (
+                      feedback.quick_tags.map((tag, idx) => (
+                        <Badge key={idx} variant="secondary" className="text-sm">
+                          {tag}
+                        </Badge>
+                      ))
+                    )}
+                  </div>
+                )}
               </div>
             ))}
           </div>
