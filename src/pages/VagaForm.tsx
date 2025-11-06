@@ -297,6 +297,19 @@ export default function VagaForm() {
 
           <Card>
             <CardHeader>
+              <CardTitle>Tags e Categorização</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <TagPicker
+                selectedTags={selectedTags}
+                onChange={setSelectedTags}
+                disabled={loading}
+              />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
               <CardTitle>Recrutamento</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -574,19 +587,6 @@ export default function VagaForm() {
                   onChange={(e) => setFormData({ ...formData, observacoes: e.target.value })}
                 />
               </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Tags e Categorização</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <TagPicker
-                selectedTags={selectedTags}
-                onChange={setSelectedTags}
-                disabled={loading}
-              />
             </CardContent>
           </Card>
 

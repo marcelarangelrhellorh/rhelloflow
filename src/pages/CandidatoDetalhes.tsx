@@ -378,6 +378,8 @@ export default function CandidatoDetalhes() {
               curriculoLink={candidato.curriculo_link}
             />
 
+            <CandidateTagsCard candidateId={id!} />
+
             {/* Exibir Dados da Candidatura se o candidato veio de link público */}
             {candidato.source_link_id && (
               <ApplicationDataCard
@@ -412,8 +414,6 @@ export default function CandidatoDetalhes() {
               onUpdate={loadCandidato}
               onVagaClick={() => vaga && navigate(`/vagas/${vaga.id}`)}
             />
-
-            <CandidateTagsCard candidateId={id!} />
           </div>
         </div>
 
