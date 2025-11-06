@@ -328,20 +328,22 @@ export default function CandidatoDetalhes() {
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#00141d' }}>
+    <div className="min-h-screen bg-background">
       {/* Breadcrumb / Back Button */}
-      <div className="sticky top-0 z-10 bg-background border-b border-border">
-        <div className="px-6 py-4">
-          <Button variant="ghost" onClick={() => navigate("/candidatos")}>
+      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border">
+        <div className="px-4 sm:px-6 py-3">
+          <Button variant="ghost" size="sm" onClick={() => navigate("/candidatos")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Voltar | Candidatos / {candidato.nome_completo}
+            <span className="hidden sm:inline">Candidatos</span>
+            <span className="text-muted-foreground mx-2">/</span>
+            <span className="font-medium">{candidato.nome_completo}</span>
           </Button>
         </div>
       </div>
 
       {/* Content */}
-      <div className="px-6 py-6 space-y-6 max-w-7xl mx-auto">
-        {/* Header */}
+      <div className="px-4 sm:px-6 py-4 space-y-4 max-w-[1600px] mx-auto">
+        {/* Simplified Header with Stats */}
         <CandidateHeader
           nome={candidato.nome_completo}
           status={candidato.status}
@@ -357,7 +359,7 @@ export default function CandidatoDetalhes() {
           onStatusChange={handleStatusChange}
         />
 
-        {/* Stats Bar */}
+        {/* Compact Stats Row */}
         <StatsBar
           criadoEm={candidato.criado_em}
           ultimoFeedback={stats.ultimoFeedback}
@@ -367,9 +369,10 @@ export default function CandidatoDetalhes() {
           totalFeedbacks={stats.totalFeedbacks}
         />
 
-        {/* Two Column Layout */}
-        <div className="grid gap-6 lg:grid-cols-2">
-          <div className="space-y-6">
+        {/* Three Column Layout */}
+        <div className="grid gap-4 lg:grid-cols-12">
+          {/* Left Sidebar - Contact & Tags */}
+          <div className="lg:col-span-3 space-y-4">
             <ContactCard
               email={candidato.email}
               telefone={candidato.telefone}
@@ -383,7 +386,8 @@ export default function CandidatoDetalhes() {
             <CandidateTagsCard candidateId={id!} />
           </div>
 
-          <div className="space-y-6">
+          {/* Main Content - Professional Info & Feedbacks */}
+          <div className="lg:col-span-6 space-y-4">
             <ProfessionalInfoCard
               recrutador={candidato.recrutador}
               pretensaoSalarial={candidato.pretensao_salarial}
@@ -404,31 +408,30 @@ export default function CandidatoDetalhes() {
               onUpdate={loadCandidato}
               onVagaClick={() => vaga && navigate(`/vagas/${vaga.id}`)}
             />
+
+            <FeedbackList
+              candidatoId={id!}
+              onAddFeedback={() => setFeedbackModalOpen(true)}
+              onSolicitarFeedback={() => setSolicitarFeedbackModalOpen(true)}
+            />
+          </div>
+
+          {/* Right Sidebar - Scorecards & Timeline */}
+          <div className="lg:col-span-3 space-y-4">
+            <ScorecardEvaluation
+              candidateId={id!}
+              candidateName={candidato.nome_completo}
+              vagaId={candidato.vaga_relacionada_id}
+            />
+
+            <ScorecardHistory candidateId={id!} />
+
+            <HistoryTimeline
+              historico={historico}
+              onVagaClick={(vagaId) => navigate(`/vagas/${vagaId}`)}
+            />
           </div>
         </div>
-
-        {/* Feedbacks */}
-        <FeedbackList
-          candidatoId={id!}
-          onAddFeedback={() => setFeedbackModalOpen(true)}
-          onSolicitarFeedback={() => setSolicitarFeedbackModalOpen(true)}
-        />
-
-        {/* Scorecard Evaluation */}
-        <ScorecardEvaluation
-          candidateId={id!}
-          candidateName={candidato.nome_completo}
-          vagaId={candidato.vaga_relacionada_id}
-        />
-
-        {/* Scorecard History */}
-        <ScorecardHistory candidateId={id!} />
-
-        {/* History Timeline */}
-        <HistoryTimeline
-          historico={historico}
-          onVagaClick={(vagaId) => navigate(`/vagas/${vagaId}`)}
-        />
       </div>
 
       {/* Modals */}

@@ -75,127 +75,121 @@ export function CandidateHeader({
   const isContratado = status === "Contratado";
 
   return (
-    <div className="space-y-4">
-      {/* Banner de Contratação */}
+    <div className="space-y-3">
+      {/* Banner de Contratação - mais compacto */}
       {isContratado && (
-        <div className="rounded-lg bg-gradient-to-r from-success/20 via-success/10 to-success/20 border-2 border-success p-4 animate-in fade-in slide-in-from-top-2 duration-500">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-success text-success-foreground">
-              <PartyPopper className="h-6 w-6" />
+        <div className="rounded-lg bg-gradient-to-r from-success/20 via-success/10 to-success/20 border border-success p-3 animate-in fade-in slide-in-from-top-2 duration-500">
+          <div className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-success text-success-foreground">
+              <PartyPopper className="h-4 w-4" />
             </div>
-            <div className="flex-1">
-              <h3 className="text-lg font-bold text-success flex items-center gap-2">
-                <CheckCircle2 className="h-5 w-5" />
+            <div>
+              <p className="text-sm font-bold text-success flex items-center gap-1.5">
+                <CheckCircle2 className="h-4 w-4" />
                 Candidato Contratado!
-              </h3>
-              <p className="text-sm text-success/80">
-                Parabéns! Este candidato foi contratado com sucesso.
               </p>
             </div>
           </div>
         </div>
       )}
 
-      <div className="rounded-lg border border-border bg-card p-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div className="rounded-lg border border-border bg-card p-4">
+        <div className="flex flex-col sm:flex-row gap-4 sm:items-start sm:justify-between">
           {/* Left Side - Candidate Info */}
-          <div className="flex gap-4">
-            {/* Avatar */}
+          <div className="flex gap-3 flex-1 min-w-0">
+            {/* Avatar - menor */}
             <div className={cn(
-              "flex h-20 w-20 flex-shrink-0 items-center justify-center rounded-full text-2xl font-semibold",
+              "flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full text-xl font-semibold",
               isContratado ? "bg-success/20 text-success ring-2 ring-success" : "bg-primary/10 text-primary"
             )}>
               {getInitials(nome)}
             </div>
 
             {/* Info */}
-            <div className="flex-1">
-              <div className="mb-3 flex flex-wrap items-center gap-2">
-                <h1 className="text-2xl font-bold text-card-foreground">{nome}</h1>
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-wrap items-center gap-2 mb-2">
+                <h1 className="text-xl font-bold text-card-foreground truncate">{nome}</h1>
                 <Badge
                   variant={isContratado ? "default" : "outline"}
                   className={cn(
-                    "text-sm font-medium",
-                    isContratado && "bg-success text-success-foreground hover:bg-success/90 border-success shadow-lg",
+                    "text-xs font-medium flex-shrink-0",
+                    isContratado && "bg-success text-success-foreground hover:bg-success/90 border-success",
                     !isContratado && (statusColors[status] || statusColors["Banco de Talentos"])
                   )}
                 >
-                  {isContratado ? "✅" : "⚪"} {status}
+                  {status}
                 </Badge>
               </div>
 
-              {/* Seletor de Etapa */}
-              <div className="mb-3">
-                <Select value={status} onValueChange={onStatusChange}>
-                  <SelectTrigger className="w-full sm:w-[280px] h-9 border-border bg-background hover:bg-accent/5 transition-colors">
-                    <SelectValue placeholder="Selecionar etapa">
-                      <span className="text-sm">
-                        <span className="text-muted-foreground">Etapa:</span>{" "}
-                        <span className="font-medium text-foreground">{status}</span>
-                      </span>
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover z-50">
-                    {ETAPAS_DISPONIVEIS.map((etapa) => (
-                      <SelectItem 
-                        key={etapa} 
-                        value={etapa}
-                        className={cn(
-                          "cursor-pointer",
-                          etapa === status && "font-semibold"
-                        )}
-                      >
-                        {etapa === status && "✓ "}{etapa}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-1 text-sm text-muted-foreground">
+              {/* Info compacta */}
+              <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground mb-2">
                 {(nivel || area) && (
-                  <div className="flex items-center gap-2">
-                    <Briefcase className="h-4 w-4" />
+                  <div className="flex items-center gap-1">
+                    <Briefcase className="h-3.5 w-3.5" />
                     <span>{[nivel, area].filter(Boolean).join(" – ")}</span>
                   </div>
                 )}
                 
                 {(cidade || estado) && (
-                  <div className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4" />
+                  <div className="flex items-center gap-1">
+                    <MapPin className="h-3.5 w-3.5" />
                     <span>{[cidade, estado].filter(Boolean).join(", ")}</span>
                   </div>
                 )}
                 
                 {recrutador && (
-                  <div className="flex items-center gap-2">
-                    <User className="h-4 w-4" />
+                  <div className="flex items-center gap-1">
+                    <User className="h-3.5 w-3.5" />
                     <span>{recrutador}</span>
                   </div>
                 )}
               </div>
+
+              {/* Seletor de Etapa - mais compacto */}
+              <Select value={status} onValueChange={onStatusChange}>
+                <SelectTrigger className="w-full sm:w-[260px] h-8 text-xs border-border bg-background hover:bg-accent/5 transition-colors">
+                  <SelectValue>
+                    <span className="text-muted-foreground">Etapa:</span>{" "}
+                    <span className="font-medium text-foreground">{status}</span>
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent className="bg-popover z-50">
+                  {ETAPAS_DISPONIVEIS.map((etapa) => (
+                    <SelectItem 
+                      key={etapa} 
+                      value={etapa}
+                      className={cn(
+                        "cursor-pointer text-sm",
+                        etapa === status && "font-semibold"
+                      )}
+                    >
+                      {etapa === status && "✓ "}{etapa}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
-          {/* Right Side - Action Buttons */}
-          <div className="flex flex-wrap gap-2">
-            <Button onClick={onEdit} size="sm">
-              <Edit className="mr-2 h-4 w-4" />
+          {/* Right Side - Action Buttons - mais compactos */}
+          <div className="flex flex-wrap gap-1.5">
+            <Button onClick={onEdit} size="sm" className="h-8 text-xs">
+              <Edit className="mr-1.5 h-3.5 w-3.5" />
               Editar
             </Button>
 
-            <Button onClick={onAddFeedback} variant="outline" size="sm">
-              <MessageSquare className="mr-2 h-4 w-4" />
+            <Button onClick={onAddFeedback} variant="outline" size="sm" className="h-8 text-xs">
+              <MessageSquare className="mr-1.5 h-3.5 w-3.5" />
               Feedback
             </Button>
 
-            <Button onClick={onRelocate} variant="outline" size="sm">
-              <RefreshCw className="mr-2 h-4 w-4" />
+            <Button onClick={onRelocate} variant="outline" size="sm" className="h-8 text-xs">
+              <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
               Realocar
             </Button>
 
-            <Button onClick={onDelete} variant="destructive" size="sm">
-              <Trash2 className="mr-2 h-4 w-4" />
+            <Button onClick={onDelete} variant="destructive" size="sm" className="h-8 text-xs">
+              <Trash2 className="mr-1.5 h-3.5 w-3.5" />
               Excluir
             </Button>
           </div>
