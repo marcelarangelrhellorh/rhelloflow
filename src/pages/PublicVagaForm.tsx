@@ -79,10 +79,11 @@ export default function PublicVagaForm() {
       const dataToSave = {
         titulo: formData.titulo,
         empresa: formData.empresa,
+        contato_nome: formData.contato_nome,
+        contato_email: formData.contato_email,
+        contato_telefone: formData.contato_telefone || null,
         confidencial: formData.confidencial,
         motivo_confidencial: formData.confidencial ? formData.motivo_confidencial : null,
-        status: "A iniciar" as any,
-        source: "externo" as any, // Mark as external submission
         salario_min: formData.salario_modalidade === "A_COMBINAR" ? null : parseCurrency(formData.salario_min),
         salario_max: formData.salario_modalidade === "A_COMBINAR" ? null : parseCurrency(formData.salario_max),
         salario_modalidade: formData.salario_modalidade,
@@ -95,13 +96,7 @@ export default function PublicVagaForm() {
         requisitos_obrigatorios: formData.requisitos_obrigatorios || null,
         requisitos_desejaveis: formData.requisitos_desejaveis || null,
         responsabilidades: formData.responsabilidades || null,
-        observacoes: [
-          formData.observacoes,
-          `\n\n--- Contato do Solicitante ---`,
-          `Nome: ${formData.contato_nome}`,
-          `Email: ${formData.contato_email}`,
-          `Telefone: ${formData.contato_telefone || "Não informado"}`
-        ].filter(Boolean).join("\n"),
+        observacoes: formData.observacoes || null,
       };
 
       // Call edge function for secure, validated submission
