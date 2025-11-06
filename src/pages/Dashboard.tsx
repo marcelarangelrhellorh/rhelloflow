@@ -336,9 +336,9 @@ export default function Dashboard() {
                 ariaLabel={`Abrir candidatos ativos (${stats.candidatosAtivos} candidatos)`}
               />
 
-              {/* 3. Atenção Necessária */}
+              {/* 3. Vagas Fora do Prazo */}
               <KPICard
-                title="Atenção Necessária"
+                title="Vagas Fora do Prazo"
                 value={formatInt(stats.vagasAtencao)}
                 subtitle="Vagas com mais de 30 dias úteis"
                 icon={<AlertTriangle className="h-7 w-7" />}

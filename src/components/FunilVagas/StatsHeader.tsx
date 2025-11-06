@@ -37,10 +37,10 @@ export function StatsHeader({
         </div>
       </div>
 
-      {/* Vagas em atenção */}
+      {/* Vagas fora do prazo */}
       <div className="flex items-center justify-between h-[60px] px-4 bg-white rounded-lg border border-gray-200 shadow-sm">
         <div className="flex-1">
-          <p className="text-xs text-[#36404A] font-medium">Em Atenção</p>
+          <p className="text-xs text-[#36404A] font-medium">Fora do Prazo</p>
           <p className="text-xl font-bold text-[#00141D]">{vagasEmAtencao}</p>
         </div>
         <div className="flex-shrink-0 w-9 h-9 rounded-full bg-orange-500/10 flex items-center justify-center">
