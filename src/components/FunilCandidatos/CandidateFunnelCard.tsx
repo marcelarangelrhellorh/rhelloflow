@@ -77,12 +77,12 @@ export function CandidateFunnelCard({ candidato, onDragStart, isDragging }: Cand
       )}
     >
       <CardHeader className="p-4 pb-2">
-        <CardTitle className="text-sm font-semibold text-card-foreground line-clamp-2">
+        <CardTitle className="text-base font-bold text-card-foreground line-clamp-2">
           {candidato.nome_completo}
         </CardTitle>
         {timeInStage && (
-          <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-            <Clock className="h-3 w-3" />
+          <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
+            <Clock className="h-4 w-4" />
             <span>há {timeInStage}</span>
           </div>
         )}
@@ -91,21 +91,21 @@ export function CandidateFunnelCard({ candidato, onDragStart, isDragging }: Cand
       <CardContent className="p-4 pt-2 space-y-3">
         {/* Contact Info */}
         <div className="space-y-1.5">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Mail className="h-3 w-3 flex-shrink-0" />
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Mail className="h-4 w-4 flex-shrink-0" />
             <span className="truncate">{candidato.email}</span>
           </div>
           
           {candidato.telefone && (
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Phone className="h-3 w-3 flex-shrink-0" />
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Phone className="h-4 w-4 flex-shrink-0" />
               <span className="truncate">{candidato.telefone}</span>
             </div>
           )}
           
           {(candidato.cidade || candidato.estado) && (
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <MapPin className="h-3 w-3 flex-shrink-0" />
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <MapPin className="h-4 w-4 flex-shrink-0" />
               <span className="truncate">
                 {[candidato.cidade, candidato.estado].filter(Boolean).join(" - ")}
               </span>
@@ -115,7 +115,7 @@ export function CandidateFunnelCard({ candidato, onDragStart, isDragging }: Cand
 
         {/* Recruiter Badge */}
         {candidato.recrutador && (
-          <Badge variant="outline" className="text-xs">
+          <Badge variant="outline" className="text-sm font-medium">
             {candidato.recrutador}
           </Badge>
         )}
@@ -134,7 +134,7 @@ export function CandidateFunnelCard({ candidato, onDragStart, isDragging }: Cand
                     navigate(`/candidatos/${candidato.id}`);
                   }}
                 >
-                  <Eye className="h-3.5 w-3.5" />
+                  <Eye className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -153,7 +153,7 @@ export function CandidateFunnelCard({ candidato, onDragStart, isDragging }: Cand
                     // TODO: Add observation modal
                   }}
                 >
-                  <MessageSquare className="h-3.5 w-3.5" />
+                  <MessageSquare className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -173,7 +173,7 @@ export function CandidateFunnelCard({ candidato, onDragStart, isDragging }: Cand
                       // TODO: Link to job modal
                     }}
                   >
-                    <LinkIcon className="h-3.5 w-3.5" />
+                    <LinkIcon className="h-4 w-4" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
