@@ -12,6 +12,7 @@ import { ShareJobModal } from "@/components/ShareJobModal";
 import { CompareCandidatesModal } from "@/components/FunilVagas/CompareCandidatesModal";
 import { TagPicker } from "@/components/TagPicker";
 import { Badge } from "@/components/ui/badge";
+import { ImportPdfModal } from "@/components/ImportPdfModal";
 import { toast } from "@/hooks/use-toast";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -96,6 +97,7 @@ export default function VagaDetalhes() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [savingTags, setSavingTags] = useState(false);
   const [vagaTags, setVagaTags] = useState<Array<{ id: string; label: string; category: string }>>([]);
+  const [importPdfModalOpen, setImportPdfModalOpen] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -533,6 +535,13 @@ export default function VagaDetalhes() {
                 Ver Detalhes
               </button>
               <button
+                onClick={() => setImportPdfModalOpen(true)}
+                className="px-4 py-2 bg-white dark:bg-background-dark border-2 border-primary text-primary-text-light dark:text-primary-text-dark rounded-md hover:bg-primary/10 transition-colors flex items-center gap-2 font-bold"
+              >
+                <span className="material-symbols-outlined text-xl">upload_file</span>
+                Importar PDF
+              </button>
+              <button
                 onClick={() => setShareModalOpen(true)}
                 className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors flex items-center gap-2 font-bold"
               >
@@ -554,6 +563,20 @@ export default function VagaDetalhes() {
             onOpenChange={setCompareModalOpen}
             vagaId={vaga.id}
             vagaTitulo={vaga.titulo}
+          />
+
+          <ImportPdfModal
+            open={importPdfModalOpen}
+            onOpenChange={setImportPdfModalOpen}
+            sourceType="vaga"
+            vagaId={vaga.id}
+            onSuccess={(candidatoId) => {
+              toast({
+                title: "Candidato importado",
+                description: "O candidato foi adicionado à vaga com sucesso.",
+              });
+              loadCandidatos();
+            }}
           />
 
           {/* Drawer de Detalhes da Vaga */}

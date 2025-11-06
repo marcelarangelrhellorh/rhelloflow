@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { CandidateCard } from "@/components/BancoTalentos/CandidateCard";
 import { CandidateProfileDrawer } from "@/components/BancoTalentos/CandidateProfileDrawer";
 import { LinkToJobModal } from "@/components/BancoTalentos/LinkToJobModal";
+import { ImportPdfModal } from "@/components/ImportPdfModal";
 import { differenceInDays } from "date-fns";
 
 interface Candidato {
@@ -52,6 +53,7 @@ export default function BancoTalentos() {
   const [showProfileDrawer, setShowProfileDrawer] = useState(false);
   const [showLinkJobModal, setShowLinkJobModal] = useState(false);
   const [linkJobCandidateId, setLinkJobCandidateId] = useState<string | null>(null);
+  const [importModalOpen, setImportModalOpen] = useState(false);
 
   useEffect(() => {
     loadCandidatos();
@@ -193,13 +195,23 @@ export default function BancoTalentos() {
             </span>
           </div>
         </div>
-        <Button 
-          onClick={() => navigate('/candidatos/novo')}
-          className="bg-[#F9EC3F] hover:bg-[#E5D72E] text-[#00141D] font-bold"
-        >
-          <Plus className="mr-2 h-5 w-5" />
-          Adicionar Candidato
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            onClick={() => navigate('/candidatos/novo')}
+            className="bg-[#F9EC3F] hover:bg-[#E5D72E] text-[#00141D] font-bold"
+          >
+            <Plus className="mr-2 h-5 w-5" />
+            Adicionar Candidato
+          </Button>
+          <Button 
+            onClick={() => setImportModalOpen(true)}
+            variant="outline"
+            className="font-bold"
+          >
+            <Plus className="mr-2 h-5 w-5" />
+            Importar do PDF
+          </Button>
+        </div>
       </div>
 
       {/* Filtros e busca */}
@@ -381,6 +393,16 @@ export default function BancoTalentos() {
           }}
         />
       )}
+
+      <ImportPdfModal
+        open={importModalOpen}
+        onOpenChange={setImportModalOpen}
+        sourceType="banco_talentos"
+        onSuccess={(candidatoId) => {
+          toast.success("Candidato importado com sucesso!");
+          loadCandidatos();
+        }}
+      />
     </div>
   );
 }

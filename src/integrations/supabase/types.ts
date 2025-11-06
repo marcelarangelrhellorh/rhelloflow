@@ -984,6 +984,103 @@ export type Database = {
           },
         ]
       }
+      pdf_imports: {
+        Row: {
+          accepted_at: string | null
+          candidato_id: string | null
+          created_at: string
+          created_by: string
+          error_message: string | null
+          expires_at: string
+          extracted_data: Json
+          file_hash: string
+          file_name: string
+          global_confidence: number | null
+          id: string
+          source_type: string
+          status: string
+          storage_path: string | null
+          vaga_id: string | null
+        }
+        Insert: {
+          accepted_at?: string | null
+          candidato_id?: string | null
+          created_at?: string
+          created_by: string
+          error_message?: string | null
+          expires_at?: string
+          extracted_data: Json
+          file_hash: string
+          file_name: string
+          global_confidence?: number | null
+          id?: string
+          source_type: string
+          status?: string
+          storage_path?: string | null
+          vaga_id?: string | null
+        }
+        Update: {
+          accepted_at?: string | null
+          candidato_id?: string | null
+          created_at?: string
+          created_by?: string
+          error_message?: string | null
+          expires_at?: string
+          extracted_data?: Json
+          file_hash?: string
+          file_name?: string
+          global_confidence?: number | null
+          id?: string
+          source_type?: string
+          status?: string
+          storage_path?: string | null
+          vaga_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_candidato_id"
+            columns: ["candidato_id"]
+            isOneToOne: false
+            referencedRelation: "candidates_with_tags"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_candidato_id"
+            columns: ["candidato_id"]
+            isOneToOne: false
+            referencedRelation: "candidatos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_candidato_id"
+            columns: ["candidato_id"]
+            isOneToOne: false
+            referencedRelation: "candidatos_active"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_candidato_id"
+            columns: ["candidato_id"]
+            isOneToOne: false
+            referencedRelation: "view_candidate_tags"
+            referencedColumns: ["candidate_id"]
+          },
+          {
+            foreignKeyName: "fk_vaga_id"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vagas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_vaga_id"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vagas_active"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pre_delete_snapshots: {
         Row: {
           correlation_id: string
@@ -2384,6 +2481,7 @@ export type Database = {
       }
       can_manage_user_roles: { Args: never; Returns: boolean }
       can_view_analytics: { Args: never; Returns: boolean }
+      cleanup_expired_pdf_imports: { Args: never; Returns: undefined }
       cleanup_old_submission_logs: { Args: never; Returns: undefined }
       compute_audit_event_hash: {
         Args: {
