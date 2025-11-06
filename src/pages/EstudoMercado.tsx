@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,8 +9,6 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, TrendingUp, TrendingDown, Minus, AlertCircle, FileDown } from "lucide-react";
 import { MultiSelect } from "@/components/ui/multi-select";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
 
 interface FaixaSalarial {
   tipo_contratacao: string;
@@ -40,7 +38,6 @@ interface EstudoMercado {
 export default function EstudoMercado() {
   const [loading, setLoading] = useState(false);
   const [estudo, setEstudo] = useState<EstudoMercado | null>(null);
-  const resultadoRef = useRef<HTMLDivElement>(null);
   
   // Form state
   const [funcao, setFuncao] = useState("");
@@ -124,54 +121,8 @@ export default function EstudoMercado() {
     }
   };
 
-  const handleExportarPDF = async () => {
-    if (!estudo || !resultadoRef.current) return;
-
-    try {
-      toast.info("Gerando PDF...");
-      
-      // Captura o elemento com o resultado
-      const canvas = await html2canvas(resultadoRef.current, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#00141d',
-      });
-
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF({
-        orientation: "portrait",
-        unit: "mm",
-        format: "a4",
-      });
-
-      const imgWidth = 210; // A4 width in mm
-      const pageHeight = 297; // A4 height in mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-      let position = 0;
-
-      // Adiciona primeira página
-      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-
-      // Adiciona páginas adicionais se necessário
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-      }
-
-      // Salvar PDF
-      const fileName = `estudo-mercado-${estudo.funcao.replace(/\s+/g, "-").toLowerCase()}-${new Date().toISOString().split("T")[0]}.pdf`;
-      pdf.save(fileName);
-      
-      toast.success("PDF exportado com sucesso!");
-    } catch (error) {
-      console.error("Erro ao exportar PDF:", error);
-      toast.error("Erro ao exportar PDF");
-    }
+  const handleExportarPDF = () => {
+    toast.info("Funcionalidade em desenvolvimento");
   };
 
   return (
@@ -308,10 +259,10 @@ export default function EstudoMercado() {
 
       {/* Resultados */}
       {estudo && (
-        <div ref={resultadoRef} className="space-y-6 animate-in fade-in duration-500">
+        <div className="space-y-6 animate-in fade-in duration-500">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold text-primary">📊 Resultado do Estudo</h2>
-            <Button onClick={handleExportarPDF} variant="outline" size="lg">
+            <Button onClick={handleExportarPDF} variant="outline" size="lg" disabled>
               <FileDown className="mr-2 h-5 w-5" />
               Exportar PDF
             </Button>
