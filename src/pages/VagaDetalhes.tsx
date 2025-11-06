@@ -42,9 +42,9 @@ type Vaga = {
   criado_em: string;
   confidencial: boolean | null;
   motivo_confidencial: string | null;
-  solicitante_nome: string | null;
-  solicitante_email: string | null;
-  solicitante_telefone: string | null;
+  contato_nome: string | null;
+  contato_email: string | null;
+  contato_telefone: string | null;
   recrutador: string | null;
   cs_responsavel: string | null;
   complexidade: string | null;
@@ -513,38 +513,38 @@ export default function VagaDetalhes() {
                       </div>
                     )}
 
-                    {vaga.solicitante_nome && (
+                    {vaga.contato_nome && (
                       <div className="pt-4 border-t space-y-3">
                         <h4 className="text-base font-semibold">📞 Contato do Solicitante</h4>
                         
                         <div>
                           <p className="text-sm font-medium text-muted-foreground mb-1">Nome</p>
-                          <p className="text-base">{vaga.solicitante_nome}</p>
+                          <p className="text-base">{vaga.contato_nome}</p>
                         </div>
                         
-                        {vaga.solicitante_email && (
+                        {vaga.contato_email && (
                           <div>
                             <p className="text-sm font-medium text-muted-foreground mb-1">E-mail</p>
                             <p className="text-base">
                               <a 
-                                href={`mailto:${vaga.solicitante_email}`}
+                                href={`mailto:${vaga.contato_email}`}
                                 className="text-primary hover:underline"
                               >
-                                {vaga.solicitante_email}
+                                {vaga.contato_email}
                               </a>
                             </p>
                           </div>
                         )}
                         
-                        {vaga.solicitante_telefone && (
+                        {vaga.contato_telefone && (
                           <div>
                             <p className="text-sm font-medium text-muted-foreground mb-1">Telefone</p>
                             <p className="text-base">
                               <a 
-                                href={`tel:${vaga.solicitante_telefone}`}
+                                href={`tel:${vaga.contato_telefone}`}
                                 className="text-primary hover:underline"
                               >
-                                {vaga.solicitante_telefone}
+                                {vaga.contato_telefone}
                               </a>
                             </p>
                           </div>

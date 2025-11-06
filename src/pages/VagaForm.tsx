@@ -47,9 +47,9 @@ export default function VagaForm() {
     empresa: "",
     confidencial: false,
     motivo_confidencial: "",
-    solicitante_nome: "",
-    solicitante_email: "",
-    solicitante_telefone: "",
+    contato_nome: "",
+    contato_email: "",
+    contato_telefone: "",
     recrutador_id: "",
     cs_id: "",
     complexidade: "",
@@ -92,9 +92,9 @@ export default function VagaForm() {
           empresa: data.empresa || "",
           confidencial: data.confidencial || false,
           motivo_confidencial: data.motivo_confidencial || "",
-          solicitante_nome: data.solicitante_nome || "",
-          solicitante_email: data.solicitante_email || "",
-          solicitante_telefone: data.solicitante_telefone || "",
+          contato_nome: data.contato_nome || "",
+          contato_email: data.contato_email || "",
+          contato_telefone: data.contato_telefone || "",
           recrutador_id: data.recrutador_id || "",
           cs_id: data.cs_id || "",
           complexidade: data.complexidade || "",
@@ -160,9 +160,9 @@ export default function VagaForm() {
         empresa: formData.empresa,
         confidencial: formData.confidencial,
         motivo_confidencial: formData.confidencial ? formData.motivo_confidencial : null,
-        solicitante_nome: formData.solicitante_nome || null,
-        solicitante_email: formData.solicitante_email || null,
-        solicitante_telefone: formData.solicitante_telefone || null,
+        contato_nome: formData.contato_nome || null,
+        contato_email: formData.contato_email || null,
+        contato_telefone: formData.contato_telefone || null,
         recrutador_id: formData.recrutador_id || null,
         cs_id: formData.cs_id || null,
         complexidade: (formData.complexidade || null) as any,
@@ -309,35 +309,35 @@ export default function VagaForm() {
                 <h3 className="text-sm font-semibold mb-3">Contato do Solicitante</h3>
                 <div className="space-y-4">
                   <div>
-                    <Label htmlFor="solicitante_nome">Nome do Solicitante</Label>
+                    <Label htmlFor="contato_nome">Nome do Solicitante</Label>
                     <Input
-                      id="solicitante_nome"
+                      id="contato_nome"
                       placeholder="Nome completo"
-                      value={formData.solicitante_nome}
-                      onChange={(e) => setFormData({ ...formData, solicitante_nome: e.target.value })}
+                      value={formData.contato_nome}
+                      onChange={(e) => setFormData({ ...formData, contato_nome: e.target.value })}
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="solicitante_email">E-mail</Label>
+                      <Label htmlFor="contato_email">E-mail</Label>
                       <Input
-                        id="solicitante_email"
+                        id="contato_email"
                         type="email"
                         placeholder="email@empresa.com"
-                        value={formData.solicitante_email}
-                        onChange={(e) => setFormData({ ...formData, solicitante_email: e.target.value })}
+                        value={formData.contato_email}
+                        onChange={(e) => setFormData({ ...formData, contato_email: e.target.value })}
                       />
                     </div>
 
                     <div>
-                      <Label htmlFor="solicitante_telefone">Telefone</Label>
+                      <Label htmlFor="contato_telefone">Telefone</Label>
                       <Input
-                        id="solicitante_telefone"
+                        id="contato_telefone"
                         type="tel"
                         placeholder="(11) 99999-9999"
-                        value={formData.solicitante_telefone}
-                        onChange={(e) => setFormData({ ...formData, solicitante_telefone: e.target.value })}
+                        value={formData.contato_telefone}
+                        onChange={(e) => setFormData({ ...formData, contato_telefone: e.target.value })}
                       />
                     </div>
                   </div>

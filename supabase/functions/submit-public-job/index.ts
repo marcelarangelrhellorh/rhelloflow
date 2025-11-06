@@ -215,23 +215,13 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Build contact info for observacoes
-    const contactInfo = [
-      '\n\n=== Dados de Contato do Solicitante ===',
-      `Nome: ${sanitizeText(validatedData.contato_nome)}`,
-      `Email: ${sanitizeText(validatedData.contato_email)}`,
-      validatedData.contato_telefone ? `Telefone: ${sanitizeText(validatedData.contato_telefone)}` : null,
-    ].filter(Boolean).join('\n');
-
-    const observacoesCompletas = [
-      validatedData.observacoes ? sanitizeText(validatedData.observacoes) : null,
-      contactInfo
-    ].filter(Boolean).join('\n');
-
     // Prepare sanitized data for insertion
     const sanitizedData = {
       titulo: sanitizeText(validatedData.titulo),
       empresa: sanitizeText(validatedData.empresa),
+      contato_nome: sanitizeText(validatedData.contato_nome),
+      contato_email: sanitizeText(validatedData.contato_email),
+      contato_telefone: validatedData.contato_telefone ? sanitizeText(validatedData.contato_telefone) : null,
       salario_min: validatedData.salario_min || null,
       salario_max: validatedData.salario_max || null,
       salario_modalidade: validatedData.salario_modalidade || 'FAIXA',
@@ -244,7 +234,7 @@ Deno.serve(async (req) => {
       requisitos_obrigatorios: validatedData.requisitos_obrigatorios ? sanitizeText(validatedData.requisitos_obrigatorios) : null,
       requisitos_desejaveis: validatedData.requisitos_desejaveis ? sanitizeText(validatedData.requisitos_desejaveis) : null,
       responsabilidades: validatedData.responsabilidades ? sanitizeText(validatedData.responsabilidades) : null,
-      observacoes: observacoesCompletas,
+      observacoes: validatedData.observacoes ? sanitizeText(validatedData.observacoes) : null,
       confidencial: validatedData.confidencial || false,
       motivo_confidencial: validatedData.motivo_confidencial ? sanitizeText(validatedData.motivo_confidencial) : null,
       source: 'externo',

@@ -1562,6 +1562,9 @@ export type Database = {
           beneficios_outros: string | null
           complexidade: Database["public"]["Enums"]["complexidade_vaga"] | null
           confidencial: boolean | null
+          contato_email: string | null
+          contato_nome: string | null
+          contato_telefone: string | null
           created_by: string | null
           criado_em: string | null
           cs_id: string | null
@@ -1606,6 +1609,9 @@ export type Database = {
           beneficios_outros?: string | null
           complexidade?: Database["public"]["Enums"]["complexidade_vaga"] | null
           confidencial?: boolean | null
+          contato_email?: string | null
+          contato_nome?: string | null
+          contato_telefone?: string | null
           created_by?: string | null
           criado_em?: string | null
           cs_id?: string | null
@@ -1652,6 +1658,9 @@ export type Database = {
           beneficios_outros?: string | null
           complexidade?: Database["public"]["Enums"]["complexidade_vaga"] | null
           confidencial?: boolean | null
+          contato_email?: string | null
+          contato_nome?: string | null
+          contato_telefone?: string | null
           created_by?: string | null
           criado_em?: string | null
           cs_id?: string | null
