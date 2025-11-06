@@ -413,14 +413,14 @@ export default function VagaDetalhes() {
             <div className="flex gap-2">
               <button
                 onClick={() => setDetailsDrawerOpen(true)}
-                className="px-4 py-2 bg-white dark:bg-background-dark border-2 border-primary text-primary-text-light dark:text-primary-text-dark rounded-md hover:bg-primary/10 transition-colors flex items-center gap-2"
+                className="px-4 py-2 bg-white dark:bg-background-dark border-2 border-primary text-primary-text-light dark:text-primary-text-dark rounded-md hover:bg-primary/10 transition-colors flex items-center gap-2 font-bold"
               >
                 <span className="material-symbols-outlined text-xl">info</span>
                 Ver Detalhes
               </button>
               <button
                 onClick={() => setShareModalOpen(true)}
-                className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors flex items-center gap-2"
+                className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors flex items-center gap-2 font-bold"
               >
                 <span className="material-symbols-outlined text-xl">share</span>
                 Compartilhar
