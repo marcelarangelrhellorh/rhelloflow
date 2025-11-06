@@ -49,6 +49,7 @@ type Vaga = {
   salario_max: number | null;
   salario_modalidade: string | null;
   modelo_trabalho: string | null;
+  tipo_contratacao: string | null;
   horario_inicio: string | null;
   horario_fim: string | null;
   dias_semana: string[] | null;
@@ -178,7 +179,8 @@ export default function VagaDetalhes() {
       setVaga({
         ...data,
         recrutador: data.recrutador_user?.name || data.recrutador || null,
-        cs_responsavel: data.cs_user?.name || data.cs_responsavel || null
+        cs_responsavel: data.cs_user?.name || data.cs_responsavel || null,
+        tipo_contratacao: (data as any).tipo_contratacao || null
       });
     } catch (error) {
       console.error("Erro ao carregar vaga:", error);
@@ -632,6 +634,15 @@ export default function VagaDetalhes() {
               </p>
               <p className="text-primary-text-light dark:text-primary-text-dark text-2xl font-bold">
                 {vaga.modelo_trabalho || "Não informado"}
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-2 rounded-lg p-6 bg-white dark:bg-background-dark border border-gray-200 dark:border-secondary-text-light/20 shadow-sm">
+              <p className="text-secondary-text-light dark:text-secondary-text-dark text-base font-medium">
+                Formato da Contratação
+              </p>
+              <p className="text-primary-text-light dark:text-primary-text-dark text-2xl font-bold">
+                {vaga.tipo_contratacao || "Não informado"}
               </p>
             </div>
           </div>
