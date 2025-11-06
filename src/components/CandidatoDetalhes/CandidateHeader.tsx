@@ -11,7 +11,6 @@ interface CandidateHeaderProps {
   area: string | null;
   cidade: string | null;
   estado: string | null;
-  recrutador: string | null;
   onEdit: () => void;
   onDelete: () => void;
   onAddFeedback: () => void;
@@ -58,7 +57,6 @@ export function CandidateHeader({
   area,
   cidade,
   estado,
-  recrutador,
   onEdit,
   onDelete,
   onAddFeedback,
@@ -137,13 +135,6 @@ export function CandidateHeader({
                   <div className="flex items-center gap-1.5">
                     <MapPin className="h-4 w-4" />
                     <span>{[cidade, estado].filter(Boolean).join(", ")}</span>
-                  </div>
-                )}
-                
-                {recrutador && (
-                  <div className="flex items-center gap-1.5">
-                    <User className="h-4 w-4" />
-                    <span>{recrutador}</span>
                   </div>
                 )}
               </div>

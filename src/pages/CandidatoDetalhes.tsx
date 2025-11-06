@@ -33,7 +33,6 @@ type Candidato = {
   nivel: string | null;
   area: string | null;
   status: string;
-  recrutador: string | null;
   vaga_relacionada_id: string | null;
   pretensao_salarial: number | null;
   disponibilidade_mudanca: string | null;
@@ -272,7 +271,7 @@ export default function CandidatoDetalhes() {
           candidato_id: id,
           vaga_id: candidato.vaga_relacionada_id,
           resultado: resultadoHistorico as "Aprovado" | "Reprovado" | "Contratado" | "Em andamento",
-          recrutador: candidato.recrutador,
+          recrutador: null,
           feedback: `Etapa alterada de "${oldStatus}" para "${newStatus}"`,
         });
 
@@ -352,7 +351,6 @@ export default function CandidatoDetalhes() {
             area={candidato.area}
             cidade={candidato.cidade}
             estado={candidato.estado}
-            recrutador={candidato.recrutador}
             onEdit={() => navigate(`/candidatos/${id}/editar`)}
             onDelete={() => setDeleteDialogOpen(true)}
             onAddFeedback={() => setFeedbackModalOpen(true)}
@@ -390,7 +388,6 @@ export default function CandidatoDetalhes() {
             {/* Main Content - Professional Info */}
             <div className="lg:col-span-9">
               <ProfessionalInfoCard
-                recrutador={candidato.recrutador}
                 pretensaoSalarial={candidato.pretensao_salarial}
                 vagaTitulo={vaga?.titulo || null}
                 vagaId={candidato.vaga_relacionada_id}

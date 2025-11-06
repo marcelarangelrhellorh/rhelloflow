@@ -4,11 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { User, Briefcase, DollarSign, Calendar, ExternalLink, FileText, MapPin, CheckCircle2, XCircle } from "lucide-react";
+import { Briefcase, DollarSign, Calendar, ExternalLink, FileText, MapPin, CheckCircle2, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
-const RECRUTADORES = ["Ítalo", "Bianca Marques", "Victor", "Mariana", "Isabella"];
 const ORIGENS = [
   { value: "Link de Divulgação", label: "🔗 Link de Divulgação" },
   { value: "Pandapé", label: "🐼 Pandapé" },
@@ -31,7 +30,6 @@ interface Vaga {
 }
 
 interface ProfessionalInfoCardProps {
-  recrutador: string | null;
   pretensaoSalarial: number | null;
   vagaTitulo: string | null;
   vagaId: string | null;
@@ -52,7 +50,6 @@ interface ProfessionalInfoCardProps {
 }
 
 export function ProfessionalInfoCard({
-  recrutador,
   pretensaoSalarial,
   vagaTitulo,
   vagaId,
@@ -120,22 +117,6 @@ export function ProfessionalInfoCard({
     }
   };
 
-  const handleRecrutadorChange = async (newRecrutador: string) => {
-    try {
-      const { error } = await supabase
-        .from("candidatos")
-        .update({ recrutador: newRecrutador })
-        .eq("id", candidatoId);
-
-      if (error) throw error;
-      toast.success("Recrutador atualizado com sucesso!");
-      onUpdate?.();
-    } catch (error) {
-      console.error("Erro ao atualizar recrutador:", error);
-      toast.error("Erro ao atualizar recrutador");
-    }
-  };
-
   const handleDisponibilidadeChange = async (newDisponibilidade: string) => {
     try {
       const { error } = await supabase
@@ -196,24 +177,6 @@ export function ProfessionalInfoCard({
       <CardContent className="space-y-6">
         {/* Grid Layout */}
         <div className="grid gap-4 sm:grid-cols-2">
-          {/* Recrutador - Editável */}
-          <div>
-            <p className="text-sm text-muted-foreground mb-2 flex items-center gap-1">
-              <User className="h-3.5 w-3.5" />
-              Recrutador Responsável
-            </p>
-            <Select value={recrutador || ""} onValueChange={handleRecrutadorChange}>
-              <SelectTrigger className="w-full bg-background">
-                <SelectValue placeholder="Não atribuído" />
-              </SelectTrigger>
-              <SelectContent className="bg-popover z-50">
-                {RECRUTADORES.map((rec) => (
-                  <SelectItem key={rec} value={rec}>{rec}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
           {/* Pretensão Salarial */}
           <div>
             <p className="text-sm text-muted-foreground mb-1 flex items-center gap-1">
@@ -244,7 +207,7 @@ export function ProfessionalInfoCard({
           {/* Disponibilidade do candidato - Editável */}
           <div className="sm:col-span-2">
             <p className="text-sm text-muted-foreground mb-2 flex items-center gap-1">
-              <User className="h-3.5 w-3.5" />
+              <CheckCircle2 className="h-3.5 w-3.5" />
               Disponibilidade do Candidato
             </p>
             <Select 
