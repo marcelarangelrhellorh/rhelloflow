@@ -468,7 +468,7 @@ export default function VagaDetalhes() {
                   <button
                     onClick={() => {
                       setDetailsDrawerOpen(false);
-                      navigate(`/vagas/editar/${vaga.id}`);
+                      navigate(`/vagas/${vaga.id}/editar`);
                     }}
                     className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors flex items-center gap-2 font-bold"
                   >
