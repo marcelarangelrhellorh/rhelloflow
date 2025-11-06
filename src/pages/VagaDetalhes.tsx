@@ -395,14 +395,14 @@ export default function VagaDetalhes() {
           <div className="mb-8 flex justify-between items-start">
             <div>
               <h1 className="text-primary-text-light dark:text-primary-text-dark text-4xl font-black tracking-tight">
-                Status da Contratação: {vaga.titulo}
+                {vaga.titulo}
               </h1>
             <p className="text-secondary-text-light dark:text-secondary-text-dark text-base font-normal mt-2">
-              Acompanhe o progresso do processo de contratação para a vaga de {vaga.titulo}, {vaga.empresa}.
+              {vaga.empresa} • Acompanhe o progresso do processo de contratação
             </p>
               {(vaga.salario_min || vaga.salario_max || vaga.salario_modalidade) && (
-                <p className="text-secondary-text-light dark:text-secondary-text-dark text-sm font-medium mt-1">
-                  Faixa Salarial: {formatSalaryRange(vaga.salario_min, vaga.salario_max, vaga.salario_modalidade)}
+                <p className="text-secondary-text-light dark:text-secondary-text-dark text-lg font-semibold mt-2">
+                  💰 {formatSalaryRange(vaga.salario_min, vaga.salario_max, vaga.salario_modalidade)}
                 </p>
               )}
             </div>
@@ -423,7 +423,7 @@ export default function VagaDetalhes() {
           />
 
           {/* KPI Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
             <div className="flex flex-col gap-3 rounded-lg p-6 bg-white dark:bg-background-dark border border-gray-200 dark:border-secondary-text-light/20 shadow-sm">
               <p className="text-secondary-text-light dark:text-secondary-text-dark text-base font-medium">
                 Etapa Atual da Contratação
@@ -475,7 +475,161 @@ export default function VagaDetalhes() {
                 {daysOpen} Dias
               </p>
             </div>
+
+            <div className="flex flex-col gap-2 rounded-lg p-6 bg-white dark:bg-background-dark border border-gray-200 dark:border-secondary-text-light/20 shadow-sm">
+              <p className="text-secondary-text-light dark:text-secondary-text-dark text-base font-medium">
+                Modelo de Trabalho
+              </p>
+              <p className="text-primary-text-light dark:text-primary-text-dark text-2xl font-bold">
+                {vaga.modelo_trabalho || "Não informado"}
+              </p>
+            </div>
           </div>
+
+          {/* Informações Gerais da Vaga */}
+          <div className="mb-12 bg-white dark:bg-background-dark border border-gray-200 dark:border-secondary-text-light/20 rounded-lg shadow-sm p-8">
+            <h2 className="text-primary-text-light dark:text-primary-text-dark text-2xl font-bold tracking-tight mb-6">
+              Informações da Vaga
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Coluna 1 */}
+              <div className="space-y-6">
+                <div>
+                  <p className="text-secondary-text-light dark:text-secondary-text-dark text-sm font-medium mb-2">Empresa</p>
+                  <p className="text-primary-text-light dark:text-primary-text-dark text-lg font-semibold">
+                    {vaga.confidencial ? "🔒 Confidencial" : vaga.empresa}
+                  </p>
+                  {vaga.confidencial && vaga.motivo_confidencial && (
+                    <p className="text-secondary-text-light dark:text-secondary-text-dark text-sm mt-1">
+                      {vaga.motivo_confidencial}
+                    </p>
+                  )}
+                </div>
+
+                {vaga.recrutador && (
+                  <div>
+                    <p className="text-secondary-text-light dark:text-secondary-text-dark text-sm font-medium mb-2">Recrutador Responsável</p>
+                    <p className="text-primary-text-light dark:text-primary-text-dark text-base">👤 {vaga.recrutador}</p>
+                  </div>
+                )}
+
+                {vaga.cs_responsavel && (
+                  <div>
+                    <p className="text-secondary-text-light dark:text-secondary-text-dark text-sm font-medium mb-2">CS Responsável</p>
+                    <p className="text-primary-text-light dark:text-primary-text-dark text-base">👥 {vaga.cs_responsavel}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Coluna 2 */}
+              <div className="space-y-6">
+                {vaga.complexidade && (
+                  <div>
+                    <p className="text-secondary-text-light dark:text-secondary-text-dark text-sm font-medium mb-2">Complexidade</p>
+                    <p className="text-primary-text-light dark:text-primary-text-dark text-base">⚙️ {vaga.complexidade}</p>
+                  </div>
+                )}
+
+                {vaga.prioridade && (
+                  <div>
+                    <p className="text-secondary-text-light dark:text-secondary-text-dark text-sm font-medium mb-2">Prioridade</p>
+                    <p className="text-primary-text-light dark:text-primary-text-dark text-base">🔥 {vaga.prioridade}</p>
+                  </div>
+                )}
+
+                {(vaga.horario_inicio || vaga.horario_fim) && (
+                  <div>
+                    <p className="text-secondary-text-light dark:text-secondary-text-dark text-sm font-medium mb-2">Horário de Trabalho</p>
+                    <p className="text-primary-text-light dark:text-primary-text-dark text-base">
+                      🕐 {vaga.horario_inicio || "?"} às {vaga.horario_fim || "?"}
+                    </p>
+                    {vaga.dias_semana && vaga.dias_semana.length > 0 && (
+                      <p className="text-secondary-text-light dark:text-secondary-text-dark text-sm mt-1">
+                        {vaga.dias_semana.join(", ")}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Responsabilidades, Requisitos e Benefícios */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+            {/* Responsabilidades */}
+            {vaga.responsabilidades && (
+              <div className="bg-white dark:bg-background-dark border border-gray-200 dark:border-secondary-text-light/20 rounded-lg shadow-sm p-6">
+                <h3 className="text-primary-text-light dark:text-primary-text-dark text-xl font-bold mb-4">
+                  📋 Responsabilidades
+                </h3>
+                <div className="text-secondary-text-light dark:text-secondary-text-dark text-base whitespace-pre-wrap">
+                  {vaga.responsabilidades}
+                </div>
+              </div>
+            )}
+
+            {/* Requisitos */}
+            <div className="space-y-6">
+              {vaga.requisitos_obrigatorios && (
+                <div className="bg-white dark:bg-background-dark border border-gray-200 dark:border-secondary-text-light/20 rounded-lg shadow-sm p-6">
+                  <h3 className="text-primary-text-light dark:text-primary-text-dark text-xl font-bold mb-4">
+                    ✅ Requisitos Obrigatórios
+                  </h3>
+                  <div className="text-secondary-text-light dark:text-secondary-text-dark text-base whitespace-pre-wrap">
+                    {vaga.requisitos_obrigatorios}
+                  </div>
+                </div>
+              )}
+
+              {vaga.requisitos_desejaveis && (
+                <div className="bg-white dark:bg-background-dark border border-gray-200 dark:border-secondary-text-light/20 rounded-lg shadow-sm p-6">
+                  <h3 className="text-primary-text-light dark:text-primary-text-dark text-xl font-bold mb-4">
+                    ⭐ Requisitos Desejáveis
+                  </h3>
+                  <div className="text-secondary-text-light dark:text-secondary-text-dark text-base whitespace-pre-wrap">
+                    {vaga.requisitos_desejaveis}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Benefícios */}
+          {(vaga.beneficios && vaga.beneficios.length > 0) && (
+            <div className="bg-white dark:bg-background-dark border border-gray-200 dark:border-secondary-text-light/20 rounded-lg shadow-sm p-6 mb-12">
+              <h3 className="text-primary-text-light dark:text-primary-text-dark text-xl font-bold mb-4">
+                🎁 Benefícios
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {vaga.beneficios.map((beneficio, index) => (
+                  <span
+                    key={index}
+                    className="px-4 py-2 bg-primary/10 text-primary-text-light dark:text-primary-text-dark rounded-full text-sm font-medium"
+                  >
+                    {beneficio}
+                  </span>
+                ))}
+              </div>
+              {vaga.beneficios_outros && (
+                <p className="text-secondary-text-light dark:text-secondary-text-dark text-base mt-4">
+                  {vaga.beneficios_outros}
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Observações */}
+          {vaga.observacoes && (
+            <div className="bg-white dark:bg-background-dark border border-gray-200 dark:border-secondary-text-light/20 rounded-lg shadow-sm p-6 mb-12">
+              <h3 className="text-primary-text-light dark:text-primary-text-dark text-xl font-bold mb-4">
+                📝 Observações
+              </h3>
+              <div className="text-secondary-text-light dark:text-secondary-text-dark text-base whitespace-pre-wrap">
+                {vaga.observacoes}
+              </div>
+            </div>
+          )}
 
           {/* Main Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
