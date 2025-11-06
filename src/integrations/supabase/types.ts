@@ -85,6 +85,104 @@ export type Database = {
           },
         ]
       }
+      candidate_scorecards: {
+        Row: {
+          candidate_id: string
+          comments: string | null
+          created_at: string | null
+          evaluator_id: string
+          id: string
+          match_percentage: number | null
+          recommendation:
+            | Database["public"]["Enums"]["scorecard_recommendation"]
+            | null
+          template_id: string
+          total_score: number | null
+          updated_at: string | null
+          vaga_id: string | null
+        }
+        Insert: {
+          candidate_id: string
+          comments?: string | null
+          created_at?: string | null
+          evaluator_id: string
+          id?: string
+          match_percentage?: number | null
+          recommendation?:
+            | Database["public"]["Enums"]["scorecard_recommendation"]
+            | null
+          template_id: string
+          total_score?: number | null
+          updated_at?: string | null
+          vaga_id?: string | null
+        }
+        Update: {
+          candidate_id?: string
+          comments?: string | null
+          created_at?: string | null
+          evaluator_id?: string
+          id?: string
+          match_percentage?: number | null
+          recommendation?:
+            | Database["public"]["Enums"]["scorecard_recommendation"]
+            | null
+          template_id?: string
+          total_score?: number | null
+          updated_at?: string | null
+          vaga_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_scorecards_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates_with_tags"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidate_scorecards_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidatos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidate_scorecards_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidatos_active"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidate_scorecards_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "view_candidate_tags"
+            referencedColumns: ["candidate_id"]
+          },
+          {
+            foreignKeyName: "candidate_scorecards_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "scorecard_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidate_scorecards_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vagas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidate_scorecards_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vagas_active"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       candidate_tags: {
         Row: {
           added_at: string | null
@@ -943,6 +1041,122 @@ export type Database = {
           full_name?: string
           id?: string
           role?: string | null
+        }
+        Relationships: []
+      }
+      scorecard_criteria: {
+        Row: {
+          category: Database["public"]["Enums"]["criteria_category"]
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          id: string
+          name: string
+          scale_type: Database["public"]["Enums"]["scale_type"] | null
+          template_id: string
+          weight: number | null
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["criteria_category"]
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          name: string
+          scale_type?: Database["public"]["Enums"]["scale_type"] | null
+          template_id: string
+          weight?: number | null
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["criteria_category"]
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          name?: string
+          scale_type?: Database["public"]["Enums"]["scale_type"] | null
+          template_id?: string
+          weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scorecard_criteria_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "scorecard_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scorecard_evaluations: {
+        Row: {
+          created_at: string | null
+          criteria_id: string
+          id: string
+          notes: string | null
+          score: number | null
+          scorecard_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          criteria_id: string
+          id?: string
+          notes?: string | null
+          score?: number | null
+          scorecard_id: string
+        }
+        Update: {
+          created_at?: string | null
+          criteria_id?: string
+          id?: string
+          notes?: string | null
+          score?: number | null
+          scorecard_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scorecard_evaluations_criteria_id_fkey"
+            columns: ["criteria_id"]
+            isOneToOne: false
+            referencedRelation: "scorecard_criteria"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scorecard_evaluations_scorecard_id_fkey"
+            columns: ["scorecard_id"]
+            isOneToOne: false
+            referencedRelation: "candidate_scorecards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scorecard_templates: {
+        Row: {
+          active: boolean | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -2156,6 +2370,12 @@ export type Database = {
         | "Logística"
         | "Outros"
       complexidade_vaga: "Baixa" | "Média" | "Alta" | "Muito Alta"
+      criteria_category:
+        | "hard_skills"
+        | "soft_skills"
+        | "experiencia"
+        | "fit_cultural"
+        | "outros"
       modelo_trabalho: "Presencial" | "Híbrido" | "Remoto"
       nivel_candidato:
         | "Estagiário"
@@ -2169,6 +2389,8 @@ export type Database = {
         | "Reprovado"
         | "Contratado"
         | "Em andamento"
+      scale_type: "rating_1_5" | "text_options"
+      scorecard_recommendation: "strong_yes" | "yes" | "maybe" | "no"
       status_candidato:
         | "Banco de Talentos"
         | "Selecionado"
@@ -2333,6 +2555,13 @@ export const Constants = {
         "Outros",
       ],
       complexidade_vaga: ["Baixa", "Média", "Alta", "Muito Alta"],
+      criteria_category: [
+        "hard_skills",
+        "soft_skills",
+        "experiencia",
+        "fit_cultural",
+        "outros",
+      ],
       modelo_trabalho: ["Presencial", "Híbrido", "Remoto"],
       nivel_candidato: ["Estagiário", "Júnior", "Pleno", "Sênior", "Liderança"],
       prioridade_vaga: ["Baixa", "Normal", "Alta", "Crítica"],
@@ -2342,6 +2571,8 @@ export const Constants = {
         "Contratado",
         "Em andamento",
       ],
+      scale_type: ["rating_1_5", "text_options"],
+      scorecard_recommendation: ["strong_yes", "yes", "maybe", "no"],
       status_candidato: [
         "Banco de Talentos",
         "Selecionado",
