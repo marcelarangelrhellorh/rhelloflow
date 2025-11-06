@@ -18,6 +18,7 @@ interface Vaga {
   criado_em: string | null;
   candidatos_count?: number;
   confidencial?: boolean | null;
+  dias_etapa_atual?: number; // Dias úteis na etapa atual
 }
 
 interface ColumnProps {
@@ -101,6 +102,7 @@ export function Column({
                 vaga={vaga}
                 stageColor={stage.color}
                 diasEmAberto={getBusinessDaysFromNow(vaga.criado_em || "")}
+                diasEtapaAtual={vaga.dias_etapa_atual || 0}
                 progresso={progresso(vaga.status_slug)}
                 onDragStart={() => {}}
                 onView={() => onJobClick(vaga.id)}

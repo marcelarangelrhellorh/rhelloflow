@@ -26,6 +26,7 @@ interface Vaga {
   candidatos_count?: number;
   confidencial?: boolean | null;
   area?: string | null;
+  dias_etapa_atual?: number; // Dias úteis na etapa atual
 }
 
 interface StatusRef {
@@ -99,7 +100,7 @@ export default function FunilVagas() {
 
       if (jobsError) throw jobsError;
 
-      // Load candidate counts for each job
+      // Load candidate counts and stage history for each job
       const jobsWithCounts = await Promise.all(
         (jobsData || []).map(async (job) => {
           const { count } = await supabase
@@ -107,12 +108,28 @@ export default function FunilVagas() {
             .select("*", { count: "exact", head: true })
             .eq("vaga_relacionada_id", job.id);
 
+          // Buscar última mudança de etapa para calcular dias na etapa atual
+          const { data: lastStageChange } = await supabase
+            .from("job_stage_history")
+            .select("changed_at")
+            .eq("job_id", job.id)
+            .order("changed_at", { ascending: false })
+            .limit(1)
+            .single();
+
+          // Calcular dias úteis na etapa atual
+          const referenceDate = lastStageChange?.changed_at || job.criado_em;
+          const diasEtapaAtual = referenceDate 
+            ? getBusinessDaysFromNow(referenceDate)
+            : 0;
+
           // Mesclar nome do recrutador e CS do JOIN
           return { 
             ...job, 
             candidatos_count: count || 0,
             recrutador: job.recrutador_user?.name || job.recrutador || null,
-            cs_responsavel: job.cs_user?.name || job.cs_responsavel || null
+            cs_responsavel: job.cs_user?.name || job.cs_responsavel || null,
+            dias_etapa_atual: diasEtapaAtual
           };
         })
       );

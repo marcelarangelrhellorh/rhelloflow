@@ -28,6 +28,7 @@ interface Vaga {
   criado_em: string | null;
   candidatos_count?: number;
   confidencial?: boolean | null;
+  dias_etapa_atual?: number; // Dias úteis na etapa atual
 }
 
 interface Stage {
@@ -138,6 +139,7 @@ export function PipelineBoard({
               vaga={activeJob}
               stageColor={activeStage.color}
               diasEmAberto={getBusinessDaysFromNow(activeJob.criado_em || "")}
+              diasEtapaAtual={activeJob.dias_etapa_atual || 0}
               progresso={progresso(activeJob.status_slug)}
               onDragStart={() => {}}
               onView={() => {}}

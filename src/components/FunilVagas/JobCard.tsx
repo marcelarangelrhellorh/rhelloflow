@@ -19,11 +19,13 @@ interface Vaga {
   candidatos_count?: number;
   confidencial?: boolean | null;
   area?: string | null;
+  dias_etapa_atual?: number;
 }
 
 interface JobCardProps {
   vaga: Vaga;
   diasEmAberto: number;
+  diasEtapaAtual: number;
   progresso: number;
   onDragStart: () => void;
   onView: () => void;
@@ -64,6 +66,7 @@ const getInitials = (name: string | null): string => {
 export function JobCard({
   vaga,
   diasEmAberto,
+  diasEtapaAtual,
   progresso,
   onDragStart,
   onView,
@@ -183,10 +186,19 @@ export function JobCard({
                 <span>{vaga.candidatos_count || 0}</span>
               </div>
               
-              <div className="flex items-center gap-1 text-[#9AA6B2]">
-                <Clock className="h-3.5 w-3.5" />
-                <span>{diasEmAberto}d úteis</span>
-              </div>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center gap-1 text-[#9AA6B2]">
+                      <Clock className="h-3.5 w-3.5" />
+                      <span>{diasEtapaAtual}d nesta etapa</span>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Total em aberto: {diasEmAberto} dias úteis</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
 
             {/* Progress bar */}
