@@ -183,12 +183,12 @@ export default function BancoTalentos() {
       <div className="mb-8 flex items-start justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground mb-2">Banco de Talentos</h1>
-          <p className="text-muted-foreground mb-2">
+          <p className="text-base text-muted-foreground mb-2">
             Visualize e gerencie candidatos disponíveis para realocação.
           </p>
           <div className="inline-flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-full">
             <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-            <span className="text-sm font-medium text-foreground">
+            <span className="text-base font-medium text-foreground">
               {filteredCandidatos.length} candidato{filteredCandidatos.length !== 1 ? "s" : ""} disponível{filteredCandidatos.length !== 1 ? "eis" : ""} para realocação
             </span>
           </div>
@@ -299,7 +299,7 @@ export default function BancoTalentos() {
 
         {hasActiveFilters && (
           <div className="flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-base text-muted-foreground">
               {filteredCandidatos.length} resultado{filteredCandidatos.length !== 1 ? "s" : ""} encontrado{filteredCandidatos.length !== 1 ? "s" : ""}
             </p>
             <Button
@@ -324,10 +324,10 @@ export default function BancoTalentos() {
       {filteredCandidatos.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <div className="mb-6 text-6xl">💛</div>
-          <h3 className="text-2xl font-bold text-foreground mb-2">
+          <h3 className="text-3xl font-bold text-foreground mb-2">
             Nenhum talento disponível no momento
           </h3>
-          <p className="text-muted-foreground mb-6">
+          <p className="text-base text-muted-foreground mb-6">
             Cadastre novos ou acompanhe os processos em andamento.
           </p>
           <Button 

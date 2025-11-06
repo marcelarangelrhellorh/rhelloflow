@@ -186,7 +186,7 @@ export default function Candidatos() {
           <div className="flex items-center justify-between mb-3">
             <div>
               <h1 className="text-3xl font-bold text-foreground">Candidatos</h1>
-              <p className="text-muted-foreground">Gerencie todos os candidatos</p>
+              <p className="text-base text-muted-foreground">Gerencie todos os candidatos</p>
             </div>
             <Button 
               onClick={() => navigate('/candidatos/novo')}
@@ -204,7 +204,7 @@ export default function Candidatos() {
           {hasActiveFilter && (
             <div className="mt-3 flex items-center gap-2 p-2 bg-purple/10 border border-purple/20 rounded-lg">
               <MessageSquare className="h-4 w-4 text-purple" />
-              <span className="text-sm font-medium">
+              <span className="text-base font-medium">
                 Aguardando feedback do cliente
               </span>
               <Button 
@@ -270,7 +270,7 @@ export default function Candidatos() {
             <h3 className="text-lg font-semibold text-foreground mb-2">
               Nenhum candidato encontrado
             </h3>
-            <p className="text-sm text-muted-foreground mb-4 max-w-md">
+            <p className="text-base text-muted-foreground mb-4 max-w-md">
               💛 Adicione um novo clicando em "+ Novo Candidato"
             </p>
             <Button 

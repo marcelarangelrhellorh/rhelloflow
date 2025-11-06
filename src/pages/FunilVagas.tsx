@@ -322,8 +322,8 @@ export default function FunilVagas() {
           {/* Title */}
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-[#00141D]">Funil de Vagas</h1>
-              <p className="text-sm text-[#36404A] mt-1">
+              <h1 className="text-3xl font-bold text-[#00141D]">Funil de Vagas</h1>
+              <p className="text-base text-[#36404A] mt-1">
                 {totalJobs} {totalJobs === 1 ? 'vaga' : 'vagas'} no pipeline
               </p>
             </div>

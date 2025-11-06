@@ -251,8 +251,8 @@ export default function FunilCandidatos() {
         <div className="px-6 py-4 space-y-3">
           {/* Title */}
           <div>
-            <h1 className="text-2xl font-bold text-[#00141D]">Funil de Candidatos</h1>
-            <p className="text-sm text-[#36404A] mt-1">
+            <h1 className="text-3xl font-bold text-[#00141D]">Funil de Candidatos</h1>
+            <p className="text-base text-[#36404A] mt-1">
               {activeCandidatesCount} {activeCandidatesCount === 1 ? 'candidato' : 'candidatos'} em andamento
             </p>
           </div>

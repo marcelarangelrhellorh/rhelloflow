@@ -159,7 +159,7 @@ export default function Vagas() {
       <div className="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Vagas</h1>
-          <p className="text-muted-foreground">Gerencie todas as vagas abertas</p>
+          <p className="text-base text-muted-foreground">Gerencie todas as vagas abertas</p>
         </div>
         <div className="flex gap-2">
           <DropdownMenu>
@@ -194,7 +194,7 @@ export default function Vagas() {
       {hasActiveFilter && (
         <div className="mb-4 flex items-center gap-2 p-3 bg-warning/10 border border-warning/20 rounded-lg">
           <AlertTriangle className="h-4 w-4 text-warning" />
-          <span className="text-sm font-medium">
+          <span className="text-base font-medium">
             Atenção: Fora do prazo (&gt;30 dias úteis)
           </span>
           <Button 
