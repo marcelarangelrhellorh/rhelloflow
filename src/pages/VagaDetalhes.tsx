@@ -466,7 +466,10 @@ export default function VagaDetalhes() {
                     </SheetDescription>
                   </div>
                   <button
-                    onClick={() => navigate(`/vagas/editar/${vaga.id}`)}
+                    onClick={() => {
+                      setDetailsDrawerOpen(false);
+                      navigate(`/vagas/editar/${vaga.id}`);
+                    }}
                     className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors flex items-center gap-2 font-bold"
                   >
                     <span className="material-symbols-outlined text-xl">edit</span>
