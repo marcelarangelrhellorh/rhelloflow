@@ -8,7 +8,6 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { CandidateHeader } from "@/components/CandidatoDetalhes/CandidateHeader";
 import { StatsBar } from "@/components/CandidatoDetalhes/StatsBar";
 import { ContactCard } from "@/components/CandidatoDetalhes/ContactCard";
-import { ApplicationDataCard } from "@/components/CandidatoDetalhes/ApplicationDataCard";
 import { ProfessionalInfoCard } from "@/components/CandidatoDetalhes/ProfessionalInfoCard";
 import { FeedbackList } from "@/components/CandidatoDetalhes/FeedbackList";
 import { FeedbackModal } from "@/components/CandidatoDetalhes/FeedbackModal";
@@ -376,21 +375,10 @@ export default function CandidatoDetalhes() {
               estado={candidato.estado}
               linkedin={candidato.linkedin}
               curriculoLink={candidato.curriculo_link}
+              isFromPublicLink={!!candidato.source_link_id}
             />
 
             <CandidateTagsCard candidateId={id!} />
-
-            {/* Exibir Dados da Candidatura se o candidato veio de link público */}
-            {candidato.source_link_id && (
-              <ApplicationDataCard
-                nomeCompleto={candidato.nome_completo}
-                email={candidato.email}
-                telefone={candidato.telefone}
-                cidade={candidato.cidade}
-                estado={candidato.estado}
-                linkedin={candidato.linkedin}
-              />
-            )}
           </div>
 
           <div className="space-y-6">

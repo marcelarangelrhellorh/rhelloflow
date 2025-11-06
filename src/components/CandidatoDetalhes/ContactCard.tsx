@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Mail, Phone, MapPin, Linkedin, FileText, Copy, ExternalLink } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Mail, Phone, MapPin, Linkedin, FileText, Copy, ExternalLink, Link2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface ContactCardProps {
@@ -10,6 +11,7 @@ interface ContactCardProps {
   estado: string | null;
   linkedin: string | null;
   curriculoLink: string | null;
+  isFromPublicLink?: boolean;
 }
 
 export function ContactCard({
@@ -19,6 +21,7 @@ export function ContactCard({
   estado,
   linkedin,
   curriculoLink,
+  isFromPublicLink = false,
 }: ContactCardProps) {
   const handleCopyContact = () => {
     const contactText = `
@@ -48,7 +51,15 @@ Localização: ${[cidade, estado].filter(Boolean).join(", ") || "Não informada"
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">Contato</CardTitle>
+          <div className="flex items-center gap-2">
+            <CardTitle className="text-lg">Contato</CardTitle>
+            {isFromPublicLink && (
+              <Badge variant="secondary" className="flex items-center gap-1">
+                <Link2 className="h-3 w-3" />
+                Via Link Público
+              </Badge>
+            )}
+          </div>
           <Button
             variant="outline"
             size="sm"
@@ -58,6 +69,11 @@ Localização: ${[cidade, estado].filter(Boolean).join(", ") || "Não informada"
             Copiar
           </Button>
         </div>
+        {isFromPublicLink && (
+          <p className="text-sm text-muted-foreground">
+            Informações enviadas pelo candidato via link de candidatura
+          </p>
+        )}
       </CardHeader>
       <CardContent className="space-y-2.5">
         {/* Email */}
