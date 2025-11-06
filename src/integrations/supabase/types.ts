@@ -269,6 +269,7 @@ export type Database = {
           email: string
           estado: string | null
           feedback: string | null
+          historico_experiencia: string | null
           id: string
           linkedin: string | null
           nivel: Database["public"]["Enums"]["nivel_candidato"] | null
@@ -303,6 +304,7 @@ export type Database = {
           email: string
           estado?: string | null
           feedback?: string | null
+          historico_experiencia?: string | null
           id?: string
           linkedin?: string | null
           nivel?: Database["public"]["Enums"]["nivel_candidato"] | null
@@ -337,6 +339,7 @@ export type Database = {
           email?: string
           estado?: string | null
           feedback?: string | null
+          historico_experiencia?: string | null
           id?: string
           linkedin?: string | null
           nivel?: Database["public"]["Enums"]["nivel_candidato"] | null

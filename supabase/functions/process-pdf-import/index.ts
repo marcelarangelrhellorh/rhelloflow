@@ -141,6 +141,20 @@ serve(async (req) => {
 
     const extractionPrompt = `Você é um extrator de dados de perfis profissionais. Abaixo está o texto extraído de um PDF (perfil LinkedIn / CV). Retorne APENAS um JSON válido com os campos descritos no schema. Para cada campo, inclua: value, confidence (0.0–1.0) e evidence (trecho do texto que suportou a extração, máximo 200 caracteres). Se não encontrar um campo, coloque null. Não invente valores.
 
+ORIENTAÇÕES ESPECÍFICAS DE LOCALIZAÇÃO:
+- Nome completo: Geralmente encontra-se na PARTE SUPERIOR do documento, em FONTE GRANDE ou destacada
+- Telefone: Quando presente, normalmente está ACIMA da informação de e-mail, na seção de contato/cabeçalho
+- E-mail: Geralmente no topo do documento, na seção de contato
+- LinkedIn: Procure por URLs do LinkedIn (linkedin.com/in/...) no cabeçalho ou seção de contato
+- Cidade/Estado: Normalmente no cabeçalho, próximo ao nome ou contato
+- Área de Especialização: Pode estar em "Resumo", "Sobre", "Objetivo" ou logo após o nome
+- Senioridade: Inferir dos títulos de cargo (Júnior, Pleno, Sênior, Gerente, Diretor, etc.)
+- Pretensão Salarial: Procure por valores monetários com "R$", "salário", "pretensão"
+- Habilidades/Skills: Procure em seções "Competências", "Habilidades", "Skills", "Tecnologias"
+- Formação/Educação: Procure em seções "Formação", "Educação", "Academic Background", "Education"
+- Experiência Profissional: Procure em seções "Experiência", "Histórico Profissional", "Work Experience", "Experience"
+- Portfólio: URLs de sites pessoais, GitHub, Behance, Dribbble, etc.
+
 Schema de saída (exemplo):
 {
  "full_name": {"value": "...", "confidence": 0.0, "evidence": "..."},
@@ -156,6 +170,7 @@ Schema de saída (exemplo):
  "skills": [{"value":"SQL","confidence":0.0,"evidence":"..."}, ...],
  "education": [{"degree":"Bacharel em Engenharia","institution":"...", "years":"2016-2020","confidence":0.0,"evidence":"..."}],
  "work_experience": [{"title":"Analista de Dados","company":"Empresa X","from":"2021-01","to":"2023-06","summary":"...","confidence":0.0,"evidence":"..."}],
+ "work_history": {"value": "Histórico completo de experiência profissional formatado de forma estruturada", "confidence": 0.0, "evidence": "..."},
  "portfolio_url": {"value":"...", "confidence":0.0, "evidence":"..."}
 }
 

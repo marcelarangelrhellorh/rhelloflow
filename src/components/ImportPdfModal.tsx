@@ -40,6 +40,7 @@ interface ExtractedData {
   skills?: Array<{ value: string; confidence: number; evidence: string }>;
   education?: Array<{ degree: string; institution: string; years: string; confidence: number; evidence: string }>;
   work_experience?: Array<{ title: string; company: string; from: string; to: string; summary: string; confidence: number; evidence: string }>;
+  work_history?: ExtractedField;
   portfolio_url?: ExtractedField;
 }
 
@@ -180,6 +181,7 @@ export function ImportPdfModal({ open, onOpenChange, sourceType, vagaId, onSucce
         nivel: editedData.seniority || null,
         pretensao_salarial: editedData.salary_expectation ? parseFloat(editedData.salary_expectation.replace(/[^\d,]/g, '').replace(',', '.')) : null,
         portfolio_url: editedData.portfolio_url || null,
+        historico_experiencia: editedData.work_history || null,
         origem: 'PDF Import',
         vaga_relacionada_id: vagaId || null,
       };
@@ -452,6 +454,28 @@ export function ImportPdfModal({ open, onOpenChange, sourceType, vagaId, onSucce
                   </div>
                 )}
               </div>
+
+              {extractedData.work_history && (
+                <>
+                  <Separator />
+                  <div className="space-y-2">
+                    <Label>Histórico de Experiência</Label>
+                    <div className="flex items-center gap-2">
+                      <textarea
+                        className="w-full min-h-[120px] p-2 border rounded-md bg-background"
+                        value={editedData.work_history || ''}
+                        onChange={(e) => setEditedData({ ...editedData, work_history: e.target.value })}
+                      />
+                      <Badge className={getConfidenceColor(extractedData.work_history.confidence)}>
+                        {getConfidenceLabel(extractedData.work_history.confidence)}
+                      </Badge>
+                    </div>
+                    {extractedData.work_history.evidence && (
+                      <p className="text-xs text-muted-foreground italic">"{extractedData.work_history.evidence}"</p>
+                    )}
+                  </div>
+                </>
+              )}
 
               {extractedData.skills && extractedData.skills.length > 0 && (
                 <>
