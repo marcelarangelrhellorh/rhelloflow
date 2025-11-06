@@ -59,7 +59,7 @@ Localização: ${[cidade, estado].filter(Boolean).join(", ") || "Não informada"
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-2.5">
         {/* Email */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 flex-1">
