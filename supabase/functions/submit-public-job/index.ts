@@ -1,11 +1,40 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Simple rate limiting storage (in production, use Redis or similar)
+// Validation schemas
+const publicJobSchema = z.object({
+  titulo: z.string().trim().min(3, 'Título muito curto').max(200, 'Título muito longo'),
+  empresa: z.string().trim().min(2, 'Nome da empresa muito curto').max(200, 'Nome da empresa muito longo'),
+  contato_email: z.string().trim().email('Email inválido').max(255, 'Email muito longo'),
+  contato_nome: z.string().trim().min(2, 'Nome muito curto').max(100, 'Nome muito longo'),
+  contato_telefone: z.string().trim().max(50).optional(),
+  salario_min: z.number().positive().optional(),
+  salario_max: z.number().positive().optional(),
+  salario_modalidade: z.enum(['FAIXA', 'A_PARTIR_DE', 'A_COMBINAR']).optional(),
+  modelo_trabalho: z.string().max(50).optional(),
+  horario_inicio: z.string().max(10).optional(),
+  horario_fim: z.string().max(10).optional(),
+  dias_semana: z.array(z.string()).optional(),
+  beneficios: z.array(z.string()).optional(),
+  beneficios_outros: z.string().trim().max(500).optional(),
+  requisitos_obrigatorios: z.string().trim().max(5000).optional(),
+  requisitos_desejaveis: z.string().trim().max(5000).optional(),
+  responsabilidades: z.string().trim().max(5000).optional(),
+  observacoes: z.string().trim().max(2000).optional(),
+  confidencial: z.boolean().optional(),
+  motivo_confidencial: z.string().trim().max(500).optional(),
+  // Honeypot field - should always be empty
+  website: z.string().max(0).optional(),
+  // Timing check - submission should take at least 3 seconds
+  formStartTime: z.number().optional(),
+});
+
+// Rate limiting storage
 const submissionTracker = new Map<string, { count: number; timestamp: number }>();
 
 function cleanupOldEntries() {
@@ -28,13 +57,11 @@ function checkRateLimit(identifier: string): boolean {
     return true;
   }
   
-  // Reset counter if more than 1 hour has passed
   if (now - entry.timestamp > 3600000) {
     submissionTracker.set(identifier, { count: 1, timestamp: now });
     return true;
   }
   
-  // Check if under limit (3 per hour)
   if (entry.count < 3) {
     entry.count++;
     return true;
@@ -45,17 +72,36 @@ function checkRateLimit(identifier: string): boolean {
 
 function sanitizeText(text: string): string {
   if (!text) return '';
-  // Remove HTML tags and trim
   return text.replace(/<[^>]*>/g, '').trim();
 }
 
-function validateEmail(email: string): boolean {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
+function sanitizeError(error: unknown): string {
+  // Return user-friendly messages without technical details
+  if (error instanceof z.ZodError) {
+    const firstError = error.errors[0];
+    return firstError?.message || 'Dados inválidos';
+  }
+  
+  if (error instanceof Error) {
+    // Only return safe error messages
+    const safeMessages = [
+      'Título inválido',
+      'Email inválido',
+      'Nome inválido',
+      'Salário mínimo não pode ser maior que o máximo',
+      'Limite de envios atingido',
+    ];
+    
+    if (safeMessages.some(msg => error.message.includes(msg))) {
+      return error.message;
+    }
+  }
+  
+  // Generic error for production
+  return 'Erro ao processar solicitação. Tente novamente.';
 }
 
 Deno.serve(async (req) => {
-  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -79,75 +125,91 @@ Deno.serve(async (req) => {
 
     const payload = await req.json();
     
-    // Validate required fields
-    if (!payload.titulo || payload.titulo.length < 3 || payload.titulo.length > 200) {
-      throw new Error('Título inválido (deve ter entre 3 e 200 caracteres)');
+    // Honeypot check - if website field is filled, it's likely a bot
+    if (payload.website && payload.website.length > 0) {
+      console.log(`Honeypot triggered for IP: ${clientIp}`);
+      // Return success to not alert the bot
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          message: 'Vaga criada com sucesso!' 
+        }),
+        { 
+          status: 200, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
     }
     
-    if (!payload.empresa || payload.empresa.length < 2 || payload.empresa.length > 200) {
-      throw new Error('Nome da empresa inválido (deve ter entre 2 e 200 caracteres)');
+    // Timing check - submission should take at least 3 seconds
+    if (payload.formStartTime) {
+      const submissionTime = Date.now() - payload.formStartTime;
+      if (submissionTime < 3000) {
+        console.log(`Suspicious fast submission from IP: ${clientIp}, time: ${submissionTime}ms`);
+        return new Response(
+          JSON.stringify({ 
+            error: 'Submissão muito rápida. Por favor, revise seus dados.' 
+          }),
+          { 
+            status: 400, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        );
+      }
     }
     
-    if (!payload.contato_email || !validateEmail(payload.contato_email)) {
-      throw new Error('Email de contato inválido');
-    }
+    // Validate with Zod
+    const validatedData = publicJobSchema.parse(payload);
     
-    if (!payload.contato_nome || payload.contato_nome.length < 2 || payload.contato_nome.length > 100) {
-      throw new Error('Nome de contato inválido (deve ter entre 2 e 100 caracteres)');
+    // Additional salary validation
+    if (validatedData.salario_min && validatedData.salario_max) {
+      if (validatedData.salario_min > validatedData.salario_max) {
+        throw new Error('Salário mínimo não pode ser maior que o máximo');
+      }
     }
 
     // Build contact info for observacoes
     const contactInfo = [
       '\n\n=== Dados de Contato do Solicitante ===',
-      `Nome: ${sanitizeText(payload.contato_nome)}`,
-      `Email: ${sanitizeText(payload.contato_email)}`,
-      payload.contato_telefone ? `Telefone: ${sanitizeText(payload.contato_telefone)}` : null,
+      `Nome: ${sanitizeText(validatedData.contato_nome)}`,
+      `Email: ${sanitizeText(validatedData.contato_email)}`,
+      validatedData.contato_telefone ? `Telefone: ${sanitizeText(validatedData.contato_telefone)}` : null,
     ].filter(Boolean).join('\n');
 
-    // Build full observacoes with contact info
     const observacoesCompletas = [
-      payload.observacoes ? sanitizeText(payload.observacoes).substring(0, 2000) : null,
+      validatedData.observacoes ? sanitizeText(validatedData.observacoes) : null,
       contactInfo
     ].filter(Boolean).join('\n');
 
-    // Sanitize all text inputs
+    // Prepare sanitized data for insertion
     const sanitizedData = {
-      titulo: sanitizeText(payload.titulo).substring(0, 200),
-      empresa: sanitizeText(payload.empresa).substring(0, 200),
-      salario_min: payload.salario_min || null,
-      salario_max: payload.salario_max || null,
-      salario_modalidade: payload.salario_modalidade || 'FAIXA',
-      modelo_trabalho: payload.modelo_trabalho || null,
-      horario_inicio: payload.horario_inicio || null,
-      horario_fim: payload.horario_fim || null,
-      dias_semana: payload.dias_semana || null,
-      beneficios: payload.beneficios || null,
-      beneficios_outros: payload.beneficios_outros ? sanitizeText(payload.beneficios_outros).substring(0, 500) : null,
-      requisitos_obrigatorios: payload.requisitos_obrigatorios ? sanitizeText(payload.requisitos_obrigatorios).substring(0, 5000) : null,
-      requisitos_desejaveis: payload.requisitos_desejaveis ? sanitizeText(payload.requisitos_desejaveis).substring(0, 5000) : null,
-      responsabilidades: payload.responsabilidades ? sanitizeText(payload.responsabilidades).substring(0, 5000) : null,
-      observacoes: observacoesCompletas.substring(0, 5000),
-      confidencial: payload.confidencial || false,
-      motivo_confidencial: payload.motivo_confidencial ? sanitizeText(payload.motivo_confidencial).substring(0, 500) : null,
+      titulo: sanitizeText(validatedData.titulo),
+      empresa: sanitizeText(validatedData.empresa),
+      salario_min: validatedData.salario_min || null,
+      salario_max: validatedData.salario_max || null,
+      salario_modalidade: validatedData.salario_modalidade || 'FAIXA',
+      modelo_trabalho: validatedData.modelo_trabalho || null,
+      horario_inicio: validatedData.horario_inicio || null,
+      horario_fim: validatedData.horario_fim || null,
+      dias_semana: validatedData.dias_semana || null,
+      beneficios: validatedData.beneficios || null,
+      beneficios_outros: validatedData.beneficios_outros ? sanitizeText(validatedData.beneficios_outros) : null,
+      requisitos_obrigatorios: validatedData.requisitos_obrigatorios ? sanitizeText(validatedData.requisitos_obrigatorios) : null,
+      requisitos_desejaveis: validatedData.requisitos_desejaveis ? sanitizeText(validatedData.requisitos_desejaveis) : null,
+      responsabilidades: validatedData.responsabilidades ? sanitizeText(validatedData.responsabilidades) : null,
+      observacoes: observacoesCompletas,
+      confidencial: validatedData.confidencial || false,
+      motivo_confidencial: validatedData.motivo_confidencial ? sanitizeText(validatedData.motivo_confidencial) : null,
       source: 'externo',
       status: 'A iniciar',
       status_slug: 'a_iniciar',
     };
 
-    // Validate salary range if both provided
-    if (sanitizedData.salario_min && sanitizedData.salario_max) {
-      if (sanitizedData.salario_min > sanitizedData.salario_max) {
-        throw new Error('Salário mínimo não pode ser maior que o máximo');
-      }
-    }
-
-    // Create admin client with service role
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Insert the job posting
     const { data, error } = await supabaseAdmin
       .from('vagas')
       .insert([sanitizedData])
@@ -176,12 +238,10 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error('Error in submit-public-job:', error);
     
-    const errorMessage = error instanceof Error ? error.message : 'Erro ao processar solicitação';
+    const errorMessage = sanitizeError(error);
     
     return new Response(
-      JSON.stringify({ 
-        error: errorMessage
-      }),
+      JSON.stringify({ error: errorMessage }),
       { 
         status: 400, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 

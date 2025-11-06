@@ -1,12 +1,52 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
+import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Rate limiting map (in-memory, resets on restart)
+// Validation schemas
+const candidateSchema = z.object({
+  nome_completo: z.string().trim().min(2, 'Nome muito curto').max(255, 'Nome muito longo'),
+  email: z.string().trim().email('Email inválido').max(255, 'Email muito longo'),
+  telefone: z.string().trim().min(8, 'Telefone inválido').max(50, 'Telefone muito longo'),
+  cidade: z.string().trim().max(100).optional(),
+  estado: z.string().trim().max(2).optional(),
+  linkedin: z.string().trim().max(500).optional(),
+  pretensao_salarial: z.number().positive().optional(),
+  area: z.string().max(100).optional(),
+  nivel: z.string().max(50).optional(),
+  disponibilidade_mudanca: z.string().trim().max(500).optional(),
+  mensagem: z.string().trim().max(2000).optional(),
+  // Honeypot field
+  company: z.string().max(0).optional(),
+});
+
+const applicationSchema = z.object({
+  token: z.string().uuid('Token inválido'),
+  candidate: candidateSchema,
+  password: z.string().optional(),
+  utm: z.object({
+    utm_source: z.string().optional(),
+    utm_medium: z.string().optional(),
+    utm_campaign: z.string().optional(),
+  }).optional(),
+  files: z.object({
+    resume: z.object({
+      data: z.string(),
+      name: z.string(),
+    }).optional(),
+    portfolio: z.object({
+      data: z.string(),
+      name: z.string(),
+    }).optional(),
+  }).optional(),
+  formStartTime: z.number().optional(),
+});
+
+// Rate limiting
 const submissionTracker = new Map<string, { count: number; resetAt: number }>();
 
 function checkRateLimit(identifier: string, maxPerHour: number = 3): boolean {
@@ -37,6 +77,32 @@ function generateProtocol(): string {
   return `RHL-${timestamp}-${random}`;
 }
 
+function sanitizeError(error: unknown): string {
+  if (error instanceof z.ZodError) {
+    const firstError = error.errors[0];
+    return firstError?.message || 'Dados inválidos';
+  }
+  
+  if (error instanceof Error) {
+    const safeMessages = [
+      'Link inválido',
+      'Link expirado',
+      'Link desativado',
+      'Senha incorreta',
+      'Senha necessária',
+      'Limite de inscrições atingido',
+      'Muitas submissões',
+      'Campos obrigatórios',
+    ];
+    
+    if (safeMessages.some(msg => error.message.includes(msg))) {
+      return error.message;
+    }
+  }
+  
+  return 'Erro ao processar candidatura. Tente novamente.';
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -47,16 +113,38 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const { token, candidate, password, utm, files } = await req.json();
-
-    if (!token || !candidate) {
+    const payload = await req.json();
+    
+    // Validate with Zod
+    const validatedData = applicationSchema.parse(payload);
+    
+    const { token, candidate, password, utm, files, formStartTime } = validatedData;
+    
+    // Honeypot check
+    if (candidate.company && candidate.company.length > 0) {
+      console.log(`Honeypot triggered for token: ${token}`);
       return new Response(
-        JSON.stringify({ error: 'Token and candidate data are required' }), 
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ 
+          success: true, 
+          protocol: generateProtocol(),
+          message: 'Candidatura enviada com sucesso!' 
+        }), 
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+    
+    // Timing check
+    if (formStartTime) {
+      const submissionTime = Date.now() - formStartTime;
+      if (submissionTime < 5000) {
+        console.log(`Suspicious fast submission, time: ${submissionTime}ms`);
+        return new Response(
+          JSON.stringify({ error: 'Submissão muito rápida. Por favor, revise seus dados.' }), 
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
 
-    // Get IP for rate limiting
     const ip = req.headers.get('x-forwarded-for')?.split(',')[0] || 
                 req.headers.get('x-real-ip') || 
                 'unknown';
@@ -69,7 +157,7 @@ serve(async (req) => {
       );
     }
 
-    // Get share link with job and recruiter info
+    // Get share link
     const { data: shareLink, error: linkError } = await supabase
       .from('share_links')
       .select(`
@@ -86,37 +174,22 @@ serve(async (req) => {
       .single();
 
     if (linkError || !shareLink) {
-      return new Response(
-        JSON.stringify({ error: 'Link inválido ou expirado' }), 
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      throw new Error('Link inválido ou expirado');
     }
 
-    // Check if link is active
     if (!shareLink.active) {
-      return new Response(
-        JSON.stringify({ error: 'Este link foi desativado' }), 
-        { status: 410, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      throw new Error('Este link foi desativado');
     }
 
-    // Check expiration
     if (shareLink.expires_at && new Date(shareLink.expires_at) < new Date()) {
-      return new Response(
-        JSON.stringify({ error: 'Este link expirou' }), 
-        { status: 410, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      throw new Error('Este link expirou');
     }
 
-    // Check max submissions
     if (shareLink.max_submissions && shareLink.submissions_count >= shareLink.max_submissions) {
-      return new Response(
-        JSON.stringify({ error: 'Limite de inscrições atingido' }), 
-        { status: 410, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      throw new Error('Limite de inscrições atingido');
     }
 
-    // Verify password if required
+    // Verify password
     if (shareLink.password_hash && password) {
       const encoder = new TextEncoder();
       const data = encoder.encode(password);
@@ -126,33 +199,18 @@ serve(async (req) => {
         .join('');
       
       if (inputHash !== shareLink.password_hash) {
-        return new Response(
-          JSON.stringify({ error: 'Senha incorreta' }), 
-          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
+        throw new Error('Senha incorreta');
       }
     } else if (shareLink.password_hash && !password) {
-      return new Response(
-        JSON.stringify({ error: 'Senha necessária' }), 
-        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      throw new Error('Senha necessária');
     }
 
-    // Validate required fields
-    if (!candidate.nome_completo || !candidate.email || !candidate.telefone) {
-      return new Response(
-        JSON.stringify({ error: 'Campos obrigatórios faltando' }), 
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Handle file uploads if present
+    // Handle file uploads
     let curriculo_url = null;
     let portfolio_url = null;
 
     if (files?.resume) {
       try {
-        // Extract base64 data and decode
         const base64Data = files.resume.data.split(',')[1];
         const fileBuffer = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
         
@@ -207,7 +265,7 @@ serve(async (req) => {
       }
     }
 
-    // Get recruiter name if there's a recruiter assigned to the job
+    // Get recruiter name
     let recrutadorNome = null;
     if (shareLink.vagas?.recrutador_id) {
       const { data: recrutadorData } = await supabase
@@ -219,27 +277,27 @@ serve(async (req) => {
       recrutadorNome = recrutadorData?.name || null;
     }
 
-    // Sanitize inputs
+    // Prepare sanitized candidate data
     const sanitizedCandidate = {
-      nome_completo: sanitizeText(candidate.nome_completo).substring(0, 255),
-      email: sanitizeText(candidate.email).substring(0, 255),
-      telefone: sanitizeText(candidate.telefone).substring(0, 50),
-      cidade: sanitizeText(candidate.cidade || '').substring(0, 100),
-      estado: sanitizeText(candidate.estado || '').substring(0, 2),
-      linkedin: sanitizeText(candidate.linkedin || '').substring(0, 500),
+      nome_completo: sanitizeText(candidate.nome_completo),
+      email: sanitizeText(candidate.email),
+      telefone: sanitizeText(candidate.telefone),
+      cidade: candidate.cidade ? sanitizeText(candidate.cidade) : null,
+      estado: candidate.estado ? sanitizeText(candidate.estado) : null,
+      linkedin: candidate.linkedin ? sanitizeText(candidate.linkedin) : null,
       pretensao_salarial: candidate.pretensao_salarial || null,
       area: candidate.area || null,
       nivel: candidate.nivel || null,
-      disponibilidade_mudanca: sanitizeText(candidate.disponibilidade_mudanca || '').substring(0, 500),
+      disponibilidade_mudanca: candidate.disponibilidade_mudanca ? sanitizeText(candidate.disponibilidade_mudanca) : null,
       curriculo_url,
       portfolio_url,
-      feedback: sanitizeText(candidate.mensagem || '').substring(0, 2000),
+      feedback: candidate.mensagem ? sanitizeText(candidate.mensagem) : null,
       vaga_relacionada_id: shareLink.vaga_id,
       source_link_id: shareLink.id,
       utm: utm || null,
       status: 'Selecionado',
       origem: 'Link de Divulgação',
-      recrutador: recrutadorNome, // Auto-assign recruiter from job
+      recrutador: recrutadorNome,
     };
 
     // Create candidate
@@ -251,10 +309,7 @@ serve(async (req) => {
 
     if (candidateError) {
       console.error('Error creating candidate:', candidateError);
-      return new Response(
-        JSON.stringify({ error: 'Erro ao processar candidatura' }), 
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      throw new Error('Erro ao processar candidatura');
     }
 
     // Create history entry
@@ -283,9 +338,6 @@ serve(async (req) => {
       metadata: { candidate_id: newCandidate.id },
     });
 
-    // Notifications are now handled by database trigger
-    // notify_new_share_application() trigger will create notifications automatically
-
     const protocol = generateProtocol();
 
     return new Response(
@@ -302,9 +354,11 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error in submit-share-application:', error);
+    const errorMessage = sanitizeError(error);
+    
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : 'Erro interno do servidor' }), 
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ error: errorMessage }), 
+      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });

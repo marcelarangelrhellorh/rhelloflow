@@ -35,6 +35,7 @@ export function ApplicationModal({
   const [submitting, setSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [lgpdConsent, setLgpdConsent] = useState(false);
+  const [formStartTime] = useState(Date.now());
   
   const [formData, setFormData] = useState({
     nome_completo: "",
@@ -46,6 +47,7 @@ export function ApplicationModal({
     pretensao_salarial: "",
     mensagem: "",
     password: "",
+    company: "", // Honeypot field
   });
 
   const [file, setFile] = useState<File | null>(null);
@@ -131,6 +133,7 @@ export function ApplicationModal({
             ...formData,
           },
           password: requiresPassword ? formData.password : undefined,
+          formStartTime, // Timing check
           files: {
             resume: {
               data: fileBase64,
@@ -358,6 +361,17 @@ export function ApplicationModal({
                 Ao enviar, seus dados serão utilizados exclusivamente para este processo seletivo e mantidos de forma segura conforme nossa política de privacidade.
               </AlertDescription>
             </Alert>
+            
+            {/* Honeypot field - hidden from users */}
+            <input
+              type="text"
+              name="company"
+              tabIndex={-1}
+              autoComplete="off"
+              style={{ position: 'absolute', left: '-9999px' }}
+              value={formData.company}
+              onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+            />
           </form>
 
           {/* Footer */}

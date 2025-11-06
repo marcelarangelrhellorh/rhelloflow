@@ -36,6 +36,7 @@ export default function PublicVagaForm() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [formStartTime] = useState(Date.now());
   const [formData, setFormData] = useState({
     titulo: "",
     empresa: "",
@@ -58,6 +59,7 @@ export default function PublicVagaForm() {
     contato_nome: "",
     contato_email: "",
     contato_telefone: "",
+    website: "", // Honeypot field
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -83,6 +85,8 @@ export default function PublicVagaForm() {
         contato_nome: formData.contato_nome,
         contato_email: formData.contato_email,
         contato_telefone: formData.contato_telefone || null,
+        website: formData.website, // Honeypot
+        formStartTime, // Timing check
         confidencial: formData.confidencial,
         motivo_confidencial: formData.confidencial ? formData.motivo_confidencial : null,
         salario_min: formData.salario_modalidade === "A_COMBINAR" ? null : parseCurrency(formData.salario_min),
@@ -222,6 +226,17 @@ export default function PublicVagaForm() {
                   />
                 </div>
               </div>
+              
+              {/* Honeypot field - hidden from users */}
+              <input
+                type="text"
+                name="website"
+                tabIndex={-1}
+                autoComplete="off"
+                style={{ position: 'absolute', left: '-9999px' }}
+                value={formData.website}
+                onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+              />
             </CardContent>
           </Card>
 
