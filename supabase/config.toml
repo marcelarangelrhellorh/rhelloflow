@@ -35,3 +35,9 @@ verify_jwt = true
 
 [functions.get-share-link-history]
 verify_jwt = true
+
+[functions.compare-candidates]
+verify_jwt = true
+
+[functions.generate-comparison-summary]
+verify_jwt = true

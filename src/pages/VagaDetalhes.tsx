@@ -9,6 +9,7 @@ import { getEventoIcon, getEventoColor, type TipoEvento, logVagaEvento } from "@
 import { formatSalaryRange } from "@/lib/salaryUtils";
 import { ExternalJobBanner } from "@/components/ExternalJobBanner";
 import { ShareJobModal } from "@/components/ShareJobModal";
+import { CompareCandidatesModal } from "@/components/FunilVagas/CompareCandidatesModal";
 import { toast } from "@/hooks/use-toast";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -86,6 +87,7 @@ export default function VagaDetalhes() {
   const [loading, setLoading] = useState(true);
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [detailsDrawerOpen, setDetailsDrawerOpen] = useState(false);
+  const [compareModalOpen, setCompareModalOpen] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -412,6 +414,13 @@ export default function VagaDetalhes() {
             </div>
             <div className="flex gap-2">
               <button
+                onClick={() => setCompareModalOpen(true)}
+                className="px-4 py-2 bg-white dark:bg-background-dark border-2 border-primary text-primary-text-light dark:text-primary-text-dark rounded-md hover:bg-primary/10 transition-colors flex items-center gap-2 font-bold"
+              >
+                <span className="material-symbols-outlined text-xl">analytics</span>
+                Comparar Candidatos
+              </button>
+              <button
                 onClick={() => setDetailsDrawerOpen(true)}
                 className="px-4 py-2 bg-white dark:bg-background-dark border-2 border-primary text-primary-text-light dark:text-primary-text-dark rounded-md hover:bg-primary/10 transition-colors flex items-center gap-2 font-bold"
               >
@@ -431,6 +440,13 @@ export default function VagaDetalhes() {
           <ShareJobModal 
             open={shareModalOpen}
             onOpenChange={setShareModalOpen}
+            vagaId={vaga.id}
+            vagaTitulo={vaga.titulo}
+          />
+
+          <CompareCandidatesModal
+            open={compareModalOpen}
+            onOpenChange={setCompareModalOpen}
             vagaId={vaga.id}
             vagaTitulo={vaga.titulo}
           />
