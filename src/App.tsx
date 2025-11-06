@@ -19,6 +19,7 @@ import FunilCandidatos from "./pages/FunilCandidatos";
 import BancoTalentos from "./pages/BancoTalentos";
 import Analises from "./pages/Analises";
 import GerenciarUsuarios from "./pages/GerenciarUsuarios";
+import GerenciarExclusoes from "./pages/GerenciarExclusoes";
 import AuditLog from "./pages/AuditLog";
 import EstudoMercado from "./pages/EstudoMercado";
 import Auth from "./pages/Auth";
@@ -52,6 +53,7 @@ const App = () => (
             <Route path="/banco-talentos" element={<BancoTalentos />} />
             <Route path="/analises" element={<Analises />} />
             <Route path="/gerenciar-usuarios" element={<GerenciarUsuarios />} />
+            <Route path="/gerenciar-exclusoes" element={<GerenciarExclusoes />} />
             <Route path="/audit-log" element={<AuditLog />} />
             <Route path="/estudo-mercado" element={<EstudoMercado />} />
           </Route>

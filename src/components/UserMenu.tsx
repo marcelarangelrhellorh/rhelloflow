@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { User, Settings, LogOut, Users, FileText } from "lucide-react";
+import { User, Settings, LogOut, Users, FileText, Trash2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,12 +14,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { logLogout } from "@/lib/auditLog";
 import { useUserRole } from "@/hooks/useUserRole";
+import { usePendingApprovals } from "@/hooks/usePendingApprovals";
+import { Badge } from "@/components/ui/badge";
 
 export function UserMenu() {
   const navigate = useNavigate();
   const [userName, setUserName] = useState<string>("");
   const [userEmail, setUserEmail] = useState<string>("");
   const { isAdmin, loading: roleLoading } = useUserRole();
+  const { pendingCount } = usePendingApprovals();
 
   useEffect(() => {
     loadUserProfile();
@@ -108,6 +111,14 @@ export function UserMenu() {
             <DropdownMenuItem className="cursor-pointer" onClick={() => navigate("/gerenciar-usuarios")}>
               <Users className="mr-2 h-4 w-4" />
               <span>Gerenciar Usuários</span>
+            </DropdownMenuItem>
+            
+            <DropdownMenuItem className="cursor-pointer" onClick={() => navigate("/gerenciar-exclusoes")}>
+              <Trash2 className="mr-2 h-4 w-4" />
+              <span>Gerenciar Exclusões</span>
+              {pendingCount > 0 && (
+                <Badge className="ml-2 bg-red-500 text-white">{pendingCount}</Badge>
+              )}
             </DropdownMenuItem>
             
             <DropdownMenuItem className="cursor-pointer" onClick={() => navigate("/audit-log")}>
