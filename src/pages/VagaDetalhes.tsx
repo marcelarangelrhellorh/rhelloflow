@@ -11,6 +11,7 @@ import { ExternalJobBanner } from "@/components/ExternalJobBanner";
 import { ShareJobModal } from "@/components/ShareJobModal";
 import { CompareCandidatesModal } from "@/components/FunilVagas/CompareCandidatesModal";
 import { TagPicker } from "@/components/TagPicker";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -94,6 +95,7 @@ export default function VagaDetalhes() {
   const [compareModalOpen, setCompareModalOpen] = useState(false);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [savingTags, setSavingTags] = useState(false);
+  const [vagaTags, setVagaTags] = useState<Array<{ id: string; label: string; category: string }>>([]);
 
   useEffect(() => {
     if (id) {
@@ -160,14 +162,27 @@ export default function VagaDetalhes() {
 
   const loadTags = async () => {
     try {
-      const { data, error } = await (supabase as any)
+      const { data: vacancyTagsData, error: vacancyTagsError } = await (supabase as any)
         .from("vacancy_tags")
         .select("tag_id")
         .eq("vacancy_id", id!);
 
-      if (error) throw error;
-      if (data) {
-        setSelectedTags(data.map((vt: any) => vt.tag_id));
+      if (vacancyTagsError) throw vacancyTagsError;
+      
+      if (vacancyTagsData && vacancyTagsData.length > 0) {
+        const tagIds = vacancyTagsData.map((vt: any) => vt.tag_id);
+        setSelectedTags(tagIds);
+
+        // Carregar dados completos das tags
+        const { data: tagsData, error: tagsError } = await (supabase as any)
+          .from("tags")
+          .select("id, label, category")
+          .in("id", tagIds);
+
+        if (tagsError) throw tagsError;
+        if (tagsData) {
+          setVagaTags(tagsData);
+        }
       }
     } catch (error) {
       console.error('Erro ao carregar tags:', error);
@@ -199,6 +214,9 @@ export default function VagaDetalhes() {
         if (error) throw error;
       }
 
+      // Recarregar tags após salvar
+      await loadTags();
+      
       toast({
         title: "Tags atualizadas",
         description: "As tags da vaga foram atualizadas com sucesso.",
@@ -469,11 +487,35 @@ export default function VagaDetalhes() {
             <p className="text-secondary-text-light dark:text-secondary-text-dark text-base font-normal mt-2">
               {vaga.empresa} • Acompanhe o progresso do processo de contratação
             </p>
-              {(vaga.salario_min || vaga.salario_max || vaga.salario_modalidade) && (
-                <p className="text-secondary-text-light dark:text-secondary-text-dark text-lg font-semibold mt-2">
-                  💰 {formatSalaryRange(vaga.salario_min, vaga.salario_max, vaga.salario_modalidade)}
-                </p>
-              )}
+              <div className="flex items-center gap-3 mt-2 flex-wrap">
+                {(vaga.salario_min || vaga.salario_max || vaga.salario_modalidade) && (
+                  <p className="text-secondary-text-light dark:text-secondary-text-dark text-lg font-semibold">
+                    💰 {formatSalaryRange(vaga.salario_min, vaga.salario_max, vaga.salario_modalidade)}
+                  </p>
+                )}
+                {vagaTags.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {vagaTags.map((tag) => {
+                      const categoryColors: Record<string, string> = {
+                        area: "bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900/30 dark:text-blue-200 dark:border-blue-700",
+                        role: "bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-900/30 dark:text-yellow-200 dark:border-yellow-700",
+                        skill: "bg-gray-100 text-gray-800 border-gray-300 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600",
+                        seniority: "bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-900/30 dark:text-purple-200 dark:border-purple-700",
+                        location: "bg-green-100 text-green-800 border-green-300 dark:bg-green-900/30 dark:text-green-200 dark:border-green-700",
+                      };
+                      return (
+                        <Badge
+                          key={tag.id}
+                          variant="outline"
+                          className={categoryColors[tag.category] || "bg-gray-100 text-gray-800 border-gray-300"}
+                        >
+                          {tag.label}
+                        </Badge>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             </div>
             <div className="flex gap-2">
               <button
