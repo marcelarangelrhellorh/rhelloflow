@@ -66,74 +66,64 @@ export function HistoryTimeline({ historico, onVagaClick }: HistoryTimelineProps
             </p>
           </div>
         ) : (
-          <div className="relative space-y-6">
-            {/* Timeline Line */}
-            <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-border" />
-
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {historico.map((item, index) => (
-              <div key={item.id} className="relative pl-12">
-                {/* Timeline Dot */}
-                <div className="absolute left-0 top-1 flex h-8 w-8 items-center justify-center rounded-full border-2 border-border bg-background">
-                  <div className="h-3 w-3 rounded-full bg-primary" />
-                </div>
-
-                {/* Content Card */}
-                <div className="rounded-lg border border-border bg-card p-4 transition-shadow hover:shadow-md">
-                  <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
-                    <div>
-                      <Badge
-                        variant="outline"
-                        className={
-                          resultadoColors[item.resultado] || resultadoColors["Banco de Talentos"]
-                        }
-                      >
-                        {resultadoIcons[item.resultado] || "⚪"} {item.resultado}
-                      </Badge>
-                    </div>
-                    {item.data && (
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Calendar className="h-3 w-3" />
-                        {formatDate(item.data)}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Vaga Info */}
-                  {item.vaga_id && (
-                    <Button
-                      variant="link"
-                      size="sm"
-                      className="h-auto p-0 mb-2 text-info hover:text-info/80"
-                      onClick={() => onVagaClick?.(item.vaga_id!)}
+              <div key={item.id} className="rounded-lg border border-border bg-card p-4 transition-shadow hover:shadow-md">
+                <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
+                  <div>
+                    <Badge
+                      variant="outline"
+                      className={`${
+                        resultadoColors[item.resultado] || resultadoColors["Banco de Talentos"]
+                      } border font-bold rounded-lg px-4 py-2 text-sm`}
                     >
-                      <Briefcase className="mr-1 h-3.5 w-3.5" />
-                      <span className="text-sm">Ver vaga relacionada</span>
-                      <ExternalLink className="ml-1 h-3 w-3" />
-                    </Button>
-                  )}
-
-                  {/* Recruiter */}
-                  {item.recrutador && (
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground mb-2">
-                      <User className="h-3.5 w-3.5" />
-                      <span>{item.recrutador}</span>
+                      <span className="mr-2 text-base">{resultadoIcons[item.resultado] || "⚪"}</span>
+                      {item.resultado}
+                    </Badge>
+                  </div>
+                  {item.data && (
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Calendar className="h-3 w-3" />
+                      {formatDate(item.data)}
                     </div>
                   )}
-
-                  {/* Feedback */}
-                  {item.feedback && (
-                    <p className="text-sm text-card-foreground bg-muted/20 rounded p-2 mt-2">
-                      {item.feedback}
-                    </p>
-                  )}
-
-                  {/* Duration (if we have date ranges) */}
-                  {index < historico.length - 1 && item.data && historico[index + 1].data && (
-                    <p className="text-xs text-muted-foreground mt-2">
-                      Duração: {calculateDuration(historico[index + 1].data, item.data)}
-                    </p>
-                  )}
                 </div>
+
+                {/* Vaga Info */}
+                {item.vaga_id && (
+                  <Button
+                    variant="link"
+                    size="sm"
+                    className="h-auto p-0 mb-2 text-info hover:text-info/80"
+                    onClick={() => onVagaClick?.(item.vaga_id!)}
+                  >
+                    <Briefcase className="mr-1 h-3.5 w-3.5" />
+                    <span className="text-sm">Ver vaga relacionada</span>
+                    <ExternalLink className="ml-1 h-3 w-3" />
+                  </Button>
+                )}
+
+                {/* Recruiter */}
+                {item.recrutador && (
+                  <div className="flex items-center gap-1 text-sm text-muted-foreground mb-2">
+                    <User className="h-3.5 w-3.5" />
+                    <span>{item.recrutador}</span>
+                  </div>
+                )}
+
+                {/* Feedback */}
+                {item.feedback && (
+                  <p className="text-sm text-card-foreground bg-muted/20 rounded p-2 mt-2">
+                    {item.feedback}
+                  </p>
+                )}
+
+                {/* Duration (if we have date ranges) */}
+                {index < historico.length - 1 && item.data && historico[index + 1].data && (
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Duração: {calculateDuration(historico[index + 1].data, item.data)}
+                  </p>
+                )}
               </div>
             ))}
           </div>

@@ -3,7 +3,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Star, User, Calendar, Target } from "lucide-react";
 import { format } from "date-fns";
@@ -203,146 +202,113 @@ export function ScorecardHistory({ candidateId }: ScorecardHistoryProps) {
         </div>
       </CardHeader>
       <CardContent>
-        <Accordion type="single" collapsible className="space-y-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {scorecards.map((scorecard) => {
             const recConfig = recommendationConfig[scorecard.recommendation];
 
             return (
-              <AccordionItem
+              <div
                 key={scorecard.id}
-                value={scorecard.id}
-                className="border rounded-lg"
+                className="border rounded-lg p-4 space-y-4 hover:shadow-md transition-shadow"
               >
-                <AccordionTrigger className="px-4 hover:no-underline">
-                  <div className="flex items-start justify-between w-full gap-4 pr-4">
-                    <div className="flex items-start gap-3 flex-1">
-                      <Avatar className="h-10 w-10 bg-primary/10">
-                        <AvatarFallback className="text-xs font-bold">
-                          {getInitials(scorecard.evaluator_name)}
-                        </AvatarFallback>
-                      </Avatar>
+                {/* Header */}
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-3 flex-1">
+                    <Avatar className="h-10 w-10 bg-primary/10">
+                      <AvatarFallback className="text-xs font-bold">
+                        {getInitials(scorecard.evaluator_name)}
+                      </AvatarFallback>
+                    </Avatar>
 
-                      <div className="flex-1 text-left">
-                        <div className="font-bold text-base">
-                          {scorecard.template_name}
-                        </div>
-                        <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
-                          <User className="h-4 w-4" />
-                          <span className="font-medium">{scorecard.evaluator_name}</span>
-                        </div>
-                        {scorecard.vaga_titulo && (
-                          <div className="flex items-center gap-2 mt-1">
-                            <Badge variant="outline" className="text-sm font-medium">
-                              {scorecard.vaga_titulo}
-                            </Badge>
-                          </div>
-                        )}
+                    <div className="flex-1">
+                      <div className="font-bold text-base">
+                        {scorecard.template_name}
                       </div>
-                    </div>
-
-                    <div className="flex items-center gap-4 shrink-0">
-                      <Badge className={cn("text-sm font-semibold", recConfig.color)}>
-                        {recConfig.label}
-                      </Badge>
-
-                      <div className="text-right">
-                        <div className="text-2xl font-bold">
-                          {scorecard.match_percentage}%
-                        </div>
-                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                          <Calendar className="h-4 w-4" />
-                          <span className="font-medium">
-                            {format(new Date(scorecard.created_at), "dd MMM yyyy", {
-                              locale: ptBR,
-                            })}
-                          </span>
-                        </div>
+                      <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
+                        <User className="h-4 w-4" />
+                        <span className="font-medium">{scorecard.evaluator_name}</span>
                       </div>
+                      {scorecard.vaga_titulo && (
+                        <div className="flex items-center gap-2 mt-1">
+                          <Badge variant="outline" className="text-sm font-medium">
+                            {scorecard.vaga_titulo}
+                          </Badge>
+                        </div>
+                      )}
                     </div>
                   </div>
-                </AccordionTrigger>
 
-                <AccordionContent className="px-4 pb-4">
-                  <div className="space-y-4 pt-2">
-                    {/* Progress Bar */}
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-base font-semibold text-muted-foreground">Match Score</span>
-                        <span className="text-lg font-bold">
-                          {scorecard.match_percentage}%
-                        </span>
-                      </div>
-                      <Progress value={scorecard.match_percentage} className="h-2" />
+                  <div className="text-right shrink-0">
+                    <div className="text-2xl font-bold">
+                      {scorecard.match_percentage}%
                     </div>
+                    <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
+                      <Calendar className="h-4 w-4" />
+                      <span className="font-medium">
+                        {format(new Date(scorecard.created_at), "dd MMM yyyy", {
+                          locale: ptBR,
+                        })}
+                      </span>
+                    </div>
+                  </div>
+                </div>
 
-                    {/* Comments */}
-                    {scorecard.comments && (
-                      <div className="bg-muted p-3 rounded-lg">
-                        <p className="text-base font-bold mb-1">Comentários Gerais:</p>
-                        <p className="text-sm text-muted-foreground">
-                          {scorecard.comments}
-                        </p>
+                {/* Recommendation Badge */}
+                <Badge className={cn("text-sm font-semibold w-fit", recConfig.color)}>
+                  {recConfig.label}
+                </Badge>
+
+                {/* Progress Bar */}
+                <div className="space-y-2">
+                  <Progress value={scorecard.match_percentage} className="h-2" />
+                </div>
+
+                {/* Comments */}
+                {scorecard.comments && (
+                  <div className="bg-muted/50 p-3 rounded-lg">
+                    <p className="text-sm font-bold mb-1">Comentários:</p>
+                    <p className="text-xs text-muted-foreground">
+                      {scorecard.comments}
+                    </p>
+                  </div>
+                )}
+
+                {/* Evaluations Summary */}
+                <div className="space-y-2">
+                  <p className="text-sm font-bold">Critérios Avaliados:</p>
+                  <div className="space-y-2">
+                    {scorecard.evaluations.slice(0, 3).map((evaluation, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between text-sm"
+                      >
+                        <span className="text-muted-foreground">{evaluation.criteria_name}</span>
+                        <div className="flex items-center gap-1">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Star
+                              key={star}
+                              className={cn(
+                                "h-3 w-3",
+                                star <= evaluation.score
+                                  ? "fill-[#FFCD00] text-[#FFCD00]"
+                                  : "text-gray-300"
+                              )}
+                            />
+                          ))}
+                        </div>
                       </div>
+                    ))}
+                    {scorecard.evaluations.length > 3 && (
+                      <p className="text-xs text-muted-foreground">
+                        +{scorecard.evaluations.length - 3} critérios adicionais
+                      </p>
                     )}
-
-                    {/* Evaluations */}
-                    <div className="space-y-3">
-                      <p className="text-base font-bold">Detalhes por Critério:</p>
-                      {scorecard.evaluations.map((evaluation, index) => (
-                        <div
-                          key={index}
-                          className="border rounded-lg p-3 space-y-2"
-                        >
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <Badge
-                                  variant="outline"
-                                  className={cn(
-                                    "text-sm font-medium",
-                                    categoryColors[evaluation.criteria_category]
-                                  )}
-                                >
-                                  {categoryLabels[evaluation.criteria_category]}
-                                </Badge>
-                                <span className="text-sm font-medium text-muted-foreground">
-                                  Peso: <span className="font-bold">{evaluation.criteria_weight}%</span>
-                                </span>
-                              </div>
-                              <p className="font-bold text-base">
-                                {evaluation.criteria_name}
-                              </p>
-                            </div>
-
-                            <div className="flex items-center gap-1">
-                              {[1, 2, 3, 4, 5].map((star) => (
-                                <Star
-                                  key={star}
-                                  className={cn(
-                                    "h-4 w-4",
-                                    star <= evaluation.score
-                                      ? "fill-[#FFCD00] text-[#FFCD00]"
-                                      : "text-gray-300"
-                                  )}
-                                />
-                              ))}
-                            </div>
-                          </div>
-
-                          {evaluation.notes && (
-                            <p className="text-xs text-muted-foreground bg-muted p-2 rounded">
-                              {evaluation.notes}
-                            </p>
-                          )}
-                        </div>
-                      ))}
-                    </div>
                   </div>
-                </AccordionContent>
-              </AccordionItem>
+                </div>
+              </div>
             );
           })}
-        </Accordion>
+        </div>
       </CardContent>
     </Card>
   );
