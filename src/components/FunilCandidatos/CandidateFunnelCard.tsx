@@ -71,7 +71,7 @@ export function CandidateFunnelCard({ candidato, onDragStart, isDragging }: Cand
       onMouseDown={onDragStart}
       onClick={handleCardClick}
       className={cn(
-        "cursor-move transition-all duration-200 hover:shadow-md hover:scale-[1.01] bg-background border-2",
+        "cursor-move transition-all duration-200 hover:shadow-md hover:scale-[1.01] bg-[#FFFDF6] border-2 border-[#FFCD00]/20",
         isDragging && "shadow-lg rotate-3 opacity-50",
         isFinalStage && "opacity-60 hover:opacity-70"
       )}
