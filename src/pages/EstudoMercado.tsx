@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, TrendingUp, TrendingDown, Minus, AlertCircle, FileDown } from "lucide-react";
 import { MultiSelect } from "@/components/ui/multi-select";
+import jsPDF from "jspdf";
 
 interface FaixaSalarial {
   tipo_contratacao: string;
@@ -122,7 +123,228 @@ export default function EstudoMercado() {
   };
 
   const handleExportarPDF = () => {
-    window.print();
+    if (!estudo) return;
+
+    try {
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      let yPos = 20;
+
+      // Header com fundo amarelo Rhello
+      doc.setFillColor(255, 205, 0);
+      doc.rect(0, 0, pageWidth, 35, "F");
+      
+      doc.setTextColor(0, 20, 29);
+      doc.setFontSize(24);
+      doc.setFont("helvetica", "bold");
+      doc.text("ESTUDO DE MERCADO", pageWidth / 2, 15, { align: "center" });
+      
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      doc.text("Rhello Flow", pageWidth / 2, 25, { align: "center" });
+
+      yPos = 50;
+
+      // Informações Gerais
+      doc.setTextColor(0, 20, 29);
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text("Informações Gerais", 20, yPos);
+      yPos += 10;
+
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      doc.text(`Função: ${estudo.funcao}`, 20, yPos);
+      yPos += 7;
+      doc.text(`Região: ${estudo.regiao}`, 20, yPos);
+      yPos += 7;
+
+      if (estudo.senioridade) {
+        doc.text(`Senioridade: ${estudo.senioridade}`, 20, yPos);
+        yPos += 7;
+      }
+
+      if (estudo.tipos_contratacao.length > 0) {
+        doc.text(`Tipos de Contratação: ${estudo.tipos_contratacao.join(", ")}`, 20, yPos);
+        yPos += 7;
+      }
+
+      if (estudo.jornada) {
+        doc.text(`Modelo de Trabalho: ${estudo.jornada}`, 20, yPos);
+        yPos += 7;
+      }
+
+      yPos += 10;
+
+      // Faixa Salarial com destaque
+      doc.setFillColor(255, 205, 0);
+      doc.rect(15, yPos - 5, pageWidth - 30, 8, "F");
+      doc.setTextColor(0, 20, 29);
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text("Faixa Salarial", 20, yPos);
+      yPos += 10;
+
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+
+      estudo.faixas_salariais.forEach((faixa) => {
+        if (estudo.faixas_salariais.length > 1) {
+          doc.setFont("helvetica", "bold");
+          doc.text(faixa.tipo_contratacao, 20, yPos);
+          yPos += 7;
+          doc.setFont("helvetica", "normal");
+        }
+
+        doc.text(`Mínimo: ${formatCurrency(faixa.salario_min)}`, 25, yPos);
+        yPos += 6;
+        doc.text(`Média: ${formatCurrency(faixa.salario_media)}`, 25, yPos);
+        yPos += 6;
+        doc.text(`Máximo: ${formatCurrency(faixa.salario_max)}`, 25, yPos);
+        yPos += 10;
+      });
+
+      if (estudo.salario_ofertado) {
+        doc.setFont("helvetica", "bold");
+        doc.text("Sua Oferta:", 20, yPos);
+        yPos += 7;
+        doc.setFont("helvetica", "normal");
+        doc.text(`Salário${estudo.tipo_contratacao_ofertado ? ` (${estudo.tipo_contratacao_ofertado})` : ""}: ${formatCurrency(estudo.salario_ofertado)}`, 25, yPos);
+        yPos += 6;
+        doc.text(`Comparação com mercado: ${estudo.comparacao_oferta}`, 25, yPos);
+        yPos += 10;
+      }
+
+      // Nova página se necessário
+      if (yPos > 250) {
+        doc.addPage();
+        yPos = 20;
+      }
+
+      // Demanda
+      doc.setFillColor(255, 205, 0);
+      doc.rect(15, yPos - 5, pageWidth - 30, 8, "F");
+      doc.setTextColor(0, 20, 29);
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text("Demanda no Mercado", 20, yPos);
+      yPos += 10;
+
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      doc.text(estudo.demanda, 20, yPos);
+      yPos += 10;
+
+      // Tendência
+      if (estudo.tendencia_short) {
+        if (yPos > 250) {
+          doc.addPage();
+          yPos = 20;
+        }
+        doc.setFillColor(255, 205, 0);
+        doc.rect(15, yPos - 5, pageWidth - 30, 8, "F");
+        doc.setFontSize(14);
+        doc.setFont("helvetica", "bold");
+        doc.text("Tendência", 20, yPos);
+        yPos += 10;
+
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+        const tendenciaLines = doc.splitTextToSize(estudo.tendencia_short, 170);
+        doc.text(tendenciaLines, 20, yPos);
+        yPos += tendenciaLines.length * 6 + 10;
+      }
+
+      // Benefícios
+      if (estudo.beneficios.length > 0) {
+        if (yPos > 250) {
+          doc.addPage();
+          yPos = 20;
+        }
+        doc.setFillColor(255, 205, 0);
+        doc.rect(15, yPos - 5, pageWidth - 30, 8, "F");
+        doc.setFontSize(14);
+        doc.setFont("helvetica", "bold");
+        doc.text("Benefícios Mais Comuns", 20, yPos);
+        yPos += 10;
+
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+        const beneficiosText = doc.splitTextToSize(estudo.beneficios.join(", "), 170);
+        doc.text(beneficiosText, 20, yPos);
+        yPos += beneficiosText.length * 6 + 10;
+      }
+
+      // Fontes
+      if (yPos > 240) {
+        doc.addPage();
+        yPos = 20;
+      }
+
+      doc.setFillColor(255, 205, 0);
+      doc.rect(15, yPos - 5, pageWidth - 30, 8, "F");
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text("Fontes Consultadas", 20, yPos);
+      yPos += 10;
+
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "normal");
+
+      estudo.fontes.forEach((fonte) => {
+        if (yPos > 270) {
+          doc.addPage();
+          yPos = 20;
+        }
+        doc.text(`• ${fonte.nome}`, 20, yPos);
+        yPos += 6;
+      });
+
+      // Observações
+      if (estudo.observacoes) {
+        yPos += 5;
+        if (yPos > 240) {
+          doc.addPage();
+          yPos = 20;
+        }
+        doc.setFillColor(255, 205, 0);
+        doc.rect(15, yPos - 5, pageWidth - 30, 8, "F");
+        doc.setFontSize(14);
+        doc.setFont("helvetica", "bold");
+        doc.text("Observações", 20, yPos);
+        yPos += 10;
+
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+        const obsLines = doc.splitTextToSize(estudo.observacoes, 170);
+        doc.text(obsLines, 20, yPos);
+      }
+
+      // Footer em todas as páginas
+      const totalPages = doc.getNumberOfPages();
+      for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        doc.setFillColor(0, 20, 29);
+        doc.rect(0, doc.internal.pageSize.getHeight() - 15, pageWidth, 15, "F");
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(8);
+        doc.text(
+          `Gerado por Rhello Flow em ${new Date().toLocaleDateString("pt-BR")}`,
+          pageWidth / 2,
+          doc.internal.pageSize.getHeight() - 7,
+          { align: "center" }
+        );
+      }
+
+      // Salvar PDF
+      const fileName = `estudo-mercado-${estudo.funcao.replace(/\s+/g, "-").toLowerCase()}-${new Date().toISOString().split("T")[0]}.pdf`;
+      doc.save(fileName);
+
+      toast.success("PDF exportado com sucesso!");
+    } catch (error) {
+      console.error("Erro ao exportar PDF:", error);
+      toast.error("Erro ao exportar PDF");
+    }
   };
 
   return (
@@ -259,8 +481,8 @@ export default function EstudoMercado() {
 
       {/* Resultados */}
       {estudo && (
-        <div className="space-y-6 animate-in fade-in duration-500 print-section">
-          <div className="flex items-center justify-between no-print">
+        <div className="space-y-6 animate-in fade-in duration-500">
+          <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold text-primary">📊 Resultado do Estudo</h2>
             <Button onClick={handleExportarPDF} variant="outline" size="lg">
               <FileDown className="mr-2 h-5 w-5" />
