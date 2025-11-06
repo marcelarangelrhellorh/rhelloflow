@@ -39,6 +39,10 @@ export default function GerenciarUsuarios() {
     }
   }, [isAdmin, roleLoading, navigate]);
 
+  useEffect(() => {
+    loadUserRoles();
+  }, [users]);
+
   // Não renderiza nada se não for admin
   if (roleLoading) {
     return (
@@ -51,10 +55,6 @@ export default function GerenciarUsuarios() {
   if (!isAdmin) {
     return null;
   }
-
-  useEffect(() => {
-    loadUserRoles();
-  }, [users]);
 
   const loadUserRoles = async () => {
     try {
