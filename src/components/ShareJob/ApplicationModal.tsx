@@ -98,7 +98,55 @@ export function ApplicationModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validações
+    // Validação do token
+    if (!token || token.length === 0) {
+      toast({
+        title: "Erro de acesso",
+        description: "Link de candidatura inválido. Verifique o link e tente novamente.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validações de campos obrigatórios
+    if (!formData.nome_completo || formData.nome_completo.trim().length < 2) {
+      toast({
+        title: "Nome obrigatório",
+        description: "Por favor, preencha seu nome completo",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!formData.email || formData.email.trim().length === 0) {
+      toast({
+        title: "E-mail obrigatório",
+        description: "Por favor, preencha seu e-mail",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validação básica de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email.trim())) {
+      toast({
+        title: "E-mail inválido",
+        description: "Por favor, insira um e-mail válido",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!formData.telefone || formData.telefone.trim().length < 8) {
+      toast({
+        title: "Telefone obrigatório",
+        description: "Por favor, preencha seu telefone",
+        variant: "destructive"
+      });
+      return;
+    }
+
     if (!lgpdConsent) {
       toast({
         title: "Consentimento necessário",
@@ -117,6 +165,15 @@ export function ApplicationModal({
       return;
     }
 
+    if (requiresPassword && (!formData.password || formData.password.trim().length === 0)) {
+      toast({
+        title: "Senha obrigatória",
+        description: "Esta vaga requer senha para candidatura",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setSubmitting(true);
 
     try {
@@ -125,15 +182,26 @@ export function ApplicationModal({
       const fileBase64 = await fileToBase64(file);
       setUploadProgress(50);
 
+      // Prepare candidate data (excluding password and company honeypot)
+      const candidateData = {
+        nome_completo: formData.nome_completo.trim(),
+        email: formData.email.trim(),
+        telefone: formData.telefone.trim(),
+        cidade: formData.cidade.trim() || null,
+        estado: formData.estado.trim() || null,
+        linkedin: formData.linkedin.trim() || null,
+        pretensao_salarial: formData.pretensao_salarial ? parseFloat(formData.pretensao_salarial) : null,
+        mensagem: formData.mensagem.trim() || null,
+        company: formData.company, // Honeypot
+      };
+
       // Submit application with file
       const { data, error } = await supabase.functions.invoke('submit-share-application', {
         body: {
-          token,
-          candidate: {
-            ...formData,
-          },
-          password: requiresPassword ? formData.password : undefined,
-          formStartTime, // Timing check
+          token: token.trim(),
+          candidate: candidateData,
+          password: requiresPassword ? formData.password.trim() : undefined,
+          formStartTime,
           files: {
             resume: {
               data: fileBase64,
@@ -161,11 +229,21 @@ export function ApplicationModal({
           description: "Recebemos sua candidatura com sucesso",
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting application:', error);
+      
+      // Extrair mensagem de erro mais detalhada
+      let errorMessage = "Erro ao enviar candidatura. Tente novamente.";
+      
+      if (error?.message) {
+        errorMessage = error.message;
+      } else if (error?.error) {
+        errorMessage = error.error;
+      }
+      
       toast({
         title: "Erro",
-        description: "Erro ao enviar candidatura. Tente novamente.",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
