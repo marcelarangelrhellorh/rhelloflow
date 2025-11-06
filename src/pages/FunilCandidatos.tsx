@@ -31,11 +31,17 @@ interface Candidato {
   recrutador: string | null;
   vaga_relacionada_id: string | null;
   criado_em: string;
+  vaga?: {
+    empresa: string | null;
+    recrutador_id: string | null;
+  };
 }
 
 interface Vaga {
   id: string;
   titulo: string;
+  empresa: string | null;
+  recrutador_id: string | null;
 }
 
 const statusColumns: StatusCandidato[] = [
@@ -68,9 +74,12 @@ export default function FunilCandidatos() {
   const [loading, setLoading] = useState(true);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [vagaFilter, setVagaFilter] = useState<string>("all");
+  const [clienteFilter, setClienteFilter] = useState<string>("all");
+  const [recrutadorVagaFilter, setRecrutadorVagaFilter] = useState<string>("all");
   const [recrutadorFilter, setRecrutadorFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [dragOverColumn, setDragOverColumn] = useState<string | null>(null);
+  const [users, setUsers] = useState<Array<{ id: string; name: string }>>([]);
   const { toast } = useToast();
 
   const sensors = useSensors(
@@ -84,13 +93,14 @@ export default function FunilCandidatos() {
   useEffect(() => {
     loadCandidatos();
     loadVagas();
+    loadUsers();
   }, []);
 
   async function loadVagas() {
     try {
       const { data, error } = await supabase
         .from("vagas")
-        .select("id, titulo")
+        .select("id, titulo, empresa, recrutador_id")
         .not("status", "in", '("Concluído","Cancelada")')
         .order("titulo");
 
@@ -101,12 +111,33 @@ export default function FunilCandidatos() {
     }
   }
 
+  async function loadUsers() {
+    try {
+      const { data, error } = await supabase
+        .from("users")
+        .select("id, name")
+        .eq("active", true)
+        .order("name");
+
+      if (error) throw error;
+      setUsers(data || []);
+    } catch (error: any) {
+      console.error("Erro ao carregar usuários:", error);
+    }
+  }
+
   async function loadCandidatos() {
     try {
       setLoading(true);
       const { data, error } = await supabase
         .from("candidatos")
-        .select("*")
+        .select(`
+          *,
+          vaga:vagas!vaga_relacionada_id(
+            empresa,
+            recrutador_id
+          )
+        `)
         .order("criado_em", { ascending: false });
 
       if (error) throw error;
@@ -206,20 +237,32 @@ export default function FunilCandidatos() {
     return candidatos.filter((candidato) => {
       const matchesStatus = candidato.status === status;
       const matchesVaga = vagaFilter === "all" || candidato.vaga_relacionada_id === vagaFilter;
+      const matchesCliente = clienteFilter === "all" || candidato.vaga?.empresa === clienteFilter;
+      const matchesRecrutadorVaga = recrutadorVagaFilter === "all" || candidato.vaga?.recrutador_id === recrutadorVagaFilter;
       const matchesRecrutador = recrutadorFilter === "all" || candidato.recrutador === recrutadorFilter;
       const matchesSearch = !searchQuery || 
         candidato.nome_completo.toLowerCase().includes(searchQuery.toLowerCase()) ||
         candidato.email.toLowerCase().includes(searchQuery.toLowerCase());
       
-      return matchesStatus && matchesVaga && matchesRecrutador && matchesSearch;
+      return matchesStatus && matchesVaga && matchesCliente && matchesRecrutadorVaga && matchesRecrutador && matchesSearch;
     });
   };
 
   // Filter out "Banco de Talentos" from funnel display
   const funnelColumns = statusColumns.filter(status => status !== "Banco de Talentos");
 
-  // Get unique recruiters
+  // Get unique recruiters and clients
   const recrutadores = Array.from(new Set(candidatos.map(c => c.recrutador).filter(Boolean))) as string[];
+  const clientes = Array.from(new Set(
+    candidatos
+      .map(c => c.vaga?.empresa)
+      .filter(Boolean)
+  )) as string[];
+  const recrutadoresVaga = Array.from(new Set(
+    candidatos
+      .map(c => c.vaga?.recrutador_id)
+      .filter(Boolean)
+  )) as string[];
 
   // Count active candidates (excluding final statuses and banco de talentos)
   const activeCandidatesCount = candidatos.filter(c => 
@@ -269,10 +312,17 @@ export default function FunilCandidatos() {
             onSearchChange={setSearchQuery}
             vagaFilter={vagaFilter}
             onVagaChange={setVagaFilter}
+            clienteFilter={clienteFilter}
+            onClienteChange={setClienteFilter}
+            recrutadorVagaFilter={recrutadorVagaFilter}
+            onRecrutadorVagaChange={setRecrutadorVagaFilter}
             recrutadorFilter={recrutadorFilter}
             onRecrutadorChange={setRecrutadorFilter}
             vagas={vagas}
+            clientes={clientes}
+            recrutadoresVaga={recrutadoresVaga}
             recrutadores={recrutadores}
+            users={users}
           />
         </div>
       </div>
