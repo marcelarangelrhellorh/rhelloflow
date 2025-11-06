@@ -11,7 +11,8 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { Users, UserPlus, Mail, UserCircle, Shield, Edit, AlertCircle } from "lucide-react";
+import { Users, UserPlus, Mail, UserCircle, Shield, Edit, AlertCircle, Trash2, KeyRound } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
@@ -157,6 +158,67 @@ export default function GerenciarUsuarios() {
     }
   };
 
+  const handleDeleteUser = async (userId: string, userName: string) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/delete-user`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ userId }),
+        }
+      );
+
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to delete user");
+      }
+
+      toast.success(`✅ Usuário ${userName} excluído com sucesso`);
+      reload();
+    } catch (error: any) {
+      console.error("Erro ao excluir usuário:", error);
+      toast.error(`❌ ${error.message}`);
+    }
+  };
+
+  const handleResetPassword = async (userId: string, userName: string, newPassword: string) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/reset-user-password`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ userId, newPassword }),
+        }
+      );
+
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to reset password");
+      }
+
+      toast.success(`✅ Senha de ${userName} redefinida com sucesso`);
+    } catch (error: any) {
+      console.error("Erro ao redefinir senha:", error);
+      toast.error(`❌ ${error.message}`);
+    }
+  };
+
   const getRoleBadge = (role: string) => {
     const badges = {
       admin: <Badge variant="destructive">Admin</Badge>,
@@ -257,6 +319,52 @@ export default function GerenciarUsuarios() {
               className="w-full"
             >
               Salvar Permissões
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  };
+
+  const PasswordResetDialog = ({ user }: { user: any }) => {
+    const [newPassword, setNewPassword] = useState("");
+    const [open, setOpen] = useState(false);
+
+    const handleSubmit = async () => {
+      await handleResetPassword(user.id, user.name, newPassword);
+      setNewPassword("");
+      setOpen(false);
+    };
+
+    return (
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          <Button variant="ghost" size="sm" title="Redefinir senha">
+            <KeyRound className="h-4 w-4" />
+          </Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Redefinir Senha - {user.name}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label htmlFor="new-password">Nova Senha</Label>
+              <Input
+                id="new-password"
+                type="password"
+                minLength={6}
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Mínimo 6 caracteres"
+              />
+            </div>
+            <Button 
+              onClick={handleSubmit}
+              disabled={newPassword.length < 6}
+              className="w-full"
+            >
+              Redefinir Senha
             </Button>
           </div>
         </DialogContent>
@@ -407,6 +515,32 @@ export default function GerenciarUsuarios() {
 
                     <div className="flex items-center gap-4">
                       <RoleEditDialog user={user} />
+                      <PasswordResetDialog user={user} />
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="sm" title="Excluir usuário">
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Tem certeza que deseja excluir o usuário <strong>{user.name}</strong>?
+                              Esta ação não pode ser desfeita e removerá todos os dados associados.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleDeleteUser(user.id, user.name)}
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            >
+                              Excluir
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                       <div className="flex items-center gap-2">
                         <Label htmlFor={`active-${user.id}`} className="text-sm">
                           {user.active ? "Ativo" : "Inativo"}
