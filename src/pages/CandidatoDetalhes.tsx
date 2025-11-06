@@ -370,7 +370,7 @@ export default function CandidatoDetalhes() {
             totalFeedbacks={stats.totalFeedbacks}
           />
 
-          {/* Three Column Layout */}
+          {/* Two Column Layout - Top */}
           <div className="grid gap-6 lg:grid-cols-12">
             {/* Left Sidebar - Contact & Tags */}
             <div className="lg:col-span-3 space-y-6">
@@ -387,8 +387,8 @@ export default function CandidatoDetalhes() {
               <CandidateTagsCard candidateId={id!} />
             </div>
 
-            {/* Main Content - Professional Info & Feedbacks */}
-            <div className="lg:col-span-6 space-y-6">
+            {/* Main Content - Professional Info */}
+            <div className="lg:col-span-9">
               <ProfessionalInfoCard
                 recrutador={candidato.recrutador}
                 pretensaoSalarial={candidato.pretensao_salarial}
@@ -409,16 +409,19 @@ export default function CandidatoDetalhes() {
                 onUpdate={loadCandidato}
                 onVagaClick={() => vaga && navigate(`/vagas/${vaga.id}`)}
               />
-
-              <FeedbackList
-                candidatoId={id!}
-                onAddFeedback={() => setFeedbackModalOpen(true)}
-                onSolicitarFeedback={() => setSolicitarFeedbackModalOpen(true)}
-              />
             </div>
+          </div>
 
-            {/* Right Sidebar - Scorecards & Timeline */}
-            <div className="lg:col-span-3 space-y-6">
+          {/* Feedbacks - Full Width */}
+          <FeedbackList
+            candidatoId={id!}
+            onAddFeedback={() => setFeedbackModalOpen(true)}
+            onSolicitarFeedback={() => setSolicitarFeedbackModalOpen(true)}
+          />
+
+          {/* Scorecards and Timeline - Horizontal */}
+          <div className="grid gap-6 lg:grid-cols-2">
+            <div className="space-y-6">
               <ScorecardEvaluation
                 candidateId={id!}
                 candidateName={candidato.nome_completo}
@@ -426,12 +429,12 @@ export default function CandidatoDetalhes() {
               />
 
               <ScorecardHistory candidateId={id!} />
-
-              <HistoryTimeline
-                historico={historico}
-                onVagaClick={(vagaId) => navigate(`/vagas/${vagaId}`)}
-              />
             </div>
+
+            <HistoryTimeline
+              historico={historico}
+              onVagaClick={(vagaId) => navigate(`/vagas/${vagaId}`)}
+            />
           </div>
         </div>
       </main>
