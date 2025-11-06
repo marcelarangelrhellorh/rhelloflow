@@ -252,18 +252,6 @@ export default function ShareJob() {
                     {formatSalaryRange(vaga.salario_min, vaga.salario_max, vaga.salario_modalidade)}
                   </Badge>
                 )}
-                {vaga.prioridade && (
-                  <Badge variant="outline" className="border-[#36404A]/20">
-                    <TrendingUp className="h-3 w-3 mr-1" />
-                    {vaga.prioridade}
-                  </Badge>
-                )}
-                {vaga.complexidade && (
-                  <Badge variant="outline" className="border-[#36404A]/20">
-                    <Award className="h-3 w-3 mr-1" />
-                    {vaga.complexidade}
-                  </Badge>
-                )}
               </div>
 
               {/* Quick Stats */}
