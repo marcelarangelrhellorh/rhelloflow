@@ -69,10 +69,19 @@ serve(async (req) => {
       );
     }
 
-    // Get share link
+    // Get share link with job and recruiter info
     const { data: shareLink, error: linkError } = await supabase
       .from('share_links')
-      .select('*, vagas(id, titulo, empresa, recrutador_id, cs_id)')
+      .select(`
+        *, 
+        vagas(
+          id, 
+          titulo, 
+          empresa, 
+          recrutador_id, 
+          cs_id
+        )
+      `)
       .eq('token', token)
       .single();
 
@@ -198,6 +207,18 @@ serve(async (req) => {
       }
     }
 
+    // Get recruiter name if there's a recruiter assigned to the job
+    let recrutadorNome = null;
+    if (shareLink.vagas?.recrutador_id) {
+      const { data: recrutadorData } = await supabase
+        .from('users')
+        .select('name')
+        .eq('id', shareLink.vagas.recrutador_id)
+        .single();
+      
+      recrutadorNome = recrutadorData?.name || null;
+    }
+
     // Sanitize inputs
     const sanitizedCandidate = {
       nome_completo: sanitizeText(candidate.nome_completo).substring(0, 255),
@@ -218,6 +239,7 @@ serve(async (req) => {
       utm: utm || null,
       status: 'Selecionado',
       origem: 'Link de Divulgação',
+      recrutador: recrutadorNome, // Auto-assign recruiter from job
     };
 
     // Create candidate
