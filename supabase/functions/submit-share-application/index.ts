@@ -29,7 +29,7 @@ const candidateSchema = z.object({
 });
 
 const applicationSchema = z.object({
-  token: z.string().uuid('Token inválido'),
+  token: z.string().min(1, 'Token inválido'),
   candidate: candidateSchema,
   password: z.string().optional(),
   utm: z.object({
