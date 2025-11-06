@@ -56,6 +56,7 @@ export default function VagaForm() {
     salario_max: "",
     salario_modalidade: "FAIXA" as "FAIXA" | "A_COMBINAR",
     modelo_trabalho: "",
+    tipo_contratacao: "",
     horario_inicio: "",
     horario_fim: "",
     dias_semana: [] as string[],
@@ -97,6 +98,7 @@ export default function VagaForm() {
           salario_max: data.salario_max?.toString() || "",
           salario_modalidade: (data.salario_modalidade as any) || "FAIXA",
           modelo_trabalho: data.modelo_trabalho || "",
+          tipo_contratacao: data.tipo_contratacao || "",
           horario_inicio: data.horario_inicio || "",
           horario_fim: data.horario_fim || "",
           dias_semana: data.dias_semana || [],
@@ -161,6 +163,7 @@ export default function VagaForm() {
         salario_max: formData.salario_modalidade === "A_COMBINAR" ? null : parseCurrency(formData.salario_max),
         salario_modalidade: formData.salario_modalidade,
         modelo_trabalho: (formData.modelo_trabalho || null) as any,
+        tipo_contratacao: formData.tipo_contratacao || null,
         horario_inicio: formData.horario_inicio || null,
         horario_fim: formData.horario_fim || null,
         dias_semana: formData.dias_semana.length > 0 ? formData.dias_semana : null,
@@ -470,6 +473,20 @@ export default function VagaForm() {
                     {Constants.public.Enums.modelo_trabalho.map((modelo) => (
                       <SelectItem key={modelo} value={modelo}>{modelo}</SelectItem>
                     ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="tipo_contratacao">Formato da Contratação</Label>
+                <Select value={formData.tipo_contratacao} onValueChange={(value) => setFormData({ ...formData, tipo_contratacao: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="CLT">CLT</SelectItem>
+                    <SelectItem value="PJ">PJ</SelectItem>
+                    <SelectItem value="CLT ou PJ">CLT ou PJ</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

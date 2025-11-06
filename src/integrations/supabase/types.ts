@@ -1566,6 +1566,7 @@ export type Database = {
           status_changed_at: string | null
           status_order: number | null
           status_slug: string | null
+          tipo_contratacao: string | null
           titulo: string
           updated_at: string | null
           updated_by: string | null
@@ -1608,6 +1609,7 @@ export type Database = {
           status_changed_at?: string | null
           status_order?: number | null
           status_slug?: string | null
+          tipo_contratacao?: string | null
           titulo: string
           updated_at?: string | null
           updated_by?: string | null
@@ -1650,6 +1652,7 @@ export type Database = {
           status_changed_at?: string | null
           status_order?: number | null
           status_slug?: string | null
+          tipo_contratacao?: string | null
           titulo?: string
           updated_at?: string | null
           updated_by?: string | null
