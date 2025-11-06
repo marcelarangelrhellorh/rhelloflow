@@ -638,89 +638,54 @@ export default function CandidatoForm() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Avaliação</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="pontos_fortes">Pontos Fortes</Label>
-                <Textarea
-                  id="pontos_fortes"
-                  rows={3}
-                  maxLength={500}
-                  placeholder="Descreva os pontos fortes do candidato..."
-                  value={formData.pontos_fortes}
-                  onChange={(e) => setFormData({ ...formData, pontos_fortes: e.target.value })}
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  {formData.pontos_fortes.length}/500 caracteres
+          {/* Seção de dados da candidatura (quando vier de link público) */}
+          {hasSourceLink && (
+            <Card className="border-primary/30 bg-primary/5">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <span>📝</span> Dados da Candidatura
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Este candidato se inscreveu através de um link público de divulgação de vaga. 
+                  As informações abaixo foram preenchidas pelo próprio candidato.
                 </p>
-              </div>
-
-              <div>
-                <Label htmlFor="pontos_desenvolver">Pontos a Desenvolver</Label>
-                <Textarea
-                  id="pontos_desenvolver"
-                  rows={3}
-                  maxLength={500}
-                  placeholder="Descreva os pontos que o candidato precisa desenvolver..."
-                  value={formData.pontos_desenvolver}
-                  onChange={(e) => setFormData({ ...formData, pontos_desenvolver: e.target.value })}
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  {formData.pontos_desenvolver.length}/500 caracteres
-                </p>
-              </div>
-
-              <div>
-                <Label htmlFor="parecer_final">Parecer Final</Label>
-                <Textarea
-                  id="parecer_final"
-                  rows={4}
-                  maxLength={500}
-                  placeholder="Parecer final sobre o candidato..."
-                  value={formData.parecer_final}
-                  onChange={(e) => setFormData({ ...formData, parecer_final: e.target.value })}
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  {formData.parecer_final.length}/500 caracteres
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Status e Feedback</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="status">Status</Label>
-                <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Constants.public.Enums.status_candidato.map((status) => (
-                      <SelectItem key={status} value={status}>{status}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="feedback">Feedback</Label>
-                <Textarea
-                  id="feedback"
-                  rows={4}
-                  placeholder="Observações sobre o candidato..."
-                  value={formData.feedback}
-                  onChange={(e) => setFormData({ ...formData, feedback: e.target.value })}
-                />
-              </div>
-            </CardContent>
-          </Card>
+                <div className="space-y-3 p-4 bg-card rounded-lg">
+                  {formData.nome_completo && (
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Nome:</span>
+                      <p className="text-sm">{formData.nome_completo}</p>
+                    </div>
+                  )}
+                  {formData.email && (
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">E-mail:</span>
+                      <p className="text-sm">{formData.email}</p>
+                    </div>
+                  )}
+                  {formData.telefone && (
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Telefone:</span>
+                      <p className="text-sm">{formData.telefone}</p>
+                    </div>
+                  )}
+                  {(formData.cidade || formData.estado) && (
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Localização:</span>
+                      <p className="text-sm">{formData.cidade}{formData.cidade && formData.estado && ', '}{formData.estado}</p>
+                    </div>
+                  )}
+                  {formData.linkedin && (
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">LinkedIn:</span>
+                      <p className="text-sm">{formData.linkedin}</p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           <div className="flex gap-4">
             <Button type="submit" disabled={loading || uploading}>

@@ -271,26 +271,24 @@ export default function Dashboard() {
         {/* Ações Rápidas - Movidas para cima */}
         <div className="mb-6">
           <h2 className="text-base font-semibold text-foreground mb-3">Ações rápidas</h2>
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex flex-wrap gap-3">
             <Button 
               onClick={() => navigate("/vagas/nova")} 
-              className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-medium transition-all duration-150 rounded-xl h-11"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold transition-all duration-150 rounded-xl h-11 px-6"
             >
               <Plus className="mr-2 h-5 w-5" />
               Nova Vaga
             </Button>
             <Button 
               onClick={() => navigate("/candidatos/novo")} 
-              variant="outline"
-              className="flex-1 border-2 hover:bg-muted transition-all duration-150 rounded-xl h-11"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold transition-all duration-150 rounded-xl h-11 px-6"
             >
               <UserPlus className="mr-2 h-5 w-5" />
               Novo Candidato
             </Button>
             <Button 
               onClick={copyPublicFormLink}
-              variant="outline"
-              className="flex-1 border-2 hover:bg-muted transition-all duration-150 rounded-xl h-11"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold transition-all duration-150 rounded-xl h-11 px-6"
             >
               <Share2 className="mr-2 h-5 w-5" />
               Compartilhar Formulário

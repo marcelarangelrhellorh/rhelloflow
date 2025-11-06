@@ -125,22 +125,32 @@ export default function PublicVagaForm() {
   if (submitted) {
     return (
       <div className="min-h-screen bg-[#FFFDF6] flex items-center justify-center p-4">
-        <Card className="max-w-2xl w-full">
+        <Card className="max-w-2xl w-full border-2 border-primary/20">
           <CardContent className="pt-12 pb-12 text-center">
             <div className="flex justify-center mb-6">
-              <div className="rounded-full bg-success/10 p-6">
-                <CheckCircle2 className="h-16 w-16 text-success" />
+              <img 
+                src="/src/assets/logo-rhello-dark.png" 
+                alt="Rhello" 
+                className="h-20 object-contain mb-4"
+              />
+            </div>
+            <div className="flex justify-center mb-6">
+              <div className="rounded-full bg-primary/10 p-6">
+                <CheckCircle2 className="h-16 w-16 text-primary" />
               </div>
             </div>
-            <h2 className="text-2xl font-bold text-[#00141D] mb-4">
+            <h2 className="text-3xl font-bold text-[#00141D] mb-4">
               Solicitação Enviada com Sucesso! 🎉
             </h2>
-            <p className="text-muted-foreground mb-8">
+            <p className="text-[#36404A] text-lg mb-8">
               Recebemos sua solicitação de vaga e nossa equipe entrará em contato em breve 
               para dar continuidade ao processo de recrutamento.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button onClick={() => setSubmitted(false)} variant="outline">
+              <Button 
+                onClick={() => setSubmitted(false)} 
+                className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold"
+              >
                 Enviar Outra Vaga
               </Button>
             </div>
@@ -155,15 +165,17 @@ export default function PublicVagaForm() {
       <div className="mx-auto max-w-4xl">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#F9EC3F]">
-              <span className="text-2xl font-bold text-[#00141D]">R</span>
-            </div>
+          <div className="flex justify-center mb-6">
+            <img 
+              src="/src/assets/logo-rhello-dark.png" 
+              alt="Rhello" 
+              className="h-16 object-contain"
+            />
           </div>
-          <h1 className="text-3xl font-bold text-[#00141D] mb-2">
+          <h1 className="text-4xl font-bold text-[#00141D] mb-3">
             Solicitar Nova Vaga
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-lg text-[#36404A]">
             Preencha os dados abaixo para iniciar o processo de recrutamento
           </p>
         </div>
