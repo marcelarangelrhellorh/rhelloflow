@@ -14,6 +14,7 @@ import { Constants } from "@/integrations/supabase/types";
 import { MultiSelect, MultiSelectOption } from "@/components/ui/multi-select";
 import { parseCurrency, applyCurrencyMask } from "@/lib/salaryUtils";
 import { useUsers } from "@/hooks/useUsers";
+import { TagPicker } from "@/components/TagPicker";
 
 const DIAS_SEMANA = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
 
@@ -39,6 +40,7 @@ export default function VagaForm() {
   const [loading, setLoading] = useState(false);
   const { users: recrutadores } = useUsers('recrutador');
   const { users: csUsers } = useUsers('cs');
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   
   const [formData, setFormData] = useState({
     titulo: "",
@@ -105,6 +107,16 @@ export default function VagaForm() {
           responsabilidades: data.responsabilidades || "",
           observacoes: data.observacoes || "",
         });
+
+        // Carregar tags da vaga
+        const { data: vacancyTagsData } = await (supabase as any)
+          .from("vacancy_tags")
+          .select("tag_id")
+          .eq("vacancy_id", id);
+
+        if (vacancyTagsData) {
+          setSelectedTags(vacancyTagsData.map((vt: any) => vt.tag_id));
+        }
       }
     } catch (error) {
       console.error("Erro ao carregar vaga:", error);
@@ -166,12 +178,25 @@ export default function VagaForm() {
           .update(dataToSave)
           .eq("id", id);
         if (error) throw error;
+
+        // Atualizar tags da vaga
+        await saveTags(id);
+
         toast.success("Vaga atualizada com sucesso!");
       } else {
-        const { error } = await supabase
+        const { data: newVaga, error } = await supabase
           .from("vagas")
-          .insert([dataToSave]);
+          .insert([dataToSave])
+          .select()
+          .single();
+        
         if (error) throw error;
+
+        // Salvar tags da vaga
+        if (newVaga) {
+          await saveTags(newVaga.id);
+        }
+
         toast.success("Vaga criada com sucesso!");
       }
       navigate("/vagas");
@@ -180,6 +205,33 @@ export default function VagaForm() {
       toast.error("Erro ao salvar vaga");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const saveTags = async (vagaId: string) => {
+    try {
+      // Remover todas as tags existentes
+      await (supabase as any)
+        .from("vacancy_tags")
+        .delete()
+        .eq("vacancy_id", vagaId);
+
+      // Inserir novas tags
+      if (selectedTags.length > 0) {
+        const tagsToInsert = selectedTags.map((tagId) => ({
+          vacancy_id: vagaId,
+          tag_id: tagId,
+        }));
+
+        const { error } = await (supabase as any)
+          .from("vacancy_tags")
+          .insert(tagsToInsert);
+
+        if (error) throw error;
+      }
+    } catch (error) {
+      console.error("Erro ao salvar tags:", error);
+      throw error;
     }
   };
 
@@ -522,6 +574,19 @@ export default function VagaForm() {
                   onChange={(e) => setFormData({ ...formData, observacoes: e.target.value })}
                 />
               </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Tags e Categorização</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <TagPicker
+                selectedTags={selectedTags}
+                onChange={setSelectedTags}
+                disabled={loading}
+              />
             </CardContent>
           </Card>
 

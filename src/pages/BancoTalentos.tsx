@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Plus, Grid3x3, List, Star } from "lucide-react";
+import { Search, Plus, Grid3x3, List, Star, Tag } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { MultiSelect } from "@/components/ui/multi-select";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { CandidateCard } from "@/components/BancoTalentos/CandidateCard";
@@ -44,6 +45,8 @@ export default function BancoTalentos() {
   const [nivelFilter, setNivelFilter] = useState<string>("all");
   const [cidadeFilter, setCidadeFilter] = useState<string>("");
   const [avaliacaoFilter, setAvaliacaoFilter] = useState<string>("all");
+  const [tagFilter, setTagFilter] = useState<string[]>([]);
+  const [availableTags, setAvailableTags] = useState<Array<{ label: string; value: string }>>([]);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [selectedCandidate, setSelectedCandidate] = useState<Candidato | null>(null);
   const [showProfileDrawer, setShowProfileDrawer] = useState(false);
@@ -52,13 +55,37 @@ export default function BancoTalentos() {
 
   useEffect(() => {
     loadCandidatos();
+    loadTags();
   }, []);
+
+  const loadTags = async () => {
+    try {
+      const { data, error } = await (supabase as any)
+        .from("tags")
+        .select("id, label, category")
+        .eq("active", true)
+        .order("label");
+
+      if (error) throw error;
+      
+      const tagOptions = (data || []).map((tag: any) => ({
+        label: `${tag.label} (${tag.category})`,
+        value: tag.id,
+      }));
+      
+      setAvailableTags(tagOptions);
+    } catch (error: any) {
+      console.error("Erro ao carregar tags:", error);
+    }
+  };
 
   const loadCandidatos = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from("candidatos")
+      
+      // Buscar candidatos com suas tags usando a view
+      const { data, error } = await (supabase as any)
+        .from("candidates_with_tags")
         .select("*")
         .eq("status", "Banco de Talentos")
         .order("criado_em", { ascending: false });
@@ -67,7 +94,7 @@ export default function BancoTalentos() {
       
       // Buscar estatísticas de avaliação para cada candidato
       const candidatosComRating = await Promise.all(
-        (data || []).map(async (candidato) => {
+        (data || []).map(async (candidato: any) => {
           const { data: ratings } = await supabase
             .from('feedbacks')
             .select('avaliacao')
@@ -113,15 +140,24 @@ export default function BancoTalentos() {
       const minRating = Number(avaliacaoFilter.replace("+", ""));
       matchesAvaliacao = (candidato.mediaRating ?? 0) >= minRating;
     }
+
+    // Filtro de tags (candidato deve ter TODAS as tags selecionadas)
+    let matchesTags = true;
+    if (tagFilter.length > 0) {
+      const candidateTags = (candidato as any).tags || [];
+      matchesTags = tagFilter.every((selectedTagId) =>
+        candidateTags.some((ct: any) => ct.tag_id === selectedTagId)
+      );
+    }
     
-    return matchesSearch && matchesArea && matchesNivel && matchesCidade && matchesAvaliacao;
+    return matchesSearch && matchesArea && matchesNivel && matchesCidade && matchesAvaliacao && matchesTags;
   });
 
   const getDaysInBank = (dateString: string) => {
     return differenceInDays(new Date(), new Date(dateString));
   };
 
-  const hasActiveFilters = areaFilter !== "all" || nivelFilter !== "all" || cidadeFilter !== "" || avaliacaoFilter !== "all";
+  const hasActiveFilters = areaFilter !== "all" || nivelFilter !== "all" || cidadeFilter !== "" || avaliacaoFilter !== "all" || tagFilter.length > 0;
 
   const handleViewProfile = (candidato: Candidato) => {
     setSelectedCandidate(candidato);
@@ -230,6 +266,16 @@ export default function BancoTalentos() {
             onChange={(e) => setCidadeFilter(e.target.value)}
             className={`w-[180px] ${cidadeFilter ? 'border-2 border-primary' : ''}`}
           />
+
+          <div className="w-[280px]">
+            <MultiSelect
+              options={availableTags}
+              value={tagFilter}
+              onChange={setTagFilter}
+              placeholder="Filtrar por tags..."
+              className={tagFilter.length > 0 ? 'border-2 border-primary' : ''}
+            />
+          </div>
 
           <div className="flex gap-2 ml-auto">
             <Button

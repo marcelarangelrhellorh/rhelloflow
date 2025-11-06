@@ -15,6 +15,7 @@ import { FeedbackModal } from "@/components/CandidatoDetalhes/FeedbackModal";
 import { SolicitarFeedbackModal } from "@/components/CandidatoDetalhes/SolicitarFeedbackModal";
 import { HistoryTimeline } from "@/components/CandidatoDetalhes/HistoryTimeline";
 import { LinkToJobModal } from "@/components/BancoTalentos/LinkToJobModal";
+import { CandidateTagsCard } from "@/components/CandidatoDetalhes/CandidateTagsCard";
 
 
 type Candidato = {
@@ -411,6 +412,8 @@ export default function CandidatoDetalhes() {
               onUpdate={loadCandidato}
               onVagaClick={() => vaga && navigate(`/vagas/${vaga.id}`)}
             />
+
+            <CandidateTagsCard candidateId={id!} />
           </div>
         </div>
 
