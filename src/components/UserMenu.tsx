@@ -13,11 +13,13 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { logLogout } from "@/lib/auditLog";
+import { useUserRole } from "@/hooks/useUserRole";
 
 export function UserMenu() {
   const navigate = useNavigate();
   const [userName, setUserName] = useState<string>("");
   const [userEmail, setUserEmail] = useState<string>("");
+  const { isAdmin, loading: roleLoading } = useUserRole();
 
   useEffect(() => {
     loadUserProfile();
@@ -101,15 +103,19 @@ export function UserMenu() {
           <span>Meu perfil</span>
         </DropdownMenuItem>
         
-        <DropdownMenuItem className="cursor-pointer" onClick={() => navigate("/gerenciar-usuarios")}>
-          <Users className="mr-2 h-4 w-4" />
-          <span>Gerenciar Usuários</span>
-        </DropdownMenuItem>
-        
-        <DropdownMenuItem className="cursor-pointer" onClick={() => navigate("/audit-log")}>
-          <FileText className="mr-2 h-4 w-4" />
-          <span>Auditoria</span>
-        </DropdownMenuItem>
+        {isAdmin && (
+          <>
+            <DropdownMenuItem className="cursor-pointer" onClick={() => navigate("/gerenciar-usuarios")}>
+              <Users className="mr-2 h-4 w-4" />
+              <span>Gerenciar Usuários</span>
+            </DropdownMenuItem>
+            
+            <DropdownMenuItem className="cursor-pointer" onClick={() => navigate("/audit-log")}>
+              <FileText className="mr-2 h-4 w-4" />
+              <span>Auditoria</span>
+            </DropdownMenuItem>
+          </>
+        )}
         
         <DropdownMenuItem className="cursor-pointer">
           <Settings className="mr-2 h-4 w-4" />

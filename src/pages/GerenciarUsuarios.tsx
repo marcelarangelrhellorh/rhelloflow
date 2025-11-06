@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useUsers } from "@/hooks/useUsers";
+import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { Users, UserPlus, Mail, UserCircle, Shield, Edit } from "lucide-react";
+import { Users, UserPlus, Mail, UserCircle, Shield, Edit, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
@@ -19,6 +20,7 @@ type AppRole = "recrutador" | "cs" | "viewer" | "admin";
 export default function GerenciarUsuarios() {
   const navigate = useNavigate();
   const { users, loading, reload } = useUsers();
+  const { isAdmin, loading: roleLoading } = useUserRole();
   const [showAddForm, setShowAddForm] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
@@ -28,6 +30,27 @@ export default function GerenciarUsuarios() {
   });
   const [editingUser, setEditingUser] = useState<any>(null);
   const [userRoles, setUserRoles] = useState<Record<string, AppRole[]>>({});
+
+  // Verifica se é admin antes de carregar a página
+  useEffect(() => {
+    if (!roleLoading && !isAdmin) {
+      toast.error("❌ Acesso negado. Apenas administradores podem acessar esta página.");
+      navigate("/");
+    }
+  }, [isAdmin, roleLoading, navigate]);
+
+  // Não renderiza nada se não for admin
+  if (roleLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return null;
+  }
 
   useEffect(() => {
     loadUserRoles();

@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useUserRole } from "@/hooks/useUserRole";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -35,6 +37,8 @@ interface AuditEvent {
 }
 
 export default function AuditLog() {
+  const navigate = useNavigate();
+  const { isAdmin, loading: roleLoading } = useUserRole();
   const [events, setEvents] = useState<AuditEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -43,9 +47,32 @@ export default function AuditLog() {
   const [dateTo, setDateTo] = useState<Date>();
   const [verifying, setVerifying] = useState(false);
 
+  // Verifica se é admin antes de carregar a página
   useEffect(() => {
-    loadAuditEvents();
-  }, []);
+    if (!roleLoading && !isAdmin) {
+      toast.error("❌ Acesso negado. Apenas administradores podem acessar esta página.");
+      navigate("/");
+    }
+  }, [isAdmin, roleLoading, navigate]);
+
+  useEffect(() => {
+    if (isAdmin) {
+      loadAuditEvents();
+    }
+  }, [isAdmin]);
+
+  // Não renderiza nada se não for admin
+  if (roleLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return null;
+  }
 
   const loadAuditEvents = async () => {
     try {
