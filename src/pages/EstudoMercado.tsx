@@ -122,7 +122,7 @@ export default function EstudoMercado() {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-8 max-w-5xl">
+    <div className="container mx-auto p-6 space-y-8 max-w-5xl min-h-screen" style={{ backgroundColor: '#00141d' }}>
       {/* Header */}
       <div className="text-center space-y-2">
         <h1 className="text-4xl font-bold text-primary">📘 Estudo de Mercado</h1>
