@@ -69,8 +69,7 @@ serve(async (req) => {
         total_score,
         match_percentage,
         created_at,
-        scorecard_templates!inner(name),
-        users!candidate_scorecards_evaluator_id_fkey(name)
+        scorecard_templates!inner(name)
       `)
       .in("candidate_id", candidateIds)
       .eq("vaga_id", vagaId)
@@ -82,6 +81,15 @@ serve(async (req) => {
     }
 
     console.log(`Found ${scorecards?.length || 0} scorecards for candidates`);
+
+    // Buscar informações dos avaliadores separadamente
+    const evaluatorIds = [...new Set((scorecards || []).map((sc: any) => sc.evaluator_id).filter(Boolean))];
+    const { data: evaluators } = await supabase
+      .from("users")
+      .select("id, name")
+      .in("id", evaluatorIds);
+
+    const evaluatorsMap = new Map((evaluators || []).map(u => [u.id, u.name]));
 
     // Buscar avaliações detalhadas
     const scorecardsWithEvaluations = await Promise.all(
@@ -98,6 +106,7 @@ serve(async (req) => {
 
         return {
           ...scorecard,
+          evaluator_name: evaluatorsMap.get(scorecard.evaluator_id) || "Desconhecido",
           evaluations: (evaluations || []).map((ev: any) => ({
             criteria_name: ev.scorecard_criteria.name,
             criteria_category: ev.scorecard_criteria.category,
@@ -161,11 +170,11 @@ serve(async (req) => {
         criteriaAverages: criteriaAverages.sort((a, b) => b.average - a.average),
         lastEvaluationDate: candidateScorecards[0].created_at,
         recommendations: recommendations,
-        evaluators: [...new Set(candidateScorecards.map((sc: any) => sc.users?.name || "Desconhecido"))],
+        evaluators: [...new Set(candidateScorecards.map((sc: any) => sc.evaluator_name || "Desconhecido"))],
         scorecards: candidateScorecards.map((sc: any) => ({
           id: sc.id,
           templateName: sc.scorecard_templates?.name || "Template",
-          evaluator: sc.users?.name || "Desconhecido",
+          evaluator: sc.evaluator_name || "Desconhecido",
           score: sc.match_percentage,
           recommendation: sc.recommendation,
           comments: sc.comments,
