@@ -1769,6 +1769,7 @@ export type Database = {
         Args: { end_date: string; start_date: string }
         Returns: number
       }
+      can_manage_user_roles: { Args: never; Returns: boolean }
       compute_audit_event_hash: {
         Args: {
           p_action: string
