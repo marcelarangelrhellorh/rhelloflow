@@ -18,6 +18,7 @@ import {
 import { toast } from "sonner";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useNavigate } from "react-router-dom";
+import { performHardDelete } from "@/lib/deletionUtils";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -160,10 +161,11 @@ export default function GerenciarExclusoes() {
 
   const handleApprove = async (approval: DeletionApproval) => {
     setProcessing(true);
-    const toastId = toast.loading("Aprovando solicitação...");
+    const toastId = toast.loading("Aprovando e executando exclusão...");
 
     try {
-      const { error } = await supabase
+      // First, update approval status
+      const { error: approvalError } = await supabase
         .from("deletion_approvals")
         .update({
           status: "approved",
@@ -172,16 +174,48 @@ export default function GerenciarExclusoes() {
         })
         .eq("id", approval.id);
 
-      if (error) throw error;
+      if (approvalError) throw approvalError;
+
+      // Fetch the resource data for the snapshot
+      let resourceData: any = null;
+      const tableName = approval.resource_type === 'job' ? 'vagas' : 'candidatos';
+      const nameField = approval.resource_type === 'job' ? 'titulo' : 'nome_completo';
+
+      const { data, error: fetchError } = await supabase
+        .from(tableName)
+        .select('*')
+        .eq('id', approval.resource_id)
+        .single();
+
+      if (fetchError || !data) {
+        throw new Error('Recurso não encontrado');
+      }
+
+      resourceData = data;
+      const resourceName = data[nameField];
+
+      // Execute hard delete
+      const deleteResult = await performHardDelete(
+        approval.resource_type as 'job' | 'candidate',
+        approval.resource_id,
+        resourceName,
+        approval.deletion_reason,
+        approval.id,
+        resourceData
+      );
+
+      if (!deleteResult.success) {
+        throw new Error(deleteResult.error || 'Erro ao executar exclusão');
+      }
 
       toast.dismiss(toastId);
-      toast.success("Solicitação aprovada com sucesso");
+      toast.success("Exclusão executada com sucesso");
       setShowApprovalDialog(false);
       loadData();
     } catch (error) {
       toast.dismiss(toastId);
       console.error("Error approving:", error);
-      toast.error("Erro ao aprovar solicitação");
+      toast.error(error instanceof Error ? error.message : "Erro ao aprovar solicitação");
     } finally {
       setProcessing(false);
     }
