@@ -122,12 +122,13 @@ export default function EstudoMercado() {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-8 max-w-5xl min-h-screen" style={{ backgroundColor: '#00141d' }}>
-      {/* Header */}
-      <div className="text-center space-y-2">
-        <h1 className="text-4xl font-bold text-primary">📘 Estudo de Mercado</h1>
-        <p className="text-muted-foreground">Análise objetiva baseada em fontes de mercado</p>
-      </div>
+    <div className="min-h-screen" style={{ backgroundColor: '#00141d' }}>
+      <div className="container mx-auto p-6 space-y-8 max-w-5xl">
+        {/* Header */}
+        <div className="text-center space-y-2">
+          <h1 className="text-4xl font-bold text-primary">📘 Estudo de Mercado</h1>
+          <p className="text-muted-foreground">Análise objetiva baseada em fontes de mercado</p>
+        </div>
 
       {/* Formulário */}
       <Card>
@@ -429,6 +430,7 @@ export default function EstudoMercado() {
           </Card>
         </div>
       )}
+      </div>
     </div>
   );
 }
