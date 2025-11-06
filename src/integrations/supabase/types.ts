@@ -1044,6 +1044,36 @@ export type Database = {
         }
         Relationships: []
       }
+      public_job_submissions_log: {
+        Row: {
+          blocked: boolean | null
+          company_name: string | null
+          content_hash: string
+          id: string
+          ip_address: string
+          job_title: string | null
+          submitted_at: string
+        }
+        Insert: {
+          blocked?: boolean | null
+          company_name?: string | null
+          content_hash: string
+          id?: string
+          ip_address: string
+          job_title?: string | null
+          submitted_at?: string
+        }
+        Update: {
+          blocked?: boolean | null
+          company_name?: string | null
+          content_hash?: string
+          id?: string
+          ip_address?: string
+          job_title?: string | null
+          submitted_at?: string
+        }
+        Relationships: []
+      }
       scorecard_criteria: {
         Row: {
           category: Database["public"]["Enums"]["criteria_category"]
@@ -2345,6 +2375,7 @@ export type Database = {
       }
       can_manage_user_roles: { Args: never; Returns: boolean }
       can_view_analytics: { Args: never; Returns: boolean }
+      cleanup_old_submission_logs: { Args: never; Returns: undefined }
       compute_audit_event_hash: {
         Args: {
           p_action: string

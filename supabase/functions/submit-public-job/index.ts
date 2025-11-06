@@ -34,40 +34,62 @@ const publicJobSchema = z.object({
   formStartTime: z.number().optional(),
 });
 
-// Rate limiting storage
-const submissionTracker = new Map<string, { count: number; timestamp: number }>();
-
-function cleanupOldEntries() {
-  const oneHourAgo = Date.now() - 3600000;
-  for (const [key, value] of submissionTracker.entries()) {
-    if (value.timestamp < oneHourAgo) {
-      submissionTracker.delete(key);
-    }
+// Persistent rate limiting using database
+async function checkRateLimit(supabaseAdmin: any, identifier: string): Promise<boolean> {
+  const oneHourAgo = new Date(Date.now() - 3600000).toISOString();
+  
+  // Count submissions from this IP in the last hour
+  const { count, error } = await supabaseAdmin
+    .from('public_job_submissions_log')
+    .select('*', { count: 'exact', head: true })
+    .eq('ip_address', identifier)
+    .gte('submitted_at', oneHourAgo)
+    .eq('blocked', false);
+  
+  if (error) {
+    console.error('Rate limit check error:', error);
+    return true; // Allow on error to not block legitimate users
   }
+  
+  return (count ?? 0) < 3;
 }
 
-function checkRateLimit(identifier: string): boolean {
-  cleanupOldEntries();
+// Check for duplicate content
+async function checkDuplicateContent(supabaseAdmin: any, contentHash: string): Promise<boolean> {
+  const oneDayAgo = new Date(Date.now() - 86400000).toISOString();
   
-  const entry = submissionTracker.get(identifier);
-  const now = Date.now();
+  const { data, error } = await supabaseAdmin
+    .from('public_job_submissions_log')
+    .select('id')
+    .eq('content_hash', contentHash)
+    .gte('submitted_at', oneDayAgo)
+    .limit(1);
   
-  if (!entry) {
-    submissionTracker.set(identifier, { count: 1, timestamp: now });
-    return true;
+  if (error) {
+    console.error('Duplicate check error:', error);
+    return false; // Allow on error
   }
   
-  if (now - entry.timestamp > 3600000) {
-    submissionTracker.set(identifier, { count: 1, timestamp: now });
-    return true;
-  }
+  return data && data.length > 0;
+}
+
+// Generate content hash for duplicate detection
+function generateContentHash(data: any): string {
+  const contentString = JSON.stringify({
+    titulo: data.titulo,
+    empresa: data.empresa,
+    requisitos: data.requisitos_obrigatorios,
+    responsabilidades: data.responsabilidades,
+  });
   
-  if (entry.count < 3) {
-    entry.count++;
-    return true;
+  // Simple hash function (for production, consider using crypto.subtle)
+  let hash = 0;
+  for (let i = 0; i < contentString.length; i++) {
+    const char = contentString.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash;
   }
-  
-  return false;
+  return hash.toString(36);
 }
 
 function sanitizeText(text: string): string {
@@ -109,8 +131,15 @@ Deno.serve(async (req) => {
   try {
     const clientIp = req.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown';
     
-    // Rate limiting check
-    if (!checkRateLimit(clientIp)) {
+    // Initialize Supabase admin client early for rate limiting
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+    
+    // Persistent rate limiting check
+    const rateLimitOk = await checkRateLimit(supabaseAdmin, clientIp);
+    if (!rateLimitOk) {
       console.log(`Rate limit exceeded for IP: ${clientIp}`);
       return new Response(
         JSON.stringify({ 
@@ -167,6 +196,24 @@ Deno.serve(async (req) => {
         throw new Error('Salário mínimo não pode ser maior que o máximo');
       }
     }
+    
+    // Generate content hash for duplicate detection
+    const contentHash = generateContentHash(validatedData);
+    
+    // Check for duplicate content
+    const isDuplicate = await checkDuplicateContent(supabaseAdmin, contentHash);
+    if (isDuplicate) {
+      console.log(`Duplicate content detected from IP: ${clientIp}`);
+      return new Response(
+        JSON.stringify({ 
+          error: 'Esta vaga já foi submetida recentemente. Aguarde 24 horas para reenviar.' 
+        }),
+        { 
+          status: 409, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
 
     // Build contact info for observacoes
     const contactInfo = [
@@ -205,11 +252,7 @@ Deno.serve(async (req) => {
       status_slug: 'a_iniciar',
     };
 
-    const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
-
+    // Insert job into database
     const { data, error } = await supabaseAdmin
       .from('vagas')
       .insert([sanitizedData])
@@ -220,6 +263,17 @@ Deno.serve(async (req) => {
       console.error('Database error:', error);
       throw new Error('Erro ao criar vaga');
     }
+
+    // Log submission for rate limiting and duplicate detection
+    await supabaseAdmin
+      .from('public_job_submissions_log')
+      .insert([{
+        ip_address: clientIp,
+        company_name: sanitizedData.empresa,
+        job_title: sanitizedData.titulo,
+        content_hash: contentHash,
+        blocked: false,
+      }]);
 
     console.log(`Job submission successful from IP ${clientIp}: ${data.id}`);
 
