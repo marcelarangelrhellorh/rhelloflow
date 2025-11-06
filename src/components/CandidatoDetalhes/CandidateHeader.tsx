@@ -75,31 +75,34 @@ export function CandidateHeader({
   const isContratado = status === "Contratado";
 
   return (
-    <div className="space-y-3">
-      {/* Banner de Contratação - mais compacto */}
+    <div className="space-y-4">
+      {/* Banner de Contratação - mais elegante */}
       {isContratado && (
-        <div className="rounded-lg bg-gradient-to-r from-success/20 via-success/10 to-success/20 border border-success p-3 animate-in fade-in slide-in-from-top-2 duration-500">
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-success text-success-foreground">
-              <PartyPopper className="h-4 w-4" />
+        <div className="rounded-lg bg-gradient-to-r from-success/15 via-success/10 to-success/15 border-2 border-success/40 p-4 animate-in fade-in slide-in-from-top-2 duration-500 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-success text-success-foreground shadow-lg">
+              <PartyPopper className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-sm font-bold text-success flex items-center gap-1.5">
+              <p className="text-base font-bold text-success flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4" />
                 Candidato Contratado!
+              </p>
+              <p className="text-sm text-success/80">
+                Parabéns! Este candidato foi contratado com sucesso.
               </p>
             </div>
           </div>
         </div>
       )}
 
-      <div className="rounded-lg border border-border bg-card p-4">
+      <div className="rounded-lg border border-gray-200 dark:border-secondary-text-light/20 bg-white dark:bg-background-dark p-6 shadow-sm">
         <div className="flex flex-col sm:flex-row gap-4 sm:items-start sm:justify-between">
           {/* Left Side - Candidate Info */}
-          <div className="flex gap-3 flex-1 min-w-0">
-            {/* Avatar - menor */}
+          <div className="flex gap-4 flex-1 min-w-0">
+            {/* Avatar */}
             <div className={cn(
-              "flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full text-xl font-semibold",
+              "flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full text-xl font-bold",
               isContratado ? "bg-success/20 text-success ring-2 ring-success" : "bg-primary/10 text-primary"
             )}>
               {getInitials(nome)}
@@ -107,12 +110,12 @@ export function CandidateHeader({
 
             {/* Info */}
             <div className="flex-1 min-w-0">
-              <div className="flex flex-wrap items-center gap-2 mb-2">
-                <h1 className="text-xl font-bold text-card-foreground truncate">{nome}</h1>
+              <div className="flex flex-wrap items-center gap-2 mb-3">
+                <h1 className="text-primary-text-light dark:text-primary-text-dark text-3xl font-black tracking-tight truncate">{nome}</h1>
                 <Badge
                   variant={isContratado ? "default" : "outline"}
                   className={cn(
-                    "text-xs font-medium flex-shrink-0",
+                    "text-sm font-semibold flex-shrink-0",
                     isContratado && "bg-success text-success-foreground hover:bg-success/90 border-success",
                     !isContratado && (statusColors[status] || statusColors["Banco de Talentos"])
                   )}
@@ -122,45 +125,45 @@ export function CandidateHeader({
               </div>
 
               {/* Info compacta */}
-              <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground mb-2">
+              <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-sm text-secondary-text-light dark:text-secondary-text-dark mb-3">
                 {(nivel || area) && (
-                  <div className="flex items-center gap-1">
-                    <Briefcase className="h-3.5 w-3.5" />
+                  <div className="flex items-center gap-1.5">
+                    <Briefcase className="h-4 w-4" />
                     <span>{[nivel, area].filter(Boolean).join(" – ")}</span>
                   </div>
                 )}
                 
                 {(cidade || estado) && (
-                  <div className="flex items-center gap-1">
-                    <MapPin className="h-3.5 w-3.5" />
+                  <div className="flex items-center gap-1.5">
+                    <MapPin className="h-4 w-4" />
                     <span>{[cidade, estado].filter(Boolean).join(", ")}</span>
                   </div>
                 )}
                 
                 {recrutador && (
-                  <div className="flex items-center gap-1">
-                    <User className="h-3.5 w-3.5" />
+                  <div className="flex items-center gap-1.5">
+                    <User className="h-4 w-4" />
                     <span>{recrutador}</span>
                   </div>
                 )}
               </div>
 
-              {/* Seletor de Etapa - mais compacto */}
+              {/* Seletor de Etapa */}
               <Select value={status} onValueChange={onStatusChange}>
-                <SelectTrigger className="w-full sm:w-[260px] h-8 text-xs border-border bg-background hover:bg-accent/5 transition-colors">
+                <SelectTrigger className="w-full sm:w-[280px] h-9 text-sm border-gray-200 dark:border-secondary-text-light/20 bg-white dark:bg-background-dark hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors">
                   <SelectValue>
-                    <span className="text-muted-foreground">Etapa:</span>{" "}
-                    <span className="font-medium text-foreground">{status}</span>
+                    <span className="text-secondary-text-light dark:text-secondary-text-dark">Etapa:</span>{" "}
+                    <span className="font-semibold text-primary-text-light dark:text-primary-text-dark">{status}</span>
                   </SelectValue>
                 </SelectTrigger>
-                <SelectContent className="bg-popover z-50">
+                <SelectContent className="bg-white dark:bg-background-dark border-gray-200 dark:border-secondary-text-light/20 z-50">
                   {ETAPAS_DISPONIVEIS.map((etapa) => (
                     <SelectItem 
                       key={etapa} 
                       value={etapa}
                       className={cn(
-                        "cursor-pointer text-sm",
-                        etapa === status && "font-semibold"
+                        "cursor-pointer",
+                        etapa === status && "font-bold bg-primary/10"
                       )}
                     >
                       {etapa === status && "✓ "}{etapa}
@@ -171,25 +174,25 @@ export function CandidateHeader({
             </div>
           </div>
 
-          {/* Right Side - Action Buttons - mais compactos */}
-          <div className="flex flex-wrap gap-1.5">
-            <Button onClick={onEdit} size="sm" className="h-8 text-xs">
-              <Edit className="mr-1.5 h-3.5 w-3.5" />
+          {/* Right Side - Action Buttons */}
+          <div className="flex flex-wrap gap-2">
+            <Button onClick={onEdit} size="sm" className="font-semibold">
+              <Edit className="mr-2 h-4 w-4" />
               Editar
             </Button>
 
-            <Button onClick={onAddFeedback} variant="outline" size="sm" className="h-8 text-xs">
-              <MessageSquare className="mr-1.5 h-3.5 w-3.5" />
+            <Button onClick={onAddFeedback} variant="outline" size="sm" className="font-semibold border-gray-200 dark:border-secondary-text-light/20">
+              <MessageSquare className="mr-2 h-4 w-4" />
               Feedback
             </Button>
 
-            <Button onClick={onRelocate} variant="outline" size="sm" className="h-8 text-xs">
-              <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
+            <Button onClick={onRelocate} variant="outline" size="sm" className="font-semibold border-gray-200 dark:border-secondary-text-light/20">
+              <RefreshCw className="mr-2 h-4 w-4" />
               Realocar
             </Button>
 
-            <Button onClick={onDelete} variant="destructive" size="sm" className="h-8 text-xs">
-              <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+            <Button onClick={onDelete} variant="destructive" size="sm" className="font-semibold">
+              <Trash2 className="mr-2 h-4 w-4" />
               Excluir
             </Button>
           </div>

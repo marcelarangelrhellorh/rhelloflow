@@ -1,4 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Mail, Phone, MapPin, Linkedin, FileText, Copy, ExternalLink, Link2 } from "lucide-react";
@@ -48,13 +47,13 @@ Localização: ${[cidade, estado].filter(Boolean).join(", ") || "Não informada"
   };
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
+    <div className="rounded-lg border border-gray-200 dark:border-secondary-text-light/20 bg-white dark:bg-background-dark shadow-sm">
+      <div className="p-6 pb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <CardTitle className="text-base">Contato</CardTitle>
+            <h3 className="text-primary-text-light dark:text-primary-text-dark text-lg font-bold">Contato</h3>
             {isFromPublicLink && (
-              <Badge variant="secondary" className="flex items-center gap-1 text-xs">
+              <Badge variant="secondary" className="flex items-center gap-1 text-xs bg-info/10 text-info border-info/20">
                 <Link2 className="h-3 w-3" />
                 Link Público
               </Badge>
@@ -64,29 +63,29 @@ Localização: ${[cidade, estado].filter(Boolean).join(", ") || "Não informada"
             variant="outline"
             size="sm"
             onClick={handleCopyContact}
-            className="h-7 text-xs"
+            className="h-8 text-xs font-semibold border-gray-200 dark:border-secondary-text-light/20"
           >
             <Copy className="mr-1.5 h-3.5 w-3.5" />
             Copiar
           </Button>
         </div>
         {isFromPublicLink && (
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className="text-xs text-secondary-text-light dark:text-secondary-text-dark mt-2">
             Informações enviadas pelo candidato
           </p>
         )}
-      </CardHeader>
-      <CardContent className="space-y-2 pt-0">
+      </div>
+      <div className="px-6 pb-6 space-y-1">
         {/* Email */}
-        <div className="flex items-center justify-between group hover:bg-accent/5 -mx-2 px-2 py-1.5 rounded transition-colors">
+        <div className="flex items-center justify-between group hover:bg-primary/5 dark:hover:bg-primary/10 -mx-2 px-2 py-2 rounded transition-colors">
           <div className="flex items-center gap-2 flex-1 min-w-0">
-            <Mail className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
-            <span className="text-xs truncate">{email}</span>
+            <Mail className="h-4 w-4 text-secondary-text-light dark:text-secondary-text-dark flex-shrink-0" />
+            <span className="text-sm text-primary-text-light dark:text-primary-text-dark truncate">{email}</span>
           </div>
           <Button
             variant="ghost"
             size="sm"
-            className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+            className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
             asChild
           >
             <a href={`mailto:${email}`} target="_blank" rel="noopener noreferrer">
@@ -97,15 +96,15 @@ Localização: ${[cidade, estado].filter(Boolean).join(", ") || "Não informada"
 
         {/* Phone */}
         {telefone && (
-          <div className="flex items-center justify-between group hover:bg-accent/5 -mx-2 px-2 py-1.5 rounded transition-colors">
+          <div className="flex items-center justify-between group hover:bg-primary/5 dark:hover:bg-primary/10 -mx-2 px-2 py-2 rounded transition-colors">
             <div className="flex items-center gap-2 flex-1 min-w-0">
-              <Phone className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
-              <span className="text-xs">{telefone}</span>
+              <Phone className="h-4 w-4 text-secondary-text-light dark:text-secondary-text-dark flex-shrink-0" />
+              <span className="text-sm text-primary-text-light dark:text-primary-text-dark">{telefone}</span>
             </div>
             <Button
               variant="ghost"
               size="sm"
-              className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+              className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
               onClick={openWhatsApp}
             >
               <ExternalLink className="h-3.5 w-3.5" />
@@ -115,15 +114,15 @@ Localização: ${[cidade, estado].filter(Boolean).join(", ") || "Não informada"
 
         {/* Location */}
         {(cidade || estado) && (
-          <div className="flex items-center justify-between group hover:bg-accent/5 -mx-2 px-2 py-1.5 rounded transition-colors">
+          <div className="flex items-center justify-between group hover:bg-primary/5 dark:hover:bg-primary/10 -mx-2 px-2 py-2 rounded transition-colors">
             <div className="flex items-center gap-2 flex-1 min-w-0">
-              <MapPin className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
-              <span className="text-xs">{[cidade, estado].filter(Boolean).join(", ")}</span>
+              <MapPin className="h-4 w-4 text-secondary-text-light dark:text-secondary-text-dark flex-shrink-0" />
+              <span className="text-sm text-primary-text-light dark:text-primary-text-dark">{[cidade, estado].filter(Boolean).join(", ")}</span>
             </div>
             <Button
               variant="ghost"
               size="sm"
-              className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+              className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
               onClick={openMaps}
             >
               <ExternalLink className="h-3.5 w-3.5" />
@@ -133,15 +132,15 @@ Localização: ${[cidade, estado].filter(Boolean).join(", ") || "Não informada"
 
         {/* LinkedIn */}
         {linkedin && (
-          <div className="flex items-center justify-between group hover:bg-accent/5 -mx-2 px-2 py-1.5 rounded transition-colors">
+          <div className="flex items-center justify-between group hover:bg-primary/5 dark:hover:bg-primary/10 -mx-2 px-2 py-2 rounded transition-colors">
             <div className="flex items-center gap-2 flex-1 min-w-0">
-              <Linkedin className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
-              <span className="text-xs text-info">LinkedIn</span>
+              <Linkedin className="h-4 w-4 text-secondary-text-light dark:text-secondary-text-dark flex-shrink-0" />
+              <span className="text-sm text-info font-medium">LinkedIn</span>
             </div>
             <Button
               variant="ghost"
               size="sm"
-              className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+              className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
               asChild
             >
               <a href={linkedin} target="_blank" rel="noopener noreferrer">
@@ -153,15 +152,15 @@ Localização: ${[cidade, estado].filter(Boolean).join(", ") || "Não informada"
 
         {/* Curriculum */}
         {curriculoLink && (
-          <div className="flex items-center justify-between group hover:bg-accent/5 -mx-2 px-2 py-1.5 rounded transition-colors">
+          <div className="flex items-center justify-between group hover:bg-primary/5 dark:hover:bg-primary/10 -mx-2 px-2 py-2 rounded transition-colors">
             <div className="flex items-center gap-2 flex-1 min-w-0">
-              <FileText className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
-              <span className="text-xs text-info">Ver Currículo</span>
+              <FileText className="h-4 w-4 text-secondary-text-light dark:text-secondary-text-dark flex-shrink-0" />
+              <span className="text-sm text-info font-medium">Ver Currículo</span>
             </div>
             <Button
               variant="ghost"
               size="sm"
-              className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+              className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
               asChild
             >
               <a href={curriculoLink} target="_blank" rel="noopener noreferrer">
@@ -170,7 +169,7 @@ Localização: ${[cidade, estado].filter(Boolean).join(", ") || "Não informada"
             </Button>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

@@ -328,111 +328,113 @@ export default function CandidatoDetalhes() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="relative flex min-h-screen w-full flex-col font-display bg-background-light dark:bg-background-dark">
       {/* Breadcrumb / Back Button */}
-      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border">
-        <div className="px-4 sm:px-6 py-3">
-          <Button variant="ghost" size="sm" onClick={() => navigate("/candidatos")}>
+      <div className="sticky top-0 z-10 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-sm border-b border-gray-200 dark:border-secondary-text-light/20">
+        <div className="px-6 sm:px-10 lg:px-20 py-4">
+          <Button variant="ghost" size="sm" onClick={() => navigate("/candidatos")} className="text-secondary-text-light dark:text-secondary-text-dark">
             <ArrowLeft className="mr-2 h-4 w-4" />
             <span className="hidden sm:inline">Candidatos</span>
-            <span className="text-muted-foreground mx-2">/</span>
-            <span className="font-medium">{candidato.nome_completo}</span>
+            <span className="mx-2">/</span>
+            <span className="font-medium text-primary-text-light dark:text-primary-text-dark">{candidato.nome_completo}</span>
           </Button>
         </div>
       </div>
 
       {/* Content */}
-      <div className="px-4 sm:px-6 py-4 space-y-4 max-w-[1600px] mx-auto">
-        {/* Simplified Header with Stats */}
-        <CandidateHeader
-          nome={candidato.nome_completo}
-          status={candidato.status}
-          nivel={candidato.nivel}
-          area={candidato.area}
-          cidade={candidato.cidade}
-          estado={candidato.estado}
-          recrutador={candidato.recrutador}
-          onEdit={() => navigate(`/candidatos/${id}/editar`)}
-          onDelete={() => setDeleteDialogOpen(true)}
-          onAddFeedback={() => setFeedbackModalOpen(true)}
-          onRelocate={() => setRelocateModalOpen(true)}
-          onStatusChange={handleStatusChange}
-        />
+      <main className="flex-1 px-6 sm:px-10 lg:px-20 py-8">
+        <div className="mx-auto max-w-7xl space-y-6">
+          {/* Simplified Header with Stats */}
+          <CandidateHeader
+            nome={candidato.nome_completo}
+            status={candidato.status}
+            nivel={candidato.nivel}
+            area={candidato.area}
+            cidade={candidato.cidade}
+            estado={candidato.estado}
+            recrutador={candidato.recrutador}
+            onEdit={() => navigate(`/candidatos/${id}/editar`)}
+            onDelete={() => setDeleteDialogOpen(true)}
+            onAddFeedback={() => setFeedbackModalOpen(true)}
+            onRelocate={() => setRelocateModalOpen(true)}
+            onStatusChange={handleStatusChange}
+          />
 
-        {/* Compact Stats Row */}
-        <StatsBar
-          criadoEm={candidato.criado_em}
-          ultimoFeedback={stats.ultimoFeedback}
-          processosParticipados={stats.totalProcessos}
-          mediaAvaliacao={stats.mediaRating}
-          qtdAvaliacoes={stats.qtdAvaliacoes}
-          totalFeedbacks={stats.totalFeedbacks}
-        />
+          {/* Compact Stats Row */}
+          <StatsBar
+            criadoEm={candidato.criado_em}
+            ultimoFeedback={stats.ultimoFeedback}
+            processosParticipados={stats.totalProcessos}
+            mediaAvaliacao={stats.mediaRating}
+            qtdAvaliacoes={stats.qtdAvaliacoes}
+            totalFeedbacks={stats.totalFeedbacks}
+          />
 
-        {/* Three Column Layout */}
-        <div className="grid gap-4 lg:grid-cols-12">
-          {/* Left Sidebar - Contact & Tags */}
-          <div className="lg:col-span-3 space-y-4">
-            <ContactCard
-              email={candidato.email}
-              telefone={candidato.telefone}
-              cidade={candidato.cidade}
-              estado={candidato.estado}
-              linkedin={candidato.linkedin}
-              curriculoLink={candidato.curriculo_link}
-              isFromPublicLink={!!candidato.source_link_id}
-            />
+          {/* Three Column Layout */}
+          <div className="grid gap-6 lg:grid-cols-12">
+            {/* Left Sidebar - Contact & Tags */}
+            <div className="lg:col-span-3 space-y-6">
+              <ContactCard
+                email={candidato.email}
+                telefone={candidato.telefone}
+                cidade={candidato.cidade}
+                estado={candidato.estado}
+                linkedin={candidato.linkedin}
+                curriculoLink={candidato.curriculo_link}
+                isFromPublicLink={!!candidato.source_link_id}
+              />
 
-            <CandidateTagsCard candidateId={id!} />
-          </div>
+              <CandidateTagsCard candidateId={id!} />
+            </div>
 
-          {/* Main Content - Professional Info & Feedbacks */}
-          <div className="lg:col-span-6 space-y-4">
-            <ProfessionalInfoCard
-              recrutador={candidato.recrutador}
-              pretensaoSalarial={candidato.pretensao_salarial}
-              vagaTitulo={vaga?.titulo || null}
-              vagaId={candidato.vaga_relacionada_id}
-              dataCadastro={candidato.criado_em}
-              nivel={candidato.nivel}
-              area={candidato.area}
-              curriculoUrl={candidato.curriculo_url}
-              portfolioUrl={candidato.portfolio_url}
-              disponibilidadeMudanca={candidato.disponibilidade_mudanca}
-              disponibilidadeStatus={candidato.disponibilidade_status}
-              pontosFortes={candidato.pontos_fortes}
-              pontosDesenvolver={candidato.pontos_desenvolver}
-              parecerFinal={candidato.parecer_final}
-              origem={candidato.origem}
-              candidatoId={id!}
-              onUpdate={loadCandidato}
-              onVagaClick={() => vaga && navigate(`/vagas/${vaga.id}`)}
-            />
+            {/* Main Content - Professional Info & Feedbacks */}
+            <div className="lg:col-span-6 space-y-6">
+              <ProfessionalInfoCard
+                recrutador={candidato.recrutador}
+                pretensaoSalarial={candidato.pretensao_salarial}
+                vagaTitulo={vaga?.titulo || null}
+                vagaId={candidato.vaga_relacionada_id}
+                dataCadastro={candidato.criado_em}
+                nivel={candidato.nivel}
+                area={candidato.area}
+                curriculoUrl={candidato.curriculo_url}
+                portfolioUrl={candidato.portfolio_url}
+                disponibilidadeMudanca={candidato.disponibilidade_mudanca}
+                disponibilidadeStatus={candidato.disponibilidade_status}
+                pontosFortes={candidato.pontos_fortes}
+                pontosDesenvolver={candidato.pontos_desenvolver}
+                parecerFinal={candidato.parecer_final}
+                origem={candidato.origem}
+                candidatoId={id!}
+                onUpdate={loadCandidato}
+                onVagaClick={() => vaga && navigate(`/vagas/${vaga.id}`)}
+              />
 
-            <FeedbackList
-              candidatoId={id!}
-              onAddFeedback={() => setFeedbackModalOpen(true)}
-              onSolicitarFeedback={() => setSolicitarFeedbackModalOpen(true)}
-            />
-          </div>
+              <FeedbackList
+                candidatoId={id!}
+                onAddFeedback={() => setFeedbackModalOpen(true)}
+                onSolicitarFeedback={() => setSolicitarFeedbackModalOpen(true)}
+              />
+            </div>
 
-          {/* Right Sidebar - Scorecards & Timeline */}
-          <div className="lg:col-span-3 space-y-4">
-            <ScorecardEvaluation
-              candidateId={id!}
-              candidateName={candidato.nome_completo}
-              vagaId={candidato.vaga_relacionada_id}
-            />
+            {/* Right Sidebar - Scorecards & Timeline */}
+            <div className="lg:col-span-3 space-y-6">
+              <ScorecardEvaluation
+                candidateId={id!}
+                candidateName={candidato.nome_completo}
+                vagaId={candidato.vaga_relacionada_id}
+              />
 
-            <ScorecardHistory candidateId={id!} />
+              <ScorecardHistory candidateId={id!} />
 
-            <HistoryTimeline
-              historico={historico}
-              onVagaClick={(vagaId) => navigate(`/vagas/${vagaId}`)}
-            />
+              <HistoryTimeline
+                historico={historico}
+                onVagaClick={(vagaId) => navigate(`/vagas/${vagaId}`)}
+              />
+            </div>
           </div>
         </div>
-      </div>
+      </main>
 
       {/* Modals */}
       <LinkToJobModal
