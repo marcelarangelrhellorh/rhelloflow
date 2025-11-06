@@ -44,3 +44,9 @@ verify_jwt = true
 
 [functions.process-pdf-import]
 verify_jwt = true
+
+[functions.aggregate-scorecards]
+verify_jwt = true
+
+[functions.analyze-scorecards-ai]
+verify_jwt = true

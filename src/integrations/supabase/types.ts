@@ -1174,6 +1174,54 @@ export type Database = {
         }
         Relationships: []
       }
+      scorecard_analysis_logs: {
+        Row: {
+          ai_model: string
+          analyzed_by: string
+          anonymized: boolean
+          candidates_count: number
+          created_at: string
+          id: string
+          included_comments: boolean
+          vaga_id: string
+        }
+        Insert: {
+          ai_model: string
+          analyzed_by: string
+          anonymized?: boolean
+          candidates_count: number
+          created_at?: string
+          id?: string
+          included_comments?: boolean
+          vaga_id: string
+        }
+        Update: {
+          ai_model?: string
+          analyzed_by?: string
+          anonymized?: boolean
+          candidates_count?: number
+          created_at?: string
+          id?: string
+          included_comments?: boolean
+          vaga_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scorecard_analysis_logs_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vagas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scorecard_analysis_logs_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vagas_active"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       scorecard_criteria: {
         Row: {
           category: Database["public"]["Enums"]["criteria_category"]

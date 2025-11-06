@@ -10,6 +10,7 @@ import { formatSalaryRange } from "@/lib/salaryUtils";
 import { ExternalJobBanner } from "@/components/ExternalJobBanner";
 import { ShareJobModal } from "@/components/ShareJobModal";
 import { CompareCandidatesModal } from "@/components/FunilVagas/CompareCandidatesModal";
+import { AnalyzeScorecards } from "@/components/FunilVagas/AnalyzeScorecards";
 import { TagPicker } from "@/components/TagPicker";
 import { Badge } from "@/components/ui/badge";
 import { ImportPdfModal } from "@/components/ImportPdfModal";
@@ -527,6 +528,7 @@ export default function VagaDetalhes() {
                 <span className="material-symbols-outlined text-xl">analytics</span>
                 Comparar Candidatos
               </button>
+              <AnalyzeScorecards vagaId={vaga.id} vagaTitulo={vaga.titulo} />
               <button
                 onClick={() => setDetailsDrawerOpen(true)}
                 className="px-4 py-2 bg-white dark:bg-background-dark border-2 border-primary text-primary-text-light dark:text-primary-text-dark rounded-md hover:bg-primary/10 transition-colors flex items-center gap-2 font-bold"
