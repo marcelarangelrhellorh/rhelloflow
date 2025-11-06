@@ -5,34 +5,44 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: 'admin' | 'recrutador' | 'cs' | 'viewer';
   active: boolean;
+  roles?: string[]; // Optional roles array
 }
 
-export function useUsers(role?: 'recrutador' | 'cs') {
+export function useUsers(roleFilter?: 'recrutador' | 'cs' | 'admin' | 'viewer') {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadUsers();
-  }, [role]);
+  }, [roleFilter]);
 
   const loadUsers = async () => {
     try {
-      let query = supabase
+      // Fetch all active users
+      const { data: usersData, error: usersError } = await supabase
         .from('users')
         .select('*')
         .eq('active', true)
         .order('name');
 
-      if (role) {
-        query = query.eq('role', role);
+      if (usersError) throw usersError;
+
+      // If a role filter is provided, fetch user roles and filter
+      if (roleFilter && usersData) {
+        const { data: rolesData, error: rolesError } = await supabase
+          .from('user_roles')
+          .select('user_id, role')
+          .eq('role', roleFilter);
+
+        if (rolesError) throw rolesError;
+
+        const userIdsWithRole = new Set(rolesData?.map(r => r.user_id) || []);
+        const filteredUsers = usersData.filter(user => userIdsWithRole.has(user.id));
+        setUsers(filteredUsers as User[]);
+      } else {
+        setUsers((usersData || []) as User[]);
       }
-
-      const { data, error } = await query;
-
-      if (error) throw error;
-      setUsers((data || []) as User[]);
     } catch (error) {
       console.error('Erro ao carregar usuários:', error);
       setUsers([]);

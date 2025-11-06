@@ -130,15 +130,6 @@ export default function GerenciarUsuarios() {
         if (insertError) throw insertError;
       }
 
-      // Atualiza a tabela users com a role principal (primeira selecionada)
-      const mainRole = selectedRoles[0] || "viewer";
-      const { error: updateError } = await supabase
-        .from("users")
-        .update({ role: mainRole })
-        .eq("id", userId);
-
-      if (updateError) throw updateError;
-
       toast.success("✅ Permissões atualizadas com sucesso!");
       setEditingUser(null);
       reload();
@@ -177,7 +168,7 @@ export default function GerenciarUsuarios() {
   };
 
   const RoleEditDialog = ({ user }: { user: any }) => {
-    const currentRoles = userRoles[user.id] || [user.role as AppRole];
+    const currentRoles = userRoles[user.id] || [];
     const [selectedRoles, setSelectedRoles] = useState<AppRole[]>(currentRoles);
 
     const toggleRole = (role: AppRole) => {
@@ -403,7 +394,7 @@ export default function GerenciarUsuarios() {
                       <div className="flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
                           <h3 className="font-semibold">{user.name}</h3>
-                          {(userRoles[user.id] || [user.role]).map((role) => (
+                          {(userRoles[user.id] || []).map((role) => (
                             <span key={role}>{getRoleBadge(role)}</span>
                           ))}
                         </div>
