@@ -10,6 +10,7 @@ import { formatSalaryRange } from "@/lib/salaryUtils";
 import { ExternalJobBanner } from "@/components/ExternalJobBanner";
 import { ShareJobModal } from "@/components/ShareJobModal";
 import { CompareCandidatesModal } from "@/components/FunilVagas/CompareCandidatesModal";
+import { TagPicker } from "@/components/TagPicker";
 import { toast } from "@/hooks/use-toast";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -91,6 +92,8 @@ export default function VagaDetalhes() {
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [detailsDrawerOpen, setDetailsDrawerOpen] = useState(false);
   const [compareModalOpen, setCompareModalOpen] = useState(false);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [savingTags, setSavingTags] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -152,6 +155,63 @@ export default function VagaDetalhes() {
       setEventos((data || []) as VagaEvento[]);
     } catch (error) {
       console.error("Erro ao carregar eventos:", error);
+    }
+  };
+
+  const loadTags = async () => {
+    try {
+      const { data, error } = await (supabase as any)
+        .from("vacancy_tags")
+        .select("tag_id")
+        .eq("vacancy_id", id!);
+
+      if (error) throw error;
+      if (data) {
+        setSelectedTags(data.map((vt: any) => vt.tag_id));
+      }
+    } catch (error) {
+      console.error('Erro ao carregar tags:', error);
+    }
+  };
+
+  const saveTags = async () => {
+    if (!id) return;
+    
+    setSavingTags(true);
+    try {
+      // Remover todas as tags existentes
+      await (supabase as any)
+        .from("vacancy_tags")
+        .delete()
+        .eq("vacancy_id", id);
+
+      // Inserir novas tags
+      if (selectedTags.length > 0) {
+        const tagsToInsert = selectedTags.map((tagId) => ({
+          vacancy_id: id,
+          tag_id: tagId,
+        }));
+
+        const { error } = await (supabase as any)
+          .from("vacancy_tags")
+          .insert(tagsToInsert);
+
+        if (error) throw error;
+      }
+
+      toast({
+        title: "Tags atualizadas",
+        description: "As tags da vaga foram atualizadas com sucesso.",
+      });
+    } catch (error) {
+      console.error("Erro ao salvar tags:", error);
+      toast({
+        title: "Erro ao salvar tags",
+        description: "Não foi possível atualizar as tags da vaga.",
+        variant: "destructive",
+      });
+    } finally {
+      setSavingTags(false);
     }
   };
 
@@ -642,6 +702,24 @@ export default function VagaDetalhes() {
                     <div className="text-base whitespace-pre-wrap">{vaga.observacoes}</div>
                   </div>
                 )}
+
+                {/* Tags */}
+                <div className="bg-muted/30 rounded-lg p-6">
+                  <h3 className="text-xl font-bold mb-4">🏷️ Tags</h3>
+                  <TagPicker
+                    selectedTags={selectedTags}
+                    onChange={setSelectedTags}
+                  />
+                  <div className="mt-4 flex justify-end">
+                    <button
+                      onClick={saveTags}
+                      disabled={savingTags}
+                      className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                    >
+                      {savingTags ? "Salvando..." : "Salvar Tags"}
+                    </button>
+                  </div>
+                </div>
               </div>
             </SheetContent>
           </Sheet>
