@@ -9,7 +9,20 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 const RECRUTADORES = ["Ítalo", "Bianca Marques", "Victor", "Mariana", "Isabella"];
-const ORIGENS = ["Indicação", "LinkedIn", "Gupy", "Site da empresa", "Redes sociais", "Outros"];
+const ORIGENS = [
+  { value: "Link de Divulgação", label: "🔗 Link de Divulgação" },
+  { value: "Pandapé", label: "🐼 Pandapé" },
+  { value: "LinkedIn", label: "💼 LinkedIn" },
+  { value: "Gupy", label: "🎯 Gupy" },
+  { value: "Indeed", label: "📋 Indeed" },
+  { value: "Catho", label: "📊 Catho" },
+  { value: "Indicação", label: "👥 Indicação" },
+  { value: "Site da Empresa", label: "🌐 Site da Empresa" },
+  { value: "Instagram", label: "📸 Instagram" },
+  { value: "WhatsApp", label: "💬 WhatsApp" },
+  { value: "E-mail Direto", label: "✉️ E-mail Direto" },
+  { value: "Outra", label: "➕ Outra" },
+];
 
 interface Vaga {
   id: string;
@@ -300,7 +313,7 @@ export function ProfessionalInfoCard({
               </SelectTrigger>
               <SelectContent className="bg-popover z-50">
                 {ORIGENS.map((org) => (
-                  <SelectItem key={org} value={org}>📍 {org}</SelectItem>
+                  <SelectItem key={org.value} value={org.value}>{org.label}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
