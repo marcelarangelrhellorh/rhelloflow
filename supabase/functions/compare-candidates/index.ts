@@ -18,7 +18,10 @@ serve(async (req) => {
 
     const { vagaId, anonymize = false } = await req.json();
 
+    console.log(`Compare candidates called with vagaId: ${vagaId}, anonymize: ${anonymize}`);
+
     if (!vagaId) {
+      console.error("No vagaId provided");
       return new Response(
         JSON.stringify({ error: "vagaId is required" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -39,14 +42,18 @@ serve(async (req) => {
       throw candidatosError;
     }
 
+    console.log(`Found ${candidatos?.length || 0} candidates for job ${vagaId}`);
+
     if (!candidatos || candidatos.length === 0) {
+      console.log("No candidates found for this job");
       return new Response(
-        JSON.stringify({ candidates: [] }),
+        JSON.stringify({ candidates: [], stats: null }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
     const candidateIds = candidatos.map(c => c.id);
+    console.log(`Candidate IDs: ${candidateIds.join(", ")}`);
 
     // Buscar scorecards dos candidatos
     const { data: scorecards, error: scorecardsError } = await supabase
@@ -73,6 +80,8 @@ serve(async (req) => {
       console.error("Error loading scorecards:", scorecardsError);
       throw scorecardsError;
     }
+
+    console.log(`Found ${scorecards?.length || 0} scorecards for candidates`);
 
     // Buscar avaliações detalhadas
     const scorecardsWithEvaluations = await Promise.all(

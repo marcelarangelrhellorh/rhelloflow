@@ -76,17 +76,29 @@ export function CompareCandidatesModal({
   const loadData = async () => {
     try {
       setLoading(true);
+      console.log("Loading comparison data for vaga:", vagaId);
       
       const { data, error } = await supabase.functions.invoke("compare-candidates", {
         body: { vagaId, anonymize },
       });
 
-      if (error) throw error;
+      console.log("Response from compare-candidates:", { data, error });
+
+      if (error) {
+        console.error("Edge function error:", error);
+        throw error;
+      }
+
+      if (!data) {
+        throw new Error("Nenhum dado retornado da função");
+      }
 
       setCandidates(data.candidates || []);
       setStats(data.stats || null);
       
-      if (data.candidates.length === 0) {
+      console.log(`Found ${data.candidates?.length || 0} candidates with scorecards`);
+      
+      if (!data.candidates || data.candidates.length === 0) {
         toast({
           title: "Nenhum scorecard encontrado",
           description: "Não há avaliações de scorecards para candidatos desta vaga.",
@@ -96,7 +108,7 @@ export function CompareCandidatesModal({
       console.error("Error loading comparison data:", error);
       toast({
         title: "Erro ao carregar dados",
-        description: error.message,
+        description: error.message || "Erro desconhecido ao carregar dados",
         variant: "destructive",
       });
     } finally {
