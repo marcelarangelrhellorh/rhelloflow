@@ -161,6 +161,17 @@ export default function VagaDetalhes() {
 
       if (error) throw error;
       
+      // Se a vaga foi deletada, redirecionar para lista
+      if (data.deleted_at) {
+        toast({
+          title: "Vaga excluída",
+          description: "Esta vaga foi excluída e não está mais disponível.",
+          variant: "destructive",
+        });
+        navigate("/vagas");
+        return;
+      }
+      
       // Mesclar nome do recrutador e CS do JOIN
       setVaga({
         ...data,

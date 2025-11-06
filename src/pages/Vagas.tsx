@@ -80,6 +80,7 @@ export default function Vagas() {
           recrutador_user:users!vagas_recrutador_id_fkey(name),
           cs_user:users!vagas_cs_id_fkey(name)
         `)
+        .is("deleted_at", null)
         .order("criado_em", { ascending: false });
 
       if (vagasError) throw vagasError;

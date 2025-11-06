@@ -87,7 +87,7 @@ export default function FunilVagas() {
     try {
       setLoading(true);
 
-      // Load jobs com JOIN na tabela users - excluir apenas vagas canceladas
+      // Load jobs com JOIN na tabela users - excluir apenas vagas canceladas e deletadas
       const { data: jobsData, error: jobsError } = await supabase
         .from("vagas")
         .select(`
@@ -96,6 +96,7 @@ export default function FunilVagas() {
           cs_user:users!vagas_cs_id_fkey(name)
         `)
         .neq("status_slug", "cancelada")
+        .is("deleted_at", null)
         .order("status_order", { ascending: true });
 
       if (jobsError) throw jobsError;
