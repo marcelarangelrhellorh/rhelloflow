@@ -214,27 +214,27 @@ export function ScorecardHistory({ candidateId }: ScorecardHistoryProps) {
             return (
               <div
                 key={scorecard.id}
-                className="border rounded-lg p-4 space-y-4 hover:shadow-md transition-shadow"
+                className="border rounded-lg p-6 space-y-6 hover:shadow-md transition-shadow"
               >
                 {/* Header */}
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-start gap-3 flex-1">
-                    <Avatar className="h-10 w-10 bg-primary/10">
-                      <AvatarFallback className="text-xs font-bold">
+                <div className="flex items-start justify-between gap-6">
+                  <div className="flex items-start gap-4 flex-1">
+                    <Avatar className="h-12 w-12 bg-primary/10 shrink-0">
+                      <AvatarFallback className="text-sm font-bold">
                         {getInitials(scorecard.evaluator_name)}
                       </AvatarFallback>
                     </Avatar>
 
-                    <div className="flex-1">
-                      <div className="font-bold text-base">
+                    <div className="flex-1 space-y-2">
+                      <div className="font-bold text-lg">
                         {scorecard.template_name}
                       </div>
-                      <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <User className="h-4 w-4" />
                         <span className="font-medium">{scorecard.evaluator_name}</span>
                       </div>
                       {scorecard.vaga_titulo && (
-                        <div className="flex items-center gap-2 mt-1">
+                        <div className="flex items-center gap-2 mt-2">
                           <Badge variant="outline" className="text-sm font-medium">
                             {scorecard.vaga_titulo}
                           </Badge>
@@ -243,11 +243,11 @@ export function ScorecardHistory({ candidateId }: ScorecardHistoryProps) {
                     </div>
                   </div>
 
-                  <div className="text-right shrink-0">
-                    <div className="text-2xl font-bold">
+                  <div className="text-right shrink-0 space-y-2">
+                    <div className="text-3xl font-bold">
                       {scorecard.match_percentage}%
                     </div>
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Calendar className="h-4 w-4" />
                       <span className="font-medium">
                         {format(new Date(scorecard.created_at), "dd MMM yyyy", {
@@ -259,41 +259,43 @@ export function ScorecardHistory({ candidateId }: ScorecardHistoryProps) {
                 </div>
 
                 {/* Recommendation Badge */}
-                <Badge className={cn("text-sm font-semibold w-fit", recConfig.color)}>
-                  {recConfig.label}
-                </Badge>
+                <div className="pt-2">
+                  <Badge className={cn("text-sm font-semibold px-4 py-1.5", recConfig.color)}>
+                    {recConfig.label}
+                  </Badge>
+                </div>
 
                 {/* Progress Bar */}
-                <div className="space-y-2">
-                  <Progress value={scorecard.match_percentage} className="h-2" />
+                <div className="space-y-3 pt-2">
+                  <Progress value={scorecard.match_percentage} className="h-2.5" />
                 </div>
 
                 {/* Comments */}
                 {scorecard.comments && (
-                  <div className="bg-muted/50 p-3 rounded-lg">
-                    <p className="text-sm font-bold mb-1">Comentários:</p>
-                    <p className="text-xs text-muted-foreground">
+                  <div className="bg-muted/50 p-4 rounded-lg space-y-2">
+                    <p className="text-sm font-bold">Comentários:</p>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
                       {scorecard.comments}
                     </p>
                   </div>
                 )}
 
                 {/* Evaluations Summary */}
-                <div className="space-y-2">
+                <div className="space-y-3 pt-2">
                   <p className="text-sm font-bold">Critérios Avaliados:</p>
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     {scorecard.evaluations.slice(0, 3).map((evaluation, index) => (
                       <div
                         key={index}
-                        className="flex items-center justify-between text-sm"
+                        className="flex items-center justify-between text-sm py-1"
                       >
-                        <span className="text-muted-foreground">{evaluation.criteria_name}</span>
+                        <span className="text-muted-foreground font-medium">{evaluation.criteria_name}</span>
                         <div className="flex items-center gap-1">
                           {[1, 2, 3, 4, 5].map((star) => (
                             <Star
                               key={star}
                               className={cn(
-                                "h-3 w-3",
+                                "h-4 w-4",
                                 star <= evaluation.score
                                   ? "fill-[#FFCD00] text-[#FFCD00]"
                                   : "text-gray-300"
@@ -304,7 +306,7 @@ export function ScorecardHistory({ candidateId }: ScorecardHistoryProps) {
                       </div>
                     ))}
                     {scorecard.evaluations.length > 3 && (
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-muted-foreground pt-1">
                         +{scorecard.evaluations.length - 3} critérios adicionais
                       </p>
                     )}
