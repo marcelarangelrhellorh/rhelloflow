@@ -12,6 +12,7 @@ import { FilterBar } from "@/components/Candidatos/FilterBar";
 import { CandidateCard } from "@/components/Candidatos/CandidateCard";
 import { LinkToJobModal } from "@/components/BancoTalentos/LinkToJobModal";
 import { handleDelete as performDeletion } from "@/lib/deletionUtils";
+import { useUserRole } from "@/hooks/useUserRole";
 
 type Candidato = {
   id: string;
@@ -30,6 +31,7 @@ type Candidato = {
 
 export default function Candidatos() {
   const navigate = useNavigate();
+  const { isAdmin } = useUserRole();
   const [candidatos, setCandidatos] = useState<Candidato[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -72,7 +74,8 @@ export default function Candidatos() {
   const handleDelete = async () => {
     if (!deletingId) return;
 
-    if (!deletionReason.trim()) {
+    // Para admins, o motivo é opcional
+    if (!isAdmin && !deletionReason.trim()) {
       toast.error("❌ Por favor, informe o motivo da exclusão");
       return;
     }
@@ -100,7 +103,7 @@ export default function Candidatos() {
         "candidate",
         deletingId,
         candidato.nome_completo,
-        deletionReason,
+        deletionReason.trim() || (isAdmin ? "Exclusão por admin sem motivo especificado" : ""),
         preSnapshot
       );
 
@@ -313,34 +316,39 @@ export default function Candidatos() {
               <AlertTriangle className="h-5 w-5 text-destructive" />
               Confirmar exclusão
             </AlertDialogTitle>
-            <AlertDialogDescription className="space-y-4">
-              <p>Tem certeza que deseja excluir este candidato?</p>
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-amber-800">
-                <p className="text-sm font-semibold mb-1">⚠️ Atenção:</p>
-                <ul className="text-sm space-y-1 list-disc list-inside">
-                  <li>Candidatos em processos ativos requerem aprovação de admin</li>
-                  <li>Todos os dados serão preservados para auditoria</li>
-                  <li>Esta ação pode ser revertida por administradores</li>
-                </ul>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="candidate-deletion-reason" className="font-medium">
-                  Motivo da exclusão *
-                </Label>
-                <Input
-                  id="candidate-deletion-reason"
-                  placeholder="Ex: Candidato desistiu, duplicado, contratado em outro processo..."
-                  value={deletionReason}
-                  onChange={(e) => setDeletionReason(e.target.value)}
-                />
-              </div>
-            </AlertDialogDescription>
           </AlertDialogHeader>
+          <div className="space-y-4 px-6">
+            <p>Tem certeza que deseja excluir este candidato?</p>
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-amber-800">
+              <p className="text-sm font-semibold mb-1">⚠️ Atenção:</p>
+              <ul className="text-sm space-y-1 list-disc list-inside">
+                <li>Candidatos em processos ativos requerem aprovação de admin</li>
+                <li>Todos os dados serão preservados para auditoria</li>
+                <li>Esta ação pode ser revertida por administradores</li>
+              </ul>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="candidate-deletion-reason" className="font-medium">
+                Motivo da exclusão {!isAdmin && "*"}
+              </Label>
+              {isAdmin && (
+                <p className="text-xs text-muted-foreground">
+                  Como admin, você pode excluir sem especificar um motivo
+                </p>
+              )}
+              <Input
+                id="candidate-deletion-reason"
+                placeholder="Ex: Candidato desistiu, duplicado, contratado em outro processo..."
+                value={deletionReason}
+                onChange={(e) => setDeletionReason(e.target.value)}
+              />
+            </div>
+          </div>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleDelete} 
-              disabled={!deletionReason.trim()}
+              disabled={!isAdmin && !deletionReason.trim()}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90 disabled:opacity-50"
             >
               Confirmar Exclusão

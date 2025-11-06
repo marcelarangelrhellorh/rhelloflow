@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
 import { handleDelete as performDeletion } from "@/lib/deletionUtils";
+import { useUserRole } from "@/hooks/useUserRole";
 
 interface VagaCardProps {
   vaga: {
@@ -64,6 +65,7 @@ const getStatusIndicator = (status: string) => {
 
 export function VagaCard({ vaga, draggable = false, onDragStart, onClick, viewMode = "grid" }: VagaCardProps) {
   const navigate = useNavigate();
+  const { isAdmin } = useUserRole();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deletionReason, setDeletionReason] = useState("");
@@ -115,7 +117,8 @@ export function VagaCard({ vaga, draggable = false, onDragStart, onClick, viewMo
   };
 
   const handleDelete = async () => {
-    if (!deletionReason.trim()) {
+    // Para admins, o motivo é opcional
+    if (!isAdmin && !deletionReason.trim()) {
       toast.error("❌ Por favor, informe o motivo da exclusão");
       return;
     }
@@ -138,7 +141,7 @@ export function VagaCard({ vaga, draggable = false, onDragStart, onClick, viewMo
         "job",
         vaga.id,
         vaga.titulo,
-        deletionReason,
+        deletionReason.trim() || (isAdmin ? "Exclusão por admin sem motivo especificado" : ""),
         preSnapshot
       );
 
@@ -342,8 +345,13 @@ export function VagaCard({ vaga, draggable = false, onDragStart, onClick, viewMo
             </div>
             <div className="space-y-2">
               <Label htmlFor="deletion-reason" className="text-[#00141D] font-medium">
-                Motivo da exclusão *
+                Motivo da exclusão {!isAdmin && "*"}
               </Label>
+              {isAdmin && (
+                <p className="text-xs text-[#6B7280]">
+                  Como admin, você pode excluir sem especificar um motivo
+                </p>
+              )}
               <Input
                 id="deletion-reason"
                 placeholder="Ex: Vaga cancelada pelo cliente, duplicada, preenchida externamente..."
@@ -363,7 +371,7 @@ export function VagaCard({ vaga, draggable = false, onDragStart, onClick, viewMo
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
-              disabled={isDeleting || !deletionReason.trim()}
+              disabled={isDeleting || (!isAdmin && !deletionReason.trim())}
               className="bg-[#D32F2F] text-white hover:bg-[#B71C1C] disabled:opacity-50"
               style={{ fontFamily: "Manrope, sans-serif" }}
             >
