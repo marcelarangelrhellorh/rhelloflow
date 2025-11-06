@@ -352,7 +352,7 @@ export default function EstudoMercado() {
       <div className="container mx-auto p-6 space-y-8 max-w-5xl">
         {/* Header */}
         <div className="text-center space-y-2">
-          <h1 className="text-4xl font-bold text-primary">📘 Estudo de Mercado</h1>
+          <h1 className="text-4xl font-bold text-primary">Estudo de Mercado</h1>
           <p className="text-muted-foreground">Análise objetiva baseada em fontes de mercado</p>
         </div>
 
@@ -483,7 +483,7 @@ export default function EstudoMercado() {
       {estudo && (
         <div className="space-y-6 animate-in fade-in duration-500">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-primary">📊 Resultado do Estudo</h2>
+            <h2 className="text-2xl font-bold text-primary">Resultado do Estudo</h2>
             <Button onClick={handleExportarPDF} variant="outline" size="lg">
               <FileDown className="mr-2 h-5 w-5" />
               Exportar PDF
