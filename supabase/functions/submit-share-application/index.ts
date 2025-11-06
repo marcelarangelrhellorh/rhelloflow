@@ -12,14 +12,18 @@ const candidateSchema = z.object({
   nome_completo: z.string().trim().min(2, 'Nome muito curto').max(255, 'Nome muito longo'),
   email: z.string().trim().email('Email inválido').max(255, 'Email muito longo'),
   telefone: z.string().trim().min(8, 'Telefone inválido').max(50, 'Telefone muito longo'),
-  cidade: z.string().trim().max(100).optional(),
-  estado: z.string().trim().max(2).optional(),
-  linkedin: z.string().trim().max(500).optional(),
-  pretensao_salarial: z.number().positive().optional(),
-  area: z.string().max(100).optional(),
-  nivel: z.string().max(50).optional(),
-  disponibilidade_mudanca: z.string().trim().max(500).optional(),
-  mensagem: z.string().trim().max(2000).optional(),
+  cidade: z.string().trim().max(100).nullable().optional().transform(val => val || null),
+  estado: z.string().trim().max(2).nullable().optional().transform(val => val || null),
+  linkedin: z.string().trim().max(500).nullable().optional().transform(val => val || null),
+  pretensao_salarial: z.union([z.number().positive(), z.string().transform((val) => {
+    if (!val || val === '') return null;
+    const num = parseFloat(val);
+    return isNaN(num) ? null : num;
+  })]).nullable().optional(),
+  area: z.string().max(100).nullable().optional().transform(val => val || null),
+  nivel: z.string().max(50).nullable().optional().transform(val => val || null),
+  disponibilidade_mudanca: z.string().trim().max(500).nullable().optional().transform(val => val || null),
+  mensagem: z.string().trim().max(2000).nullable().optional().transform(val => val || null),
   // Honeypot field
   company: z.string().max(0).optional(),
 });
