@@ -51,16 +51,17 @@ const statusProgressMap: Record<string, number> = {
 };
 
 const getStatusColor = (status: string): string => {
-  if (status === "Concluído") return "bg-success text-success-foreground";
-  if (status === "Cancelada") return "bg-destructive/10 text-destructive";
-  if (status === "A iniciar") return "bg-info/10 text-info";
-  return "bg-success text-success-foreground";
+  if (status === "Concluído") return "bg-success/20 text-success border-success/30";
+  if (status === "Cancelada") return "bg-destructive/20 text-destructive border-destructive/30";
+  if (status === "A iniciar") return "bg-info/20 text-info border-info/30";
+  return "bg-warning/20 text-warning border-warning/30";
 };
 
 const getStatusIndicator = (status: string) => {
-  if (status === "Concluído") return "🟢";
-  if (status === "Cancelada") return "🔴";
-  return "🟢";
+  if (status === "Concluído") return "✓";
+  if (status === "Cancelada") return "✕";
+  if (status === "A iniciar") return "○";
+  return "●";
 };
 
 export function VagaCard({ vaga, draggable = false, onDragStart, onClick, viewMode = "grid" }: VagaCardProps) {
@@ -247,8 +248,8 @@ export function VagaCard({ vaga, draggable = false, onDragStart, onClick, viewMo
 
         {/* Status Badge */}
         <div>
-          <Badge className={`${getStatusColor(vaga.status)} border-0 font-bold rounded-full px-3 py-1`}>
-            <span className="mr-1">{getStatusIndicator(vaga.status)}</span>
+          <Badge className={`${getStatusColor(vaga.status)} border font-bold rounded-lg px-4 py-2 text-sm`}>
+            <span className="mr-2 text-base">{getStatusIndicator(vaga.status)}</span>
             {vaga.status}
           </Badge>
         </div>
