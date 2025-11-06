@@ -417,8 +417,11 @@ export default function CandidatoDetalhes() {
         {/* Feedbacks */}
         <div className="space-y-4">
           <div className="flex justify-end">
-            <Button onClick={() => setSolicitarFeedbackModalOpen(true)} size="sm" variant="outline">
-              <ExternalLink className="h-4 w-4 mr-2" />
+            <Button 
+              onClick={() => setSolicitarFeedbackModalOpen(true)} 
+              className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold"
+            >
+              <ExternalLink className="h-5 w-5 mr-2" />
               Solicitar Feedback do Cliente
             </Button>
           </div>
