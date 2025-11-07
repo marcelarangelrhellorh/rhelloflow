@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, Briefcase, Users, AlertTriangle, MessageSquare, Clock, Target, Share2, UserPlus, XCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { RejectedCandidatesCard } from "@/components/Dashboard/RejectedCandidatesCard";
 
 // Utility functions
 const formatInt = (n: number): string => Math.round(n).toString();
@@ -294,6 +295,11 @@ export default function Dashboard() {
               Compartilhar Formulário
             </Button>
           </div>
+        </div>
+
+        {/* Card de Candidatos Reprovados sem WhatsApp */}
+        <div className="mb-6">
+          <RejectedCandidatesCard />
         </div>
 
         {/* KPI Cards Grid */}
