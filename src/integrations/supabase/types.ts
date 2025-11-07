@@ -268,6 +268,7 @@ export type Database = {
           disponibilidade_status: string | null
           email: string
           estado: string | null
+          experiencia_profissional: string | null
           feedback: string | null
           historico_experiencia: string | null
           id: string
@@ -283,6 +284,7 @@ export type Database = {
           portfolio_url: string | null
           pretensao_salarial: number | null
           recrutador: string | null
+          sexo: string | null
           source_link_id: string | null
           status: Database["public"]["Enums"]["status_candidato"] | null
           telefone: string | null
@@ -305,6 +307,7 @@ export type Database = {
           disponibilidade_status?: string | null
           email: string
           estado?: string | null
+          experiencia_profissional?: string | null
           feedback?: string | null
           historico_experiencia?: string | null
           id?: string
@@ -320,6 +323,7 @@ export type Database = {
           portfolio_url?: string | null
           pretensao_salarial?: number | null
           recrutador?: string | null
+          sexo?: string | null
           source_link_id?: string | null
           status?: Database["public"]["Enums"]["status_candidato"] | null
           telefone?: string | null
@@ -342,6 +346,7 @@ export type Database = {
           disponibilidade_status?: string | null
           email?: string
           estado?: string | null
+          experiencia_profissional?: string | null
           feedback?: string | null
           historico_experiencia?: string | null
           id?: string
@@ -357,6 +362,7 @@ export type Database = {
           portfolio_url?: string | null
           pretensao_salarial?: number | null
           recrutador?: string | null
+          sexo?: string | null
           source_link_id?: string | null
           status?: Database["public"]["Enums"]["status_candidato"] | null
           telefone?: string | null
@@ -837,6 +843,78 @@ export type Database = {
           },
           {
             foreignKeyName: "historico_candidatos_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vagas_active"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      import_logs: {
+        Row: {
+          created_at: string
+          created_by: string
+          dedup_field: string
+          duplicates_found: Json | null
+          error_count: number
+          file_name: string
+          id: string
+          ignored_count: number
+          import_mode: string
+          processing_time_ms: number | null
+          results: Json | null
+          source_type: string
+          success_count: number
+          total_rows: number
+          updated_count: number
+          vaga_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          dedup_field?: string
+          duplicates_found?: Json | null
+          error_count?: number
+          file_name: string
+          id?: string
+          ignored_count?: number
+          import_mode?: string
+          processing_time_ms?: number | null
+          results?: Json | null
+          source_type: string
+          success_count?: number
+          total_rows?: number
+          updated_count?: number
+          vaga_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          dedup_field?: string
+          duplicates_found?: Json | null
+          error_count?: number
+          file_name?: string
+          id?: string
+          ignored_count?: number
+          import_mode?: string
+          processing_time_ms?: number | null
+          results?: Json | null
+          source_type?: string
+          success_count?: number
+          total_rows?: number
+          updated_count?: number
+          vaga_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "import_logs_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vagas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "import_logs_vaga_id_fkey"
             columns: ["vaga_id"]
             isOneToOne: false
             referencedRelation: "vagas_active"
@@ -2648,6 +2726,14 @@ export type Database = {
         | "Pleno"
         | "Sênior"
         | "Liderança"
+      origem_candidatura:
+        | "linkedin"
+        | "infojobs"
+        | "catho"
+        | "indicacao"
+        | "site_empresa"
+        | "importacao_xls"
+        | "outro"
       prioridade_vaga: "Baixa" | "Normal" | "Alta" | "Crítica"
       resultado_historico:
         | "Aprovado"
@@ -2829,6 +2915,15 @@ export const Constants = {
       ],
       modelo_trabalho: ["Presencial", "Híbrido", "Remoto"],
       nivel_candidato: ["Estagiário", "Júnior", "Pleno", "Sênior", "Liderança"],
+      origem_candidatura: [
+        "linkedin",
+        "infojobs",
+        "catho",
+        "indicacao",
+        "site_empresa",
+        "importacao_xls",
+        "outro",
+      ],
       prioridade_vaga: ["Baixa", "Normal", "Alta", "Crítica"],
       resultado_historico: [
         "Aprovado",
