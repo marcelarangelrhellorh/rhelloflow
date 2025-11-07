@@ -321,11 +321,11 @@ export default function CandidatoDetalhes() {
             </div>
           </div>
 
-          {/* Feedbacks - Full Width */}
-          <FeedbackList candidatoId={id!} onAddFeedback={() => setFeedbackModalOpen(true)} onSolicitarFeedback={() => setSolicitarFeedbackModalOpen(true)} />
-
-          {/* WhatsApp History */}
-          <WhatsAppHistory candidateId={id!} />
+          {/* Feedbacks and WhatsApp History - Side by Side */}
+          <div className="grid gap-6 lg:grid-cols-2">
+            <FeedbackList candidatoId={id!} onAddFeedback={() => setFeedbackModalOpen(true)} onSolicitarFeedback={() => setSolicitarFeedbackModalOpen(true)} />
+            <WhatsAppHistory candidateId={id!} />
+          </div>
 
           {/* Scorecards and Timeline - Horizontal */}
           <div className="grid gap-6 lg:grid-cols-2">

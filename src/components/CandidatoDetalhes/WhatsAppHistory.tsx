@@ -108,7 +108,7 @@ export function WhatsAppHistory({
         </CardContent>
       </Card>;
   }
-  return <Card className="mx-[300px]">
+  return <Card className="h-full">
       <CardHeader className="mx-[20px]">
         <CardTitle className="flex items-center gap-2">
           <MessageSquare className="h-5 w-5" />
