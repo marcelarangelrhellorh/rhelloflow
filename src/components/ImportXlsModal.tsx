@@ -22,21 +22,35 @@ interface ImportXlsModalProps {
   showVagaSelector?: boolean;
 }
 
+// Função para normalizar valores vazios/inválidos
+const normalizeEmptyValue = (value: any): string | null => {
+  if (value === null || value === undefined) return null;
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (trimmed === '' || trimmed === '-' || trimmed.toUpperCase() === 'N/A' || 
+        trimmed.toUpperCase() === 'NULL' || trimmed === '–' || trimmed === '—') {
+      return null;
+    }
+    return trimmed;
+  }
+  return String(value);
+};
+
 const candidatoSchema = z.object({
-  Nome: z.string().trim().min(1, "Nome é obrigatório").max(100),
-  Sobrenome: z.string().trim().max(100).optional().or(z.literal('')),
-  'E-mail': z.string().trim().email("Email inválido").max(255),
-  Telefone: z.string().trim().max(50).optional().or(z.literal('')),
-  Celular: z.string().trim().max(50).optional().or(z.literal('')),
-  Estado: z.string().trim().max(100).optional().or(z.literal('')),
-  Cidade: z.string().trim().max(100).optional().or(z.literal('')),
-  Idade: z.union([z.string(), z.number()]).optional().or(z.literal('')),
-  Sexo: z.string().trim().max(50).optional().or(z.literal('')),
-  'Salário máximo': z.union([z.string(), z.number()]).optional().or(z.literal('')),
-  'Experiência profissional': z.string().trim().max(5000).optional().or(z.literal('')),
-  Idiomas: z.string().trim().max(500).optional().or(z.literal('')),
-  'Origem da candidatura': z.string().trim().max(200).optional().or(z.literal('')),
-  'Inscrito desde': z.string().trim().optional().or(z.literal('')),
+  Nome: z.preprocess(normalizeEmptyValue, z.string().min(1, "Nome é obrigatório").max(100)),
+  Sobrenome: z.preprocess(normalizeEmptyValue, z.string().max(100).nullable().default(null)),
+  'E-mail': z.preprocess(normalizeEmptyValue, z.string().email("Email inválido").max(255)),
+  Telefone: z.preprocess(normalizeEmptyValue, z.string().max(50).nullable().default(null)),
+  Celular: z.preprocess(normalizeEmptyValue, z.string().max(50).nullable().default(null)),
+  Estado: z.preprocess(normalizeEmptyValue, z.string().max(100).nullable().default(null)),
+  Cidade: z.preprocess(normalizeEmptyValue, z.string().max(100).nullable().default(null)),
+  Idade: z.preprocess(normalizeEmptyValue, z.union([z.string(), z.number()]).nullable().default(null)),
+  Sexo: z.preprocess(normalizeEmptyValue, z.string().max(50).nullable().default(null)),
+  'Salário máximo': z.preprocess(normalizeEmptyValue, z.union([z.string(), z.number()]).nullable().default(null)),
+  'Experiência profissional': z.preprocess(normalizeEmptyValue, z.string().max(5000).nullable().default(null)),
+  Idiomas: z.preprocess(normalizeEmptyValue, z.string().max(500).nullable().default(null)),
+  'Origem da candidatura': z.preprocess(normalizeEmptyValue, z.string().max(200).nullable().default(null)),
+  'Inscrito desde': z.preprocess(normalizeEmptyValue, z.string().nullable().default(null)),
 }).passthrough();
 
 interface ParsedCandidate {
@@ -59,6 +73,7 @@ interface ParsedCandidate {
   duplicateType?: 'exact' | 'conflict';
   duplicateWith?: any;
   validationError?: string;
+  warnings?: string[];
 }
 
 interface ImportResult {
@@ -167,26 +182,38 @@ export function ImportXlsModal({ open, onOpenChange, sourceType, vagaId: initial
 
   const normalizeEstado = (estado: string | undefined | null): string | null => {
     if (!estado) return null;
-    const e = estado.trim().toUpperCase();
+    // Remove acentos usando NFD
+    const e = estado.trim()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toUpperCase();
     
     const stateMap: Record<string, string> = {
-      'ACRE': 'AC', 'ALAGOAS': 'AL', 'AMAPÁ': 'AP', 'AMAZONAS': 'AM',
-      'BAHIA': 'BA', 'CEARÁ': 'CE', 'DISTRITO FEDERAL': 'DF', 'ESPÍRITO SANTO': 'ES',
-      'GOIÁS': 'GO', 'MARANHÃO': 'MA', 'MATO GROSSO': 'MT', 'MATO GROSSO DO SUL': 'MS',
-      'MINAS GERAIS': 'MG', 'PARÁ': 'PA', 'PARAÍBA': 'PB', 'PARANÁ': 'PR',
-      'PERNAMBUCO': 'PE', 'PIAUÍ': 'PI', 'RIO DE JANEIRO': 'RJ', 'RIO GRANDE DO NORTE': 'RN',
-      'RIO GRANDE DO SUL': 'RS', 'RONDÔNIA': 'RO', 'RORAIMA': 'RR', 'SANTA CATARINA': 'SC',
-      'SÃO PAULO': 'SP', 'SERGIPE': 'SE', 'TOCANTINS': 'TO',
-      'ESPIRITO SANTO': 'ES', 'CEARA': 'CE', 'GOIAS': 'GO', 'MARANHAO': 'MA',
-      'PARAIBA': 'PB', 'PARANA': 'PR', 'PIAUI': 'PI', 'RONDONIA': 'RO',
-      'SAO PAULO': 'SP'
+      'ACRE': 'AC', 'ALAGOAS': 'AL', 'AMAPA': 'AP', 'AMAZONAS': 'AM',
+      'BAHIA': 'BA', 'CEARA': 'CE', 'DISTRITO FEDERAL': 'DF', 'ESPIRITO SANTO': 'ES',
+      'GOIAS': 'GO', 'MARANHAO': 'MA', 'MATO GROSSO': 'MT', 'MATO GROSSO DO SUL': 'MS',
+      'MINAS GERAIS': 'MG', 'PARA': 'PA', 'PARAIBA': 'PB', 'PARANA': 'PR',
+      'PERNAMBUCO': 'PE', 'PIAUI': 'PI', 'RIO DE JANEIRO': 'RJ', 'RIO GRANDE DO NORTE': 'RN',
+      'RIO GRANDE DO SUL': 'RS', 'RONDONIA': 'RO', 'RORAIMA': 'RR', 'SANTA CATARINA': 'SC',
+      'SAO PAULO': 'SP', 'SERGIPE': 'SE', 'TOCANTINS': 'TO'
     };
     
     // Se já é uma sigla válida de 2 letras, retorna
     if (e.length === 2) return e;
     
     // Tenta encontrar o nome completo no mapa
-    return stateMap[e] || e.substring(0, 2);
+    return stateMap[e] || null;
+  };
+
+  const normalizeTelefone = (telefone: string | undefined | null): string | null => {
+    if (!telefone) return null;
+    // Remove tudo que não é dígito
+    const digits = telefone.replace(/\D/g, '');
+    // Aceita 10-11 dígitos (formato Brasil)
+    if (digits.length >= 10 && digits.length <= 11) {
+      return digits;
+    }
+    return null;
   };
 
   const toTitleCase = (str: string): string => {
@@ -280,16 +307,39 @@ export function ImportXlsModal({ open, onOpenChange, sourceType, vagaId: initial
           }
 
           const validated = candidatoSchema.parse(row);
+          const warnings: string[] = [];
 
-          const nome_completo = validated.Sobrenome && validated.Sobrenome.trim()
+          const nome_completo = validated.Sobrenome
             ? toTitleCase(`${validated.Nome} ${validated.Sobrenome}`.trim())
             : toTitleCase(validated.Nome);
 
-          const telefone = validated.Celular || validated.Telefone || null;
+          // Normalizar telefones com warnings
+          const telefoneRaw = validated.Celular || validated.Telefone || null;
+          const telefone = normalizeTelefone(telefoneRaw);
+          if (telefoneRaw && !telefone) {
+            warnings.push('Telefone em formato inválido');
+          }
+
           const idade = parseAge(validated.Idade);
+          if (validated.Idade && !idade) {
+            warnings.push('Idade inválida');
+          }
+
           const sexo = normalizeSexo(validated.Sexo);
           const pretensao_salarial = parseSalary(validated['Salário máximo']);
           const origem = normalizeOrigem(validated['Origem da candidatura'], validated['Inscrito desde']);
+
+          // Normalizar estado com warning
+          const estadoNormalized = normalizeEstado(validated.Estado);
+          if (validated.Estado && !estadoNormalized) {
+            warnings.push('Estado não reconhecido');
+          }
+
+          // Validar cidade
+          const cidade = validated.Cidade || null;
+          if (!cidade && estadoNormalized) {
+            warnings.push('Cidade não informada');
+          }
 
           const normalized = {
             nome_completo,
@@ -297,11 +347,11 @@ export function ImportXlsModal({ open, onOpenChange, sourceType, vagaId: initial
             telefone,
             idade,
             sexo,
-            cidade: validated.Cidade?.trim() || null,
-            estado: normalizeEstado(validated.Estado),
+            cidade,
+            estado: estadoNormalized,
             pretensao_salarial,
-            experiencia_profissional: validated['Experiência profissional']?.trim() || null,
-            idiomas: validated.Idiomas?.trim() || null,
+            experiencia_profissional: validated['Experiência profissional'] || null,
+            idiomas: validated.Idiomas || null,
             origem,
           };
 
@@ -332,6 +382,7 @@ export function ImportXlsModal({ open, onOpenChange, sourceType, vagaId: initial
             isDuplicate,
             duplicateType,
             duplicateWith: existingCandidate,
+            warnings: warnings.length > 0 ? warnings : undefined,
           });
         } catch (error: any) {
           parsed.push({
@@ -373,7 +424,9 @@ export function ImportXlsModal({ open, onOpenChange, sourceType, vagaId: initial
       if (!user) throw new Error("Usuário não autenticado");
 
       let processed = 0;
+      // Incluir candidatos com warnings (não bloquear por warnings)
       const validCandidates = parsedData.filter(c => !c.validationError);
+      const invalidCandidates = parsedData.filter(c => c.validationError);
 
       for (const candidate of validCandidates) {
         try {
@@ -458,6 +511,33 @@ export function ImportXlsModal({ open, onOpenChange, sourceType, vagaId: initial
       const skippedCount = importResults.filter(r => r.status === 'skipped').length;
       const updatedCount = importResults.filter(r => r.status === 'updated').length;
 
+      // Exportar CSV com linhas inválidas/erro (se houver)
+      if (invalidCandidates.length > 0 || errorCount > 0) {
+        const csvData = [
+          ['Linha', 'Nome', 'Email', 'Motivo'],
+          ...invalidCandidates.map(c => [
+            c.lineNumber,
+            c.data.Nome || '',
+            c.data['E-mail'] || '',
+            c.validationError || ''
+          ]),
+          ...importResults
+            .filter(r => r.status === 'error')
+            .map(r => [r.line, r.nome, '', r.message])
+        ];
+        
+        const csvContent = csvData.map(row => row.join(';')).join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `erros_importacao_${Date.now()}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+
       // Save import log
       const { error: logError } = await supabase.from('import_logs').insert([{
         file_name: file?.name || 'unknown',
@@ -518,6 +598,7 @@ export function ImportXlsModal({ open, onOpenChange, sourceType, vagaId: initial
   const duplicatesCount = parsedData.filter(c => c.isDuplicate).length;
   const exactDuplicates = parsedData.filter(c => c.duplicateType === 'exact').length;
   const conflictDuplicates = parsedData.filter(c => c.duplicateType === 'conflict').length;
+  const warningsCount = parsedData.filter(c => c.warnings && c.warnings.length > 0).length;
   const successCount = results.filter(r => r.status === 'success').length;
   const errorCount = results.filter(r => r.status === 'error').length;
   const skippedCount = results.filter(r => r.status === 'skipped').length;
@@ -663,6 +744,12 @@ export function ImportXlsModal({ open, onOpenChange, sourceType, vagaId: initial
                       {conflictDuplicates > 0 && <span className="ml-2 text-red-600">({conflictDuplicates} com divergência)</span>}
                     </>
                   )}
+                  {warningsCount > 0 && (
+                    <>
+                      <br />
+                      <span className="text-blue-600">ℹ️ {warningsCount} linha(s) com avisos (serão importadas mesmo assim)</span>
+                    </>
+                  )}
                 </AlertDescription>
               </Alert>
 
@@ -754,6 +841,13 @@ export function ImportXlsModal({ open, onOpenChange, sourceType, vagaId: initial
                             <span className="text-red-600 text-xs">⚠️ Duplicado (divergência)</span>
                           ) : candidate.duplicateType === 'exact' ? (
                             <span className="text-amber-600 text-xs">⚠️ Duplicado (igual)</span>
+                          ) : candidate.warnings && candidate.warnings.length > 0 ? (
+                            <div className="text-blue-600 text-xs">
+                              <div>ℹ️ Avisos:</div>
+                              {candidate.warnings.map((w, idx) => (
+                                <div key={idx}>• {w}</div>
+                              ))}
+                            </div>
                           ) : (
                             <span className="text-green-600 text-xs">✓ OK</span>
                           )}
@@ -812,7 +906,14 @@ export function ImportXlsModal({ open, onOpenChange, sourceType, vagaId: initial
                     <div>✅ {successCount} importado(s)</div>
                     {updatedCount > 0 && <div>🔄 {updatedCount} atualizado(s)</div>}
                     {skippedCount > 0 && <div>⏭️ {skippedCount} ignorado(s)</div>}
-                    {errorCount > 0 && <div className="text-red-600">❌ {errorCount} erro(s)</div>}
+                    {errorCount > 0 && (
+                      <>
+                        <div className="text-red-600">❌ {errorCount} erro(s)</div>
+                        <div className="text-xs text-muted-foreground">
+                          CSV com erros foi baixado automaticamente
+                        </div>
+                      </>
+                    )}
                   </div>
                 </AlertDescription>
               </Alert>
