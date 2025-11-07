@@ -19,8 +19,6 @@ import { LinkToJobModal } from "@/components/BancoTalentos/LinkToJobModal";
 import { CandidateTagsCard } from "@/components/CandidatoDetalhes/CandidateTagsCard";
 import { SendWhatsAppModal } from "@/components/CandidatoDetalhes/SendWhatsAppModal";
 import { WhatsAppHistory } from "@/components/CandidatoDetalhes/WhatsAppHistory";
-
-
 type Candidato = {
   id: string;
   nome_completo: string;
@@ -47,12 +45,10 @@ type Candidato = {
   origem: string | null;
   source_link_id: string | null;
 };
-
 type Vaga = {
   id: string;
   titulo: string;
 };
-
 type Historico = {
   id: string;
   resultado: string;
@@ -61,9 +57,10 @@ type Historico = {
   recrutador: string | null;
   vaga_id: string | null;
 };
-
 export default function CandidatoDetalhes() {
-  const { id } = useParams();
+  const {
+    id
+  } = useParams();
   const navigate = useNavigate();
   const [candidato, setCandidato] = useState<Candidato | null>(null);
   const [vaga, setVaga] = useState<Vaga | null>(null);
@@ -87,7 +84,6 @@ export default function CandidatoDetalhes() {
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
   const [solicitarFeedbackModalOpen, setSolicitarFeedbackModalOpen] = useState(false);
   const [whatsappModalOpen, setWhatsappModalOpen] = useState(false);
-
   useEffect(() => {
     if (id) {
       loadCandidato();
@@ -95,59 +91,37 @@ export default function CandidatoDetalhes() {
       refreshStats();
 
       // Subscribe to realtime updates
-      const candidatoChannel = supabase
-        .channel('candidato-changes')
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'candidatos',
-            filter: `id=eq.${id}`
-          },
-          (payload) => {
-            console.log('Candidato atualizado:', payload);
-            if (payload.eventType === 'UPDATE') {
-              loadCandidato();
-            }
-          }
-        )
-        .subscribe();
+      const candidatoChannel = supabase.channel('candidato-changes').on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'candidatos',
+        filter: `id=eq.${id}`
+      }, payload => {
+        console.log('Candidato atualizado:', payload);
+        if (payload.eventType === 'UPDATE') {
+          loadCandidato();
+        }
+      }).subscribe();
 
       // Subscribe to feedback updates
-      const feedbackChannel = supabase
-        .channel('feedback-changes')
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'feedbacks',
-            filter: `candidato_id=eq.${id}`
-          },
-          () => {
-            refreshStats();
-          }
-        )
-        .subscribe();
+      const feedbackChannel = supabase.channel('feedback-changes').on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'feedbacks',
+        filter: `candidato_id=eq.${id}`
+      }, () => {
+        refreshStats();
+      }).subscribe();
 
       // Subscribe to historico updates
-      const historicoChannel = supabase
-        .channel('historico-changes')
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'historico_candidatos',
-            filter: `candidato_id=eq.${id}`
-          },
-          () => {
-            loadHistorico();
-          }
-        )
-        .subscribe();
-
+      const historicoChannel = supabase.channel('historico-changes').on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'historico_candidatos',
+        filter: `candidato_id=eq.${id}`
+      }, () => {
+        loadHistorico();
+      }).subscribe();
       return () => {
         supabase.removeChannel(candidatoChannel);
         supabase.removeChannel(feedbackChannel);
@@ -155,29 +129,22 @@ export default function CandidatoDetalhes() {
       };
     }
   }, [id]);
-
   const refreshStats = async () => {
     const newStats = await loadStats();
     setStats(newStats);
   };
-
   const loadCandidato = async () => {
     try {
-      const { data, error } = await supabase
-        .from("candidatos")
-        .select("*")
-        .eq("id", id)
-        .single();
-
+      const {
+        data,
+        error
+      } = await supabase.from("candidatos").select("*").eq("id", id).single();
       if (error) throw error;
       setCandidato(data);
-
       if (data.vaga_relacionada_id) {
-        const { data: vagaData } = await supabase
-          .from("vagas")
-          .select("id, titulo")
-          .eq("id", data.vaga_relacionada_id)
-          .single();
+        const {
+          data: vagaData
+        } = await supabase.from("vagas").select("id, titulo").eq("id", data.vaga_relacionada_id).single();
         setVaga(vagaData);
       }
     } catch (error) {
@@ -187,40 +154,33 @@ export default function CandidatoDetalhes() {
       setLoading(false);
     }
   };
-
   const loadStats = async () => {
-    if (!id) return { ultimoFeedback: null, totalProcessos: 0, mediaRating: null, qtdAvaliacoes: 0, totalFeedbacks: 0 };
-
+    if (!id) return {
+      ultimoFeedback: null,
+      totalProcessos: 0,
+      mediaRating: null,
+      qtdAvaliacoes: 0,
+      totalFeedbacks: 0
+    };
     try {
       // Buscar último feedback
-      const { data: fbUltimo } = await supabase
-        .from('feedbacks')
-        .select('criado_em')
-        .eq('candidato_id', id)
-        .order('criado_em', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+      const {
+        data: fbUltimo
+      } = await supabase.from('feedbacks').select('criado_em').eq('candidato_id', id).order('criado_em', {
+        ascending: false
+      }).limit(1).maybeSingle();
 
       // Buscar total de processos distintos
-      const { data: processosData } = await supabase
-        .from('candidatos')
-        .select('vaga_relacionada_id')
-        .eq('id', id);
+      const {
+        data: processosData
+      } = await supabase.from('candidatos').select('vaga_relacionada_id').eq('id', id);
 
       // Buscar estatísticas de avaliação
-      const { data: ratingData } = await supabase
-        .from('feedbacks')
-        .select('avaliacao')
-        .eq('candidato_id', id);
-
-      const ratings = (ratingData || [])
-        .map(f => f.avaliacao)
-        .filter((n): n is number => typeof n === 'number' && Number.isFinite(n));
-      
-      const mediaRating = ratings.length > 0 
-        ? ratings.reduce((a, b) => a + b, 0) / ratings.length 
-        : null;
-
+      const {
+        data: ratingData
+      } = await supabase.from('feedbacks').select('avaliacao').eq('candidato_id', id);
+      const ratings = (ratingData || []).map(f => f.avaliacao).filter((n): n is number => typeof n === 'number' && Number.isFinite(n));
+      const mediaRating = ratings.length > 0 ? ratings.reduce((a, b) => a + b, 0) / ratings.length : null;
       return {
         ultimoFeedback: fbUltimo?.criado_em || null,
         totalProcessos: processosData?.[0]?.vaga_relacionada_id ? 1 : 0,
@@ -230,58 +190,55 @@ export default function CandidatoDetalhes() {
       };
     } catch (error) {
       console.error("Erro ao carregar estatísticas:", error);
-      return { ultimoFeedback: null, totalProcessos: 0, mediaRating: null, qtdAvaliacoes: 0, totalFeedbacks: 0 };
+      return {
+        ultimoFeedback: null,
+        totalProcessos: 0,
+        mediaRating: null,
+        qtdAvaliacoes: 0,
+        totalFeedbacks: 0
+      };
     }
   };
-
   const loadHistorico = async () => {
     try {
-      const { data, error } = await supabase
-        .from("historico_candidatos")
-        .select("*")
-        .eq("candidato_id", id)
-        .order("data", { ascending: false });
-
+      const {
+        data,
+        error
+      } = await supabase.from("historico_candidatos").select("*").eq("candidato_id", id).order("data", {
+        ascending: false
+      });
       if (error) throw error;
       setHistorico(data || []);
     } catch (error) {
       console.error("Erro ao carregar histórico:", error);
     }
   };
-
   const handleStatusChange = async (newStatus: string) => {
     if (!id || !candidato) return;
-    
     const oldStatus = candidato.status;
-    
     try {
       // Atualizar status do candidato
-      const { error: updateError } = await supabase
-        .from("candidatos")
-        .update({ status: newStatus as any })
-        .eq("id", id);
-
+      const {
+        error: updateError
+      } = await supabase.from("candidatos").update({
+        status: newStatus as any
+      }).eq("id", id);
       if (updateError) throw updateError;
 
       // Registrar no histórico com resultado mapeado
-      const resultadoHistorico = newStatus === "Contratado" ? "Contratado" : 
-                                 newStatus.includes("Aprovado") ? "Aprovado" :
-                                 newStatus.includes("Reprovado") ? "Reprovado" : "Em andamento";
-      
-      const { error: historicoError } = await supabase
-        .from("historico_candidatos")
-        .insert({
-          candidato_id: id,
-          vaga_id: candidato.vaga_relacionada_id,
-          resultado: resultadoHistorico as "Aprovado" | "Reprovado" | "Contratado" | "Em andamento",
-          recrutador: null,
-          feedback: `Etapa alterada de "${oldStatus}" para "${newStatus}"`,
-        });
-
+      const resultadoHistorico = newStatus === "Contratado" ? "Contratado" : newStatus.includes("Aprovado") ? "Aprovado" : newStatus.includes("Reprovado") ? "Reprovado" : "Em andamento";
+      const {
+        error: historicoError
+      } = await supabase.from("historico_candidatos").insert({
+        candidato_id: id,
+        vaga_id: candidato.vaga_relacionada_id,
+        resultado: resultadoHistorico as "Aprovado" | "Reprovado" | "Contratado" | "Em andamento",
+        recrutador: null,
+        feedback: `Etapa alterada de "${oldStatus}" para "${newStatus}"`
+      });
       if (historicoError) throw historicoError;
-
       toast.success(`✅ Etapa atualizada com sucesso para "${newStatus}"`);
-      
+
       // Recarregar dados
       await loadCandidato();
       await loadHistorico();
@@ -290,14 +247,11 @@ export default function CandidatoDetalhes() {
       toast.error("Erro ao atualizar etapa do candidato");
     }
   };
-
   const handleDelete = async () => {
     try {
-      const { error } = await supabase
-        .from("candidatos")
-        .delete()
-        .eq("id", id);
-
+      const {
+        error
+      } = await supabase.from("candidatos").delete().eq("id", id);
       if (error) throw error;
       toast.success("Candidato excluído com sucesso!");
       navigate("/candidatos");
@@ -306,18 +260,17 @@ export default function CandidatoDetalhes() {
       toast.error("Erro ao excluir candidato");
     }
   };
-
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: '#FFFBF0' }}>
+    return <div className="flex min-h-screen items-center justify-center" style={{
+      backgroundColor: '#FFFBF0'
+    }}>
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-      </div>
-    );
+      </div>;
   }
-
   if (!candidato) {
-    return (
-      <div className="min-h-screen p-8" style={{ backgroundColor: '#FFFBF0' }}>
+    return <div className="min-h-screen p-8" style={{
+      backgroundColor: '#FFFBF0'
+    }}>
         <div className="text-center">
           <p className="text-muted-foreground mb-4">Candidato não encontrado</p>
           <Button onClick={() => navigate("/candidatos")}>
@@ -325,14 +278,15 @@ export default function CandidatoDetalhes() {
             Voltar para Candidatos
           </Button>
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="relative flex min-h-screen w-full flex-col font-display" style={{ backgroundColor: '#FFFBF0' }}>
+  return <div className="relative flex min-h-screen w-full flex-col font-display" style={{
+    backgroundColor: '#FFFBF0'
+  }}>
       {/* Breadcrumb / Back Button */}
-      <div className="sticky top-0 z-10 backdrop-blur-sm border-b border-gray-200 dark:border-secondary-text-light/20" style={{ backgroundColor: 'rgba(255, 251, 240, 0.95)' }}>
+      <div className="sticky top-0 z-10 backdrop-blur-sm border-b border-gray-200 dark:border-secondary-text-light/20" style={{
+      backgroundColor: 'rgba(255, 251, 240, 0.95)'
+    }}>
         <div className="px-6 sm:px-10 lg:px-20 py-4">
           <Button variant="ghost" size="sm" onClick={() => navigate("/candidatos")} className="text-secondary-text-light dark:text-secondary-text-dark">
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -345,82 +299,30 @@ export default function CandidatoDetalhes() {
 
       {/* Content */}
       <main className="flex-1 px-6 sm:px-10 lg:px-20 py-8">
-        <div className="mx-auto max-w-7xl space-y-6">
+        <div className="max-w-7xl space-y-6 my-0 mx-0">
           {/* Simplified Header with Stats */}
-          <CandidateHeader
-            nome={candidato.nome_completo}
-            status={candidato.status}
-            nivel={candidato.nivel}
-            area={candidato.area}
-            cidade={candidato.cidade}
-            estado={candidato.estado}
-            onEdit={() => navigate(`/candidatos/${id}/editar`)}
-            onDelete={() => setDeleteDialogOpen(true)}
-            onAddFeedback={() => setFeedbackModalOpen(true)}
-            onRelocate={() => setRelocateModalOpen(true)}
-            onStatusChange={handleStatusChange}
-            onSendWhatsApp={() => setWhatsappModalOpen(true)}
-          />
+          <CandidateHeader nome={candidato.nome_completo} status={candidato.status} nivel={candidato.nivel} area={candidato.area} cidade={candidato.cidade} estado={candidato.estado} onEdit={() => navigate(`/candidatos/${id}/editar`)} onDelete={() => setDeleteDialogOpen(true)} onAddFeedback={() => setFeedbackModalOpen(true)} onRelocate={() => setRelocateModalOpen(true)} onStatusChange={handleStatusChange} onSendWhatsApp={() => setWhatsappModalOpen(true)} />
 
           {/* Compact Stats Row */}
-          <StatsBar
-            criadoEm={candidato.criado_em}
-            ultimoFeedback={stats.ultimoFeedback}
-            processosParticipados={stats.totalProcessos}
-            mediaAvaliacao={stats.mediaRating}
-            qtdAvaliacoes={stats.qtdAvaliacoes}
-            totalFeedbacks={stats.totalFeedbacks}
-          />
+          <StatsBar criadoEm={candidato.criado_em} ultimoFeedback={stats.ultimoFeedback} processosParticipados={stats.totalProcessos} mediaAvaliacao={stats.mediaRating} qtdAvaliacoes={stats.qtdAvaliacoes} totalFeedbacks={stats.totalFeedbacks} />
 
           {/* Two Column Layout - Top */}
           <div className="grid gap-6 lg:grid-cols-12">
             {/* Left Sidebar - Contact & Tags */}
-            <div className="lg:col-span-3 space-y-6">
-              <ContactCard
-                email={candidato.email}
-                telefone={candidato.telefone}
-                cidade={candidato.cidade}
-                estado={candidato.estado}
-                linkedin={candidato.linkedin}
-                curriculoLink={candidato.curriculo_link}
-                isFromPublicLink={!!candidato.source_link_id}
-              />
+            <div className="lg:col-span-3 space-y-6 mx-0 py-0 my-0">
+              <ContactCard email={candidato.email} telefone={candidato.telefone} cidade={candidato.cidade} estado={candidato.estado} linkedin={candidato.linkedin} curriculoLink={candidato.curriculo_link} isFromPublicLink={!!candidato.source_link_id} />
 
               <CandidateTagsCard candidateId={id!} />
             </div>
 
             {/* Main Content - Professional Info */}
             <div className="lg:col-span-9">
-              <ProfessionalInfoCard
-                pretensaoSalarial={candidato.pretensao_salarial}
-                vagaTitulo={vaga?.titulo || null}
-                vagaId={candidato.vaga_relacionada_id}
-                dataCadastro={candidato.criado_em}
-                nivel={candidato.nivel}
-                area={candidato.area}
-                curriculoUrl={candidato.curriculo_url}
-                portfolioUrl={candidato.portfolio_url}
-                disponibilidadeMudanca={candidato.disponibilidade_mudanca}
-                disponibilidadeStatus={candidato.disponibilidade_status}
-                pontosFortes={candidato.pontos_fortes}
-                pontosDesenvolver={candidato.pontos_desenvolver}
-                parecerFinal={candidato.parecer_final}
-                origem={candidato.origem}
-                candidatoId={id!}
-                experienciaProfissional={(candidato as any).experiencia_profissional || null}
-                idiomas={(candidato as any).idiomas || null}
-                onUpdate={loadCandidato}
-                onVagaClick={() => vaga && navigate(`/vagas/${vaga.id}`)}
-              />
+              <ProfessionalInfoCard pretensaoSalarial={candidato.pretensao_salarial} vagaTitulo={vaga?.titulo || null} vagaId={candidato.vaga_relacionada_id} dataCadastro={candidato.criado_em} nivel={candidato.nivel} area={candidato.area} curriculoUrl={candidato.curriculo_url} portfolioUrl={candidato.portfolio_url} disponibilidadeMudanca={candidato.disponibilidade_mudanca} disponibilidadeStatus={candidato.disponibilidade_status} pontosFortes={candidato.pontos_fortes} pontosDesenvolver={candidato.pontos_desenvolver} parecerFinal={candidato.parecer_final} origem={candidato.origem} candidatoId={id!} experienciaProfissional={(candidato as any).experiencia_profissional || null} idiomas={(candidato as any).idiomas || null} onUpdate={loadCandidato} onVagaClick={() => vaga && navigate(`/vagas/${vaga.id}`)} />
             </div>
           </div>
 
           {/* Feedbacks - Full Width */}
-          <FeedbackList
-            candidatoId={id!}
-            onAddFeedback={() => setFeedbackModalOpen(true)}
-            onSolicitarFeedback={() => setSolicitarFeedbackModalOpen(true)}
-          />
+          <FeedbackList candidatoId={id!} onAddFeedback={() => setFeedbackModalOpen(true)} onSolicitarFeedback={() => setSolicitarFeedbackModalOpen(true)} />
 
           {/* WhatsApp History */}
           <WhatsAppHistory candidateId={id!} />
@@ -428,33 +330,21 @@ export default function CandidatoDetalhes() {
           {/* Scorecards and Timeline - Horizontal */}
           <div className="grid gap-6 lg:grid-cols-2">
             <div className="space-y-6">
-              <ScorecardEvaluation
-                candidateId={id!}
-                candidateName={candidato.nome_completo}
-                vagaId={candidato.vaga_relacionada_id}
-              />
+              <ScorecardEvaluation candidateId={id!} candidateName={candidato.nome_completo} vagaId={candidato.vaga_relacionada_id} />
 
               <ScorecardHistory candidateId={id!} />
             </div>
 
-            <HistoryTimeline
-              historico={historico}
-              onVagaClick={(vagaId) => navigate(`/vagas/${vagaId}`)}
-            />
+            <HistoryTimeline historico={historico} onVagaClick={vagaId => navigate(`/vagas/${vagaId}`)} />
           </div>
         </div>
       </main>
 
       {/* Modals */}
-      <LinkToJobModal
-        open={relocateModalOpen}
-        onOpenChange={setRelocateModalOpen}
-        candidateId={id || ""}
-        onSuccess={() => {
-          loadCandidato();
-          setRelocateModalOpen(false);
-        }}
-      />
+      <LinkToJobModal open={relocateModalOpen} onOpenChange={setRelocateModalOpen} candidateId={id || ""} onSuccess={() => {
+      loadCandidato();
+      setRelocateModalOpen(false);
+    }} />
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
@@ -466,10 +356,7 @@ export default function CandidatoDetalhes() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
               Excluir
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -477,35 +364,14 @@ export default function CandidatoDetalhes() {
       </AlertDialog>
 
       {/* Feedback Modal */}
-      <FeedbackModal
-        open={feedbackModalOpen}
-        onOpenChange={setFeedbackModalOpen}
-        candidatoId={id!}
-        vagaId={candidato.vaga_relacionada_id}
-        etapaAtual={candidato.status}
-        onSuccess={() => {
-          loadCandidato();
-        }}
-      />
+      <FeedbackModal open={feedbackModalOpen} onOpenChange={setFeedbackModalOpen} candidatoId={id!} vagaId={candidato.vaga_relacionada_id} etapaAtual={candidato.status} onSuccess={() => {
+      loadCandidato();
+    }} />
 
       {/* Solicitar Feedback Modal */}
-      <SolicitarFeedbackModal
-        open={solicitarFeedbackModalOpen}
-        onOpenChange={setSolicitarFeedbackModalOpen}
-        candidatoId={id!}
-        vagaId={candidato.vaga_relacionada_id}
-        candidatoNome={candidato.nome_completo}
-      />
+      <SolicitarFeedbackModal open={solicitarFeedbackModalOpen} onOpenChange={setSolicitarFeedbackModalOpen} candidatoId={id!} vagaId={candidato.vaga_relacionada_id} candidatoNome={candidato.nome_completo} />
 
       {/* WhatsApp Modal */}
-      <SendWhatsAppModal
-        open={whatsappModalOpen}
-        onOpenChange={setWhatsappModalOpen}
-        candidateId={id!}
-        candidateName={candidato.nome_completo}
-        candidatePhone={candidato.telefone}
-        vacancyTitle={vaga?.titulo}
-      />
-    </div>
-  );
+      <SendWhatsAppModal open={whatsappModalOpen} onOpenChange={setWhatsappModalOpen} candidateId={id!} candidateName={candidato.nome_completo} candidatePhone={candidato.telefone} vacancyTitle={vaga?.titulo} />
+    </div>;
 }
