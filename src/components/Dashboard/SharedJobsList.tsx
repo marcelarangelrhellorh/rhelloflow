@@ -2,11 +2,12 @@ import { useState, useEffect } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Copy, Calendar, Users, RefreshCw, Share2 } from "lucide-react";
+import { ExternalLink, Copy, Calendar, Users, RefreshCw, Share2, Power, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 interface SharedJob {
   vaga_id: string;
@@ -28,6 +29,8 @@ interface SharedJobsListProps {
 export function SharedJobsList({ open, onOpenChange, onRefresh }: SharedJobsListProps) {
   const [jobs, setJobs] = useState<SharedJob[]>([]);
   const [loading, setLoading] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [processingId, setProcessingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (open) {
@@ -54,6 +57,7 @@ export function SharedJobsList({ open, onOpenChange, onRefresh }: SharedJobsList
           )
         `)
         .eq('deleted', false)
+        .eq('active', true)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -104,6 +108,51 @@ export function SharedJobsList({ open, onOpenChange, onRefresh }: SharedJobsList
         Expira {formatDistanceToNow(expirationDate, { addSuffix: true, locale: ptBR })}
       </span>
     );
+  };
+
+  const handleToggleActive = async (linkId: string) => {
+    try {
+      setProcessingId(linkId);
+      
+      const { error } = await supabase.functions.invoke('toggle-share-link', {
+        body: { linkId }
+      });
+
+      if (error) throw error;
+
+      toast.success("Link desativado com sucesso!");
+      loadJobs();
+      onRefresh();
+    } catch (error) {
+      console.error("Erro ao desativar link:", error);
+      toast.error("Erro ao desativar link");
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deletingId) return;
+
+    try {
+      setProcessingId(deletingId);
+      
+      const { error } = await supabase.functions.invoke('delete-share-link', {
+        body: { linkId: deletingId }
+      });
+
+      if (error) throw error;
+
+      toast.success("Link excluído com sucesso!");
+      setDeletingId(null);
+      loadJobs();
+      onRefresh();
+    } catch (error) {
+      console.error("Erro ao excluir link:", error);
+      toast.error("Erro ao excluir link");
+    } finally {
+      setProcessingId(null);
+    }
   };
 
   return (
@@ -163,9 +212,6 @@ export function SharedJobsList({ open, onOpenChange, onRefresh }: SharedJobsList
                           {job.vaga_titulo}
                         </h4>
                         <div className="flex flex-wrap items-center gap-2 text-xs">
-                          <Badge variant={job.active ? "default" : "secondary"}>
-                            {job.active ? "Ativo" : "Inativo"}
-                          </Badge>
                           <span className="flex items-center gap-1 text-muted-foreground">
                             <Users className="h-3 w-3" />
                             {job.submissions_count} {job.submissions_count === 1 ? 'candidatura' : 'candidaturas'}
@@ -185,6 +231,7 @@ export function SharedJobsList({ open, onOpenChange, onRefresh }: SharedJobsList
                         size="sm"
                         onClick={() => copyLink(job.token)}
                         className="flex-1"
+                        disabled={processingId === job.link_id}
                       >
                         <Copy className="mr-2 h-4 w-4" />
                         Copiar Link
@@ -193,8 +240,28 @@ export function SharedJobsList({ open, onOpenChange, onRefresh }: SharedJobsList
                         variant="outline"
                         size="sm"
                         onClick={() => openLink(job.token)}
+                        disabled={processingId === job.link_id}
                       >
                         <ExternalLink className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleToggleActive(job.link_id)}
+                        disabled={processingId === job.link_id}
+                        title="Desativar link"
+                      >
+                        <Power className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setDeletingId(job.link_id)}
+                        disabled={processingId === job.link_id}
+                        className="text-destructive hover:text-destructive"
+                        title="Excluir link"
+                      >
+                        <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
@@ -204,6 +271,26 @@ export function SharedJobsList({ open, onOpenChange, onRefresh }: SharedJobsList
           )}
         </div>
       </SheetContent>
+
+      <AlertDialog open={!!deletingId} onOpenChange={() => setDeletingId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir este link de compartilhamento? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Sheet>
   );
 }
