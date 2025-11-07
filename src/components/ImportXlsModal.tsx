@@ -28,7 +28,7 @@ const candidatoSchema = z.object({
   'E-mail': z.string().trim().email("Email inválido").max(255),
   Telefone: z.string().trim().max(50).optional().or(z.literal('')),
   Celular: z.string().trim().max(50).optional().or(z.literal('')),
-  Estado: z.string().trim().max(2).optional().or(z.literal('')),
+  Estado: z.string().trim().max(100).optional().or(z.literal('')),
   Cidade: z.string().trim().max(100).optional().or(z.literal('')),
   Idade: z.union([z.string(), z.number()]).optional().or(z.literal('')),
   Sexo: z.string().trim().max(50).optional().or(z.literal('')),
@@ -165,6 +165,30 @@ export function ImportXlsModal({ open, onOpenChange, sourceType, vagaId: initial
     return (!isNaN(num) && num > 0 && num < 150) ? num : null;
   };
 
+  const normalizeEstado = (estado: string | undefined | null): string | null => {
+    if (!estado) return null;
+    const e = estado.trim().toUpperCase();
+    
+    const stateMap: Record<string, string> = {
+      'ACRE': 'AC', 'ALAGOAS': 'AL', 'AMAPÁ': 'AP', 'AMAZONAS': 'AM',
+      'BAHIA': 'BA', 'CEARÁ': 'CE', 'DISTRITO FEDERAL': 'DF', 'ESPÍRITO SANTO': 'ES',
+      'GOIÁS': 'GO', 'MARANHÃO': 'MA', 'MATO GROSSO': 'MT', 'MATO GROSSO DO SUL': 'MS',
+      'MINAS GERAIS': 'MG', 'PARÁ': 'PA', 'PARAÍBA': 'PB', 'PARANÁ': 'PR',
+      'PERNAMBUCO': 'PE', 'PIAUÍ': 'PI', 'RIO DE JANEIRO': 'RJ', 'RIO GRANDE DO NORTE': 'RN',
+      'RIO GRANDE DO SUL': 'RS', 'RONDÔNIA': 'RO', 'RORAIMA': 'RR', 'SANTA CATARINA': 'SC',
+      'SÃO PAULO': 'SP', 'SERGIPE': 'SE', 'TOCANTINS': 'TO',
+      'ESPIRITO SANTO': 'ES', 'CEARA': 'CE', 'GOIAS': 'GO', 'MARANHAO': 'MA',
+      'PARAIBA': 'PB', 'PARANA': 'PR', 'PIAUI': 'PI', 'RONDONIA': 'RO',
+      'SAO PAULO': 'SP'
+    };
+    
+    // Se já é uma sigla válida de 2 letras, retorna
+    if (e.length === 2) return e;
+    
+    // Tenta encontrar o nome completo no mapa
+    return stateMap[e] || e.substring(0, 2);
+  };
+
   const toTitleCase = (str: string): string => {
     return str.toLowerCase().split(' ').map(word => 
       word.charAt(0).toUpperCase() + word.slice(1)
@@ -274,7 +298,7 @@ export function ImportXlsModal({ open, onOpenChange, sourceType, vagaId: initial
             idade,
             sexo,
             cidade: validated.Cidade?.trim() || null,
-            estado: validated.Estado?.trim()?.toUpperCase() || null,
+            estado: normalizeEstado(validated.Estado),
             pretensao_salarial,
             experiencia_profissional: validated['Experiência profissional']?.trim() || null,
             idiomas: validated.Idiomas?.trim() || null,
