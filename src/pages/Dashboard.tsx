@@ -297,11 +297,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Card de Candidatos Reprovados sem WhatsApp */}
-        <div className="mb-6">
-          <RejectedCandidatesCard />
-        </div>
-
         {/* KPI Cards Grid */}
         <div className="grid gap-6 mb-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {loading ? (
@@ -409,6 +404,9 @@ export default function Dashboard() {
                 onClick={handleVagasCanceladasClick}
                 ariaLabel={`Ver vagas canceladas (${stats.vagasCanceladas} vagas)`}
               />
+
+              {/* 8. Candidatos Reprovados sem WhatsApp */}
+              <RejectedCandidatesCard />
             </>
           )}
         </div>
