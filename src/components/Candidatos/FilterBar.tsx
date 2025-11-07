@@ -7,21 +7,12 @@ interface FilterBarProps {
   onSearchChange: (value: string) => void;
   statusFilter: string;
   onStatusChange: (value: string) => void;
-  recrutadorFilter: string;
-  onRecrutadorChange: (value: string) => void;
-  areaFilter: string;
-  onAreaChange: (value: string) => void;
-  nivelFilter: string;
-  onNivelChange: (value: string) => void;
   disponibilidadeFilter: string;
   onDisponibilidadeChange: (value: string) => void;
   vagaFilter: string;
   onVagaChange: (value: string) => void;
   clienteFilter: string;
   onClienteChange: (value: string) => void;
-  recrutadores: string[];
-  areas: string[];
-  niveis: string[];
   vagas: { id: string; titulo: string }[];
   clientes: string[];
 }
@@ -44,21 +35,12 @@ export function FilterBar({
   onSearchChange,
   statusFilter,
   onStatusChange,
-  recrutadorFilter,
-  onRecrutadorChange,
-  areaFilter,
-  onAreaChange,
-  nivelFilter,
-  onNivelChange,
   disponibilidadeFilter,
   onDisponibilidadeChange,
   vagaFilter,
   onVagaChange,
   clienteFilter,
   onClienteChange,
-  recrutadores,
-  areas,
-  niveis,
   vagas,
   clientes,
 }: FilterBarProps) {
@@ -95,48 +77,6 @@ export function FilterBar({
             {statusOptions.map((status) => (
               <SelectItem key={status} value={status}>
                 {status}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Select value={recrutadorFilter} onValueChange={onRecrutadorChange}>
-          <SelectTrigger className="w-full sm:w-[180px] bg-background">
-            <SelectValue placeholder="Recrutador" />
-          </SelectTrigger>
-          <SelectContent className="bg-popover z-50">
-            <SelectItem value="all">Todos</SelectItem>
-            {recrutadores.map((rec) => (
-              <SelectItem key={rec} value={rec}>
-                {rec}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Select value={areaFilter} onValueChange={onAreaChange}>
-          <SelectTrigger className="w-full sm:w-[180px] bg-background">
-            <SelectValue placeholder="Área" />
-          </SelectTrigger>
-          <SelectContent className="bg-popover z-50">
-            <SelectItem value="all">Todas as áreas</SelectItem>
-            {areas.map((area) => (
-              <SelectItem key={area} value={area}>
-                {area}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Select value={nivelFilter} onValueChange={onNivelChange}>
-          <SelectTrigger className="w-full sm:w-[180px] bg-background">
-            <SelectValue placeholder="Nível" />
-          </SelectTrigger>
-          <SelectContent className="bg-popover z-50">
-            <SelectItem value="all">Todos os níveis</SelectItem>
-            {niveis.map((nivel) => (
-              <SelectItem key={nivel} value={nivel}>
-                {nivel}
               </SelectItem>
             ))}
           </SelectContent>
