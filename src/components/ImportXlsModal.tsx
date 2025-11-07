@@ -23,36 +23,36 @@ interface ImportXlsModalProps {
 
 const candidatoSchema = z.object({
   Nome: z.string().trim().min(1, "Nome é obrigatório").max(100),
-  Sobrenome: z.string().trim().max(100).optional(),
+  Sobrenome: z.string().trim().max(100).optional().or(z.literal('')),
   'E-mail': z.string().trim().email("Email inválido").max(255),
-  Telefone: z.string().trim().max(50).optional(),
-  Celular: z.string().trim().max(50).optional(),
-  Estado: z.string().trim().max(2).optional(),
-  Cidade: z.string().trim().max(100).optional(),
-  CEP: z.string().trim().max(20).optional(),
-  Endereço: z.string().trim().max(200).optional(),
-  Complemento: z.string().trim().max(100).optional(),
-  Número: z.string().trim().max(20).optional(),
-  Bairro: z.string().trim().max(100).optional(),
-  'Data de Nascimento': z.string().trim().optional(),
-  Idade: z.union([z.string(), z.number()]).optional(),
-  Sexo: z.string().trim().max(50).optional(),
-  'Estado Civil': z.string().trim().max(50).optional(),
-  Nacionalidade: z.string().trim().max(100).optional(),
-  'Salário mínimo': z.union([z.string(), z.number()]).optional(),
-  'Salário máximo': z.union([z.string(), z.number()]).optional(),
-  'TAG\'s do CV do candidato': z.string().trim().optional(),
-  'Experiência profissional': z.string().trim().max(5000).optional(),
-  Treinamento: z.string().trim().max(2000).optional(),
-  Idiomas: z.string().trim().max(500).optional(),
-  'Origem da candidatura': z.string().trim().max(200).optional(),
+  Telefone: z.string().trim().max(50).optional().or(z.literal('')),
+  Celular: z.string().trim().max(50).optional().or(z.literal('')),
+  Estado: z.string().trim().max(2).optional().or(z.literal('')),
+  Cidade: z.string().trim().max(100).optional().or(z.literal('')),
+  CEP: z.string().trim().max(20).optional().or(z.literal('')),
+  Endereço: z.string().trim().max(200).optional().or(z.literal('')),
+  Complemento: z.string().trim().max(100).optional().or(z.literal('')),
+  Número: z.string().trim().max(20).optional().or(z.literal('')),
+  Bairro: z.string().trim().max(100).optional().or(z.literal('')),
+  'Data de Nascimento': z.string().trim().optional().or(z.literal('')),
+  Idade: z.union([z.string(), z.number()]).optional().or(z.literal('')),
+  Sexo: z.string().trim().max(50).optional().or(z.literal('')),
+  'Estado Civil': z.string().trim().max(50).optional().or(z.literal('')),
+  Nacionalidade: z.string().trim().max(100).optional().or(z.literal('')),
+  'Salário mínimo': z.union([z.string(), z.number()]).optional().or(z.literal('')),
+  'Salário máximo': z.union([z.string(), z.number()]).optional().or(z.literal('')),
+  'TAG\'s do CV do candidato': z.string().trim().optional().or(z.literal('')),
+  'Experiência profissional': z.string().trim().max(5000).optional().or(z.literal('')),
+  Treinamento: z.string().trim().max(2000).optional().or(z.literal('')),
+  Idiomas: z.string().trim().max(500).optional().or(z.literal('')),
+  'Origem da candidatura': z.string().trim().max(200).optional().or(z.literal('')),
   // Campos adicionais do template ATS (opcionais)
-  'Tipo de documento': z.string().trim().optional(),
-  'Número de identificação': z.string().trim().optional(),
-  'Título': z.string().trim().optional(),
-  'Data de Inscrição': z.string().trim().optional(),
-  'Inscrito desde': z.string().trim().optional(),
-  'Histórico de aplicação na empresa': z.string().trim().optional(),
+  'Tipo de documento': z.string().trim().optional().or(z.literal('')),
+  'Número de identificação': z.string().trim().optional().or(z.literal('')),
+  'Título': z.string().trim().optional().or(z.literal('')),
+  'Data de Inscrição': z.string().trim().optional().or(z.literal('')),
+  'Inscrito desde': z.string().trim().optional().or(z.literal('')),
+  'Histórico de aplicação na empresa': z.string().trim().optional().or(z.literal('')),
 }).passthrough(); // Permite campos extras não mapeados
 
 interface ImportResult {
@@ -240,11 +240,15 @@ export function ImportXlsModal({ open, onOpenChange, sourceType, vagaId: initial
             continue;
           }
 
-          // Validate data
-          const validated = candidatoSchema.parse(row);
+          // Validate data - aceitar campos vazios/null
+          const validated = candidatoSchema.parse({
+            ...row,
+            Nome: row['Nome'] || '',
+            'E-mail': row['E-mail'] || '',
+          });
 
           // Map to database fields
-          const nomeCompleto = validated.Sobrenome 
+          const nomeCompleto = validated.Sobrenome && validated.Sobrenome.trim()
             ? `${validated.Nome} ${validated.Sobrenome}`.trim()
             : validated.Nome;
 
@@ -271,25 +275,25 @@ export function ImportXlsModal({ open, onOpenChange, sourceType, vagaId: initial
             validated.CEP
           ].filter(Boolean).join(', ') || null;
 
-          // Combine professional info
+          // Combine professional info - filtrar valores vazios e nulos
           const historicoExperiencia = [
             validated['Experiência profissional'],
             validated.Treinamento ? `Treinamento: ${validated.Treinamento}` : null,
             validated.Idiomas ? `Idiomas: ${validated.Idiomas}` : null
-          ].filter(Boolean).join('\n\n') || null;
+          ].filter(item => item && item.trim && item.trim() !== '').join('\n\n') || null;
 
-          // Insert into database
+          // Insert into database - normalizar valores vazios para null
           const candidatoData: any = {
             nome_completo: nomeCompleto,
             email: validated['E-mail'],
             telefone: telefone,
-            cidade: validated.Cidade || null,
-            estado: validated.Estado || null,
+            cidade: validated.Cidade?.trim() || null,
+            estado: validated.Estado?.trim() || null,
             pretensao_salarial: pretensaoSalarial,
             historico_experiencia: historicoExperiencia,
             disponibilidade_status: 'disponível',
             status: sourceType === 'vaga' ? 'Triagem' : 'Banco de Talentos',
-            origem: validated['Origem da candidatura'] || 'importacao_xls',
+            origem: validated['Origem da candidatura']?.trim() || validated['Inscrito desde']?.trim() || 'importacao_xls',
           };
 
           if (vagaId) {
