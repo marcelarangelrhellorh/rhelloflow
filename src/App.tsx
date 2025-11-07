@@ -11,6 +11,7 @@ import PublicVagaForm from "./pages/PublicVagaForm";
 import VagaDetalhes from "./pages/VagaDetalhes";
 import ShareJob from "./pages/ShareJob";
 import FeedbackCliente from "./pages/FeedbackCliente";
+import FeedbacksPendentes from "./pages/FeedbacksPendentes";
 import FunilVagas from "./pages/FunilVagas";
 import Candidatos from "./pages/Candidatos";
 import CandidatoForm from "./pages/CandidatoForm";
@@ -53,6 +54,7 @@ const App = () => (
             <Route path="/candidatos/:id/editar" element={<CandidatoForm />} />
             <Route path="/funil-candidatos" element={<FunilCandidatos />} />
             <Route path="/banco-talentos" element={<BancoTalentos />} />
+            <Route path="/feedbacks-pendentes" element={<FeedbacksPendentes />} />
             <Route path="/scorecards" element={<Scorecards />} />
             <Route path="/scorecards/novo" element={<ScorecardForm />} />
             <Route path="/scorecards/:id/editar" element={<ScorecardForm />} />

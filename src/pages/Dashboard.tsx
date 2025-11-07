@@ -198,7 +198,7 @@ export default function Dashboard() {
     const ids = stats.idsVagasAtencao.join(',');
     navigate(`/vagas?attention=out_of_sla&ids=${encodeURIComponent(ids)}`);
   };
-  const handleFeedbacksClick = () => navigate('/candidatos?attention=awaiting_client_feedback');
+  const handleFeedbacksClick = () => navigate('/feedbacks-pendentes');
   const handleTempoMedioClick = () => navigate('/vagas?metric=avg_time_to_close');
   const handleTaxaAprovacaoClick = () => navigate('/relatorios?focus=conversion');
   const handleVagasCanceladasClick = () => navigate('/vagas?status=Cancelada');
