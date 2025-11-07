@@ -57,14 +57,13 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Get vaga details
+    // Get vaga details with status from reference table
     const { data: vaga, error: vagaError } = await supabase
       .from('vagas')
       .select(`
         id,
         titulo,
         empresa,
-        status,
         status_slug,
         criado_em,
         status_changed_at,
@@ -84,6 +83,14 @@ Deno.serve(async (req) => {
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
+    // Get status label from reference table
+    const { data: statusRef } = await supabase
+      .from('vaga_status_ref')
+      .select('label')
+      .eq('slug', vaga.status_slug)
+      .single();
+
 
     // Count active candidates
     const { count: candidatosCount } = await supabase
@@ -118,7 +125,7 @@ Deno.serve(async (req) => {
         vaga: {
           titulo: vaga.titulo,
           empresa: vaga.empresa,
-          status: vaga.status,
+          status: statusRef?.label || vaga.status_slug,
           statusSlug: vaga.status_slug,
           salarioMin: vaga.salario_min,
           salarioMax: vaga.salario_max,
