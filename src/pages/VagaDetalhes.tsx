@@ -15,11 +15,11 @@ import { VagaActivityLog } from "@/components/VagaDetalhes/VagaActivityLog";
 import { VagaDetailsDrawer } from "@/components/VagaDetalhes/VagaDetailsDrawer";
 import { toast } from "@/hooks/use-toast";
 
-// Custom hooks
-import { useVaga } from "@/hooks/data/useVaga";
-import { useCandidatos } from "@/hooks/data/useCandidatos";
-import { useVagaEventos } from "@/hooks/data/useVagaEventos";
-import { useVagaTags } from "@/hooks/data/useVagaTags";
+// Custom hooks with React Query
+import { useVaga } from "@/hooks/data/useVagaQuery";
+import { useCandidatos } from "@/hooks/data/useCandidatosQuery";
+import { useVagaEventos } from "@/hooks/data/useVagaEventosQuery";
+import { useVagaTags } from "@/hooks/data/useVagaTagsQuery";
 export default function VagaDetalhes() {
   const { id } = useParams();
 
