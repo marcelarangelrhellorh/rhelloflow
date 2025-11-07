@@ -140,7 +140,7 @@ export function AnalyzeScorecards({
     });
   };
   return <>
-      <Button onClick={() => setOpen(true)} variant="default" className="gap-2 bg-[faec3e] text-[faec3e] font-semibold my-[8px] bg-[#faec3e] py-0">
+      <Button onClick={() => setOpen(true)} variant="default" className="gap-2 bg-[#faec3e] text-foreground font-semibold">
         <Sparkles className="h-4 w-4" />
         Analisar scorecards (IA)
       </Button>

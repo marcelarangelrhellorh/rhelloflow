@@ -89,7 +89,7 @@ export function PipelineBoard({
       <div className="flex gap-4" style={{
       minWidth: 'max-content'
     }}>
-        {stages.map(stage => <Column key={stage.id} stage={stage} jobs={getJobsByStage(stage.slug)} progresso={progresso} onJobClick={onJobClick} onJobEdit={onJobEdit} onJobMoveStage={onJobMoveStage} onJobDuplicate={onJobDuplicate} onJobClose={onJobClose} className="bg-neutral-50" />)}
+        {stages.map(stage => <Column key={stage.id} stage={stage} jobs={getJobsByStage(stage.slug)} progresso={progresso} onJobClick={onJobClick} onJobEdit={onJobEdit} onJobMoveStage={onJobMoveStage} onJobDuplicate={onJobDuplicate} onJobClose={onJobClose} />)}
       </div>
 
       <DragOverlay>
