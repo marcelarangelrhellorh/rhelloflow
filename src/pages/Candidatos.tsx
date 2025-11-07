@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, MessageSquare, X, AlertTriangle, Grid3x3, List } from "lucide-react";
+import { Plus, MessageSquare, X, AlertTriangle, Grid3x3, List, FileSpreadsheet } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -11,6 +11,7 @@ import { StatsHeader } from "@/components/Candidatos/StatsHeader";
 import { FilterBar } from "@/components/Candidatos/FilterBar";
 import { CandidateCard } from "@/components/Candidatos/CandidateCard";
 import { LinkToJobModal } from "@/components/BancoTalentos/LinkToJobModal";
+import { ImportXlsModal } from "@/components/ImportXlsModal";
 import { handleDelete as performDeletion } from "@/lib/deletionUtils";
 import { useUserRole } from "@/hooks/useUserRole";
 
@@ -45,6 +46,7 @@ export default function Candidatos() {
   const [deletionReason, setDeletionReason] = useState("");
   const [requiresApproval, setRequiresApproval] = useState(false);
   const [linkingJobId, setLinkingJobId] = useState<string | null>(null);
+  const [importModalOpen, setImportModalOpen] = useState(false);
 
   // Verificar se há filtro de atenção pela URL
   const searchParams = new URLSearchParams(window.location.search);
@@ -188,13 +190,23 @@ export default function Candidatos() {
               <h1 className="text-3xl font-bold text-foreground">Candidatos</h1>
               <p className="text-base text-muted-foreground">Gerencie todos os candidatos</p>
             </div>
-            <Button 
-              onClick={() => navigate('/candidatos/novo')}
-              className="bg-[#F9EC3F] hover:bg-[#E5D72E] text-[#00141D] font-bold"
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              Novo Candidato
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                onClick={() => navigate('/candidatos/novo')}
+                className="bg-[#F9EC3F] hover:bg-[#E5D72E] text-[#00141D] font-bold"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Novo Candidato
+              </Button>
+              <Button 
+                onClick={() => setImportModalOpen(true)}
+                variant="outline"
+                className="font-bold"
+              >
+                <FileSpreadsheet className="mr-2 h-4 w-4" />
+                Importar XLS
+              </Button>
+            </div>
           </div>
 
           {/* Stats */}
@@ -356,6 +368,15 @@ export default function Candidatos() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <ImportXlsModal
+        open={importModalOpen}
+        onOpenChange={setImportModalOpen}
+        sourceType="vaga"
+        onSuccess={() => {
+          loadCandidatos();
+        }}
+      />
     </div>
   );
 }
