@@ -70,11 +70,30 @@ export function CandidateCard({ candidato, onView, onEdit, onDelete, onLinkJob, 
       !isAvailable && "opacity-70"
     )}>
       <CardHeader className="pb-2 pt-3 px-3">
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex items-start gap-2 mb-2">
           <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#F9EC3F]/20 text-[#00141D] font-bold text-base flex-shrink-0">
             {getInitials(candidato.nome_completo)}
           </div>
-          <div className="flex gap-1 flex-wrap justify-end ml-2">
+          
+          <div className="flex flex-col gap-1.5 flex-1 min-w-0">
+            <Badge
+              variant="outline"
+              className={cn("text-sm font-bold rounded-full px-3 py-1 w-fit", statusColors[candidato.status] || statusColors["Banco de Talentos"])}
+            >
+              {statusIcons[candidato.status] || "⚪"} {candidato.status}
+            </Badge>
+            
+            {candidato.vaga_titulo && (
+              <Badge
+                variant="outline"
+                className="text-sm font-medium rounded-full px-3 py-1 w-fit bg-blue-50 text-blue-700 border-blue-200"
+              >
+                📋 {candidato.vaga_titulo}
+              </Badge>
+            )}
+          </div>
+
+          <div className="flex gap-1 flex-shrink-0">
             {candidato.disponibilidade_status === 'disponível' ? (
               <Badge className="text-sm font-bold rounded-full px-2.5 py-1 bg-[#C9F4C7] text-[#1B5E20] hover:bg-[#C9F4C7]/90">
                 ✅
@@ -90,22 +109,6 @@ export function CandidateCard({ candidato, onView, onEdit, onDelete, onLinkJob, 
         <h3 className="text-lg font-bold text-[#00141D] line-clamp-1 mb-1">
           {candidato.nome_completo}
         </h3>
-        
-        <Badge
-          variant="outline"
-          className={cn("text-sm font-bold rounded-full px-3 py-1 w-fit", statusColors[candidato.status] || statusColors["Banco de Talentos"])}
-        >
-          {statusIcons[candidato.status] || "⚪"} {candidato.status}
-        </Badge>
-        
-        {candidato.vaga_titulo && (
-          <Badge
-            variant="outline"
-            className="text-sm font-medium rounded-full px-3 py-1 w-fit bg-blue-50 text-blue-700 border-blue-200 mt-1"
-          >
-            📋 {candidato.vaga_titulo}
-          </Badge>
-        )}
       </CardHeader>
 
       <CardContent className="space-y-2 px-3 pb-3">
