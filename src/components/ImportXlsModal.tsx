@@ -96,6 +96,7 @@ export function ImportXlsModal({ open, onOpenChange, sourceType, vagaId: initial
   const [importMode, setImportMode] = useState<'all' | 'skip_duplicates' | 'update_existing'>('all');
   const [lgpdAccepted, setLgpdAccepted] = useState(false);
   const [showSelectVaga, setShowSelectVaga] = useState(showVagaSelector);
+  const [selectedOrigem, setSelectedOrigem] = useState<string>('importacao_xls');
 
   useEffect(() => {
     if (showVagaSelector && open) {
@@ -338,7 +339,8 @@ export function ImportXlsModal({ open, onOpenChange, sourceType, vagaId: initial
 
           const sexo = normalizeSexo(validated.Sexo);
           const pretensao_salarial = parseSalary(validated['Salário máximo']);
-          const origem = normalizeOrigem(validated['Origem da candidatura'], validated['Inscrito desde']);
+          // Usar origem selecionada pelo recrutador ao invés de inferir da planilha
+          const origem = selectedOrigem;
 
           // Normalizar estado com warning
           const estadoNormalized = normalizeEstado(validated.Estado);
@@ -612,6 +614,7 @@ export function ImportXlsModal({ open, onOpenChange, sourceType, vagaId: initial
       setResults([]);
       setProgress(0);
       setSelectedVagaId('');
+      setSelectedOrigem('importacao_xls');
       setStep('upload');
       setLgpdAccepted(false);
       onOpenChange(false);
@@ -659,6 +662,27 @@ export function ImportXlsModal({ open, onOpenChange, sourceType, vagaId: initial
                   </Select>
                 </div>
               )}
+
+              <div className="space-y-3">
+                <Label htmlFor="origem-select">Origem dos candidatos *</Label>
+                <Select value={selectedOrigem} onValueChange={setSelectedOrigem}>
+                  <SelectTrigger id="origem-select">
+                    <SelectValue placeholder="Selecione a origem" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="importacao_xls">Importação XLS</SelectItem>
+                    <SelectItem value="linkedin">LinkedIn</SelectItem>
+                    <SelectItem value="infojobs">Infojobs</SelectItem>
+                    <SelectItem value="catho">Catho</SelectItem>
+                    <SelectItem value="indicacao">Indicação</SelectItem>
+                    <SelectItem value="site_empresa">Site da Empresa</SelectItem>
+                    <SelectItem value="eventos">Eventos</SelectItem>
+                    <SelectItem value="universidades">Universidades</SelectItem>
+                    <SelectItem value="hunting">Hunting</SelectItem>
+                    <SelectItem value="outros">Outros</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
               <Alert>
                 <Download className="h-4 w-4" />
