@@ -5,7 +5,6 @@ import { Plus, MessageSquare, Trash2, Star, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useEffect, useState } from "react";
-
 interface Feedback {
   id: string;
   tipo: "interno" | "cliente";
@@ -19,64 +18,56 @@ interface Feedback {
   sender_name?: string;
   quick_tags?: string[];
 }
-
 interface FeedbackListProps {
   candidatoId: string;
   onAddFeedback: () => void;
   onSolicitarFeedback?: () => void;
 }
-
 const disposicaoColors = {
   aprovado: "bg-success/10 text-success border-success/20",
   reprovado: "bg-destructive/10 text-destructive border-destructive/20",
-  neutro: "bg-muted/10 text-muted-foreground border-muted",
+  neutro: "bg-muted/10 text-muted-foreground border-muted"
 };
-
 const disposicaoIcons = {
   aprovado: "✅",
   reprovado: "❌",
-  neutro: "⚪",
+  neutro: "⚪"
 };
-
-export function FeedbackList({ candidatoId, onAddFeedback, onSolicitarFeedback }: FeedbackListProps) {
-  const { toast } = useToast();
+export function FeedbackList({
+  candidatoId,
+  onAddFeedback,
+  onSolicitarFeedback
+}: FeedbackListProps) {
+  const {
+    toast
+  } = useToast();
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [profiles, setProfiles] = useState<Record<string, string>>({});
-
   useEffect(() => {
     loadFeedbacks();
 
     // Subscribe to realtime changes
-    const channel = supabase
-      .channel(`feedbacks-${candidatoId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'feedbacks',
-          filter: `candidato_id=eq.${candidatoId}`
-        },
-        () => {
-          loadFeedbacks();
-        }
-      )
-      .subscribe();
-
+    const channel = supabase.channel(`feedbacks-${candidatoId}`).on('postgres_changes', {
+      event: '*',
+      schema: 'public',
+      table: 'feedbacks',
+      filter: `candidato_id=eq.${candidatoId}`
+    }, () => {
+      loadFeedbacks();
+    }).subscribe();
     return () => {
       supabase.removeChannel(channel);
     };
   }, [candidatoId]);
-
   const loadFeedbacks = async () => {
     try {
-      const { data, error } = await supabase
-        .from("feedbacks")
-        .select("*")
-        .eq("candidato_id", candidatoId)
-        .order("criado_em", { ascending: false });
-
+      const {
+        data,
+        error
+      } = await supabase.from("feedbacks").select("*").eq("candidato_id", candidatoId).order("criado_em", {
+        ascending: false
+      });
       if (error) throw error;
 
       // Cast the data to match our Feedback type
@@ -85,17 +76,14 @@ export function FeedbackList({ candidatoId, onAddFeedback, onSolicitarFeedback }
         tipo: item.tipo as "interno" | "cliente",
         disposicao: item.disposicao as "aprovado" | "reprovado" | "neutro" | null
       }));
-
       setFeedbacks(feedbacksData);
 
       // Load author profiles
       if (data && data.length > 0) {
         const authorIds = [...new Set(data.map(f => f.author_user_id))];
-        const { data: profilesData } = await supabase
-          .from("profiles")
-          .select("id, full_name")
-          .in("id", authorIds);
-
+        const {
+          data: profilesData
+        } = await supabase.from("profiles").select("id, full_name").in("id", authorIds);
         if (profilesData) {
           const profilesMap = profilesData.reduce((acc, p) => {
             acc[p.id] = p.full_name;
@@ -115,20 +103,15 @@ export function FeedbackList({ candidatoId, onAddFeedback, onSolicitarFeedback }
       setIsLoading(false);
     }
   };
-
   const handleDelete = async (feedbackId: string) => {
     if (!confirm("Tem certeza que deseja excluir este feedback?")) {
       return;
     }
-
     try {
-      const { error } = await supabase
-        .from("feedbacks")
-        .delete()
-        .eq("id", feedbackId);
-
+      const {
+        error
+      } = await supabase.from("feedbacks").delete().eq("id", feedbackId);
       if (error) throw error;
-
       toast({
         title: "Sucesso",
         description: "Feedback excluído com sucesso!"
@@ -146,24 +129,20 @@ export function FeedbackList({ candidatoId, onAddFeedback, onSolicitarFeedback }
     return new Date(dateString).toLocaleDateString("pt-BR", {
       day: "2-digit",
       month: "short",
-      year: "numeric",
+      year: "numeric"
     });
   };
-
-  return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
+  return <Card className="mx-[300px] px-0 py-0">
+      <CardHeader className="mx-[10px]">
+        <div className="flex items-center justify-between px-0 mx-[14px]">
           <CardTitle className="text-xl font-bold">
             Feedbacks <span className="font-normal text-muted-foreground">({feedbacks.length})</span>
           </CardTitle>
           <div className="flex gap-2">
-            {onSolicitarFeedback && (
-              <Button onClick={onSolicitarFeedback} size="sm" variant="outline">
+            {onSolicitarFeedback && <Button onClick={onSolicitarFeedback} size="sm" variant="outline">
                 <Send className="mr-2 h-4 w-4" />
                 Solicitar Feedback
-              </Button>
-            )}
+              </Button>}
             <Button onClick={onAddFeedback} size="sm">
               <Plus className="mr-2 h-4 w-4" />
               Novo Feedback
@@ -172,12 +151,9 @@ export function FeedbackList({ candidatoId, onAddFeedback, onSolicitarFeedback }
         </div>
       </CardHeader>
       <CardContent>
-        {isLoading ? (
-          <div className="flex justify-center py-8">
+        {isLoading ? <div className="flex justify-center py-8">
             <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-          </div>
-        ) : feedbacks.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-8 text-center">
+          </div> : feedbacks.length === 0 ? <div className="flex flex-col items-center justify-center py-8 text-center">
             <div className="mb-4 rounded-full bg-muted/20 p-4">
               <MessageSquare className="h-8 w-8 text-muted-foreground" />
             </div>
@@ -188,55 +164,30 @@ export function FeedbackList({ candidatoId, onAddFeedback, onSolicitarFeedback }
               <Plus className="mr-2 h-4 w-4" />
               Adicionar Primeiro Feedback
             </Button>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {feedbacks.map((feedback) => (
-              <div
-                key={feedback.id}
-                className="group rounded-lg border-2 border-border bg-card p-5 transition-all hover:shadow-lg hover:border-primary/20"
-              >
+          </div> : <div className="space-y-4">
+            {feedbacks.map(feedback => <div key={feedback.id} className="group rounded-lg border-2 border-border bg-card p-5 transition-all hover:shadow-lg hover:border-primary/20">
                 {/* Header com tipo e data */}
                 <div className="mb-4 flex items-start justify-between gap-4">
                   <div className="flex items-center gap-3 flex-wrap">
-                    <Badge
-                      className={
-                        feedback.origem === "cliente"
-                          ? "bg-blue-500 text-white text-sm font-semibold"
-                          : feedback.tipo === "interno"
-                          ? "bg-muted text-muted-foreground text-sm font-semibold"
-                          : "bg-primary text-primary-foreground text-sm font-semibold"
-                      }
-                    >
+                    <Badge className={feedback.origem === "cliente" ? "bg-blue-500 text-white text-sm font-semibold" : feedback.tipo === "interno" ? "bg-muted text-muted-foreground text-sm font-semibold" : "bg-primary text-primary-foreground text-sm font-semibold"}>
                       {feedback.origem === "cliente" ? "👤 Cliente" : feedback.tipo === "interno" ? "💬 Interno" : "📋 Cliente"}
                     </Badge>
 
-                    {feedback.disposicao && (
-                      <Badge
-                        className={disposicaoColors[feedback.disposicao] + " text-sm font-semibold"}
-                      >
+                    {feedback.disposicao && <Badge className={disposicaoColors[feedback.disposicao] + " text-sm font-semibold"}>
                         {disposicaoIcons[feedback.disposicao]} {feedback.disposicao}
-                      </Badge>
-                    )}
+                      </Badge>}
 
-                    {feedback.avaliacao && (
-                      <Badge variant="outline" className="text-sm font-semibold gap-1">
+                    {feedback.avaliacao && <Badge variant="outline" className="text-sm font-semibold gap-1">
                         <Star className="h-4 w-4 fill-[#FFCD00] text-[#FFCD00]" />
                         {feedback.avaliacao}
-                      </Badge>
-                    )}
+                      </Badge>}
                   </div>
 
                   <div className="flex items-center gap-2 shrink-0">
                     <span className="text-sm font-medium text-muted-foreground">
                       {formatDate(feedback.criado_em)}
                     </span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDelete(feedback.id)}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0"
-                    >
+                    <Button variant="ghost" size="sm" onClick={() => handleDelete(feedback.id)} className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0">
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
                   </div>
@@ -246,11 +197,9 @@ export function FeedbackList({ candidatoId, onAddFeedback, onSolicitarFeedback }
                 <div className="mb-3">
                   <p className="text-base font-bold text-card-foreground">
                     {profiles[feedback.author_user_id] || "Carregando..."}
-                    {feedback.sender_name && (
-                      <span className="text-sm font-normal text-muted-foreground ml-2">
+                    {feedback.sender_name && <span className="text-sm font-normal text-muted-foreground ml-2">
                         via {feedback.sender_name}
-                      </span>
-                    )}
+                      </span>}
                   </p>
                 </div>
 
@@ -260,28 +209,17 @@ export function FeedbackList({ candidatoId, onAddFeedback, onSolicitarFeedback }
                 </p>
 
                 {/* Tags e etapa na parte inferior */}
-                {(feedback.etapa || (feedback.quick_tags && feedback.quick_tags.length > 0)) && (
-                  <div className="flex gap-2 flex-wrap pt-3 border-t border-border">
-                    {feedback.etapa && (
-                      <Badge variant="outline" className="text-sm">
+                {(feedback.etapa || feedback.quick_tags && feedback.quick_tags.length > 0) && <div className="flex gap-2 flex-wrap pt-3 border-t border-border">
+                    {feedback.etapa && <Badge variant="outline" className="text-sm">
                         📍 {feedback.etapa}
-                      </Badge>
-                    )}
+                      </Badge>}
 
-                    {feedback.quick_tags && feedback.quick_tags.length > 0 && (
-                      feedback.quick_tags.map((tag, idx) => (
-                        <Badge key={idx} variant="secondary" className="text-sm">
+                    {feedback.quick_tags && feedback.quick_tags.length > 0 && feedback.quick_tags.map((tag, idx) => <Badge key={idx} variant="secondary" className="text-sm">
                           {tag}
-                        </Badge>
-                      ))
-                    )}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
+                        </Badge>)}
+                  </div>}
+              </div>)}
+          </div>}
       </CardContent>
-    </Card>
-  );
+    </Card>;
 }
