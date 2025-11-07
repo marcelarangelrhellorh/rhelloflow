@@ -96,7 +96,7 @@ export function ImportXlsModal({ open, onOpenChange, sourceType, vagaId: initial
   const [importMode, setImportMode] = useState<'all' | 'skip_duplicates' | 'update_existing'>('all');
   const [lgpdAccepted, setLgpdAccepted] = useState(false);
   const [showSelectVaga, setShowSelectVaga] = useState(showVagaSelector);
-  const [selectedOrigem, setSelectedOrigem] = useState<string>('importacao_xls');
+  const [selectedOrigem, setSelectedOrigem] = useState<string>('Link de Divulgação');
 
   useEffect(() => {
     if (showVagaSelector && open) {
@@ -614,7 +614,7 @@ export function ImportXlsModal({ open, onOpenChange, sourceType, vagaId: initial
       setResults([]);
       setProgress(0);
       setSelectedVagaId('');
-      setSelectedOrigem('importacao_xls');
+      setSelectedOrigem('Link de Divulgação');
       setStep('upload');
       setLgpdAccepted(false);
       onOpenChange(false);
@@ -670,16 +670,19 @@ export function ImportXlsModal({ open, onOpenChange, sourceType, vagaId: initial
                     <SelectValue placeholder="Selecione a origem" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="importacao_xls">Importação XLS</SelectItem>
-                    <SelectItem value="linkedin">LinkedIn</SelectItem>
-                    <SelectItem value="infojobs">Infojobs</SelectItem>
-                    <SelectItem value="catho">Catho</SelectItem>
-                    <SelectItem value="indicacao">Indicação</SelectItem>
-                    <SelectItem value="site_empresa">Site da Empresa</SelectItem>
-                    <SelectItem value="eventos">Eventos</SelectItem>
-                    <SelectItem value="universidades">Universidades</SelectItem>
-                    <SelectItem value="hunting">Hunting</SelectItem>
-                    <SelectItem value="outros">Outros</SelectItem>
+                    <SelectItem value="Link de Divulgação">🔗 Link de Divulgação</SelectItem>
+                    <SelectItem value="Pandapé">🐼 Pandapé</SelectItem>
+                    <SelectItem value="LinkedIn">💼 LinkedIn</SelectItem>
+                    <SelectItem value="Gupy">🎯 Gupy</SelectItem>
+                    <SelectItem value="Indeed">📋 Indeed</SelectItem>
+                    <SelectItem value="Catho">📊 Catho</SelectItem>
+                    <SelectItem value="Indicação">👥 Indicação</SelectItem>
+                    <SelectItem value="Site da Empresa">🌐 Site da Empresa</SelectItem>
+                    <SelectItem value="Instagram">📸 Instagram</SelectItem>
+                    <SelectItem value="WhatsApp">💬 WhatsApp</SelectItem>
+                    <SelectItem value="E-mail Direto">✉️ E-mail Direto</SelectItem>
+                    <SelectItem value="Hunting">🎯 Hunting</SelectItem>
+                    <SelectItem value="Outra">➕ Outra</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

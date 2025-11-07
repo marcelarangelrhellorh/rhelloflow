@@ -368,6 +368,7 @@ export function CandidateModal({ open, onClose, candidatoId, onSave }: Candidate
                     <SelectItem value="Instagram">📸 Instagram</SelectItem>
                     <SelectItem value="WhatsApp">💬 WhatsApp</SelectItem>
                     <SelectItem value="E-mail Direto">✉️ E-mail Direto</SelectItem>
+                    <SelectItem value="Hunting">🎯 Hunting</SelectItem>
                     <SelectItem value="Outra">➕ Outra</SelectItem>
                   </SelectContent>
                 </Select>

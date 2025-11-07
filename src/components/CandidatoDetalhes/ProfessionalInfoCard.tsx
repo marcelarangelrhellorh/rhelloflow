@@ -20,6 +20,7 @@ const ORIGENS = [
   { value: "Instagram", label: "📸 Instagram" },
   { value: "WhatsApp", label: "💬 WhatsApp" },
   { value: "E-mail Direto", label: "✉️ E-mail Direto" },
+  { value: "Hunting", label: "🎯 Hunting" },
   { value: "Outra", label: "➕ Outra" },
 ];
 
