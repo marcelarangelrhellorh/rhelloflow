@@ -164,7 +164,7 @@ export function JobCard({
               {/* Subheader - Cliente/Área */}
               <div className="flex items-center gap-2">
                 <p 
-                  className="text-sm text-muted-foreground truncate"
+                  className="text-sm text-muted-foreground truncate font-bold"
                 >
                   {vaga.empresa}
                   {vaga.area && ` • ${vaga.area}`}
@@ -174,7 +174,7 @@ export function JobCard({
 
             {/* Métricas rápidas */}
             <div className="flex items-center gap-4 text-sm">
-              <div className="flex items-center gap-1.5 text-muted-foreground">
+              <div className="flex items-center gap-1.5 text-muted-foreground font-bold">
                 <Users className="h-4 w-4" />
                 <span>{vaga.candidatos_count || 0} candidatos</span>
               </div>
@@ -182,13 +182,13 @@ export function JobCard({
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                    <div className="flex items-center gap-1.5 text-muted-foreground font-bold">
                       <Clock className="h-4 w-4" />
                       <span>{diasEtapaAtual}d nesta etapa</span>
                     </div>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Total em aberto: {diasEmAberto} dias úteis</p>
+                    <p className="font-bold">Total em aberto: {diasEmAberto} dias úteis</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -204,7 +204,7 @@ export function JobCard({
               </div>
               <div className="flex justify-end">
                 <span 
-                  className="text-sm text-muted-foreground"
+                  className="text-sm text-muted-foreground font-bold"
                 >
                   {progresso}% concluído
                 </span>
@@ -214,7 +214,7 @@ export function JobCard({
             {/* Rodapé - Chips de equipe */}
             <div className="flex flex-wrap gap-2 pt-2 border-t border-border">
               {vaga.recrutador && (
-                <Badge variant="outline" className="text-sm gap-1.5">
+                <Badge variant="outline" className="text-sm gap-1.5 font-bold">
                   <Avatar className="h-5 w-5 bg-[#FFCD00]">
                     <AvatarFallback 
                       className="text-[#00141D] text-[10px] font-bold"
@@ -227,7 +227,7 @@ export function JobCard({
               )}
               
               {vaga.cs_responsavel && (
-                <Badge variant="outline" className="text-sm gap-1.5">
+                <Badge variant="outline" className="text-sm gap-1.5 font-bold">
                   <Avatar className="h-5 w-5 bg-foreground">
                     <AvatarFallback 
                       className="text-background text-[10px] font-bold"
