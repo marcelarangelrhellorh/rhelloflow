@@ -516,12 +516,12 @@ export function ImportXlsModal({ open, onOpenChange, sourceType, vagaId: initial
               {showSelectVaga && (
                 <div className="space-y-3">
                   <Label htmlFor="vaga-select">Selecione a vaga (opcional)</Label>
-                  <Select value={selectedVagaId} onValueChange={setSelectedVagaId}>
+                  <Select value={selectedVagaId || "none"} onValueChange={(value) => setSelectedVagaId(value === "none" ? "" : value)}>
                     <SelectTrigger id="vaga-select">
                       <SelectValue placeholder="Sem vaga específica (Banco de Talentos)" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Sem vaga específica</SelectItem>
+                      <SelectItem value="none">Sem vaga específica</SelectItem>
                       {vagas.map((vaga) => (
                         <SelectItem key={vaga.id} value={vaga.id}>
                           {vaga.titulo}
