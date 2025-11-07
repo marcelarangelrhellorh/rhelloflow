@@ -18,6 +18,7 @@ import { HistoryTimeline } from "@/components/CandidatoDetalhes/HistoryTimeline"
 import { LinkToJobModal } from "@/components/BancoTalentos/LinkToJobModal";
 import { CandidateTagsCard } from "@/components/CandidatoDetalhes/CandidateTagsCard";
 import { SendWhatsAppModal } from "@/components/CandidatoDetalhes/SendWhatsAppModal";
+import { WhatsAppHistory } from "@/components/CandidatoDetalhes/WhatsAppHistory";
 
 
 type Candidato = {
@@ -420,6 +421,9 @@ export default function CandidatoDetalhes() {
             onAddFeedback={() => setFeedbackModalOpen(true)}
             onSolicitarFeedback={() => setSolicitarFeedbackModalOpen(true)}
           />
+
+          {/* WhatsApp History */}
+          <WhatsAppHistory candidateId={id!} />
 
           {/* Scorecards and Timeline - Horizontal */}
           <div className="grid gap-6 lg:grid-cols-2">
