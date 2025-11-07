@@ -3,10 +3,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Briefcase, Users, AlertTriangle, MessageSquare, Clock, Target, Share2, UserPlus, XCircle, ExternalLink } from "lucide-react";
+import { Plus, Briefcase, Users, AlertTriangle, MessageSquare, Clock, Target, UserPlus, XCircle, Share2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { RejectedCandidatesCard } from "@/components/Dashboard/RejectedCandidatesCard";
+import { SharedJobsCard } from "@/components/Dashboard/SharedJobsCard";
 
 // Utility functions
 const formatInt = (n: number): string => Math.round(n).toString();
@@ -112,7 +113,6 @@ export default function Dashboard() {
     taxaAprovacao: 0,
     feedbacksPendentes: 0,
     vagasCanceladas: 0,
-    vagasExternas: 0,
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -159,14 +159,6 @@ export default function Dashboard() {
         .select('*', { count: 'exact', head: true })
         .eq('status', 'Cancelada');
 
-      // Buscar vagas que foram compartilhadas via link
-      const { data: vagasCompartilhadas } = await supabase
-        .from('share_links')
-        .select('vaga_id')
-        .eq('deleted', false);
-      
-      const vagasCompartilhadasCount = new Set(vagasCompartilhadas?.map(sl => sl.vaga_id) || []).size;
-
       setStats({
         vagasAbertas: data.vagas_abertas ?? 0,
         candidatosAtivos: data.candidatos_ativos ?? 0,
@@ -176,7 +168,6 @@ export default function Dashboard() {
         taxaAprovacao: data.taxa_aprovacao ?? 0,
         feedbacksPendentes: data.feedbacks_pendentes ?? 0,
         vagasCanceladas: canceladasCount ?? 0,
-        vagasExternas: vagasCompartilhadasCount,
       });
       setError(false);
     } catch (error) {
@@ -213,7 +204,6 @@ export default function Dashboard() {
   const handleTempoMedioClick = () => navigate('/vagas?metric=avg_time_to_close');
   const handleTaxaAprovacaoClick = () => navigate('/relatorios?focus=conversion');
   const handleVagasCanceladasClick = () => navigate('/vagas?status=Cancelada');
-  const handleVagasCompartilhadasClick = () => navigate('/vagas?shared=true');
 
   const copyPublicFormLink = () => {
     const link = `${window.location.origin}/solicitar-vaga`;
@@ -417,17 +407,7 @@ export default function Dashboard() {
               />
 
               {/* 8. Vagas Compartilhadas via Link */}
-              <KPICard
-                title="Vagas Compartilhadas"
-                value={formatInt(stats.vagasExternas)}
-                subtitle="Com link de divulgação ativo"
-                icon={<Share2 className="h-7 w-7" />}
-                borderColor="border-l-info"
-                iconBgColor="bg-info/10"
-                iconColor="text-info"
-                onClick={handleVagasCompartilhadasClick}
-                ariaLabel={`Ver vagas compartilhadas (${stats.vagasExternas} vagas)`}
-              />
+              <SharedJobsCard />
 
               {/* 9. Candidatos Reprovados sem WhatsApp */}
               <RejectedCandidatesCard />
