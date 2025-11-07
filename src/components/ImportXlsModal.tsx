@@ -171,7 +171,8 @@ export function ImportXlsModal({ open, onOpenChange, sourceType, vagaId: initial
     const num = typeof value === 'string' 
       ? parseFloat(value.replace(/[^\d,.-]/g, '').replace(',', '.'))
       : value;
-    return !isNaN(num) ? num : null;
+    // Retornar null se for NaN, negativo ou zero
+    return (!isNaN(num) && num > 0) ? num : null;
   };
 
   const parseAge = (value: any): number | null => {
