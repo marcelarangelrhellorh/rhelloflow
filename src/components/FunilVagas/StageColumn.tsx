@@ -36,7 +36,7 @@ export function StageColumn({
       )}
     >
       {/* Column Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white/50 backdrop-blur-sm rounded-t-lg">
+      <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white rounded-t-lg">
         <h3 className="font-semibold text-sm text-foreground">{status}</h3>
         <Badge
           variant="secondary"
