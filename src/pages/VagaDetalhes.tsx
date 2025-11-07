@@ -1,11 +1,11 @@
-import { useEffect, useState, useRef } from "react";
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { getBusinessDaysFromNow } from "@/lib/dateUtils";
-import { JOB_STAGES, getStageIndex, calculateProgress } from "@/lib/jobStages";
-import { getEventoIcon, getEventoColor, type TipoEvento, logVagaEvento } from "@/lib/vagaEventos";
+import { JOB_STAGES, calculateProgress } from "@/lib/jobStages";
+import { logVagaEvento } from "@/lib/vagaEventos";
 import { formatSalaryRange } from "@/lib/salaryUtils";
 import { ExternalJobBanner } from "@/components/ExternalJobBanner";
 import { ShareJobModal } from "@/components/ShareJobModal";
@@ -15,57 +15,16 @@ import { ClientViewLinkManager } from "@/components/ClientViewLinkManager";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import type { Database } from "@/integrations/supabase/types";
-type VagaEvento = {
-  id: string;
-  tipo: TipoEvento;
-  descricao: string;
-  created_at: string;
-  payload: any;
-};
-type Vaga = {
-  id: string;
-  titulo: string;
-  empresa: string;
-  status: string; // Legado - ainda usado para exibição
-  status_slug: string; // Novo campo padronizado
-  status_order: number; // Ordem no funil
-  criado_em: string;
-  confidencial: boolean | null;
-  motivo_confidencial: string | null;
-  contato_nome: string | null;
-  contato_email: string | null;
-  contato_telefone: string | null;
-  recrutador: string | null;
-  cs_responsavel: string | null;
-  complexidade: string | null;
-  prioridade: string | null;
-  salario_min: number | null;
-  salario_max: number | null;
-  salario_modalidade: string | null;
-  modelo_trabalho: string | null;
-  tipo_contratacao: string | null;
-  horario_inicio: string | null;
-  horario_fim: string | null;
-  dias_semana: string[] | null;
-  beneficios: string[] | null;
-  beneficios_outros: string | null;
-  requisitos_obrigatorios: string | null;
-  requisitos_desejaveis: string | null;
-  responsabilidades: string | null;
-  observacoes: string | null;
-  source: string | null;
-};
-type Candidato = {
-  id: string;
-  nome_completo: string;
-  status: string;
-  criado_em: string;
-};
+
+// Custom hooks
+import { useVaga } from "@/hooks/data/useVaga";
+import { useCandidatos } from "@/hooks/data/useCandidatos";
+import { useVagaEventos } from "@/hooks/data/useVagaEventos";
+import { useVagaTags } from "@/hooks/data/useVagaTags";
 type Activity = {
   id: string;
   type: "offer" | "status_change" | "candidate_added" | "process_started";
@@ -261,31 +220,30 @@ export default function VagaDetalhes() {
     if (!id || !vaga) return;
 
     // Buscar stage pelo slug
-    const newStage = JOB_STAGES.find(s => s.slug === newStatusSlug);
+    const newStage = JOB_STAGES.find((s) => s.slug === newStatusSlug);
     if (!newStage) {
       toast({
         title: "Erro",
         description: "Status inválido selecionado.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
+
     try {
-      const {
-        data: {
-          user
-        }
-      } = await supabase.auth.getUser();
+      const { data: { user } } = await supabase.auth.getUser();
 
       // Atualizar status da vaga usando apenas slug e order
-      const {
-        error: updateError
-      } = await supabase.from("vagas").update({
-        status_slug: newStage.slug,
-        status_order: newStage.order,
-        status_changed_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      }).eq("id", id);
+      const { error: updateError } = await supabase
+        .from("vagas")
+        .update({
+          status_slug: newStage.slug,
+          status_order: newStage.order,
+          status_changed_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", id);
+
       if (updateError) throw updateError;
 
       // Registrar evento
@@ -298,27 +256,26 @@ export default function VagaDetalhes() {
           status_anterior: vaga.status,
           status_anterior_slug: vaga.status_slug,
           status_novo: newStage.name,
-          status_novo_slug: newStage.slug
-        }
+          status_novo_slug: newStage.slug,
+        },
       });
 
       // Atualizar estado local
-      setVaga({
-        ...vaga,
+      updateVaga({
         status: newStage.name,
         status_slug: newStage.slug,
-        status_order: newStage.order
+        status_order: newStage.order,
       });
 
       // Mostrar toast de sucesso
       toast({
         title: "Etapa atualizada",
-        description: `Etapa da vaga atualizada para ${newStage.name} com sucesso.`
+        description: `Etapa da vaga atualizada para ${newStage.name} com sucesso.`,
       });
 
       // Recarregar dados
-      loadVaga();
-      loadEventos();
+      reloadVaga();
+      reloadEventos();
 
       // Scroll para etapa atual após pequeno delay
       setTimeout(() => {
@@ -327,7 +284,7 @@ export default function VagaDetalhes() {
           currentStepElement.scrollIntoView({
             behavior: "smooth",
             block: "nearest",
-            inline: "center"
+            inline: "center",
           });
         }
       }, 300);
@@ -336,20 +293,26 @@ export default function VagaDetalhes() {
       toast({
         title: "Erro",
         description: "Não foi possível atualizar a etapa da vaga.",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
   const getTimelineSteps = (currentStatusSlug: string) => {
-    const currentStage = JOB_STAGES.find(s => s.slug === currentStatusSlug);
+    const currentStage = JOB_STAGES.find((s) => s.slug === currentStatusSlug);
     const currentIndex = currentStage ? currentStage.order - 1 : 0;
-    return JOB_STAGES.map(stage => ({
+    return JOB_STAGES.map((stage) => ({
       label: stage.name,
       dates: "",
-      status: stage.order - 1 < currentIndex ? "completed" as const : stage.order - 1 === currentIndex ? "current" as const : "pending" as const,
-      color: stage.color
+      status:
+        stage.order - 1 < currentIndex
+          ? ("completed" as const)
+          : stage.order - 1 === currentIndex
+          ? ("current" as const)
+          : ("pending" as const),
+      color: stage.color,
     }));
   };
+
   const getRecentActivities = (): Activity[] => {
     const activities: Activity[] = [];
 
@@ -359,14 +322,16 @@ export default function VagaDetalhes() {
         id: `contratado-${candidatoContratado.id}`,
         type: "offer",
         description: `Candidato "${candidatoContratado.nome_completo}" foi contratado para esta vaga`,
-        date: format(new Date(candidatoContratado.criado_em), "d 'de' MMMM 'de' yyyy 'às' HH:mm", {
-          locale: ptBR
-        })
+        date: format(
+          new Date(candidatoContratado.criado_em),
+          "d 'de' MMMM 'de' yyyy 'às' HH:mm",
+          { locale: ptBR }
+        ),
       });
     }
 
     // Usar eventos reais da tabela
-    const eventosAtividades = eventos.map(evento => {
+    const eventosAtividades = eventos.map((evento) => {
       // Mapear tipos de eventos para os tipos esperados pelo ActivityLog
       let type: Activity["type"] = "process_started";
       if (evento.tipo === "CANDIDATO_ADICIONADO") {
@@ -378,60 +343,64 @@ export default function VagaDetalhes() {
       } else if (evento.tipo === "FEEDBACK_ADICIONADO") {
         type = "status_change";
       }
+
       return {
         id: evento.id,
         type,
         description: evento.descricao,
-        date: format(new Date(evento.created_at), "d 'de' MMMM 'de' yyyy 'às' HH:mm", {
-          locale: ptBR
-        })
+        date: format(
+          new Date(evento.created_at),
+          "d 'de' MMMM 'de' yyyy 'às' HH:mm",
+          { locale: ptBR }
+        ),
       };
     });
+
     return [...activities, ...eventosAtividades];
   };
   const getStatusBadgeClass = (status: string) => {
-    if (status === "Oferta Enviada") return "bg-green-500/20 text-green-800 dark:text-green-300";
-    if (status === "1ª Entrevista") return "bg-blue-500/20 text-blue-800 dark:text-blue-300";
+    if (status === "Oferta Enviada")
+      return "bg-green-500/20 text-green-800 dark:text-green-300";
+    if (status === "1ª Entrevista")
+      return "bg-blue-500/20 text-blue-800 dark:text-blue-300";
     return "bg-primary/20 text-primary-text-light dark:text-primary-text-dark";
   };
+
   const getActivityIcon = (type: Activity["type"]) => {
     switch (type) {
       case "offer":
-        return {
-          icon: "celebration",
-          color: "green"
-        };
+        return { icon: "celebration", color: "green" };
       case "status_change":
-        return {
-          icon: "add_task",
-          color: "blue"
-        };
+        return { icon: "add_task", color: "blue" };
       case "candidate_added":
-        return {
-          icon: "person_add",
-          color: "blue"
-        };
+        return { icon: "person_add", color: "blue" };
       case "process_started":
-        return {
-          icon: "event",
-          color: "gray"
-        };
+        return { icon: "event", color: "gray" };
     }
   };
+
   if (loading) {
-    return <div className="flex min-h-screen items-center justify-center bg-background-light dark:bg-background-dark">
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background-light dark:bg-background-dark">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-      </div>;
+      </div>
+    );
   }
+
   if (!vaga) {
-    return <div className="min-h-screen bg-background-light dark:bg-background-dark p-8">
-        <p className="text-primary-text-light dark:text-primary-text-dark">Vaga não encontrada</p>
-      </div>;
+    return (
+      <div className="min-h-screen bg-background-light dark:bg-background-dark p-8">
+        <p className="text-primary-text-light dark:text-primary-text-dark">
+          Vaga não encontrada
+        </p>
+      </div>
+    );
   }
+
   const daysOpen = getBusinessDaysFromNow(vaga.criado_em);
-  const timelineSteps = getTimelineSteps(vaga.status_slug || 'a_iniciar');
+  const timelineSteps = getTimelineSteps(vaga.status_slug || "a_iniciar");
   const activities = getRecentActivities();
-  const progress = calculateProgress(vaga.status_slug || 'a_iniciar');
+  const progress = calculateProgress(vaga.status_slug || "a_iniciar");
   return <div className="relative flex min-h-screen w-full flex-col font-display bg-background-light dark:bg-background-dark">
       {/* Main Content */}
       <main className="flex-1 px-6 sm:px-10 lg:px-20 py-8">
