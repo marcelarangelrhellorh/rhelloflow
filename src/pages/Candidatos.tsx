@@ -373,6 +373,7 @@ export default function Candidatos() {
         open={importModalOpen}
         onOpenChange={setImportModalOpen}
         sourceType="vaga"
+        showVagaSelector={true}
         onSuccess={() => {
           loadCandidatos();
         }}

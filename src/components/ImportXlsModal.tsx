@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { FileSpreadsheet, Download, Upload, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -16,6 +18,7 @@ interface ImportXlsModalProps {
   sourceType: 'vaga' | 'banco_talentos';
   vagaId?: string;
   onSuccess?: () => void;
+  showVagaSelector?: boolean;
 }
 
 const candidatoSchema = z.object({
@@ -52,12 +55,36 @@ interface ImportResult {
   message: string;
 }
 
-export function ImportXlsModal({ open, onOpenChange, sourceType, vagaId, onSuccess }: ImportXlsModalProps) {
+export function ImportXlsModal({ open, onOpenChange, sourceType, vagaId: initialVagaId, onSuccess, showVagaSelector = false }: ImportXlsModalProps) {
   const [file, setFile] = useState<File | null>(null);
   const [processing, setProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [results, setResults] = useState<ImportResult[]>([]);
   const [showResults, setShowResults] = useState(false);
+  const [selectedVagaId, setSelectedVagaId] = useState<string>('');
+  const [vagas, setVagas] = useState<Array<{ id: string; titulo: string }>>([]);
+  const [step, setStep] = useState<'select-vaga' | 'import'>(showVagaSelector ? 'select-vaga' : 'import');
+
+  useEffect(() => {
+    if (showVagaSelector && open) {
+      loadVagas();
+    }
+  }, [showVagaSelector, open]);
+
+  const loadVagas = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("vagas")
+        .select("id, titulo")
+        .order("titulo");
+
+      if (error) throw error;
+      setVagas(data || []);
+    } catch (error) {
+      console.error("Erro ao carregar vagas:", error);
+      toast.error("Erro ao carregar vagas");
+    }
+  };
 
   const downloadTemplate = () => {
     const template = [
@@ -131,6 +158,8 @@ export function ImportXlsModal({ open, onOpenChange, sourceType, vagaId, onSucce
 
   const processFile = async () => {
     if (!file) return;
+
+    const vagaId = initialVagaId || selectedVagaId || undefined;
 
     setProcessing(true);
     setProgress(0);
@@ -322,12 +351,15 @@ export function ImportXlsModal({ open, onOpenChange, sourceType, vagaId, onSucce
       setResults([]);
       setShowResults(false);
       setProgress(0);
+      setSelectedVagaId('');
+      setStep(showVagaSelector ? 'select-vaga' : 'import');
       onOpenChange(false);
     }
   };
 
   const successCount = results.filter(r => r.status === 'success').length;
   const errorCount = results.filter(r => r.status === 'error').length;
+  const selectedVaga = vagas.find(v => v.id === selectedVagaId);
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -340,114 +372,180 @@ export function ImportXlsModal({ open, onOpenChange, sourceType, vagaId, onSucce
         </DialogHeader>
 
         <div className="space-y-4">
-          {/* Template Download */}
-          <Alert>
-            <Download className="h-4 w-4" />
-            <AlertDescription>
-              <div className="flex items-center justify-between">
-                <span>Baixe o template com os campos e formato corretos</span>
-                <Button onClick={downloadTemplate} variant="outline" size="sm">
-                  <Download className="mr-2 h-4 w-4" />
-                  Baixar Template
+          {/* Step 1: Seleção de Vaga */}
+          {showVagaSelector && step === 'select-vaga' && (
+            <div className="space-y-4">
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  Selecione a vaga para a qual você está importando os candidatos
+                </AlertDescription>
+              </Alert>
+
+              <div>
+                <Label htmlFor="vaga-select">Vaga *</Label>
+                <Select value={selectedVagaId} onValueChange={setSelectedVagaId}>
+                  <SelectTrigger id="vaga-select" className="mt-2">
+                    <SelectValue placeholder="Selecione uma vaga" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {vagas.map((vaga) => (
+                      <SelectItem key={vaga.id} value={vaga.id}>
+                        {vaga.titulo}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex justify-end gap-2">
+                <Button onClick={handleClose} variant="outline">
+                  Cancelar
+                </Button>
+                <Button 
+                  onClick={() => setStep('import')} 
+                  disabled={!selectedVagaId}
+                >
+                  Próximo
                 </Button>
               </div>
-            </AlertDescription>
-          </Alert>
+            </div>
+          )}
 
-          {/* File Upload */}
-          {!showResults && (
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <input
-                  type="file"
-                  accept=".xlsx,.xls"
-                  onChange={handleFileChange}
-                  disabled={processing}
-                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
-                />
-              </div>
-
-              {file && (
-                <Alert>
+          {/* Step 2: Import */}
+          {step === 'import' && (
+            <>
+              {showVagaSelector && selectedVaga && (
+                <Alert className="bg-primary/5">
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription>
-                    Arquivo selecionado: <strong>{file.name}</strong> ({(file.size / 1024).toFixed(2)} KB)
+                    <strong>Vaga selecionada:</strong> {selectedVaga.titulo}
                   </AlertDescription>
                 </Alert>
               )}
+              
+              {/* Template Download */}
+              <Alert>
+                <Download className="h-4 w-4" />
+                <AlertDescription>
+                  <div className="flex items-center justify-between">
+                    <span>Baixe o template com os campos e formato corretos</span>
+                    <Button onClick={downloadTemplate} variant="outline" size="sm">
+                      <Download className="mr-2 h-4 w-4" />
+                      Baixar Template
+                    </Button>
+                  </div>
+                </AlertDescription>
+              </Alert>
 
-              {processing && (
-                <div className="space-y-2">
-                  <Progress value={progress} />
-                  <p className="text-sm text-muted-foreground text-center">
-                    Processando... {progress}%
-                  </p>
+              {/* File Upload */}
+              {!showResults && (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="file"
+                      accept=".xlsx,.xls"
+                      onChange={handleFileChange}
+                      disabled={processing}
+                      className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
+                    />
+                  </div>
+
+                  {file && (
+                    <Alert>
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertDescription>
+                        Arquivo selecionado: <strong>{file.name}</strong> ({(file.size / 1024).toFixed(2)} KB)
+                      </AlertDescription>
+                    </Alert>
+                  )}
+
+                  {processing && (
+                    <div className="space-y-2">
+                      <Progress value={progress} />
+                      <p className="text-sm text-muted-foreground text-center">
+                        Processando... {progress}%
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
-            </div>
-          )}
 
-          {/* Results */}
-          {showResults && (
-            <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <Alert className="border-green-500">
-                  <CheckCircle2 className="h-4 w-4 text-green-600" />
-                  <AlertDescription>
-                    <strong>{successCount}</strong> sucesso(s)
-                  </AlertDescription>
-                </Alert>
-                <Alert className="border-red-500">
-                  <XCircle className="h-4 w-4 text-red-600" />
-                  <AlertDescription>
-                    <strong>{errorCount}</strong> erro(s)
-                  </AlertDescription>
-                </Alert>
+              {/* Results */}
+              {showResults && (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <Alert className="border-green-500">
+                      <CheckCircle2 className="h-4 w-4 text-green-600" />
+                      <AlertDescription>
+                        <strong>{successCount}</strong> sucesso(s)
+                      </AlertDescription>
+                    </Alert>
+                    <Alert className="border-red-500">
+                      <XCircle className="h-4 w-4 text-red-600" />
+                      <AlertDescription>
+                        <strong>{errorCount}</strong> erro(s)
+                      </AlertDescription>
+                    </Alert>
+                  </div>
+
+                  <div className="border rounded-lg max-h-96 overflow-y-auto">
+                    <table className="w-full text-sm">
+                      <thead className="bg-muted sticky top-0">
+                        <tr>
+                          <th className="px-3 py-2 text-left">Linha</th>
+                          <th className="px-3 py-2 text-left">Candidato</th>
+                          <th className="px-3 py-2 text-left">Status</th>
+                          <th className="px-3 py-2 text-left">Mensagem</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {results.map((result, idx) => (
+                          <tr key={idx} className="border-t">
+                            <td className="px-3 py-2">{result.line}</td>
+                            <td className="px-3 py-2">{result.nome}</td>
+                            <td className="px-3 py-2">
+                              {result.status === 'success' ? (
+                                <CheckCircle2 className="h-4 w-4 text-green-600" />
+                              ) : (
+                                <XCircle className="h-4 w-4 text-red-600" />
+                              )}
+                            </td>
+                            <td className="px-3 py-2 text-muted-foreground">{result.message}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {/* Actions */}
+              <div className="flex justify-end gap-2">
+                <Button onClick={handleClose} variant="outline" disabled={processing}>
+                  {showResults ? 'Fechar' : 'Cancelar'}
+                </Button>
+                {showVagaSelector && step === 'import' && !showResults && (
+                  <Button 
+                    onClick={() => {
+                      setStep('select-vaga');
+                      setFile(null);
+                    }} 
+                    variant="outline"
+                    disabled={processing}
+                  >
+                    Voltar
+                  </Button>
+                )}
+                {!showResults && (
+                  <Button onClick={processFile} disabled={!file || processing}>
+                    <Upload className="mr-2 h-4 w-4" />
+                    {processing ? 'Processando...' : 'Importar Candidatos'}
+                  </Button>
+                )}
               </div>
-
-              <div className="border rounded-lg max-h-96 overflow-y-auto">
-                <table className="w-full text-sm">
-                  <thead className="bg-muted sticky top-0">
-                    <tr>
-                      <th className="px-3 py-2 text-left">Linha</th>
-                      <th className="px-3 py-2 text-left">Candidato</th>
-                      <th className="px-3 py-2 text-left">Status</th>
-                      <th className="px-3 py-2 text-left">Mensagem</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {results.map((result, idx) => (
-                      <tr key={idx} className="border-t">
-                        <td className="px-3 py-2">{result.line}</td>
-                        <td className="px-3 py-2">{result.nome}</td>
-                        <td className="px-3 py-2">
-                          {result.status === 'success' ? (
-                            <CheckCircle2 className="h-4 w-4 text-green-600" />
-                          ) : (
-                            <XCircle className="h-4 w-4 text-red-600" />
-                          )}
-                        </td>
-                        <td className="px-3 py-2 text-muted-foreground">{result.message}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+            </>
           )}
-
-          {/* Actions */}
-          <div className="flex justify-end gap-2">
-            <Button onClick={handleClose} variant="outline" disabled={processing}>
-              {showResults ? 'Fechar' : 'Cancelar'}
-            </Button>
-            {!showResults && (
-              <Button onClick={processFile} disabled={!file || processing}>
-                <Upload className="mr-2 h-4 w-4" />
-                {processing ? 'Processando...' : 'Importar Candidatos'}
-              </Button>
-            )}
-          </div>
         </div>
       </DialogContent>
     </Dialog>
