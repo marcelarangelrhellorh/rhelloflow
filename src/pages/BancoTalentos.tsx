@@ -43,7 +43,7 @@ export default function BancoTalentos() {
   const [searchTerm, setSearchTerm] = useState("");
   const [areaFilter, setAreaFilter] = useState<string>("all");
   const [nivelFilter, setNivelFilter] = useState<string>("all");
-  const [cidadeFilter, setCidadeFilter] = useState<string>("");
+  const [estadoFilter, setEstadoFilter] = useState<string>("");
   const [avaliacaoFilter, setAvaliacaoFilter] = useState<string>("all");
   const [tagFilter, setTagFilter] = useState<string>("all");
   const [availableTags, setAvailableTags] = useState<Array<{ label: string; value: string }>>([]);
@@ -133,7 +133,7 @@ export default function BancoTalentos() {
       candidato.cidade?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesArea = areaFilter === "all" || candidato.area === areaFilter;
     const matchesNivel = nivelFilter === "all" || candidato.nivel === nivelFilter;
-    const matchesCidade = !cidadeFilter || candidato.cidade?.toLowerCase().includes(cidadeFilter.toLowerCase());
+    const matchesEstado = !estadoFilter || candidato.estado?.toLowerCase().includes(estadoFilter.toLowerCase());
     
     // Filtro de avaliação
     let matchesAvaliacao = true;
@@ -149,14 +149,14 @@ export default function BancoTalentos() {
       matchesTags = candidateTags.some((ct: any) => ct.tag_id === tagFilter);
     }
     
-    return matchesSearch && matchesArea && matchesNivel && matchesCidade && matchesAvaliacao && matchesTags;
+    return matchesSearch && matchesArea && matchesNivel && matchesEstado && matchesAvaliacao && matchesTags;
   });
 
   const getDaysInBank = (dateString: string) => {
     return differenceInDays(new Date(), new Date(dateString));
   };
 
-  const hasActiveFilters = areaFilter !== "all" || nivelFilter !== "all" || cidadeFilter !== "" || avaliacaoFilter !== "all" || tagFilter !== "all";
+  const hasActiveFilters = areaFilter !== "all" || nivelFilter !== "all" || estadoFilter !== "" || avaliacaoFilter !== "all" || tagFilter !== "all";
 
   const handleViewProfile = (candidato: Candidato) => {
     setSelectedCandidate(candidato);
@@ -270,10 +270,10 @@ export default function BancoTalentos() {
           </Select>
 
           <Input
-            placeholder="Filtrar por cidade..."
-            value={cidadeFilter}
-            onChange={(e) => setCidadeFilter(e.target.value)}
-            className={`w-[180px] ${cidadeFilter ? 'border-2 border-primary' : ''}`}
+            placeholder="Filtrar por estado..."
+            value={estadoFilter}
+            onChange={(e) => setEstadoFilter(e.target.value)}
+            className={`w-[180px] ${estadoFilter ? 'border-2 border-primary' : ''}`}
           />
 
           <Select value={tagFilter} onValueChange={setTagFilter}>
@@ -321,7 +321,7 @@ export default function BancoTalentos() {
               onClick={() => {
                 setAreaFilter("all");
                 setNivelFilter("all");
-                setCidadeFilter("");
+                setEstadoFilter("");
                 setAvaliacaoFilter("all");
                 setTagFilter("all");
                 setSearchTerm("");
