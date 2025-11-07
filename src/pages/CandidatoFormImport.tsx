@@ -2,8 +2,8 @@ import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, FileUp } from "lucide-react";
-import { ImportPdfModal } from "@/components/ImportPdfModal";
+import { ArrowLeft, FileSpreadsheet } from "lucide-react";
+import { ImportXlsModal } from "@/components/ImportXlsModal";
 
 export default function CandidatoFormImport() {
   const navigate = useNavigate();
@@ -11,8 +11,12 @@ export default function CandidatoFormImport() {
   const vagaId = searchParams.get("vaga");
   const [importModalOpen, setImportModalOpen] = useState(true);
 
-  const handleSuccess = (candidatoId: string) => {
-    navigate(`/candidatos/${candidatoId}`);
+  const handleSuccess = () => {
+    if (vagaId) {
+      navigate(`/vagas/${vagaId}`);
+    } else {
+      navigate("/banco-talentos");
+    }
   };
 
   const handleClose = () => {
@@ -36,10 +40,10 @@ export default function CandidatoFormImport() {
           </Button>
           <div>
             <h1 className="text-3xl font-bold text-primary-text-light dark:text-primary-text-dark">
-              Importar Candidato do PDF
+              Importar Candidatos em Massa
             </h1>
             <p className="text-secondary-text-light dark:text-secondary-text-dark">
-              Extraia automaticamente informações de CVs e perfis do LinkedIn
+              Importe vários candidatos de uma vez usando planilha XLS/XLSX
             </p>
           </div>
         </div>
@@ -48,22 +52,22 @@ export default function CandidatoFormImport() {
           <div className="text-center space-y-4">
             <div className="flex justify-center">
               <div className="rounded-full bg-primary/10 p-6">
-                <FileUp className="h-12 w-12 text-primary" />
+                <FileSpreadsheet className="h-12 w-12 text-primary" />
               </div>
             </div>
-            <h2 className="text-xl font-semibold">Upload de PDF</h2>
+            <h2 className="text-xl font-semibold">Importação em Massa</h2>
             <p className="text-muted-foreground max-w-md mx-auto">
-              Faça upload de um CV ou perfil do LinkedIn em formato PDF.
-              O sistema irá extrair automaticamente as informações do candidato.
+              Baixe o template, preencha com os dados dos candidatos e importe a planilha.
+              Você pode importar até 100 candidatos por vez.
             </p>
             <Button onClick={() => setImportModalOpen(true)} size="lg">
-              <FileUp className="mr-2 h-5 w-5" />
-              Selecionar PDF
+              <FileSpreadsheet className="mr-2 h-5 w-5" />
+              Importar Planilha
             </Button>
           </div>
         </Card>
 
-        <ImportPdfModal
+        <ImportXlsModal
           open={importModalOpen}
           onOpenChange={(open) => {
             setImportModalOpen(open);
