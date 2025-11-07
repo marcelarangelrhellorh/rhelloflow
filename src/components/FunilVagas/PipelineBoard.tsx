@@ -1,20 +1,9 @@
 import { useState } from "react";
-import {
-  DndContext,
-  DragOverlay,
-  closestCorners,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  DragStartEvent,
-  DragEndEvent,
-} from "@dnd-kit/core";
+import { DndContext, DragOverlay, closestCorners, KeyboardSensor, PointerSensor, useSensor, useSensors, DragStartEvent, DragEndEvent } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { Column } from "./Column";
 import { JobCard } from "./JobCard";
 import { getBusinessDaysFromNow } from "@/lib/dateUtils";
-
 interface Vaga {
   id: string;
   titulo: string;
@@ -30,7 +19,6 @@ interface Vaga {
   confidencial?: boolean | null;
   dias_etapa_atual?: number; // Dias úteis na etapa atual
 }
-
 interface Stage {
   id: string;
   slug: string;
@@ -43,7 +31,6 @@ interface Stage {
     columnBg: string;
   };
 }
-
 interface PipelineBoardProps {
   jobs: Vaga[];
   stages: Stage[];
@@ -55,7 +42,6 @@ interface PipelineBoardProps {
   onJobDuplicate: (jobId: string) => void;
   onJobClose: (jobId: string) => void;
 }
-
 export function PipelineBoard({
   jobs,
   stages,
@@ -65,92 +51,51 @@ export function PipelineBoard({
   onJobEdit,
   onJobMoveStage,
   onJobDuplicate,
-  onJobClose,
+  onJobClose
 }: PipelineBoardProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
-
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
-
+  const sensors = useSensors(useSensor(PointerSensor, {
+    activationConstraint: {
+      distance: 8
+    }
+  }), useSensor(KeyboardSensor, {
+    coordinateGetter: sortableKeyboardCoordinates
+  }));
   const getJobsByStage = (stageSlug: string) => {
-    return jobs.filter((job) => job.status_slug === stageSlug);
+    return jobs.filter(job => job.status_slug === stageSlug);
   };
-
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
   };
-
   const handleDragEnd = async (event: DragEndEvent) => {
-    const { active, over } = event;
-
+    const {
+      active,
+      over
+    } = event;
     if (!over) {
       setActiveId(null);
       return;
     }
-
-    const activeJob = jobs.find((j) => j.id === active.id);
-    const overStage = stages.find((s) => s.slug === over.id);
-
+    const activeJob = jobs.find(j => j.id === active.id);
+    const overStage = stages.find(s => s.slug === over.id);
     if (activeJob && overStage && activeJob.status_slug !== overStage.slug) {
       await onJobMove(activeJob.id, activeJob.status_slug, overStage.slug);
     }
-
     setActiveId(null);
   };
-
-  const activeJob = activeId ? jobs.find((j) => j.id === activeId) : null;
-  const activeStage = activeJob ? stages.find((s) => s.slug === activeJob.status_slug) : null;
-
-  return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCorners}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-    >
-      <div className="flex gap-4" style={{ minWidth: 'max-content' }}>
-        {stages.map((stage) => (
-          <Column
-            key={stage.id}
-            stage={stage}
-            jobs={getJobsByStage(stage.slug)}
-            progresso={progresso}
-            onJobClick={onJobClick}
-            onJobEdit={onJobEdit}
-            onJobMoveStage={onJobMoveStage}
-            onJobDuplicate={onJobDuplicate}
-            onJobClose={onJobClose}
-          />
-        ))}
+  const activeJob = activeId ? jobs.find(j => j.id === activeId) : null;
+  const activeStage = activeJob ? stages.find(s => s.slug === activeJob.status_slug) : null;
+  return <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+      <div className="flex gap-4" style={{
+      minWidth: 'max-content'
+    }}>
+        {stages.map(stage => <Column key={stage.id} stage={stage} jobs={getJobsByStage(stage.slug)} progresso={progresso} onJobClick={onJobClick} onJobEdit={onJobEdit} onJobMoveStage={onJobMoveStage} onJobDuplicate={onJobDuplicate} onJobClose={onJobClose} className="bg-neutral-50" />)}
       </div>
 
       <DragOverlay>
-        {activeJob && activeStage ? (
-          <div className="w-[320px]">
-            <JobCard
-              vaga={activeJob}
-              stageColor={activeStage.color}
-              diasEmAberto={getBusinessDaysFromNow(activeJob.criado_em || "")}
-              diasEtapaAtual={activeJob.dias_etapa_atual || 0}
-              progresso={progresso(activeJob.status_slug)}
-              onDragStart={() => {}}
-              onView={() => {}}
-              onEdit={() => {}}
-              onDuplicate={() => {}}
-              onClose={() => {}}
-              isDragging
-            />
-          </div>
-        ) : null}
+        {activeJob && activeStage ? <div className="w-[320px]">
+            <JobCard vaga={activeJob} stageColor={activeStage.color} diasEmAberto={getBusinessDaysFromNow(activeJob.criado_em || "")} diasEtapaAtual={activeJob.dias_etapa_atual || 0} progresso={progresso(activeJob.status_slug)} onDragStart={() => {}} onView={() => {}} onEdit={() => {}} onDuplicate={() => {}} onClose={() => {}} isDragging />
+          </div> : null}
       </DragOverlay>
-    </DndContext>
-  );
+    </DndContext>;
 }
