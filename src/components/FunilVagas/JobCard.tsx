@@ -117,10 +117,10 @@ export function JobCard({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div 
-                    className="absolute top-3 left-3 flex items-center gap-1.5 px-2 py-1 rounded-full border border-destructive/20 bg-destructive/10 text-destructive backdrop-blur-sm"
+                    className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-destructive/20 bg-destructive/10 text-destructive backdrop-blur-sm"
                   >
-                    <EyeOff className="h-3 w-3" />
-                    <span className="text-xs font-medium hidden sm:inline">
+                    <EyeOff className="h-3.5 w-3.5" />
+                    <span className="text-sm font-medium hidden sm:inline">
                       Confidencial
                     </span>
                   </div>
@@ -138,7 +138,7 @@ export function JobCard({
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <h3 
-                        className="font-bold text-sm text-card-foreground truncate leading-tight"
+                        className="font-bold text-base text-card-foreground truncate leading-tight"
                       >
                         {vaga.titulo}
                       </h3>
@@ -150,13 +150,13 @@ export function JobCard({
                 </div>
 
                 <Badge
-                  className="text-xs font-semibold whitespace-nowrap px-2 py-1 flex items-center gap-1 shrink-0"
+                  className="text-sm font-semibold whitespace-nowrap px-2.5 py-1 flex items-center gap-1 shrink-0"
                   style={{
                     backgroundColor: statusColor.bg,
                     color: statusColor.text,
                   }}
                 >
-                  {isConcluida && <Check className="h-3 w-3" />}
+                  {isConcluida && <Check className="h-3.5 w-3.5" />}
                   {vaga.status}
                 </Badge>
               </div>
@@ -164,7 +164,7 @@ export function JobCard({
               {/* Subheader - Cliente/Área */}
               <div className="flex items-center gap-2">
                 <p 
-                  className="text-xs text-muted-foreground truncate"
+                  className="text-sm text-muted-foreground truncate"
                 >
                   {vaga.empresa}
                   {vaga.area && ` • ${vaga.area}`}
@@ -173,9 +173,9 @@ export function JobCard({
             </div>
 
             {/* Métricas rápidas */}
-            <div className="flex items-center gap-4 text-xs">
+            <div className="flex items-center gap-4 text-sm">
               <div className="flex items-center gap-1.5 text-muted-foreground">
-                <Users className="h-3.5 w-3.5" />
+                <Users className="h-4 w-4" />
                 <span>{vaga.candidatos_count || 0} candidatos</span>
               </div>
               
@@ -183,7 +183,7 @@ export function JobCard({
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <div className="flex items-center gap-1.5 text-muted-foreground">
-                      <Clock className="h-3.5 w-3.5" />
+                      <Clock className="h-4 w-4" />
                       <span>{diasEtapaAtual}d nesta etapa</span>
                     </div>
                   </TooltipTrigger>
@@ -204,7 +204,7 @@ export function JobCard({
               </div>
               <div className="flex justify-end">
                 <span 
-                  className="text-xs text-muted-foreground"
+                  className="text-sm text-muted-foreground"
                 >
                   {progresso}% concluído
                 </span>
@@ -214,10 +214,10 @@ export function JobCard({
             {/* Rodapé - Chips de equipe */}
             <div className="flex flex-wrap gap-2 pt-2 border-t border-border">
               {vaga.recrutador && (
-                <Badge variant="outline" className="text-xs gap-1.5">
-                  <Avatar className="h-4 w-4 bg-[#FFCD00]">
+                <Badge variant="outline" className="text-sm gap-1.5">
+                  <Avatar className="h-5 w-5 bg-[#FFCD00]">
                     <AvatarFallback 
-                      className="text-[#00141D] text-[9px] font-bold"
+                      className="text-[#00141D] text-[10px] font-bold"
                     >
                       {getInitials(vaga.recrutador)}
                     </AvatarFallback>
@@ -227,10 +227,10 @@ export function JobCard({
               )}
               
               {vaga.cs_responsavel && (
-                <Badge variant="outline" className="text-xs gap-1.5">
-                  <Avatar className="h-4 w-4 bg-foreground">
+                <Badge variant="outline" className="text-sm gap-1.5">
+                  <Avatar className="h-5 w-5 bg-foreground">
                     <AvatarFallback 
-                      className="text-background text-[9px] font-bold"
+                      className="text-background text-[10px] font-bold"
                     >
                       {getInitials(vaga.cs_responsavel)}
                     </AvatarFallback>
