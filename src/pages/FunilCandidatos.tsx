@@ -34,6 +34,7 @@ interface Candidato {
   vaga?: {
     empresa: string | null;
     recrutador_id: string | null;
+    titulo: string | null;
   };
 }
 
@@ -134,6 +135,7 @@ export default function FunilCandidatos() {
         .select(`
           *,
           vaga:vagas!vaga_relacionada_id(
+            titulo,
             empresa,
             recrutador_id
           )

@@ -22,6 +22,9 @@ interface Candidato {
   recrutador: string | null;
   vaga_relacionada_id: string | null;
   criado_em: string;
+  vaga?: {
+    titulo?: string | null;
+  };
 }
 
 interface CandidateFunnelCardProps {
@@ -80,6 +83,16 @@ export function CandidateFunnelCard({ candidato, onDragStart, isDragging }: Cand
         <CardTitle className="text-base font-bold text-card-foreground line-clamp-2">
           {candidato.nome_completo}
         </CardTitle>
+        
+        {candidato.vaga?.titulo && (
+          <Badge
+            variant="outline"
+            className="text-sm font-medium rounded-full px-3 py-1 w-fit bg-blue-50 text-blue-700 border-blue-200 mt-2"
+          >
+            📋 {candidato.vaga.titulo}
+          </Badge>
+        )}
+        
         {timeInStage && (
           <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
             <Clock className="h-4 w-4" />
