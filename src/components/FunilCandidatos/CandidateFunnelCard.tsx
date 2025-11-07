@@ -138,7 +138,7 @@ export function CandidateFunnelCard({ candidato, onDragStart, isDragging }: Cand
               {/* Vaga vinculada */}
               {candidato.vaga?.titulo && (
                 <div className="flex items-center gap-2">
-                  <Badge className="text-sm font-medium bg-[#faec3e] text-[#00141D] hover:bg-[#faec3e]/90">
+                  <Badge className="text-sm font-medium bg-[#faec3e]/30 text-[#00141D] border border-[#faec3e] hover:bg-[#faec3e]/40">
                     📋 {candidato.vaga.titulo}
                   </Badge>
                 </div>
