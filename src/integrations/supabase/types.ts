@@ -271,6 +271,8 @@ export type Database = {
           feedback: string | null
           historico_experiencia: string | null
           id: string
+          idade: number | null
+          idiomas: string | null
           linkedin: string | null
           nivel: Database["public"]["Enums"]["nivel_candidato"] | null
           nome_completo: string
@@ -306,6 +308,8 @@ export type Database = {
           feedback?: string | null
           historico_experiencia?: string | null
           id?: string
+          idade?: number | null
+          idiomas?: string | null
           linkedin?: string | null
           nivel?: Database["public"]["Enums"]["nivel_candidato"] | null
           nome_completo: string
@@ -341,6 +345,8 @@ export type Database = {
           feedback?: string | null
           historico_experiencia?: string | null
           id?: string
+          idade?: number | null
+          idiomas?: string | null
           linkedin?: string | null
           nivel?: Database["public"]["Enums"]["nivel_candidato"] | null
           nome_completo?: string

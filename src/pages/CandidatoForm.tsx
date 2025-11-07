@@ -41,6 +41,9 @@ export default function CandidatoForm() {
     status: "Banco de Talentos",
     feedback: "",
     origem: "",
+    idade: "",
+    historico_experiencia: "",
+    idiomas: "",
   });
 
   useEffect(() => {
@@ -97,6 +100,9 @@ export default function CandidatoForm() {
           status: data.status || "Banco de Talentos",
           feedback: data.feedback || "",
           origem: data.origem || "",
+          idade: data.idade || "",
+          historico_experiencia: data.historico_experiencia || "",
+          idiomas: data.idiomas || "",
         });
       }
     } catch (error) {
@@ -201,6 +207,9 @@ export default function CandidatoForm() {
         status: formData.status as any,
         feedback: formData.feedback || null,
         origem: formData.origem || null,
+        idade: formData.idade || null,
+        historico_experiencia: formData.historico_experiencia || null,
+        idiomas: formData.idiomas || null,
       };
 
       const { error } = await supabase
@@ -320,7 +329,7 @@ export default function CandidatoForm() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="cidade">Cidade</Label>
                   <Input
@@ -338,6 +347,19 @@ export default function CandidatoForm() {
                     maxLength={2}
                     value={formData.estado}
                     onChange={(e) => setFormData({ ...formData, estado: e.target.value.toUpperCase() })}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="idade">Idade</Label>
+                  <Input
+                    id="idade"
+                    type="number"
+                    min="18"
+                    max="100"
+                    placeholder="Ex: 30"
+                    value={formData.idade}
+                    onChange={(e) => setFormData({ ...formData, idade: e.target.value })}
                   />
                 </div>
               </div>
@@ -569,6 +591,34 @@ export default function CandidatoForm() {
                   </SelectContent>
                 </Select>
               </div>
+
+              <div>
+                <Label htmlFor="historico_experiencia">Experiência Profissional</Label>
+                <Textarea
+                  id="historico_experiencia"
+                  placeholder="Descreva a experiência profissional do candidato, formações, treinamentos, etc."
+                  rows={6}
+                  value={formData.historico_experiencia}
+                  onChange={(e) => setFormData({ ...formData, historico_experiencia: e.target.value })}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Histórico de experiências, formações e treinamentos
+                </p>
+              </div>
+
+              <div>
+                <Label htmlFor="idiomas">Idiomas</Label>
+                <Textarea
+                  id="idiomas"
+                  placeholder="Ex: Inglês (fluente), Espanhol (intermediário)"
+                  rows={3}
+                  value={formData.idiomas}
+                  onChange={(e) => setFormData({ ...formData, idiomas: e.target.value })}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Lista de idiomas e níveis de proficiência
+                </p>
+              </div>
             </CardContent>
           </Card>
 
@@ -582,28 +632,16 @@ export default function CandidatoForm() {
             <CardContent>
               <div>
                 <Label htmlFor="origem">Como este candidato chegou até nós?</Label>
-                <Select 
-                  value={formData.origem} 
-                  onValueChange={(value) => setFormData({ ...formData, origem: value })}
-                >
-                  <SelectTrigger className="mt-2">
-                    <SelectValue placeholder="Selecione a origem" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Link de Divulgação">🔗 Link de Divulgação</SelectItem>
-                    <SelectItem value="Pandapé">🐼 Pandapé</SelectItem>
-                    <SelectItem value="LinkedIn">💼 LinkedIn</SelectItem>
-                    <SelectItem value="Gupy">🎯 Gupy</SelectItem>
-                    <SelectItem value="Indeed">📋 Indeed</SelectItem>
-                    <SelectItem value="Catho">📊 Catho</SelectItem>
-                    <SelectItem value="Indicação">👥 Indicação</SelectItem>
-                    <SelectItem value="Site da Empresa">🌐 Site da Empresa</SelectItem>
-                    <SelectItem value="Instagram">📸 Instagram</SelectItem>
-                    <SelectItem value="WhatsApp">💬 WhatsApp</SelectItem>
-                    <SelectItem value="E-mail Direto">✉️ E-mail Direto</SelectItem>
-                    <SelectItem value="Outra">➕ Outra</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Input
+                  id="origem"
+                  placeholder="Ex: LinkedIn, Indicação, Gupy, etc."
+                  value={formData.origem}
+                  onChange={(e) => setFormData({ ...formData, origem: e.target.value })}
+                  className="mt-2"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Digite a origem da candidatura. Novas origens serão adicionadas automaticamente.
+                </p>
               </div>
             </CardContent>
           </Card>
