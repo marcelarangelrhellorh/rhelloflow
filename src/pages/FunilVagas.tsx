@@ -210,7 +210,7 @@ export default function FunilVagas() {
       const { error: updateError } = await supabase
         .from("vagas")
         .update({
-          status: toStage.name as any, // Manter compatibilidade com enum legado
+          status: toStage.slug as any, // Usar slug para compatibilidade com enum
           status_slug: toStage.slug,
           status_order: toStage.order,
           status_changed_at: new Date().toISOString(),
