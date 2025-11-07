@@ -134,9 +134,7 @@ export function RejectedCandidatesCard() {
             <div className="space-y-2 flex-1">
               <div className="flex items-center gap-2">
                 <p className="text-sm font-medium text-muted-foreground">Candidatos reprovados sem feedback </p>
-                {count > 0 && <Badge variant="destructive" className="text-xs">
-                    {count}
-                  </Badge>}
+                {count > 0}
               </div>
               <p className="text-[42px] font-semibold leading-none text-card-foreground">
                 {loading ? '...' : count}
@@ -144,9 +142,7 @@ export function RejectedCandidatesCard() {
               <p className="text-[13px] text-muted-foreground">Candidatos em &quot;Reprovado rhello&quot; ou &quot;Reprovado Solicitante&quot; sem receber negativa/retorno</p>
               
               {count > 0 && <div className="pt-2">
-                  <p className="text-xs text-muted-foreground">
-                    Clique no card para ver a lista e enviar WhatsApp
-                  </p>
+                  
                 </div>}
             </div>
             <div className={`
