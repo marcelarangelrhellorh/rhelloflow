@@ -25,6 +25,7 @@ import GerenciarUsuarios from "./pages/GerenciarUsuarios";
 import GerenciarExclusoes from "./pages/GerenciarExclusoes";
 import AuditLog from "./pages/AuditLog";
 import EstudoMercado from "./pages/EstudoMercado";
+import WhatsAppTemplates from "./pages/WhatsAppTemplates";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -63,6 +64,7 @@ const App = () => (
             <Route path="/gerenciar-exclusoes" element={<GerenciarExclusoes />} />
             <Route path="/audit-log" element={<AuditLog />} />
             <Route path="/estudo-mercado" element={<EstudoMercado />} />
+            <Route path="/whatsapp-templates" element={<WhatsAppTemplates />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

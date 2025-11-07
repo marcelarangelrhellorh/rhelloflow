@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -18,24 +18,12 @@ interface SendWhatsAppModalProps {
   vacancyTitle?: string;
 }
 
-const TEMPLATES = {
-  convite_entrevista: {
-    label: "Convite para Entrevista",
-    message: "Olá {{candidate_first_name}}, aqui é {{recruiter_name}} da rhello. Gostaríamos de agendar uma entrevista para a vaga de {{vacancy_title}}. Você tem disponibilidade?"
-  },
-  confirmacao_recebida: {
-    label: "Confirmação Recebida",
-    message: "Olá {{candidate_first_name}}! Recebemos sua candidatura para {{vacancy_title}}. Em breve retornaremos o contato."
-  },
-  reprovacao: {
-    label: "Reprovação",
-    message: "Olá {{candidate_first_name}}, agradecemos seu interesse na vaga de {{vacancy_title}}. Infelizmente, neste momento não seguiremos com sua candidatura. Desejamos sucesso em sua busca!"
-  },
-  atualizacao_processo: {
-    label: "Atualização de Processo",
-    message: "Olá {{candidate_first_name}}, este é um update sobre sua candidatura para {{vacancy_title}}."
-  },
-};
+interface WhatsAppTemplate {
+  id: string;
+  key: string;
+  name: string;
+  content: string;
+}
 
 export function SendWhatsAppModal({
   open,
@@ -45,18 +33,48 @@ export function SendWhatsAppModal({
   candidatePhone,
   vacancyTitle,
 }: SendWhatsAppModalProps) {
+  const [templates, setTemplates] = useState<WhatsAppTemplate[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<string>("");
   const [message, setMessage] = useState("");
   const [consentConfirmed, setConsentConfirmed] = useState(false);
   const [sending, setSending] = useState(false);
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+
+  useEffect(() => {
+    const loadTemplates = async () => {
+      if (!open) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('whatsapp_templates')
+          .select('id, key, name, content')
+          .eq('active', true)
+          .order('name');
+
+        if (error) throw error;
+        setTemplates(data || []);
+      } catch (error) {
+        console.error('Error loading templates:', error);
+        toast({
+          title: "Erro ao carregar templates",
+          description: "Não foi possível carregar os templates de mensagem.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadTemplates();
+  }, [open, toast]);
 
   const handleTemplateChange = (templateKey: string) => {
     setSelectedTemplate(templateKey);
-    const template = TEMPLATES[templateKey as keyof typeof TEMPLATES];
+    const template = templates.find(t => t.key === templateKey);
     if (template) {
       const firstName = candidateName.split(' ')[0];
-      let msg = template.message
+      let msg = template.content
         .replace(/\{\{candidate_first_name\}\}/g, firstName)
         .replace(/\{\{candidate_name\}\}/g, candidateName)
         .replace(/\{\{recruiter_name\}\}/g, 'rhello')
@@ -175,14 +193,14 @@ export function SendWhatsAppModal({
 
           <div className="space-y-2">
             <Label htmlFor="template">Template</Label>
-            <Select value={selectedTemplate} onValueChange={handleTemplateChange}>
+            <Select value={selectedTemplate} onValueChange={handleTemplateChange} disabled={loading}>
               <SelectTrigger id="template">
-                <SelectValue placeholder="Selecione um template" />
+                <SelectValue placeholder={loading ? "Carregando templates..." : "Selecione um template"} />
               </SelectTrigger>
               <SelectContent>
-                {Object.entries(TEMPLATES).map(([key, template]) => (
-                  <SelectItem key={key} value={key}>
-                    {template.label}
+                {templates.map((template) => (
+                  <SelectItem key={template.id} value={template.key}>
+                    {template.name}
                   </SelectItem>
                 ))}
               </SelectContent>

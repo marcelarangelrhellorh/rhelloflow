@@ -17,6 +17,7 @@ const menuItems = [
   { title: "Funil de Candidatos", url: "/funil-candidatos" },
   { title: "Banco de Talentos", url: "/banco-talentos" },
   { title: "Scorecards", url: "/scorecards" },
+  { title: "Templates WhatsApp", url: "/whatsapp-templates" },
   { title: "Estudo de Mercado", url: "/estudo-mercado" },
 ];
 

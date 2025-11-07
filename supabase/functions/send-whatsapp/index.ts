@@ -13,12 +13,7 @@ interface WhatsAppRequest {
   consent_confirmed: boolean;
 }
 
-const TEMPLATES = {
-  'convite_entrevista': 'Olá {{candidate_first_name}}, aqui é {{recruiter_name}} da rhello. Gostaríamos de agendar uma entrevista para a vaga de {{vacancy_title}}. Você tem disponibilidade?',
-  'confirmacao_recebida': 'Olá {{candidate_first_name}}! Recebemos sua candidatura para {{vacancy_title}}. Em breve retornaremos o contato.',
-  'reprovacao': 'Olá {{candidate_first_name}}, agradecemos seu interesse na vaga de {{vacancy_title}}. Infelizmente, neste momento não seguiremos com sua candidatura. Desejamos sucesso em sua busca!',
-  'atualizacao_processo': 'Olá {{candidate_first_name}}, este é um update sobre sua candidatura para {{vacancy_title}}: {{custom_note}}',
-};
+// Templates are now loaded from database
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -95,8 +90,24 @@ serve(async (req) => {
       );
     }
 
+    // Buscar template do banco de dados
+    const { data: template, error: templateError } = await supabase
+      .from('whatsapp_templates')
+      .select('content')
+      .eq('key', body.template_key)
+      .eq('active', true)
+      .single();
+
+    if (templateError || !template) {
+      console.error('Template fetch error:', templateError);
+      return new Response(
+        JSON.stringify({ error: 'Template não encontrado ou inativo' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Preparar mensagem
-    let message = body.custom_message || TEMPLATES[body.template_key as keyof typeof TEMPLATES] || '';
+    let message = body.custom_message || template.content;
     
     // Substituir placeholders
     message = message
