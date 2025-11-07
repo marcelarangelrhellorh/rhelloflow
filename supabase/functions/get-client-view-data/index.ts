@@ -91,6 +91,12 @@ Deno.serve(async (req) => {
       .eq('slug', vaga.status_slug)
       .single();
 
+    // Get all stages for timeline (excluding cancelled and frozen)
+    const { data: allStages } = await supabase
+      .from('vaga_status_ref')
+      .select('slug, label, order')
+      .not('slug', 'in', '("cancelada","congelada","pausada")')
+      .order('order', { ascending: true });
 
     // Count active candidates
     const { count: candidatosCount } = await supabase
@@ -135,6 +141,7 @@ Deno.serve(async (req) => {
           candidatosAtivos: candidatosCount || 0,
           duracaoDias: durationDays
         },
+        stages: allStages || [],
         timeline: stageHistory || []
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

@@ -8,6 +8,12 @@ import { formatCurrency } from "@/lib/salaryUtils";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
+interface Stage {
+  slug: string;
+  label: string;
+  order: number;
+}
+
 interface VagaData {
   titulo: string;
   empresa: string;
@@ -33,6 +39,7 @@ export default function ClientView() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [vaga, setVaga] = useState<VagaData | null>(null);
+  const [stages, setStages] = useState<Stage[]>([]);
   const [timeline, setTimeline] = useState<TimelineEvent[]>([]);
 
   useEffect(() => {
@@ -58,6 +65,7 @@ export default function ClientView() {
       }
 
       setVaga(data.vaga);
+      setStages(data.stages || []);
       setTimeline(data.timeline || []);
     } catch (err) {
       console.error('Error loading client view:', err);
@@ -67,16 +75,8 @@ export default function ClientView() {
     }
   };
 
-  const stages = [
-    { slug: 'a_iniciar', name: 'A iniciar' },
-    { slug: 'discovery', name: 'Discovery' },
-    { slug: 'divulgacao', name: 'Divulgação' },
-    { slug: 'triagem', name: 'Triagem' },
-    { slug: 'entrevistas_rhello', name: 'Entrevistas rhello' },
-  ];
-
   const getCurrentStageIndex = () => {
-    if (!vaga) return 0;
+    if (!vaga || stages.length === 0) return 0;
     return stages.findIndex(s => s.slug === vaga.statusSlug);
   };
 
@@ -236,7 +236,7 @@ export default function ClientView() {
                         text-sm font-medium text-center max-w-[100px]
                         ${isCurrent ? 'text-foreground' : 'text-muted-foreground'}
                       `}>
-                        {stage.name}
+                        {stage.label}
                       </span>
                     </div>
                   );
