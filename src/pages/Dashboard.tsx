@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Briefcase, Users, AlertTriangle, MessageSquare, Clock, Target, Share2, UserPlus, XCircle } from "lucide-react";
+import { Plus, Briefcase, Users, AlertTriangle, MessageSquare, Clock, Target, Share2, UserPlus, XCircle, ExternalLink } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { RejectedCandidatesCard } from "@/components/Dashboard/RejectedCandidatesCard";
@@ -112,6 +112,7 @@ export default function Dashboard() {
     taxaAprovacao: 0,
     feedbacksPendentes: 0,
     vagasCanceladas: 0,
+    vagasExternas: 0,
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -158,6 +159,12 @@ export default function Dashboard() {
         .select('*', { count: 'exact', head: true })
         .eq('status', 'Cancelada');
 
+      // Buscar vagas criadas via formulário externo
+      const { count: externasCount } = await supabase
+        .from('vagas')
+        .select('*', { count: 'exact', head: true })
+        .eq('source', 'externo');
+
       setStats({
         vagasAbertas: data.vagas_abertas ?? 0,
         candidatosAtivos: data.candidatos_ativos ?? 0,
@@ -167,6 +174,7 @@ export default function Dashboard() {
         taxaAprovacao: data.taxa_aprovacao ?? 0,
         feedbacksPendentes: data.feedbacks_pendentes ?? 0,
         vagasCanceladas: canceladasCount ?? 0,
+        vagasExternas: externasCount ?? 0,
       });
       setError(false);
     } catch (error) {
@@ -203,6 +211,7 @@ export default function Dashboard() {
   const handleTempoMedioClick = () => navigate('/vagas?metric=avg_time_to_close');
   const handleTaxaAprovacaoClick = () => navigate('/relatorios?focus=conversion');
   const handleVagasCanceladasClick = () => navigate('/vagas?status=Cancelada');
+  const handleVagasExternasClick = () => navigate('/vagas?source=externo');
 
   const copyPublicFormLink = () => {
     const link = `${window.location.origin}/solicitar-vaga`;
@@ -405,7 +414,20 @@ export default function Dashboard() {
                 ariaLabel={`Ver vagas canceladas (${stats.vagasCanceladas} vagas)`}
               />
 
-              {/* 8. Candidatos Reprovados sem WhatsApp */}
+              {/* 8. Vagas Publicadas Externamente */}
+              <KPICard
+                title="Vagas Publicadas via Link"
+                value={formatInt(stats.vagasExternas)}
+                subtitle="Criadas via formulário externo"
+                icon={<ExternalLink className="h-7 w-7" />}
+                borderColor="border-l-info"
+                iconBgColor="bg-info/10"
+                iconColor="text-info"
+                onClick={handleVagasExternasClick}
+                ariaLabel={`Ver vagas publicadas externamente (${stats.vagasExternas} vagas)`}
+              />
+
+              {/* 9. Candidatos Reprovados sem WhatsApp */}
               <RejectedCandidatesCard />
             </>
           )}
