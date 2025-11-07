@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { CandidateCard } from "@/components/BancoTalentos/CandidateCard";
 import { CandidateProfileDrawer } from "@/components/BancoTalentos/CandidateProfileDrawer";
 import { LinkToJobModal } from "@/components/BancoTalentos/LinkToJobModal";
-import { ImportPdfModal } from "@/components/ImportPdfModal";
+import { ImportXlsModal } from "@/components/ImportXlsModal";
 import { differenceInDays } from "date-fns";
 
 interface Candidato {
@@ -206,7 +206,7 @@ export default function BancoTalentos() {
             className="font-bold"
           >
             <Plus className="mr-2 h-5 w-5" />
-            Importar do PDF
+            Importar Planilha XLS
           </Button>
         </div>
       </div>
@@ -396,12 +396,11 @@ export default function BancoTalentos() {
         />
       )}
 
-      <ImportPdfModal
+      <ImportXlsModal
         open={importModalOpen}
         onOpenChange={setImportModalOpen}
         sourceType="banco_talentos"
-        onSuccess={(candidatoId) => {
-          toast.success("Candidato importado com sucesso!");
+        onSuccess={() => {
           loadCandidatos();
         }}
       />

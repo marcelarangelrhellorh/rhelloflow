@@ -100,7 +100,7 @@ export default function CandidatoForm() {
           status: data.status || "Banco de Talentos",
           feedback: data.feedback || "",
           origem: data.origem || "",
-          idade: data.idade || "",
+          idade: data.idade ? data.idade.toString() : "",
           historico_experiencia: data.historico_experiencia || "",
           idiomas: data.idiomas || "",
         });
@@ -207,7 +207,7 @@ export default function CandidatoForm() {
         status: formData.status as any,
         feedback: formData.feedback || null,
         origem: formData.origem || null,
-        idade: formData.idade || null,
+        idade: formData.idade ? parseInt(formData.idade) : null,
         historico_experiencia: formData.historico_experiencia || null,
         idiomas: formData.idiomas || null,
       };
