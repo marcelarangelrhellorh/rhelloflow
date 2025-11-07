@@ -117,7 +117,7 @@ export function CandidateCard({
         </CardContent>
       </Card>;
   }
-  return <Card className="hover:shadow-lg transition-all duration-200 hover:scale-[1.01] bg-white my-0 mx-[150px] px-0">
+  return <Card className="hover:shadow-lg transition-all duration-200 hover:scale-[1.01] bg-white my-0 ml-0 mr-auto px-0">
       <CardContent className="p-6 mx-0">
         {/* Header do card */}
         <div className="flex items-start justify-between mb-4">
