@@ -395,6 +395,63 @@ export type Database = {
           },
         ]
       }
+      client_view_links: {
+        Row: {
+          active: boolean
+          created_at: string
+          created_by: string | null
+          deleted: boolean
+          deleted_at: string | null
+          deleted_by: string | null
+          expires_at: string | null
+          id: string
+          last_accessed_at: string | null
+          token: string
+          vaga_id: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          deleted?: boolean
+          deleted_at?: string | null
+          deleted_by?: string | null
+          expires_at?: string | null
+          id?: string
+          last_accessed_at?: string | null
+          token: string
+          vaga_id: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          deleted?: boolean
+          deleted_at?: string | null
+          deleted_by?: string | null
+          expires_at?: string | null
+          id?: string
+          last_accessed_at?: string | null
+          token?: string
+          vaga_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_view_links_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vagas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_view_links_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vagas_active"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deletion_approvals: {
         Row: {
           approved_at: string | null

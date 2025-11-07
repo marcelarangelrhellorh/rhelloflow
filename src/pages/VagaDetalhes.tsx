@@ -82,6 +82,7 @@ export default function VagaDetalhes() {
   const [eventos, setEventos] = useState<VagaEvento[]>([]);
   const [loading, setLoading] = useState(true);
   const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [generatingClientLink, setGeneratingClientLink] = useState(false);
   const [detailsDrawerOpen, setDetailsDrawerOpen] = useState(false);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [savingTags, setSavingTags] = useState(false);
@@ -196,6 +197,43 @@ export default function VagaDetalhes() {
       setSavingTags(false);
     }
   };
+
+  const handleGenerateClientLink = async () => {
+    if (!vaga) return;
+
+    try {
+      setGeneratingClientLink(true);
+
+      const { data, error } = await supabase.functions.invoke('generate-client-view-link', {
+        body: { vagaId: vaga.id }
+      });
+
+      if (error) throw error;
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      // Copy link to clipboard
+      const fullUrl = data.url;
+      await navigator.clipboard.writeText(fullUrl);
+
+      toast({
+        title: "Link gerado com sucesso!",
+        description: "Link de visualização do cliente copiado para área de transferência.",
+      });
+    } catch (error) {
+      console.error("Erro ao gerar link:", error);
+      toast({
+        title: "Erro ao gerar link",
+        description: error instanceof Error ? error.message : "Não foi possível gerar o link de visualização.",
+        variant: "destructive"
+      });
+    } finally {
+      setGeneratingClientLink(false);
+    }
+  };
+
   const loadVaga = async () => {
     try {
       const {
@@ -465,6 +503,14 @@ export default function VagaDetalhes() {
             </div>
             <div className="flex gap-2">
               <AnalyzeScorecards vagaId={vaga.id} vagaTitulo={vaga.titulo} />
+              <button 
+                onClick={handleGenerateClientLink}
+                disabled={generatingClientLink}
+                className="px-4 py-2 dark:bg-background-dark border-2 border-purple-500 text-purple-700 dark:text-purple-400 transition-colors flex items-center gap-2 font-bold rounded-sm hover:bg-purple-50 dark:hover:bg-purple-950 disabled:opacity-50"
+              >
+                <span className="material-symbols-outlined text-xl">link</span>
+                {generatingClientLink ? "Gerando..." : "Link Cliente"}
+              </button>
               <button onClick={() => setDetailsDrawerOpen(true)} className="px-4 py-2 dark:bg-background-dark border-2 border-primary text-primary-text-light dark:text-primary-text-dark transition-colors flex items-center gap-2 font-bold bg-[faec3e] rounded-sm text-[faec3e] text-slate-950 bg-[#faec3e]">
                 <span className="material-symbols-outlined text-xl">info</span>
                 Ver Detalhes

@@ -53,3 +53,10 @@ verify_jwt = true
 
 [functions.send-whatsapp]
 verify_jwt = true
+
+[functions.generate-client-view-link]
+verify_jwt = true
+
+[functions.get-client-view-data]
+verify_jwt = false
+
