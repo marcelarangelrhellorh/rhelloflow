@@ -456,7 +456,7 @@ export function ImportXlsModal({ open, onOpenChange, sourceType, vagaId: initial
             idiomas: candidate.normalized.idiomas,
             origem: candidate.normalized.origem,
             disponibilidade_status: 'disponível',
-            status: sourceType === 'vaga' ? 'Triagem' : 'Banco de Talentos',
+            status: sourceType === 'vaga' ? 'Selecionado' : 'Banco de Talentos',
           };
 
           if (vagaId) {
