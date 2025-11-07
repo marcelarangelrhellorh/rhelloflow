@@ -159,11 +159,13 @@ export default function Dashboard() {
         .select('*', { count: 'exact', head: true })
         .eq('status', 'Cancelada');
 
-      // Buscar vagas criadas via formulário externo
-      const { count: externasCount } = await supabase
-        .from('vagas')
-        .select('*', { count: 'exact', head: true })
-        .eq('source', 'externo');
+      // Buscar vagas que foram compartilhadas via link
+      const { data: vagasCompartilhadas } = await supabase
+        .from('share_links')
+        .select('vaga_id')
+        .eq('deleted', false);
+      
+      const vagasCompartilhadasCount = new Set(vagasCompartilhadas?.map(sl => sl.vaga_id) || []).size;
 
       setStats({
         vagasAbertas: data.vagas_abertas ?? 0,
@@ -174,7 +176,7 @@ export default function Dashboard() {
         taxaAprovacao: data.taxa_aprovacao ?? 0,
         feedbacksPendentes: data.feedbacks_pendentes ?? 0,
         vagasCanceladas: canceladasCount ?? 0,
-        vagasExternas: externasCount ?? 0,
+        vagasExternas: vagasCompartilhadasCount,
       });
       setError(false);
     } catch (error) {
@@ -211,7 +213,7 @@ export default function Dashboard() {
   const handleTempoMedioClick = () => navigate('/vagas?metric=avg_time_to_close');
   const handleTaxaAprovacaoClick = () => navigate('/relatorios?focus=conversion');
   const handleVagasCanceladasClick = () => navigate('/vagas?status=Cancelada');
-  const handleVagasExternasClick = () => navigate('/vagas?source=externo');
+  const handleVagasCompartilhadasClick = () => navigate('/vagas?shared=true');
 
   const copyPublicFormLink = () => {
     const link = `${window.location.origin}/solicitar-vaga`;
@@ -414,17 +416,17 @@ export default function Dashboard() {
                 ariaLabel={`Ver vagas canceladas (${stats.vagasCanceladas} vagas)`}
               />
 
-              {/* 8. Vagas Publicadas Externamente */}
+              {/* 8. Vagas Compartilhadas via Link */}
               <KPICard
-                title="Vagas Publicadas via Link"
+                title="Vagas Compartilhadas"
                 value={formatInt(stats.vagasExternas)}
-                subtitle="Criadas via formulário externo"
-                icon={<ExternalLink className="h-7 w-7" />}
+                subtitle="Com link de divulgação ativo"
+                icon={<Share2 className="h-7 w-7" />}
                 borderColor="border-l-info"
                 iconBgColor="bg-info/10"
                 iconColor="text-info"
-                onClick={handleVagasExternasClick}
-                ariaLabel={`Ver vagas publicadas externamente (${stats.vagasExternas} vagas)`}
+                onClick={handleVagasCompartilhadasClick}
+                ariaLabel={`Ver vagas compartilhadas (${stats.vagasExternas} vagas)`}
               />
 
               {/* 9. Candidatos Reprovados sem WhatsApp */}
