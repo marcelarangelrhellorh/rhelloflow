@@ -223,6 +223,16 @@ export function ImportXlsModal({ open, onOpenChange, sourceType, vagaId: initial
     ).join(' ');
   };
 
+  // Função auxiliar para buscar campo com nome variado
+  const getFieldValue = (row: any, possibleNames: string[]): any => {
+    for (const name of possibleNames) {
+      if (row[name] !== undefined && row[name] !== null) {
+        return row[name];
+      }
+    }
+    return null;
+  };
+
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (!selectedFile) return;
@@ -342,6 +352,18 @@ export function ImportXlsModal({ open, onOpenChange, sourceType, vagaId: initial
             warnings.push('Cidade não informada');
           }
 
+          // Buscar experiência profissional com nomes variados
+          const experienciaProfissional = 
+            validated['Experiência profissional'] || 
+            getFieldValue(row, [
+              'Experiência profissional',
+              'Experiencia profissional', 
+              'Experiência Profissional',
+              'Experiencia Profissional',
+              'Experiência',
+              'Experiencia'
+            ]);
+
           const normalized = {
             nome_completo,
             email: validated['E-mail'].toLowerCase().trim(),
@@ -351,7 +373,7 @@ export function ImportXlsModal({ open, onOpenChange, sourceType, vagaId: initial
             cidade,
             estado: estadoNormalized,
             pretensao_salarial,
-            experiencia_profissional: validated['Experiência profissional'] || null,
+            experiencia_profissional: experienciaProfissional,
             idiomas: validated.Idiomas || null,
             origem,
           };
