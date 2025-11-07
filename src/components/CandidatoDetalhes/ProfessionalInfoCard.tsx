@@ -46,6 +46,8 @@ interface ProfessionalInfoCardProps {
   parecerFinal: string | null;
   origem: string | null;
   candidatoId: string;
+  experienciaProfissional: string | null;
+  idiomas: string | null;
   onUpdate?: () => void;
   onVagaClick?: () => void;
 }
@@ -66,6 +68,8 @@ export function ProfessionalInfoCard({
   parecerFinal,
   origem,
   candidatoId,
+  experienciaProfissional,
+  idiomas,
   onUpdate,
   onVagaClick,
 }: ProfessionalInfoCardProps) {
@@ -197,11 +201,38 @@ export function ProfessionalInfoCard({
             </div>
           )}
 
+          {/* Nível */}
+          {nivel && (
+            <div>
+              <p className="text-sm text-muted-foreground mb-1">Nível</p>
+              <p className="text-base font-medium text-card-foreground capitalize">{nivel}</p>
+            </div>
+          )}
+
           {/* Área */}
           {area && (
             <div>
               <p className="text-sm text-muted-foreground mb-1">Área</p>
               <p className="text-base font-medium text-card-foreground">{area}</p>
+            </div>
+          )}
+
+          {/* Experiência Profissional */}
+          {experienciaProfissional && (
+            <div className="sm:col-span-2">
+              <p className="text-sm text-muted-foreground mb-1 flex items-center gap-1">
+                <Briefcase className="h-3.5 w-3.5" />
+                Experiência Profissional
+              </p>
+              <p className="text-base text-card-foreground whitespace-pre-wrap">{experienciaProfissional}</p>
+            </div>
+          )}
+
+          {/* Idiomas */}
+          {idiomas && (
+            <div className="sm:col-span-2">
+              <p className="text-sm text-muted-foreground mb-1">Idiomas</p>
+              <p className="text-base text-card-foreground">{idiomas}</p>
             </div>
           )}
 

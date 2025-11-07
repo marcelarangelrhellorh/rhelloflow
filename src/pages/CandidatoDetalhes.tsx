@@ -403,6 +403,8 @@ export default function CandidatoDetalhes() {
                 parecerFinal={candidato.parecer_final}
                 origem={candidato.origem}
                 candidatoId={id!}
+                experienciaProfissional={(candidato as any).experiencia_profissional || null}
+                idiomas={(candidato as any).idiomas || null}
                 onUpdate={loadCandidato}
                 onVagaClick={() => vaga && navigate(`/vagas/${vaga.id}`)}
               />
