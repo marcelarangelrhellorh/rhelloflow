@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { User, Settings, LogOut, Users, FileText, Trash2 } from "lucide-react";
+import { User, Settings, LogOut, Users, FileText, Trash2, MessageSquare } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -104,6 +104,11 @@ export function UserMenu() {
         <DropdownMenuItem className="cursor-pointer">
           <User className="mr-2 h-4 w-4" />
           <span>Meu perfil</span>
+        </DropdownMenuItem>
+        
+        <DropdownMenuItem className="cursor-pointer" onClick={() => navigate("/whatsapp-templates")}>
+          <MessageSquare className="mr-2 h-4 w-4" />
+          <span>Templates WhatsApp</span>
         </DropdownMenuItem>
         
         {isAdmin && (
