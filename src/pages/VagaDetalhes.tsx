@@ -473,7 +473,7 @@ export default function VagaDetalhes() {
             <div className="flex gap-2">
               <button 
                 onClick={handleGenerateClientLink}
-                className="px-4 py-2 dark:bg-background-dark border-2 border-purple-500 text-purple-700 dark:text-purple-400 transition-colors flex items-center gap-2 font-bold rounded-sm hover:bg-purple-50 dark:hover:bg-purple-950"
+                className="px-4 py-2 dark:bg-background-dark border-2 border-slate-800 text-slate-900 dark:text-slate-100 transition-colors flex items-center gap-2 font-bold rounded-sm hover:bg-slate-100 dark:hover:bg-slate-900"
               >
                 <span className="material-symbols-outlined text-xl">link</span>
                 Link Cliente
