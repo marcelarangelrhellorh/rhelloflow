@@ -1,17 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
-  MapPin, 
-  Briefcase, 
-  User, 
-  Calendar, 
-  ExternalLink, 
-  Link as LinkIcon,
-  Download,
-  Star
-} from "lucide-react";
-
+import { MapPin, Briefcase, User, Calendar, ExternalLink, Link as LinkIcon, Download, Star } from "lucide-react";
 interface CandidateCardProps {
   candidate: {
     id: string;
@@ -31,8 +21,12 @@ interface CandidateCardProps {
   onLinkToJob: () => void;
   viewMode?: "grid" | "list";
 }
-
-export function CandidateCard({ candidate, onViewProfile, onLinkToJob, viewMode = "grid" }: CandidateCardProps) {
+export function CandidateCard({
+  candidate,
+  onViewProfile,
+  onLinkToJob,
+  viewMode = "grid"
+}: CandidateCardProps) {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Banco de Talentos":
@@ -45,7 +39,6 @@ export function CandidateCard({ candidate, onViewProfile, onLinkToJob, viewMode 
         return "bg-muted text-muted-foreground";
     }
   };
-
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "Banco de Talentos":
@@ -58,10 +51,8 @@ export function CandidateCard({ candidate, onViewProfile, onLinkToJob, viewMode 
         return "⚪";
     }
   };
-
   if (viewMode === "list") {
-    return (
-      <Card className="hover:shadow-lg transition-all duration-200 hover:scale-[1.01] bg-white">
+    return <Card className="hover:shadow-lg transition-all duration-200 hover:scale-[1.01] bg-white">
         <CardContent className="p-6">
           <div className="flex items-center justify-between gap-6">
             <div className="flex items-center gap-6 flex-1">
@@ -102,52 +93,32 @@ export function CandidateCard({ candidate, onViewProfile, onLinkToJob, viewMode 
             </div>
 
             <div className="flex items-center gap-2 flex-shrink-0">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onViewProfile();
-                }}
-                className="hover:bg-[#F9EC3F] hover:text-[#00141D] hover:border-[#F9EC3F]"
-              >
+              <Button variant="outline" size="sm" onClick={e => {
+              e.stopPropagation();
+              onViewProfile();
+            }} className="hover:bg-[#F9EC3F] hover:text-[#00141D] hover:border-[#F9EC3F]">
                 <ExternalLink className="mr-2 h-4 w-4" />
                 Ver perfil
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onLinkToJob();
-                }}
-                className="hover:bg-[#F9EC3F] hover:text-[#00141D] hover:border-[#F9EC3F]"
-              >
+              <Button variant="outline" size="sm" onClick={e => {
+              e.stopPropagation();
+              onLinkToJob();
+            }} className="hover:bg-[#F9EC3F] hover:text-[#00141D] hover:border-[#F9EC3F]">
                 <LinkIcon className="mr-2 h-4 w-4" />
                 Vincular
               </Button>
-              {candidate.curriculo_link && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  asChild
-                  onClick={(e) => e.stopPropagation()}
-                >
+              {candidate.curriculo_link && <Button variant="ghost" size="icon" asChild onClick={e => e.stopPropagation()}>
                   <a href={candidate.curriculo_link} target="_blank" rel="noopener noreferrer">
                     <Download className="h-4 w-4" />
                   </a>
-                </Button>
-              )}
+                </Button>}
             </div>
           </div>
         </CardContent>
-      </Card>
-    );
+      </Card>;
   }
-
-  return (
-    <Card className="hover:shadow-lg transition-all duration-200 hover:scale-[1.01] bg-white">
-      <CardContent className="p-6">
+  return <Card className="hover:shadow-lg transition-all duration-200 hover:scale-[1.01] bg-white my-0 mx-[150px] px-0">
+      <CardContent className="p-6 mx-0">
         {/* Header do card */}
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-3">
@@ -181,14 +152,12 @@ export function CandidateCard({ candidate, onViewProfile, onLinkToJob, viewMode 
             <span>Disponível há {candidate.days_in_bank} dias</span>
           </div>
 
-          {candidate.mediaRating !== undefined && candidate.mediaRating !== null && candidate.qtdAvaliacoes! > 0 && (
-            <div className="flex items-center gap-2 text-sm">
+          {candidate.mediaRating !== undefined && candidate.mediaRating !== null && candidate.qtdAvaliacoes! > 0 && <div className="flex items-center gap-2 text-sm">
               <Star className="h-4 w-4 flex-shrink-0 fill-yellow-400 text-yellow-400" />
               <span className="font-medium text-[#00141D]">
                 {candidate.mediaRating.toFixed(1)} ★ ({candidate.qtdAvaliacoes})
               </span>
-            </div>
-          )}
+            </div>}
         </div>
 
         {/* Status */}
@@ -207,37 +176,20 @@ export function CandidateCard({ candidate, onViewProfile, onLinkToJob, viewMode 
 
         {/* Ações */}
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-1 hover:bg-[#F9EC3F] hover:text-[#00141D] hover:border-[#F9EC3F]"
-            onClick={onViewProfile}
-          >
+          <Button variant="outline" size="sm" className="flex-1 hover:bg-[#F9EC3F] hover:text-[#00141D] hover:border-[#F9EC3F]" onClick={onViewProfile}>
             <ExternalLink className="mr-2 h-4 w-4" />
             Ver perfil
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-1 hover:bg-[#F9EC3F] hover:text-[#00141D] hover:border-[#F9EC3F]"
-            onClick={onLinkToJob}
-          >
+          <Button variant="outline" size="sm" className="flex-1 hover:bg-[#F9EC3F] hover:text-[#00141D] hover:border-[#F9EC3F]" onClick={onLinkToJob}>
             <LinkIcon className="mr-2 h-4 w-4" />
             Vincular
           </Button>
-          {candidate.curriculo_link && (
-            <Button
-              variant="ghost"
-              size="icon"
-              asChild
-            >
+          {candidate.curriculo_link && <Button variant="ghost" size="icon" asChild>
               <a href={candidate.curriculo_link} target="_blank" rel="noopener noreferrer" title="Baixar currículo">
                 <Download className="h-4 w-4" />
               </a>
-            </Button>
-          )}
+            </Button>}
         </div>
       </CardContent>
-    </Card>
-  );
+    </Card>;
 }
