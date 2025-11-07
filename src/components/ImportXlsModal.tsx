@@ -354,17 +354,15 @@ export function ImportXlsModal({ open, onOpenChange, sourceType, vagaId: initial
             warnings.push('Cidade não informada');
           }
 
-          // Buscar experiência profissional com nomes variados
+          // Buscar experiência profissional diretamente do row original (antes da validação)
+          // para capturar textos longos que podem ter sido perdidos
           const experienciaProfissional = 
+            row['Experiência profissional'] ||
+            row['Experiencia profissional'] || 
+            row['Experiência Profissional'] ||
+            row['Experiencia Profissional'] ||
             validated['Experiência profissional'] || 
-            getFieldValue(row, [
-              'Experiência profissional',
-              'Experiencia profissional', 
-              'Experiência Profissional',
-              'Experiencia Profissional',
-              'Experiência',
-              'Experiencia'
-            ]);
+            null;
 
           const normalized = {
             nome_completo,
@@ -375,7 +373,7 @@ export function ImportXlsModal({ open, onOpenChange, sourceType, vagaId: initial
             cidade,
             estado: estadoNormalized,
             pretensao_salarial,
-            experiencia_profissional: experienciaProfissional,
+            experiencia_profissional: experienciaProfissional ? String(experienciaProfissional).trim() : null,
             idiomas: validated.Idiomas || null,
             origem,
           };
