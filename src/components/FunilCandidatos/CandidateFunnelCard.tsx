@@ -42,13 +42,13 @@ const statusColors: Record<string, { bg: string; text: string }> = {
   "Entrevista Agendada": { bg: "#512DA8", text: "#FFFFFF" },
   "Em Entrevista": { bg: "#F57C00", text: "#FFFFFF" },
   "Aguardando Feedback": { bg: "#8D6E63", text: "#FFFFFF" },
-  "Aprovado Rhello": { bg: "#00796B", text: "#FFFFFF" },
+  "Aprovado rhello": { bg: "#00796B", text: "#FFFFFF" },
   "Apresentado ao Cliente": { bg: "#0097A7", text: "#FFFFFF" },
   "Em Entrevista Cliente": { bg: "#5C6BC0", text: "#FFFFFF" },
   "Aprovado Cliente": { bg: "#2E7D32", text: "#FFFFFF" },
   "Em Processo de Contratação": { bg: "#00796B", text: "#FFFFFF" },
   "Contratado": { bg: "#2E7D32", text: "#FFFFFF" },
-  "Reprovado Rhello": { bg: "#D32F2F", text: "#FFFFFF" },
+  "Reprovado rhello": { bg: "#D32F2F", text: "#FFFFFF" },
   "Reprovado Solicitante": { bg: "#D32F2F", text: "#FFFFFF" },
   "Desistente": { bg: "#757575", text: "#FFFFFF" },
 };
@@ -84,7 +84,7 @@ export function CandidateFunnelCard({ candidato, onDragStart, isDragging }: Cand
     : null;
 
   // Check if candidate is in a final stage
-  const isFinalStage = ["Reprovado Rhello", "Reprovado Solicitante", "Contratado"].includes(candidato.status);
+  const isFinalStage = ["Reprovado rhello", "Reprovado Solicitante", "Contratado"].includes(candidato.status);
   const isContratado = candidato.status === "Contratado";
   const statusColor = statusColors[candidato.status] || { bg: "#757575", text: "#FFFFFF" };
 

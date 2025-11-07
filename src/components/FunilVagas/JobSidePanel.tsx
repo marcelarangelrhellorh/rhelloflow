@@ -28,7 +28,7 @@ const statusColors: Record<string, string> = {
   "A iniciar": "bg-success/10 text-success border-success/20",
   "Discovery": "bg-info/10 text-info border-info/20",
   "Triagem": "bg-warning/10 text-warning border-warning/20",
-  "Entrevistas Rhello": "bg-warning/10 text-warning border-warning/20",
+  "Entrevistas rhello": "bg-warning/10 text-warning border-warning/20",
   "Shortlist enviada": "bg-primary/10 text-primary border-primary/20",
   "Entrevistas Cliente": "bg-muted/50 text-muted-foreground border-muted",
   "Em fechamento": "bg-success/10 text-success border-success/20",

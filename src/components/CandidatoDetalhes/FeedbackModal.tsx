@@ -184,9 +184,9 @@ export function FeedbackModal({
               <SelectContent>
                 <SelectItem value="Banco de Talentos">Banco de Talentos</SelectItem>
                 <SelectItem value="Selecionado">Selecionado</SelectItem>
-                <SelectItem value="Entrevista Rhello">Entrevista Rhello</SelectItem>
-                <SelectItem value="Reprovado Rhello">Reprovado Rhello</SelectItem>
-                <SelectItem value="Aprovado Rhello">Aprovado Rhello</SelectItem>
+                <SelectItem value="Entrevista rhello">Entrevista rhello</SelectItem>
+                <SelectItem value="Reprovado rhello">Reprovado rhello</SelectItem>
+                <SelectItem value="Aprovado rhello">Aprovado rhello</SelectItem>
                 <SelectItem value="Entrevistas Solicitante">Entrevistas Solicitante</SelectItem>
                 <SelectItem value="Reprovado Solicitante">Reprovado Solicitante</SelectItem>
                 <SelectItem value="Aprovado Solicitante">Aprovado Solicitante</SelectItem>

@@ -35,7 +35,7 @@ export function RejectedCandidatesCard() {
       const {
         data: candidatosReprovados,
         error: candError
-      } = await supabase.from('candidatos').select('id').or('status.eq.Reprovado Rhello,status.eq.Reprovado Solicitante').is('deleted_at', null);
+      } = await supabase.from('candidatos').select('id').or('status.eq.Reprovado rhello,status.eq.Reprovado Solicitante').is('deleted_at', null);
       if (candError) throw candError;
       const candidateIds = candidatosReprovados?.map(c => c.id) || [];
       if (candidateIds.length === 0) {
@@ -72,7 +72,7 @@ export function RejectedCandidatesCard() {
           status,
           criado_em,
           vaga_relacionada_id
-        `).or('status.eq.Reprovado Rhello,status.eq.Reprovado Solicitante').is('deleted_at', null).order('criado_em', {
+        `).or('status.eq.Reprovado rhello,status.eq.Reprovado Solicitante').is('deleted_at', null).order('criado_em', {
         ascending: false
       }).limit(100);
       if (candError) throw candError;

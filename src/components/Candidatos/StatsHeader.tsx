@@ -8,7 +8,7 @@ interface StatsHeaderProps {
 
 const statusColors: Record<string, string> = {
   "Selecionado": "bg-primary/10 text-primary border-primary/20",
-  "Entrevista Rhello": "bg-warning/10 text-warning border-warning/20",
+  "Entrevista rhello": "bg-warning/10 text-warning border-warning/20",
   "Aprovado": "bg-success/10 text-success border-success/20",
   "Declinou": "bg-destructive/10 text-destructive border-destructive/20",
   "Reprovado Cliente": "bg-destructive/10 text-destructive border-destructive/20",
@@ -16,14 +16,14 @@ const statusColors: Record<string, string> = {
 
 const statusIcons: Record<string, string> = {
   "Selecionado": "🟡",
-  "Entrevista Rhello": "🔵",
+  "Entrevista rhello": "🔵",
   "Aprovado": "🟢",
   "Declinou": "🔴",
   "Reprovado Cliente": "🔴",
 };
 
 export function StatsHeader({ total, byStatus }: StatsHeaderProps) {
-  const activeStatuses = ["Selecionado", "Entrevista Rhello", "Enviado ao Cliente"];
+  const activeStatuses = ["Selecionado", "Entrevista rhello", "Enviado ao Cliente"];
   const activeCount = Object.entries(byStatus)
     .filter(([status]) => activeStatuses.includes(status))
     .reduce((sum, [, count]) => sum + count, 0);

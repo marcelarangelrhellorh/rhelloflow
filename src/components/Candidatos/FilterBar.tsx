@@ -20,7 +20,7 @@ interface FilterBarProps {
 const statusOptions = [
   "Banco de Talentos",
   "Selecionado",
-  "Entrevista Rhello",
+  "Entrevista rhello",
   "Enviado ao Cliente",
   "Entrevista com Cliente",
   "Feedback Cliente",

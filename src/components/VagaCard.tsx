@@ -39,7 +39,7 @@ const statusProgressMap: Record<string, number> = {
   "A iniciar": 10,
   "Discovery": 20,
   "Triagem": 25,
-  "Entrevistas Rhello": 40,
+  "Entrevistas rhello": 40,
   "Aguardando retorno do cliente": 50,
   "Apresentação de Candidatos": 60,
   "Entrevista cliente": 75,
