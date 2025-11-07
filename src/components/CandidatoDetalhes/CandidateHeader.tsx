@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Trash2, MessageSquare, RefreshCw, Briefcase, MapPin, User, PartyPopper, CheckCircle2, MessageCircle } from "lucide-react";
+import { Edit, Trash2, RefreshCw, Briefcase, MapPin, User, PartyPopper, CheckCircle2, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -13,7 +13,6 @@ interface CandidateHeaderProps {
   estado: string | null;
   onEdit: () => void;
   onDelete: () => void;
-  onAddFeedback: () => void;
   onRelocate: () => void;
   onStatusChange: (newStatus: string) => void;
   onSendWhatsApp: () => void;
@@ -59,7 +58,6 @@ export function CandidateHeader({
   estado,
   onEdit,
   onDelete,
-  onAddFeedback,
   onRelocate,
   onStatusChange,
   onSendWhatsApp,
@@ -176,11 +174,6 @@ export function CandidateHeader({
             <Button onClick={onEdit} size="sm" className="font-semibold">
               <Edit className="mr-2 h-4 w-4" />
               Editar
-            </Button>
-
-            <Button onClick={onAddFeedback} variant="outline" size="sm" className="font-semibold border-gray-200 dark:border-secondary-text-light/20">
-              <MessageSquare className="mr-2 h-4 w-4" />
-              Feedback
             </Button>
 
             <Button onClick={onRelocate} variant="outline" size="sm" className="font-semibold border-gray-200 dark:border-secondary-text-light/20">
