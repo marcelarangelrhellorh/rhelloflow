@@ -70,52 +70,52 @@ export function CandidateCard({ candidato, onView, onEdit, onDelete, onLinkJob, 
     )}>
       <CardHeader className="pb-2 pt-3 px-3">
         <div className="flex items-center justify-between mb-2">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F9EC3F]/20 text-[#00141D] font-bold text-sm flex-shrink-0">
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#F9EC3F]/20 text-[#00141D] font-bold text-base flex-shrink-0">
             {getInitials(candidato.nome_completo)}
           </div>
           <div className="flex gap-1 flex-wrap justify-end ml-2">
             {candidato.disponibilidade_status === 'disponível' ? (
-              <Badge className="text-xs font-bold rounded-full px-2 py-0.5 bg-[#C9F4C7] text-[#1B5E20] hover:bg-[#C9F4C7]/90">
+              <Badge className="text-sm font-bold rounded-full px-2.5 py-1 bg-[#C9F4C7] text-[#1B5E20] hover:bg-[#C9F4C7]/90">
                 ✅
               </Badge>
             ) : candidato.disponibilidade_status === 'não_disponível' ? (
-              <Badge className="text-xs font-bold rounded-full px-2 py-0.5 bg-[#FFD6D6] text-[#B71C1C] hover:bg-[#FFD6D6]/90">
+              <Badge className="text-sm font-bold rounded-full px-2.5 py-1 bg-[#FFD6D6] text-[#B71C1C] hover:bg-[#FFD6D6]/90">
                 ❌
               </Badge>
             ) : null}
           </div>
         </div>
         
-        <h3 className="text-base font-bold text-[#00141D] line-clamp-1 mb-1">
+        <h3 className="text-lg font-bold text-[#00141D] line-clamp-1 mb-1">
           {candidato.nome_completo}
         </h3>
         
         <Badge
           variant="outline"
-          className={cn("text-xs font-bold rounded-full px-2.5 py-0.5 w-fit", statusColors[candidato.status] || statusColors["Banco de Talentos"])}
+          className={cn("text-sm font-bold rounded-full px-3 py-1 w-fit", statusColors[candidato.status] || statusColors["Banco de Talentos"])}
         >
           {statusIcons[candidato.status] || "⚪"} {candidato.status}
         </Badge>
       </CardHeader>
 
-      <CardContent className="space-y-1.5 px-3 pb-2.5">
+      <CardContent className="space-y-2 px-3 pb-3">
         {(candidato.nivel || candidato.area) && (
-          <div className="flex items-center gap-1.5 text-xs text-[#00141D]/80 font-medium">
-            <Briefcase className="h-3.5 w-3.5 flex-shrink-0 text-[#00141D]/60" />
+          <div className="flex items-center gap-2 text-sm text-[#00141D]/80 font-medium">
+            <Briefcase className="h-4 w-4 flex-shrink-0 text-[#00141D]/60" />
             <span className="truncate">
               {[candidato.nivel, candidato.area].filter(Boolean).join(" – ")}
             </span>
           </div>
         )}
 
-        <div className="flex items-center gap-1.5 text-xs text-[#00141D]/80 font-medium">
-          <Mail className="h-3.5 w-3.5 flex-shrink-0 text-[#00141D]/60" />
+        <div className="flex items-center gap-2 text-sm text-[#00141D]/80 font-medium">
+          <Mail className="h-4 w-4 flex-shrink-0 text-[#00141D]/60" />
           <span className="truncate">{candidato.email}</span>
         </div>
 
         {(candidato.cidade || candidato.estado) && (
-          <div className="flex items-center gap-1.5 text-xs text-[#00141D]/80 font-medium">
-            <MapPin className="h-3.5 w-3.5 flex-shrink-0 text-[#00141D]/60" />
+          <div className="flex items-center gap-2 text-sm text-[#00141D]/80 font-medium">
+            <MapPin className="h-4 w-4 flex-shrink-0 text-[#00141D]/60" />
             <span className="truncate">
               {[candidato.cidade, candidato.estado].filter(Boolean).join(", ")}
             </span>
@@ -123,27 +123,27 @@ export function CandidateCard({ candidato, onView, onEdit, onDelete, onLinkJob, 
         )}
 
         {candidato.recrutador && (
-          <div className="flex items-center gap-1.5 text-xs text-[#00141D]/80 font-medium">
-            <User className="h-3.5 w-3.5 flex-shrink-0 text-[#00141D]/60" />
+          <div className="flex items-center gap-2 text-sm text-[#00141D]/80 font-medium">
+            <User className="h-4 w-4 flex-shrink-0 text-[#00141D]/60" />
             <span className="truncate">{candidato.recrutador}</span>
           </div>
         )}
 
         {/* Quick Actions */}
         <TooltipProvider>
-          <div className="flex gap-0.5 pt-1.5 mt-1 border-t border-[#E5E7EB]">
+          <div className="flex gap-1 pt-2 mt-2 border-t border-[#E5E7EB]">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-8 flex-1 hover:bg-[#F9EC3F]/20 hover:text-[#00141D] font-medium px-1"
+                  className="h-9 flex-1 hover:bg-[#F9EC3F]/20 hover:text-[#00141D] font-medium px-2"
                   onClick={(e) => {
                     e.stopPropagation();
                     onView();
                   }}
                 >
-                  <Eye className="h-3.5 w-3.5" />
+                  <Eye className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -156,13 +156,13 @@ export function CandidateCard({ candidato, onView, onEdit, onDelete, onLinkJob, 
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-8 flex-1 hover:bg-[#F9EC3F]/20 hover:text-[#00141D] font-medium px-1"
+                  className="h-9 flex-1 hover:bg-[#F9EC3F]/20 hover:text-[#00141D] font-medium px-2"
                   onClick={(e) => {
                     e.stopPropagation();
                     onEdit();
                   }}
                 >
-                  <Edit className="h-3.5 w-3.5" />
+                  <Edit className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -176,13 +176,13 @@ export function CandidateCard({ candidato, onView, onEdit, onDelete, onLinkJob, 
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-8 flex-1 hover:bg-[#F9EC3F]/20 hover:text-[#00141D] font-medium px-1"
+                    className="h-9 flex-1 hover:bg-[#F9EC3F]/20 hover:text-[#00141D] font-medium px-2"
                     onClick={(e) => {
                       e.stopPropagation();
                       onLinkJob();
                     }}
                   >
-                    <LinkIcon className="h-3.5 w-3.5" />
+                    <LinkIcon className="h-4 w-4" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -196,13 +196,13 @@ export function CandidateCard({ candidato, onView, onEdit, onDelete, onLinkJob, 
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-8 flex-1 text-destructive hover:text-destructive hover:bg-destructive/10 font-medium px-1"
+                  className="h-9 flex-1 text-destructive hover:text-destructive hover:bg-destructive/10 font-medium px-2"
                   onClick={(e) => {
                     e.stopPropagation();
                     onDelete();
                   }}
                 >
-                  <Trash2 className="h-3.5 w-3.5" />
+                  <Trash2 className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
