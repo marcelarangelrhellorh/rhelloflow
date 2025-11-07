@@ -133,23 +133,12 @@ export function CandidateFunnelCard({ candidato, onDragStart, isDragging }: Cand
                     </TooltipContent>
                   </Tooltip>
                 </div>
-
-                <Badge
-                  className="text-sm font-semibold whitespace-nowrap px-2.5 py-1 flex items-center gap-1 shrink-0"
-                  style={{
-                    backgroundColor: statusColor.bg,
-                    color: statusColor.text,
-                  }}
-                >
-                  {isContratado && <Check className="h-3.5 w-3.5" />}
-                  {candidato.status}
-                </Badge>
               </div>
 
               {/* Vaga vinculada */}
               {candidato.vaga?.titulo && (
                 <div className="flex items-center gap-2">
-                  <Badge className="text-sm font-medium bg-[#FFCD00] text-[#00141D] hover:bg-[#FFCD00]/90">
+                  <Badge className="text-sm font-medium bg-[#faec3e] text-[#00141D] hover:bg-[#faec3e]/90">
                     📋 {candidato.vaga.titulo}
                   </Badge>
                 </div>
