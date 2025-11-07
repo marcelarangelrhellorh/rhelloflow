@@ -102,23 +102,37 @@ export function RejectedCandidatesList({
           </SheetHeader>
 
           <div className="mt-6 space-y-4">
-            {selectedIds.size > 0 && (
-              <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
+              {selectedIds.size > 0 ? (
+                <>
+                  <Button
+                    onClick={() => setShowBulkModal(true)}
+                    className="bg-primary"
+                  >
+                    <Send className="mr-2 h-4 w-4" />
+                    Enviar WhatsApp para {selectedIds.size} selecionados
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => setSelectedIds(new Set())}
+                  >
+                    Limpar seleção
+                  </Button>
+                </>
+              ) : (
                 <Button
-                  onClick={() => setShowBulkModal(true)}
+                  onClick={() => {
+                    handleSelectAll(true);
+                    setShowBulkModal(true);
+                  }}
                   className="bg-primary"
+                  disabled={candidates.length === 0}
                 >
                   <Send className="mr-2 h-4 w-4" />
-                  Enviar WhatsApp para {selectedIds.size} selecionados
+                  Enviar WhatsApp para todos ({candidates.length})
                 </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => setSelectedIds(new Set())}
-                >
-                  Limpar seleção
-                </Button>
-              </div>
-            )}
+              )}
+            </div>
 
             <div className="border rounded-lg">
               <Table>

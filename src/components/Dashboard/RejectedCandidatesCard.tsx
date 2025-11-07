@@ -143,21 +143,10 @@ export function RejectedCandidatesCard() {
               </p>
               <p className="text-[13px] text-muted-foreground">Candidatos em &quot;Reprovado rhello&quot; ou &quot;Reprovado Solicitante&quot; sem receber negativa/retorno</p>
               
-              {count > 0 && <div className="flex gap-2 pt-2">
-                  <Button variant="outline" size="sm" onClick={e => {
-                e.stopPropagation();
-                setShowList(true);
-              }}>
-                    <ExternalLink className="mr-2 h-4 w-4" />
-                    Ver lista ({count})
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={e => {
-                e.stopPropagation();
-                setShowBulkModal(true);
-              }}>
-                    <Send className="mr-2 h-4 w-4" />
-                    Enviar WhatsApp
-                  </Button>
+              {count > 0 && <div className="pt-2">
+                  <p className="text-xs text-muted-foreground">
+                    Clique no card para ver a lista e enviar WhatsApp
+                  </p>
                 </div>}
             </div>
             <div className={`
