@@ -17,6 +17,7 @@ import { ScorecardHistory } from "@/components/CandidatoDetalhes/ScorecardHistor
 import { HistoryTimeline } from "@/components/CandidatoDetalhes/HistoryTimeline";
 import { LinkToJobModal } from "@/components/BancoTalentos/LinkToJobModal";
 import { CandidateTagsCard } from "@/components/CandidatoDetalhes/CandidateTagsCard";
+import { SendWhatsAppModal } from "@/components/CandidatoDetalhes/SendWhatsAppModal";
 
 
 type Candidato = {
@@ -84,6 +85,7 @@ export default function CandidatoDetalhes() {
   const [relocateModalOpen, setRelocateModalOpen] = useState(false);
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
   const [solicitarFeedbackModalOpen, setSolicitarFeedbackModalOpen] = useState(false);
+  const [whatsappModalOpen, setWhatsappModalOpen] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -356,6 +358,7 @@ export default function CandidatoDetalhes() {
             onAddFeedback={() => setFeedbackModalOpen(true)}
             onRelocate={() => setRelocateModalOpen(true)}
             onStatusChange={handleStatusChange}
+            onSendWhatsApp={() => setWhatsappModalOpen(true)}
           />
 
           {/* Compact Stats Row */}
@@ -488,6 +491,16 @@ export default function CandidatoDetalhes() {
         candidatoId={id!}
         vagaId={candidato.vaga_relacionada_id}
         candidatoNome={candidato.nome_completo}
+      />
+
+      {/* WhatsApp Modal */}
+      <SendWhatsAppModal
+        open={whatsappModalOpen}
+        onOpenChange={setWhatsappModalOpen}
+        candidateId={id!}
+        candidateName={candidato.nome_completo}
+        candidatePhone={candidato.telefone}
+        vacancyTitle={vaga?.titulo}
       />
     </div>
   );

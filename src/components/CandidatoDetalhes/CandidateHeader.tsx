@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Trash2, MessageSquare, RefreshCw, Briefcase, MapPin, User, PartyPopper, CheckCircle2 } from "lucide-react";
+import { Edit, Trash2, MessageSquare, RefreshCw, Briefcase, MapPin, User, PartyPopper, CheckCircle2, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -16,6 +16,7 @@ interface CandidateHeaderProps {
   onAddFeedback: () => void;
   onRelocate: () => void;
   onStatusChange: (newStatus: string) => void;
+  onSendWhatsApp: () => void;
 }
 
 const ETAPAS_DISPONIVEIS = [
@@ -62,6 +63,7 @@ export function CandidateHeader({
   onAddFeedback,
   onRelocate,
   onStatusChange,
+  onSendWhatsApp,
 }: CandidateHeaderProps) {
   const getInitials = (name: string) => {
     const parts = name.split(" ");
@@ -167,6 +169,11 @@ export function CandidateHeader({
 
           {/* Right Side - Action Buttons */}
           <div className="flex flex-wrap gap-2">
+            <Button onClick={onSendWhatsApp} variant="outline" size="sm" className="font-semibold border-gray-200 dark:border-secondary-text-light/20 text-success hover:bg-success/10">
+              <MessageCircle className="mr-2 h-4 w-4" />
+              WhatsApp
+            </Button>
+
             <Button onClick={onEdit} size="sm" className="font-semibold">
               <Edit className="mr-2 h-4 w-4" />
               Editar

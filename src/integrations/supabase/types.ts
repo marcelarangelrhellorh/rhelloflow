@@ -1979,6 +1979,97 @@ export type Database = {
           },
         ]
       }
+      whatsapp_sends: {
+        Row: {
+          candidate_id: string
+          consent_confirmed: boolean
+          created_at: string
+          error_message: string | null
+          id: string
+          number: string
+          provider_response: Json | null
+          sent_at: string | null
+          sent_by: string
+          status: string
+          template_key: string | null
+          text: string
+          vacancy_id: string | null
+        }
+        Insert: {
+          candidate_id: string
+          consent_confirmed?: boolean
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          number: string
+          provider_response?: Json | null
+          sent_at?: string | null
+          sent_by: string
+          status?: string
+          template_key?: string | null
+          text: string
+          vacancy_id?: string | null
+        }
+        Update: {
+          candidate_id?: string
+          consent_confirmed?: boolean
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          number?: string
+          provider_response?: Json | null
+          sent_at?: string | null
+          sent_by?: string
+          status?: string
+          template_key?: string | null
+          text?: string
+          vacancy_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_sends_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates_with_tags"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whatsapp_sends_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidatos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whatsapp_sends_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidatos_active"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whatsapp_sends_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "view_candidate_tags"
+            referencedColumns: ["candidate_id"]
+          },
+          {
+            foreignKeyName: "whatsapp_sends_vacancy_id_fkey"
+            columns: ["vacancy_id"]
+            isOneToOne: false
+            referencedRelation: "vagas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whatsapp_sends_vacancy_id_fkey"
+            columns: ["vacancy_id"]
+            isOneToOne: false
+            referencedRelation: "vagas_active"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       audit_events_recent: {

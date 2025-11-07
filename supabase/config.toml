@@ -50,3 +50,6 @@ verify_jwt = true
 
 [functions.analyze-scorecards-ai]
 verify_jwt = true
+
+[functions.send-whatsapp]
+verify_jwt = true
