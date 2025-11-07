@@ -18,20 +18,30 @@ interface ImportXlsModalProps {
 }
 
 const candidatoSchema = z.object({
-  nome_completo: z.string().trim().min(1, "Nome é obrigatório").max(200),
-  email: z.string().trim().email("Email inválido").max(255),
-  telefone: z.string().trim().max(50).optional(),
-  cidade: z.string().trim().max(100).optional(),
-  estado: z.string().trim().max(2).optional(),
-  linkedin: z.string().trim().max(500).optional(),
-  area: z.enum(['Tecnologia', 'Marketing', 'Vendas', 'Financeiro', 'RH', 'Operações', 'Outro']).optional(),
-  nivel: z.enum(['Júnior', 'Pleno', 'Sênior', 'Especialista', 'Coordenador', 'Gerente', 'Diretor']).optional(),
-  pretensao_salarial: z.number().positive().optional(),
-  disponibilidade_status: z.string().trim().max(100).optional(),
-  disponibilidade_mudanca: z.string().trim().max(100).optional(),
-  curriculo_link: z.string().trim().max(500).optional(),
-  portfolio_url: z.string().trim().max(500).optional(),
-  historico_experiencia: z.string().trim().max(5000).optional(),
+  Nome: z.string().trim().min(1, "Nome é obrigatório").max(100),
+  Sobrenome: z.string().trim().max(100).optional(),
+  'E-mail': z.string().trim().email("Email inválido").max(255),
+  Telefone: z.string().trim().max(50).optional(),
+  Celular: z.string().trim().max(50).optional(),
+  Estado: z.string().trim().max(2).optional(),
+  Cidade: z.string().trim().max(100).optional(),
+  CEP: z.string().trim().max(20).optional(),
+  Endereço: z.string().trim().max(200).optional(),
+  Complemento: z.string().trim().max(100).optional(),
+  Número: z.string().trim().max(20).optional(),
+  Bairro: z.string().trim().max(100).optional(),
+  'Data de Nascimento': z.string().trim().optional(),
+  Idade: z.union([z.string(), z.number()]).optional(),
+  Sexo: z.string().trim().max(50).optional(),
+  'Estado Civil': z.string().trim().max(50).optional(),
+  Nacionalidade: z.string().trim().max(100).optional(),
+  'Salário mínimo': z.union([z.string(), z.number()]).optional(),
+  'Salário máximo': z.union([z.string(), z.number()]).optional(),
+  'TAG\'s do CV do candidato': z.string().trim().optional(),
+  'Experiência profissional': z.string().trim().max(5000).optional(),
+  Treinamento: z.string().trim().max(2000).optional(),
+  Idiomas: z.string().trim().max(500).optional(),
+  'Origem da candidatura': z.string().trim().max(200).optional(),
 });
 
 interface ImportResult {
@@ -51,20 +61,30 @@ export function ImportXlsModal({ open, onOpenChange, sourceType, vagaId, onSucce
   const downloadTemplate = () => {
     const template = [
       {
-        nome_completo: "João Silva",
-        email: "joao.silva@example.com",
-        telefone: "(11) 99999-9999",
-        cidade: "São Paulo",
-        estado: "SP",
-        linkedin: "https://linkedin.com/in/joaosilva",
-        area: "Tecnologia",
-        nivel: "Pleno",
-        pretensao_salarial: 8000,
-        disponibilidade_status: "Disponível imediato",
-        disponibilidade_mudanca: "Sim, para qualquer localidade",
-        curriculo_link: "https://drive.google.com/...",
-        portfolio_url: "https://portfolio.com/joao",
-        historico_experiencia: "5 anos como desenvolvedor..."
+        'Nome': 'João',
+        'Sobrenome': 'Silva',
+        'E-mail': 'joao.silva@example.com',
+        'Telefone': '(11) 3333-4444',
+        'Celular': '(11) 99999-9999',
+        'Estado': 'SP',
+        'Cidade': 'São Paulo',
+        'CEP': '01310-100',
+        'Endereço': 'Av. Paulista',
+        'Complemento': 'Apto 123',
+        'Número': '1000',
+        'Bairro': 'Bela Vista',
+        'Data de Nascimento': '15/05/1990',
+        'Idade': 34,
+        'Sexo': 'Masculino',
+        'Estado Civil': 'Solteiro',
+        'Nacionalidade': 'Brasileira',
+        'Salário mínimo': 8000,
+        'Salário máximo': 12000,
+        'TAG\'s do CV do candidato': 'Liderança, Vendas, Gestão',
+        'Experiência profissional': '10 anos como gerente comercial...',
+        'Treinamento': 'MBA em Gestão Comercial',
+        'Idiomas': 'Inglês (fluente), Espanhol (intermediário)',
+        'Origem da candidatura': 'LinkedIn'
       }
     ];
 
@@ -73,12 +93,12 @@ export function ImportXlsModal({ open, onOpenChange, sourceType, vagaId, onSucce
     XLSX.utils.book_append_sheet(wb, ws, "Candidatos");
     
     // Set column widths
-    ws['!cols'] = [
-      { wch: 25 }, { wch: 30 }, { wch: 18 }, { wch: 15 },
-      { wch: 8 }, { wch: 35 }, { wch: 15 }, { wch: 15 },
-      { wch: 18 }, { wch: 25 }, { wch: 30 }, { wch: 35 },
-      { wch: 35 }, { wch: 50 }
+    const widths = [
+      15, 15, 30, 18, 18, 8, 20, 15, 30, 20, 
+      10, 20, 15, 8, 15, 15, 20, 15, 15, 30,
+      50, 30, 30, 20
     ];
+    ws['!cols'] = widths.map(wch => ({ wch }));
 
     XLSX.writeFile(wb, "template_importacao_candidatos.xlsx");
     toast.success("Template baixado com sucesso!");
@@ -121,7 +141,31 @@ export function ImportXlsModal({ open, onOpenChange, sourceType, vagaId, onSucce
       const workbook = XLSX.read(data, { type: 'array' });
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
-      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+      
+      // Try to find header row (skip metadata rows like "Nome da vaga:", etc.)
+      const rawData: any[] = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+      let headerRowIndex = -1;
+      
+      // Look for the row that contains "Nome" and "E-mail" columns
+      for (let i = 0; i < Math.min(10, rawData.length); i++) {
+        const row = rawData[i];
+        if (Array.isArray(row) && row.includes('Nome') && row.includes('E-mail')) {
+          headerRowIndex = i;
+          break;
+        }
+      }
+      
+      if (headerRowIndex === -1) {
+        toast.error("Não foi possível encontrar o cabeçalho da planilha. Certifique-se de que há uma linha com 'Nome' e 'E-mail'.");
+        setProcessing(false);
+        return;
+      }
+      
+      // Parse data starting from header row
+      const jsonData = XLSX.utils.sheet_to_json(worksheet, { 
+        range: headerRowIndex,
+        defval: null 
+      });
 
       if (jsonData.length === 0) {
         toast.error("Planilha vazia. Adicione candidatos e tente novamente.");
@@ -145,45 +189,64 @@ export function ImportXlsModal({ open, onOpenChange, sourceType, vagaId, onSucce
       // Process each row
       for (let i = 0; i < jsonData.length; i++) {
         const row: any = jsonData[i];
-        const lineNumber = i + 2; // +2 because Excel starts at 1 and has header
+        const lineNumber = headerRowIndex + i + 2; // +2 for Excel 1-based and header
 
         try {
+          // Skip empty rows
+          if (!row['Nome'] || !row['E-mail']) {
+            continue;
+          }
+
           // Validate data
-          const validated = candidatoSchema.parse({
-            nome_completo: row.nome_completo,
-            email: row.email,
-            telefone: row.telefone || null,
-            cidade: row.cidade || null,
-            estado: row.estado || null,
-            linkedin: row.linkedin || null,
-            area: row.area || null,
-            nivel: row.nivel || null,
-            pretensao_salarial: row.pretensao_salarial ? Number(row.pretensao_salarial) : null,
-            disponibilidade_status: row.disponibilidade_status || 'disponível',
-            disponibilidade_mudanca: row.disponibilidade_mudanca || null,
-            curriculo_link: row.curriculo_link || null,
-            portfolio_url: row.portfolio_url || null,
-            historico_experiencia: row.historico_experiencia || null,
-          });
+          const validated = candidatoSchema.parse(row);
+
+          // Map to database fields
+          const nomeCompleto = validated.Sobrenome 
+            ? `${validated.Nome} ${validated.Sobrenome}`.trim()
+            : validated.Nome;
+
+          const telefone = validated.Celular || validated.Telefone || null;
+          
+          // Parse salary (handle both string and number)
+          let pretensaoSalarial: number | null = null;
+          const salarioMax = validated['Salário máximo'];
+          if (salarioMax) {
+            const salarioNum = typeof salarioMax === 'string' 
+              ? parseFloat(salarioMax.replace(/[^\d,.-]/g, '').replace(',', '.'))
+              : salarioMax;
+            if (!isNaN(salarioNum)) {
+              pretensaoSalarial = salarioNum;
+            }
+          }
+
+          // Build address if available
+          const enderecoCompleto = [
+            validated.Endereço,
+            validated.Número,
+            validated.Complemento,
+            validated.Bairro,
+            validated.CEP
+          ].filter(Boolean).join(', ') || null;
+
+          // Combine professional info
+          const historicoExperiencia = [
+            validated['Experiência profissional'],
+            validated.Treinamento ? `Treinamento: ${validated.Treinamento}` : null,
+            validated.Idiomas ? `Idiomas: ${validated.Idiomas}` : null
+          ].filter(Boolean).join('\n\n') || null;
 
           // Insert into database
           const candidatoData: any = {
-            nome_completo: validated.nome_completo,
-            email: validated.email,
-            telefone: validated.telefone,
-            cidade: validated.cidade,
-            estado: validated.estado,
-            linkedin: validated.linkedin,
-            area: validated.area,
-            nivel: validated.nivel,
-            pretensao_salarial: validated.pretensao_salarial,
-            disponibilidade_status: validated.disponibilidade_status,
-            disponibilidade_mudanca: validated.disponibilidade_mudanca,
-            curriculo_link: validated.curriculo_link,
-            portfolio_url: validated.portfolio_url,
-            historico_experiencia: validated.historico_experiencia,
+            nome_completo: nomeCompleto,
+            email: validated['E-mail'],
+            telefone: telefone,
+            cidade: validated.Cidade || null,
+            estado: validated.Estado || null,
+            pretensao_salarial: pretensaoSalarial,
+            historico_experiencia: historicoExperiencia,
+            disponibilidade_status: 'disponível',
             status: sourceType === 'vaga' ? 'Triagem' : 'Banco de Talentos',
-            origem: 'importacao_xls',
+            origem: validated['Origem da candidatura'] || 'importacao_xls',
           };
 
           if (vagaId) {
@@ -198,14 +261,18 @@ export function ImportXlsModal({ open, onOpenChange, sourceType, vagaId, onSucce
 
           importResults.push({
             line: lineNumber,
-            nome: validated.nome_completo,
+            nome: nomeCompleto,
             status: 'success',
             message: 'Importado com sucesso'
           });
         } catch (error: any) {
+          const nomeTentativa = row['Nome'] 
+            ? (row['Sobrenome'] ? `${row['Nome']} ${row['Sobrenome']}` : row['Nome'])
+            : 'Nome não informado';
+          
           importResults.push({
             line: lineNumber,
-            nome: row.nome_completo || 'Nome não informado',
+            nome: nomeTentativa,
             status: 'error',
             message: error.message || 'Erro ao importar'
           });
