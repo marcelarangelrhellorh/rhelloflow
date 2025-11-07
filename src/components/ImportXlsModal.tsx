@@ -46,7 +46,14 @@ const candidatoSchema = z.object({
   Treinamento: z.string().trim().max(2000).optional(),
   Idiomas: z.string().trim().max(500).optional(),
   'Origem da candidatura': z.string().trim().max(200).optional(),
-});
+  // Campos adicionais do template ATS (opcionais)
+  'Tipo de documento': z.string().trim().optional(),
+  'Número de identificação': z.string().trim().optional(),
+  'Título': z.string().trim().optional(),
+  'Data de Inscrição': z.string().trim().optional(),
+  'Inscrito desde': z.string().trim().optional(),
+  'Histórico de aplicação na empresa': z.string().trim().optional(),
+}).passthrough(); // Permite campos extras não mapeados
 
 interface ImportResult {
   line: number;
@@ -91,6 +98,11 @@ export function ImportXlsModal({ open, onOpenChange, sourceType, vagaId: initial
       {
         'Nome': 'João',
         'Sobrenome': 'Silva',
+        'Tipo de documento': '',
+        'Número de identificação': '12345678900',
+        'Título': 'Gerente Comercial',
+        'Data de Inscrição': '07/11/2025',
+        'Inscrito desde': 'LinkedIn',
         'E-mail': 'joao.silva@example.com',
         'Telefone': '(11) 3333-4444',
         'Celular': '(11) 99999-9999',
@@ -112,7 +124,8 @@ export function ImportXlsModal({ open, onOpenChange, sourceType, vagaId: initial
         'Experiência profissional': '10 anos como gerente comercial...',
         'Treinamento': 'MBA em Gestão Comercial',
         'Idiomas': 'Inglês (fluente), Espanhol (intermediário)',
-        'Origem da candidatura': 'LinkedIn'
+        'Origem da candidatura': 'LinkedIn',
+        'Histórico de aplicação na empresa': ''
       }
     ];
 
@@ -120,11 +133,11 @@ export function ImportXlsModal({ open, onOpenChange, sourceType, vagaId: initial
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Candidatos");
     
-    // Set column widths
+    // Set column widths - ajustado para novos campos do ATS
     const widths = [
-      15, 15, 30, 18, 18, 8, 20, 15, 30, 20, 
-      10, 20, 15, 8, 15, 15, 20, 15, 15, 30,
-      50, 30, 30, 20
+      15, 15, 20, 20, 25, 18, 18, 30, 18, 18, 
+      8, 20, 15, 30, 20, 10, 20, 18, 8, 15,
+      15, 20, 15, 15, 30, 50, 30, 30, 25, 35
     ];
     ws['!cols'] = widths.map(wch => ({ wch }));
 
