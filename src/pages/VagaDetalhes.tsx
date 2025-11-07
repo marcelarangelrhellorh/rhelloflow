@@ -502,7 +502,6 @@ export default function VagaDetalhes() {
               </div>
             </div>
             <div className="flex gap-2">
-              <AnalyzeScorecards vagaId={vaga.id} vagaTitulo={vaga.titulo} />
               <button 
                 onClick={handleGenerateClientLink}
                 disabled={generatingClientLink}
@@ -825,9 +824,12 @@ export default function VagaDetalhes() {
                 </div>}
 
               {/* Active Candidates Table */}
-              <h2 className="text-primary-text-light dark:text-primary-text-dark text-2xl font-bold tracking-tight mt-12 mb-6">
-                Candidatos Ativos
-              </h2>
+              <div className="flex items-center justify-between mt-12 mb-6">
+                <h2 className="text-primary-text-light dark:text-primary-text-dark text-2xl font-bold tracking-tight">
+                  Candidatos Ativos
+                </h2>
+                <AnalyzeScorecards vagaId={vaga.id} vagaTitulo={vaga.titulo} />
+              </div>
 
               <div className="overflow-x-auto bg-white dark:bg-background-dark border border-gray-200 dark:border-secondary-text-light/20 rounded-lg shadow-sm">
                 <table className="w-full text-left">
