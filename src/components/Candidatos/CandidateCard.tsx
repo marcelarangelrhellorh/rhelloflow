@@ -68,25 +68,25 @@ export function CandidateCard({ candidato, onView, onEdit, onDelete, onLinkJob, 
       "hover-lift card-shadow bg-white border border-[#E5E7EB] overflow-hidden rounded-2xl",
       !isAvailable && "opacity-70"
     )}>
-      <CardHeader className="pb-2 pt-4 px-5">
-        <div className="flex items-start justify-between mb-2">
+      <CardHeader className="pb-1 pt-3 px-4">
+        <div className="flex items-start justify-between mb-1">
           <div className="flex items-center gap-2 flex-wrap">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F9EC3F]/20 text-[#00141D] font-bold text-sm">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#F9EC3F]/20 text-[#00141D] font-bold text-sm">
               {getInitials(candidato.nome_completo)}
             </div>
             <div className="flex gap-1 flex-wrap">
               <Badge
                 variant="outline"
-                className={cn("text-xs font-bold rounded-full px-3", statusColors[candidato.status] || statusColors["Banco de Talentos"])}
+                className={cn("text-xs font-bold rounded-full px-2.5 py-0.5", statusColors[candidato.status] || statusColors["Banco de Talentos"])}
               >
                 {statusIcons[candidato.status] || "⚪"} {candidato.status}
               </Badge>
               {candidato.disponibilidade_status === 'disponível' ? (
-                <Badge className="text-xs font-bold rounded-full px-3 bg-[#C9F4C7] text-[#1B5E20] hover:bg-[#C9F4C7]/90">
+                <Badge className="text-xs font-bold rounded-full px-2.5 py-0.5 bg-[#C9F4C7] text-[#1B5E20] hover:bg-[#C9F4C7]/90">
                   ✅ Disponível
                 </Badge>
               ) : candidato.disponibilidade_status === 'não_disponível' ? (
-                <Badge className="text-xs font-bold rounded-full px-3 bg-[#FFD6D6] text-[#B71C1C] hover:bg-[#FFD6D6]/90">
+                <Badge className="text-xs font-bold rounded-full px-2.5 py-0.5 bg-[#FFD6D6] text-[#B71C1C] hover:bg-[#FFD6D6]/90">
                   ❌ Não disponível
                 </Badge>
               ) : null}
@@ -94,12 +94,12 @@ export function CandidateCard({ candidato, onView, onEdit, onDelete, onLinkJob, 
           </div>
         </div>
         
-        <h3 className="text-lg font-bold text-[#00141D] line-clamp-1">
+        <h3 className="text-base font-bold text-[#00141D] line-clamp-1">
           {candidato.nome_completo}
         </h3>
       </CardHeader>
 
-      <CardContent className="space-y-2 px-5 pb-4">
+      <CardContent className="space-y-1.5 px-4 pb-3">
         {(candidato.nivel || candidato.area) && (
           <div className="flex items-center gap-2 text-sm text-[#00141D]/80 font-medium">
             <Briefcase className="h-4 w-4 flex-shrink-0 text-[#00141D]/60" />
@@ -132,7 +132,7 @@ export function CandidateCard({ candidato, onView, onEdit, onDelete, onLinkJob, 
 
         {/* Quick Actions */}
         <TooltipProvider>
-          <div className="flex gap-1 pt-2 border-t border-[#E5E7EB]">
+          <div className="flex gap-1 pt-1.5 mt-1.5 border-t border-[#E5E7EB]">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button

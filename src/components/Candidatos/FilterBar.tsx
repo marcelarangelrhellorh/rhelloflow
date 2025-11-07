@@ -1,6 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search } from "lucide-react";
+import { Search, Briefcase, Building2 } from "lucide-react";
 
 interface FilterBarProps {
   searchTerm: string;
@@ -15,9 +15,15 @@ interface FilterBarProps {
   onNivelChange: (value: string) => void;
   disponibilidadeFilter: string;
   onDisponibilidadeChange: (value: string) => void;
+  vagaFilter: string;
+  onVagaChange: (value: string) => void;
+  clienteFilter: string;
+  onClienteChange: (value: string) => void;
   recrutadores: string[];
   areas: string[];
   niveis: string[];
+  vagas: { id: string; titulo: string }[];
+  clientes: string[];
 }
 
 const statusOptions = [
@@ -46,9 +52,15 @@ export function FilterBar({
   onNivelChange,
   disponibilidadeFilter,
   onDisponibilidadeChange,
+  vagaFilter,
+  onVagaChange,
+  clienteFilter,
+  onClienteChange,
   recrutadores,
   areas,
   niveis,
+  vagas,
+  clientes,
 }: FilterBarProps) {
   return (
     <div className="sticky top-0 z-10 bg-background border-b border-border pb-4">
@@ -125,6 +137,36 @@ export function FilterBar({
             {niveis.map((nivel) => (
               <SelectItem key={nivel} value={nivel}>
                 {nivel}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select value={vagaFilter} onValueChange={onVagaChange}>
+          <SelectTrigger className="w-full sm:w-[180px] bg-background">
+            <Briefcase className="h-4 w-4 mr-2 text-[#36404A]" />
+            <SelectValue placeholder="Vaga" />
+          </SelectTrigger>
+          <SelectContent className="bg-popover z-50">
+            <SelectItem value="all">Todas as vagas</SelectItem>
+            {vagas.map((vaga) => (
+              <SelectItem key={vaga.id} value={vaga.id}>
+                {vaga.titulo}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select value={clienteFilter} onValueChange={onClienteChange}>
+          <SelectTrigger className="w-full sm:w-[180px] bg-background">
+            <Building2 className="h-4 w-4 mr-2 text-[#36404A]" />
+            <SelectValue placeholder="Cliente" />
+          </SelectTrigger>
+          <SelectContent className="bg-popover z-50">
+            <SelectItem value="all">Todos os clientes</SelectItem>
+            {clientes.map((cliente) => (
+              <SelectItem key={cliente} value={cliente}>
+                {cliente}
               </SelectItem>
             ))}
           </SelectContent>

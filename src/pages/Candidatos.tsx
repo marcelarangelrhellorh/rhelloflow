@@ -41,12 +41,15 @@ export default function Candidatos() {
   const [areaFilter, setAreaFilter] = useState<string>("all");
   const [nivelFilter, setNivelFilter] = useState<string>("all");
   const [disponibilidadeFilter, setDisponibilidadeFilter] = useState<string>("disponível");
+  const [vagaFilter, setVagaFilter] = useState<string>("all");
+  const [clienteFilter, setClienteFilter] = useState<string>("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deletionReason, setDeletionReason] = useState("");
   const [requiresApproval, setRequiresApproval] = useState(false);
   const [linkingJobId, setLinkingJobId] = useState<string | null>(null);
   const [importModalOpen, setImportModalOpen] = useState(false);
+  const [vagas, setVagas] = useState<{ id: string; titulo: string; empresa: string }[]>([]);
 
   // Verificar se há filtro de atenção pela URL
   const searchParams = new URLSearchParams(window.location.search);
@@ -54,7 +57,22 @@ export default function Candidatos() {
 
   useEffect(() => {
     loadCandidatos();
+    loadVagas();
   }, []);
+
+  const loadVagas = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("vagas")
+        .select("id, titulo, empresa")
+        .order("titulo");
+
+      if (error) throw error;
+      setVagas(data || []);
+    } catch (error) {
+      console.error("Erro ao carregar vagas:", error);
+    }
+  };
 
   const loadCandidatos = async () => {
     try {
@@ -147,11 +165,17 @@ export default function Candidatos() {
     const matchesNivel = nivelFilter === "all" || candidato.nivel === nivelFilter;
     const matchesDisponibilidade = disponibilidadeFilter === "all" || 
       candidato.disponibilidade_status === disponibilidadeFilter;
+    const matchesVaga = vagaFilter === "all" || candidato.vaga_relacionada_id === vagaFilter;
+    
+    // Match cliente by finding the vaga and checking its empresa
+    const matchesCliente = clienteFilter === "all" || 
+      (candidato.vaga_relacionada_id && 
+       vagas.find(v => v.id === candidato.vaga_relacionada_id)?.empresa === clienteFilter);
     
     // Filtro de atenção: candidatos aguardando feedback do cliente
     const matchesAttention = attentionFilter !== 'awaiting_client_feedback' || candidato.status === 'Entrevistas Solicitante';
     
-    return matchesSearch && matchesStatus && matchesRecrutador && matchesArea && matchesNivel && matchesDisponibilidade && matchesAttention;
+    return matchesSearch && matchesStatus && matchesRecrutador && matchesArea && matchesNivel && matchesDisponibilidade && matchesVaga && matchesCliente && matchesAttention;
   });
 
   const hasActiveFilter = attentionFilter === 'awaiting_client_feedback';
@@ -165,6 +189,7 @@ export default function Candidatos() {
   const recrutadores = Array.from(new Set(candidatos.map(c => c.recrutador).filter(Boolean))) as string[];
   const areas = Array.from(new Set(candidatos.map(c => c.area).filter(Boolean))) as string[];
   const niveis = Array.from(new Set(candidatos.map(c => c.nivel).filter(Boolean))) as string[];
+  const clientes = Array.from(new Set(vagas.map(v => v.empresa).filter(Boolean))) as string[];
 
   // Calculate stats
   const statsByStatus = candidatos.reduce((acc, c) => {
@@ -245,9 +270,15 @@ export default function Candidatos() {
               onNivelChange={setNivelFilter}
               disponibilidadeFilter={disponibilidadeFilter}
               onDisponibilidadeChange={setDisponibilidadeFilter}
+              vagaFilter={vagaFilter}
+              onVagaChange={setVagaFilter}
+              clienteFilter={clienteFilter}
+              onClienteChange={setClienteFilter}
               recrutadores={recrutadores}
               areas={areas}
               niveis={niveis}
+              vagas={vagas}
+              clientes={clientes}
             />
             
             <div className="flex gap-2">
