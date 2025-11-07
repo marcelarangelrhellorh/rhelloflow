@@ -188,7 +188,7 @@ export default function BancoTalentos() {
           <div className="inline-flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-full">
             <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
             <span className="text-base font-medium text-foreground">
-              {filteredCandidatos.length} candidato{filteredCandidatos.length !== 1 ? "s" : ""} disponível{filteredCandidatos.length !== 1 ? "eis" : ""} para realocação
+              {filteredCandidatos.length} candidato{filteredCandidatos.length !== 1 ? "s" : ""} disponível{filteredCandidatos.length !== 1 ? "is" : ""} para realocação
             </span>
           </div>
         </div>
