@@ -354,16 +354,6 @@ export function ImportXlsModal({ open, onOpenChange, sourceType, vagaId: initial
             warnings.push('Cidade não informada');
           }
 
-          // Buscar experiência profissional diretamente do row original (antes da validação)
-          // para capturar textos longos que podem ter sido perdidos
-          const experienciaProfissional = 
-            row['Experiência profissional'] ||
-            row['Experiencia profissional'] || 
-            row['Experiência Profissional'] ||
-            row['Experiencia Profissional'] ||
-            validated['Experiência profissional'] || 
-            null;
-
           const normalized = {
             nome_completo,
             email: validated['E-mail'].toLowerCase().trim(),
@@ -373,7 +363,7 @@ export function ImportXlsModal({ open, onOpenChange, sourceType, vagaId: initial
             cidade,
             estado: estadoNormalized,
             pretensao_salarial,
-            experiencia_profissional: experienciaProfissional ? String(experienciaProfissional).trim() : null,
+            experiencia_profissional: validated['Experiência profissional'] || null,
             idiomas: validated.Idiomas || null,
             origem,
           };
@@ -563,6 +553,7 @@ export function ImportXlsModal({ open, onOpenChange, sourceType, vagaId: initial
 
       // Save import log
       const { error: logError } = await supabase.from('import_logs').insert([{
+        created_by: user.id,
         file_name: file?.name || 'unknown',
         source_type: sourceType,
         vaga_id: vagaId || null,
