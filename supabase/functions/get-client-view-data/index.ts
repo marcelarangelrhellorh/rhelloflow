@@ -64,14 +64,13 @@ Deno.serve(async (req) => {
         id,
         titulo,
         empresa,
-        descricao,
         status,
         status_slug,
         criado_em,
         status_changed_at,
         salario_min,
         salario_max,
-        tipo_contrato,
+        tipo_contratacao,
         modelo_trabalho
       `)
       .eq('id', link.vaga_id)
@@ -119,12 +118,11 @@ Deno.serve(async (req) => {
         vaga: {
           titulo: vaga.titulo,
           empresa: vaga.empresa,
-          descricao: vaga.descricao,
           status: vaga.status,
           statusSlug: vaga.status_slug,
           salarioMin: vaga.salario_min,
           salarioMax: vaga.salario_max,
-          tipoContrato: vaga.tipo_contrato,
+          tipoContratacao: vaga.tipo_contratacao,
           modeloTrabalho: vaga.modelo_trabalho,
           criadoEm: vaga.criado_em,
           candidatosAtivos: candidatosCount || 0,

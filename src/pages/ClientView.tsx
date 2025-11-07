@@ -11,12 +11,11 @@ import { ptBR } from "date-fns/locale";
 interface VagaData {
   titulo: string;
   empresa: string;
-  descricao: string | null;
   status: string;
   statusSlug: string;
   salarioMin: number | null;
   salarioMax: number | null;
-  tipoContrato: string | null;
+  tipoContratacao: string | null;
   modeloTrabalho: string | null;
   criadoEm: string;
   candidatosAtivos: number;
@@ -183,7 +182,7 @@ export default function ClientView() {
           </Card>
         </div>
 
-        {vaga.tipoContrato && (
+        {vaga.tipoContratacao && (
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -191,7 +190,7 @@ export default function ClientView() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <span className="text-xl font-semibold">{vaga.tipoContrato}</span>
+              <span className="text-xl font-semibold">{vaga.tipoContratacao}</span>
             </CardContent>
           </Card>
         )}
