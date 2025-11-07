@@ -14,6 +14,7 @@ export type AuditAction =
   | "CANDIDATE_DELETE"
   | "CANDIDATE_SOFT_DELETE"
   | "CANDIDATE_HARD_DELETE"
+  | "CANDIDATE_IMPORT_XLS"
   | "FILE_DOWNLOAD"
   | "JOB_CREATE"
   | "JOB_UPDATE"
@@ -221,6 +222,36 @@ export async function logCandidateExport(candidateIds: string[], exportType: str
       candidate_ids: candidateIds,
       export_type: exportType,
       count: candidateIds.length,
+    },
+  });
+}
+
+/**
+ * Log candidate XLS import
+ */
+export async function logCandidateImport(
+  fileName: string,
+  sourceType: 'vaga' | 'banco_talentos',
+  vagaId: string | undefined,
+  successCount: number,
+  errorCount: number,
+  totalProcessed: number
+) {
+  return logAuditEvent({
+    action: "CANDIDATE_IMPORT_XLS",
+    resource: { 
+      type: "candidate", 
+      path: "/import",
+      ...(vagaId && { id: vagaId })
+    },
+    payload: {
+      file_name: fileName,
+      source_type: sourceType,
+      vaga_id: vagaId || null,
+      total_processed: totalProcessed,
+      success_count: successCount,
+      error_count: errorCount,
+      success_rate: totalProcessed > 0 ? ((successCount / totalProcessed) * 100).toFixed(2) + '%' : '0%',
     },
   });
 }

@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import * as XLSX from 'xlsx';
 import { z } from 'zod';
+import { logCandidateImport } from "@/lib/auditLog";
 
 interface ImportXlsModalProps {
   open: boolean;
@@ -286,6 +287,16 @@ export function ImportXlsModal({ open, onOpenChange, sourceType, vagaId, onSucce
 
       const successCount = importResults.filter(r => r.status === 'success').length;
       const errorCount = importResults.filter(r => r.status === 'error').length;
+
+      // Log importação na auditoria
+      await logCandidateImport(
+        file.name,
+        sourceType,
+        vagaId,
+        successCount,
+        errorCount,
+        importResults.length
+      );
 
       if (successCount > 0) {
         toast.success(`${successCount} candidato(s) importado(s) com sucesso!`);
