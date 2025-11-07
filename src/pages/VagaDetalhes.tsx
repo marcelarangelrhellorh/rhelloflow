@@ -311,11 +311,10 @@ export default function VagaDetalhes() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       
-      // Atualizar status da vaga com os novos campos
+      // Atualizar status da vaga usando apenas slug e order
       const { error: updateError } = await supabase
         .from("vagas")
         .update({ 
-          status: newStage.name as Database['public']['Enums']['status_vaga'], // Manter compatibilidade
           status_slug: newStage.slug,
           status_order: newStage.order,
           status_changed_at: new Date().toISOString(),

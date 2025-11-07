@@ -206,11 +206,10 @@ export default function FunilVagas() {
         return;
       }
 
-      // Update job status usando slug e order
+      // Update job status usando apenas slug e order (não atualizar enum status)
       const { error: updateError } = await supabase
         .from("vagas")
         .update({
-          status: toStage.slug as any, // Usar slug para compatibilidade com enum
           status_slug: toStage.slug,
           status_order: toStage.order,
           status_changed_at: new Date().toISOString(),
