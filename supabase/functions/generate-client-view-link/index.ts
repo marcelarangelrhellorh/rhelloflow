@@ -73,8 +73,7 @@ Deno.serve(async (req) => {
         JSON.stringify({ 
           linkId: existingLink.id,
           token: existingLink.token,
-          expiresAt: existingLink.expires_at,
-          url: `${new URL(req.url).origin}/client-view/${existingLink.token}`
+          expiresAt: existingLink.expires_at
         }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
@@ -112,8 +111,7 @@ Deno.serve(async (req) => {
       JSON.stringify({ 
         linkId: newLink.id,
         token: newLink.token,
-        expiresAt: newLink.expires_at,
-        url: `${new URL(req.url).origin}/client-view/${newLink.token}`
+        expiresAt: newLink.expires_at
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

@@ -215,7 +215,7 @@ export default function VagaDetalhes() {
       }
 
       // Copy link to clipboard
-      const fullUrl = data.url;
+      const fullUrl = `${window.location.origin}/client-view/${data.token}`;
       await navigator.clipboard.writeText(fullUrl);
 
       toast({
