@@ -86,7 +86,7 @@ export function CandidateCard({ candidato, onView, onEdit, onDelete, onLinkJob, 
             {candidato.vaga_titulo && (
               <Badge
                 variant="outline"
-                className="text-sm font-medium rounded-full px-3 py-1 w-fit bg-blue-50 text-blue-700 border-blue-200"
+                className="text-sm font-medium rounded-full px-3 py-1 w-fit bg-[#faec3e]/30 text-[#00141D] border-[#faec3e]"
               >
                 📋 {candidato.vaga_titulo}
               </Badge>
