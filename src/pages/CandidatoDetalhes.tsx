@@ -144,7 +144,7 @@ export default function CandidatoDetalhes() {
       if (data.vaga_relacionada_id) {
         const {
           data: vagaData
-        } = await supabase.from("vagas").select("id, titulo").eq("id", data.vaga_relacionada_id).single();
+        } = await supabase.from("vagas").select("id, titulo").eq("id", data.vaga_relacionada_id).is("deleted_at", null).single();
         setVaga(vagaData);
       }
     } catch (error) {

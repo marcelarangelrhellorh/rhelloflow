@@ -109,6 +109,7 @@ export function ImportXlsModal({ open, onOpenChange, sourceType, vagaId: initial
       const { data, error } = await supabase
         .from("vagas")
         .select("id, titulo")
+        .is("deleted_at", null)
         .order("titulo");
 
       if (error) throw error;

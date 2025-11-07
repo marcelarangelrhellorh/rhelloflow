@@ -205,7 +205,7 @@ export default function VagaDetalhes() {
           *,
           recrutador_user:users!vagas_recrutador_id_fkey(name),
           cs_user:users!vagas_cs_id_fkey(name)
-        `).eq("id", id).single();
+        `).eq("id", id).is("deleted_at", null).single();
       if (error) throw error;
 
       // Se a vaga foi deletada, redirecionar para lista

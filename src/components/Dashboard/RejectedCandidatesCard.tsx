@@ -91,7 +91,7 @@ export function RejectedCandidatesCard() {
       const vagaIds = [...new Set(candidatesSemWhatsApp.map(c => c.vaga_relacionada_id).filter(Boolean))];
       const {
         data: vagas
-      } = await supabase.from('vagas').select('id, titulo').in('id', vagaIds);
+      } = await supabase.from('vagas').select('id, titulo').is('deleted_at', null).in('id', vagaIds);
       const vagasMap = new Map(vagas?.map(v => [v.id, v.titulo]) || []);
 
       // Montar lista final

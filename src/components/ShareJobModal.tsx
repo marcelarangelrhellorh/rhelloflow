@@ -79,6 +79,7 @@ export function ShareJobModal({ open, onOpenChange, vagaId, vagaTitulo }: ShareJ
         .from('vagas')
         .select('*')
         .eq('id', vagaId)
+        .is('deleted_at', null)
         .single();
 
       if (error) throw error;

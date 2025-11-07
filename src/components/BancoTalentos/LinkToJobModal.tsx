@@ -44,6 +44,7 @@ export function LinkToJobModal({ open, onOpenChange, candidateId, onSuccess }: L
         .select("id, titulo, empresa, status")
         .neq("status", "Concluído")
         .neq("status", "Cancelada")
+        .is("deleted_at", null)
         .order("titulo");
 
       if (error) throw error;

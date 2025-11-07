@@ -63,6 +63,7 @@ export default function Candidatos() {
       const { data, error } = await supabase
         .from("vagas")
         .select("id, titulo, empresa")
+        .is("deleted_at", null)
         .order("titulo");
 
       if (error) throw error;

@@ -80,6 +80,7 @@ export function CandidateModal({ open, onClose, candidatoId, onSave }: Candidate
         .from("vagas")
         .select("id, titulo")
         .not("status", "in", '("Concluído","Cancelada")')
+        .is("deleted_at", null)
         .order("titulo");
 
       if (error) throw error;

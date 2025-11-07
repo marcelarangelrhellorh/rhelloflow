@@ -102,6 +102,7 @@ export const useNotifications = () => {
         .from('vagas')
         .select('recrutador_id, cs_id')
         .eq('id', jobId)
+        .is('deleted_at', null)
         .single();
 
       if (jobError) throw jobError;

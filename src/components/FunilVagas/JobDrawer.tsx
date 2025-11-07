@@ -36,7 +36,7 @@ export function JobDrawer({
       const {
         data: jobData,
         error: jobError
-      } = await supabase.from("vagas").select("*").eq("id", jobId).single();
+      } = await supabase.from("vagas").select("*").eq("id", jobId).is("deleted_at", null).single();
       if (jobError) throw jobError;
 
       // Count candidates

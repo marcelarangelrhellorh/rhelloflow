@@ -157,7 +157,8 @@ export default function Dashboard() {
       const { count: canceladasCount } = await supabase
         .from('vagas')
         .select('*', { count: 'exact', head: true })
-        .eq('status', 'Cancelada');
+        .eq('status', 'Cancelada')
+        .is('deleted_at', null);
 
       setStats({
         vagasAbertas: data.vagas_abertas ?? 0,
