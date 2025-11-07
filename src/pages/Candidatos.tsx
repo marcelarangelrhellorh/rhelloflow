@@ -28,6 +28,7 @@ type Candidato = {
   recrutador: string | null;
   vaga_relacionada_id: string | null;
   disponibilidade_status?: string | null;
+  vaga_titulo?: string | null;
 };
 
 export default function Candidatos() {
@@ -66,8 +67,10 @@ export default function Candidatos() {
 
       if (error) throw error;
       setVagas(data || []);
+      return data || [];
     } catch (error) {
       console.error("Erro ao carregar vagas:", error);
+      return [];
     }
   };
 
@@ -75,11 +78,24 @@ export default function Candidatos() {
     try {
       const { data, error } = await supabase
         .from("candidatos")
-        .select("*")
+        .select(`
+          *,
+          vagas:vaga_relacionada_id (
+            id,
+            titulo
+          )
+        `)
         .order("criado_em", { ascending: false });
 
       if (error) throw error;
-      setCandidatos(data || []);
+      
+      // Enriquecer candidatos com título da vaga
+      const candidatosEnriquecidos = (data || []).map((candidato: any) => ({
+        ...candidato,
+        vaga_titulo: candidato.vagas?.titulo || null
+      }));
+      
+      setCandidatos(candidatosEnriquecidos);
     } catch (error) {
       console.error("Erro ao carregar candidatos:", error);
       toast.error("Erro ao carregar candidatos");

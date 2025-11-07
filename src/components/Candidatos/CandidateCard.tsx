@@ -18,6 +18,7 @@ interface Candidato {
   recrutador: string | null;
   vaga_relacionada_id: string | null;
   disponibilidade_status?: string | null;
+  vaga_titulo?: string | null;
 }
 
 interface CandidateCardProps {
@@ -96,6 +97,15 @@ export function CandidateCard({ candidato, onView, onEdit, onDelete, onLinkJob, 
         >
           {statusIcons[candidato.status] || "⚪"} {candidato.status}
         </Badge>
+        
+        {candidato.vaga_titulo && (
+          <Badge
+            variant="outline"
+            className="text-sm font-medium rounded-full px-3 py-1 w-fit bg-blue-50 text-blue-700 border-blue-200 mt-1"
+          >
+            📋 {candidato.vaga_titulo}
+          </Badge>
+        )}
       </CardHeader>
 
       <CardContent className="space-y-2 px-3 pb-3">
