@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
@@ -32,25 +32,23 @@ type Activity = {
   date: string;
 };
 export default function VagaDetalhes() {
-  const {
-    id
-  } = useParams();
+  const { id } = useParams();
   const navigate = useNavigate();
-  const [vaga, setVaga] = useState<Vaga | null>(null);
-  const [candidatos, setCandidatos] = useState<Candidato[]>([]);
-  const [candidatoContratado, setCandidatoContratado] = useState<Candidato | null>(null);
-  const [eventos, setEventos] = useState<VagaEvento[]>([]);
-  const [loading, setLoading] = useState(true);
+
+  // Custom hooks - centralized data management
+  const { vaga, loading, reload: reloadVaga, updateVaga } = useVaga(id);
+  const { candidatos, candidatoContratado } = useCandidatos(id);
+  const { eventos, reload: reloadEventos } = useVagaEventos(id);
+  const { selectedTags, setSelectedTags, vagaTags, saving: savingTags, saveTags } = useVagaTags(id);
+
+  // Local UI state
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [clientViewManagerOpen, setClientViewManagerOpen] = useState(false);
   const [detailsDrawerOpen, setDetailsDrawerOpen] = useState(false);
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [savingTags, setSavingTags] = useState(false);
-  const [vagaTags, setVagaTags] = useState<Array<{
-    id: string;
-    label: string;
-    category: string;
-  }>>([]);
+
+  const handleGenerateClientLink = () => {
+    setClientViewManagerOpen(true);
+  };
   useEffect(() => {
     if (id) {
       loadVaga();
