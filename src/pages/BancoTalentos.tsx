@@ -43,7 +43,7 @@ export default function BancoTalentos() {
   const [searchTerm, setSearchTerm] = useState("");
   const [areaFilter, setAreaFilter] = useState<string>("all");
   const [nivelFilter, setNivelFilter] = useState<string>("all");
-  const [estadoFilter, setEstadoFilter] = useState<string>("");
+  const [estadoFilter, setEstadoFilter] = useState<string>("all");
   const [avaliacaoFilter, setAvaliacaoFilter] = useState<string>("all");
   const [tagFilter, setTagFilter] = useState<string>("all");
   const [availableTags, setAvailableTags] = useState<Array<{ label: string; value: string }>>([]);
@@ -133,7 +133,7 @@ export default function BancoTalentos() {
       candidato.cidade?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesArea = areaFilter === "all" || candidato.area === areaFilter;
     const matchesNivel = nivelFilter === "all" || candidato.nivel === nivelFilter;
-    const matchesEstado = !estadoFilter || candidato.estado?.toLowerCase().includes(estadoFilter.toLowerCase());
+    const matchesEstado = estadoFilter === "all" || candidato.estado === estadoFilter;
     
     // Filtro de avaliação
     let matchesAvaliacao = true;
@@ -156,7 +156,7 @@ export default function BancoTalentos() {
     return differenceInDays(new Date(), new Date(dateString));
   };
 
-  const hasActiveFilters = areaFilter !== "all" || nivelFilter !== "all" || estadoFilter !== "" || avaliacaoFilter !== "all" || tagFilter !== "all";
+  const hasActiveFilters = areaFilter !== "all" || nivelFilter !== "all" || estadoFilter !== "all" || avaliacaoFilter !== "all" || tagFilter !== "all";
 
   const handleViewProfile = (candidato: Candidato) => {
     setSelectedCandidate(candidato);
@@ -269,12 +269,41 @@ export default function BancoTalentos() {
             </SelectContent>
           </Select>
 
-          <Input
-            placeholder="Filtrar por estado..."
-            value={estadoFilter}
-            onChange={(e) => setEstadoFilter(e.target.value)}
-            className={`w-[180px] ${estadoFilter ? 'border-2 border-primary' : ''}`}
-          />
+          <Select value={estadoFilter} onValueChange={setEstadoFilter}>
+            <SelectTrigger className={`w-[180px] ${estadoFilter !== '' && estadoFilter !== 'all' ? 'border-2 border-primary' : ''}`}>
+              <SelectValue placeholder="Estado" />
+            </SelectTrigger>
+            <SelectContent className="bg-white z-50">
+              <SelectItem value="all">Todos os estados</SelectItem>
+              <SelectItem value="AC">AC - Acre</SelectItem>
+              <SelectItem value="AL">AL - Alagoas</SelectItem>
+              <SelectItem value="AP">AP - Amapá</SelectItem>
+              <SelectItem value="AM">AM - Amazonas</SelectItem>
+              <SelectItem value="BA">BA - Bahia</SelectItem>
+              <SelectItem value="CE">CE - Ceará</SelectItem>
+              <SelectItem value="DF">DF - Distrito Federal</SelectItem>
+              <SelectItem value="ES">ES - Espírito Santo</SelectItem>
+              <SelectItem value="GO">GO - Goiás</SelectItem>
+              <SelectItem value="MA">MA - Maranhão</SelectItem>
+              <SelectItem value="MT">MT - Mato Grosso</SelectItem>
+              <SelectItem value="MS">MS - Mato Grosso do Sul</SelectItem>
+              <SelectItem value="MG">MG - Minas Gerais</SelectItem>
+              <SelectItem value="PA">PA - Pará</SelectItem>
+              <SelectItem value="PB">PB - Paraíba</SelectItem>
+              <SelectItem value="PR">PR - Paraná</SelectItem>
+              <SelectItem value="PE">PE - Pernambuco</SelectItem>
+              <SelectItem value="PI">PI - Piauí</SelectItem>
+              <SelectItem value="RJ">RJ - Rio de Janeiro</SelectItem>
+              <SelectItem value="RN">RN - Rio Grande do Norte</SelectItem>
+              <SelectItem value="RS">RS - Rio Grande do Sul</SelectItem>
+              <SelectItem value="RO">RO - Rondônia</SelectItem>
+              <SelectItem value="RR">RR - Roraima</SelectItem>
+              <SelectItem value="SC">SC - Santa Catarina</SelectItem>
+              <SelectItem value="SP">SP - São Paulo</SelectItem>
+              <SelectItem value="SE">SE - Sergipe</SelectItem>
+              <SelectItem value="TO">TO - Tocantins</SelectItem>
+            </SelectContent>
+          </Select>
 
           <Select value={tagFilter} onValueChange={setTagFilter}>
             <SelectTrigger className={`w-[250px] ${tagFilter !== 'all' ? 'border-2 border-primary' : ''}`}>
@@ -321,7 +350,7 @@ export default function BancoTalentos() {
               onClick={() => {
                 setAreaFilter("all");
                 setNivelFilter("all");
-                setEstadoFilter("");
+                setEstadoFilter("all");
                 setAvaliacaoFilter("all");
                 setTagFilter("all");
                 setSearchTerm("");
