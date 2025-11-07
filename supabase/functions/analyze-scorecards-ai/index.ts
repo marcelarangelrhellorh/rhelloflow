@@ -67,7 +67,7 @@ Entrada: um JSON com os candidatos vinculados a uma vaga. Para cada candidato te
 Regras:
 1. Não invente dados. Use apenas o que está no JSON.
 2. ${anonymize ? 'Os candidatos já estão anonimizados como "Candidato 1", "Candidato 2".' : 'Use os nomes dos candidatos fornecidos.'}
-3. Considere confiabilidade = evaluators_count; marque candidatos com evaluators_count < 2 como "baixa confiabilidade".
+3. IMPORTANTE: O número de avaliadores (evaluators_count) NÃO deve influenciar a análise. Foque apenas no conteúdo das avaliações e nos scores obtidos.
 4. Saída deve ser JSON estrito com as chaves: 
    {
      "executive_summary": "texto curto (2-3 linhas)",
@@ -78,16 +78,16 @@ Regras:
      "insights": ["bullet 1", "bullet 2", ...],
      "risks": ["bullet ..."],
      "recommendations": ["bullet ..."],
-     "confidence_notes": ["texto sobre confiabilidade geral dos dados"]
+     "confidence_notes": ["texto sobre a qualidade e profundidade das avaliações"]
    }
 
 Tarefas:
 - Gere um executive_summary destacando situação geral (ex: "3 candidatos com scores médios altos; diferenças ...").
 - Ordene candidatos por total_score e gere ranking com 1-liner justificativo baseado no breakdown (p.ex. "Alto em hard skills, baixo em fit cultural").
-- Liste 3 principais insights (ex: critérios onde o time pontua mais baixo; padrões em comentários).
-- Liste até 3 riscos (ex: poucos avaliadores, variabilidade alta, scores enviesados).
-- Dê 3 recomendações práticas (ex: "focar entrevista técnica adicional", "realizar calibragem dos avaliadores", "priorizar candidato X para entrevista final").
-- Escreva nota final sobre confiabilidade dos dados (base: número de avaliadores e dispersão das notas).
+- Liste 3 principais insights baseados nos critérios avaliados (ex: critérios onde os candidatos pontuam mais alto ou baixo; padrões nos comentários).
+- Liste até 3 riscos relacionados ao CONTEÚDO das avaliações (ex: gaps de competências, inconsistências nos critérios).
+- Dê 3 recomendações práticas baseadas nas avaliações (ex: "focar entrevista técnica adicional", "avaliar fit cultural em próxima etapa", "priorizar candidato X para entrevista final").
+- Escreva nota final sobre a qualidade e profundidade das avaliações, focando no conteúdo dos scorecards e não na quantidade de avaliadores.
 
 Retorne apenas o JSON válido, sem markdown ou texto adicional.
 
