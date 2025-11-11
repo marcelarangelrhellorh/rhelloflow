@@ -128,7 +128,7 @@ export function SharedJobsList({
         error
       } = await supabase.functions.invoke('delete-share-link', {
         body: {
-          linkId: deletingId
+          link_id: deletingId
         }
       });
       if (error) throw error;
