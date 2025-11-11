@@ -281,7 +281,7 @@ export function VagaCard({
         </div>
 
         {/* Botão Ver Detalhes */}
-        <Button onClick={handleViewDetails} className="w-full text-[#00141D] font-bold rounded-xl transition-all duration-200 hover:scale-[1.03] shadow-sm bg-[#ffcd00]">
+        <Button onClick={handleViewDetails} className="w-full text-[#00141D] font-bold rounded-xl transition-all duration-200 hover:scale-[1.03] shadow-sm bg-[#faec3e]">
           Ver Detalhes
         </Button>
       </CardContent>
