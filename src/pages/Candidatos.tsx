@@ -241,7 +241,7 @@ export default function Candidatos() {
       </div>
 
       {/* Cards Grid */}
-      <div className="px-6 py-4 bg-[t#36404a0f] bg-[#36404a]/[0.06]">
+      <div className="px-6 py-4 bg-[t#36404a0f] bg-[#faec3e]/[0.01]">
         {filteredCandidatos.length === 0 ? <div className="flex flex-col items-center justify-center py-12 text-center">
             <div className="mb-3 rounded-full bg-primary/10 p-4">
               <Plus className="h-10 w-10 text-primary" />
