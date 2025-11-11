@@ -1,6 +1,15 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.78.0';
 import { corsHeaders } from '../_shared/cors.ts';
 
+interface FeedbackTokenData {
+  id: string;
+  vaga_id: string;
+  candidato_id: string;
+  recrutador_id: string;
+  allow_multiple: boolean;
+  expires_at: string;
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -18,14 +27,12 @@ Deno.serve(async (req) => {
       throw new Error('Token não fornecido');
     }
 
-    // Buscar feedback request
-    const { data: request, error: requestError } = await supabase
-      .from('feedback_requests')
-      .select('id, vaga_id, candidato_id, allow_multiple, expires_at')
-      .eq('token', token)
+    // Buscar feedback request usando função segura
+    const { data: requestData, error: requestError } = await supabase
+      .rpc('validate_feedback_token', { p_token: token })
       .single();
 
-    if (requestError || !request) {
+    if (requestError || !requestData) {
       console.error('Token inválido:', requestError);
       return new Response(
         JSON.stringify({ error: 'Link inválido. Peça ao recrutador um novo link.' }),
@@ -35,6 +42,8 @@ Deno.serve(async (req) => {
         }
       );
     }
+
+    const request = requestData as FeedbackTokenData;
 
     // Buscar dados do candidato
     const { data: candidato, error: candidatoError } = await supabase

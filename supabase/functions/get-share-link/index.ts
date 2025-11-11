@@ -6,6 +6,18 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+interface ShareLinkData {
+  id: string;
+  vaga_id: string;
+  token: string;
+  active: boolean;
+  expires_at: string | null;
+  created_at: string;
+  share_config: any;
+  max_submissions: number | null;
+  submissions_count: number;
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -26,41 +38,58 @@ serve(async (req) => {
       );
     }
 
-    // Get share link with vaga details
-    const { data: shareLink, error: linkError } = await supabase
-      .from('share_links')
-      .select(`
-        *,
-        vagas (
-          id,
-          titulo,
-          empresa,
-          confidencial,
-          responsabilidades,
-          requisitos_obrigatorios,
-          requisitos_desejaveis,
-          beneficios,
-          beneficios_outros,
-          modelo_trabalho,
-          horario_inicio,
-          horario_fim,
-          dias_semana,
-          salario_min,
-          salario_max,
-          salario_modalidade,
-          observacoes,
-          prioridade,
-          complexidade,
-          criado_em
-        )
-      `)
-      .eq('token', token)
+    // Get share link usando função segura
+    const { data: shareLinkData, error: linkError } = await supabase
+      .rpc('get_share_link_by_token', { p_token: token })
       .single();
 
-    if (linkError || !shareLink) {
+    if (linkError || !shareLinkData) {
       return new Response(
         JSON.stringify({ error: 'Link inválido' }), 
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const shareLink = shareLinkData as ShareLinkData;
+
+    // Buscar detalhes da vaga separadamente (usando service role para acesso)
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    );
+
+    const { data: vaga, error: vagaError } = await supabaseAdmin
+      .from('vagas')
+      .select(`
+        id,
+        titulo,
+        empresa,
+        confidencial,
+        responsabilidades,
+        requisitos_obrigatorios,
+        requisitos_desejaveis,
+        beneficios,
+        beneficios_outros,
+        modelo_trabalho,
+        horario_inicio,
+        horario_fim,
+        dias_semana,
+        salario_min,
+        salario_max,
+        salario_modalidade,
+        observacoes,
+        prioridade,
+        complexidade,
+        criado_em
+      `)
+      .eq('id', shareLink.vaga_id)
+      .single();
+
+    if (vagaError) {
+      console.error('Error fetching vaga:', vagaError);
+      return new Response(
+        JSON.stringify({ error: 'Erro ao buscar vaga' }), 
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -100,11 +129,8 @@ serve(async (req) => {
       user_agent: req.headers.get('user-agent'),
     });
 
-    // Return sanitized data (no password_hash)
-    const { password_hash, ...safeLinkData } = shareLink;
-
     // Ensure share_config has default values if not set
-    const finalShareConfig = safeLinkData.share_config || {
+    const finalShareConfig = shareLink.share_config || {
       exibir_sobre: true,
       exibir_responsabilidades: true,
       exibir_requisitos: true,
@@ -115,11 +141,13 @@ serve(async (req) => {
       exibir_observacoes: true,
     };
 
+    // Return response with vaga data
     return new Response(
       JSON.stringify({ 
-        ...safeLinkData,
+        ...shareLink,
+        vagas: vaga,
         share_config: finalShareConfig,
-        requires_password: !!password_hash 
+        requires_password: false // Password hash is not returned by secure function
       }), 
       { 
         status: 200, 

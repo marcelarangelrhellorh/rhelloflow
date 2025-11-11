@@ -2846,6 +2846,20 @@ export type Database = {
         Returns: string
       }
       get_latest_audit_event_hash: { Args: never; Returns: string }
+      get_share_link_by_token: {
+        Args: { p_token: string }
+        Returns: {
+          active: boolean
+          created_at: string
+          expires_at: string
+          id: string
+          max_submissions: number
+          share_config: Json
+          submissions_count: number
+          token: string
+          vaga_id: string
+        }[]
+      }
       get_user_role: { Args: { user_id: string }; Returns: string }
       get_user_roles: {
         Args: { user_id: string }
@@ -2873,6 +2887,17 @@ export type Database = {
       map_legacy_status_to_slug: {
         Args: { old_status: string }
         Returns: string
+      }
+      validate_feedback_token: {
+        Args: { p_token: string }
+        Returns: {
+          allow_multiple: boolean
+          candidato_id: string
+          expires_at: string
+          id: string
+          recrutador_id: string
+          vaga_id: string
+        }[]
       }
       verify_audit_chain: {
         Args: { p_from_timestamp?: string; p_to_timestamp?: string }
