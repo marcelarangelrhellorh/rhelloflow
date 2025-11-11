@@ -226,7 +226,7 @@ export function VagaCard({
               <Briefcase className="h-4 w-4 text-[#00141D]/80" />
             </div>
             <div className="min-w-0">
-              <p className="text-xs text-[#00141D]/60">Cliente</p>
+              <p className="text-[#00141D]/60 text-sm font-semibold">Cliente</p>
               <p className="text-sm font-semibold truncate text-[#00141D]">{vaga.empresa}</p>
             </div>
           </div>
@@ -236,7 +236,7 @@ export function VagaCard({
               <User className="h-4 w-4 text-[#00141D]" />
             </div>
             <div className="min-w-0">
-              <p className="text-xs text-[#00141D]/60">Recrutador</p>
+              <p className="text-[#00141D]/60 text-sm font-semibold">Recrutador</p>
               <p className="text-sm font-semibold truncate text-[#00141D]">{recrutadorName || "Não atribuído"}</p>
             </div>
           </div>
@@ -244,7 +244,7 @@ export function VagaCard({
 
         {/* Salary Range */}
         {(vaga.salario_min || vaga.salario_max || vaga.salario_modalidade) && <div className="pt-2 border-t border-[#E5E7EB]">
-            <p className="text-xs text-[#00141D]/60 mb-1">Faixa Salarial</p>
+            <p className="text-[#00141D]/60 mb-1 text-sm font-semibold">Faixa Salarial</p>
             <p className="text-sm font-bold text-[#00141D]">
               {formatSalaryRange(vaga.salario_min, vaga.salario_max, vaga.salario_modalidade)}
             </p>
