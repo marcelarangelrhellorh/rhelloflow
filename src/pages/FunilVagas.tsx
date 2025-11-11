@@ -285,7 +285,7 @@ export default function FunilVagas() {
                 {totalJobs} {totalJobs === 1 ? 'vaga' : 'vagas'} no pipeline
               </p>
             </div>
-            <Button onClick={() => navigate("/vagas/nova")} className="h-9 rounded-lg bg-[#FFCD00] hover:bg-[#FAEC3E] text-[#00141D] font-medium">
+            <Button onClick={() => navigate("/vagas/nova")} className="h-9 rounded-lg bg-[#FFCD00] hover:bg-[#FAEC3E] text-[#00141D] font-semibold">
               <Plus className="mr-2 h-4 w-4" />
               Nova Vaga
             </Button>
