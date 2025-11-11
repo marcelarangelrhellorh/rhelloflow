@@ -18,6 +18,7 @@ const menuItems = [
   { title: "Banco de Talentos", url: "/banco-talentos" },
   { title: "Scorecards", url: "/scorecards" },
   { title: "Estudo de Mercado", url: "/estudo-mercado" },
+  { title: "Relatórios", url: "/relatorios" },
 ];
 
 export function AppNavbar() {
