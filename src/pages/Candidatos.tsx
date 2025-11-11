@@ -14,7 +14,6 @@ import { LinkToJobModal } from "@/components/BancoTalentos/LinkToJobModal";
 import { ImportXlsModal } from "@/components/ImportXlsModal";
 import { handleDelete as performDeletion } from "@/lib/deletionUtils";
 import { useUserRole } from "@/hooks/useUserRole";
-
 type Candidato = {
   id: string;
   nome_completo: string;
@@ -30,10 +29,11 @@ type Candidato = {
   disponibilidade_status?: string | null;
   vaga_titulo?: string | null;
 };
-
 export default function Candidatos() {
   const navigate = useNavigate();
-  const { isAdmin } = useUserRole();
+  const {
+    isAdmin
+  } = useUserRole();
   const [candidatos, setCandidatos] = useState<Candidato[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -47,25 +47,25 @@ export default function Candidatos() {
   const [requiresApproval, setRequiresApproval] = useState(false);
   const [linkingJobId, setLinkingJobId] = useState<string | null>(null);
   const [importModalOpen, setImportModalOpen] = useState(false);
-  const [vagas, setVagas] = useState<{ id: string; titulo: string; empresa: string }[]>([]);
+  const [vagas, setVagas] = useState<{
+    id: string;
+    titulo: string;
+    empresa: string;
+  }[]>([]);
 
   // Verificar se há filtro de atenção pela URL
   const searchParams = new URLSearchParams(window.location.search);
   const attentionFilter = searchParams.get('attention');
-
   useEffect(() => {
     loadCandidatos();
     loadVagas();
   }, []);
-
   const loadVagas = async () => {
     try {
-      const { data, error } = await supabase
-        .from("vagas")
-        .select("id, titulo, empresa")
-        .is("deleted_at", null)
-        .order("titulo");
-
+      const {
+        data,
+        error
+      } = await supabase.from("vagas").select("id, titulo, empresa").is("deleted_at", null).order("titulo");
       if (error) throw error;
       setVagas(data || []);
       return data || [];
@@ -74,28 +74,27 @@ export default function Candidatos() {
       return [];
     }
   };
-
   const loadCandidatos = async () => {
     try {
-      const { data, error } = await supabase
-        .from("candidatos")
-        .select(`
+      const {
+        data,
+        error
+      } = await supabase.from("candidatos").select(`
           *,
           vagas:vaga_relacionada_id (
             id,
             titulo
           )
-        `)
-        .order("criado_em", { ascending: false });
-
+        `).order("criado_em", {
+        ascending: false
+      });
       if (error) throw error;
-      
+
       // Enriquecer candidatos com título da vaga
       const candidatosEnriquecidos = (data || []).map((candidato: any) => ({
         ...candidato,
         vaga_titulo: candidato.vagas?.titulo || null
       }));
-      
       setCandidatos(candidatosEnriquecidos);
     } catch (error) {
       console.error("Erro ao carregar candidatos:", error);
@@ -104,7 +103,6 @@ export default function Candidatos() {
       setLoading(false);
     }
   };
-
   const handleDelete = async () => {
     if (!deletingId) return;
 
@@ -113,7 +111,6 @@ export default function Candidatos() {
       toast.error("❌ Por favor, informe o motivo da exclusão");
       return;
     }
-
     try {
       // Find the candidate to get their data for snapshot
       const candidato = candidatos.find(c => c.id === deletingId);
@@ -130,31 +127,21 @@ export default function Candidatos() {
         telefone: candidato.telefone,
         status: candidato.status,
         recrutador: candidato.recrutador,
-        vaga_relacionada_id: candidato.vaga_relacionada_id,
+        vaga_relacionada_id: candidato.vaga_relacionada_id
       };
-
-      const result = await performDeletion(
-        "candidate",
-        deletingId,
-        candidato.nome_completo,
-        deletionReason.trim() || (isAdmin ? "Exclusão por admin sem motivo especificado" : ""),
-        preSnapshot
-      );
-
+      const result = await performDeletion("candidate", deletingId, candidato.nome_completo, deletionReason.trim() || (isAdmin ? "Exclusão por admin sem motivo especificado" : ""), preSnapshot);
       if (!result.success) {
         toast.error(`❌ ${result.error || "Erro ao excluir candidato"}`);
         return;
       }
-
       if (result.requiresApproval) {
         setRequiresApproval(true);
         toast.info("⚠️ Este candidato possui processos ativos. Solicitação de exclusão enviada para aprovação de admin.", {
-          duration: 5000,
+          duration: 5000
         });
         setDeletingId(null);
         return;
       }
-
       toast.success("✅ Candidato marcado para exclusão com sucesso");
       loadCandidatos();
     } catch (error) {
@@ -166,31 +153,20 @@ export default function Candidatos() {
       setRequiresApproval(false);
     }
   };
-
-  const filteredCandidatos = candidatos.filter((candidato) => {
-    const matchesSearch = 
-      candidato.nome_completo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      candidato.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (candidato.cidade && candidato.cidade.toLowerCase().includes(searchTerm.toLowerCase()));
-    
+  const filteredCandidatos = candidatos.filter(candidato => {
+    const matchesSearch = candidato.nome_completo.toLowerCase().includes(searchTerm.toLowerCase()) || candidato.email.toLowerCase().includes(searchTerm.toLowerCase()) || candidato.cidade && candidato.cidade.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || candidato.status === statusFilter;
-    const matchesDisponibilidade = disponibilidadeFilter === "all" || 
-      candidato.disponibilidade_status === disponibilidadeFilter;
+    const matchesDisponibilidade = disponibilidadeFilter === "all" || candidato.disponibilidade_status === disponibilidadeFilter;
     const matchesVaga = vagaFilter === "all" || candidato.vaga_relacionada_id === vagaFilter;
-    
+
     // Match cliente by finding the vaga and checking its empresa
-    const matchesCliente = clienteFilter === "all" || 
-      (candidato.vaga_relacionada_id && 
-       vagas.find(v => v.id === candidato.vaga_relacionada_id)?.empresa === clienteFilter);
-    
+    const matchesCliente = clienteFilter === "all" || candidato.vaga_relacionada_id && vagas.find(v => v.id === candidato.vaga_relacionada_id)?.empresa === clienteFilter;
+
     // Filtro de atenção: candidatos aguardando feedback do cliente
     const matchesAttention = attentionFilter !== 'awaiting_client_feedback' || candidato.status === 'Entrevistas Solicitante';
-    
     return matchesSearch && matchesStatus && matchesDisponibilidade && matchesVaga && matchesCliente && matchesAttention;
   });
-
   const hasActiveFilter = attentionFilter === 'awaiting_client_feedback';
-  
   const clearAttentionFilter = () => {
     navigate('/candidatos');
     window.location.reload();
@@ -204,17 +180,16 @@ export default function Candidatos() {
     acc[c.status] = (acc[c.status] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
-
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: '#FFFBF0' }}>
+    return <div className="flex min-h-screen items-center justify-center" style={{
+      backgroundColor: '#FFFBF0'
+    }}>
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="min-h-screen" style={{ backgroundColor: '#FFFBF0' }}>
+  return <div className="min-h-screen" style={{
+    backgroundColor: '#FFFBF0'
+  }}>
       {/* Header - Fixed */}
       <div className="sticky top-0 z-20 bg-background border-b border-border shadow-sm">
         <div className="px-6 py-4">
@@ -224,18 +199,11 @@ export default function Candidatos() {
               <p className="text-base text-muted-foreground">Gerencie todos os candidatos</p>
             </div>
             <div className="flex gap-2">
-              <Button 
-                onClick={() => navigate('/candidatos/novo')}
-                className="bg-[#F9EC3F] hover:bg-[#E5D72E] text-[#00141D] font-bold"
-              >
+              <Button onClick={() => navigate('/candidatos/novo')} className="bg-[#F9EC3F] hover:bg-[#E5D72E] text-[#00141D] font-bold">
                 <Plus className="mr-2 h-4 w-4" />
                 Novo Candidato
               </Button>
-              <Button 
-                onClick={() => setImportModalOpen(true)}
-                variant="outline"
-                className="font-bold"
-              >
+              <Button onClick={() => setImportModalOpen(true)} variant="outline" className="font-bold">
                 <FileSpreadsheet className="mr-2 h-4 w-4" />
                 Importar XLS
               </Button>
@@ -246,55 +214,25 @@ export default function Candidatos() {
           <StatsHeader total={candidatos.length} byStatus={statsByStatus} />
 
           {/* Filter chip */}
-          {hasActiveFilter && (
-            <div className="mt-3 flex items-center gap-2 p-2 bg-purple/10 border border-purple/20 rounded-lg">
+          {hasActiveFilter && <div className="mt-3 flex items-center gap-2 p-2 bg-purple/10 border border-purple/20 rounded-lg">
               <MessageSquare className="h-4 w-4 text-purple" />
               <span className="text-base font-medium">
                 Aguardando feedback do cliente
               </span>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={clearAttentionFilter}
-                className="ml-auto"
-              >
+              <Button variant="ghost" size="sm" onClick={clearAttentionFilter} className="ml-auto">
                 <X className="h-4 w-4" />
               </Button>
-            </div>
-          )}
+            </div>}
 
           {/* Filters */}
           <div className="mt-3 flex items-center gap-2">
-            <FilterBar
-              searchTerm={searchTerm}
-              onSearchChange={setSearchTerm}
-              statusFilter={statusFilter}
-              onStatusChange={setStatusFilter}
-              disponibilidadeFilter={disponibilidadeFilter}
-              onDisponibilidadeChange={setDisponibilidadeFilter}
-              vagaFilter={vagaFilter}
-              onVagaChange={setVagaFilter}
-              clienteFilter={clienteFilter}
-              onClienteChange={setClienteFilter}
-              vagas={vagas}
-              clientes={clientes}
-            />
+            <FilterBar searchTerm={searchTerm} onSearchChange={setSearchTerm} statusFilter={statusFilter} onStatusChange={setStatusFilter} disponibilidadeFilter={disponibilidadeFilter} onDisponibilidadeChange={setDisponibilidadeFilter} vagaFilter={vagaFilter} onVagaChange={setVagaFilter} clienteFilter={clienteFilter} onClienteChange={setClienteFilter} vagas={vagas} clientes={clientes} />
             
             <div className="flex gap-2">
-              <Button
-                variant={viewMode === "grid" ? "default" : "outline"}
-                size="icon"
-                onClick={() => setViewMode("grid")}
-                className={viewMode === "grid" ? "bg-[#F9EC3F] text-[#00141D] hover:bg-[#E5D72E]" : ""}
-              >
+              <Button variant={viewMode === "grid" ? "default" : "outline"} size="icon" onClick={() => setViewMode("grid")} className={viewMode === "grid" ? "bg-[#F9EC3F] text-[#00141D] hover:bg-[#E5D72E]" : ""}>
                 <Grid3x3 className="h-4 w-4" />
               </Button>
-              <Button
-                variant={viewMode === "list" ? "default" : "outline"}
-                size="icon"
-                onClick={() => setViewMode("list")}
-                className={viewMode === "list" ? "bg-[#F9EC3F] text-[#00141D] hover:bg-[#E5D72E]" : ""}
-              >
+              <Button variant={viewMode === "list" ? "default" : "outline"} size="icon" onClick={() => setViewMode("list")} className={viewMode === "list" ? "bg-[#F9EC3F] text-[#00141D] hover:bg-[#E5D72E]" : ""}>
                 <List className="h-4 w-4" />
               </Button>
             </div>
@@ -303,9 +241,8 @@ export default function Candidatos() {
       </div>
 
       {/* Cards Grid */}
-      <div className="px-6 py-4">
-        {filteredCandidatos.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
+      <div className="px-6 py-4 bg-[t#36404a0f] bg-[#36404a]/[0.06]">
+        {filteredCandidatos.length === 0 ? <div className="flex flex-col items-center justify-center py-12 text-center">
             <div className="mb-3 rounded-full bg-primary/10 p-4">
               <Plus className="h-10 w-10 text-primary" />
             </div>
@@ -315,43 +252,22 @@ export default function Candidatos() {
             <p className="text-base text-muted-foreground mb-4 max-w-md">
               💛 Adicione um novo clicando em "+ Novo Candidato"
             </p>
-            <Button 
-              onClick={() => navigate('/candidatos/novo')}
-              className="bg-[#F9EC3F] hover:bg-[#E5D72E] text-[#00141D] font-bold"
-            >
+            <Button onClick={() => navigate('/candidatos/novo')} className="bg-[#F9EC3F] hover:bg-[#E5D72E] text-[#00141D] font-bold">
               <Plus className="mr-2 h-4 w-4" />
               Novo Candidato
             </Button>
-          </div>
-        ) : (
-          <div className={viewMode === "grid" ? "grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "space-y-4"}>
-            {filteredCandidatos.map((candidato) => (
-              <CandidateCard
-                key={candidato.id}
-                candidato={candidato}
-                onView={() => navigate(`/candidatos/${candidato.id}`)}
-                onEdit={() => navigate(`/candidatos/${candidato.id}/editar`)}
-                onDelete={() => setDeletingId(candidato.id)}
-                onLinkJob={() => setLinkingJobId(candidato.id)}
-                viewMode={viewMode}
-              />
-            ))}
-          </div>
-        )}
+          </div> : <div className={viewMode === "grid" ? "grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "space-y-4"}>
+            {filteredCandidatos.map(candidato => <CandidateCard key={candidato.id} candidato={candidato} onView={() => navigate(`/candidatos/${candidato.id}`)} onEdit={() => navigate(`/candidatos/${candidato.id}/editar`)} onDelete={() => setDeletingId(candidato.id)} onLinkJob={() => setLinkingJobId(candidato.id)} viewMode={viewMode} />)}
+          </div>}
       </div>
 
       {/* Modals */}
-      <LinkToJobModal
-        open={!!linkingJobId}
-        onOpenChange={() => setLinkingJobId(null)}
-        candidateId={linkingJobId || ""}
-        onSuccess={loadCandidatos}
-      />
+      <LinkToJobModal open={!!linkingJobId} onOpenChange={() => setLinkingJobId(null)} candidateId={linkingJobId || ""} onSuccess={loadCandidatos} />
 
       <AlertDialog open={!!deletingId} onOpenChange={() => {
-        setDeletingId(null);
-        setDeletionReason("");
-      }}>
+      setDeletingId(null);
+      setDeletionReason("");
+    }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
@@ -373,41 +289,23 @@ export default function Candidatos() {
               <Label htmlFor="candidate-deletion-reason" className="font-medium">
                 Motivo da exclusão {!isAdmin && "*"}
               </Label>
-              {isAdmin && (
-                <p className="text-xs text-muted-foreground">
+              {isAdmin && <p className="text-xs text-muted-foreground">
                   Como admin, você pode excluir sem especificar um motivo
-                </p>
-              )}
-              <Input
-                id="candidate-deletion-reason"
-                placeholder="Ex: Candidato desistiu, duplicado, contratado em outro processo..."
-                value={deletionReason}
-                onChange={(e) => setDeletionReason(e.target.value)}
-              />
+                </p>}
+              <Input id="candidate-deletion-reason" placeholder="Ex: Candidato desistiu, duplicado, contratado em outro processo..." value={deletionReason} onChange={e => setDeletionReason(e.target.value)} />
             </div>
           </div>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDelete} 
-              disabled={!isAdmin && !deletionReason.trim()}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 disabled:opacity-50"
-            >
+            <AlertDialogAction onClick={handleDelete} disabled={!isAdmin && !deletionReason.trim()} className="bg-destructive text-destructive-foreground hover:bg-destructive/90 disabled:opacity-50">
               Confirmar Exclusão
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      <ImportXlsModal
-        open={importModalOpen}
-        onOpenChange={setImportModalOpen}
-        sourceType="vaga"
-        showVagaSelector={true}
-        onSuccess={() => {
-          loadCandidatos();
-        }}
-      />
-    </div>
-  );
+      <ImportXlsModal open={importModalOpen} onOpenChange={setImportModalOpen} sourceType="vaga" showVagaSelector={true} onSuccess={() => {
+      loadCandidatos();
+    }} />
+    </div>;
 }
