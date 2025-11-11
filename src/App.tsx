@@ -41,7 +41,7 @@ const App = () => <QueryClientProvider client={queryClient}>
           <Route path="/solicitar-vaga" element={<PublicVagaForm />} />
           <Route path="/share/:token" element={<ShareJob />} />
           <Route path="/client-view/:token" element={<ClientView />} />
-          <Route path="/feedback/:token" element={<FeedbackCliente />} />
+          <Route path="/feedback/:token" element={<FeedbackCliente />} className="bg-[#faec3e]/[0.01]" />
           <Route element={<Layout />}>
             <Route path="/" element={<Dashboard />} className="bg-[t#] bg-[#faec3e]/[0.01]" />
             <Route path="/vagas" element={<Vagas />} />
