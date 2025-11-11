@@ -265,15 +265,11 @@ export default function FunilVagas() {
     return acc;
   }, {} as Record<string, number>);
   if (loading) {
-    return <div className="flex min-h-screen items-center justify-center" style={{
-      backgroundColor: '#FFFBF0'
-    }}>
+    return <div className="flex min-h-screen items-center justify-center bg-funil-vagas-bg">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
       </div>;
   }
-  return <div className="min-h-screen" style={{
-    backgroundColor: '#FFFBF0'
-  }}>
+  return <div className="min-h-screen bg-funil-vagas-bg">
       {/* Header - Compact */}
       <div className="sticky top-0 z-20 bg-white border-b border-gray-200 shadow-sm">
         <div className="px-6 py-4 space-y-3">
