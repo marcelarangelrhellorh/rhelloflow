@@ -257,8 +257,9 @@ export default function Dashboard() {
           <div className="flex flex-wrap gap-3">
             
             
-            <Button onClick={copyPublicFormLink} className="font-bold transition-all duration-150 rounded-xl h-11 px-6 text-slate-950 bg-[s#] bg-[#faec3e]">​Formulário de Vaga<Share2 className="mr-2 h-5 w-5" />
-              Compartilhar Formulário
+            <Button onClick={copyPublicFormLink} className="font-bold transition-all duration-150 rounded-xl h-11 px-6 text-slate-950 bg-[#faec3e]">
+              <Share2 className="mr-2 h-5 w-5" />
+              Formulário de vaga
             </Button>
           </div>
         </div>

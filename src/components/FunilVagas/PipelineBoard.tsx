@@ -85,11 +85,11 @@ export function PipelineBoard({
   };
   const activeJob = activeId ? jobs.find(j => j.id === activeId) : null;
   const activeStage = activeJob ? stages.find(s => s.slug === activeJob.status_slug) : null;
-  return <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd} className="bg-[n#36404a0f] bg-[#36404a]/[0.06]">
-      <div className="flex gap-4" style={{
+  return <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+      <div className="flex gap-4 bg-[#36404a]/[0.06]" style={{
       minWidth: 'max-content'
     }}>
-        {stages.map(stage => <Column key={stage.id} stage={stage} jobs={getJobsByStage(stage.slug)} progresso={progresso} onJobClick={onJobClick} onJobEdit={onJobEdit} onJobMoveStage={onJobMoveStage} onJobDuplicate={onJobDuplicate} onJobClose={onJobClose} className="bg-zinc-50" />)}
+        {stages.map(stage => <Column key={stage.id} stage={stage} jobs={getJobsByStage(stage.slug)} progresso={progresso} onJobClick={onJobClick} onJobEdit={onJobEdit} onJobMoveStage={onJobMoveStage} onJobDuplicate={onJobDuplicate} onJobClose={onJobClose} />)}
       </div>
 
       <DragOverlay>
