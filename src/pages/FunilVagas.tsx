@@ -301,7 +301,7 @@ export default function FunilVagas() {
 
       {/* Pipeline Board */}
       <div className="overflow-x-auto pb-4">
-        <div className="px-6 py-4 bg-[t#36404a0f] bg-[#36404a]/[0.06]">
+        <div className="px-6 py-4 bg-[t#36404a0f] bg-[#fdf9ee]">
           <PipelineBoard jobs={filteredJobs} stages={JOB_STAGES} progresso={calculateProgress} onJobMove={handleJobMove} onJobClick={handleJobClick} onJobEdit={handleJobEdit} onJobMoveStage={handleJobMoveStage} onJobDuplicate={handleJobDuplicate} onJobClose={handleJobClose} />
         </div>
       </div>

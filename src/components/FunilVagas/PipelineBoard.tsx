@@ -85,7 +85,7 @@ export function PipelineBoard({
   };
   const activeJob = activeId ? jobs.find(j => j.id === activeId) : null;
   const activeStage = activeJob ? stages.find(s => s.slug === activeJob.status_slug) : null;
-  return <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+  return <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd} className="bg-[g#] bg-[#fdf9ee]">
       <div className="flex gap-4 bg-[#36404a]/[0.06]" style={{
       minWidth: 'max-content'
     }}>
