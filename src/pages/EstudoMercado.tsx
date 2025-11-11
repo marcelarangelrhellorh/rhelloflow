@@ -417,7 +417,7 @@ export default function EstudoMercado() {
             </div>
           </div>
 
-          <Button onClick={handleGerarEstudo} disabled={loading} className="w-full" size="lg">
+          <Button onClick={handleGerarEstudo} disabled={loading} size="lg" className="w-full font-semibold">
             {loading ? <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Gerando estudo...
