@@ -153,7 +153,7 @@ export function CandidateTagsCard({
             <TagIcon className="h-5 w-5" />
             <CardTitle>Tags</CardTitle>
           </div>
-          <Button size="sm" onClick={() => setAddModalOpen(true)}>
+          <Button size="sm" onClick={() => setAddModalOpen(true)} className="font-semibold">
             <Plus className="h-4 w-4 mr-1" />
             Adicionar Tags
           </Button>

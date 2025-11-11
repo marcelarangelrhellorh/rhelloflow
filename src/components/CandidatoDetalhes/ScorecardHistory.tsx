@@ -8,11 +8,9 @@ import { Star, User, Calendar, Target } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
-
 interface ScorecardHistoryProps {
   candidateId: string;
 }
-
 interface Scorecard {
   id: string;
   template_name: string;
@@ -31,30 +29,41 @@ interface Scorecard {
     notes: string | null;
   }>;
 }
-
 const categoryLabels: Record<string, string> = {
   hard_skills: "Hard Skills",
   soft_skills: "Soft Skills",
   experiencia: "Experiência",
   fit_cultural: "Fit Cultural",
-  outros: "Outros",
+  outros: "Outros"
 };
-
 const categoryColors: Record<string, string> = {
   hard_skills: "bg-blue-100 text-blue-800 border-blue-200",
   soft_skills: "bg-green-100 text-green-800 border-green-200",
   experiencia: "bg-purple-100 text-purple-800 border-purple-200",
   fit_cultural: "bg-orange-100 text-orange-800 border-orange-200",
-  outros: "bg-gray-100 text-gray-800 border-gray-200",
+  outros: "bg-gray-100 text-gray-800 border-gray-200"
 };
-
-const recommendationConfig: Record<string, { label: string; color: string }> = {
-  strong_yes: { label: "Fortemente Recomendado", color: "bg-green-600 text-white" },
-  yes: { label: "Recomendado", color: "bg-green-400 text-white" },
-  maybe: { label: "Talvez", color: "bg-yellow-500 text-white" },
-  no: { label: "Não Recomendado", color: "bg-red-500 text-white" },
+const recommendationConfig: Record<string, {
+  label: string;
+  color: string;
+}> = {
+  strong_yes: {
+    label: "Fortemente Recomendado",
+    color: "bg-green-600 text-white"
+  },
+  yes: {
+    label: "Recomendado",
+    color: "bg-green-400 text-white"
+  },
+  maybe: {
+    label: "Talvez",
+    color: "bg-yellow-500 text-white"
+  },
+  no: {
+    label: "Não Recomendado",
+    color: "bg-red-500 text-white"
+  }
 };
-
 function getInitials(name: string | undefined): string {
   if (!name || name.trim().length === 0) {
     return "??";
@@ -65,47 +74,44 @@ function getInitials(name: string | undefined): string {
   }
   return parts[0].substring(0, 2).toUpperCase();
 }
-
-export function ScorecardHistory({ candidateId }: ScorecardHistoryProps) {
+export function ScorecardHistory({
+  candidateId
+}: ScorecardHistoryProps) {
   const [scorecards, setScorecards] = useState<Scorecard[]>([]);
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     loadScorecards();
   }, [candidateId]);
-
   async function loadScorecards() {
     try {
       setLoading(true);
 
       // Load scorecards with related data
-      const { data: scorecardsData, error: scorecardsError } = await supabase
-        .from("candidate_scorecards")
-        .select(`
+      const {
+        data: scorecardsData,
+        error: scorecardsError
+      } = await supabase.from("candidate_scorecards").select(`
           *,
           scorecard_templates!candidate_scorecards_template_id_fkey(name),
           vagas(titulo)
-        `)
-        .eq("candidate_id", candidateId)
-        .order("created_at", { ascending: false });
-
+        `).eq("candidate_id", candidateId).order("created_at", {
+        ascending: false
+      });
       if (scorecardsError) throw scorecardsError;
 
       // Get evaluator names separately
       const userIds = [...new Set((scorecardsData || []).map(s => s.evaluator_id))];
-      const { data: usersData } = await supabase
-        .from("users")
-        .select("id, name")
-        .in("id", userIds);
-
+      const {
+        data: usersData
+      } = await supabase.from("users").select("id, name").in("id", userIds);
       const usersMap = new Map(usersData?.map(u => [u.id, u.name]) || []);
 
       // Load evaluations for each scorecard
-      const scorecardsWithEvaluations = await Promise.all(
-        (scorecardsData || []).map(async (scorecard) => {
-          const { data: evaluationsData, error: evaluationsError } = await supabase
-            .from("scorecard_evaluations")
-            .select(`
+      const scorecardsWithEvaluations = await Promise.all((scorecardsData || []).map(async scorecard => {
+        const {
+          data: evaluationsData,
+          error: evaluationsError
+        } = await supabase.from("scorecard_evaluations").select(`
               score,
               notes,
               scorecard_criteria!inner(
@@ -114,43 +120,38 @@ export function ScorecardHistory({ candidateId }: ScorecardHistoryProps) {
                 weight,
                 display_order
               )
-            `)
-            .eq("scorecard_id", scorecard.id);
-
-          if (evaluationsError) {
-            console.error("Error loading evaluations:", evaluationsError);
-            return {
-              ...scorecard,
-              evaluations: [],
-            };
-          }
-
-          // Ordenar manualmente após carregar
-          const sortedEvaluations = (evaluationsData || []).sort((a: any, b: any) => {
-            return (a.scorecard_criteria?.display_order || 0) - (b.scorecard_criteria?.display_order || 0);
-          });
-
+            `).eq("scorecard_id", scorecard.id);
+        if (evaluationsError) {
+          console.error("Error loading evaluations:", evaluationsError);
           return {
-            id: scorecard.id,
-            template_name: scorecard.scorecard_templates?.name || "Template",
-            evaluator_name: usersMap.get(scorecard.evaluator_id) || "Avaliador",
-            recommendation: scorecard.recommendation,
-            comments: scorecard.comments,
-            total_score: scorecard.total_score,
-            match_percentage: scorecard.match_percentage,
-            created_at: scorecard.created_at,
-            vaga_titulo: scorecard.vagas?.titulo || null,
-            evaluations: sortedEvaluations.map((ev: any) => ({
-              criteria_name: ev.scorecard_criteria.name,
-              criteria_category: ev.scorecard_criteria.category,
-              criteria_weight: ev.scorecard_criteria.weight,
-              score: ev.score,
-              notes: ev.notes,
-            })),
+            ...scorecard,
+            evaluations: []
           };
-        })
-      );
+        }
 
+        // Ordenar manualmente após carregar
+        const sortedEvaluations = (evaluationsData || []).sort((a: any, b: any) => {
+          return (a.scorecard_criteria?.display_order || 0) - (b.scorecard_criteria?.display_order || 0);
+        });
+        return {
+          id: scorecard.id,
+          template_name: scorecard.scorecard_templates?.name || "Template",
+          evaluator_name: usersMap.get(scorecard.evaluator_id) || "Avaliador",
+          recommendation: scorecard.recommendation,
+          comments: scorecard.comments,
+          total_score: scorecard.total_score,
+          match_percentage: scorecard.match_percentage,
+          created_at: scorecard.created_at,
+          vaga_titulo: scorecard.vagas?.titulo || null,
+          evaluations: sortedEvaluations.map((ev: any) => ({
+            criteria_name: ev.scorecard_criteria.name,
+            criteria_category: ev.scorecard_criteria.category,
+            criteria_weight: ev.scorecard_criteria.weight,
+            score: ev.score,
+            notes: ev.notes
+          }))
+        };
+      }));
       setScorecards(scorecardsWithEvaluations as Scorecard[]);
     } catch (error: any) {
       console.error("Erro ao carregar histórico de scorecards:", error);
@@ -158,23 +159,18 @@ export function ScorecardHistory({ candidateId }: ScorecardHistoryProps) {
       setLoading(false);
     }
   }
-
   if (loading) {
-    return (
-      <Card>
+    return <Card>
         <CardContent className="flex items-center justify-center py-8">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         </CardContent>
-      </Card>
-    );
+      </Card>;
   }
-
   if (scorecards.length === 0) {
-    return (
-      <Card>
+    return <Card>
         <CardHeader>
           <CardTitle>Histórico de Avaliações</CardTitle>
-          <CardDescription>Scorecards preenchidos para este candidato</CardDescription>
+          <CardDescription className="font-semibold">Scorecards preenchidos para este candidato</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col items-center justify-center py-12">
           <Target className="h-12 w-12 text-muted-foreground mb-4" />
@@ -182,16 +178,12 @@ export function ScorecardHistory({ candidateId }: ScorecardHistoryProps) {
             Nenhum scorecard preenchido ainda
           </p>
         </CardContent>
-      </Card>
-    );
+      </Card>;
   }
 
   // Calculate average score
-  const averageScore =
-    scorecards.reduce((sum, s) => sum + s.match_percentage, 0) / scorecards.length;
-
-  return (
-    <Card>
+  const averageScore = scorecards.reduce((sum, s) => sum + s.match_percentage, 0) / scorecards.length;
+  return <Card>
       <CardHeader>
         <div className="flex items-start justify-between">
           <div>
@@ -208,25 +200,18 @@ export function ScorecardHistory({ candidateId }: ScorecardHistoryProps) {
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 gap-6">
-          {scorecards.map((scorecard) => {
-            const recConfig = recommendationConfig[scorecard.recommendation];
-
-            return (
-              <div
-                key={scorecard.id}
-                className="border rounded-lg p-8 space-y-6 hover:shadow-md transition-shadow"
-              >
+          {scorecards.map(scorecard => {
+          const recConfig = recommendationConfig[scorecard.recommendation];
+          return <div key={scorecard.id} className="border rounded-lg p-8 space-y-6 hover:shadow-md transition-shadow">
                 {/* Header com título e pontuação */}
                 <div className="flex items-start justify-between gap-6 pb-4 border-b">
                   <div className="space-y-1">
                     <h3 className="font-bold text-xl">
                       {scorecard.template_name}
                     </h3>
-                    {scorecard.vaga_titulo && (
-                      <Badge variant="outline" className="text-sm font-medium mt-2">
+                    {scorecard.vaga_titulo && <Badge variant="outline" className="text-sm font-medium mt-2">
                         {scorecard.vaga_titulo}
-                      </Badge>
-                    )}
+                      </Badge>}
                   </div>
                   <div className="text-right shrink-0">
                     <div className="text-4xl font-bold text-primary">
@@ -257,8 +242,8 @@ export function ScorecardHistory({ candidateId }: ScorecardHistoryProps) {
                     <Calendar className="h-4 w-4" />
                     <span className="font-medium">
                       {format(new Date(scorecard.created_at), "dd MMM yyyy", {
-                        locale: ptBR,
-                      })}
+                    locale: ptBR
+                  })}
                     </span>
                   </div>
                 </div>
@@ -276,52 +261,31 @@ export function ScorecardHistory({ candidateId }: ScorecardHistoryProps) {
                 </div>
 
                 {/* Comments */}
-                {scorecard.comments && (
-                  <div className="bg-muted/50 p-4 rounded-lg space-y-2">
+                {scorecard.comments && <div className="bg-muted/50 p-4 rounded-lg space-y-2">
                     <p className="text-sm font-bold">Comentários:</p>
                     <p className="text-sm text-muted-foreground leading-relaxed">
                       {scorecard.comments}
                     </p>
-                  </div>
-                )}
+                  </div>}
 
                 {/* Evaluations Summary */}
                 <div className="space-y-3 pt-2">
                   <p className="text-sm font-bold">Critérios Avaliados:</p>
                   <div className="space-y-3">
-                    {scorecard.evaluations.slice(0, 3).map((evaluation, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between text-sm py-1"
-                      >
+                    {scorecard.evaluations.slice(0, 3).map((evaluation, index) => <div key={index} className="flex items-center justify-between text-sm py-1">
                         <span className="text-muted-foreground font-medium">{evaluation.criteria_name}</span>
                         <div className="flex items-center gap-1">
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <Star
-                              key={star}
-                              className={cn(
-                                "h-4 w-4",
-                                star <= evaluation.score
-                                  ? "fill-[#FFCD00] text-[#FFCD00]"
-                                  : "text-gray-300"
-                              )}
-                            />
-                          ))}
+                          {[1, 2, 3, 4, 5].map(star => <Star key={star} className={cn("h-4 w-4", star <= evaluation.score ? "fill-[#FFCD00] text-[#FFCD00]" : "text-gray-300")} />)}
                         </div>
-                      </div>
-                    ))}
-                    {scorecard.evaluations.length > 3 && (
-                      <p className="text-xs text-muted-foreground pt-1">
+                      </div>)}
+                    {scorecard.evaluations.length > 3 && <p className="text-xs text-muted-foreground pt-1">
                         +{scorecard.evaluations.length - 3} critérios adicionais
-                      </p>
-                    )}
+                      </p>}
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              </div>;
+        })}
         </div>
       </CardContent>
-    </Card>
-  );
+    </Card>;
 }
