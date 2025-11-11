@@ -133,7 +133,7 @@ export function RejectedCandidatesCard() {
           <div className="flex items-start justify-between">
             <div className="space-y-2 flex-1">
               <div className="flex items-center gap-2">
-                <p className="text-sm font-medium text-muted-foreground">Candidatos reprovados sem feedback </p>
+                <p className="text-sm text-muted-foreground font-semibold">Candidatos reprovados sem feedback </p>
                 {count > 0}
               </div>
               <p className="text-[42px] font-semibold leading-none text-card-foreground">
