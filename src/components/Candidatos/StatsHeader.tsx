@@ -38,7 +38,7 @@ export function StatsHeader({ total, byStatus }: StatsHeaderProps) {
       <div className="h-5 w-px bg-border" />
       
       {activeCount > 0 && (
-        <Badge variant="outline" className="bg-success/10 text-success border-success/20 text-xs">
+        <Badge variant="outline" className="bg-success/10 text-success border-success/20 text-sm">
           🟢 {activeCount} ativos
         </Badge>
       )}
@@ -50,7 +50,7 @@ export function StatsHeader({ total, byStatus }: StatsHeaderProps) {
           <Badge
             key={status}
             variant="outline"
-            className={`text-xs ${statusColors[status] || "bg-muted/10 text-muted-foreground border-muted"}`}
+            className={`text-sm ${statusColors[status] || "bg-muted/10 text-muted-foreground border-muted"}`}
           >
             {statusIcons[status] || "⚪"} {count} {status.toLowerCase()}
           </Badge>
