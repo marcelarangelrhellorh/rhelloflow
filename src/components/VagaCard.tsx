@@ -158,7 +158,7 @@ export function VagaCard({
       }
     }
   };
-  return <Card draggable={draggable} onDragStart={onDragStart} onClick={handleClick} className="relative cursor-pointer hover-lift card-shadow bg-white border border-gray-200 overflow-hidden rounded-xl shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.01]">
+  return <Card draggable={draggable} onDragStart={onDragStart} onClick={handleClick} className="relative cursor-pointer hover-lift card-shadow bg-card-subtle-bg border border-gray-200 overflow-hidden rounded-xl shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.01]">
       {/* Confidential Indicator */}
       {vaga.confidencial && <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2 py-1 rounded-full border backdrop-blur-sm z-10" style={{
       backgroundColor: "rgba(254, 243, 242, 0.5)",

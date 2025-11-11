@@ -72,6 +72,8 @@ All colors MUST be HSL.
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 206 13% 24% / 0.2;
     --sidebar-ring: 47 100% 50%;
+    
+    --card-subtle-bg: 208 16% 25% / 0.06;
   }
 
   .dark {
@@ -113,6 +115,8 @@ All colors MUST be HSL.
     --sidebar-accent-foreground: 50 100% 98%;
     --sidebar-border: 206 29% 72% / 0.2;
     --sidebar-ring: 47 100% 50%;
+    
+    --card-subtle-bg: 208 16% 25% / 0.06;
   }
 }
 
