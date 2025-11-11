@@ -11,7 +11,6 @@ import { CandidateProfileDrawer } from "@/components/BancoTalentos/CandidateProf
 import { LinkToJobModal } from "@/components/BancoTalentos/LinkToJobModal";
 import { ImportXlsModal } from "@/components/ImportXlsModal";
 import { differenceInDays } from "date-fns";
-
 interface Candidato {
   id: string;
   nome_completo: string;
@@ -35,7 +34,6 @@ interface Candidato {
   mediaRating?: number | null;
   qtdAvaliacoes?: number;
 }
-
 export default function BancoTalentos() {
   const navigate = useNavigate();
   const [candidatos, setCandidatos] = useState<Candidato[]>([]);
@@ -46,77 +44,62 @@ export default function BancoTalentos() {
   const [estadoFilter, setEstadoFilter] = useState<string>("all");
   const [avaliacaoFilter, setAvaliacaoFilter] = useState<string>("all");
   const [tagFilter, setTagFilter] = useState<string>("all");
-  const [availableTags, setAvailableTags] = useState<Array<{ label: string; value: string }>>([]);
+  const [availableTags, setAvailableTags] = useState<Array<{
+    label: string;
+    value: string;
+  }>>([]);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [selectedCandidate, setSelectedCandidate] = useState<Candidato | null>(null);
   const [showProfileDrawer, setShowProfileDrawer] = useState(false);
   const [showLinkJobModal, setShowLinkJobModal] = useState(false);
   const [linkJobCandidateId, setLinkJobCandidateId] = useState<string | null>(null);
   const [importModalOpen, setImportModalOpen] = useState(false);
-
   useEffect(() => {
     loadCandidatos();
     loadTags();
   }, []);
-
   const loadTags = async () => {
     try {
-      const { data, error } = await (supabase as any)
-        .from("tags")
-        .select("id, label, category")
-        .eq("active", true)
-        .order("label");
-
+      const {
+        data,
+        error
+      } = await (supabase as any).from("tags").select("id, label, category").eq("active", true).order("label");
       if (error) throw error;
-      
       const tagOptions = (data || []).map((tag: any) => ({
         label: `${tag.label} (${tag.category})`,
-        value: tag.id,
+        value: tag.id
       }));
-      
       setAvailableTags(tagOptions);
     } catch (error: any) {
       console.error("Erro ao carregar tags:", error);
     }
   };
-
   const loadCandidatos = async () => {
     try {
       setLoading(true);
-      
+
       // Buscar candidatos com suas tags usando a view
-      const { data, error } = await (supabase as any)
-        .from("candidates_with_tags")
-        .select("*")
-        .eq("status", "Banco de Talentos")
-        .order("criado_em", { ascending: false });
-
+      const {
+        data,
+        error
+      } = await (supabase as any).from("candidates_with_tags").select("*").eq("status", "Banco de Talentos").order("criado_em", {
+        ascending: false
+      });
       if (error) throw error;
-      
+
       // Buscar estatísticas de avaliação para cada candidato
-      const candidatosComRating = await Promise.all(
-        (data || []).map(async (candidato: any) => {
-          const { data: ratings } = await supabase
-            .from('feedbacks')
-            .select('avaliacao')
-            .eq('candidato_id', candidato.id);
-
-          const avaliacoes = (ratings || [])
-            .map(f => f.avaliacao)
-            .filter((n): n is number => typeof n === 'number' && Number.isFinite(n));
-          
-          const mediaRating = avaliacoes.length > 0 
-            ? avaliacoes.reduce((a, b) => a + b, 0) / avaliacoes.length 
-            : null;
-
-          return {
-            ...candidato,
-            mediaRating,
-            qtdAvaliacoes: avaliacoes.length
-          };
-        })
-      );
-
+      const candidatosComRating = await Promise.all((data || []).map(async (candidato: any) => {
+        const {
+          data: ratings
+        } = await supabase.from('feedbacks').select('avaliacao').eq('candidato_id', candidato.id);
+        const avaliacoes = (ratings || []).map(f => f.avaliacao).filter((n): n is number => typeof n === 'number' && Number.isFinite(n));
+        const mediaRating = avaliacoes.length > 0 ? avaliacoes.reduce((a, b) => a + b, 0) / avaliacoes.length : null;
+        return {
+          ...candidato,
+          mediaRating,
+          qtdAvaliacoes: avaliacoes.length
+        };
+      }));
       setCandidatos(candidatosComRating as any);
     } catch (error: any) {
       console.error("Erro ao carregar banco de talentos:", error);
@@ -125,16 +108,12 @@ export default function BancoTalentos() {
       setLoading(false);
     }
   };
-
-  const filteredCandidatos = candidatos.filter((candidato) => {
-    const matchesSearch =
-      candidato.nome_completo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      candidato.area?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      candidato.cidade?.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredCandidatos = candidatos.filter(candidato => {
+    const matchesSearch = candidato.nome_completo?.toLowerCase().includes(searchTerm.toLowerCase()) || candidato.area?.toLowerCase().includes(searchTerm.toLowerCase()) || candidato.cidade?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesArea = areaFilter === "all" || candidato.area === areaFilter;
     const matchesNivel = nivelFilter === "all" || candidato.nivel === nivelFilter;
     const matchesEstado = estadoFilter === "all" || candidato.estado === estadoFilter;
-    
+
     // Filtro de avaliação
     let matchesAvaliacao = true;
     if (avaliacaoFilter !== "all") {
@@ -148,36 +127,28 @@ export default function BancoTalentos() {
       const candidateTags = (candidato as any).tags || [];
       matchesTags = candidateTags.some((ct: any) => ct.tag_id === tagFilter);
     }
-    
     return matchesSearch && matchesArea && matchesNivel && matchesEstado && matchesAvaliacao && matchesTags;
   });
-
   const getDaysInBank = (dateString: string) => {
     return differenceInDays(new Date(), new Date(dateString));
   };
-
   const hasActiveFilters = areaFilter !== "all" || nivelFilter !== "all" || estadoFilter !== "all" || avaliacaoFilter !== "all" || tagFilter !== "all";
-
   const handleViewProfile = (candidato: Candidato) => {
     setSelectedCandidate(candidato);
     setShowProfileDrawer(true);
   };
-
   const handleLinkToJob = (candidatoId: string) => {
     setLinkJobCandidateId(candidatoId);
     setShowLinkJobModal(true);
   };
-
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
+    return <div className="flex min-h-screen items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="min-h-screen p-8" style={{ backgroundColor: '#FFFBF0' }}>
+  return <div className="min-h-screen p-8" style={{
+    backgroundColor: '#FFFBF0'
+  }}>
       {/* Cabeçalho */}
       <div className="mb-8 flex items-start justify-between">
         <div>
@@ -193,18 +164,11 @@ export default function BancoTalentos() {
           </div>
         </div>
         <div className="flex gap-2">
-          <Button 
-            onClick={() => navigate('/candidatos/novo')}
-            className="bg-[#F9EC3F] hover:bg-[#E5D72E] text-[#00141D] font-bold"
-          >
+          <Button onClick={() => navigate('/candidatos/novo')} className="bg-[#F9EC3F] hover:bg-[#E5D72E] text-[#00141D] font-bold">
             <Plus className="mr-2 h-5 w-5" />
             Adicionar Candidato
           </Button>
-          <Button 
-            onClick={() => setImportModalOpen(true)}
-            variant="outline"
-            className="font-bold"
-          >
+          <Button onClick={() => setImportModalOpen(true)} variant="outline" className="font-bold text-[0#] text-slate-950 bg-[t#] bg-[#faec3e]">
             <Plus className="mr-2 h-5 w-5" />
             Importar Planilha XLS
           </Button>
@@ -216,12 +180,7 @@ export default function BancoTalentos() {
         <div className="flex flex-wrap gap-4 mb-4">
           <div className="relative flex-1 min-w-[300px]">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Buscar por nome, área ou cidade..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className={`pl-10 ${searchTerm ? 'border-2 border-primary' : ''}`}
-            />
+            <Input placeholder="Buscar por nome, área ou cidade..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className={`pl-10 ${searchTerm ? 'border-2 border-primary' : ''}`} />
           </div>
 
           <Select value={areaFilter} onValueChange={setAreaFilter}>
@@ -311,61 +270,41 @@ export default function BancoTalentos() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todas as tags</SelectItem>
-              {availableTags.map((tag) => (
-                <SelectItem key={tag.value} value={tag.value}>
+              {availableTags.map(tag => <SelectItem key={tag.value} value={tag.value}>
                   {tag.label}
-                </SelectItem>
-              ))}
+                </SelectItem>)}
             </SelectContent>
           </Select>
 
           <div className="flex gap-2 ml-auto">
-            <Button
-              variant={viewMode === "grid" ? "default" : "outline"}
-              size="icon"
-              onClick={() => setViewMode("grid")}
-              className={viewMode === "grid" ? "bg-[#F9EC3F] text-[#00141D] hover:bg-[#E5D72E]" : ""}
-            >
+            <Button variant={viewMode === "grid" ? "default" : "outline"} size="icon" onClick={() => setViewMode("grid")} className={viewMode === "grid" ? "bg-[#F9EC3F] text-[#00141D] hover:bg-[#E5D72E]" : ""}>
               <Grid3x3 className="h-4 w-4" />
             </Button>
-            <Button
-              variant={viewMode === "list" ? "default" : "outline"}
-              size="icon"
-              onClick={() => setViewMode("list")}
-              className={viewMode === "list" ? "bg-[#F9EC3F] text-[#00141D] hover:bg-[#E5D72E]" : ""}
-            >
+            <Button variant={viewMode === "list" ? "default" : "outline"} size="icon" onClick={() => setViewMode("list")} className={viewMode === "list" ? "bg-[#F9EC3F] text-[#00141D] hover:bg-[#E5D72E]" : ""}>
               <List className="h-4 w-4" />
             </Button>
           </div>
         </div>
 
-        {hasActiveFilters && (
-          <div className="flex items-center justify-between">
+        {hasActiveFilters && <div className="flex items-center justify-between">
             <p className="text-base text-muted-foreground">
               {filteredCandidatos.length} resultado{filteredCandidatos.length !== 1 ? "s" : ""} encontrado{filteredCandidatos.length !== 1 ? "s" : ""}
             </p>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                setAreaFilter("all");
-                setNivelFilter("all");
-                setEstadoFilter("all");
-                setAvaliacaoFilter("all");
-                setTagFilter("all");
-                setSearchTerm("");
-              }}
-              className="text-muted-foreground hover:text-foreground"
-            >
+            <Button variant="ghost" size="sm" onClick={() => {
+          setAreaFilter("all");
+          setNivelFilter("all");
+          setEstadoFilter("all");
+          setAvaliacaoFilter("all");
+          setTagFilter("all");
+          setSearchTerm("");
+        }} className="text-muted-foreground hover:text-foreground">
               Limpar filtros
             </Button>
-          </div>
-        )}
+          </div>}
       </div>
 
       {/* Cards de candidatos */}
-      {filteredCandidatos.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-center">
+      {filteredCandidatos.length === 0 ? <div className="flex flex-col items-center justify-center py-20 text-center">
           
           <h3 className="text-3xl font-bold text-foreground mb-2">
             Nenhum talento disponível no momento
@@ -373,66 +312,33 @@ export default function BancoTalentos() {
           <p className="text-base text-muted-foreground mb-6">
             Cadastre novos ou acompanhe os processos em andamento.
           </p>
-          <Button 
-            onClick={() => navigate('/candidatos/novo')}
-            className="bg-[#F9EC3F] hover:bg-[#E5D72E] text-[#00141D] font-bold"
-          >
+          <Button onClick={() => navigate('/candidatos/novo')} className="bg-[#F9EC3F] hover:bg-[#E5D72E] text-[#00141D] font-bold">
             <Plus className="mr-2 h-5 w-5" />
             Adicionar Primeiro Candidato
           </Button>
-        </div>
-      ) : (
-        <div className={viewMode === "grid" ? "grid gap-6 md:grid-cols-2" : "space-y-4"}>
-          {filteredCandidatos.map((candidato) => (
-            <CandidateCard
-              key={candidato.id}
-              candidate={{
-                ...candidato,
-                recruiter_name: candidato.profiles?.full_name || candidato.recrutador || "Não atribuído",
-                days_in_bank: getDaysInBank(candidato.criado_em)
-              }}
-              onViewProfile={() => handleViewProfile(candidato)}
-              onLinkToJob={() => handleLinkToJob(candidato.id)}
-              viewMode={viewMode}
-            />
-          ))}
-        </div>
-      )}
+        </div> : <div className={viewMode === "grid" ? "grid gap-6 md:grid-cols-2" : "space-y-4"}>
+          {filteredCandidatos.map(candidato => <CandidateCard key={candidato.id} candidate={{
+        ...candidato,
+        recruiter_name: candidato.profiles?.full_name || candidato.recrutador || "Não atribuído",
+        days_in_bank: getDaysInBank(candidato.criado_em)
+      }} onViewProfile={() => handleViewProfile(candidato)} onLinkToJob={() => handleLinkToJob(candidato.id)} viewMode={viewMode} />)}
+        </div>}
 
       {/* Modals */}
-      {selectedCandidate && (
-        <CandidateProfileDrawer
-          open={showProfileDrawer}
-          onOpenChange={setShowProfileDrawer}
-          candidate={{
-            ...selectedCandidate,
-            recruiter_name: selectedCandidate.profiles?.full_name || selectedCandidate.recrutador || "Não atribuído",
-            days_in_bank: getDaysInBank(selectedCandidate.criado_em)
-          }}
-        />
-      )}
+      {selectedCandidate && <CandidateProfileDrawer open={showProfileDrawer} onOpenChange={setShowProfileDrawer} candidate={{
+      ...selectedCandidate,
+      recruiter_name: selectedCandidate.profiles?.full_name || selectedCandidate.recrutador || "Não atribuído",
+      days_in_bank: getDaysInBank(selectedCandidate.criado_em)
+    }} />}
 
-      {linkJobCandidateId && (
-        <LinkToJobModal
-          open={showLinkJobModal}
-          onOpenChange={setShowLinkJobModal}
-          candidateId={linkJobCandidateId}
-          onSuccess={() => {
-            loadCandidatos();
-            setShowLinkJobModal(false);
-            setLinkJobCandidateId(null);
-          }}
-        />
-      )}
+      {linkJobCandidateId && <LinkToJobModal open={showLinkJobModal} onOpenChange={setShowLinkJobModal} candidateId={linkJobCandidateId} onSuccess={() => {
+      loadCandidatos();
+      setShowLinkJobModal(false);
+      setLinkJobCandidateId(null);
+    }} />}
 
-      <ImportXlsModal
-        open={importModalOpen}
-        onOpenChange={setImportModalOpen}
-        sourceType="banco_talentos"
-        onSuccess={() => {
-          loadCandidatos();
-        }}
-      />
-    </div>
-  );
+      <ImportXlsModal open={importModalOpen} onOpenChange={setImportModalOpen} sourceType="banco_talentos" onSuccess={() => {
+      loadCandidatos();
+    }} />
+    </div>;
 }
