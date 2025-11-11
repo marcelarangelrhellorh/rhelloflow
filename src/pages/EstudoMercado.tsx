@@ -10,6 +10,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Loader2, TrendingUp, TrendingDown, Minus, AlertCircle, FileDown } from "lucide-react";
 import { MultiSelect } from "@/components/ui/multi-select";
 import jsPDF from "jspdf";
+import logoRhelloDark from "@/assets/logo-rhello-dark.png";
+import symbolRhelloDark from "@/assets/symbol-rhello-dark.png";
 interface FaixaSalarial {
   tipo_contratacao: string;
   salario_media: number | null;
@@ -139,6 +141,13 @@ export default function EstudoMercado() {
       doc.setFillColor(...colors.lightBg);
       doc.rect(0, 0, pageWidth, pageHeight, "F");
 
+      // Logo da rhello no topo
+      try {
+        doc.addImage(logoRhelloDark, 'PNG', pageWidth / 2 - 25, 30, 50, 15);
+      } catch (e) {
+        console.log("Erro ao adicionar logo:", e);
+      }
+
       // Título principal
       doc.setTextColor(...colors.darkBlue);
       doc.setFontSize(28);
@@ -156,15 +165,22 @@ export default function EstudoMercado() {
       doc.setTextColor(...colors.grayText);
       doc.text(`Gerado por rhello flow em ${new Date().toLocaleDateString("pt-BR")}`, pageWidth / 2, 110, { align: "center" });
 
+      // Símbolo rhello decorativo
+      try {
+        doc.addImage(symbolRhelloDark, 'PNG', pageWidth / 2 - 15, pageHeight - 50, 30, 30);
+      } catch (e) {
+        console.log("Erro ao adicionar símbolo:", e);
+      }
+
       // Faixa amarela decorativa no rodapé da capa
       doc.setFillColor(...colors.yellowPrimary);
-      doc.rect(0, pageHeight - 40, pageWidth, 8, "F");
+      doc.rect(0, pageHeight - 12, pageWidth, 12, "F");
 
-      // Logo texto no rodapé
+      // Texto do rodapé
       doc.setTextColor(...colors.darkBlue);
-      doc.setFontSize(14);
-      doc.setFont("helvetica", "bold");
-      doc.text("rhello", pageWidth / 2, pageHeight - 20, { align: "center" });
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "normal");
+      doc.text("rhello flow - Inteligência em recrutamento", pageWidth / 2, pageHeight - 5, { align: "center" });
 
       // ===== NOVA PÁGINA - CONTEÚDO =====
       doc.addPage();
@@ -275,9 +291,14 @@ export default function EstudoMercado() {
           yPos += 10;
         }
 
-        // Bloco de salários com fundo sutil
-        doc.setFillColor(250, 236, 62, 0.1); // Amarelo muito claro
+        // Bloco de salários com fundo branco e borda
+        doc.setFillColor(255, 255, 255); // Fundo branco
         doc.roundedRect(20, yPos - 5, pageWidth - 40, 30, 3, 3, "F");
+        
+        // Borda amarela sutil
+        doc.setDrawColor(...colors.yellowSecondary);
+        doc.setLineWidth(0.5);
+        doc.roundedRect(20, yPos - 5, pageWidth - 40, 30, 3, 3, "S");
 
         doc.setFontSize(10);
         doc.setTextColor(...colors.grayText);
@@ -329,13 +350,18 @@ export default function EstudoMercado() {
         doc.text("Sua Oferta", 20, yPos);
         yPos += 10;
 
-        // Bloco destacado
+        // Bloco destacado com fundo branco e borda colorida
         const compColor = (estudo.comparacao_oferta === "Acima" ? [34, 197, 94] : 
                          estudo.comparacao_oferta === "Abaixo" ? [239, 68, 68] : 
                          estudo.comparacao_oferta === "Dentro" ? [59, 130, 246] : colors.grayText) as [number, number, number];
         
-        doc.setFillColor(...compColor, 0.1);
+        doc.setFillColor(255, 255, 255); // Fundo branco
         doc.roundedRect(20, yPos - 5, pageWidth - 40, 22, 3, 3, "F");
+        
+        // Borda colorida de acordo com a comparação
+        doc.setDrawColor(...compColor);
+        doc.setLineWidth(1);
+        doc.roundedRect(20, yPos - 5, pageWidth - 40, 22, 3, 3, "S");
 
         doc.setFontSize(10);
         doc.setTextColor(...colors.grayText);
@@ -364,8 +390,13 @@ export default function EstudoMercado() {
                           estudo.demanda === "Média" ? [234, 179, 8] : 
                           [34, 197, 94]) as [number, number, number];
       
-      doc.setFillColor(...demandaColor, 0.15);
+      // Fundo branco com borda colorida
+      doc.setFillColor(255, 255, 255);
       doc.roundedRect(20, yPos - 5, 60, 15, 3, 3, "F");
+      
+      doc.setDrawColor(...demandaColor);
+      doc.setLineWidth(1.5);
+      doc.roundedRect(20, yPos - 5, 60, 15, 3, 3, "S");
       
       doc.setFontSize(12);
       doc.setFont("helvetica", "bold");
@@ -418,9 +449,13 @@ export default function EstudoMercado() {
             xPos = 20;
           }
 
-          // Badge com fundo amarelo claro
-          doc.setFillColor(...colors.yellowSecondary, 0.2);
+          // Badge com fundo branco e borda amarela
+          doc.setFillColor(255, 255, 255);
           doc.roundedRect(xPos, lineY - 6, badgeWidth, 10, 2, 2, "F");
+          
+          doc.setDrawColor(...colors.yellowSecondary);
+          doc.setLineWidth(0.5);
+          doc.roundedRect(xPos, lineY - 6, badgeWidth, 10, 2, 2, "S");
           
           doc.setTextColor(...colors.darkBlue);
           doc.setFont("helvetica", "normal");
