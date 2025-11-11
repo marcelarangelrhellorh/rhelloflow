@@ -194,7 +194,7 @@ export function ProfessionalInfoCard({
         <div className="grid gap-4 sm:grid-cols-2">
           {/* Pretensão Salarial */}
           <div>
-            <p className="text-sm text-muted-foreground mb-1 flex items-center gap-1 font-semibold">
+            <p className="text-muted-foreground mb-1 flex items-center gap-1 font-semibold text-base">
               <DollarSign className="h-3.5 w-3.5" />
               Pretensão Salarial
             </p>
@@ -223,7 +223,7 @@ export function ProfessionalInfoCard({
 
           {/* Experiência Profissional */}
           {experienciaProfissional && <div className="sm:col-span-2">
-              <p className="text-sm text-muted-foreground mb-1 flex items-center gap-1">
+              <p className="text-muted-foreground mb-1 flex items-center gap-1 text-base font-semibold">
                 <Briefcase className="h-3.5 w-3.5" />
                 Experiência Profissional
               </p>
@@ -232,13 +232,13 @@ export function ProfessionalInfoCard({
 
           {/* Idiomas */}
           {idiomas && <div className="sm:col-span-2">
-              <p className="text-sm text-muted-foreground mb-1">Idiomas</p>
+              <p className="text-muted-foreground mb-1 text-base font-semibold">Idiomas</p>
               <p className="text-base text-card-foreground">{idiomas}</p>
             </div>}
 
           {/* Disponibilidade do candidato - Editável */}
           <div className="sm:col-span-2">
-            <p className="text-sm text-muted-foreground mb-2 flex items-center gap-1 font-semibold">
+            <p className="text-muted-foreground mb-2 flex items-center gap-1 font-semibold text-base">
               <CheckCircle2 className="h-3.5 w-3.5" />
               Disponibilidade do Candidato
             </p>
@@ -255,7 +255,7 @@ export function ProfessionalInfoCard({
 
           {/* Disponibilidade para mudança */}
           <div className="sm:col-span-2">
-            <p className="text-sm text-muted-foreground mb-1 flex items-center gap-1 font-semibold">
+            <p className="text-muted-foreground mb-1 flex items-center gap-1 font-semibold text-base">
               <MapPin className="h-3.5 w-3.5" />
               Disponibilidade para Mudança
             </p>
@@ -278,7 +278,7 @@ export function ProfessionalInfoCard({
 
           {/* Data de Cadastro */}
           <div className="sm:col-span-2">
-            <p className="text-sm text-muted-foreground mb-1 flex items-center gap-1 font-semibold">
+            <p className="text-muted-foreground mb-1 flex items-center gap-1 font-semibold text-base">
               <Calendar className="h-3.5 w-3.5" />
               Data de Cadastro
             </p>
@@ -287,7 +287,7 @@ export function ProfessionalInfoCard({
 
           {/* Origem - Editável */}
           <div className="sm:col-span-2">
-            <p className="text-sm text-muted-foreground mb-2 flex items-center gap-1.5 font-semibold">
+            <p className="text-muted-foreground mb-2 flex items-center gap-1.5 font-semibold text-base">
               <ExternalLink className="h-4 w-4" />
               Origem do Candidato
             </p>
@@ -306,7 +306,7 @@ export function ProfessionalInfoCard({
 
         {/* Documentos */}
         <div>
-          <p className="text-sm mb-3 flex items-center gap-1 font-semibold">
+          <p className="mb-3 flex items-center gap-1 font-semibold text-base">
             <FileText className="h-4 w-4" />
             Documentos Anexados
           </p>
@@ -333,7 +333,7 @@ export function ProfessionalInfoCard({
 
         {/* Vaga Relacionada - Editável */}
         <div>
-          <p className="text-sm text-muted-foreground mb-2 flex items-center gap-1 font-semibold">
+          <p className="text-muted-foreground mb-2 flex items-center gap-1 font-semibold text-base">
             <Briefcase className="h-3.5 w-3.5" />
             Vaga Relacionada
           </p>
