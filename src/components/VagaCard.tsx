@@ -276,7 +276,7 @@ export function VagaCard({
           </div>
           <div className="text-center">
             <div className="text-3xl font-bold text-[#00141D]">{daysOpen}</div>
-            <div className="text-xs text-[#00141D]/60 mt-1 font-medium">Dias em Aberto</div>
+            <div className="text-sm text-[#00141D]/60 mt-1 font-medium">Dias em Aberto</div>
           </div>
         </div>
 
