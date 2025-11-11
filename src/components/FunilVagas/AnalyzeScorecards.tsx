@@ -9,6 +9,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { FileDown, Copy, Sparkles, AlertCircle, TrendingUp, AlertTriangle, Lightbulb } from "lucide-react";
+import jsPDF from "jspdf";
+import logoRhelloDark from "@/assets/logo-rhello-dark.png";
+import symbolRhelloDark from "@/assets/symbol-rhello-dark.png";
 interface AnalyzeScorecardProps {
   vagaId: string;
   vagaTitulo: string;
@@ -106,8 +109,14 @@ export function AnalyzeScorecards({
     text += `${analysis.executive_summary}\n\n`;
     text += `═══════════════════════════════════════\n\n`;
     text += `🏆 RANKING\n`;
-    analysis.ranking.forEach((item: any) => {
-      text += `${item.rank}º - ${item.candidate_id} (${item.total_score}%)\n`;
+    analysis.ranking.forEach((item: any, index: number) => {
+      const candidate = aggregateData.candidates.find((c: any) => 
+        c.candidate_id === item.candidate_id || 
+        `Candidato ${index + 1}` === item.candidate_id || 
+        `candidate_${index + 1}` === item.candidate_id
+      );
+      const candidateName = candidate?.candidate_name || item.candidate_id || `Candidato ${index + 1}`;
+      text += `${item.rank}º - ${candidateName} (${item.total_score}%)\n`;
       text += `   ${item.note}\n\n`;
     });
     text += `═══════════════════════════════════════\n\n`;
@@ -134,10 +143,273 @@ export function AnalyzeScorecards({
     });
   };
   const handleDownloadPDF = () => {
-    toast({
-      title: "Em desenvolvimento",
-      description: "A funcionalidade de download em PDF estará disponível em breve."
-    });
+    if (!analysis || !aggregateData) return;
+
+    try {
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      
+      const colors = {
+        yellowPrimary: [255, 205, 0] as [number, number, number],
+        yellowSecondary: [250, 236, 62] as [number, number, number],
+        darkBlue: [0, 20, 29] as [number, number, number],
+        grayText: [54, 64, 74] as [number, number, number],
+        lightBg: [255, 253, 246] as [number, number, number],
+      };
+
+      // ===== CAPA =====
+      doc.setFillColor(...colors.lightBg);
+      doc.rect(0, 0, pageWidth, pageHeight, "F");
+
+      // Logo da rhello no topo
+      try {
+        doc.addImage(logoRhelloDark, 'PNG', pageWidth / 2 - 25, 30, 50, 15);
+      } catch (e) {
+        console.log("Erro ao adicionar logo:", e);
+      }
+
+      // Título principal
+      doc.setTextColor(...colors.darkBlue);
+      doc.setFontSize(24);
+      doc.setFont("helvetica", "bold");
+      doc.text("ANÁLISE DE SCORECARDS", pageWidth / 2, 70, { align: "center" });
+      
+      // Subtítulo - Nome da vaga
+      doc.setFontSize(16);
+      doc.setFont("helvetica", "normal");
+      doc.text(vagaTitulo, pageWidth / 2, 85, { align: "center" });
+
+      // Data de geração
+      doc.setFontSize(11);
+      doc.setTextColor(...colors.grayText);
+      doc.text(`Gerado por rhello flow em ${new Date().toLocaleDateString("pt-BR")}`, pageWidth / 2, 100, { align: "center" });
+
+      // Símbolo rhello decorativo
+      try {
+        doc.addImage(symbolRhelloDark, 'PNG', pageWidth / 2 - 15, pageHeight - 50, 30, 30);
+      } catch (e) {
+        console.log("Erro ao adicionar símbolo:", e);
+      }
+
+      // Faixa amarela decorativa no rodapé da capa
+      doc.setFillColor(...colors.yellowPrimary);
+      doc.rect(0, pageHeight - 12, pageWidth, 12, "F");
+
+      // Texto do rodapé
+      doc.setTextColor(...colors.darkBlue);
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "normal");
+      doc.text("rhello flow - Inteligência em recrutamento", pageWidth / 2, pageHeight - 5, { align: "center" });
+
+      // ===== NOVA PÁGINA - RESUMO EXECUTIVO =====
+      doc.addPage();
+      let yPos = 20;
+
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(...colors.darkBlue);
+      doc.text("RESUMO EXECUTIVO", 20, yPos);
+      yPos += 10;
+
+      // Bloco amarelo com texto
+      doc.setFillColor(255, 255, 255);
+      const summaryLines = doc.splitTextToSize(analysis.executive_summary, pageWidth - 50);
+      const summaryHeight = summaryLines.length * 6 + 10;
+      doc.roundedRect(20, yPos - 5, pageWidth - 40, summaryHeight, 3, 3, "F");
+      doc.setDrawColor(...colors.yellowSecondary);
+      doc.setLineWidth(1);
+      doc.roundedRect(20, yPos - 5, pageWidth - 40, summaryHeight, 3, 3, "S");
+
+      doc.setFontSize(10);
+      doc.setTextColor(...colors.grayText);
+      doc.setFont("helvetica", "normal");
+      doc.text(summaryLines, 25, yPos + 2);
+      yPos += summaryHeight + 15;
+
+      // ===== RANKING DE CANDIDATOS =====
+      if (yPos > pageHeight - 60) {
+        doc.addPage();
+        yPos = 20;
+      }
+
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(...colors.darkBlue);
+      doc.text("RANKING DE CANDIDATOS", 20, yPos);
+      yPos += 10;
+
+      analysis.ranking.forEach((item: any, index: number) => {
+        if (yPos > pageHeight - 40) {
+          doc.addPage();
+          yPos = 20;
+        }
+
+        const candidate = aggregateData.candidates.find((c: any) => 
+          c.candidate_id === item.candidate_id || 
+          `Candidato ${index + 1}` === item.candidate_id || 
+          `candidate_${index + 1}` === item.candidate_id
+        );
+        const candidateName = candidate?.candidate_name || item.candidate_id || `Candidato ${index + 1}`;
+
+        // Box para cada candidato
+        doc.setFillColor(255, 255, 255);
+        doc.roundedRect(20, yPos - 5, pageWidth - 40, 28, 3, 3, "F");
+        const borderColor = item.rank === 1 ? colors.yellowPrimary : colors.grayText;
+        doc.setDrawColor(...borderColor);
+        doc.setLineWidth(item.rank === 1 ? 1.5 : 0.5);
+        doc.roundedRect(20, yPos - 5, pageWidth - 40, 28, 3, 3, "S");
+
+        // Rank badge
+        const badgeFillColor = item.rank === 1 ? colors.yellowPrimary : [240, 240, 240] as [number, number, number];
+        doc.setFillColor(...badgeFillColor);
+        doc.circle(30, yPos + 6, 6, "F");
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(...colors.darkBlue);
+        doc.text(`${item.rank}`, 30, yPos + 8, { align: "center" });
+
+        // Nome do candidato
+        doc.setFontSize(11);
+        doc.setFont("helvetica", "bold");
+        doc.text(candidateName, 42, yPos + 3);
+
+        // Score
+        doc.setFontSize(16);
+        doc.setTextColor(...colors.yellowPrimary);
+        doc.text(`${item.total_score}%`, pageWidth - 30, yPos + 8, { align: "right" });
+
+        // Nota/Justificativa
+        doc.setFontSize(9);
+        doc.setTextColor(...colors.grayText);
+        doc.setFont("helvetica", "normal");
+        const noteLines = doc.splitTextToSize(item.note, pageWidth - 70);
+        doc.text(noteLines.slice(0, 2), 42, yPos + 11);
+
+        yPos += 35;
+      });
+
+      // ===== NOVA PÁGINA - INSIGHTS, RISCOS E RECOMENDAÇÕES =====
+      doc.addPage();
+      yPos = 20;
+
+      // Insights
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(...colors.darkBlue);
+      doc.text("INSIGHTS PRINCIPAIS", 20, yPos);
+      yPos += 10;
+
+      analysis.insights.forEach((insight: string) => {
+        if (yPos > pageHeight - 30) {
+          doc.addPage();
+          yPos = 20;
+        }
+        doc.setFontSize(10);
+        doc.setTextColor(...colors.grayText);
+        doc.setFont("helvetica", "normal");
+        const lines = doc.splitTextToSize(`• ${insight}`, pageWidth - 50);
+        doc.text(lines, 25, yPos);
+        yPos += lines.length * 5 + 3;
+      });
+
+      yPos += 10;
+
+      // Riscos
+      if (yPos > pageHeight - 60) {
+        doc.addPage();
+        yPos = 20;
+      }
+
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(239, 68, 68);
+      doc.text("RISCOS IDENTIFICADOS", 20, yPos);
+      yPos += 10;
+
+      analysis.risks.forEach((risk: string) => {
+        if (yPos > pageHeight - 30) {
+          doc.addPage();
+          yPos = 20;
+        }
+        doc.setFontSize(10);
+        doc.setTextColor(...colors.grayText);
+        doc.setFont("helvetica", "normal");
+        const lines = doc.splitTextToSize(`⚠️ ${risk}`, pageWidth - 50);
+        doc.text(lines, 25, yPos);
+        yPos += lines.length * 5 + 3;
+      });
+
+      yPos += 10;
+
+      // Recomendações
+      if (yPos > pageHeight - 60) {
+        doc.addPage();
+        yPos = 20;
+      }
+
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(34, 197, 94);
+      doc.text("RECOMENDAÇÕES", 20, yPos);
+      yPos += 10;
+
+      analysis.recommendations.forEach((rec: string) => {
+        if (yPos > pageHeight - 30) {
+          doc.addPage();
+          yPos = 20;
+        }
+        doc.setFontSize(10);
+        doc.setTextColor(...colors.grayText);
+        doc.setFont("helvetica", "normal");
+        const lines = doc.splitTextToSize(`✓ ${rec}`, pageWidth - 50);
+        doc.text(lines, 25, yPos);
+        yPos += lines.length * 5 + 3;
+      });
+
+      yPos += 10;
+
+      // Notas de confiabilidade
+      if (yPos > pageHeight - 60) {
+        doc.addPage();
+        yPos = 20;
+      }
+
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(...colors.darkBlue);
+      doc.text("NOTAS DE CONFIABILIDADE", 20, yPos);
+      yPos += 8;
+
+      analysis.confidence_notes.forEach((note: string) => {
+        if (yPos > pageHeight - 30) {
+          doc.addPage();
+          yPos = 20;
+        }
+        doc.setFontSize(9);
+        doc.setTextColor(...colors.grayText);
+        doc.setFont("helvetica", "normal");
+        const lines = doc.splitTextToSize(note, pageWidth - 50);
+        doc.text(lines, 25, yPos);
+        yPos += lines.length * 4 + 2;
+      });
+
+      // Salvar PDF
+      const fileName = `analise-scorecards-${vagaTitulo.replace(/[^a-z0-9]/gi, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}.pdf`;
+      doc.save(fileName);
+
+      toast({
+        title: "PDF gerado com sucesso",
+        description: `Arquivo ${fileName} baixado.`
+      });
+    } catch (error) {
+      console.error('Erro ao gerar PDF:', error);
+      toast({
+        title: "Erro ao gerar PDF",
+        description: "Tente novamente mais tarde.",
+        variant: "destructive"
+      });
+    }
   };
   return <>
       <Button onClick={() => setOpen(true)} variant="default" className="gap-2 bg-[#faec3e] text-foreground font-semibold">
@@ -213,13 +485,14 @@ export function AnalyzeScorecards({
                         <tbody>
                           {analysis.ranking.map((item: any, index: number) => {
                         const candidate = aggregateData.candidates.find((c: any) => c.candidate_id === item.candidate_id || `Candidato ${index + 1}` === item.candidate_id || `candidate_${index + 1}` === item.candidate_id);
+                        const candidateName = candidate?.candidate_name || item.candidate_id || `Candidato ${index + 1}`;
                         return <tr key={item.rank} className="border-t">
                                 <td className="p-3">
                                   <Badge variant={item.rank === 1 ? "default" : "secondary"}>
                                     {item.rank}º
                                   </Badge>
                                 </td>
-                                <td className="p-3 font-medium">{item.candidate_id}</td>
+                                <td className="p-3 font-medium">{candidateName}</td>
                                 <td className="p-3">
                                   <span className="font-bold text-lg">{item.total_score}%</span>
                                 </td>
