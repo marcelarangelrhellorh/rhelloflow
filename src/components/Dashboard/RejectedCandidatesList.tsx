@@ -135,7 +135,7 @@ export function RejectedCandidatesList({
                           </span>
                         </TableCell>
                         <TableCell>
-                          <Badge variant="outline" className={`text-sm ${candidate.status === 'Reprovado rhello' ? 'border-destructive/30 text-destructive' : 'border-orange-500/30 text-orange-500'}`}>
+                          <Badge variant="outline" className={`text-sm whitespace-nowrap ${candidate.status === 'Reprovado rhello' ? 'border-destructive/30 text-destructive' : 'border-orange-500/30 text-orange-500'}`}>
                             {candidate.status}
                           </Badge>
                         </TableCell>
