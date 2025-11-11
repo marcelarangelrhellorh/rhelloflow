@@ -259,7 +259,7 @@ export default function FunilCandidatos() {
         <div className="overflow-x-auto pb-4">
           <div style={{
           minWidth: 'max-content'
-        }} className="flex gap-4 px-6 py-4 bg-[g#] bg-[#36404a]/[0.06]">
+        }} className="flex gap-4 px-6 py-4 bg-[g#] bg-[#faec3e]/[0.01]">
             {funnelColumns.map(status => {
             const candidatosInColumn = getCandidatosByStatus(status);
             return <FunnelColumn key={status} status={status} count={candidatosInColumn.length} colorClass={statusColors[status]} isOver={dragOverColumn === status} onDragOver={() => setDragOverColumn(status)} onDragLeave={() => setDragOverColumn(null)}>
