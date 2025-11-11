@@ -250,7 +250,7 @@ export default function Candidatos() {
               Nenhum candidato encontrado
             </h3>
             <p className="text-base text-muted-foreground mb-4 max-w-md">
-              💛 Adicione um novo clicando em "+ Novo Candidato"
+              Adicione um novo clicando em "+ Novo Candidato"
             </p>
             <Button onClick={() => navigate('/candidatos/novo')} className="bg-[#F9EC3F] hover:bg-[#E5D72E] text-[#00141D] font-bold">
               <Plus className="mr-2 h-4 w-4" />

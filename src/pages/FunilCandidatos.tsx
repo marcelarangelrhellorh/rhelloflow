@@ -268,7 +268,7 @@ export default function FunilCandidatos() {
                         Nenhum candidato nesta etapa ainda
                       </p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        💛 Movimente os cards conforme o andamento
+                        Movimente os cards conforme o andamento
                       </p>
                     </div> : candidatosInColumn.map(candidato => <CandidateFunnelCard key={candidato.id} candidato={candidato} onDragStart={() => setActiveId(candidato.id)} />)}
                 </FunnelColumn>;
