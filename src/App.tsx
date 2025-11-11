@@ -30,11 +30,8 @@ import WhatsAppTemplates from "./pages/WhatsAppTemplates";
 import Relatorios from "./pages/Relatorios";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
-
 const queryClient = new QueryClient();
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
+const App = () => <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
@@ -46,7 +43,7 @@ const App = () => (
           <Route path="/client-view/:token" element={<ClientView />} />
           <Route path="/feedback/:token" element={<FeedbackCliente />} />
           <Route element={<Layout />}>
-            <Route path="/" element={<Dashboard />} />
+            <Route path="/" element={<Dashboard />} className="bg-[t#] bg-[#faec3e]/[0.01]" />
             <Route path="/vagas" element={<Vagas />} />
             <Route path="/vagas/nova" element={<VagaForm />} />
             <Route path="/vagas/:id" element={<VagaDetalhes />} />
@@ -74,7 +71,5 @@ const App = () => (
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
-  </QueryClientProvider>
-);
-
+  </QueryClientProvider>;
 export default App;
