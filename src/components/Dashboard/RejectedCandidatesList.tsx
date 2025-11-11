@@ -165,7 +165,7 @@ export function RejectedCandidatesList({
               </Table>
             </div>
 
-            {candidates.length > 0 && <div className="text-sm text-muted-foreground">
+            {candidates.length > 0 && <div className="text-base font-bold text-muted-foreground">
                 Total: {candidates.length} candidatos sem WhatsApp de reprovação
               </div>}
           </div>
