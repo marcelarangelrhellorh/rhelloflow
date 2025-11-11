@@ -139,9 +139,9 @@ export default function Vagas() {
         <div className="flex gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline">
+              <Button className="font-bold transition-all duration-150 rounded-xl h-11 px-6 text-slate-950 bg-[#faec3e]">
                 <Link2 className="mr-2 h-4 w-4" />
-                Formulário Público
+                Formulário de vaga
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-64">
