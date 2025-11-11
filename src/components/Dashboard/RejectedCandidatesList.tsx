@@ -67,7 +67,7 @@ export function RejectedCandidatesList({
         <SheetContent side="right" className="w-full sm:max-w-4xl overflow-y-auto">
           <SheetHeader>
             <SheetTitle>Candidatos Reprovados sem WhatsApp</SheetTitle>
-            <SheetDescription>
+            <SheetDescription className="text-base font-bold">
               Lista de candidatos que foram reprovados e ainda não receberam mensagem de reprovação via WhatsApp.
               {selectedIds.size > 0 && <span className="ml-2 text-primary font-semibold">
                   ({selectedIds.size} selecionados)
