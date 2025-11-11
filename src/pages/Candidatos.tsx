@@ -203,7 +203,7 @@ export default function Candidatos() {
                 <Plus className="mr-2 h-4 w-4" />
                 Novo Candidato
               </Button>
-              <Button onClick={() => setImportModalOpen(true)} variant="outline" className="font-bold">
+              <Button onClick={() => setImportModalOpen(true)} variant="outline" className="font-bold text-[t] text-slate-950 bg-[#faec3e]">
                 <FileSpreadsheet className="mr-2 h-4 w-4" />
                 Importar XLS
               </Button>
