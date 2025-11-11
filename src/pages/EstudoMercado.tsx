@@ -360,7 +360,7 @@ export default function EstudoMercado() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Júnior">Júnior</SelectItem>
-                  <SelectItem value="Pleno">Pleno</SelectItem>
+                  <SelectItem value="Pleno" className="text-base">Pleno</SelectItem>
                   <SelectItem value="Sênior">Sênior</SelectItem>
                   <SelectItem value="Especialista">Especialista</SelectItem>
                 </SelectContent>
