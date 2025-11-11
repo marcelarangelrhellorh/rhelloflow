@@ -272,7 +272,7 @@ export function VagaCard({
         <div className="grid grid-cols-2 gap-4 pt-2">
           <div className="text-center">
             <div className="text-3xl font-bold text-[#00141D]">{vaga.candidatos_count || 0}</div>
-            <div className="text-xs text-[#00141D]/60 mt-1 font-medium">Total de Candidatos</div>
+            <div className="text-sm text-[#00141D]/60 mt-1 font-medium">Total de Candidatos</div>
           </div>
           <div className="text-center">
             <div className="text-3xl font-bold text-[#00141D]">{daysOpen}</div>
