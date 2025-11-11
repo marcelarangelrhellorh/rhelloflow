@@ -6,17 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Copy, Edit, Trash, TrendingUp, Users, Target } from "lucide-react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 interface ScorecardTemplate {
   id: string;
   name: string;
@@ -26,81 +16,74 @@ interface ScorecardTemplate {
   criteria_count?: number;
   usage_count?: number;
 }
-
 interface DashboardStats {
   totalTemplates: number;
   totalEvaluations: number;
   averageScore: number;
 }
-
 export default function Scorecards() {
   const navigate = useNavigate();
   const [templates, setTemplates] = useState<ScorecardTemplate[]>([]);
   const [stats, setStats] = useState<DashboardStats>({
     totalTemplates: 0,
     totalEvaluations: 0,
-    averageScore: 0,
+    averageScore: 0
   });
   const [loading, setLoading] = useState(true);
   const [deleteTemplateId, setDeleteTemplateId] = useState<string | null>(null);
-
   useEffect(() => {
     loadData();
   }, []);
-
   async function loadData() {
     try {
       setLoading(true);
 
       // Load templates with criteria count
-      const { data: templatesData, error: templatesError } = await supabase
-        .from("scorecard_templates")
-        .select("*")
-        .order("created_at", { ascending: false });
-
+      const {
+        data: templatesData,
+        error: templatesError
+      } = await supabase.from("scorecard_templates").select("*").order("created_at", {
+        ascending: false
+      });
       if (templatesError) throw templatesError;
 
       // Get criteria count for each template
-      const templatesWithCounts = await Promise.all(
-        (templatesData || []).map(async (template) => {
-          const { count: criteriaCount } = await supabase
-            .from("scorecard_criteria")
-            .select("*", { count: "exact", head: true })
-            .eq("template_id", template.id);
-
-          const { count: usageCount } = await supabase
-            .from("candidate_scorecards")
-            .select("*", { count: "exact", head: true })
-            .eq("template_id", template.id);
-
-          return {
-            ...template,
-            criteria_count: criteriaCount || 0,
-            usage_count: usageCount || 0,
-          };
-        })
-      );
-
+      const templatesWithCounts = await Promise.all((templatesData || []).map(async template => {
+        const {
+          count: criteriaCount
+        } = await supabase.from("scorecard_criteria").select("*", {
+          count: "exact",
+          head: true
+        }).eq("template_id", template.id);
+        const {
+          count: usageCount
+        } = await supabase.from("candidate_scorecards").select("*", {
+          count: "exact",
+          head: true
+        }).eq("template_id", template.id);
+        return {
+          ...template,
+          criteria_count: criteriaCount || 0,
+          usage_count: usageCount || 0
+        };
+      }));
       setTemplates(templatesWithCounts);
 
       // Calculate stats
-      const { count: totalEvaluations } = await supabase
-        .from("candidate_scorecards")
-        .select("*", { count: "exact", head: true });
-
-      const { data: avgScoreData } = await supabase
-        .from("candidate_scorecards")
-        .select("match_percentage");
-
-      const avgScore =
-        avgScoreData && avgScoreData.length > 0
-          ? avgScoreData.reduce((sum, s) => sum + (s.match_percentage || 0), 0) / avgScoreData.length
-          : 0;
-
+      const {
+        count: totalEvaluations
+      } = await supabase.from("candidate_scorecards").select("*", {
+        count: "exact",
+        head: true
+      });
+      const {
+        data: avgScoreData
+      } = await supabase.from("candidate_scorecards").select("match_percentage");
+      const avgScore = avgScoreData && avgScoreData.length > 0 ? avgScoreData.reduce((sum, s) => sum + (s.match_percentage || 0), 0) / avgScoreData.length : 0;
       setStats({
         totalTemplates: templatesWithCounts.length,
         totalEvaluations: totalEvaluations || 0,
-        averageScore: Math.round(avgScore),
+        averageScore: Math.round(avgScore)
       });
     } catch (error: any) {
       console.error("Erro ao carregar scorecards:", error);
@@ -109,58 +92,49 @@ export default function Scorecards() {
       setLoading(false);
     }
   }
-
   async function handleDuplicate(templateId: string) {
     try {
       // Get original template
-      const { data: originalTemplate, error: templateError } = await supabase
-        .from("scorecard_templates")
-        .select("*")
-        .eq("id", templateId)
-        .single();
-
+      const {
+        data: originalTemplate,
+        error: templateError
+      } = await supabase.from("scorecard_templates").select("*").eq("id", templateId).single();
       if (templateError) throw templateError;
 
       // Get criteria
-      const { data: criteria, error: criteriaError } = await supabase
-        .from("scorecard_criteria")
-        .select("*")
-        .eq("template_id", templateId);
-
+      const {
+        data: criteria,
+        error: criteriaError
+      } = await supabase.from("scorecard_criteria").select("*").eq("template_id", templateId);
       if (criteriaError) throw criteriaError;
 
       // Create new template
-      const { data: newTemplate, error: newTemplateError } = await supabase
-        .from("scorecard_templates")
-        .insert({
-          name: `${originalTemplate.name} (Cópia)`,
-          description: originalTemplate.description,
-          active: true,
-        })
-        .select()
-        .single();
-
+      const {
+        data: newTemplate,
+        error: newTemplateError
+      } = await supabase.from("scorecard_templates").insert({
+        name: `${originalTemplate.name} (Cópia)`,
+        description: originalTemplate.description,
+        active: true
+      }).select().single();
       if (newTemplateError) throw newTemplateError;
 
       // Duplicate criteria
       if (criteria && criteria.length > 0) {
-        const newCriteria = criteria.map((c) => ({
+        const newCriteria = criteria.map(c => ({
           template_id: newTemplate.id,
           category: c.category,
           name: c.name,
           description: c.description,
           weight: c.weight,
           scale_type: c.scale_type,
-          display_order: c.display_order,
+          display_order: c.display_order
         }));
-
-        const { error: criteriaInsertError } = await supabase
-          .from("scorecard_criteria")
-          .insert(newCriteria);
-
+        const {
+          error: criteriaInsertError
+        } = await supabase.from("scorecard_criteria").insert(newCriteria);
         if (criteriaInsertError) throw criteriaInsertError;
       }
-
       toast.success("Template duplicado com sucesso!");
       loadData();
     } catch (error: any) {
@@ -168,16 +142,12 @@ export default function Scorecards() {
       toast.error("Erro ao duplicar template");
     }
   }
-
   async function handleDelete(templateId: string) {
     try {
-      const { error } = await supabase
-        .from("scorecard_templates")
-        .delete()
-        .eq("id", templateId);
-
+      const {
+        error
+      } = await supabase.from("scorecard_templates").delete().eq("id", templateId);
       if (error) throw error;
-
       toast.success("Template excluído com sucesso!");
       setDeleteTemplateId(null);
       loadData();
@@ -186,17 +156,16 @@ export default function Scorecards() {
       toast.error("Erro ao excluir template");
     }
   }
-
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: '#FFFBF0' }}>
+    return <div className="flex items-center justify-center min-h-screen" style={{
+      backgroundColor: '#FFFBF0'
+    }}>
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="min-h-screen" style={{ backgroundColor: '#FFFBF0' }}>
+  return <div className="min-h-screen" style={{
+    backgroundColor: '#FFFBF0'
+  }}>
       {/* Header */}
       <div className="sticky top-0 z-20 bg-white border-b border-gray-200 shadow-sm">
         <div className="px-6 py-4">
@@ -207,10 +176,7 @@ export default function Scorecards() {
                 Gerencie templates de avaliação de candidatos
               </p>
             </div>
-            <Button
-              onClick={() => navigate("/scorecards/novo")}
-              className="bg-[#FFCD00] hover:bg-[#FAEC3E] text-[#00141D]"
-            >
+            <Button onClick={() => navigate("/scorecards/novo")} className="bg-[#FFCD00] hover:bg-[#FAEC3E] text-[#00141D] font-semibold">
               <Plus className="mr-2 h-4 w-4" />
               Novo Template
             </Button>
@@ -230,7 +196,7 @@ export default function Scorecards() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-[hsl(var(--foreground))]">{stats.totalTemplates}</div>
-              <p className="text-sm text-[hsl(var(--muted-foreground))] mt-1">Templates ativos</p>
+              <p className="text-sm text-[hsl(var(--muted-foreground))] mt-1 font-medium">Templates ativos</p>
             </CardContent>
           </Card>
 
@@ -243,7 +209,7 @@ export default function Scorecards() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-[hsl(var(--foreground))]">{stats.totalEvaluations}</div>
-              <p className="text-sm text-[hsl(var(--muted-foreground))] mt-1">Candidatos avaliados</p>
+              <p className="text-sm text-[hsl(var(--muted-foreground))] mt-1 font-medium">Candidatos avaliados</p>
             </CardContent>
           </Card>
 
@@ -256,7 +222,7 @@ export default function Scorecards() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-[hsl(var(--foreground))]">{stats.averageScore}%</div>
-              <p className="text-sm text-[hsl(var(--muted-foreground))] mt-1">Match geral</p>
+              <p className="text-sm text-[hsl(var(--muted-foreground))] mt-1 font-medium">Match geral</p>
             </CardContent>
           </Card>
         </div>
@@ -265,8 +231,7 @@ export default function Scorecards() {
         <div>
           <h2 className="text-xl font-bold mb-5 text-[hsl(var(--foreground))]">Templates de Avaliação</h2>
           
-          {templates.length === 0 ? (
-            <Card className="bg-gradient-to-br from-[hsl(var(--primary))]/5 to-[hsl(var(--accent))]/5 border-[hsl(var(--border))]">
+          {templates.length === 0 ? <Card className="bg-gradient-to-br from-[hsl(var(--primary))]/5 to-[hsl(var(--accent))]/5 border-[hsl(var(--border))]">
               <CardContent className="flex flex-col items-center justify-center py-16">
                 <div className="h-16 w-16 rounded-full bg-[hsl(var(--primary))]/10 flex items-center justify-center mb-5">
                   <Target className="h-10 w-10 text-[hsl(var(--primary-foreground))]" />
@@ -280,68 +245,46 @@ export default function Scorecards() {
                   Criar Template
                 </Button>
               </CardContent>
-            </Card>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {templates.map((template) => (
-                <Card key={template.id} className="hover:shadow-lg transition-all duration-200 bg-gradient-to-br from-white to-[hsl(var(--background))] border-[hsl(var(--border))]">
+            </Card> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {templates.map(template => <Card key={template.id} className="hover:shadow-lg transition-all duration-200 bg-gradient-to-br from-white to-[hsl(var(--background))] border-[hsl(var(--border))]">
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <CardTitle className="text-lg font-bold text-[hsl(var(--foreground))]">{template.name}</CardTitle>
-                        <CardDescription className="mt-1.5 text-base">
+                        <CardDescription className="mt-1.5 text-base font-medium">
                           {template.description || "Sem descrição"}
                         </CardDescription>
                       </div>
-                      {template.active && (
-                        <Badge variant="outline" className="bg-[hsl(var(--success))]/10 text-[hsl(var(--success))] border-[hsl(var(--success))]/30 font-medium">
+                      {template.active && <Badge variant="outline" className="bg-[hsl(var(--success))]/10 text-[hsl(var(--success))] border-[hsl(var(--success))]/30 font-medium">
                           Ativo
-                        </Badge>
-                      )}
+                        </Badge>}
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="flex items-center justify-between text-base">
-                      <span className="text-[hsl(var(--muted-foreground))]">Critérios:</span>
+                      <span className="text-[hsl(var(--muted-foreground))] font-semibold">Critérios:</span>
                       <span className="font-bold text-[hsl(var(--foreground))]">{template.criteria_count}</span>
                     </div>
                     <div className="flex items-center justify-between text-base">
-                      <span className="text-[hsl(var(--muted-foreground))]">Usado em:</span>
+                      <span className="text-[hsl(var(--muted-foreground))] font-semibold">Usado em:</span>
                       <span className="font-bold text-[hsl(var(--foreground))]">{template.usage_count} avaliações</span>
                     </div>
                     
                     <div className="flex gap-2 pt-3 border-t border-[hsl(var(--border))]">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => navigate(`/scorecards/${template.id}/editar`)}
-                        className="flex-1 hover:bg-[hsl(var(--primary))]/10 hover:border-[hsl(var(--primary))]/30"
-                      >
+                      <Button variant="outline" size="sm" onClick={() => navigate(`/scorecards/${template.id}/editar`)} className="flex-1 hover:bg-[hsl(var(--primary))]/10 hover:border-[hsl(var(--primary))]/30 font-semibold">
                         <Edit className="mr-2 h-4 w-4" />
                         Editar
                       </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDuplicate(template.id)}
-                        className="hover:bg-[hsl(var(--accent))]/10 hover:border-[hsl(var(--accent))]/30"
-                      >
+                      <Button variant="outline" size="sm" onClick={() => handleDuplicate(template.id)} className="hover:bg-[hsl(var(--accent))]/10 hover:border-[hsl(var(--accent))]/30">
                         <Copy className="h-4 w-4" />
                       </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setDeleteTemplateId(template.id)}
-                        className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
-                      >
+                      <Button variant="outline" size="sm" onClick={() => setDeleteTemplateId(template.id)} className="text-destructive hover:bg-destructive hover:text-destructive-foreground">
                         <Trash className="h-4 w-4" />
                       </Button>
                     </div>
                   </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
+                </Card>)}
+            </div>}
         </div>
       </div>
 
@@ -356,15 +299,11 @@ export default function Scorecards() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => deleteTemplateId && handleDelete(deleteTemplateId)}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
+            <AlertDialogAction onClick={() => deleteTemplateId && handleDelete(deleteTemplateId)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
               Excluir
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
-  );
+    </div>;
 }
