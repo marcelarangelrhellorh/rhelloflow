@@ -158,7 +158,7 @@ export default function Vagas() {
             </DropdownMenuContent>
           </DropdownMenu>
           
-          <Button onClick={() => navigate("/vagas/nova")} className="font-semibold">
+          <Button onClick={() => navigate("/vagas/nova")} className="font-bold transition-all duration-150 rounded-xl h-11 px-6 text-slate-950 bg-[#faec3e]">
             <Plus className="mr-2 h-5 w-5" />
             Nova Vaga
           </Button>
