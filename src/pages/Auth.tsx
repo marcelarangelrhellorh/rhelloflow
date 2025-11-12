@@ -36,8 +36,23 @@ export default function Auth() {
       if (data.user) {
         // Log successful login
         await logLoginSuccess(data.user.id, email);
+        
+        // Verificar se o usuário é cliente
+        const { data: rolesData } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", data.user.id)
+          .eq("role", "cliente")
+          .maybeSingle();
+
         toast.success("Login realizado com sucesso!");
-        navigate("/");
+        
+        // Redirecionar baseado no role
+        if (rolesData) {
+          navigate("/acompanhamento");
+        } else {
+          navigate("/");
+        }
       }
     } catch (error: any) {
       console.error("Erro na autenticação:", error);

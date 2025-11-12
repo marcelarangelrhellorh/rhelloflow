@@ -56,10 +56,15 @@ export default function Acompanhamento() {
     try {
       setLoading(true);
       
+      // Obter ID do usuário atual
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
       // Carregar vagas do cliente
       const { data: vagasData, error: vagasError } = await supabase
         .from("vagas")
         .select("*")
+        .eq("cliente_id", user.id)
         .order("criado_em", { ascending: false });
 
       if (vagasError) throw vagasError;
@@ -84,23 +89,35 @@ export default function Acompanhamento() {
         }
       }
 
-      // Carregar candidatos de todas as vagas do cliente
-      const { data: candidatosData, error: candidatosError } = await supabase
-        .from("candidatos")
-        .select("*")
-        .order("criado_em", { ascending: false });
+      // Carregar candidatos apenas das vagas do cliente
+      const vagaIds = vagasData?.map(v => v.id) || [];
+      
+      if (vagaIds.length > 0) {
+        const { data: candidatosData, error: candidatosError } = await supabase
+          .from("candidatos")
+          .select("*")
+          .in("vaga_relacionada_id", vagaIds)
+          .order("criado_em", { ascending: false });
 
-      if (candidatosError) throw candidatosError;
-      setCandidatos(candidatosData || []);
+        if (candidatosError) throw candidatosError;
+        setCandidatos(candidatosData || []);
+      } else {
+        setCandidatos([]);
+      }
 
-      // Carregar histórico de etapas
-      const { data: historyData, error: historyError } = await supabase
-        .from("job_stage_history")
-        .select("*")
-        .order("changed_at", { ascending: false });
+      // Carregar histórico de etapas apenas das vagas do cliente
+      if (vagaIds.length > 0) {
+        const { data: historyData, error: historyError } = await supabase
+          .from("job_stage_history")
+          .select("*")
+          .in("job_id", vagaIds)
+          .order("changed_at", { ascending: false });
 
-      if (historyError) throw historyError;
-      setStageHistory(historyData || []);
+        if (historyError) throw historyError;
+        setStageHistory(historyData || []);
+      } else {
+        setStageHistory([]);
+      }
 
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
