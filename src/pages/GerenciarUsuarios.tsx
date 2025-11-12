@@ -445,7 +445,7 @@ export default function GerenciarUsuarios() {
     const unlinkedJobs = availableJobs.filter(job => !job.cliente_id || job.cliente_id === client.id);
     return <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <Button variant="outline" size="sm" className="h-8">
+          <Button variant="outline" size="sm" className="h-8 font-semibold">
             <LinkIcon className="h-3.5 w-3.5 mr-1.5" />
             Vincular
           </Button>
@@ -763,7 +763,7 @@ export default function GerenciarUsuarios() {
           {/* TAB: Clientes */}
           <TabsContent value="clients" className="space-y-4">
             {/* Adicionar Cliente */}
-            {!showClientForm && <Button onClick={() => setShowClientForm(true)} className="w-full h-9" variant="outline">
+            {!showClientForm && <Button onClick={() => setShowClientForm(true)} variant="outline" className="w-full h-9 font-semibold">
                 <UserPlus className="mr-2 h-4 w-4" />
                 Adicionar Novo Usuário Externo
               </Button>}
@@ -837,7 +837,7 @@ export default function GerenciarUsuarios() {
             {/* Lista de Clientes */}
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-base">Clientes Cadastrados ({clients.length})</CardTitle>
+                <CardTitle className="text-base font-semibold">Clientes Cadastrados ({clients.length})</CardTitle>
               </CardHeader>
               <CardContent>
                 {clients.length === 0 ? <div className="text-center py-6 text-sm text-muted-foreground">
@@ -851,7 +851,7 @@ export default function GerenciarUsuarios() {
                           
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
-                              <h3 className="font-semibold text-base truncate">{client.name}</h3>
+                              <h3 className="font-semibold truncate text-lg">{client.name}</h3>
                               {getRoleBadge("cliente")}
                             </div>
                             <div className="flex items-center gap-1 text-sm text-muted-foreground truncate">
@@ -892,7 +892,7 @@ export default function GerenciarUsuarios() {
                         {clientJobs[client.id]?.length > 0 && <div className="border-t border-border pt-2.5">
                             <div className="flex items-center gap-1.5 mb-2">
                               <Briefcase className="h-4 w-4 text-muted-foreground" />
-                              <span className="text-sm font-medium text-muted-foreground">
+                              <span className="text-muted-foreground font-semibold text-base">
                                 Vagas ({clientJobs[client.id].length})
                               </span>
                             </div>
