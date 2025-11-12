@@ -383,7 +383,7 @@ export default function Acompanhamento() {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="border-primary">
                 <CardContent className="p-4">
                   <p className="text-muted-foreground mb-1 text-base font-semibold">Candidatos</p>
                   <div className="flex items-center gap-2">
@@ -393,7 +393,7 @@ export default function Acompanhamento() {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="border-primary">
                 <CardContent className="p-4">
                   <p className="text-muted-foreground mb-1 text-base font-semibold">Duração</p>
                   <div className="flex items-center gap-2">
@@ -405,7 +405,7 @@ export default function Acompanhamento() {
                 </CardContent>
               </Card>
 
-              {selectedVagaData.modelo_trabalho && <Card>
+              {selectedVagaData.modelo_trabalho && <Card className="border-primary">
                   <CardContent className="p-4">
                     <p className="text-muted-foreground mb-1 text-base font-semibold">Modelo</p>
                     <div className="flex items-center gap-2">
@@ -415,7 +415,7 @@ export default function Acompanhamento() {
                   </CardContent>
                 </Card>}
 
-              {selectedVagaData.regime && <Card>
+              {selectedVagaData.regime && <Card className="border-primary">
                   <CardContent className="p-4">
                     <p className="text-sm text-muted-foreground mb-1">Contratação</p>
                     <div className="flex items-center gap-2">
@@ -425,7 +425,7 @@ export default function Acompanhamento() {
                   </CardContent>
                 </Card>}
 
-              <Card>
+              <Card className="border-primary">
                 <CardContent className="p-4">
                   <p className="text-muted-foreground mb-1 text-base font-semibold">Vaga Publicada</p>
                   <div className="flex items-center gap-2">
