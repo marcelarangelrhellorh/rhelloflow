@@ -28,15 +28,12 @@ export function AppNavbar() {
   const navigate = useNavigate();
   const { roles, loading } = useUserRole();
 
-  // Debug: verificar roles carregados
-  console.log('AppNavbar - Roles do usuário:', roles);
-
-  // Filtrar itens do menu baseado nos roles do usuário
-  const visibleMenuItems = menuItems.filter(item => 
-    roles.some(role => item.roles.includes(role))
-  );
-
-  console.log('AppNavbar - Itens visíveis:', visibleMenuItems.map(i => i.title));
+  // Se o usuário tem role "client", mostrar APENAS a aba Acompanhamento
+  const visibleMenuItems = roles.includes('client')
+    ? menuItems.filter(item => item.url === '/acompanhamento')
+    : menuItems.filter(item => 
+        roles.some(role => item.roles.includes(role))
+      );
 
   if (loading) {
     return null;
