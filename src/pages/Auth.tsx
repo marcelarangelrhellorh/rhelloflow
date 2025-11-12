@@ -10,43 +10,37 @@ import { toast } from "sonner";
 import { logLoginSuccess, logLoginFailure, logRoleAssign } from "@/lib/auditLog";
 import logoLight from "@/assets/logo-rhello-light.png";
 import logoDark from "@/assets/logo-rhello-dark.png";
-
 export default function Auth() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const {
+        data,
+        error
+      } = await supabase.auth.signInWithPassword({
         email,
-        password,
+        password
       });
-
       if (error) {
         // Log failed login attempt
         await logLoginFailure(email, error.message);
         throw error;
       }
-
       if (data.user) {
         // Log successful login
         await logLoginSuccess(data.user.id, email);
-        
-        // Verificar se o usuário tem role client
-        const { data: rolesData } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", data.user.id)
-          .eq("role", "client")
-          .maybeSingle();
 
+        // Verificar se o usuário tem role client
+        const {
+          data: rolesData
+        } = await supabase.from("user_roles").select("role").eq("user_id", data.user.id).eq("role", "client").maybeSingle();
         toast.success("Login realizado com sucesso!");
-        
+
         // Redirecionar baseado no role
         if (rolesData) {
           navigate("/acompanhamento");
@@ -56,7 +50,6 @@ export default function Auth() {
       }
     } catch (error: any) {
       console.error("Erro na autenticação:", error);
-      
       if (error.message?.includes("Invalid login credentials")) {
         toast.error("Credenciais inválidas");
       } else {
@@ -66,9 +59,9 @@ export default function Auth() {
       setLoading(false);
     }
   };
-
-  return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden" style={{ backgroundColor: 'hsl(var(--background-dark))' }}>
+  return <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden" style={{
+    backgroundColor: 'hsl(var(--background-dark))'
+  }}>
       {/* Background decorative elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
@@ -79,27 +72,22 @@ export default function Auth() {
         <CardHeader className="space-y-6 text-center pb-8">
           {/* Logo Rhello + Flow */}
           <div className="flex items-center justify-center gap-1 mb-2">
-            <img 
-              src={logoLight} 
-              alt="Rhello RH" 
-              className="h-16 w-auto"
-            />
-            <span 
-              className="text-6xl font-black leading-none"
-              style={{ 
-                color: 'hsl(var(--background-dark))',
-                fontFamily: 'Manrope, sans-serif'
-              }}
-            >
+            <img src={logoLight} alt="Rhello RH" className="h-16 w-auto" />
+            <span className="text-6xl font-black leading-none" style={{
+            color: 'hsl(var(--background-dark))',
+            fontFamily: 'Manrope, sans-serif'
+          }}>
               Flow
             </span>
           </div>
           
           <div className="space-y-2">
-            <CardTitle className="text-3xl font-bold" style={{ color: 'hsl(var(--foreground))' }}>
+            <CardTitle className="text-3xl font-bold" style={{
+            color: 'hsl(var(--foreground))'
+          }}>
               Bem-vindo
             </CardTitle>
-            <CardDescription className="text-base">
+            <CardDescription className="text-base font-medium">
               Entre com suas credenciais para acessar o sistema
             </CardDescription>
           </div>
@@ -113,15 +101,7 @@ export default function Auth() {
               </Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="seu@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="pl-10 h-12 text-base"
-                />
+                <Input id="email" type="email" placeholder="seu@email.com" value={email} onChange={e => setEmail(e.target.value)} required className="pl-10 h-12 text-base" />
               </div>
             </div>
 
@@ -131,32 +111,15 @@ export default function Auth() {
               </Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={6}
-                  className="pl-10 h-12 text-base"
-                />
+                <Input id="password" type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required minLength={6} className="pl-10 h-12 text-base" />
               </div>
             </div>
 
-            <Button
-              type="submit"
-              className="w-full h-12 text-base font-semibold bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
-              disabled={loading}
-            >
-              {loading ? (
-                <div className="flex items-center gap-2">
+            <Button type="submit" className="w-full h-12 text-base font-semibold bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]" disabled={loading}>
+              {loading ? <div className="flex items-center gap-2">
                   <div className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
                   Processando...
-                </div>
-              ) : (
-                "Entrar"
-              )}
+                </div> : "Entrar"}
             </Button>
           </form>
 
@@ -165,6 +128,5 @@ export default function Auth() {
           </div>
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>;
 }
