@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useUsers } from "@/hooks/useUsers";
 import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,12 +11,14 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { Users, UserPlus, Mail, UserCircle, Shield, Edit, AlertCircle, Trash2, KeyRound } from "lucide-react";
+import { Users, UserPlus, Mail, UserCircle, Shield, Edit, AlertCircle, Trash2, KeyRound, Building2, Briefcase, Link as LinkIcon, X } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-type AppRole = "recrutador" | "cs" | "viewer" | "admin";
+type AppRole = "recrutador" | "cs" | "viewer" | "admin" | "cliente";
 
 export default function GerenciarUsuarios() {
   const navigate = useNavigate();
@@ -29,6 +31,16 @@ export default function GerenciarUsuarios() {
     role: "recrutador" as AppRole,
     password: ""
   });
+  const [clientFormData, setClientFormData] = useState({
+    email: "",
+    name: "",
+    company: "",
+    password: ""
+  });
+  const [showClientForm, setShowClientForm] = useState(false);
+  const [clients, setClients] = useState<any[]>([]);
+  const [clientJobs, setClientJobs] = useState<Record<string, any[]>>({});
+  const [availableJobs, setAvailableJobs] = useState<any[]>([]);
   const [editingUser, setEditingUser] = useState<any>(null);
   const [userRoles, setUserRoles] = useState<Record<string, AppRole[]>>({});
 
@@ -64,7 +76,64 @@ export default function GerenciarUsuarios() {
 
   useEffect(() => {
     loadUserRoles();
+    loadClients();
+    loadAvailableJobs();
   }, [users]);
+
+  const loadClients = async () => {
+    try {
+      const { data: clientRoles, error: rolesError } = await supabase
+        .from("user_roles")
+        .select("user_id")
+        .eq("role", "cliente");
+
+      if (rolesError) throw rolesError;
+
+      const clientIds = clientRoles?.map(r => r.user_id) || [];
+
+      if (clientIds.length === 0) {
+        setClients([]);
+        return;
+      }
+
+      const { data: clientUsers, error: usersError } = await supabase
+        .from("users")
+        .select("*")
+        .in("id", clientIds)
+        .order("name");
+
+      if (usersError) throw usersError;
+
+      setClients(clientUsers || []);
+
+      // Carregar vagas de cada cliente
+      const jobsMap: Record<string, any[]> = {};
+      for (const client of clientUsers || []) {
+        const { data: jobs } = await supabase
+          .from("vagas")
+          .select("id, titulo, empresa, status")
+          .eq("cliente_id", client.id);
+        jobsMap[client.id] = jobs || [];
+      }
+      setClientJobs(jobsMap);
+    } catch (error) {
+      console.error("Erro ao carregar clientes:", error);
+    }
+  };
+
+  const loadAvailableJobs = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("vagas")
+        .select("id, titulo, empresa, status")
+        .order("titulo");
+
+      if (error) throw error;
+      setAvailableJobs(data || []);
+    } catch (error) {
+      console.error("Erro ao carregar vagas:", error);
+    }
+  };
 
   // Não renderiza nada se não for admin
   if (roleLoading) {
@@ -104,6 +173,71 @@ export default function GerenciarUsuarios() {
     } catch (error: any) {
       console.error("Erro ao criar usuário:", error);
       toast.error(`❌ Erro ao criar usuário: ${error.message}`);
+    }
+  };
+
+  const handleClientSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      // Criar usuário cliente no auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: clientFormData.email,
+        password: clientFormData.password,
+        options: {
+          data: {
+            full_name: clientFormData.name,
+            role: "cliente"
+          }
+        }
+      });
+
+      if (authError) throw authError;
+
+      toast.success("✅ Cliente criado com sucesso! Um email de confirmação foi enviado.");
+      setShowClientForm(false);
+      setClientFormData({ email: "", name: "", company: "", password: "" });
+      loadClients();
+      reload();
+    } catch (error: any) {
+      console.error("Erro ao criar cliente:", error);
+      toast.error(`❌ Erro ao criar cliente: ${error.message}`);
+    }
+  };
+
+  const handleLinkJob = async (clientId: string, jobId: string) => {
+    try {
+      const { error } = await supabase
+        .from("vagas")
+        .update({ cliente_id: clientId })
+        .eq("id", jobId);
+
+      if (error) throw error;
+
+      toast.success("✅ Vaga vinculada ao cliente com sucesso!");
+      loadClients();
+      loadAvailableJobs();
+    } catch (error: any) {
+      console.error("Erro ao vincular vaga:", error);
+      toast.error(`❌ Erro ao vincular vaga: ${error.message}`);
+    }
+  };
+
+  const handleUnlinkJob = async (jobId: string) => {
+    try {
+      const { error } = await supabase
+        .from("vagas")
+        .update({ cliente_id: null })
+        .eq("id", jobId);
+
+      if (error) throw error;
+
+      toast.success("✅ Vaga desvinculada do cliente!");
+      loadClients();
+      loadAvailableJobs();
+    } catch (error: any) {
+      console.error("Erro ao desvincular vaga:", error);
+      toast.error(`❌ Erro ao desvincular vaga: ${error.message}`);
     }
   };
 
@@ -224,9 +358,65 @@ export default function GerenciarUsuarios() {
       admin: <Badge variant="destructive">Admin</Badge>,
       recrutador: <Badge className="bg-blue-500">Recrutador</Badge>,
       cs: <Badge className="bg-green-500">CS</Badge>,
-      viewer: <Badge variant="outline">Visualizador</Badge>
+      viewer: <Badge variant="outline">Visualizador</Badge>,
+      cliente: <Badge className="bg-purple-500">Cliente</Badge>
     };
     return badges[role as keyof typeof badges] || <Badge>{role}</Badge>;
+  };
+
+  const LinkJobDialog = ({ client }: { client: any }) => {
+    const [selectedJobId, setSelectedJobId] = useState("");
+    const [open, setOpen] = useState(false);
+    
+    const unlinkedJobs = availableJobs.filter(job => 
+      !job.cliente_id || job.cliente_id === client.id
+    );
+
+    return (
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          <Button variant="outline" size="sm">
+            <LinkIcon className="h-4 w-4 mr-2" />
+            Vincular Vaga
+          </Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Vincular Vaga - {client.name}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label htmlFor="job-select">Selecione a vaga</Label>
+              <Select value={selectedJobId} onValueChange={setSelectedJobId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Escolha uma vaga" />
+                </SelectTrigger>
+                <SelectContent>
+                  {unlinkedJobs.map((job) => (
+                    <SelectItem key={job.id} value={job.id}>
+                      {job.titulo} - {job.empresa}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Button 
+              onClick={() => {
+                if (selectedJobId) {
+                  handleLinkJob(client.id, selectedJobId);
+                  setOpen(false);
+                  setSelectedJobId("");
+                }
+              }}
+              disabled={!selectedJobId}
+              className="w-full"
+            >
+              Vincular
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
   };
 
   const RoleEditDialog = ({ user }: { user: any }) => {
@@ -372,6 +562,8 @@ export default function GerenciarUsuarios() {
     );
   };
 
+  const internalUsers = users.filter(user => !userRoles[user.id]?.includes("cliente"));
+
   return (
     <div className="min-h-screen p-8" style={{ backgroundColor: '#00141d' }}>
       <div className="mx-auto max-w-6xl">
@@ -382,13 +574,28 @@ export default function GerenciarUsuarios() {
               Gerenciar Usuários
             </h1>
             <p className="text-muted-foreground mt-2">
-              Administre recrutadores, CS e outros usuários do sistema
+              Administre usuários internos e clientes do sistema
             </p>
           </div>
           <Button onClick={() => navigate("/vagas")} variant="outline">
             Voltar
           </Button>
         </div>
+
+        <Tabs defaultValue="internal" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-6">
+            <TabsTrigger value="internal">
+              <Users className="h-4 w-4 mr-2" />
+              Usuários Internos ({internalUsers.length})
+            </TabsTrigger>
+            <TabsTrigger value="clients">
+              <Building2 className="h-4 w-4 mr-2" />
+              Clientes ({clients.length})
+            </TabsTrigger>
+          </TabsList>
+
+          {/* TAB: Usuários Internos */}
+          <TabsContent value="internal" className="space-y-6">
 
         {/* Adicionar Usuário */}
         {!showAddForm && (
@@ -476,21 +683,21 @@ export default function GerenciarUsuarios() {
           </Card>
         )}
 
-        {/* Lista de Usuários */}
+        {/* Lista de Usuários Internos */}
         <Card>
           <CardHeader>
-            <CardTitle>Usuários Cadastrados ({users.length})</CardTitle>
+            <CardTitle>Usuários Internos Cadastrados ({internalUsers.length})</CardTitle>
           </CardHeader>
           <CardContent>
             {loading ? (
               <div className="text-center py-8 text-muted-foreground">Carregando...</div>
-            ) : users.length === 0 ? (
+            ) : internalUsers.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
-                Nenhum usuário cadastrado
+                Nenhum usuário interno cadastrado
               </div>
             ) : (
               <div className="space-y-4">
-                {users.map((user) => (
+                {internalUsers.map((user) => (
                   <div
                     key={user.id}
                     className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors"
@@ -559,7 +766,7 @@ export default function GerenciarUsuarios() {
           </CardContent>
         </Card>
 
-        {/* Informações */}
+        {/* Informações sobre Usuários Internos */}
         <Card className="mt-6 bg-blue-500/10 border-blue-500/20">
           <CardContent className="pt-6">
             <div className="flex gap-3">
@@ -580,6 +787,232 @@ export default function GerenciarUsuarios() {
             </div>
           </CardContent>
         </Card>
+          </TabsContent>
+
+          {/* TAB: Clientes */}
+          <TabsContent value="clients" className="space-y-6">
+            {/* Adicionar Cliente */}
+            {!showClientForm && (
+              <Card>
+                <CardContent className="pt-6">
+                  <Button onClick={() => setShowClientForm(true)} className="w-full">
+                    <UserPlus className="mr-2 h-4 w-4" />
+                    Adicionar Novo Cliente
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+
+            {showClientForm && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Novo Cliente</CardTitle>
+                  <CardDescription>
+                    Clientes terão acesso apenas à aba de Acompanhamento de suas vagas
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleClientSubmit} className="space-y-4">
+                    <div>
+                      <Label htmlFor="client-name">Nome Completo *</Label>
+                      <Input
+                        id="client-name"
+                        required
+                        value={clientFormData.name}
+                        onChange={(e) => setClientFormData({ ...clientFormData, name: e.target.value })}
+                        placeholder="Nome do cliente"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="client-company">Empresa *</Label>
+                      <Input
+                        id="client-company"
+                        required
+                        value={clientFormData.company}
+                        onChange={(e) => setClientFormData({ ...clientFormData, company: e.target.value })}
+                        placeholder="Nome da empresa"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="client-email">Email *</Label>
+                      <Input
+                        id="client-email"
+                        type="email"
+                        required
+                        value={clientFormData.email}
+                        onChange={(e) => setClientFormData({ ...clientFormData, email: e.target.value })}
+                        placeholder="email@empresa.com"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="client-password">Senha Temporária *</Label>
+                      <Input
+                        id="client-password"
+                        type="password"
+                        required
+                        minLength={6}
+                        value={clientFormData.password}
+                        onChange={(e) => setClientFormData({ ...clientFormData, password: e.target.value })}
+                        placeholder="Mínimo 6 caracteres"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        O cliente receberá um email para confirmar e alterar a senha
+                      </p>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <Button type="submit" className="flex-1">
+                        Criar Cliente
+                      </Button>
+                      <Button type="button" variant="outline" onClick={() => setShowClientForm(false)}>
+                        Cancelar
+                      </Button>
+                    </div>
+                  </form>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Lista de Clientes */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Clientes Cadastrados ({clients.length})</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {clients.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    Nenhum cliente cadastrado
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {clients.map((client) => (
+                      <div
+                        key={client.id}
+                        className="border rounded-lg p-4 space-y-4"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4 flex-1">
+                            <div className="h-12 w-12 rounded-full bg-purple-500/10 flex items-center justify-center">
+                              <Building2 className="h-6 w-6 text-purple-500" />
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <h3 className="font-semibold">{client.name}</h3>
+                                {getRoleBadge("cliente")}
+                              </div>
+                              <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                                <Mail className="h-3 w-3" />
+                                {client.email}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-4">
+                            <LinkJobDialog client={client} />
+                            <PasswordResetDialog user={client} />
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="ghost" size="sm" title="Excluir cliente">
+                                  <Trash2 className="h-4 w-4 text-destructive" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Tem certeza que deseja excluir o cliente <strong>{client.name}</strong>?
+                                    Esta ação não pode ser desfeita.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => handleDeleteUser(client.id, client.name)}
+                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  >
+                                    Excluir
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                            <div className="flex items-center gap-2">
+                              <Label htmlFor={`active-${client.id}`} className="text-sm">
+                                {client.active ? "Ativo" : "Inativo"}
+                              </Label>
+                              <Switch
+                                id={`active-${client.id}`}
+                                checked={client.active}
+                                onCheckedChange={() => toggleUserStatus(client.id, client.active)}
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Vagas Vinculadas */}
+                        <div className="pl-16">
+                          <div className="flex items-center gap-2 mb-3">
+                            <Briefcase className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm font-medium text-muted-foreground">
+                              Vagas Vinculadas ({clientJobs[client.id]?.length || 0})
+                            </span>
+                          </div>
+                          {clientJobs[client.id]?.length > 0 ? (
+                            <div className="space-y-2">
+                              {clientJobs[client.id].map((job) => (
+                                <div
+                                  key={job.id}
+                                  className="flex items-center justify-between p-3 bg-accent/50 rounded-md"
+                                >
+                                  <div>
+                                    <p className="font-medium text-sm">{job.titulo}</p>
+                                    <p className="text-xs text-muted-foreground">{job.empresa}</p>
+                                  </div>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleUnlinkJob(job.id)}
+                                    title="Desvincular vaga"
+                                  >
+                                    <X className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-sm text-muted-foreground">
+                              Nenhuma vaga vinculada a este cliente
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Informações sobre Clientes */}
+            <Card className="bg-purple-500/10 border-purple-500/20">
+              <CardContent className="pt-6">
+                <div className="flex gap-3">
+                  <Building2 className="h-5 w-5 text-purple-500 shrink-0 mt-0.5" />
+                  <div className="space-y-2 text-sm">
+                    <p className="font-semibold text-purple-500">Sobre Clientes:</p>
+                    <ul className="space-y-1 text-muted-foreground">
+                      <li><strong>Acesso Restrito:</strong> Clientes veem apenas a aba "Acompanhamento"</li>
+                      <li><strong>Visão Limitada:</strong> Podem visualizar apenas suas vagas e candidatos vinculados</li>
+                      <li><strong>Sem Edição:</strong> Não têm permissão para editar ou excluir dados</li>
+                      <li><strong>Vinculação de Vagas:</strong> Use o botão "Vincular Vaga" para associar vagas aos clientes</li>
+                    </ul>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
