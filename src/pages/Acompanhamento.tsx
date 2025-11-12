@@ -283,11 +283,11 @@ export default function Acompanhamento() {
 
         {/* Metrics Cards */}
         {!selectedVaga && <div className="grid gap-4 sm:grid-cols-3">
-            <Card className="border-2 border-primary">
+            <Card className="border-2">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-muted-foreground mb-1 font-semibold">Vagas em Aberto</p>
+                    <p className="text-muted-foreground mb-1 font-semibold text-base">Vagas em Aberto</p>
                     <p className="text-3xl font-bold text-foreground">{totalVagasAbertas}</p>
                   </div>
                   <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
@@ -297,11 +297,11 @@ export default function Acompanhamento() {
               </CardContent>
             </Card>
 
-            <Card className="border-2 border-primary">
+            <Card className="border-2">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-muted-foreground mb-1 font-semibold">Total de Candidatos</p>
+                    <p className="text-muted-foreground mb-1 font-semibold text-base">Total de Candidatos</p>
                     <p className="text-3xl font-bold text-foreground">{totalCandidatos}</p>
                   </div>
                   <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
@@ -311,11 +311,11 @@ export default function Acompanhamento() {
               </CardContent>
             </Card>
 
-            <Card className="border-2 border-primary cursor-pointer transition-all hover:shadow-md hover:border-primary/50" onClick={() => setNoFeedbackDrawerOpen(true)}>
+            <Card className="border-2 cursor-pointer transition-all hover:shadow-md hover:border-primary/50" onClick={() => setNoFeedbackDrawerOpen(true)}>
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-muted-foreground mb-1 font-semibold">Sem Feedback</p>
+                    <p className="text-muted-foreground mb-1 font-semibold text-base">Sem Feedback</p>
                     <p className="text-3xl font-bold text-foreground">{totalSemFeedback}</p>
                   </div>
                   <div className="h-12 w-12 rounded-full bg-orange-500/10 flex items-center justify-center">
@@ -335,9 +335,9 @@ export default function Acompanhamento() {
                   <CardContent className="p-4">
                     <div className="space-y-2">
                       <div className="flex items-start justify-between gap-2">
-                        <h3 className="font-semibold text-base text-foreground line-clamp-2">{vaga.titulo}</h3>
+                        <h3 className="font-semibold text-foreground line-clamp-2 text-base">{vaga.titulo}</h3>
                       </div>
-                      <p className="text-sm text-muted-foreground font-semibold">
+                      <p className="text-muted-foreground font-semibold text-base">
                         {formatSalaryRange(vaga.salario_min, vaga.salario_max, vaga.salario_modalidade)}
                       </p>
                       <div className="pt-2 border-t border-border">
