@@ -20,7 +20,7 @@ import symbolRhelloLight from "@/assets/symbol-rhello-light.png";
   { title: "Scorecards", url: "/scorecards", roles: ["admin", "recrutador", "cs"] },
   { title: "Estudo de Mercado", url: "/estudo-mercado", roles: ["admin", "recrutador", "cs"] },
   { title: "Relatórios", url: "/relatorios", roles: ["admin", "recrutador", "cs"] },
-  { title: "Acompanhamento", url: "/acompanhamento", roles: ["admin", "client"] },
+  { title: "Processos", url: "/acompanhamento", roles: ["admin", "client"] },
 ];
 
 export function AppNavbar() {
