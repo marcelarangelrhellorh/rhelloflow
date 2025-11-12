@@ -273,14 +273,18 @@ export default function Relatorios() {
 
       // Buscar todos os profiles dos recrutadores únicos
       const recruiterIds = [...new Set(vagas.map(v => v.recrutador_id).filter(Boolean))];
+      console.log("📊 Recruiter IDs a buscar:", recruiterIds);
+      
       const { data: profiles, error: profilesError } = await supabase
         .from("profiles")
         .select("id, full_name")
         .in("id", recruiterIds);
 
       if (profilesError) {
-        console.error("Erro ao carregar profiles:", profilesError);
+        console.error("❌ Erro ao carregar profiles:", profilesError);
       }
+      
+      console.log("📊 Profiles retornados:", profiles);
 
       // Criar um mapa de id -> nome
       const profilesMap = new Map(profiles?.map(p => [p.id, p.full_name]) || []);
