@@ -237,23 +237,37 @@ export default function Relatorios() {
   };
 
   const loadRecruiterPerformance = async () => {
-    const { data: vagas } = await supabase
-      .from("vagas")
-      .select(`
-        id,
-        recrutador_id,
-        profiles:recrutador_id (full_name)
-      `)
-      .gte("criado_em", dateFrom)
-      .lte("criado_em", dateTo);
+    try {
+      const { data: vagas, error: vagasError } = await supabase
+        .from("vagas")
+        .select(`
+          id,
+          recrutador_id,
+          profiles:recrutador_id (full_name)
+        `)
+        .gte("criado_em", dateFrom)
+        .lte("criado_em", dateTo);
 
-    if (!vagas) return;
+      if (vagasError) {
+        console.error("Erro ao carregar vagas para performance:", vagasError);
+        setRecruiterData([]);
+        return;
+      }
 
-    const { data: candidatos } = await supabase
-      .from("candidatos")
-      .select("id, status, vaga_relacionada_id, criado_em")
-      .gte("criado_em", dateFrom)
-      .lte("criado_em", dateTo);
+      if (!vagas || vagas.length === 0) {
+        setRecruiterData([]);
+        return;
+      }
+
+      const { data: candidatos, error: candidatosError } = await supabase
+        .from("candidatos")
+        .select("id, status, vaga_relacionada_id, criado_em")
+        .gte("criado_em", dateFrom)
+        .lte("criado_em", dateTo);
+
+      if (candidatosError) {
+        console.error("Erro ao carregar candidatos para performance:", candidatosError);
+      }
 
     const recruiterStats: Record<string, any> = {};
 
@@ -294,18 +308,22 @@ export default function Relatorios() {
       }
     });
 
-    const recruiterArray: RecruiterPerformance[] = Object.values(recruiterStats)
-      .map((r: any) => ({
-        recrutador_nome: r.recrutador_nome,
-        vagas: r.vagas,
-        candidatos: r.candidatos,
-        contratacoes: r.contratacoes,
-        avg_time_to_hire: r.hired_count > 0 ? Math.round(r.total_days / r.hired_count) : 0
-      }))
-      .sort((a, b) => b.contratacoes - a.contratacoes)
-      .slice(0, 10);
+      const recruiterArray: RecruiterPerformance[] = Object.values(recruiterStats)
+        .map((r: any) => ({
+          recrutador_nome: r.recrutador_nome,
+          vagas: r.vagas,
+          candidatos: r.candidatos,
+          contratacoes: r.contratacoes,
+          avg_time_to_hire: r.hired_count > 0 ? Math.round(r.total_days / r.hired_count) : 0
+        }))
+        .sort((a, b) => b.contratacoes - a.contratacoes)
+        .slice(0, 10);
 
-    setRecruiterData(recruiterArray);
+      setRecruiterData(recruiterArray);
+    } catch (error) {
+      console.error("Erro ao carregar performance de recrutadores:", error);
+      setRecruiterData([]);
+    }
   };
 
   const loadOverdueJobs = async () => {
@@ -588,6 +606,8 @@ export default function Relatorios() {
         <CardContent>
           {loading ? (
             <Skeleton className="h-[200px] w-full" />
+          ) : recruiterData.length === 0 ? (
+            <p className="text-muted-foreground text-center py-8">Nenhum dado de performance disponível para o período selecionado</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
