@@ -56,7 +56,7 @@ export function VagaCandidatesTable({ candidatos, vagaId, vagaTitulo }: VagaCand
                   <td className="p-4 font-medium">{candidato.nome_completo}</td>
                   <td className="p-4">
                     <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeClass(
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-semibold ${getStatusBadgeClass(
                         candidato.status
                       )}`}
                     >
