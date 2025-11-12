@@ -331,7 +331,7 @@ export default function Acompanhamento() {
             {vagas.map(vaga => {
           const vagaCandidatosCount = candidatos.filter(c => c.vaga_relacionada_id === vaga.id).length;
           const currentStage = getStageBySlug(vaga.status);
-          return <Card key={vaga.id} className="cursor-pointer transition-all hover:shadow-md border-2 border-primary hover:border-primary/50" onClick={() => setSelectedVaga(vaga.id)}>
+          return <Card key={vaga.id} className="cursor-pointer transition-all hover:shadow-md border-2 border-border hover:border-muted-foreground/50" onClick={() => setSelectedVaga(vaga.id)}>
                   <CardContent className="p-4">
                     <div className="space-y-2">
                       <div className="flex items-start justify-between gap-2">
