@@ -448,7 +448,7 @@ export default function Acompanhamento() {
                     <h3 className="font-semibold text-lg">Benefícios Oferecidos</h3>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    {selectedVagaData.beneficios.map((beneficio, index) => <Badge key={index} variant="outline" className="bg-primary/10 text-primary border-primary/20">
+                    {selectedVagaData.beneficios.map((beneficio, index) => <Badge key={index} variant="outline" className="bg-primary/10 text-primary border-primary/20 text-base font-semibold">
                         {beneficio}
                       </Badge>)}
                   </div>
