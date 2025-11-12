@@ -28,10 +28,15 @@ export function AppNavbar() {
   const navigate = useNavigate();
   const { roles, loading } = useUserRole();
 
+  // Debug: verificar roles carregados
+  console.log('AppNavbar - Roles do usuário:', roles);
+
   // Filtrar itens do menu baseado nos roles do usuário
   const visibleMenuItems = menuItems.filter(item => 
     roles.some(role => item.roles.includes(role))
   );
+
+  console.log('AppNavbar - Itens visíveis:', visibleMenuItems.map(i => i.title));
 
   if (loading) {
     return null;
