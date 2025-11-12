@@ -149,7 +149,7 @@ export function ClientCandidateDrawer({ open, onOpenChange, candidateId }: Clien
                 <p className="text-muted-foreground">{candidate.nivel} - {candidate.area}</p>
               </div>
             </div>
-            <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
+            <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 text-base font-semibold">
               {candidate.status}
             </Badge>
           </div>
