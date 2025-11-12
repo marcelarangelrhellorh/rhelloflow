@@ -20,7 +20,7 @@ const menuItems = [
   { title: "Scorecards", url: "/scorecards", roles: ["admin", "recrutador", "cs"] },
   { title: "Estudo de Mercado", url: "/estudo-mercado", roles: ["admin", "recrutador", "cs"] },
   { title: "Relatórios", url: "/relatorios", roles: ["admin", "recrutador", "cs"] },
-  { title: "Acompanhamento", url: "/acompanhamento", roles: ["cliente"] },
+  { title: "Acompanhamento", url: "/acompanhamento", roles: ["admin", "cliente"] },
 ];
 
 export function AppNavbar() {

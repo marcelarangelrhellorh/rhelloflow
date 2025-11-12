@@ -56,15 +56,30 @@ export default function Acompanhamento() {
     try {
       setLoading(true);
       
-      // Obter ID do usuário atual
+      // Obter ID do usuário atual e role
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Carregar vagas do cliente
-      const { data: vagasData, error: vagasError } = await supabase
+      // Verificar se é admin
+      const { data: rolesData } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .eq("role", "admin")
+        .maybeSingle();
+
+      const isAdmin = !!rolesData;
+
+      // Carregar vagas - admin vê todas, cliente vê apenas as suas
+      let vagasQuery = supabase
         .from("vagas")
-        .select("*")
-        .eq("cliente_id", user.id)
+        .select("*");
+      
+      if (!isAdmin) {
+        vagasQuery = vagasQuery.eq("cliente_id", user.id);
+      }
+
+      const { data: vagasData, error: vagasError } = await vagasQuery
         .order("criado_em", { ascending: false });
 
       if (vagasError) throw vagasError;
