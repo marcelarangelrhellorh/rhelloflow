@@ -73,10 +73,10 @@ export default function Auth() {
           {/* Logo Rhello + Flow */}
           <div className="flex items-center justify-center gap-1 mb-2">
             <img src={logoLight} alt="Rhello RH" className="h-16 w-auto" />
-            <span className="text-6xl font-black leading-none" style={{
+            <span style={{
             color: 'hsl(var(--background-dark))',
             fontFamily: 'Manrope, sans-serif'
-          }}>
+          }} className="text-6xl font-black leading-none text-[#ffcd00]">
               Flow
             </span>
           </div>
