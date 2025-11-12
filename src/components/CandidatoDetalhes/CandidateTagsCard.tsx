@@ -10,6 +10,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { TagPicker } from "@/components/TagPicker";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { logger } from "@/lib/logger";
 interface CandidateTag {
   id: string;
   tag_id: string;
@@ -66,7 +67,7 @@ export function CandidateTagsCard({
       if (error) throw error;
       setTags(data || []);
     } catch (error: any) {
-      console.error("Erro ao carregar tags:", error);
+      logger.error("Erro ao carregar tags:", error);
       toast.error("Erro ao carregar tags");
     } finally {
       setLoading(false);
@@ -100,9 +101,9 @@ export function CandidateTagsCard({
       setSelectedTagIds([]);
       loadTags();
     } catch (error: any) {
-      console.error("Erro ao adicionar tags:", error);
+      logger.error("Erro ao adicionar tags:", error);
       toast.error("Erro ao adicionar tags");
-    } finally {
+    } finally{
       setSaving(false);
     }
   };
@@ -115,7 +116,7 @@ export function CandidateTagsCard({
       toast.success("Tag removida");
       loadTags();
     } catch (error: any) {
-      console.error("Erro ao remover tag:", error);
+      logger.error("Erro ao remover tag:", error);
       toast.error("Erro ao remover tag");
     }
   };

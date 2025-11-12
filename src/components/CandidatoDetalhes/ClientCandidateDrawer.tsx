@@ -25,6 +25,7 @@ import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { logger } from "@/lib/logger";
 
 interface Feedback {
   id: string;
@@ -97,7 +98,7 @@ export function ClientCandidateDrawer({ open, onOpenChange, candidateId }: Clien
       setFeedbackRequests(requestsData || []);
 
     } catch (error) {
-      console.error("Erro ao carregar dados do candidato:", error);
+      logger.error("Erro ao carregar dados do candidato:", error);
     } finally {
       setLoading(false);
     }

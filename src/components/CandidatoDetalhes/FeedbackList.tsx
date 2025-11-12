@@ -5,6 +5,7 @@ import { Plus, MessageSquare, Trash2, Star, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useEffect, useState } from "react";
+import { logger } from "@/lib/logger";
 interface Feedback {
   id: string;
   tipo: "interno" | "cliente";
@@ -93,7 +94,7 @@ export function FeedbackList({
         }
       }
     } catch (error: any) {
-      console.error("Erro ao carregar feedbacks:", error);
+      logger.error("Erro ao carregar feedbacks:", error);
       toast({
         title: "Erro",
         description: "Não foi possível carregar os feedbacks.",
@@ -117,7 +118,7 @@ export function FeedbackList({
         description: "Feedback excluído com sucesso!"
       });
     } catch (error: any) {
-      console.error("Erro ao excluir feedback:", error);
+      logger.error("Erro ao excluir feedback:", error);
       toast({
         title: "Erro",
         description: "Não foi possível excluir o feedback.",

@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { logger } from "@/lib/logger";
 
 interface AddCandidateModalProps {
   open: boolean;
@@ -54,7 +55,7 @@ export function AddCandidateModal({ open, onOpenChange, onSuccess }: AddCandidat
       if (error) throw error;
       setRecruiters(data || []);
     } catch (error: any) {
-      console.error("Erro ao carregar recrutadores:", error);
+      logger.error("Erro ao carregar recrutadores:", error);
     }
   };
 
@@ -86,7 +87,7 @@ export function AddCandidateModal({ open, onOpenChange, onSuccess }: AddCandidat
       onSuccess();
       resetForm();
     } catch (error: any) {
-      console.error("Erro ao adicionar candidato:", error);
+      logger.error("Erro ao adicionar candidato:", error);
       toast.error("Erro ao adicionar candidato");
     } finally {
       setLoading(false);

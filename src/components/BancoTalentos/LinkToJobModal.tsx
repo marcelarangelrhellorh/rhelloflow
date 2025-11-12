@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { logger } from "@/lib/logger";
 
 interface LinkToJobModalProps {
   open: boolean;
@@ -50,7 +51,7 @@ export function LinkToJobModal({ open, onOpenChange, candidateId, onSuccess }: L
       if (error) throw error;
       setVagas(data || []);
     } catch (error: any) {
-      console.error("Erro ao carregar vagas:", error);
+      logger.error("Erro ao carregar vagas:", error);
       toast.error("Erro ao carregar vagas disponíveis");
     }
   };
@@ -112,7 +113,7 @@ export function LinkToJobModal({ open, onOpenChange, candidateId, onSuccess }: L
       toast.success("Candidato vinculado à vaga com sucesso!");
       onSuccess();
     } catch (error: any) {
-      console.error("Erro ao vincular candidato:", error);
+      logger.error("Erro ao vincular candidato:", error);
       toast.error("Erro ao vincular candidato à vaga");
     } finally {
       setLoading(false);

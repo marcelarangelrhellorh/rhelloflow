@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { StarRating } from "@/components/ui/star-rating";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { logger } from "@/lib/logger";
 
 interface FeedbackModalProps {
   open: boolean;
@@ -128,7 +129,7 @@ export function FeedbackModal({
       onOpenChange(false);
       onSuccess?.();
     } catch (error: any) {
-      console.error("Erro ao criar feedback:", error);
+      logger.error("Erro ao criar feedback:", error);
       toast({
         title: "Erro",
         description: error.message || "Não foi possível adicionar o feedback.",
