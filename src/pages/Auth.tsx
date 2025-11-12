@@ -76,7 +76,7 @@ export default function Auth() {
             <span style={{
             color: 'hsl(var(--background-dark))',
             fontFamily: 'Manrope, sans-serif'
-          }} className="text-6xl font-black leading-none text-[#ffcd00]">
+          }} className="text-6xl font-black leading-none text-[#faec3e]">
               Flow
             </span>
           </div>
@@ -115,7 +115,7 @@ export default function Auth() {
               </div>
             </div>
 
-            <Button type="submit" className="w-full h-12 text-base font-semibold bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]" disabled={loading}>
+            <Button type="submit" disabled={loading} className="w-full h-12 text-base font-semibold text-primary-foreground transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] bg-[#faec3e]">
               {loading ? <div className="flex items-center gap-2">
                   <div className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
                   Processando...
