@@ -14,6 +14,9 @@ import { LinkToJobModal } from "@/components/BancoTalentos/LinkToJobModal";
 import { ImportXlsModal } from "@/components/ImportXlsModal";
 import { handleDelete as performDeletion } from "@/lib/deletionUtils";
 import { useUserRole } from "@/hooks/useUserRole";
+import { usePagination } from "@/hooks/usePagination";
+import { PaginationControls } from "@/components/ui/pagination-controls";
+import { logger } from "@/lib/logger";
 type Candidato = {
   id: string;
   nome_completo: string;
@@ -70,7 +73,7 @@ export default function Candidatos() {
       setVagas(data || []);
       return data || [];
     } catch (error) {
-      console.error("Erro ao carregar vagas:", error);
+      logger.error("Erro ao carregar vagas:", error);
       return [];
     }
   };
@@ -97,7 +100,7 @@ export default function Candidatos() {
       }));
       setCandidatos(candidatosEnriquecidos);
     } catch (error) {
-      console.error("Erro ao carregar candidatos:", error);
+      logger.error("Erro ao carregar candidatos:", error);
       toast.error("Erro ao carregar candidatos");
     } finally {
       setLoading(false);
@@ -145,7 +148,7 @@ export default function Candidatos() {
       toast.success("✅ Candidato marcado para exclusão com sucesso");
       loadCandidatos();
     } catch (error) {
-      console.error("Erro ao excluir candidato:", error);
+      logger.error("Erro ao excluir candidato:", error);
       toast.error("❌ Erro ao excluir candidato");
     } finally {
       setDeletingId(null);
@@ -180,6 +183,19 @@ export default function Candidatos() {
     acc[c.status] = (acc[c.status] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
+
+  // Pagination
+  const {
+    paginatedData: paginatedCandidatos,
+    currentPage,
+    totalPages,
+    goToPage,
+    canGoNext,
+    canGoPrevious,
+    startIndex,
+    endIndex,
+  } = usePagination(filteredCandidatos, 50);
+
   if (loading) {
     return <div className="flex min-h-screen items-center justify-center" style={{
       backgroundColor: '#FFFBF0'
@@ -256,9 +272,23 @@ export default function Candidatos() {
               <Plus className="mr-2 h-4 w-4" />
               Novo Candidato
             </Button>
-          </div> : <div className={viewMode === "grid" ? "grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "space-y-4"}>
-            {filteredCandidatos.map(candidato => <CandidateCard key={candidato.id} candidato={candidato} onView={() => navigate(`/candidatos/${candidato.id}`)} onEdit={() => navigate(`/candidatos/${candidato.id}/editar`)} onDelete={() => setDeletingId(candidato.id)} onLinkJob={() => setLinkingJobId(candidato.id)} viewMode={viewMode} />)}
-          </div>}
+          </div> : (
+            <>
+              <div className={viewMode === "grid" ? "grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "space-y-4"}>
+                {paginatedCandidatos.map(candidato => <CandidateCard key={candidato.id} candidato={candidato} onView={() => navigate(`/candidatos/${candidato.id}`)} onEdit={() => navigate(`/candidatos/${candidato.id}/editar`)} onDelete={() => setDeletingId(candidato.id)} onLinkJob={() => setLinkingJobId(candidato.id)} viewMode={viewMode} />)}
+              </div>
+              <PaginationControls
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={goToPage}
+                canGoPrevious={canGoPrevious}
+                canGoNext={canGoNext}
+                startIndex={startIndex}
+                endIndex={endIndex}
+                totalItems={filteredCandidatos.length}
+              />
+            </>
+          )}
       </div>
 
       {/* Modals */}

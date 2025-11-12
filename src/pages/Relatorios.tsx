@@ -10,6 +10,9 @@ import { Download, FileDown, Briefcase, Users, Clock, AlertTriangle, TrendingUp,
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
+import { usePagination } from "@/hooks/usePagination";
+import { PaginationControls } from "@/components/ui/pagination-controls";
+import { logger } from "@/lib/logger";
 
 interface KPIData {
   vagas_abertas: number;
@@ -77,6 +80,89 @@ const KPICard = ({ title, value, icon, iconBgColor }: KPICardProps) => (
   </Card>
 );
 
+// Component for recruiter performance table with pagination
+const RecruiterPerformanceTable = ({ loading, recruiterData, onExport }: { 
+  loading: boolean; 
+  recruiterData: RecruiterPerformance[];
+  onExport: () => void;
+}) => {
+  const {
+    paginatedData,
+    currentPage,
+    totalPages,
+    goToPage,
+    canGoNext,
+    canGoPrevious,
+    startIndex,
+    endIndex,
+  } = usePagination(recruiterData, 20);
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex justify-between items-center">
+          <div>
+            <CardTitle>Performance por Recrutador</CardTitle>
+            <CardDescription>Métricas individuais de performance</CardDescription>
+          </div>
+          <Button 
+            size="sm" 
+            variant="outline"
+            onClick={onExport}
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Exportar CSV
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {loading ? (
+          <Skeleton className="h-[200px] w-full" />
+        ) : recruiterData.length === 0 ? (
+          <p className="text-muted-foreground text-center py-8">Nenhum dado de performance disponível para o período selecionado</p>
+        ) : (
+          <>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left p-2">Recrutador</th>
+                    <th className="text-right p-2">Vagas</th>
+                    <th className="text-right p-2">Candidatos</th>
+                    <th className="text-right p-2">Contratações</th>
+                    <th className="text-right p-2">Tempo Médio (dias)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedData.map((r, i) => (
+                    <tr key={i} className="border-b hover:bg-muted/50">
+                      <td className="p-2">{r.recrutador_nome}</td>
+                      <td className="text-right p-2">{r.vagas}</td>
+                      <td className="text-right p-2">{r.candidatos}</td>
+                      <td className="text-right p-2">{r.contratacoes}</td>
+                      <td className="text-right p-2">{r.avg_time_to_hire}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <PaginationControls
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={goToPage}
+              canGoPrevious={canGoPrevious}
+              canGoNext={canGoNext}
+              startIndex={startIndex}
+              endIndex={endIndex}
+              totalItems={recruiterData.length}
+            />
+          </>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
 export default function Relatorios() {
   const [loading, setLoading] = useState(true);
   const [kpiData, setKpiData] = useState<KPIData | null>(null);
@@ -123,7 +209,7 @@ export default function Relatorios() {
       
       if (profiles) setRecruiters(profiles);
     } catch (error) {
-      console.error("Error loading recruiters:", error);
+      logger.error("Error loading recruiters:", error);
     }
   };
 
@@ -138,7 +224,7 @@ export default function Relatorios() {
         loadOverdueJobs()
       ]);
     } catch (error) {
-      console.error("Error loading data:", error);
+      logger.error("Error loading data:", error);
       toast.error("Erro ao carregar dados dos relatórios");
     } finally {
       setLoading(false);
@@ -261,7 +347,7 @@ export default function Relatorios() {
         .not("recrutador_id", "is", null);
 
       if (vagasError) {
-        console.error("Erro ao carregar vagas para performance:", vagasError);
+        logger.error("Erro ao carregar vagas para performance:", vagasError);
         setRecruiterData([]);
         return;
       }
@@ -280,7 +366,7 @@ export default function Relatorios() {
         .in("id", recruiterIds);
 
       if (profilesError) {
-        console.error("Erro ao carregar profiles:", profilesError);
+        logger.error("Erro ao carregar profiles:", profilesError);
       }
 
       // Criar um mapa de id -> nome
@@ -293,7 +379,7 @@ export default function Relatorios() {
         .lte("criado_em", dateTo);
 
       if (candidatosError) {
-        console.error("Erro ao carregar candidatos para performance:", candidatosError);
+        logger.error("Erro ao carregar candidatos para performance:", candidatosError);
       }
 
     const recruiterStats: Record<string, any> = {};
@@ -348,7 +434,7 @@ export default function Relatorios() {
 
       setRecruiterData(recruiterArray);
     } catch (error) {
-      console.error("Erro ao carregar performance de recrutadores:", error);
+      logger.error("Erro ao carregar performance de recrutadores:", error);
       setRecruiterData([]);
     }
   };
@@ -613,56 +699,11 @@ export default function Relatorios() {
       </div>
 
       {/* Performance por Recrutador */}
-      <Card>
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <div>
-              <CardTitle>Performance por Recrutador</CardTitle>
-              <CardDescription>Métricas individuais de performance</CardDescription>
-            </div>
-            <Button 
-              size="sm" 
-              variant="outline"
-              onClick={() => exportCSV(recruiterData, 'performance_recrutador')}
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Exportar CSV
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <Skeleton className="h-[200px] w-full" />
-          ) : recruiterData.length === 0 ? (
-            <p className="text-muted-foreground text-center py-8">Nenhum dado de performance disponível para o período selecionado</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left p-2">Recrutador</th>
-                    <th className="text-right p-2">Vagas</th>
-                    <th className="text-right p-2">Candidatos</th>
-                    <th className="text-right p-2">Contratações</th>
-                    <th className="text-right p-2">Tempo Médio (dias)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {recruiterData.map((r, i) => (
-                    <tr key={i} className="border-b hover:bg-muted/50">
-                      <td className="p-2">{r.recrutador_nome}</td>
-                      <td className="text-right p-2">{r.vagas}</td>
-                      <td className="text-right p-2">{r.candidatos}</td>
-                      <td className="text-right p-2">{r.contratacoes}</td>
-                      <td className="text-right p-2">{r.avg_time_to_hire}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      <RecruiterPerformanceTable 
+        loading={loading}
+        recruiterData={recruiterData}
+        onExport={() => exportCSV(recruiterData, 'performance_recrutador')}
+      />
 
       {/* Vagas Fora do Prazo */}
       <Card>

@@ -8,6 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { VagaCard } from "@/components/VagaCard";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
+import { usePagination } from "@/hooks/usePagination";
+import { PaginationControls } from "@/components/ui/pagination-controls";
+import { logger } from "@/lib/logger";
 type Vaga = {
   id: string;
   titulo: string;
@@ -54,7 +57,7 @@ export default function Vagas() {
       if (error) throw error;
       setStatusOptions(data || []);
     } catch (error) {
-      console.error("Erro ao carregar status:", error);
+      logger.error("Erro ao carregar status:", error);
     }
   };
   const loadVagas = async () => {
@@ -90,7 +93,7 @@ export default function Vagas() {
       }));
       setVagas(vagasWithCounts);
     } catch (error) {
-      console.error("Erro ao carregar vagas:", error);
+      logger.error("Erro ao carregar vagas:", error);
       toast.error("Erro ao carregar vagas");
     } finally {
       setLoading(false);
@@ -111,6 +114,19 @@ export default function Vagas() {
     navigate('/vagas');
     window.location.reload();
   };
+
+  // Pagination
+  const {
+    paginatedData: paginatedVagas,
+    currentPage,
+    totalPages,
+    goToPage,
+    canGoNext,
+    canGoPrevious,
+    startIndex,
+    endIndex,
+  } = usePagination(filteredVagas, 30);
+
   const copyPublicFormLink = () => {
     const publicLink = `${window.location.origin}/solicitar-vaga`;
     navigator.clipboard.writeText(publicLink);
@@ -228,12 +244,26 @@ export default function Vagas() {
         </div>
       </div>
 
-      <div className={viewMode === "grid" ? "grid gap-6 md:grid-cols-2 lg:grid-cols-3" : "space-y-4"}>
-        {filteredVagas.map(vaga => <VagaCard key={vaga.id} vaga={vaga} viewMode={viewMode} />)}
-      </div>
-
-      {filteredVagas.length === 0 && <div className="py-12 text-center">
+      {filteredVagas.length === 0 ? (
+        <div className="py-12 text-center">
           <p className="text-muted-foreground">Nenhuma vaga encontrada</p>
-        </div>}
+        </div>
+      ) : (
+        <>
+          <div className={viewMode === "grid" ? "grid gap-6 md:grid-cols-2 lg:grid-cols-3" : "space-y-4"}>
+            {paginatedVagas.map(vaga => <VagaCard key={vaga.id} vaga={vaga} viewMode={viewMode} />)}
+          </div>
+          <PaginationControls
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={goToPage}
+            canGoPrevious={canGoPrevious}
+            canGoNext={canGoNext}
+            startIndex={startIndex}
+            endIndex={endIndex}
+            totalItems={filteredVagas.length}
+          />
+        </>
+      )}
     </div>;
 }
