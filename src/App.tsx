@@ -67,7 +67,7 @@ const App = () => <QueryClientProvider client={queryClient}>
             <Route path="/estudo-mercado" element={<EstudoMercado />} />
             <Route path="/whatsapp-templates" element={<WhatsAppTemplates />} />
             <Route path="/relatorios" element={<Relatorios />} />
-            <Route path="/acompanhamento" element={<Acompanhamento />} />
+            <Route path="/acompanhamento" element={<Acompanhamento />} className="bg-[#faec3e]/[0.01]" />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

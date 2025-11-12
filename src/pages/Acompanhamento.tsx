@@ -377,7 +377,7 @@ export default function Acompanhamento() {
               <Card className="border-primary">
                 <CardContent className="p-4">
                   <p className="text-muted-foreground mb-1 text-base font-semibold">Etapa Atual</p>
-                  <Badge variant="secondary" className="text-sm">
+                  <Badge variant="secondary" className="text-sm bg-[#ffcd00]">
                     {getStageBySlug(selectedVagaData.status)?.name || selectedVagaData.status}
                   </Badge>
                 </CardContent>
@@ -465,33 +465,21 @@ export default function Acompanhamento() {
                   <div className="absolute top-5 left-5 right-5 h-0.5 bg-border z-0" />
                   
                   <div className="flex items-start gap-0 relative min-w-max px-5">
-                    {getTimelineSteps(selectedVagaData.status).map((step, index, array) => (
-                      <div key={index} className="flex flex-col items-center flex-1 min-w-[120px] relative">
+                    {getTimelineSteps(selectedVagaData.status).map((step, index, array) => <div key={index} className="flex flex-col items-center flex-1 min-w-[120px] relative">
                         {/* Active connector line */}
-                        {index > 0 && array[index - 1].status === "completed" && (
-                          <div className="absolute top-5 right-1/2 w-full h-0.5 bg-primary z-0" />
-                        )}
+                        {index > 0 && array[index - 1].status === "completed" && <div className="absolute top-5 right-1/2 w-full h-0.5 bg-primary z-0" />}
                         
                         {/* Circle */}
-                        <div className={cn(
-                          "relative z-10 w-10 h-10 rounded-full flex items-center justify-center mb-3 transition-all",
-                          step.status === "completed" && "bg-primary",
-                          step.status === "current" && "bg-primary animate-pulse",
-                          step.status === "pending" && "bg-border"
-                        )}>
+                        <div className={cn("relative z-10 w-10 h-10 rounded-full flex items-center justify-center mb-3 transition-all", step.status === "completed" && "bg-primary", step.status === "current" && "bg-primary animate-pulse", step.status === "pending" && "bg-border")}>
                           {step.status === "completed" && <CheckCircle2 className="h-5 w-5 text-primary-foreground" />}
                           {step.status === "current" && <div className="w-3 h-3 bg-primary-foreground rounded-full" />}
                         </div>
 
                         {/* Label */}
-                        <p className={cn(
-                          "text-xs text-center font-medium leading-tight",
-                          step.status === "pending" ? "text-muted-foreground" : "text-foreground"
-                        )}>
+                        <p className={cn("text-xs text-center font-medium leading-tight", step.status === "pending" ? "text-muted-foreground" : "text-foreground")}>
                           {step.label}
                         </p>
-                      </div>
-                    ))}
+                      </div>)}
                   </div>
                 </div>
 
@@ -503,8 +491,8 @@ export default function Acompanhamento() {
                   </div>
                   <div className="w-full bg-border rounded-full h-2 overflow-hidden">
                     <div className="bg-primary h-full transition-all duration-500 rounded-full" style={{
-                      width: `${calculateProgress(selectedVagaData.status)}%`
-                    }} />
+                  width: `${calculateProgress(selectedVagaData.status)}%`
+                }} />
                   </div>
                 </div>
               </CardContent>
@@ -524,7 +512,7 @@ export default function Acompanhamento() {
                     })}
                           </p>
                         </div>
-                        <Badge variant={getStatusBadgeVariant(candidato.status)} className="bg-[#ffcd00] text-base font-semibold">
+                        <Badge variant={getStatusBadgeVariant(candidato.status)} className="text-base font-semibold bg-[#ffcd00]/[0.36]">
                           {candidato.status}
                         </Badge>
                       </div>)}
