@@ -243,7 +243,7 @@ export default function Relatorios() {
         .select(`
           id,
           recrutador_id,
-          profiles:recrutador_id (full_name)
+          profiles!vagas_recrutador_id_fkey (full_name)
         `)
         .gte("criado_em", dateFrom)
         .lte("criado_em", dateTo);
