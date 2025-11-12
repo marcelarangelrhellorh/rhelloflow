@@ -283,7 +283,7 @@ export default function Acompanhamento() {
 
         {/* Metrics Cards */}
         {!selectedVaga && <div className="grid gap-4 sm:grid-cols-3">
-            <Card className="border-2">
+            <Card className="border-2 border-primary">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -297,7 +297,7 @@ export default function Acompanhamento() {
               </CardContent>
             </Card>
 
-            <Card className="border-2">
+            <Card className="border-2 border-primary">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -311,7 +311,7 @@ export default function Acompanhamento() {
               </CardContent>
             </Card>
 
-            <Card className="border-2 cursor-pointer transition-all hover:shadow-md hover:border-primary/50" onClick={() => setNoFeedbackDrawerOpen(true)}>
+            <Card className="border-2 border-primary cursor-pointer transition-all hover:shadow-md hover:border-primary/50" onClick={() => setNoFeedbackDrawerOpen(true)}>
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -331,7 +331,7 @@ export default function Acompanhamento() {
             {vagas.map(vaga => {
           const vagaCandidatosCount = candidatos.filter(c => c.vaga_relacionada_id === vaga.id).length;
           const currentStage = getStageBySlug(vaga.status);
-          return <Card key={vaga.id} className="cursor-pointer transition-all hover:shadow-md border-2 hover:border-primary/50" onClick={() => setSelectedVaga(vaga.id)}>
+          return <Card key={vaga.id} className="cursor-pointer transition-all hover:shadow-md border-2 border-primary hover:border-primary/50" onClick={() => setSelectedVaga(vaga.id)}>
                   <CardContent className="p-4">
                     <div className="space-y-2">
                       <div className="flex items-start justify-between gap-2">
