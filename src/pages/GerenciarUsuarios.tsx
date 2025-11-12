@@ -791,7 +791,7 @@ export default function GerenciarUsuarios() {
                         <Input id="client-company" required value={clientFormData.company} onChange={e => setClientFormData({
                       ...clientFormData,
                       company: e.target.value
-                    })} onFocus={() => setShowCompanySuggestions(true)} onBlur={() => setTimeout(() => setShowCompanySuggestions(false), 200)} placeholder="Digite o nome da empresa" autoComplete="off" className="h-9" />
+                    })} onFocus={() => setShowCompanySuggestions(true)} onBlur={() => setTimeout(() => setShowCompanySuggestions(false), 200)} placeholder="Digite o nome da empresa" autoComplete="off" className="h-9 text-xl" />
                         {showCompanySuggestions && filteredCompanies.length > 0 && <div className="absolute z-50 w-full mt-1 bg-card border border-border rounded-md shadow-lg max-h-48 overflow-auto">
                             {filteredCompanies.map((company, index) => <button key={index} type="button" className="w-full text-left px-3 py-2 hover:bg-muted transition-colors text-sm" onClick={() => {
                         setClientFormData({
@@ -845,17 +845,17 @@ export default function GerenciarUsuarios() {
                   </div> : <div className="space-y-3">
                     {clients.map(client => <div key={client.id} className="border border-border rounded-lg p-3 space-y-3">
                         <div className="flex items-center gap-3">
-                          <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                            <Building2 className="h-6 w-6 text-primary" />
+                          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                            <Building2 className="h-5 w-5 text-primary" />
                           </div>
                           
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
-                              <h3 className="font-semibold text-base truncate">{client.name}</h3>
+                              <h3 className="font-semibold text-sm truncate">{client.name}</h3>
                               {getRoleBadge("cliente")}
                             </div>
-                            <div className="flex items-center gap-1 text-sm text-muted-foreground truncate">
-                              <Mail className="h-4 w-4 shrink-0" />
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground truncate">
+                              <Mail className="h-3 w-3 shrink-0" />
                               <span className="truncate">{client.email}</span>
                             </div>
                           </div>
