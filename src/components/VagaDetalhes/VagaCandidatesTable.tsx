@@ -24,7 +24,7 @@ export function VagaCandidatesTable({ candidatos, vagaId, vagaTitulo }: VagaCand
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-primary-text-light dark:text-primary-text-dark text-2xl font-bold tracking-tight">
+        <h2 className="text-primary-text-light dark:text-primary-text-dark text-3xl font-bold tracking-tight">
           Candidatos Ativos
         </h2>
         <AnalyzeScorecards vagaId={vagaId} vagaTitulo={vagaTitulo} />
@@ -32,15 +32,15 @@ export function VagaCandidatesTable({ candidatos, vagaId, vagaTitulo }: VagaCand
 
       <div className="overflow-x-auto bg-white dark:bg-background-dark border border-gray-200 dark:border-secondary-text-light/20 rounded-lg shadow-sm">
         <table className="w-full text-left">
-          <thead className="border-b border-gray-200 dark:border-secondary-text-light/20 text-sm text-secondary-text-light dark:text-secondary-text-dark">
+          <thead className="border-b border-gray-200 dark:border-secondary-text-light/20 text-base text-secondary-text-light dark:text-secondary-text-dark">
             <tr>
-              <th className="p-4 font-medium">Nome do Candidato</th>
-              <th className="p-4 font-medium">Status</th>
-              <th className="p-4 font-medium">Última Atualização</th>
-              <th className="p-4 font-medium text-right">Ações</th>
+              <th className="p-4 font-semibold">Nome do Candidato</th>
+              <th className="p-4 font-semibold">Status</th>
+              <th className="p-4 font-semibold">Última Atualização</th>
+              <th className="p-4 font-semibold text-right">Ações</th>
             </tr>
           </thead>
-          <tbody className="text-primary-text-light dark:text-primary-text-dark text-sm">
+          <tbody className="text-primary-text-light dark:text-primary-text-dark text-base">
             {candidatos.length === 0 ? (
               <tr>
                 <td colSpan={4} className="p-8 text-center text-secondary-text-light dark:text-secondary-text-dark">
@@ -53,7 +53,7 @@ export function VagaCandidatesTable({ candidatos, vagaId, vagaTitulo }: VagaCand
                   key={candidato.id}
                   className={index < candidatos.length - 1 ? "border-b border-gray-200 dark:border-secondary-text-light/20" : ""}
                 >
-                  <td className="p-4 font-medium">{candidato.nome_completo}</td>
+                  <td className="p-4 font-semibold text-base">{candidato.nome_completo}</td>
                   <td className="p-4">
                     <span
                       className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-semibold ${getStatusBadgeClass(
@@ -63,13 +63,13 @@ export function VagaCandidatesTable({ candidatos, vagaId, vagaTitulo }: VagaCand
                       {candidato.status}
                     </span>
                   </td>
-                  <td className="p-4 text-secondary-text-light dark:text-secondary-text-dark">
+                  <td className="p-4 text-secondary-text-light dark:text-secondary-text-dark text-base font-medium">
                     {format(new Date(candidato.criado_em), "d 'de' MMM", { locale: ptBR })}
                   </td>
                   <td className="p-4 text-right">
                     <button
                       onClick={() => navigate(`/candidatos/${candidato.id}`)}
-                      className="text-primary font-bold text-sm hover:brightness-95 transition-all"
+                      className="text-primary font-bold text-base hover:brightness-95 transition-all"
                     >
                       Visualizar
                     </button>
