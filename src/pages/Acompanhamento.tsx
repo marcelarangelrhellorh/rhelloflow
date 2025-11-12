@@ -129,75 +129,79 @@ export default function Acompanhamento() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FFFDF6] p-6">
-      <div className="mx-auto max-w-7xl space-y-6">
+    <div className="min-h-screen bg-background p-6">
+      <div className="mx-auto max-w-7xl space-y-8">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between border-b border-border pb-6">
           <div>
-            <h1 className="text-3xl font-bold text-[#00141D]">Acompanhamento de Processos</h1>
-            <p className="text-sm text-[#36404A] mt-1">Visualize o andamento das suas vagas</p>
+            <h1 className="text-3xl font-bold text-foreground">Acompanhamento de Processos</h1>
+            <p className="text-sm text-muted-foreground mt-2">Visualize o andamento das suas vagas</p>
           </div>
-          <Select value={selectedVaga || ""} onValueChange={setSelectedVaga}>
-            <SelectTrigger className="w-[300px]">
-              <SelectValue placeholder="Selecione uma vaga" />
-            </SelectTrigger>
-            <SelectContent>
-              {vagas.map(vaga => (
-                <SelectItem key={vaga.id} value={vaga.id}>
-                  {vaga.titulo} - {vaga.empresa}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {vagas.length > 1 && (
+            <Select value={selectedVaga || ""} onValueChange={setSelectedVaga}>
+              <SelectTrigger className="w-[320px]">
+                <SelectValue placeholder="Selecione uma vaga" />
+              </SelectTrigger>
+              <SelectContent>
+                {vagas.map(vaga => (
+                  <SelectItem key={vaga.id} value={vaga.id}>
+                    {vaga.titulo} - {vaga.empresa}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
         </div>
 
         {/* Visão Geral - Cards de Vagas */}
         {!selectedVaga && (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {vagas.map(vaga => {
               const vagaCandidatosCount = candidatos.filter(c => c.vaga_relacionada_id === vaga.id).length;
               
               return (
                 <Card 
                   key={vaga.id}
-                  className="cursor-pointer transition-all hover:shadow-md bg-white border-[#FAEC3E]/20"
+                  className="cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02] bg-card border-border/50"
                   onClick={() => setSelectedVaga(vaga.id)}
                 >
-                  <CardHeader className="space-y-2">
-                    <div className="flex items-start justify-between">
-                      <CardTitle className="text-lg text-[#00141D]">{vaga.titulo}</CardTitle>
+                  <CardHeader className="space-y-3 pb-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <CardTitle className="text-xl text-foreground font-semibold">{vaga.titulo}</CardTitle>
                       <StatusBadge status={vaga.status} />
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-[#36404A]">
-                      <Building2 className="h-4 w-4" />
-                      <span>{vaga.empresa}</span>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Building2 className="h-4 w-4 text-primary" />
+                      <span className="font-medium">{vaga.empresa}</span>
                     </div>
                   </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="flex items-center justify-between text-sm">
-                      <div className="flex items-center gap-2 text-[#36404A]">
-                        <Users className="h-4 w-4" />
-                        <span>{vagaCandidatosCount} candidato{vagaCandidatosCount !== 1 ? 's' : ''}</span>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between text-sm bg-muted/50 rounded-lg p-3">
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Users className="h-4 w-4 text-primary" />
+                        <span className="font-medium">{vagaCandidatosCount} candidato{vagaCandidatosCount !== 1 ? 's' : ''}</span>
                       </div>
-                      <div className="flex items-center gap-2 text-[#36404A]">
-                        <Clock className="h-4 w-4" />
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Clock className="h-4 w-4 text-primary" />
                         <span>{format(new Date(vaga.criado_em), "dd/MM/yyyy", { locale: ptBR })}</span>
                       </div>
                     </div>
-                    <div className="space-y-1 pt-2 border-t border-[#FAEC3E]/20">
-                      {vaga.recrutador_id && profiles.get(vaga.recrutador_id) && (
-                        <div className="flex items-center gap-2 text-sm text-[#36404A]">
-                          <User className="h-3.5 w-3.5" />
-                          <span className="text-xs">Recrutador: {profiles.get(vaga.recrutador_id)}</span>
-                        </div>
-                      )}
-                      {vaga.cs_id && profiles.get(vaga.cs_id) && (
-                        <div className="flex items-center gap-2 text-sm text-[#36404A]">
-                          <User className="h-3.5 w-3.5" />
-                          <span className="text-xs">CS: {profiles.get(vaga.cs_id)}</span>
-                        </div>
-                      )}
-                    </div>
+                    {(vaga.recrutador_id || vaga.cs_id) && (
+                      <div className="space-y-2 pt-2 border-t border-border">
+                        {vaga.recrutador_id && profiles.get(vaga.recrutador_id) && (
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <User className="h-3.5 w-3.5 text-primary" />
+                            <span className="text-xs"><span className="font-semibold">Recrutador:</span> {profiles.get(vaga.recrutador_id)}</span>
+                          </div>
+                        )}
+                        {vaga.cs_id && profiles.get(vaga.cs_id) && (
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <User className="h-3.5 w-3.5 text-primary" />
+                            <span className="text-xs"><span className="font-semibold">CS:</span> {profiles.get(vaga.cs_id)}</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               );
@@ -209,34 +213,44 @@ export default function Acompanhamento() {
         {selectedVaga && selectedVagaData && (
           <div className="space-y-6">
             {/* Informações da Vaga */}
-            <Card className="bg-white border-[#FAEC3E]/20">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div>
-                    <CardTitle className="text-2xl text-[#00141D]">{selectedVagaData.titulo}</CardTitle>
-                    <p className="text-[#36404A] mt-1">{selectedVagaData.empresa}</p>
+            <Card className="bg-card border-border/50">
+              <CardHeader className="pb-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <CardTitle className="text-2xl text-foreground font-bold">{selectedVagaData.titulo}</CardTitle>
+                    <p className="text-muted-foreground mt-2 flex items-center gap-2">
+                      <Building2 className="h-4 w-4 text-primary" />
+                      <span className="font-medium">{selectedVagaData.empresa}</span>
+                    </p>
                   </div>
                   <StatusBadge status={selectedVagaData.status} />
                 </div>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-3">
-                  <div className="space-y-1">
-                    <p className="text-sm text-[#36404A]">Data de Abertura</p>
-                    <p className="font-medium text-[#00141D]">
+              <CardContent className="space-y-6">
+                <div className="grid gap-6 md:grid-cols-3 bg-muted/30 rounded-lg p-4">
+                  <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground font-medium">Data de Abertura</p>
+                    <p className="font-semibold text-foreground flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-primary" />
                       {format(new Date(selectedVagaData.criado_em), "dd/MM/yyyy", { locale: ptBR })}
                     </p>
                   </div>
                   {selectedVagaData.recrutador_id && profiles.get(selectedVagaData.recrutador_id) && (
-                    <div className="space-y-1">
-                      <p className="text-sm text-[#36404A]">Recrutador Responsável</p>
-                      <p className="font-medium text-[#00141D]">{profiles.get(selectedVagaData.recrutador_id)}</p>
+                    <div className="space-y-2">
+                      <p className="text-sm text-muted-foreground font-medium">Recrutador Responsável</p>
+                      <p className="font-semibold text-foreground flex items-center gap-2">
+                        <User className="h-4 w-4 text-primary" />
+                        {profiles.get(selectedVagaData.recrutador_id)}
+                      </p>
                     </div>
                   )}
                   {selectedVagaData.cs_id && profiles.get(selectedVagaData.cs_id) && (
-                    <div className="space-y-1">
-                      <p className="text-sm text-[#36404A]">CS Responsável</p>
-                      <p className="font-medium text-[#00141D]">{profiles.get(selectedVagaData.cs_id)}</p>
+                    <div className="space-y-2">
+                      <p className="text-sm text-muted-foreground font-medium">CS Responsável</p>
+                      <p className="font-semibold text-foreground flex items-center gap-2">
+                        <User className="h-4 w-4 text-primary" />
+                        {profiles.get(selectedVagaData.cs_id)}
+                      </p>
                     </div>
                   )}
                 </div>
@@ -245,38 +259,46 @@ export default function Acompanhamento() {
 
             {/* Linha do Tempo */}
             {timelineSteps.length > 0 && (
-              <Card className="bg-white border-[#FAEC3E]/20">
+              <Card className="bg-card border-border/50">
                 <CardHeader>
-                  <CardTitle className="text-[#00141D]">Linha do Tempo do Processo</CardTitle>
+                  <CardTitle className="text-foreground font-semibold">Linha do Tempo do Processo</CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">Histórico de mudanças de etapa</p>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pt-2">
                   <ProcessTimeline steps={timelineSteps} />
                 </CardContent>
               </Card>
             )}
 
             {/* Lista de Candidatos */}
-            <Card className="bg-white border-[#FAEC3E]/20">
+            <Card className="bg-card border-border/50">
               <CardHeader>
-                <CardTitle className="text-[#00141D]">Candidatos no Processo</CardTitle>
+                <CardTitle className="text-foreground font-semibold">Candidatos no Processo</CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {vagaCandidatos.length} {vagaCandidatos.length === 1 ? 'candidato' : 'candidatos'} vinculado{vagaCandidatos.length === 1 ? '' : 's'}
+                </p>
               </CardHeader>
               <CardContent>
                 {vagaCandidatos.length === 0 ? (
-                  <p className="text-center text-[#36404A] py-8">Nenhum candidato vinculado ainda</p>
+                  <div className="text-center py-12 text-muted-foreground">
+                    <Users className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                    <p>Nenhum candidato vinculado ainda</p>
+                  </div>
                 ) : (
                   <div className="space-y-3">
                     {vagaCandidatos.map(candidato => (
                       <div 
                         key={candidato.id}
-                        className="flex items-center justify-between p-4 rounded-lg bg-[#FFFDF6] border border-[#FAEC3E]/20"
+                        className="flex items-center justify-between p-4 rounded-lg bg-muted/30 border border-border/50 hover:bg-muted/50 transition-colors"
                       >
                         <div className="space-y-1">
-                          <p className="font-medium text-[#00141D]">{candidato.nome_completo}</p>
-                          <p className="text-sm text-[#36404A]">
+                          <p className="font-semibold text-foreground">{candidato.nome_completo}</p>
+                          <p className="text-sm text-muted-foreground flex items-center gap-1.5">
+                            <Clock className="h-3.5 w-3.5" />
                             Desde {format(new Date(candidato.criado_em), "dd/MM/yyyy", { locale: ptBR })}
                           </p>
                         </div>
-                        <Badge variant="outline" className="bg-white">
+                        <Badge variant="outline" className="bg-background font-medium">
                           {candidato.status}
                         </Badge>
                       </div>
