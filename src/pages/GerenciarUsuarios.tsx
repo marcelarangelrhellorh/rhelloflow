@@ -199,9 +199,25 @@ export default function GerenciarUsuarios() {
 
       if (authError) throw authError;
 
+      // Inserir role na tabela user_roles
+      if (authData.user) {
+        const { error: roleError } = await supabase
+          .from("user_roles")
+          .insert({
+            user_id: authData.user.id,
+            role: formData.role
+          });
+
+        if (roleError) {
+          console.error("Erro ao criar role do usuário:", roleError);
+          throw roleError;
+        }
+      }
+
       toast.success("✅ Usuário criado com sucesso! Um email de confirmação foi enviado.");
       setShowAddForm(false);
       setFormData({ email: "", name: "", role: "recrutador", password: "" });
+      loadUserRoles();
       reload();
     } catch (error: any) {
       console.error("Erro ao criar usuário:", error);
@@ -227,10 +243,26 @@ export default function GerenciarUsuarios() {
 
       if (authError) throw authError;
 
+      // Inserir role na tabela user_roles
+      if (authData.user) {
+        const { error: roleError } = await supabase
+          .from("user_roles")
+          .insert({
+            user_id: authData.user.id,
+            role: "cliente"
+          });
+
+        if (roleError) {
+          console.error("Erro ao criar role do cliente:", roleError);
+          throw roleError;
+        }
+      }
+
       toast.success("✅ Cliente criado com sucesso! Um email de confirmação foi enviado.");
       setShowClientForm(false);
       setClientFormData({ email: "", name: "", company: "", password: "" });
       loadClients();
+      loadUserRoles();
       reload();
     } catch (error: any) {
       console.error("Erro ao criar cliente:", error);
