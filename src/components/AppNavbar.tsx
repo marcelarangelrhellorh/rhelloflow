@@ -48,11 +48,13 @@ export function AppNavbar() {
             src={symbolRhelloLight} 
             alt="rhello" 
             className="h-8 hidden sm:block"
+            loading="lazy"
           />
           <img 
             src={symbolRhelloLight} 
             alt="rhello" 
             className="h-10 w-10 sm:hidden"
+            loading="lazy"
           />
         </NavLink>
 
