@@ -61,7 +61,7 @@ const App = () => <QueryClientProvider client={queryClient}>
             <Route path="/scorecards/novo" element={<ScorecardForm />} />
             <Route path="/scorecards/:id/editar" element={<ScorecardForm />} />
             <Route path="/analises" element={<Analises />} />
-            <Route path="/gerenciar-usuarios" element={<GerenciarUsuarios />} />
+            <Route path="/gerenciar-usuarios" element={<GerenciarUsuarios />} className="bg-[s#] bg-[#faec3e]/[0.01]" />
             <Route path="/gerenciar-exclusoes" element={<GerenciarExclusoes />} />
             <Route path="/audit-log" element={<AuditLog />} />
             <Route path="/estudo-mercado" element={<EstudoMercado />} />
