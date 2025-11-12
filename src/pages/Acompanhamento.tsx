@@ -546,12 +546,12 @@ export default function Acompanhamento() {
             setCandidateDrawerOpen(true);
             setNoFeedbackDrawerOpen(false);
           }}>
-                  <CardContent className="p-4">
+                  <CardContent className="p-4 rounded-sm bg-transparent">
                     <div className="space-y-2">
                       <div className="flex items-start justify-between">
                         <div>
                           <p className="font-bold text-foreground">{candidate.nome_completo}</p>
-                          <p className="text-sm text-muted-foreground">{candidate.email}</p>
+                          <p className="text-muted-foreground font-medium text-sm">{candidate.email}</p>
                         </div>
                         <Badge variant="outline" className="bg-orange-500/10 text-orange-500 border-orange-500/20">
                           Pendente
@@ -559,16 +559,16 @@ export default function Acompanhamento() {
                       </div>
 
                       <div className="pt-2 border-t border-border">
-                        <p className="text-sm text-muted-foreground flex items-center gap-2">
+                        <p className="flex items-center gap-2 text-base font-semibold text-[#00141d]">
                           <Briefcase className="h-3.5 w-3.5" />
                           {candidate.vaga_titulo}
                         </p>
-                        <p className="text-xs text-muted-foreground mt-1">
+                        <p className="text-muted-foreground mt-1 text-sm font-medium">
                           Solicitado em: {format(new Date(candidate.request_created), "dd/MM/yyyy", {
                       locale: ptBR
                     })}
                         </p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-muted-foreground text-sm font-medium">
                           Expira em: {format(new Date(candidate.request_expires), "dd/MM/yyyy", {
                       locale: ptBR
                     })}
