@@ -763,7 +763,7 @@ export default function GerenciarUsuarios() {
           {/* TAB: Clientes */}
           <TabsContent value="clients" className="space-y-4">
             {/* Adicionar Cliente */}
-            {!showClientForm && <Button onClick={() => setShowClientForm(true)} variant="outline" className="w-full h-9 font-semibold">
+            {!showClientForm && <Button onClick={() => setShowClientForm(true)} variant="outline" className="w-full h-9 font-semibold text-base">
                 <UserPlus className="mr-2 h-4 w-4" />
                 Adicionar Novo Usuário Externo
               </Button>}
