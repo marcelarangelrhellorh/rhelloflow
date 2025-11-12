@@ -700,11 +700,11 @@ export default function GerenciarUsuarios() {
                     
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
-                        <h3 className="font-semibold text-sm truncate">{user.name}</h3>
+                        <h3 className="font-semibold text-base truncate">{user.name}</h3>
                         {(userRoles[user.id] || []).slice(0, 2).map(role => <span key={role}>{getRoleBadge(role)}</span>)}
                       </div>
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground truncate">
-                        <Mail className="h-3 w-3 shrink-0" />
+                      <div className="flex items-center gap-1 text-sm text-muted-foreground truncate">
+                        <Mail className="h-3.5 w-3.5 shrink-0" />
                         <span className="truncate">{user.email}</span>
                       </div>
                     </div>
@@ -851,11 +851,11 @@ export default function GerenciarUsuarios() {
                           
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
-                              <h3 className="font-semibold text-sm truncate">{client.name}</h3>
+                              <h3 className="font-semibold text-base truncate">{client.name}</h3>
                               {getRoleBadge("cliente")}
                             </div>
-                            <div className="flex items-center gap-1 text-xs text-muted-foreground truncate">
-                              <Mail className="h-3 w-3 shrink-0" />
+                            <div className="flex items-center gap-1 text-sm text-muted-foreground truncate">
+                              <Mail className="h-3.5 w-3.5 shrink-0" />
                               <span className="truncate">{client.email}</span>
                             </div>
                           </div>
@@ -891,19 +891,19 @@ export default function GerenciarUsuarios() {
                         {/* Vagas Vinculadas */}
                         {clientJobs[client.id]?.length > 0 && <div className="border-t border-border pt-2.5">
                             <div className="flex items-center gap-1.5 mb-2">
-                              <Briefcase className="h-3.5 w-3.5 text-muted-foreground" />
-                              <span className="text-xs font-medium text-muted-foreground">
+                              <Briefcase className="h-4 w-4 text-muted-foreground" />
+                              <span className="text-sm font-medium text-muted-foreground">
                                 Vagas ({clientJobs[client.id].length})
                               </span>
                             </div>
                             <div className="space-y-1.5">
-                              {clientJobs[client.id].map(job => <div key={job.id} className="flex items-center justify-between p-2 bg-accent/30 rounded text-xs">
+                              {clientJobs[client.id].map(job => <div key={job.id} className="flex items-center justify-between p-2 bg-accent/30 rounded text-sm">
                                   <div className="flex-1 min-w-0">
                                     <p className="font-medium truncate">{job.titulo}</p>
                                     <p className="text-muted-foreground truncate">{job.empresa}</p>
                                   </div>
                                   <Button variant="ghost" size="sm" className="h-6 w-6 p-0 shrink-0" onClick={() => handleUnlinkJob(job.id)} title="Desvincular">
-                                    <X className="h-3 w-3" />
+                                    <X className="h-3.5 w-3.5" />
                                   </Button>
                                 </div>)}
                             </div>
