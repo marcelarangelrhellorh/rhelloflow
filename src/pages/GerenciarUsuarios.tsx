@@ -98,14 +98,15 @@ export default function GerenciarUsuarios() {
 
   const loadClients = async () => {
     try {
-      const { data: clientRoles, error: rolesError } = await supabase
-        .from("user_roles")
-        .select("user_id")
-        .eq("role", "cliente" as any);
+      // Buscar usuários externos pela tabela profiles
+      const { data: externalProfiles, error: profilesError } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("user_type", "external");
 
-      if (rolesError) throw rolesError;
+      if (profilesError) throw profilesError;
 
-      const clientIds = clientRoles?.map(r => r.user_id) || [];
+      const clientIds = externalProfiles?.map(p => p.id) || [];
 
       if (clientIds.length === 0) {
         setClients([]);
@@ -122,14 +123,23 @@ export default function GerenciarUsuarios() {
 
       setClients(clientUsers || []);
 
-      // Carregar vagas de cada cliente
+      // Carregar vagas de cada cliente pela empresa vinculada
       const jobsMap: Record<string, any[]> = {};
       for (const client of clientUsers || []) {
-        const { data: jobs } = await supabase
-          .from("vagas")
-          .select("id, titulo, empresa, status")
-          .eq("cliente_id", client.id);
-        jobsMap[client.id] = jobs || [];
+        // Buscar empresa do perfil
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("empresa")
+          .eq("id", client.id)
+          .single();
+
+        if (profile?.empresa) {
+          const { data: jobs } = await supabase
+            .from("vagas")
+            .select("id, titulo, empresa, status")
+            .eq("empresa", profile.empresa);
+          jobsMap[client.id] = jobs || [];
+        }
       }
       setClientJobs(jobsMap);
     } catch (error) {
@@ -268,18 +278,7 @@ export default function GerenciarUsuarios() {
           throw profileError;
         }
 
-        // Inserir role 'cliente' na tabela user_roles
-        const { error: roleError } = await supabase
-          .from("user_roles")
-          .insert({
-            user_id: authData.user.id,
-            role: "cliente"
-          });
-
-        if (roleError) {
-          console.error("Erro ao criar role do cliente:", roleError);
-          throw roleError;
-        }
+        // Usuários externos não precisam de roles - são identificados pelo user_type
       }
 
       toast.success("✅ Usuário externo criado com sucesso!");
@@ -296,9 +295,22 @@ export default function GerenciarUsuarios() {
 
   const handleLinkJob = async (clientId: string, jobId: string) => {
     try {
+      // Buscar empresa do cliente
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("empresa")
+        .eq("id", clientId)
+        .single();
+
+      if (!profile?.empresa) {
+        toast.error("❌ Usuário externo sem empresa vinculada");
+        return;
+      }
+
+      // Vincular vaga atualizando a empresa da vaga
       const { error } = await supabase
         .from("vagas")
-        .update({ cliente_id: clientId })
+        .update({ empresa: profile.empresa })
         .eq("id", jobId);
 
       if (error) throw error;
@@ -640,10 +652,7 @@ export default function GerenciarUsuarios() {
     );
   };
 
-  const internalUsers = users.filter(user => {
-    const roles = userRoles[user.id] || [];
-    return !roles.includes("cliente" as any);
-  });
+  const internalUsers = users.filter(user => !clients.some(client => client.id === user.id));
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-6">
