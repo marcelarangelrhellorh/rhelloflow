@@ -130,6 +130,7 @@ export function NotificationBell() {
       candidato: "👤",
       feedback: "💬",
       feedback_cliente: "👤💬",
+      feedback_solicitado: "📝",
       sistema: "🔔",
       stage_age_threshold: "⚠️",
       no_activity: "📅",
