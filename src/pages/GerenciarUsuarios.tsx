@@ -41,6 +41,9 @@ export default function GerenciarUsuarios() {
   const [clients, setClients] = useState<any[]>([]);
   const [clientJobs, setClientJobs] = useState<Record<string, any[]>>({});
   const [availableJobs, setAvailableJobs] = useState<any[]>([]);
+  const [availableCompanies, setAvailableCompanies] = useState<string[]>([]);
+  const [filteredCompanies, setFilteredCompanies] = useState<string[]>([]);
+  const [showCompanySuggestions, setShowCompanySuggestions] = useState(false);
   const [editingUser, setEditingUser] = useState<any>(null);
   const [userRoles, setUserRoles] = useState<Record<string, AppRole[]>>({});
 
@@ -78,7 +81,19 @@ export default function GerenciarUsuarios() {
     loadUserRoles();
     loadClients();
     loadAvailableJobs();
+    loadAvailableCompanies();
   }, [users]);
+
+  useEffect(() => {
+    if (clientFormData.company) {
+      const filtered = availableCompanies.filter(company =>
+        company.toLowerCase().includes(clientFormData.company.toLowerCase())
+      );
+      setFilteredCompanies(filtered);
+    } else {
+      setFilteredCompanies([]);
+    }
+  }, [clientFormData.company, availableCompanies]);
 
   const loadClients = async () => {
     try {
@@ -132,6 +147,24 @@ export default function GerenciarUsuarios() {
       setAvailableJobs(data || []);
     } catch (error) {
       console.error("Erro ao carregar vagas:", error);
+    }
+  };
+
+  const loadAvailableCompanies = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("vagas")
+        .select("empresa")
+        .not("empresa", "is", null);
+
+      if (error) throw error;
+
+      if (data) {
+        const uniqueCompanies = [...new Set(data.map(v => v.empresa).filter(Boolean))] as string[];
+        setAvailableCompanies(uniqueCompanies);
+      }
+    } catch (error) {
+      console.error("Erro ao carregar empresas:", error);
     }
   };
 
@@ -824,15 +857,38 @@ export default function GerenciarUsuarios() {
                       />
                     </div>
 
-                    <div>
+                    <div className="relative">
                       <Label htmlFor="client-company">Empresa *</Label>
                       <Input
                         id="client-company"
                         required
                         value={clientFormData.company}
                         onChange={(e) => setClientFormData({ ...clientFormData, company: e.target.value })}
-                        placeholder="Nome da empresa"
+                        onFocus={() => setShowCompanySuggestions(true)}
+                        onBlur={() => setTimeout(() => setShowCompanySuggestions(false), 200)}
+                        placeholder="Digite o nome da empresa"
+                        autoComplete="off"
                       />
+                      {showCompanySuggestions && filteredCompanies.length > 0 && (
+                        <div className="absolute z-10 w-full mt-1 bg-card border border-border rounded-md shadow-lg max-h-48 overflow-auto">
+                          {filteredCompanies.map((company, index) => (
+                            <button
+                              key={index}
+                              type="button"
+                              className="w-full text-left px-4 py-2 hover:bg-muted transition-colors text-sm"
+                              onClick={() => {
+                                setClientFormData({ ...clientFormData, company });
+                                setShowCompanySuggestions(false);
+                              }}
+                            >
+                              {company}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Ao digitar, empresas já cadastradas aparecerão como sugestão
+                      </p>
                     </div>
 
                     <div>
