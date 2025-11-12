@@ -278,7 +278,7 @@ export default function Acompanhamento() {
         {/* Header */}
         <div>
           <h1 className="text-3xl font-bold text-foreground">Meus Processos</h1>
-          <p className="text-muted-foreground mt-1">Acompanhe o andamento das suas vagas em aberto</p>
+          <p className="text-muted-foreground mt-1 font-medium">Acompanhe o andamento das suas vagas em aberto</p>
         </div>
 
         {/* Metrics Cards */}
@@ -361,7 +361,7 @@ export default function Acompanhamento() {
             {/* Vaga Header */}
             <div>
               <h2 className="text-3xl font-bold text-foreground">{selectedVagaData.titulo}</h2>
-              <p className="text-muted-foreground mt-1">{selectedVagaData.empresa} • Acompanhe o progresso do processo de contratação</p>
+              <p className="text-muted-foreground mt-1 text-base font-medium">{selectedVagaData.empresa} • Acompanhe o progresso do processo de contratação</p>
             </div>
 
             {/* Salary Badge */}
@@ -376,7 +376,7 @@ export default function Acompanhamento() {
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               <Card>
                 <CardContent className="p-4">
-                  <p className="text-sm text-muted-foreground mb-1">Etapa Atual</p>
+                  <p className="text-muted-foreground mb-1 text-base font-semibold">Etapa Atual</p>
                   <Badge variant="secondary" className="text-sm">
                     {getStageBySlug(selectedVagaData.status)?.name || selectedVagaData.status}
                   </Badge>
@@ -385,7 +385,7 @@ export default function Acompanhamento() {
 
               <Card>
                 <CardContent className="p-4">
-                  <p className="text-sm text-muted-foreground mb-1">Candidatos</p>
+                  <p className="text-muted-foreground mb-1 text-base font-semibold">Candidatos</p>
                   <div className="flex items-center gap-2">
                     <Users className="h-4 w-4 text-muted-foreground" />
                     <span className="text-lg font-semibold">{vagaCandidatos.length}</span>
@@ -395,7 +395,7 @@ export default function Acompanhamento() {
 
               <Card>
                 <CardContent className="p-4">
-                  <p className="text-sm text-muted-foreground mb-1">Duração</p>
+                  <p className="text-muted-foreground mb-1 text-base font-semibold">Duração</p>
                   <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4 text-muted-foreground" />
                     <span className="text-lg font-semibold">
@@ -407,7 +407,7 @@ export default function Acompanhamento() {
 
               {selectedVagaData.modelo_trabalho && <Card>
                   <CardContent className="p-4">
-                    <p className="text-sm text-muted-foreground mb-1">Modelo</p>
+                    <p className="text-muted-foreground mb-1 text-base font-semibold">Modelo</p>
                     <div className="flex items-center gap-2">
                       <MapPin className="h-4 w-4 text-muted-foreground" />
                       <span className="text-lg font-semibold">{selectedVagaData.modelo_trabalho}</span>
@@ -427,10 +427,10 @@ export default function Acompanhamento() {
 
               <Card>
                 <CardContent className="p-4">
-                  <p className="text-sm text-muted-foreground mb-1">Vaga Publicada</p>
+                  <p className="text-muted-foreground mb-1 text-base font-semibold">Vaga Publicada</p>
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm font-medium">
+                    <span className="font-medium text-base">
                       {format(new Date(selectedVagaData.criado_em), "dd/MM/yyyy", {
                     locale: ptBR
                   })}
@@ -483,7 +483,7 @@ export default function Acompanhamento() {
                 {/* Progress Bar */}
                 <div className="mt-6">
                   <div className="flex items-center justify-between text-sm mb-2">
-                    <span className="text-muted-foreground">Progresso</span>
+                    <span className="text-muted-foreground font-semibold">Progresso</span>
                     <span className="font-semibold">{calculateProgress(selectedVagaData.status)}%</span>
                   </div>
                   <div className="w-full bg-border rounded-full h-2 overflow-hidden">
@@ -502,14 +502,14 @@ export default function Acompanhamento() {
                   <div className="space-y-3">
                     {vagaCandidatos.map(candidato => <div key={candidato.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleCandidateClick(candidato.id)}>
                         <div>
-                          <p className="font-bold text-foreground">{candidato.nome_completo}</p>
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-foreground text-base font-semibold">{candidato.nome_completo}</p>
+                          <p className="text-muted-foreground text-base font-medium">
                             Desde {format(new Date(candidato.criado_em), "dd/MM/yyyy", {
                       locale: ptBR
                     })}
                           </p>
                         </div>
-                        <Badge variant={getStatusBadgeVariant(candidato.status)}>
+                        <Badge variant={getStatusBadgeVariant(candidato.status)} className="bg-[#ffcd00]">
                           {candidato.status}
                         </Badge>
                       </div>)}
