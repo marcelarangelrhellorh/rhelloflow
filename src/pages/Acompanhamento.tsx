@@ -374,7 +374,7 @@ export default function Acompanhamento() {
 
             {/* Info Grid */}
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              <Card>
+              <Card className="border-primary">
                 <CardContent className="p-4">
                   <p className="text-muted-foreground mb-1 text-base font-semibold">Etapa Atual</p>
                   <Badge variant="secondary" className="text-sm">
