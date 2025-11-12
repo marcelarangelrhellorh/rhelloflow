@@ -56,37 +56,45 @@ export default function Acompanhamento() {
     try {
       setLoading(true);
       
-      // Obter ID do usuário atual e perfil
+      // Obter ID do usuário atual
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Buscar perfil do usuário
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("user_type, empresa")
-        .eq("id", user.id)
-        .single();
-
-      // Verificar se é admin
+      // Verificar roles do usuário
       const { data: rolesData } = await supabase
         .from("user_roles")
         .select("role")
-        .eq("user_id", user.id)
-        .eq("role", "admin")
-        .maybeSingle();
+        .eq("user_id", user.id);
 
-      const isAdmin = !!rolesData;
+      const roles = rolesData?.map(r => r.role) || [];
+      const isAdmin = roles.includes('admin');
+      const isClient = roles.includes('client');
 
-      // Carregar vagas baseado no tipo de usuário
+      // Carregar vagas baseado no role
       let vagasQuery = supabase
         .from("vagas")
         .select("*");
       
-      if (!isAdmin && profile?.user_type === 'external' && profile?.empresa) {
-        // Usuários externos veem vagas da sua empresa
-        vagasQuery = vagasQuery.eq("empresa", profile.empresa);
-      } else if (!isAdmin) {
-        // Se não é admin e não é externo, não mostra nada
+      if (!isAdmin && isClient) {
+        // Clientes veem vagas da sua empresa
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("empresa")
+          .eq("id", user.id)
+          .single();
+
+        if (profile?.empresa) {
+          vagasQuery = vagasQuery.eq("empresa", profile.empresa);
+        } else {
+          // Se não tem empresa, não mostra nada
+          setVagas([]);
+          setCandidatos([]);
+          setStageHistory([]);
+          setLoading(false);
+          return;
+        }
+      } else if (!isAdmin && !isClient) {
+        // Se não é admin nem cliente, não mostra nada
         setVagas([]);
         setCandidatos([]);
         setStageHistory([]);

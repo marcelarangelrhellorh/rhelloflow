@@ -18,7 +18,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-type AppRole = "recrutador" | "cs" | "admin";
+type AppRole = "recrutador" | "cs" | "admin" | "client";
 type UserType = "rhello" | "external";
 
 export default function GerenciarUsuarios() {
@@ -98,15 +98,15 @@ export default function GerenciarUsuarios() {
 
   const loadClients = async () => {
     try {
-      // Buscar usuários externos pela tabela profiles
-      const { data: externalProfiles, error: profilesError } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("user_type", "external");
+      // Buscar usuários com role 'client'
+      const { data: clientRoles, error: rolesError } = await supabase
+        .from("user_roles")
+        .select("user_id")
+        .eq("role", "client");
 
-      if (profilesError) throw profilesError;
+      if (rolesError) throw rolesError;
 
-      const clientIds = externalProfiles?.map(p => p.id) || [];
+      const clientIds = clientRoles?.map(r => r.user_id) || [];
 
       if (clientIds.length === 0) {
         setClients([]);
@@ -278,7 +278,18 @@ export default function GerenciarUsuarios() {
           throw profileError;
         }
 
-        // Usuários externos não precisam de roles - são identificados pelo user_type
+        // Inserir role 'client' na tabela user_roles
+        const { error: roleError } = await supabase
+          .from("user_roles")
+          .insert({
+            user_id: authData.user.id,
+            role: "client"
+          });
+
+        if (roleError) {
+          console.error("Erro ao criar role do cliente:", roleError);
+          throw roleError;
+        }
       }
 
       toast.success("✅ Usuário externo criado com sucesso!");
@@ -459,7 +470,7 @@ export default function GerenciarUsuarios() {
       admin: <Badge variant="destructive" className="text-xs px-1.5 py-0">Admin</Badge>,
       recrutador: <Badge className="bg-primary text-primary-foreground text-xs px-1.5 py-0">Recrutador</Badge>,
       cs: <Badge className="bg-secondary text-secondary-foreground text-xs px-1.5 py-0">CS</Badge>,
-      cliente: <Badge className="bg-accent text-accent-foreground text-xs px-1.5 py-0">Externo</Badge>
+      client: <Badge className="bg-accent text-accent-foreground text-xs px-1.5 py-0">Cliente</Badge>
     };
     return badges[role as keyof typeof badges] || <Badge className="text-xs px-1.5 py-0">{role}</Badge>;
   };
@@ -652,7 +663,10 @@ export default function GerenciarUsuarios() {
     );
   };
 
-  const internalUsers = users.filter(user => !clients.some(client => client.id === user.id));
+  const internalUsers = users.filter(user => {
+    const userRolesList = userRoles[user.id] || [];
+    return !userRolesList.includes('client');
+  });
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-6">

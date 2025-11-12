@@ -20,23 +20,18 @@ import symbolRhelloLight from "@/assets/symbol-rhello-light.png";
   { title: "Scorecards", url: "/scorecards", roles: ["admin", "recrutador", "cs"] },
   { title: "Estudo de Mercado", url: "/estudo-mercado", roles: ["admin", "recrutador", "cs"] },
   { title: "Relatórios", url: "/relatorios", roles: ["admin", "recrutador", "cs"] },
-  { title: "Acompanhamento", url: "/acompanhamento", roles: ["admin", "external"] },
+  { title: "Acompanhamento", url: "/acompanhamento", roles: ["admin", "client"] },
 ];
 
 export function AppNavbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
-  const { roles, userType, loading } = useUserRole();
+  const { roles, loading } = useUserRole();
 
-  // Filtrar itens do menu baseado no role do usuário e user_type
-  const visibleMenuItems = menuItems.filter(item => {
-    // Para usuários externos, só mostrar Acompanhamento
-    if (userType === 'external') {
-      return item.url === '/acompanhamento';
-    }
-    // Para usuários rhello, verificar roles
-    return roles.some(role => item.roles.includes(role));
-  });
+  // Filtrar itens do menu baseado nos roles do usuário
+  const visibleMenuItems = menuItems.filter(item => 
+    roles.some(role => item.roles.includes(role))
+  );
 
   if (loading) {
     return null;
