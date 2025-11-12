@@ -524,7 +524,7 @@ export default function Acompanhamento() {
                     })}
                           </p>
                         </div>
-                        <Badge variant={getStatusBadgeVariant(candidato.status)} className="bg-[#ffcd00]">
+                        <Badge variant={getStatusBadgeVariant(candidato.status)} className="bg-[#ffcd00] text-base font-semibold">
                           {candidato.status}
                         </Badge>
                       </div>)}
