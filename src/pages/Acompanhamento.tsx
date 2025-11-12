@@ -283,7 +283,7 @@ export default function Acompanhamento() {
 
         {/* Metrics Cards */}
         {!selectedVaga && <div className="grid gap-4 sm:grid-cols-3">
-            <Card className="border-2 border-primary">
+            <Card className="border-2 border-primary bg-primary/5">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -297,7 +297,7 @@ export default function Acompanhamento() {
               </CardContent>
             </Card>
 
-            <Card className="border-2 border-primary">
+            <Card className="border-2 border-primary bg-primary/5">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -311,7 +311,7 @@ export default function Acompanhamento() {
               </CardContent>
             </Card>
 
-            <Card className="border-2 border-primary cursor-pointer transition-all hover:shadow-md hover:border-primary/50" onClick={() => setNoFeedbackDrawerOpen(true)}>
+            <Card className="border-2 border-primary bg-primary/5 cursor-pointer transition-all hover:shadow-md hover:border-primary/50" onClick={() => setNoFeedbackDrawerOpen(true)}>
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
