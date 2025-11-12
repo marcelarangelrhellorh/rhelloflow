@@ -18,7 +18,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-type AppRole = "recrutador" | "cs" | "viewer" | "admin" | "cliente";
+type AppRole = "recrutador" | "cs" | "admin";
+type UserType = "rhello" | "external";
 
 export default function GerenciarUsuarios() {
   const navigate = useNavigate();
@@ -100,7 +101,7 @@ export default function GerenciarUsuarios() {
       const { data: clientRoles, error: rolesError } = await supabase
         .from("user_roles")
         .select("user_id")
-        .eq("role", "cliente");
+        .eq("role", "cliente" as any);
 
       if (rolesError) throw rolesError;
 
@@ -185,7 +186,7 @@ export default function GerenciarUsuarios() {
     e.preventDefault();
 
     try {
-      // Criar usuário no auth
+      // Criar usuário rhello no auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -199,8 +200,18 @@ export default function GerenciarUsuarios() {
 
       if (authError) throw authError;
 
-      // Inserir role na tabela user_roles
+      // Atualizar perfil como usuário rhello
       if (authData.user) {
+        const { error: profileError } = await supabase
+          .from("profiles")
+          .update({ user_type: 'rhello' })
+          .eq("id", authData.user.id);
+
+        if (profileError) {
+          console.error("Erro ao atualizar perfil:", profileError);
+        }
+
+        // Inserir role na tabela user_roles
         const { error: roleError } = await supabase
           .from("user_roles")
           .insert({
@@ -214,7 +225,7 @@ export default function GerenciarUsuarios() {
         }
       }
 
-      toast.success("✅ Usuário criado com sucesso! Um email de confirmação foi enviado.");
+      toast.success("✅ Usuário rhello criado com sucesso!");
       setShowAddForm(false);
       setFormData({ email: "", name: "", role: "recrutador", password: "" });
       loadUserRoles();
@@ -229,22 +240,35 @@ export default function GerenciarUsuarios() {
     e.preventDefault();
 
     try {
-      // Criar usuário cliente no auth
+      // Criar usuário externo no auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: clientFormData.email,
         password: clientFormData.password,
         options: {
           data: {
             full_name: clientFormData.name,
-            role: "cliente"
           }
         }
       });
 
       if (authError) throw authError;
 
-      // Inserir role na tabela user_roles
       if (authData.user) {
+        // Atualizar perfil como usuário externo com empresa vinculada
+        const { error: profileError } = await supabase
+          .from("profiles")
+          .update({ 
+            user_type: 'external',
+            empresa: clientFormData.company 
+          })
+          .eq("id", authData.user.id);
+
+        if (profileError) {
+          console.error("Erro ao atualizar perfil:", profileError);
+          throw profileError;
+        }
+
+        // Inserir role 'cliente' na tabela user_roles
         const { error: roleError } = await supabase
           .from("user_roles")
           .insert({
@@ -258,15 +282,15 @@ export default function GerenciarUsuarios() {
         }
       }
 
-      toast.success("✅ Cliente criado com sucesso! Um email de confirmação foi enviado.");
+      toast.success("✅ Usuário externo criado com sucesso!");
       setShowClientForm(false);
       setClientFormData({ email: "", name: "", company: "", password: "" });
       loadClients();
       loadUserRoles();
       reload();
     } catch (error: any) {
-      console.error("Erro ao criar cliente:", error);
-      toast.error(`❌ Erro ao criar cliente: ${error.message}`);
+      console.error("Erro ao criar usuário externo:", error);
+      toast.error(`❌ Erro ao criar usuário externo: ${error.message}`);
     }
   };
 
@@ -423,8 +447,7 @@ export default function GerenciarUsuarios() {
       admin: <Badge variant="destructive" className="text-xs px-1.5 py-0">Admin</Badge>,
       recrutador: <Badge className="bg-primary text-primary-foreground text-xs px-1.5 py-0">Recrutador</Badge>,
       cs: <Badge className="bg-secondary text-secondary-foreground text-xs px-1.5 py-0">CS</Badge>,
-      viewer: <Badge variant="outline" className="text-xs px-1.5 py-0">Viewer</Badge>,
-      cliente: <Badge className="bg-accent text-accent-foreground text-xs px-1.5 py-0">Cliente</Badge>
+      cliente: <Badge className="bg-accent text-accent-foreground text-xs px-1.5 py-0">Externo</Badge>
     };
     return badges[role as keyof typeof badges] || <Badge className="text-xs px-1.5 py-0">{role}</Badge>;
   };
@@ -549,17 +572,6 @@ export default function GerenciarUsuarios() {
                 </Label>
               </div>
 
-              <div className="flex items-center space-x-2">
-                <Checkbox 
-                  id={`role-viewer-${user.id}`}
-                  checked={selectedRoles.includes("viewer")}
-                  onCheckedChange={() => toggleRole("viewer")}
-                />
-                <Label htmlFor={`role-viewer-${user.id}`} className="flex items-center gap-1.5 text-sm">
-                  {getRoleBadge("viewer")}
-                  <span className="text-xs text-muted-foreground">Apenas visualização</span>
-                </Label>
-              </div>
             </div>
 
             {selectedRoles.length === 0 && (
@@ -628,7 +640,10 @@ export default function GerenciarUsuarios() {
     );
   };
 
-  const internalUsers = users.filter(user => !userRoles[user.id]?.includes("cliente"));
+  const internalUsers = users.filter(user => {
+    const roles = userRoles[user.id] || [];
+    return !roles.includes("cliente" as any);
+  });
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-6">
@@ -640,7 +655,7 @@ export default function GerenciarUsuarios() {
               Gerenciar Usuários
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
-              Administre usuários internos e clientes do sistema
+              Gerencie usuários rhello (internos) e usuários externos (clientes)
             </p>
           </div>
           <Button onClick={() => navigate("/vagas")} variant="outline" size="sm">
@@ -649,32 +664,35 @@ export default function GerenciarUsuarios() {
         </div>
 
         <Tabs defaultValue="internal" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-4">
+            <TabsList className="grid w-full grid-cols-2 mb-4">
             <TabsTrigger value="internal" className="text-sm">
               <Users className="h-4 w-4 mr-1.5" />
-              Internos ({internalUsers.length})
+              Usuários rhello ({internalUsers.length})
             </TabsTrigger>
             <TabsTrigger value="clients" className="text-sm">
               <Building2 className="h-4 w-4 mr-1.5" />
-              Clientes ({clients.length})
+              Usuários Externos ({clients.length})
             </TabsTrigger>
           </TabsList>
 
-          {/* TAB: Usuários Internos */}
+          {/* TAB: Usuários Internos (rhello) */}
           <TabsContent value="internal" className="space-y-4">
 
-        {/* Adicionar Usuário */}
+        {/* Adicionar Usuário rhello */}
         {!showAddForm && (
           <Button onClick={() => setShowAddForm(true)} className="w-full h-9" variant="outline">
             <UserPlus className="mr-2 h-4 w-4" />
-            Adicionar Novo Usuário
+            Adicionar Novo Usuário rhello
           </Button>
         )}
 
         {showAddForm && (
           <Card className="border-primary/20">
             <CardHeader className="pb-3">
-              <CardTitle className="text-lg">Novo Usuário</CardTitle>
+              <CardTitle className="text-lg">Novo Usuário rhello</CardTitle>
+              <CardDescription className="text-xs">
+                Usuário interno da equipe rhello - pode ter múltiplos roles
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-3">
@@ -727,8 +745,7 @@ export default function GerenciarUsuarios() {
                       <SelectContent>
                         <SelectItem value="recrutador">Recrutador</SelectItem>
                         <SelectItem value="cs">CS</SelectItem>
-                        <SelectItem value="viewer">Visualizador</SelectItem>
-                        <SelectItem value="admin">Admin</SelectItem>
+                        <SelectItem value="admin">Administrador</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -825,18 +842,18 @@ export default function GerenciarUsuarios() {
           </CardContent>
         </Card>
 
-        {/* Informações sobre Usuários Internos */}
+        {/* Informações sobre Usuários rhello */}
         <Card className="bg-primary/5 border-primary/20">
           <CardContent className="pt-4 pb-4">
             <div className="flex gap-2.5">
               <Shield className="h-4 w-4 text-primary shrink-0 mt-0.5" />
               <div className="space-y-1.5 text-xs">
-                <p className="font-semibold text-primary text-sm">Sobre as Funções</p>
+                <p className="font-semibold text-primary text-sm">Sobre os Usuários rhello</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1 text-muted-foreground">
                   <p><strong>Recrutador:</strong> Gerencia vagas e candidatos</p>
                   <p><strong>CS:</strong> Mesmos acessos que recrutador</p>
-                  <p><strong>Visualizador:</strong> Apenas visualização</p>
-                  <p><strong>Admin:</strong> Acesso completo</p>
+                  <p><strong>Administrador:</strong> Acesso completo ao sistema</p>
+                  <p><strong>Múltiplos Roles:</strong> Um usuário pode ter várias funções</p>
                 </div>
               </div>
             </div>
@@ -850,16 +867,16 @@ export default function GerenciarUsuarios() {
             {!showClientForm && (
               <Button onClick={() => setShowClientForm(true)} className="w-full h-9" variant="outline">
                 <UserPlus className="mr-2 h-4 w-4" />
-                Adicionar Novo Cliente
+                Adicionar Novo Usuário Externo
               </Button>
             )}
 
             {showClientForm && (
               <Card className="border-primary/20">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-lg">Novo Cliente</CardTitle>
+                  <CardTitle className="text-lg">Novo Usuário Externo</CardTitle>
                   <CardDescription className="text-xs">
-                    Acesso à aba de Acompanhamento
+                    Usuário externo com acesso apenas à página Acompanhamento
                   </CardDescription>
                 </CardHeader>
                 <CardContent>

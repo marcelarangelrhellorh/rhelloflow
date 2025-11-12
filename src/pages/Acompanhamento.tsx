@@ -56,9 +56,16 @@ export default function Acompanhamento() {
     try {
       setLoading(true);
       
-      // Obter ID do usuário atual e role
+      // Obter ID do usuário atual e perfil
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
+
+      // Buscar perfil do usuário
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("user_type, empresa")
+        .eq("id", user.id)
+        .single();
 
       // Verificar se é admin
       const { data: rolesData } = await supabase
@@ -70,13 +77,21 @@ export default function Acompanhamento() {
 
       const isAdmin = !!rolesData;
 
-      // Carregar vagas - admin vê todas, cliente vê apenas as suas
+      // Carregar vagas baseado no tipo de usuário
       let vagasQuery = supabase
         .from("vagas")
         .select("*");
       
-      if (!isAdmin) {
-        vagasQuery = vagasQuery.eq("cliente_id", user.id);
+      if (!isAdmin && profile?.user_type === 'external' && profile?.empresa) {
+        // Usuários externos veem vagas da sua empresa
+        vagasQuery = vagasQuery.eq("empresa", profile.empresa);
+      } else if (!isAdmin) {
+        // Se não é admin e não é externo, não mostra nada
+        setVagas([]);
+        setCandidatos([]);
+        setStageHistory([]);
+        setLoading(false);
+        return;
       }
 
       const { data: vagasData, error: vagasError } = await vagasQuery

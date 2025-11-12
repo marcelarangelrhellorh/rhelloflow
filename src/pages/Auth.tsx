@@ -37,18 +37,17 @@ export default function Auth() {
         // Log successful login
         await logLoginSuccess(data.user.id, email);
         
-        // Verificar se o usuário é cliente
-        const { data: rolesData } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", data.user.id)
-          .eq("role", "cliente")
+        // Verificar se o usuário é externo
+        const { data: profileData } = await supabase
+          .from("profiles")
+          .select("user_type")
+          .eq("id", data.user.id)
           .maybeSingle();
 
         toast.success("Login realizado com sucesso!");
         
-        // Redirecionar baseado no role
-        if (rolesData) {
+        // Redirecionar baseado no tipo de usuário
+        if (profileData?.user_type === 'external') {
           navigate("/acompanhamento");
         } else {
           navigate("/");

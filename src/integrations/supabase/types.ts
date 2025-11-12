@@ -1267,21 +1267,27 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string | null
+          empresa: string | null
           full_name: string
           id: string
           role: string | null
+          user_type: Database["public"]["Enums"]["user_type"] | null
         }
         Insert: {
           created_at?: string | null
+          empresa?: string | null
           full_name: string
           id: string
           role?: string | null
+          user_type?: Database["public"]["Enums"]["user_type"] | null
         }
         Update: {
           created_at?: string | null
+          empresa?: string | null
           full_name?: string
           id?: string
           role?: string | null
+          user_type?: Database["public"]["Enums"]["user_type"] | null
         }
         Relationships: []
       }
@@ -2978,6 +2984,7 @@ export type Database = {
         | "Em processo de contratação"
         | "Concluído"
         | "Cancelada"
+      user_type: "rhello" | "external"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -3171,6 +3178,7 @@ export const Constants = {
         "Concluído",
         "Cancelada",
       ],
+      user_type: ["rhello", "external"],
     },
   },
 } as const

@@ -10,7 +10,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import logoRhelloDark from "@/assets/logo-rhello-dark.png";
 import symbolRhelloLight from "@/assets/symbol-rhello-light.png";
 
-const menuItems = [
+  const menuItems = [
   { title: "Dashboard", url: "/", roles: ["admin", "recrutador", "cs"] },
   { title: "Vagas", url: "/vagas", roles: ["admin", "recrutador", "cs"] },
   { title: "Funil de Vagas", url: "/funil-vagas", roles: ["admin", "recrutador", "cs"] },
@@ -20,18 +20,23 @@ const menuItems = [
   { title: "Scorecards", url: "/scorecards", roles: ["admin", "recrutador", "cs"] },
   { title: "Estudo de Mercado", url: "/estudo-mercado", roles: ["admin", "recrutador", "cs"] },
   { title: "Relatórios", url: "/relatorios", roles: ["admin", "recrutador", "cs"] },
-  { title: "Acompanhamento", url: "/acompanhamento", roles: ["admin", "cliente"] },
+  { title: "Acompanhamento", url: "/acompanhamento", roles: ["admin", "external"] },
 ];
 
 export function AppNavbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
-  const { roles, loading } = useUserRole();
+  const { roles, userType, loading } = useUserRole();
 
-  // Filtrar itens do menu baseado no role do usuário
-  const visibleMenuItems = menuItems.filter(item => 
-    roles.some(role => item.roles.includes(role))
-  );
+  // Filtrar itens do menu baseado no role do usuário e user_type
+  const visibleMenuItems = menuItems.filter(item => {
+    // Para usuários externos, só mostrar Acompanhamento
+    if (userType === 'external') {
+      return item.url === '/acompanhamento';
+    }
+    // Para usuários rhello, verificar roles
+    return roles.some(role => item.roles.includes(role));
+  });
 
   if (loading) {
     return null;

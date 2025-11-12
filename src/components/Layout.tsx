@@ -9,9 +9,11 @@ export function Layout() {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isExternalUser, setIsExternalUser] = useState(false);
   const { roles, loading: rolesLoading } = useUserRole();
   const navigate = useNavigate();
   const location = useLocation();
+
   useEffect(() => {
     // Set up auth state listener FIRST
     const {
@@ -36,14 +38,32 @@ export function Layout() {
     });
     return () => subscription.unsubscribe();
   }, []);
-  // Redirecionar clientes para /acompanhamento
+
+  // Verificar se é usuário externo
   useEffect(() => {
-    if (!loading && !rolesLoading && user && roles.includes('cliente')) {
+    const checkUserType = async () => {
+      if (user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("user_type")
+          .eq("id", user.id)
+          .single();
+        
+        setIsExternalUser(profile?.user_type === 'external');
+      }
+    };
+    
+    checkUserType();
+  }, [user]);
+
+  // Redirecionar usuários externos para /acompanhamento
+  useEffect(() => {
+    if (!loading && !rolesLoading && user && isExternalUser) {
       if (location.pathname !== '/acompanhamento') {
         navigate('/acompanhamento', { replace: true });
       }
     }
-  }, [loading, rolesLoading, user, roles, location.pathname, navigate]);
+  }, [loading, rolesLoading, user, isExternalUser, location.pathname, navigate]);
 
   if (loading || rolesLoading) {
     return <div className="flex min-h-screen items-center justify-center">
