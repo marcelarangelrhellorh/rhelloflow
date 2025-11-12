@@ -273,7 +273,6 @@ export default function Relatorios() {
 
       // Buscar todos os profiles dos recrutadores únicos
       const recruiterIds = [...new Set(vagas.map(v => v.recrutador_id).filter(Boolean))];
-      console.log("📊 Recruiter IDs a buscar:", recruiterIds);
       
       const { data: profiles, error: profilesError } = await supabase
         .from("profiles")
@@ -281,14 +280,11 @@ export default function Relatorios() {
         .in("id", recruiterIds);
 
       if (profilesError) {
-        console.error("❌ Erro ao carregar profiles:", profilesError);
+        console.error("Erro ao carregar profiles:", profilesError);
       }
-      
-      console.log("📊 Profiles retornados:", profiles);
 
       // Criar um mapa de id -> nome
       const profilesMap = new Map(profiles?.map(p => [p.id, p.full_name]) || []);
-      console.log("📊 Profiles Map:", profilesMap);
 
       const { data: candidatos, error: candidatosError } = await supabase
         .from("candidatos")
@@ -350,7 +346,6 @@ export default function Relatorios() {
         .sort((a, b) => b.contratacoes - a.contratacoes)
         .slice(0, 10);
 
-      console.log("📊 Recruiter Performance Data:", recruiterArray);
       setRecruiterData(recruiterArray);
     } catch (error) {
       console.error("Erro ao carregar performance de recrutadores:", error);
