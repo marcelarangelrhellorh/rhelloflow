@@ -6,24 +6,36 @@ import { NotificationBell } from "./NotificationBell";
 import { UserMenu } from "./UserMenu";
 import { ConnectionIndicator } from "./ConnectionIndicator";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet";
+import { useUserRole } from "@/hooks/useUserRole";
 import logoRhelloDark from "@/assets/logo-rhello-dark.png";
 import symbolRhelloLight from "@/assets/symbol-rhello-light.png";
 
 const menuItems = [
-  { title: "Dashboard", url: "/" },
-  { title: "Vagas", url: "/vagas" },
-  { title: "Funil de Vagas", url: "/funil-vagas" },
-  { title: "Candidatos", url: "/candidatos" },
-  { title: "Funil de Candidatos", url: "/funil-candidatos" },
-  { title: "Banco de Talentos", url: "/banco-talentos" },
-  { title: "Scorecards", url: "/scorecards" },
-  { title: "Estudo de Mercado", url: "/estudo-mercado" },
-  { title: "Relatórios", url: "/relatorios" },
+  { title: "Dashboard", url: "/", roles: ["admin", "recrutador", "cs"] },
+  { title: "Vagas", url: "/vagas", roles: ["admin", "recrutador", "cs"] },
+  { title: "Funil de Vagas", url: "/funil-vagas", roles: ["admin", "recrutador", "cs"] },
+  { title: "Candidatos", url: "/candidatos", roles: ["admin", "recrutador", "cs"] },
+  { title: "Funil de Candidatos", url: "/funil-candidatos", roles: ["admin", "recrutador", "cs"] },
+  { title: "Banco de Talentos", url: "/banco-talentos", roles: ["admin", "recrutador", "cs"] },
+  { title: "Scorecards", url: "/scorecards", roles: ["admin", "recrutador", "cs"] },
+  { title: "Estudo de Mercado", url: "/estudo-mercado", roles: ["admin", "recrutador", "cs"] },
+  { title: "Relatórios", url: "/relatorios", roles: ["admin", "recrutador", "cs"] },
+  { title: "Acompanhamento", url: "/acompanhamento", roles: ["cliente"] },
 ];
 
 export function AppNavbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const { roles, loading } = useUserRole();
+
+  // Filtrar itens do menu baseado no role do usuário
+  const visibleMenuItems = menuItems.filter(item => 
+    roles.some(role => item.roles.includes(role))
+  );
+
+  if (loading) {
+    return null;
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-[#00141d] shadow-sm">
@@ -44,7 +56,7 @@ export function AppNavbar() {
 
         {/* Desktop Navigation */}
         <nav className="hidden lg:flex flex-1 items-center justify-center gap-6">
-          {menuItems.map((item) => (
+          {visibleMenuItems.map((item) => (
             <NavLink
               key={item.title}
               to={item.url}
@@ -100,7 +112,7 @@ export function AppNavbar() {
               </SheetHeader>
 
               <nav className="mt-8 flex flex-col gap-2">
-                {menuItems.map((item) => (
+                {visibleMenuItems.map((item) => (
                   <NavLink
                     key={item.title}
                     to={item.url}

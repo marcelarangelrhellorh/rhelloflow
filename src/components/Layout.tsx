@@ -1,12 +1,17 @@
 import { AppNavbar } from "./AppNavbar";
-import { Outlet, Navigate } from "react-router-dom";
+import { Outlet, Navigate, useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
+import { useUserRole } from "@/hooks/useUserRole";
+
 export function Layout() {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const { roles, loading: rolesLoading } = useUserRole();
+  const navigate = useNavigate();
+  const location = useLocation();
   useEffect(() => {
     // Set up auth state listener FIRST
     const {
@@ -31,7 +36,16 @@ export function Layout() {
     });
     return () => subscription.unsubscribe();
   }, []);
-  if (loading) {
+  // Redirecionar clientes para /acompanhamento
+  useEffect(() => {
+    if (!loading && !rolesLoading && user && roles.includes('cliente')) {
+      if (location.pathname !== '/acompanhamento') {
+        navigate('/acompanhamento', { replace: true });
+      }
+    }
+  }, [loading, rolesLoading, user, roles, location.pathname, navigate]);
+
+  if (loading || rolesLoading) {
     return <div className="flex min-h-screen items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
       </div>;

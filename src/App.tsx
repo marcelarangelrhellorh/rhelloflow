@@ -28,6 +28,7 @@ import AuditLog from "./pages/AuditLog";
 import EstudoMercado from "./pages/EstudoMercado";
 import WhatsAppTemplates from "./pages/WhatsAppTemplates";
 import Relatorios from "./pages/Relatorios";
+import Acompanhamento from "./pages/Acompanhamento";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
@@ -66,6 +67,7 @@ const App = () => <QueryClientProvider client={queryClient}>
             <Route path="/estudo-mercado" element={<EstudoMercado />} />
             <Route path="/whatsapp-templates" element={<WhatsAppTemplates />} />
             <Route path="/relatorios" element={<Relatorios />} />
+            <Route path="/acompanhamento" element={<Acompanhamento />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

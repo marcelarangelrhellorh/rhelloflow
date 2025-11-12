@@ -1849,6 +1849,7 @@ export type Database = {
         Row: {
           beneficios: string[] | null
           beneficios_outros: string | null
+          cliente_id: string | null
           complexidade: Database["public"]["Enums"]["complexidade_vaga"] | null
           confidencial: boolean | null
           contato_email: string | null
@@ -1896,6 +1897,7 @@ export type Database = {
         Insert: {
           beneficios?: string[] | null
           beneficios_outros?: string | null
+          cliente_id?: string | null
           complexidade?: Database["public"]["Enums"]["complexidade_vaga"] | null
           confidencial?: boolean | null
           contato_email?: string | null
@@ -1945,6 +1947,7 @@ export type Database = {
         Update: {
           beneficios?: string[] | null
           beneficios_outros?: string | null
+          cliente_id?: string | null
           complexidade?: Database["public"]["Enums"]["complexidade_vaga"] | null
           confidencial?: boolean | null
           contato_email?: string | null
@@ -2910,7 +2913,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "recrutador" | "viewer" | "cs"
+      app_role: "admin" | "recrutador" | "viewer" | "cs" | "cliente"
       area_candidato:
         | "RH"
         | "Vendas"
@@ -3102,7 +3105,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "recrutador", "viewer", "cs"],
+      app_role: ["admin", "recrutador", "viewer", "cs", "cliente"],
       area_candidato: [
         "RH",
         "Vendas",
