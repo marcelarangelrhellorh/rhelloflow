@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { StatusBadge } from "@/components/StatusBadge";
-import { ProcessTimeline } from "@/components/ProcessTimeline";
-import { Clock, Users, Building2, User } from "lucide-react";
-import { format } from "date-fns";
+import { Button } from "@/components/ui/button";
+import { Clock, Users, Briefcase, MapPin, DollarSign, FileText, Calendar, CheckCircle2 } from "lucide-react";
+import { format, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { formatSalaryRange } from "@/lib/salaryUtils";
+import { JOB_STAGES, calculateProgress, getStageBySlug } from "@/lib/jobStages";
+import { cn } from "@/lib/utils";
 
 interface Vaga {
   id: string;
@@ -17,6 +18,13 @@ interface Vaga {
   criado_em: string;
   recrutador_id: string | null;
   cs_id: string | null;
+  salario_min: number | null;
+  salario_max: number | null;
+  salario_modalidade: string | null;
+  modelo_trabalho: string | null;
+  regime?: string | null;
+  beneficios: string[] | null;
+  beneficios_outros: string | null;
 }
 
 interface Profile {
@@ -56,11 +64,9 @@ export default function Acompanhamento() {
     try {
       setLoading(true);
       
-      // Obter ID do usuário atual
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Verificar roles do usuário
       const { data: rolesData } = await supabase
         .from("user_roles")
         .select("role")
@@ -70,13 +76,11 @@ export default function Acompanhamento() {
       const isAdmin = roles.includes('admin');
       const isClient = roles.includes('client');
 
-      // Carregar vagas baseado no role
       let vagasQuery = supabase
         .from("vagas")
         .select("*");
       
       if (!isAdmin && isClient) {
-        // Clientes veem vagas da sua empresa
         const { data: profile } = await supabase
           .from("profiles")
           .select("empresa")
@@ -86,7 +90,6 @@ export default function Acompanhamento() {
         if (profile?.empresa) {
           vagasQuery = vagasQuery.eq("empresa", profile.empresa);
         } else {
-          // Se não tem empresa, não mostra nada
           setVagas([]);
           setCandidatos([]);
           setStageHistory([]);
@@ -94,7 +97,6 @@ export default function Acompanhamento() {
           return;
         }
       } else if (!isAdmin && !isClient) {
-        // Se não é admin nem cliente, não mostra nada
         setVagas([]);
         setCandidatos([]);
         setStageHistory([]);
@@ -108,7 +110,6 @@ export default function Acompanhamento() {
       if (vagasError) throw vagasError;
       setVagas(vagasData || []);
 
-      // Carregar profiles dos recrutadores e CS
       const userIds = new Set<string>();
       vagasData?.forEach(v => {
         if (v.recrutador_id) userIds.add(v.recrutador_id);
@@ -127,7 +128,6 @@ export default function Acompanhamento() {
         }
       }
 
-      // Carregar candidatos apenas das vagas do cliente
       const vagaIds = vagasData?.map(v => v.id) || [];
       
       if (vagaIds.length > 0) {
@@ -143,7 +143,6 @@ export default function Acompanhamento() {
         setCandidatos([]);
       }
 
-      // Carregar histórico de etapas apenas das vagas do cliente
       if (vagaIds.length > 0) {
         const { data: historyData, error: historyError } = await supabase
           .from("job_stage_history")
@@ -168,95 +167,65 @@ export default function Acompanhamento() {
   const vagaCandidatos = candidatos.filter(c => c.vaga_relacionada_id === selectedVaga);
   const vagaHistory = stageHistory.filter(h => h.job_id === selectedVaga);
 
-  // Converter histórico para steps do ProcessTimeline
-  const timelineSteps = vagaHistory.map((h, index) => ({
-    label: h.to_status,
-    dates: format(new Date(h.changed_at), "dd/MM/yyyy", { locale: ptBR }),
-    status: index === 0 ? "current" as const : "completed" as const
-  }));
+  // Calculate progress and timeline based on current status
+  const getTimelineSteps = (currentStatus: string) => {
+    const currentStage = getStageBySlug(currentStatus);
+    
+    return JOB_STAGES.filter(stage => stage.kind === "normal").map(stage => {
+      const isCompleted = stage.order < (currentStage?.order || 0);
+      const isCurrent = stage.slug === currentStatus;
+      
+      return {
+        label: stage.name,
+        status: isCompleted ? "completed" : isCurrent ? "current" : "pending" as const
+      };
+    });
+  };
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#FFFDF6]">
+      <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="mx-auto max-w-7xl space-y-8">
+    <div className="min-h-screen bg-background">
+      <div className="mx-auto max-w-7xl p-6 space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-border pb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Acompanhamento de Processos</h1>
-            <p className="text-sm text-muted-foreground mt-2">Visualize o andamento das suas vagas</p>
-          </div>
-          {vagas.length > 1 && (
-            <Select value={selectedVaga || ""} onValueChange={setSelectedVaga}>
-              <SelectTrigger className="w-[320px]">
-                <SelectValue placeholder="Selecione uma vaga" />
-              </SelectTrigger>
-              <SelectContent>
-                {vagas.map(vaga => (
-                  <SelectItem key={vaga.id} value={vaga.id}>
-                    {vaga.titulo} - {vaga.empresa}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Meus Processos</h1>
+          <p className="text-muted-foreground mt-1">Acompanhe o andamento das suas vagas em aberto</p>
         </div>
 
-        {/* Visão Geral - Cards de Vagas */}
+        {/* Vagas Overview - Small Cards */}
         {!selectedVaga && (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {vagas.map(vaga => {
               const vagaCandidatosCount = candidatos.filter(c => c.vaga_relacionada_id === vaga.id).length;
+              const currentStage = getStageBySlug(vaga.status);
               
               return (
                 <Card 
                   key={vaga.id}
-                  className="cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02] bg-card border-border/50"
+                  className="cursor-pointer transition-all hover:shadow-md border-2 hover:border-primary/50"
                   onClick={() => setSelectedVaga(vaga.id)}
                 >
-                  <CardHeader className="space-y-3 pb-3">
-                    <div className="flex items-start justify-between gap-3">
-                      <CardTitle className="text-xl text-foreground font-semibold">{vaga.titulo}</CardTitle>
-                      <StatusBadge status={vaga.status} />
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Building2 className="h-4 w-4 text-primary" />
-                      <span className="font-medium">{vaga.empresa}</span>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center justify-between text-sm bg-muted/50 rounded-lg p-3">
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Users className="h-4 w-4 text-primary" />
-                        <span className="font-medium">{vagaCandidatosCount} candidato{vagaCandidatosCount !== 1 ? 's' : ''}</span>
+                  <CardContent className="p-4">
+                    <div className="space-y-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <h3 className="font-semibold text-base text-foreground line-clamp-2">{vaga.titulo}</h3>
                       </div>
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Clock className="h-4 w-4 text-primary" />
-                        <span>{format(new Date(vaga.criado_em), "dd/MM/yyyy", { locale: ptBR })}</span>
+                      <p className="text-sm text-muted-foreground">
+                        {formatSalaryRange(vaga.salario_min, vaga.salario_max, vaga.salario_modalidade)}
+                      </p>
+                      <div className="pt-2 border-t border-border">
+                        <Badge variant="secondary" className="text-xs">
+                          {currentStage?.name || vaga.status}
+                        </Badge>
                       </div>
                     </div>
-                    {(vaga.recrutador_id || vaga.cs_id) && (
-                      <div className="space-y-2 pt-2 border-t border-border">
-                        {vaga.recrutador_id && profiles.get(vaga.recrutador_id) && (
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <User className="h-3.5 w-3.5 text-primary" />
-                            <span className="text-xs"><span className="font-semibold">Recrutador:</span> {profiles.get(vaga.recrutador_id)}</span>
-                          </div>
-                        )}
-                        {vaga.cs_id && profiles.get(vaga.cs_id) && (
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <User className="h-3.5 w-3.5 text-primary" />
-                            <span className="text-xs"><span className="font-semibold">CS:</span> {profiles.get(vaga.cs_id)}</span>
-                          </div>
-                        )}
-                      </div>
-                    )}
                   </CardContent>
                 </Card>
               );
@@ -264,105 +233,224 @@ export default function Acompanhamento() {
           </div>
         )}
 
-        {/* Detalhes da Vaga Selecionada */}
+        {/* Selected Vaga Details */}
         {selectedVaga && selectedVagaData && (
           <div className="space-y-6">
-            {/* Informações da Vaga */}
-            <Card className="bg-card border-border/50">
-              <CardHeader className="pb-4">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <CardTitle className="text-2xl text-foreground font-bold">{selectedVagaData.titulo}</CardTitle>
-                    <p className="text-muted-foreground mt-2 flex items-center gap-2">
-                      <Building2 className="h-4 w-4 text-primary" />
-                      <span className="font-medium">{selectedVagaData.empresa}</span>
-                    </p>
-                  </div>
-                  <StatusBadge status={selectedVagaData.status} />
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid gap-6 md:grid-cols-3 bg-muted/30 rounded-lg p-4">
-                  <div className="space-y-2">
-                    <p className="text-sm text-muted-foreground font-medium">Data de Abertura</p>
-                    <p className="font-semibold text-foreground flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-primary" />
-                      {format(new Date(selectedVagaData.criado_em), "dd/MM/yyyy", { locale: ptBR })}
-                    </p>
-                  </div>
-                  {selectedVagaData.recrutador_id && profiles.get(selectedVagaData.recrutador_id) && (
-                    <div className="space-y-2">
-                      <p className="text-sm text-muted-foreground font-medium">Recrutador Responsável</p>
-                      <p className="font-semibold text-foreground flex items-center gap-2">
-                        <User className="h-4 w-4 text-primary" />
-                        {profiles.get(selectedVagaData.recrutador_id)}
-                      </p>
-                    </div>
-                  )}
-                  {selectedVagaData.cs_id && profiles.get(selectedVagaData.cs_id) && (
-                    <div className="space-y-2">
-                      <p className="text-sm text-muted-foreground font-medium">CS Responsável</p>
-                      <p className="font-semibold text-foreground flex items-center gap-2">
-                        <User className="h-4 w-4 text-primary" />
-                        {profiles.get(selectedVagaData.cs_id)}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+            {/* Back Button */}
+            <Button 
+              variant="ghost" 
+              onClick={() => setSelectedVaga(null)}
+              className="mb-4"
+            >
+              ← Voltar para Meus Processos
+            </Button>
 
-            {/* Linha do Tempo */}
-            {timelineSteps.length > 0 && (
-              <Card className="bg-card border-border/50">
-                <CardHeader>
-                  <CardTitle className="text-foreground font-semibold">Linha do Tempo do Processo</CardTitle>
-                  <p className="text-sm text-muted-foreground mt-1">Histórico de mudanças de etapa</p>
-                </CardHeader>
-                <CardContent className="pt-2">
-                  <ProcessTimeline steps={timelineSteps} />
+            {/* Vaga Header */}
+            <div>
+              <h2 className="text-3xl font-bold text-foreground">{selectedVagaData.titulo}</h2>
+              <p className="text-muted-foreground mt-1">{selectedVagaData.empresa} • Acompanhe o progresso do processo de contratação</p>
+            </div>
+
+            {/* Salary Badge */}
+            {(selectedVagaData.salario_min || selectedVagaData.salario_max) && (
+              <div className="flex items-center gap-2">
+                <DollarSign className="h-5 w-5 text-primary" />
+                <span className="text-xl font-semibold text-foreground">
+                  {formatSalaryRange(selectedVagaData.salario_min, selectedVagaData.salario_max, selectedVagaData.salario_modalidade)}
+                </span>
+              </div>
+            )}
+
+            {/* Info Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <Card>
+                <CardContent className="p-4">
+                  <p className="text-sm text-muted-foreground mb-1">Etapa Atual</p>
+                  <Badge variant="secondary" className="text-sm">
+                    {getStageBySlug(selectedVagaData.status)?.name || selectedVagaData.status}
+                  </Badge>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-4">
+                  <p className="text-sm text-muted-foreground mb-1">Candidatos</p>
+                  <div className="flex items-center gap-2">
+                    <Users className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-lg font-semibold">{vagaCandidatos.length}</span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-4">
+                  <p className="text-sm text-muted-foreground mb-1">Duração</p>
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-lg font-semibold">
+                      {differenceInDays(new Date(), new Date(selectedVagaData.criado_em))} Dias
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {selectedVagaData.modelo_trabalho && (
+                <Card>
+                  <CardContent className="p-4">
+                    <p className="text-sm text-muted-foreground mb-1">Modelo</p>
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-lg font-semibold">{selectedVagaData.modelo_trabalho}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {selectedVagaData.regime && (
+                <Card>
+                  <CardContent className="p-4">
+                    <p className="text-sm text-muted-foreground mb-1">Contratação</p>
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-lg font-semibold">{selectedVagaData.regime}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              <Card>
+                <CardContent className="p-4">
+                  <p className="text-sm text-muted-foreground mb-1">Vaga Publicada</p>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">
+                      {format(new Date(selectedVagaData.criado_em), "dd/MM/yyyy", { locale: ptBR })}
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Benefits Section */}
+            {selectedVagaData.beneficios && selectedVagaData.beneficios.length > 0 && (
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Briefcase className="h-5 w-5 text-primary" />
+                    <h3 className="font-semibold text-lg">Benefícios Oferecidos</h3>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedVagaData.beneficios.map((beneficio, index) => (
+                      <Badge key={index} variant="outline" className="bg-primary/10 text-primary border-primary/20">
+                        {beneficio}
+                      </Badge>
+                    ))}
+                  </div>
+                  {selectedVagaData.beneficios_outros && (
+                    <p className="text-sm text-muted-foreground mt-3">{selectedVagaData.beneficios_outros}</p>
+                  )}
                 </CardContent>
               </Card>
             )}
 
-            {/* Lista de Candidatos */}
-            <Card className="bg-card border-border/50">
-              <CardHeader>
-                <CardTitle className="text-foreground font-semibold">Candidatos no Processo</CardTitle>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {vagaCandidatos.length} {vagaCandidatos.length === 1 ? 'candidato' : 'candidatos'} vinculado{vagaCandidatos.length === 1 ? '' : 's'}
-                </p>
-              </CardHeader>
-              <CardContent>
-                {vagaCandidatos.length === 0 ? (
-                  <div className="text-center py-12 text-muted-foreground">
-                    <Users className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                    <p>Nenhum candidato vinculado ainda</p>
+            {/* Process Timeline */}
+            <Card>
+              <CardContent className="p-6">
+                <h3 className="font-semibold text-lg mb-6">Linha do Tempo do Processo</h3>
+                <div className="relative">
+                  <div className="flex items-start justify-between gap-2 overflow-x-auto pb-4">
+                    {getTimelineSteps(selectedVagaData.status).map((step, index, array) => (
+                      <div key={index} className="flex flex-col items-center min-w-[100px] relative">
+                        {/* Connector Line */}
+                        {index < array.length - 1 && (
+                          <div 
+                            className={cn(
+                              "absolute top-5 left-[50%] w-full h-0.5 z-0",
+                              step.status === "completed" ? "bg-primary" : "bg-border"
+                            )}
+                          />
+                        )}
+                        
+                        {/* Circle */}
+                        <div 
+                          className={cn(
+                            "relative z-10 w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-all",
+                            step.status === "completed" && "bg-primary",
+                            step.status === "current" && "bg-primary animate-pulse",
+                            step.status === "pending" && "bg-border"
+                          )}
+                        >
+                          {step.status === "completed" && (
+                            <CheckCircle2 className="h-5 w-5 text-primary-foreground" />
+                          )}
+                          {step.status === "current" && (
+                            <div className="w-3 h-3 bg-primary-foreground rounded-full" />
+                          )}
+                        </div>
+
+                        {/* Label */}
+                        <p className={cn(
+                          "text-xs text-center font-medium",
+                          step.status === "pending" ? "text-muted-foreground" : "text-foreground"
+                        )}>
+                          {step.label}
+                        </p>
+                      </div>
+                    ))}
                   </div>
-                ) : (
+                </div>
+
+                {/* Progress Bar */}
+                <div className="mt-6">
+                  <div className="flex items-center justify-between text-sm mb-2">
+                    <span className="text-muted-foreground">Progresso</span>
+                    <span className="font-semibold">{calculateProgress(selectedVagaData.status)}%</span>
+                  </div>
+                  <div className="w-full bg-border rounded-full h-2 overflow-hidden">
+                    <div 
+                      className="bg-primary h-full transition-all duration-500 rounded-full"
+                      style={{ width: `${calculateProgress(selectedVagaData.status)}%` }}
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Candidates List */}
+            {vagaCandidatos.length > 0 && (
+              <Card>
+                <CardContent className="p-6">
+                  <h3 className="font-semibold text-lg mb-4">Candidatos ({vagaCandidatos.length})</h3>
                   <div className="space-y-3">
                     {vagaCandidatos.map(candidato => (
                       <div 
                         key={candidato.id}
-                        className="flex items-center justify-between p-4 rounded-lg bg-muted/30 border border-border/50 hover:bg-muted/50 transition-colors"
+                        className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border"
                       >
-                        <div className="space-y-1">
-                          <p className="font-semibold text-foreground">{candidato.nome_completo}</p>
-                          <p className="text-sm text-muted-foreground flex items-center gap-1.5">
-                            <Clock className="h-3.5 w-3.5" />
+                        <div>
+                          <p className="font-medium text-foreground">{candidato.nome_completo}</p>
+                          <p className="text-sm text-muted-foreground">
                             Desde {format(new Date(candidato.criado_em), "dd/MM/yyyy", { locale: ptBR })}
                           </p>
                         </div>
-                        <Badge variant="outline" className="bg-background font-medium">
-                          {candidato.status}
-                        </Badge>
+                        <Badge variant="outline">{candidato.status}</Badge>
                       </div>
                     ))}
                   </div>
-                )}
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
           </div>
+        )}
+
+        {/* Empty State */}
+        {!selectedVaga && vagas.length === 0 && (
+          <Card>
+            <CardContent className="p-12 text-center">
+              <Briefcase className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+              <p className="text-muted-foreground">Nenhum processo em andamento no momento</p>
+            </CardContent>
+          </Card>
         )}
       </div>
     </div>
