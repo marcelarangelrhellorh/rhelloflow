@@ -156,48 +156,6 @@ export function ClientCandidateDrawer({ open, onOpenChange, candidateId }: Clien
 
           <Separator />
 
-          {/* Informações de contato */}
-          <div className="space-y-3">
-            <h4 className="font-semibold text-foreground text-lg">Contato</h4>
-            
-            <div className="flex items-center gap-3 text-muted-foreground">
-              <Mail className="h-4 w-4" />
-              <span>{candidate.email}</span>
-            </div>
-
-            {candidate.telefone && (
-              <div className="flex items-center gap-3 text-muted-foreground">
-                <Phone className="h-4 w-4" />
-                <span>{candidate.telefone}</span>
-              </div>
-            )}
-
-            {(candidate.cidade || candidate.estado) && (
-              <div className="flex items-center gap-3 text-muted-foreground">
-                <MapPin className="h-4 w-4" />
-                <span>
-                  {[candidate.cidade, candidate.estado].filter(Boolean).join(" / ")}
-                </span>
-              </div>
-            )}
-
-            {candidate.linkedin && (
-              <div className="flex items-center gap-3">
-                <ExternalLink className="h-4 w-4 text-muted-foreground" />
-                <a 
-                  href={candidate.linkedin} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-primary hover:underline"
-                >
-                  Ver LinkedIn
-                </a>
-              </div>
-            )}
-          </div>
-
-          <Separator />
-
           {/* Informações profissionais */}
           <div className="space-y-3">
             <h4 className="font-semibold text-foreground text-lg">Informações Profissionais</h4>
@@ -290,8 +248,8 @@ export function ClientCandidateDrawer({ open, onOpenChange, candidateId }: Clien
               <Separator />
               <div className="space-y-4">
                 <h4 className="font-semibold text-foreground text-lg flex items-center gap-2">
-                  <LinkIcon className="h-5 w-5" />
-                  Links de Solicitação de Feedback
+                  <MessageSquare className="h-5 w-5" />
+                  Dar Feedback sobre o Candidato
                 </h4>
 
                 <div className="space-y-3">
@@ -302,37 +260,25 @@ export function ClientCandidateDrawer({ open, onOpenChange, candidateId }: Clien
                     return (
                       <Card key={request.id}>
                         <CardContent className="p-4">
-                          <div className="space-y-2">
+                          <div className="space-y-3">
                             <div className="flex items-center justify-between">
                               <Badge variant={isExpired ? "secondary" : "default"} className="text-xs">
                                 {isExpired ? "Expirado" : "Ativo"}
                               </Badge>
                               <span className="text-xs text-muted-foreground">
-                                Criado em {format(new Date(request.created_at), "dd/MM/yyyy", { locale: ptBR })}
+                                Expira em: {format(new Date(request.expires_at), "dd/MM/yyyy", { locale: ptBR })}
                               </span>
                             </div>
                             
-                            <p className="text-xs text-muted-foreground">
-                              Expira em: {format(new Date(request.expires_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
-                            </p>
-
-                            <div className="flex items-center gap-2">
-                              <input
-                                type="text"
-                                value={feedbackLink}
-                                readOnly
-                                className="flex-1 text-xs bg-muted rounded px-2 py-1 text-muted-foreground"
-                              />
+                            {!isExpired && (
                               <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => {
-                                  navigator.clipboard.writeText(feedbackLink);
-                                }}
+                                className="w-full"
+                                onClick={() => window.open(feedbackLink, '_blank')}
                               >
-                                Copiar
+                                <MessageSquare className="mr-2 h-4 w-4" />
+                                Dar feedback
                               </Button>
-                            </div>
+                            )}
                           </div>
                         </CardContent>
                       </Card>
