@@ -9,6 +9,7 @@ import { ptBR } from "date-fns/locale";
 import { formatSalaryRange } from "@/lib/salaryUtils";
 import { JOB_STAGES, calculateProgress, getStageBySlug } from "@/lib/jobStages";
 import { cn } from "@/lib/utils";
+import { ClientCandidateDrawer } from "@/components/CandidatoDetalhes/ClientCandidateDrawer";
 
 interface Vaga {
   id: string;
@@ -54,6 +55,8 @@ export default function Acompanhamento() {
   const [stageHistory, setStageHistory] = useState<StageHistory[]>([]);
   const [profiles, setProfiles] = useState<Map<string, string>>(new Map());
   const [selectedVaga, setSelectedVaga] = useState<string | null>(null);
+  const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(null);
+  const [candidateDrawerOpen, setCandidateDrawerOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -166,6 +169,26 @@ export default function Acompanhamento() {
   const selectedVagaData = vagas.find(v => v.id === selectedVaga);
   const vagaCandidatos = candidatos.filter(c => c.vaga_relacionada_id === selectedVaga);
   const vagaHistory = stageHistory.filter(h => h.job_id === selectedVaga);
+
+  // Get badge variant based on candidate status
+  const getStatusBadgeVariant = (status: string) => {
+    const statusLower = status.toLowerCase();
+    if (statusLower.includes('aprovado') || statusLower.includes('contratado')) {
+      return 'default'; // Green/success
+    }
+    if (statusLower.includes('processo') || statusLower.includes('andamento')) {
+      return 'secondary'; // Blue
+    }
+    if (statusLower.includes('recusado') || statusLower.includes('reprovado')) {
+      return 'destructive'; // Red
+    }
+    return 'outline'; // Default gray
+  };
+
+  const handleCandidateClick = (candidateId: string) => {
+    setSelectedCandidateId(candidateId);
+    setCandidateDrawerOpen(true);
+  };
 
   // Calculate progress and timeline based on current status
   const getTimelineSteps = (currentStatus: string) => {
@@ -425,15 +448,18 @@ export default function Acompanhamento() {
                     {vagaCandidatos.map(candidato => (
                       <div 
                         key={candidato.id}
-                        className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border"
+                        className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border cursor-pointer hover:bg-muted/50 transition-colors"
+                        onClick={() => handleCandidateClick(candidato.id)}
                       >
                         <div>
-                          <p className="font-medium text-foreground">{candidato.nome_completo}</p>
+                          <p className="font-bold text-foreground">{candidato.nome_completo}</p>
                           <p className="text-sm text-muted-foreground">
                             Desde {format(new Date(candidato.criado_em), "dd/MM/yyyy", { locale: ptBR })}
                           </p>
                         </div>
-                        <Badge variant="outline">{candidato.status}</Badge>
+                        <Badge variant={getStatusBadgeVariant(candidato.status)}>
+                          {candidato.status}
+                        </Badge>
                       </div>
                     ))}
                   </div>
@@ -453,6 +479,15 @@ export default function Acompanhamento() {
           </Card>
         )}
       </div>
+
+      {/* Candidate Details Drawer */}
+      {selectedCandidateId && (
+        <ClientCandidateDrawer
+          open={candidateDrawerOpen}
+          onOpenChange={setCandidateDrawerOpen}
+          candidateId={selectedCandidateId}
+        />
+      )}
     </div>
   );
 }
