@@ -661,7 +661,7 @@ export default function GerenciarUsuarios() {
                       role: value
                     })}>
                       <SelectTrigger className="h-9">
-                        <SelectValue />
+                        <SelectValue className="font-semibold" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="recrutador">Recrutador</SelectItem>
