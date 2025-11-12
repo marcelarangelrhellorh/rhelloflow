@@ -919,12 +919,12 @@ export default function GerenciarUsuarios() {
                 <div className="flex gap-2.5">
                   <Building2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                   <div className="space-y-1.5 text-xs">
-                    <p className="font-semibold text-primary text-sm">Sobre Clientes</p>
+                    <p className="font-semibold text-primary text-xl">Sobre Clientes</p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1 text-muted-foreground">
-                      <p><strong>Acesso:</strong> Apenas aba "Acompanhamento"</p>
-                      <p><strong>Visão:</strong> Suas vagas e candidatos</p>
-                      <p><strong>Permissões:</strong> Somente leitura</p>
-                      <p><strong>Vincular:</strong> Use "Vincular Vaga"</p>
+                      <p className="text-base font-medium"><strong>Acesso:</strong> Apenas aba "Acompanhamento"</p>
+                      <p className="text-base font-medium"><strong>Visão:</strong> Suas vagas e candidatos</p>
+                      <p className="text-base font-medium"><strong>Permissões:</strong> Somente leitura</p>
+                      <p className="text-base font-medium"><strong>Vincular:</strong> Use "Vincular Vaga"</p>
                     </div>
                   </div>
                 </div>
