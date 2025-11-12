@@ -341,7 +341,7 @@ export default function Acompanhamento() {
                         {formatSalaryRange(vaga.salario_min, vaga.salario_max, vaga.salario_modalidade)}
                       </p>
                       <div className="pt-2 border-t border-border">
-                        <Badge variant="secondary" className="text-xs bg-[#ffcd00]">
+                        <Badge variant="secondary" className="text-sm font-semibold bg-[#ffcd00]">
                           {currentStage?.name || vaga.status}
                         </Badge>
                       </div>
