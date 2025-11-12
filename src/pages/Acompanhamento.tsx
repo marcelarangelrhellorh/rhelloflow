@@ -11,6 +11,9 @@ import { formatSalaryRange } from "@/lib/salaryUtils";
 import { JOB_STAGES, calculateProgress, getStageBySlug } from "@/lib/jobStages";
 import { cn } from "@/lib/utils";
 import { ClientCandidateDrawer } from "@/components/CandidatoDetalhes/ClientCandidateDrawer";
+import { useClientJobs, useJobCandidates } from "@/hooks/useClientJobs";
+import { useUserRole } from "@/hooks/useUserRole";
+import { logger } from "@/lib/logger";
 interface Vaga {
   id: string;
   titulo: string;
@@ -55,123 +58,70 @@ interface CandidateWithoutFeedback {
   request_expires: string;
 }
 export default function Acompanhamento() {
-  const [vagas, setVagas] = useState<Vaga[]>([]);
-  const [candidatos, setCandidatos] = useState<Candidato[]>([]);
+  const { roles } = useUserRole();
+  const [userId, setUserId] = useState<string | null>(null);
   const [stageHistory, setStageHistory] = useState<StageHistory[]>([]);
-  const [profiles, setProfiles] = useState<Map<string, string>>(new Map());
   const [selectedVaga, setSelectedVaga] = useState<string | null>(null);
   const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(null);
   const [candidateDrawerOpen, setCandidateDrawerOpen] = useState(false);
   const [candidatesWithoutFeedback, setCandidatesWithoutFeedback] = useState<CandidateWithoutFeedback[]>([]);
   const [noFeedbackDrawerOpen, setNoFeedbackDrawerOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    loadData();
-  }, []);
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      const {
-        data: {
-          user
-        }
-      } = await supabase.auth.getUser();
-      if (!user) return;
-      const {
-        data: rolesData
-      } = await supabase.from("user_roles").select("role").eq("user_id", user.id);
-      const roles = rolesData?.map(r => r.role) || [];
-      const isAdmin = roles.includes('admin');
-      const isClient = roles.includes('client');
-      let vagasQuery = supabase.from("vagas").select("*");
-      if (!isAdmin && isClient) {
-        const {
-          data: profile
-        } = await supabase.from("profiles").select("empresa").eq("id", user.id).single();
-        if (profile?.empresa) {
-          vagasQuery = vagasQuery.eq("empresa", profile.empresa);
-        } else {
-          setVagas([]);
-          setCandidatos([]);
-          setStageHistory([]);
-          setLoading(false);
-          return;
-        }
-      } else if (!isAdmin && !isClient) {
-        setVagas([]);
-        setCandidatos([]);
-        setStageHistory([]);
-        setLoading(false);
-        return;
-      }
-      const {
-        data: vagasData,
-        error: vagasError
-      } = await vagasQuery.order("criado_em", {
-        ascending: false
-      });
-      if (vagasError) throw vagasError;
-      setVagas(vagasData || []);
-      const userIds = new Set<string>();
-      vagasData?.forEach(v => {
-        if (v.recrutador_id) userIds.add(v.recrutador_id);
-        if (v.cs_id) userIds.add(v.cs_id);
-      });
-      if (userIds.size > 0) {
-        const {
-          data: profilesData,
-          error: profilesError
-        } = await supabase.from("profiles").select("id, full_name").in("id", Array.from(userIds));
-        if (!profilesError && profilesData) {
-          const profilesMap = new Map(profilesData.map(p => [p.id, p.full_name]));
-          setProfiles(profilesMap);
-        }
-      }
-      const vagaIds = vagasData?.map(v => v.id) || [];
-      if (vagaIds.length > 0) {
-        const {
-          data: candidatosData,
-          error: candidatosError
-        } = await supabase.from("candidatos").select("*").in("vaga_relacionada_id", vagaIds).order("criado_em", {
-          ascending: false
-        });
-        if (candidatosError) throw candidatosError;
-        setCandidatos(candidatosData || []);
-      } else {
-        setCandidatos([]);
-      }
-      if (vagaIds.length > 0) {
-        const {
-          data: historyData,
-          error: historyError
-        } = await supabase.from("job_stage_history").select("*").in("job_id", vagaIds).order("changed_at", {
-          ascending: false
-        });
-        if (historyError) throw historyError;
-        setStageHistory(historyData || []);
-      } else {
-        setStageHistory([]);
-      }
 
-      // Load candidates without feedback
-      if (vagaIds.length > 0) {
-        await loadCandidatesWithoutFeedback(vagaIds);
+  // FASE 3: Usar hooks otimizados com views materializadas
+  const { data: vagas = [], isLoading: loadingVagas } = useClientJobs(userId || undefined);
+  const { data: candidatos = [] } = useJobCandidates(selectedVaga || undefined);
+  
+  const loading = loadingVagas;
+
+  useEffect(() => {
+    loadUserId();
+  }, []);
+  // FASE 3: Carregar apenas user ID - views já trazem dados otimizados
+  const loadUserId = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const isClient = roles.includes('client');
+      
+      if (isClient) {
+        setUserId(user.id);
+        loadStageHistory();
       }
     } catch (error) {
-      console.error("Erro ao carregar dados:", error);
-    } finally {
-      setLoading(false);
+      logger.error('Error loading user ID:', error);
+    }
+  };
+
+  const loadStageHistory = async () => {
+    try {
+      const vagaIds = vagas.map(v => v.id);
+      if (vagaIds.length === 0) return;
+
+      const { data: historyData, error: historyError } = await supabase
+        .from("job_stage_history")
+        .select("*")
+        .in("job_id", vagaIds)
+        .order("changed_at", { ascending: false });
+      
+      if (historyError) throw historyError;
+      setStageHistory(historyData || []);
+
+      // Load candidates without feedback
+      await loadCandidatesWithoutFeedback(vagaIds);
+    } catch (error) {
+      logger.error("Error loading stage history:", error);
     }
   };
   const loadCandidatesWithoutFeedback = async (vagaIds: string[]) => {
     try {
-      // Get all feedback requests for these vagas
-      const {
-        data: requests,
-        error: requestsError
-      } = await supabase.from("feedback_requests").select("id, candidato_id, vaga_id, created_at, expires_at").in("vaga_id", vagaIds).gt("expires_at", new Date().toISOString()).order("created_at", {
-        ascending: false
-      });
+      const { data: requests, error: requestsError } = await supabase
+        .from("feedback_requests")
+        .select("id, candidato_id, vaga_id, created_at, expires_at")
+        .in("vaga_id", vagaIds)
+        .gt("expires_at", new Date().toISOString())
+        .order("created_at", { ascending: false });
+        
       if (requestsError) throw requestsError;
       if (!requests || requests.length === 0) {
         setCandidatesWithoutFeedback([]);
@@ -180,15 +130,17 @@ export default function Acompanhamento() {
 
       // Get all feedbacks for these requests
       const requestIds = requests.map(r => r.id);
-      const {
-        data: feedbacks,
-        error: feedbacksError
-      } = await supabase.from("feedbacks").select("request_id").in("request_id", requestIds);
+      const { data: feedbacks, error: feedbacksError } = await supabase
+        .from("feedbacks")
+        .select("request_id")
+        .in("request_id", requestIds);
+        
       if (feedbacksError) throw feedbacksError;
 
       // Find requests without feedback
       const feedbackRequestIds = new Set(feedbacks?.map(f => f.request_id) || []);
       const requestsWithoutFeedback = requests.filter(r => !feedbackRequestIds.has(r.id));
+      
       if (requestsWithoutFeedback.length === 0) {
         setCandidatesWithoutFeedback([]);
         return;
@@ -196,10 +148,11 @@ export default function Acompanhamento() {
 
       // Get candidate and vaga info
       const candidateIds = [...new Set(requestsWithoutFeedback.map(r => r.candidato_id))];
-      const {
-        data: candidatesData,
-        error: candidatesError
-      } = await supabase.from("candidatos").select("id, nome_completo, email, vaga_relacionada_id").in("id", candidateIds);
+      const { data: candidatesData, error: candidatesError } = await supabase
+        .from("candidatos")
+        .select("id, nome_completo, email, vaga_relacionada_id")
+        .in("id", candidateIds);
+        
       if (candidatesError) throw candidatesError;
       const {
         data: vagasData,
