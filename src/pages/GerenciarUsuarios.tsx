@@ -388,13 +388,13 @@ export default function GerenciarUsuarios() {
 
   const getRoleBadge = (role: string) => {
     const badges = {
-      admin: <Badge variant="destructive">Admin</Badge>,
-      recrutador: <Badge className="bg-blue-500">Recrutador</Badge>,
-      cs: <Badge className="bg-green-500">CS</Badge>,
-      viewer: <Badge variant="outline">Visualizador</Badge>,
-      cliente: <Badge className="bg-purple-500">Cliente</Badge>
+      admin: <Badge variant="destructive" className="text-xs px-1.5 py-0">Admin</Badge>,
+      recrutador: <Badge className="bg-primary text-primary-foreground text-xs px-1.5 py-0">Recrutador</Badge>,
+      cs: <Badge className="bg-secondary text-secondary-foreground text-xs px-1.5 py-0">CS</Badge>,
+      viewer: <Badge variant="outline" className="text-xs px-1.5 py-0">Viewer</Badge>,
+      cliente: <Badge className="bg-accent text-accent-foreground text-xs px-1.5 py-0">Cliente</Badge>
     };
-    return badges[role as keyof typeof badges] || <Badge>{role}</Badge>;
+    return badges[role as keyof typeof badges] || <Badge className="text-xs px-1.5 py-0">{role}</Badge>;
   };
 
   const LinkJobDialog = ({ client }: { client: any }) => {
@@ -408,20 +408,20 @@ export default function GerenciarUsuarios() {
     return (
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <Button variant="outline" size="sm">
-            <LinkIcon className="h-4 w-4 mr-2" />
-            Vincular Vaga
+          <Button variant="outline" size="sm" className="h-8">
+            <LinkIcon className="h-3.5 w-3.5 mr-1.5" />
+            Vincular
           </Button>
         </DialogTrigger>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Vincular Vaga - {client.name}</DialogTitle>
+            <DialogTitle className="text-base">Vincular Vaga</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div>
-              <Label htmlFor="job-select">Selecione a vaga</Label>
+          <div className="space-y-3 py-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="job-select" className="text-sm">Selecione a vaga</Label>
               <Select value={selectedJobId} onValueChange={setSelectedJobId}>
-                <SelectTrigger>
+                <SelectTrigger className="h-9">
                   <SelectValue placeholder="Escolha uma vaga" />
                 </SelectTrigger>
                 <SelectContent>
@@ -442,7 +442,7 @@ export default function GerenciarUsuarios() {
                 }
               }}
               disabled={!selectedJobId}
-              className="w-full"
+              className="w-full h-9"
             >
               Vincular
             </Button>
@@ -467,29 +467,29 @@ export default function GerenciarUsuarios() {
     return (
       <Dialog>
         <DialogTrigger asChild>
-          <Button variant="ghost" size="sm">
+          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
             <Edit className="h-4 w-4" />
           </Button>
         </DialogTrigger>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Editar Permissões - {user.name}</DialogTitle>
+            <DialogTitle className="text-base">Editar Permissões</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            <p className="text-sm text-muted-foreground">
-              Selecione todas as funções que este usuário deve ter:
+          <div className="space-y-3 py-2">
+            <p className="text-xs text-muted-foreground">
+              Selecione as funções deste usuário
             </p>
             
-            <div className="space-y-3">
+            <div className="space-y-2">
               <div className="flex items-center space-x-2">
                 <Checkbox 
                   id={`role-admin-${user.id}`}
                   checked={selectedRoles.includes("admin")}
                   onCheckedChange={() => toggleRole("admin")}
                 />
-                <Label htmlFor={`role-admin-${user.id}`} className="flex items-center gap-2">
+                <Label htmlFor={`role-admin-${user.id}`} className="flex items-center gap-1.5 text-sm">
                   {getRoleBadge("admin")}
-                  <span className="text-sm">- Acesso total ao sistema</span>
+                  <span className="text-xs text-muted-foreground">Acesso total</span>
                 </Label>
               </div>
 
@@ -499,9 +499,9 @@ export default function GerenciarUsuarios() {
                   checked={selectedRoles.includes("recrutador")}
                   onCheckedChange={() => toggleRole("recrutador")}
                 />
-                <Label htmlFor={`role-recrutador-${user.id}`} className="flex items-center gap-2">
+                <Label htmlFor={`role-recrutador-${user.id}`} className="flex items-center gap-1.5 text-sm">
                   {getRoleBadge("recrutador")}
-                  <span className="text-sm">- Gerencia vagas e candidatos</span>
+                  <span className="text-xs text-muted-foreground">Vagas e candidatos</span>
                 </Label>
               </div>
 
@@ -511,9 +511,9 @@ export default function GerenciarUsuarios() {
                   checked={selectedRoles.includes("cs")}
                   onCheckedChange={() => toggleRole("cs")}
                 />
-                <Label htmlFor={`role-cs-${user.id}`} className="flex items-center gap-2">
+                <Label htmlFor={`role-cs-${user.id}`} className="flex items-center gap-1.5 text-sm">
                   {getRoleBadge("cs")}
-                  <span className="text-sm">- Gestão de clientes (mesmos acessos que recrutador)</span>
+                  <span className="text-xs text-muted-foreground">Customer Success</span>
                 </Label>
               </div>
 
@@ -523,15 +523,15 @@ export default function GerenciarUsuarios() {
                   checked={selectedRoles.includes("viewer")}
                   onCheckedChange={() => toggleRole("viewer")}
                 />
-                <Label htmlFor={`role-viewer-${user.id}`} className="flex items-center gap-2">
+                <Label htmlFor={`role-viewer-${user.id}`} className="flex items-center gap-1.5 text-sm">
                   {getRoleBadge("viewer")}
-                  <span className="text-sm">- Apenas visualização</span>
+                  <span className="text-xs text-muted-foreground">Apenas visualização</span>
                 </Label>
               </div>
             </div>
 
             {selectedRoles.length === 0 && (
-              <p className="text-sm text-destructive">
+              <p className="text-xs text-destructive">
                 ⚠️ Selecione pelo menos uma função
               </p>
             )}
@@ -539,7 +539,7 @@ export default function GerenciarUsuarios() {
             <Button 
               onClick={() => handleUpdateRoles(user.id, selectedRoles)}
               disabled={selectedRoles.length === 0}
-              className="w-full"
+              className="w-full h-9"
             >
               Salvar Permissões
             </Button>
@@ -562,17 +562,17 @@ export default function GerenciarUsuarios() {
     return (
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <Button variant="ghost" size="sm" title="Redefinir senha">
+          <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Redefinir senha">
             <KeyRound className="h-4 w-4" />
           </Button>
         </DialogTrigger>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Redefinir Senha - {user.name}</DialogTitle>
+            <DialogTitle className="text-base">Redefinir Senha</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div>
-              <Label htmlFor="new-password">Nova Senha</Label>
+          <div className="space-y-3 py-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="new-password" className="text-sm">Nova Senha</Label>
               <Input
                 id="new-password"
                 type="password"
@@ -580,12 +580,13 @@ export default function GerenciarUsuarios() {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="Mínimo 6 caracteres"
+                className="h-9"
               />
             </div>
             <Button 
               onClick={handleSubmit}
               disabled={newPassword.length < 6}
-              className="w-full"
+              className="w-full h-9"
             >
               Redefinir Senha
             </Button>
@@ -598,116 +599,114 @@ export default function GerenciarUsuarios() {
   const internalUsers = users.filter(user => !userRoles[user.id]?.includes("cliente"));
 
   return (
-    <div className="min-h-screen p-8" style={{ backgroundColor: '#00141d' }}>
-      <div className="mx-auto max-w-6xl">
+    <div className="min-h-screen bg-background p-4 md:p-6">
+      <div className="mx-auto max-w-7xl">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2">
-              <Users className="h-8 w-8" />
+            <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2 text-foreground">
+              <Users className="h-6 w-6 md:h-7 md:w-7" />
               Gerenciar Usuários
             </h1>
-            <p className="text-muted-foreground mt-2">
+            <p className="text-sm text-muted-foreground mt-1">
               Administre usuários internos e clientes do sistema
             </p>
           </div>
-          <Button onClick={() => navigate("/vagas")} variant="outline">
+          <Button onClick={() => navigate("/vagas")} variant="outline" size="sm">
             Voltar
           </Button>
         </div>
 
         <Tabs defaultValue="internal" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-6">
-            <TabsTrigger value="internal">
-              <Users className="h-4 w-4 mr-2" />
-              Usuários Internos ({internalUsers.length})
+          <TabsList className="grid w-full grid-cols-2 mb-4">
+            <TabsTrigger value="internal" className="text-sm">
+              <Users className="h-4 w-4 mr-1.5" />
+              Internos ({internalUsers.length})
             </TabsTrigger>
-            <TabsTrigger value="clients">
-              <Building2 className="h-4 w-4 mr-2" />
+            <TabsTrigger value="clients" className="text-sm">
+              <Building2 className="h-4 w-4 mr-1.5" />
               Clientes ({clients.length})
             </TabsTrigger>
           </TabsList>
 
           {/* TAB: Usuários Internos */}
-          <TabsContent value="internal" className="space-y-6">
+          <TabsContent value="internal" className="space-y-4">
 
         {/* Adicionar Usuário */}
         {!showAddForm && (
-          <Card className="mb-6">
-            <CardContent className="pt-6">
-              <Button onClick={() => setShowAddForm(true)} className="w-full">
-                <UserPlus className="mr-2 h-4 w-4" />
-                Adicionar Novo Usuário
-              </Button>
-            </CardContent>
-          </Card>
+          <Button onClick={() => setShowAddForm(true)} className="w-full h-9" variant="outline">
+            <UserPlus className="mr-2 h-4 w-4" />
+            Adicionar Novo Usuário
+          </Button>
         )}
 
         {showAddForm && (
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle>Novo Usuário</CardTitle>
+          <Card className="border-primary/20">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg">Novo Usuário</CardTitle>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <Label htmlFor="name">Nome Completo *</Label>
-                  <Input
-                    id="name"
-                    required
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="João Silva"
-                  />
+              <form onSubmit={handleSubmit} className="space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="name" className="text-sm">Nome Completo</Label>
+                    <Input
+                      id="name"
+                      required
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      placeholder="João Silva"
+                      className="h-9"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="email" className="text-sm">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      required
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      placeholder="joao@empresa.com"
+                      className="h-9"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="password" className="text-sm">Senha Temporária</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      required
+                      minLength={6}
+                      value={formData.password}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      placeholder="Mínimo 6 caracteres"
+                      className="h-9"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="role" className="text-sm">Função</Label>
+                    <Select value={formData.role} onValueChange={(value: any) => setFormData({ ...formData, role: value })}>
+                      <SelectTrigger className="h-9">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="recrutador">Recrutador</SelectItem>
+                        <SelectItem value="cs">CS</SelectItem>
+                        <SelectItem value="viewer">Visualizador</SelectItem>
+                        <SelectItem value="admin">Admin</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
 
-                <div>
-                  <Label htmlFor="email">Email *</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    required
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    placeholder="joao@empresa.com"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="password">Senha Temporária *</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    required
-                    minLength={6}
-                    value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    placeholder="Mínimo 6 caracteres"
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    O usuário receberá um email para confirmar e alterar a senha
-                  </p>
-                </div>
-
-                <div>
-                  <Label htmlFor="role">Função *</Label>
-                  <Select value={formData.role} onValueChange={(value: any) => setFormData({ ...formData, role: value })}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="recrutador">Recrutador</SelectItem>
-                      <SelectItem value="cs">CS (Customer Success)</SelectItem>
-                      <SelectItem value="viewer">Visualizador</SelectItem>
-                      <SelectItem value="admin">Administrador</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="flex gap-2">
-                  <Button type="submit" className="flex-1">
+                <div className="flex gap-2 pt-2">
+                  <Button type="submit" className="flex-1 h-9">
                     Criar Usuário
                   </Button>
-                  <Button type="button" variant="outline" onClick={() => setShowAddForm(false)}>
+                  <Button type="button" variant="outline" onClick={() => setShowAddForm(false)} className="h-9">
                     Cancelar
                   </Button>
                 </div>
@@ -718,47 +717,46 @@ export default function GerenciarUsuarios() {
 
         {/* Lista de Usuários Internos */}
         <Card>
-          <CardHeader>
-            <CardTitle>Usuários Internos Cadastrados ({internalUsers.length})</CardTitle>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">Usuários Cadastrados ({internalUsers.length})</CardTitle>
           </CardHeader>
           <CardContent>
             {loading ? (
-              <div className="text-center py-8 text-muted-foreground">Carregando...</div>
+              <div className="text-center py-6 text-sm text-muted-foreground">Carregando...</div>
             ) : internalUsers.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                Nenhum usuário interno cadastrado
+              <div className="text-center py-6 text-sm text-muted-foreground">
+                Nenhum usuário cadastrado
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                 {internalUsers.map((user) => (
                   <div
                     key={user.id}
-                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors"
+                    className="flex items-center gap-3 p-3 border border-border rounded-lg hover:bg-accent/50 transition-colors"
                   >
-                    <div className="flex items-center gap-4 flex-1">
-                      <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                        <UserCircle className="h-6 w-6 text-primary" />
+                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                      <UserCircle className="h-5 w-5 text-primary" />
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
+                        <h3 className="font-semibold text-sm truncate">{user.name}</h3>
+                        {(userRoles[user.id] || []).slice(0, 2).map((role) => (
+                          <span key={role}>{getRoleBadge(role)}</span>
+                        ))}
                       </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className="font-semibold">{user.name}</h3>
-                          {(userRoles[user.id] || []).map((role) => (
-                            <span key={role}>{getRoleBadge(role)}</span>
-                          ))}
-                        </div>
-                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                          <Mail className="h-3 w-3" />
-                          {user.email}
-                        </div>
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground truncate">
+                        <Mail className="h-3 w-3 shrink-0" />
+                        <span className="truncate">{user.email}</span>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-1 shrink-0">
                       <RoleEditDialog user={user} />
                       <PasswordResetDialog user={user} />
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="sm" title="Excluir usuário">
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Excluir">
                             <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
                         </AlertDialogTrigger>
@@ -766,8 +764,8 @@ export default function GerenciarUsuarios() {
                           <AlertDialogHeader>
                             <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
                             <AlertDialogDescription>
-                              Tem certeza que deseja excluir o usuário <strong>{user.name}</strong>?
-                              Esta ação não pode ser desfeita e removerá todos os dados associados.
+                              Tem certeza que deseja excluir <strong>{user.name}</strong>?
+                              Esta ação não pode ser desfeita.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
@@ -781,16 +779,12 @@ export default function GerenciarUsuarios() {
                           </AlertDialogFooter>
                         </AlertDialogContent>
                       </AlertDialog>
-                      <div className="flex items-center gap-2">
-                        <Label htmlFor={`active-${user.id}`} className="text-sm">
-                          {user.active ? "Ativo" : "Inativo"}
-                        </Label>
-                        <Switch
-                          id={`active-${user.id}`}
-                          checked={user.active}
-                          onCheckedChange={() => toggleUserStatus(user.id, user.active)}
-                        />
-                      </div>
+                      <Switch
+                        id={`active-${user.id}`}
+                        checked={user.active}
+                        onCheckedChange={() => toggleUserStatus(user.id, user.active)}
+                        className="scale-75"
+                      />
                     </div>
                   </div>
                 ))}
@@ -800,22 +794,18 @@ export default function GerenciarUsuarios() {
         </Card>
 
         {/* Informações sobre Usuários Internos */}
-        <Card className="mt-6 bg-blue-500/10 border-blue-500/20">
-          <CardContent className="pt-6">
-            <div className="flex gap-3">
-              <Shield className="h-5 w-5 text-blue-500 shrink-0 mt-0.5" />
-              <div className="space-y-2 text-sm">
-                <p className="font-semibold text-blue-500">Sobre as Funções:</p>
-                <ul className="space-y-1 text-muted-foreground">
-                  <li><strong>Recrutador:</strong> Pode gerenciar vagas e candidatos atribuídos a si</li>
-                  <li><strong>CS (Customer Success):</strong> Mesmos acessos que recrutador + foco em clientes</li>
-                  <li><strong>Visualizador:</strong> Acesso apenas para visualização</li>
-                  <li><strong>Administrador:</strong> Acesso completo ao sistema</li>
-                </ul>
-                <p className="mt-3 text-sm font-semibold text-blue-500">💡 Múltiplas Funções:</p>
-                <p className="text-sm text-muted-foreground">
-                  Um usuário pode ter várias funções simultaneamente. Por exemplo, um CS pode também ser Admin, tendo todos os privilégios de ambas as funções.
-                </p>
+        <Card className="bg-primary/5 border-primary/20">
+          <CardContent className="pt-4 pb-4">
+            <div className="flex gap-2.5">
+              <Shield className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+              <div className="space-y-1.5 text-xs">
+                <p className="font-semibold text-primary text-sm">Sobre as Funções</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1 text-muted-foreground">
+                  <p><strong>Recrutador:</strong> Gerencia vagas e candidatos</p>
+                  <p><strong>CS:</strong> Mesmos acessos que recrutador</p>
+                  <p><strong>Visualizador:</strong> Apenas visualização</p>
+                  <p><strong>Admin:</strong> Acesso completo</p>
+                </div>
               </div>
             </div>
           </CardContent>
@@ -823,107 +813,103 @@ export default function GerenciarUsuarios() {
           </TabsContent>
 
           {/* TAB: Clientes */}
-          <TabsContent value="clients" className="space-y-6">
+          <TabsContent value="clients" className="space-y-4">
             {/* Adicionar Cliente */}
             {!showClientForm && (
-              <Card>
-                <CardContent className="pt-6">
-                  <Button onClick={() => setShowClientForm(true)} className="w-full">
-                    <UserPlus className="mr-2 h-4 w-4" />
-                    Adicionar Novo Cliente
-                  </Button>
-                </CardContent>
-              </Card>
+              <Button onClick={() => setShowClientForm(true)} className="w-full h-9" variant="outline">
+                <UserPlus className="mr-2 h-4 w-4" />
+                Adicionar Novo Cliente
+              </Button>
             )}
 
             {showClientForm && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Novo Cliente</CardTitle>
-                  <CardDescription>
-                    Clientes terão acesso apenas à aba de Acompanhamento de suas vagas
+              <Card className="border-primary/20">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg">Novo Cliente</CardTitle>
+                  <CardDescription className="text-xs">
+                    Acesso à aba de Acompanhamento
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <form onSubmit={handleClientSubmit} className="space-y-4">
-                    <div>
-                      <Label htmlFor="client-name">Nome Completo *</Label>
-                      <Input
-                        id="client-name"
-                        required
-                        value={clientFormData.name}
-                        onChange={(e) => setClientFormData({ ...clientFormData, name: e.target.value })}
-                        placeholder="Nome do cliente"
-                      />
+                  <form onSubmit={handleClientSubmit} className="space-y-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <Label htmlFor="client-name" className="text-sm">Nome Completo</Label>
+                        <Input
+                          id="client-name"
+                          required
+                          value={clientFormData.name}
+                          onChange={(e) => setClientFormData({ ...clientFormData, name: e.target.value })}
+                          placeholder="Nome do cliente"
+                          className="h-9"
+                        />
+                      </div>
+
+                      <div className="relative space-y-1.5">
+                        <Label htmlFor="client-company" className="text-sm">Empresa</Label>
+                        <Input
+                          id="client-company"
+                          required
+                          value={clientFormData.company}
+                          onChange={(e) => setClientFormData({ ...clientFormData, company: e.target.value })}
+                          onFocus={() => setShowCompanySuggestions(true)}
+                          onBlur={() => setTimeout(() => setShowCompanySuggestions(false), 200)}
+                          placeholder="Digite o nome da empresa"
+                          autoComplete="off"
+                          className="h-9"
+                        />
+                        {showCompanySuggestions && filteredCompanies.length > 0 && (
+                          <div className="absolute z-50 w-full mt-1 bg-card border border-border rounded-md shadow-lg max-h-48 overflow-auto">
+                            {filteredCompanies.map((company, index) => (
+                              <button
+                                key={index}
+                                type="button"
+                                className="w-full text-left px-3 py-2 hover:bg-muted transition-colors text-sm"
+                                onClick={() => {
+                                  setClientFormData({ ...clientFormData, company });
+                                  setShowCompanySuggestions(false);
+                                }}
+                              >
+                                {company}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <Label htmlFor="client-email" className="text-sm">Email</Label>
+                        <Input
+                          id="client-email"
+                          type="email"
+                          required
+                          value={clientFormData.email}
+                          onChange={(e) => setClientFormData({ ...clientFormData, email: e.target.value })}
+                          placeholder="email@empresa.com"
+                          className="h-9"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <Label htmlFor="client-password" className="text-sm">Senha Temporária</Label>
+                        <Input
+                          id="client-password"
+                          type="password"
+                          required
+                          minLength={6}
+                          value={clientFormData.password}
+                          onChange={(e) => setClientFormData({ ...clientFormData, password: e.target.value })}
+                          placeholder="Mínimo 6 caracteres"
+                          className="h-9"
+                        />
+                      </div>
                     </div>
 
-                    <div className="relative">
-                      <Label htmlFor="client-company">Empresa *</Label>
-                      <Input
-                        id="client-company"
-                        required
-                        value={clientFormData.company}
-                        onChange={(e) => setClientFormData({ ...clientFormData, company: e.target.value })}
-                        onFocus={() => setShowCompanySuggestions(true)}
-                        onBlur={() => setTimeout(() => setShowCompanySuggestions(false), 200)}
-                        placeholder="Digite o nome da empresa"
-                        autoComplete="off"
-                      />
-                      {showCompanySuggestions && filteredCompanies.length > 0 && (
-                        <div className="absolute z-10 w-full mt-1 bg-card border border-border rounded-md shadow-lg max-h-48 overflow-auto">
-                          {filteredCompanies.map((company, index) => (
-                            <button
-                              key={index}
-                              type="button"
-                              className="w-full text-left px-4 py-2 hover:bg-muted transition-colors text-sm"
-                              onClick={() => {
-                                setClientFormData({ ...clientFormData, company });
-                                setShowCompanySuggestions(false);
-                              }}
-                            >
-                              {company}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Ao digitar, empresas já cadastradas aparecerão como sugestão
-                      </p>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="client-email">Email *</Label>
-                      <Input
-                        id="client-email"
-                        type="email"
-                        required
-                        value={clientFormData.email}
-                        onChange={(e) => setClientFormData({ ...clientFormData, email: e.target.value })}
-                        placeholder="email@empresa.com"
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="client-password">Senha Temporária *</Label>
-                      <Input
-                        id="client-password"
-                        type="password"
-                        required
-                        minLength={6}
-                        value={clientFormData.password}
-                        onChange={(e) => setClientFormData({ ...clientFormData, password: e.target.value })}
-                        placeholder="Mínimo 6 caracteres"
-                      />
-                      <p className="text-xs text-muted-foreground mt-1">
-                        O cliente receberá um email para confirmar e alterar a senha
-                      </p>
-                    </div>
-
-                    <div className="flex gap-2">
-                      <Button type="submit" className="flex-1">
+                    <div className="flex gap-2 pt-2">
+                      <Button type="submit" className="flex-1 h-9">
                         Criar Cliente
                       </Button>
-                      <Button type="button" variant="outline" onClick={() => setShowClientForm(false)}>
+                      <Button type="button" variant="outline" onClick={() => setShowClientForm(false)} className="h-9">
                         Cancelar
                       </Button>
                     </div>
@@ -934,44 +920,43 @@ export default function GerenciarUsuarios() {
 
             {/* Lista de Clientes */}
             <Card>
-              <CardHeader>
-                <CardTitle>Clientes Cadastrados ({clients.length})</CardTitle>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">Clientes Cadastrados ({clients.length})</CardTitle>
               </CardHeader>
               <CardContent>
                 {clients.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
+                  <div className="text-center py-6 text-sm text-muted-foreground">
                     Nenhum cliente cadastrado
                   </div>
                 ) : (
-                  <div className="space-y-6">
+                  <div className="space-y-3">
                     {clients.map((client) => (
                       <div
                         key={client.id}
-                        className="border rounded-lg p-4 space-y-4"
+                        className="border border-border rounded-lg p-3 space-y-3"
                       >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-4 flex-1">
-                            <div className="h-12 w-12 rounded-full bg-purple-500/10 flex items-center justify-center">
-                              <Building2 className="h-6 w-6 text-purple-500" />
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                            <Building2 className="h-5 w-5 text-primary" />
+                          </div>
+                          
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
+                              <h3 className="font-semibold text-sm truncate">{client.name}</h3>
+                              {getRoleBadge("cliente")}
                             </div>
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <h3 className="font-semibold">{client.name}</h3>
-                                {getRoleBadge("cliente")}
-                              </div>
-                              <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                                <Mail className="h-3 w-3" />
-                                {client.email}
-                              </div>
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground truncate">
+                              <Mail className="h-3 w-3 shrink-0" />
+                              <span className="truncate">{client.email}</span>
                             </div>
                           </div>
 
-                          <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-1 shrink-0">
                             <LinkJobDialog client={client} />
                             <PasswordResetDialog user={client} />
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
-                                <Button variant="ghost" size="sm" title="Excluir cliente">
+                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Excluir">
                                   <Trash2 className="h-4 w-4 text-destructive" />
                                 </Button>
                               </AlertDialogTrigger>
@@ -979,8 +964,7 @@ export default function GerenciarUsuarios() {
                                 <AlertDialogHeader>
                                   <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
                                   <AlertDialogDescription>
-                                    Tem certeza que deseja excluir o cliente <strong>{client.name}</strong>?
-                                    Esta ação não pode ser desfeita.
+                                    Tem certeza que deseja excluir <strong>{client.name}</strong>?
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
@@ -994,55 +978,48 @@ export default function GerenciarUsuarios() {
                                 </AlertDialogFooter>
                               </AlertDialogContent>
                             </AlertDialog>
-                            <div className="flex items-center gap-2">
-                              <Label htmlFor={`active-${client.id}`} className="text-sm">
-                                {client.active ? "Ativo" : "Inativo"}
-                              </Label>
-                              <Switch
-                                id={`active-${client.id}`}
-                                checked={client.active}
-                                onCheckedChange={() => toggleUserStatus(client.id, client.active)}
-                              />
-                            </div>
+                            <Switch
+                              id={`active-${client.id}`}
+                              checked={client.active}
+                              onCheckedChange={() => toggleUserStatus(client.id, client.active)}
+                              className="scale-75"
+                            />
                           </div>
                         </div>
 
                         {/* Vagas Vinculadas */}
-                        <div className="pl-16">
-                          <div className="flex items-center gap-2 mb-3">
-                            <Briefcase className="h-4 w-4 text-muted-foreground" />
-                            <span className="text-sm font-medium text-muted-foreground">
-                              Vagas Vinculadas ({clientJobs[client.id]?.length || 0})
-                            </span>
-                          </div>
-                          {clientJobs[client.id]?.length > 0 ? (
-                            <div className="space-y-2">
+                        {clientJobs[client.id]?.length > 0 && (
+                          <div className="border-t border-border pt-2.5">
+                            <div className="flex items-center gap-1.5 mb-2">
+                              <Briefcase className="h-3.5 w-3.5 text-muted-foreground" />
+                              <span className="text-xs font-medium text-muted-foreground">
+                                Vagas ({clientJobs[client.id].length})
+                              </span>
+                            </div>
+                            <div className="space-y-1.5">
                               {clientJobs[client.id].map((job) => (
                                 <div
                                   key={job.id}
-                                  className="flex items-center justify-between p-3 bg-accent/50 rounded-md"
+                                  className="flex items-center justify-between p-2 bg-accent/30 rounded text-xs"
                                 >
-                                  <div>
-                                    <p className="font-medium text-sm">{job.titulo}</p>
-                                    <p className="text-xs text-muted-foreground">{job.empresa}</p>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="font-medium truncate">{job.titulo}</p>
+                                    <p className="text-muted-foreground truncate">{job.empresa}</p>
                                   </div>
                                   <Button
                                     variant="ghost"
                                     size="sm"
+                                    className="h-6 w-6 p-0 shrink-0"
                                     onClick={() => handleUnlinkJob(job.id)}
-                                    title="Desvincular vaga"
+                                    title="Desvincular"
                                   >
-                                    <X className="h-4 w-4" />
+                                    <X className="h-3 w-3" />
                                   </Button>
                                 </div>
                               ))}
                             </div>
-                          ) : (
-                            <p className="text-sm text-muted-foreground">
-                              Nenhuma vaga vinculada a este cliente
-                            </p>
-                          )}
-                        </div>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -1051,18 +1028,18 @@ export default function GerenciarUsuarios() {
             </Card>
 
             {/* Informações sobre Clientes */}
-            <Card className="bg-purple-500/10 border-purple-500/20">
-              <CardContent className="pt-6">
-                <div className="flex gap-3">
-                  <Building2 className="h-5 w-5 text-purple-500 shrink-0 mt-0.5" />
-                  <div className="space-y-2 text-sm">
-                    <p className="font-semibold text-purple-500">Sobre Clientes:</p>
-                    <ul className="space-y-1 text-muted-foreground">
-                      <li><strong>Acesso Restrito:</strong> Clientes veem apenas a aba "Acompanhamento"</li>
-                      <li><strong>Visão Limitada:</strong> Podem visualizar apenas suas vagas e candidatos vinculados</li>
-                      <li><strong>Sem Edição:</strong> Não têm permissão para editar ou excluir dados</li>
-                      <li><strong>Vinculação de Vagas:</strong> Use o botão "Vincular Vaga" para associar vagas aos clientes</li>
-                    </ul>
+            <Card className="bg-primary/5 border-primary/20">
+              <CardContent className="pt-4 pb-4">
+                <div className="flex gap-2.5">
+                  <Building2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                  <div className="space-y-1.5 text-xs">
+                    <p className="font-semibold text-primary text-sm">Sobre Clientes</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1 text-muted-foreground">
+                      <p><strong>Acesso:</strong> Apenas aba "Acompanhamento"</p>
+                      <p><strong>Visão:</strong> Suas vagas e candidatos</p>
+                      <p><strong>Permissões:</strong> Somente leitura</p>
+                      <p><strong>Vincular:</strong> Use "Vincular Vaga"</p>
+                    </div>
                   </div>
                 </div>
               </CardContent>
