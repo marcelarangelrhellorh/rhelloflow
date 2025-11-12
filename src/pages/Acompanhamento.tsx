@@ -11,7 +11,6 @@ import { formatSalaryRange } from "@/lib/salaryUtils";
 import { JOB_STAGES, calculateProgress, getStageBySlug } from "@/lib/jobStages";
 import { cn } from "@/lib/utils";
 import { ClientCandidateDrawer } from "@/components/CandidatoDetalhes/ClientCandidateDrawer";
-
 interface Vaga {
   id: string;
   titulo: string;
@@ -28,12 +27,10 @@ interface Vaga {
   beneficios: string[] | null;
   beneficios_outros: string | null;
 }
-
 interface Profile {
   id: string;
   full_name: string;
 }
-
 interface Candidato {
   id: string;
   nome_completo: string;
@@ -41,7 +38,6 @@ interface Candidato {
   criado_em: string;
   vaga_relacionada_id: string;
 }
-
 interface StageHistory {
   id: string;
   from_status: string | null;
@@ -49,7 +45,6 @@ interface StageHistory {
   changed_at: string;
   job_id: string;
 }
-
 interface CandidateWithoutFeedback {
   id: string;
   nome_completo: string;
@@ -59,7 +54,6 @@ interface CandidateWithoutFeedback {
   request_created: string;
   request_expires: string;
 }
-
 export default function Acompanhamento() {
   const [vagas, setVagas] = useState<Vaga[]>([]);
   const [candidatos, setCandidatos] = useState<Candidato[]>([]);
@@ -71,38 +65,29 @@ export default function Acompanhamento() {
   const [candidatesWithoutFeedback, setCandidatesWithoutFeedback] = useState<CandidateWithoutFeedback[]>([]);
   const [noFeedbackDrawerOpen, setNoFeedbackDrawerOpen] = useState(false);
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     loadData();
   }, []);
-
   const loadData = async () => {
     try {
       setLoading(true);
-      
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: {
+          user
+        }
+      } = await supabase.auth.getUser();
       if (!user) return;
-
-      const { data: rolesData } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user.id);
-
+      const {
+        data: rolesData
+      } = await supabase.from("user_roles").select("role").eq("user_id", user.id);
       const roles = rolesData?.map(r => r.role) || [];
       const isAdmin = roles.includes('admin');
       const isClient = roles.includes('client');
-
-      let vagasQuery = supabase
-        .from("vagas")
-        .select("*");
-      
+      let vagasQuery = supabase.from("vagas").select("*");
       if (!isAdmin && isClient) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("empresa")
-          .eq("id", user.id)
-          .single();
-
+        const {
+          data: profile
+        } = await supabase.from("profiles").select("empresa").eq("id", user.id).single();
         if (profile?.empresa) {
           vagasQuery = vagasQuery.eq("empresa", profile.empresa);
         } else {
@@ -119,53 +104,49 @@ export default function Acompanhamento() {
         setLoading(false);
         return;
       }
-
-      const { data: vagasData, error: vagasError } = await vagasQuery
-        .order("criado_em", { ascending: false });
-
+      const {
+        data: vagasData,
+        error: vagasError
+      } = await vagasQuery.order("criado_em", {
+        ascending: false
+      });
       if (vagasError) throw vagasError;
       setVagas(vagasData || []);
-
       const userIds = new Set<string>();
       vagasData?.forEach(v => {
         if (v.recrutador_id) userIds.add(v.recrutador_id);
         if (v.cs_id) userIds.add(v.cs_id);
       });
-
       if (userIds.size > 0) {
-        const { data: profilesData, error: profilesError } = await supabase
-          .from("profiles")
-          .select("id, full_name")
-          .in("id", Array.from(userIds));
-
+        const {
+          data: profilesData,
+          error: profilesError
+        } = await supabase.from("profiles").select("id, full_name").in("id", Array.from(userIds));
         if (!profilesError && profilesData) {
           const profilesMap = new Map(profilesData.map(p => [p.id, p.full_name]));
           setProfiles(profilesMap);
         }
       }
-
       const vagaIds = vagasData?.map(v => v.id) || [];
-      
       if (vagaIds.length > 0) {
-        const { data: candidatosData, error: candidatosError } = await supabase
-          .from("candidatos")
-          .select("*")
-          .in("vaga_relacionada_id", vagaIds)
-          .order("criado_em", { ascending: false });
-
+        const {
+          data: candidatosData,
+          error: candidatosError
+        } = await supabase.from("candidatos").select("*").in("vaga_relacionada_id", vagaIds).order("criado_em", {
+          ascending: false
+        });
         if (candidatosError) throw candidatosError;
         setCandidatos(candidatosData || []);
       } else {
         setCandidatos([]);
       }
-
       if (vagaIds.length > 0) {
-        const { data: historyData, error: historyError } = await supabase
-          .from("job_stage_history")
-          .select("*")
-          .in("job_id", vagaIds)
-          .order("changed_at", { ascending: false });
-
+        const {
+          data: historyData,
+          error: historyError
+        } = await supabase.from("job_stage_history").select("*").in("job_id", vagaIds).order("changed_at", {
+          ascending: false
+        });
         if (historyError) throw historyError;
         setStageHistory(historyData || []);
       } else {
@@ -176,26 +157,22 @@ export default function Acompanhamento() {
       if (vagaIds.length > 0) {
         await loadCandidatesWithoutFeedback(vagaIds);
       }
-
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
     } finally {
       setLoading(false);
     }
   };
-
   const loadCandidatesWithoutFeedback = async (vagaIds: string[]) => {
     try {
       // Get all feedback requests for these vagas
-      const { data: requests, error: requestsError } = await supabase
-        .from("feedback_requests")
-        .select("id, candidato_id, vaga_id, created_at, expires_at")
-        .in("vaga_id", vagaIds)
-        .gt("expires_at", new Date().toISOString())
-        .order("created_at", { ascending: false });
-
+      const {
+        data: requests,
+        error: requestsError
+      } = await supabase.from("feedback_requests").select("id, candidato_id, vaga_id, created_at, expires_at").in("vaga_id", vagaIds).gt("expires_at", new Date().toISOString()).order("created_at", {
+        ascending: false
+      });
       if (requestsError) throw requestsError;
-
       if (!requests || requests.length === 0) {
         setCandidatesWithoutFeedback([]);
         return;
@@ -203,17 +180,15 @@ export default function Acompanhamento() {
 
       // Get all feedbacks for these requests
       const requestIds = requests.map(r => r.id);
-      const { data: feedbacks, error: feedbacksError } = await supabase
-        .from("feedbacks")
-        .select("request_id")
-        .in("request_id", requestIds);
-
+      const {
+        data: feedbacks,
+        error: feedbacksError
+      } = await supabase.from("feedbacks").select("request_id").in("request_id", requestIds);
       if (feedbacksError) throw feedbacksError;
 
       // Find requests without feedback
       const feedbackRequestIds = new Set(feedbacks?.map(f => f.request_id) || []);
       const requestsWithoutFeedback = requests.filter(r => !feedbackRequestIds.has(r.id));
-
       if (requestsWithoutFeedback.length === 0) {
         setCandidatesWithoutFeedback([]);
         return;
@@ -221,25 +196,20 @@ export default function Acompanhamento() {
 
       // Get candidate and vaga info
       const candidateIds = [...new Set(requestsWithoutFeedback.map(r => r.candidato_id))];
-      
-      const { data: candidatesData, error: candidatesError } = await supabase
-        .from("candidatos")
-        .select("id, nome_completo, email, vaga_relacionada_id")
-        .in("id", candidateIds);
-
+      const {
+        data: candidatesData,
+        error: candidatesError
+      } = await supabase.from("candidatos").select("id, nome_completo, email, vaga_relacionada_id").in("id", candidateIds);
       if (candidatesError) throw candidatesError;
-
-      const { data: vagasData, error: vagasError } = await supabase
-        .from("vagas")
-        .select("id, titulo")
-        .in("id", vagaIds);
-
+      const {
+        data: vagasData,
+        error: vagasError
+      } = await supabase.from("vagas").select("id, titulo").in("id", vagaIds);
       if (vagasError) throw vagasError;
 
       // Build the result
       const vagasMap = new Map(vagasData?.map(v => [v.id, v.titulo]) || []);
       const candidatesMap = new Map(candidatesData?.map(c => [c.id, c]) || []);
-
       const result: CandidateWithoutFeedback[] = requestsWithoutFeedback.map(req => {
         const candidate = candidatesMap.get(req.candidato_id);
         return {
@@ -249,17 +219,15 @@ export default function Acompanhamento() {
           vaga_relacionada_id: req.vaga_id,
           vaga_titulo: vagasMap.get(req.vaga_id) || "Vaga não encontrada",
           request_created: req.created_at,
-          request_expires: req.expires_at,
+          request_expires: req.expires_at
         };
       });
-
       setCandidatesWithoutFeedback(result);
     } catch (error) {
       console.error("Erro ao carregar candidatos sem feedback:", error);
       setCandidatesWithoutFeedback([]);
     }
   };
-
   const selectedVagaData = vagas.find(v => v.id === selectedVaga);
   const vagaCandidatos = candidatos.filter(c => c.vaga_relacionada_id === selectedVaga);
   const vagaHistory = stageHistory.filter(h => h.job_id === selectedVaga);
@@ -283,7 +251,6 @@ export default function Acompanhamento() {
     }
     return 'outline'; // Default gray
   };
-
   const handleCandidateClick = (candidateId: string) => {
     setSelectedCandidateId(candidateId);
     setCandidateDrawerOpen(true);
@@ -292,28 +259,21 @@ export default function Acompanhamento() {
   // Calculate progress and timeline based on current status
   const getTimelineSteps = (currentStatus: string) => {
     const currentStage = getStageBySlug(currentStatus);
-    
     return JOB_STAGES.filter(stage => stage.kind === "normal").map(stage => {
       const isCompleted = stage.order < (currentStage?.order || 0);
       const isCurrent = stage.slug === currentStatus;
-      
       return {
         label: stage.name,
         status: isCompleted ? "completed" : isCurrent ? "current" : "pending" as const
       };
     });
   };
-
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
+    return <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       <div className="mx-auto max-w-7xl p-6 space-y-6">
         {/* Header */}
         <div>
@@ -322,13 +282,12 @@ export default function Acompanhamento() {
         </div>
 
         {/* Metrics Cards */}
-        {!selectedVaga && (
-          <div className="grid gap-4 sm:grid-cols-3">
+        {!selectedVaga && <div className="grid gap-4 sm:grid-cols-3">
             <Card className="border-2">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-muted-foreground mb-1">Vagas em Aberto</p>
+                    <p className="text-sm text-muted-foreground mb-1 font-semibold">Vagas em Aberto</p>
                     <p className="text-3xl font-bold text-foreground">{totalVagasAbertas}</p>
                   </div>
                   <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
@@ -342,7 +301,7 @@ export default function Acompanhamento() {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-muted-foreground mb-1">Total de Candidatos</p>
+                    <p className="text-sm text-muted-foreground mb-1 font-semibold">Total de Candidatos</p>
                     <p className="text-3xl font-bold text-foreground">{totalCandidatos}</p>
                   </div>
                   <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
@@ -352,14 +311,11 @@ export default function Acompanhamento() {
               </CardContent>
             </Card>
 
-            <Card 
-              className="border-2 cursor-pointer transition-all hover:shadow-md hover:border-primary/50"
-              onClick={() => setNoFeedbackDrawerOpen(true)}
-            >
+            <Card className="border-2 cursor-pointer transition-all hover:shadow-md hover:border-primary/50" onClick={() => setNoFeedbackDrawerOpen(true)}>
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-muted-foreground mb-1">Sem Feedback</p>
+                    <p className="text-sm text-muted-foreground mb-1 font-semibold">Sem Feedback</p>
                     <p className="text-3xl font-bold text-foreground">{totalSemFeedback}</p>
                   </div>
                   <div className="h-12 w-12 rounded-full bg-orange-500/10 flex items-center justify-center">
@@ -368,52 +324,37 @@ export default function Acompanhamento() {
                 </div>
               </CardContent>
             </Card>
-          </div>
-        )}
+          </div>}
 
         {/* Vagas Overview - Small Cards */}
-        {!selectedVaga && (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {!selectedVaga && <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {vagas.map(vaga => {
-              const vagaCandidatosCount = candidatos.filter(c => c.vaga_relacionada_id === vaga.id).length;
-              const currentStage = getStageBySlug(vaga.status);
-              
-              return (
-                <Card 
-                  key={vaga.id}
-                  className="cursor-pointer transition-all hover:shadow-md border-2 hover:border-primary/50"
-                  onClick={() => setSelectedVaga(vaga.id)}
-                >
+          const vagaCandidatosCount = candidatos.filter(c => c.vaga_relacionada_id === vaga.id).length;
+          const currentStage = getStageBySlug(vaga.status);
+          return <Card key={vaga.id} className="cursor-pointer transition-all hover:shadow-md border-2 hover:border-primary/50" onClick={() => setSelectedVaga(vaga.id)}>
                   <CardContent className="p-4">
                     <div className="space-y-2">
                       <div className="flex items-start justify-between gap-2">
                         <h3 className="font-semibold text-base text-foreground line-clamp-2">{vaga.titulo}</h3>
                       </div>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-muted-foreground font-semibold">
                         {formatSalaryRange(vaga.salario_min, vaga.salario_max, vaga.salario_modalidade)}
                       </p>
                       <div className="pt-2 border-t border-border">
-                        <Badge variant="secondary" className="text-xs">
+                        <Badge variant="secondary" className="text-xs bg-[#ffcd00]">
                           {currentStage?.name || vaga.status}
                         </Badge>
                       </div>
                     </div>
                   </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        )}
+                </Card>;
+        })}
+          </div>}
 
         {/* Selected Vaga Details */}
-        {selectedVaga && selectedVagaData && (
-          <div className="space-y-6">
+        {selectedVaga && selectedVagaData && <div className="space-y-6">
             {/* Back Button */}
-            <Button 
-              variant="ghost" 
-              onClick={() => setSelectedVaga(null)}
-              className="mb-4"
-            >
+            <Button variant="ghost" onClick={() => setSelectedVaga(null)} className="mb-4">
               ← Voltar para Meus Processos
             </Button>
 
@@ -424,14 +365,12 @@ export default function Acompanhamento() {
             </div>
 
             {/* Salary Badge */}
-            {(selectedVagaData.salario_min || selectedVagaData.salario_max) && (
-              <div className="flex items-center gap-2">
+            {(selectedVagaData.salario_min || selectedVagaData.salario_max) && <div className="flex items-center gap-2">
                 <DollarSign className="h-5 w-5 text-primary" />
                 <span className="text-xl font-semibold text-foreground">
                   {formatSalaryRange(selectedVagaData.salario_min, selectedVagaData.salario_max, selectedVagaData.salario_modalidade)}
                 </span>
-              </div>
-            )}
+              </div>}
 
             {/* Info Grid */}
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -466,8 +405,7 @@ export default function Acompanhamento() {
                 </CardContent>
               </Card>
 
-              {selectedVagaData.modelo_trabalho && (
-                <Card>
+              {selectedVagaData.modelo_trabalho && <Card>
                   <CardContent className="p-4">
                     <p className="text-sm text-muted-foreground mb-1">Modelo</p>
                     <div className="flex items-center gap-2">
@@ -475,11 +413,9 @@ export default function Acompanhamento() {
                       <span className="text-lg font-semibold">{selectedVagaData.modelo_trabalho}</span>
                     </div>
                   </CardContent>
-                </Card>
-              )}
+                </Card>}
 
-              {selectedVagaData.regime && (
-                <Card>
+              {selectedVagaData.regime && <Card>
                   <CardContent className="p-4">
                     <p className="text-sm text-muted-foreground mb-1">Contratação</p>
                     <div className="flex items-center gap-2">
@@ -487,8 +423,7 @@ export default function Acompanhamento() {
                       <span className="text-lg font-semibold">{selectedVagaData.regime}</span>
                     </div>
                   </CardContent>
-                </Card>
-              )}
+                </Card>}
 
               <Card>
                 <CardContent className="p-4">
@@ -496,7 +431,9 @@ export default function Acompanhamento() {
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm font-medium">
-                      {format(new Date(selectedVagaData.criado_em), "dd/MM/yyyy", { locale: ptBR })}
+                      {format(new Date(selectedVagaData.criado_em), "dd/MM/yyyy", {
+                    locale: ptBR
+                  })}
                     </span>
                   </div>
                 </CardContent>
@@ -504,26 +441,20 @@ export default function Acompanhamento() {
             </div>
 
             {/* Benefits Section */}
-            {selectedVagaData.beneficios && selectedVagaData.beneficios.length > 0 && (
-              <Card>
+            {selectedVagaData.beneficios && selectedVagaData.beneficios.length > 0 && <Card>
                 <CardContent className="p-6">
                   <div className="flex items-center gap-2 mb-4">
                     <Briefcase className="h-5 w-5 text-primary" />
                     <h3 className="font-semibold text-lg">Benefícios Oferecidos</h3>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    {selectedVagaData.beneficios.map((beneficio, index) => (
-                      <Badge key={index} variant="outline" className="bg-primary/10 text-primary border-primary/20">
+                    {selectedVagaData.beneficios.map((beneficio, index) => <Badge key={index} variant="outline" className="bg-primary/10 text-primary border-primary/20">
                         {beneficio}
-                      </Badge>
-                    ))}
+                      </Badge>)}
                   </div>
-                  {selectedVagaData.beneficios_outros && (
-                    <p className="text-sm text-muted-foreground mt-3">{selectedVagaData.beneficios_outros}</p>
-                  )}
+                  {selectedVagaData.beneficios_outros && <p className="text-sm text-muted-foreground mt-3">{selectedVagaData.beneficios_outros}</p>}
                 </CardContent>
-              </Card>
-            )}
+              </Card>}
 
             {/* Process Timeline */}
             <Card>
@@ -531,44 +462,21 @@ export default function Acompanhamento() {
                 <h3 className="font-semibold text-lg mb-6">Linha do Tempo do Processo</h3>
                 <div className="relative">
                   <div className="flex items-start justify-between gap-2 overflow-x-auto pb-4">
-                    {getTimelineSteps(selectedVagaData.status).map((step, index, array) => (
-                      <div key={index} className="flex flex-col items-center min-w-[100px] relative">
+                    {getTimelineSteps(selectedVagaData.status).map((step, index, array) => <div key={index} className="flex flex-col items-center min-w-[100px] relative">
                         {/* Connector Line */}
-                        {index < array.length - 1 && (
-                          <div 
-                            className={cn(
-                              "absolute top-5 left-[50%] w-full h-0.5 z-0",
-                              step.status === "completed" ? "bg-primary" : "bg-border"
-                            )}
-                          />
-                        )}
+                        {index < array.length - 1 && <div className={cn("absolute top-5 left-[50%] w-full h-0.5 z-0", step.status === "completed" ? "bg-primary" : "bg-border")} />}
                         
                         {/* Circle */}
-                        <div 
-                          className={cn(
-                            "relative z-10 w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-all",
-                            step.status === "completed" && "bg-primary",
-                            step.status === "current" && "bg-primary animate-pulse",
-                            step.status === "pending" && "bg-border"
-                          )}
-                        >
-                          {step.status === "completed" && (
-                            <CheckCircle2 className="h-5 w-5 text-primary-foreground" />
-                          )}
-                          {step.status === "current" && (
-                            <div className="w-3 h-3 bg-primary-foreground rounded-full" />
-                          )}
+                        <div className={cn("relative z-10 w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-all", step.status === "completed" && "bg-primary", step.status === "current" && "bg-primary animate-pulse", step.status === "pending" && "bg-border")}>
+                          {step.status === "completed" && <CheckCircle2 className="h-5 w-5 text-primary-foreground" />}
+                          {step.status === "current" && <div className="w-3 h-3 bg-primary-foreground rounded-full" />}
                         </div>
 
                         {/* Label */}
-                        <p className={cn(
-                          "text-xs text-center font-medium",
-                          step.status === "pending" ? "text-muted-foreground" : "text-foreground"
-                        )}>
+                        <p className={cn("text-xs text-center font-medium", step.status === "pending" ? "text-muted-foreground" : "text-foreground")}>
                           {step.label}
                         </p>
-                      </div>
-                    ))}
+                      </div>)}
                   </div>
                 </div>
 
@@ -579,64 +487,48 @@ export default function Acompanhamento() {
                     <span className="font-semibold">{calculateProgress(selectedVagaData.status)}%</span>
                   </div>
                   <div className="w-full bg-border rounded-full h-2 overflow-hidden">
-                    <div 
-                      className="bg-primary h-full transition-all duration-500 rounded-full"
-                      style={{ width: `${calculateProgress(selectedVagaData.status)}%` }}
-                    />
+                    <div className="bg-primary h-full transition-all duration-500 rounded-full" style={{
+                  width: `${calculateProgress(selectedVagaData.status)}%`
+                }} />
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             {/* Candidates List */}
-            {vagaCandidatos.length > 0 && (
-              <Card>
+            {vagaCandidatos.length > 0 && <Card>
                 <CardContent className="p-6">
                   <h3 className="font-semibold text-lg mb-4">Candidatos ({vagaCandidatos.length})</h3>
                   <div className="space-y-3">
-                    {vagaCandidatos.map(candidato => (
-                      <div 
-                        key={candidato.id}
-                        className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border cursor-pointer hover:bg-muted/50 transition-colors"
-                        onClick={() => handleCandidateClick(candidato.id)}
-                      >
+                    {vagaCandidatos.map(candidato => <div key={candidato.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleCandidateClick(candidato.id)}>
                         <div>
                           <p className="font-bold text-foreground">{candidato.nome_completo}</p>
                           <p className="text-sm text-muted-foreground">
-                            Desde {format(new Date(candidato.criado_em), "dd/MM/yyyy", { locale: ptBR })}
+                            Desde {format(new Date(candidato.criado_em), "dd/MM/yyyy", {
+                      locale: ptBR
+                    })}
                           </p>
                         </div>
                         <Badge variant={getStatusBadgeVariant(candidato.status)}>
                           {candidato.status}
                         </Badge>
-                      </div>
-                    ))}
+                      </div>)}
                   </div>
                 </CardContent>
-              </Card>
-            )}
-          </div>
-        )}
+              </Card>}
+          </div>}
 
         {/* Empty State */}
-        {!selectedVaga && vagas.length === 0 && (
-          <Card>
+        {!selectedVaga && vagas.length === 0 && <Card>
             <CardContent className="p-12 text-center">
               <Briefcase className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
               <p className="text-muted-foreground">Nenhum processo em andamento no momento</p>
             </CardContent>
-          </Card>
-        )}
+          </Card>}
       </div>
 
       {/* Candidate Details Drawer */}
-      {selectedCandidateId && (
-        <ClientCandidateDrawer
-          open={candidateDrawerOpen}
-          onOpenChange={setCandidateDrawerOpen}
-          candidateId={selectedCandidateId}
-        />
-      )}
+      {selectedCandidateId && <ClientCandidateDrawer open={candidateDrawerOpen} onOpenChange={setCandidateDrawerOpen} candidateId={selectedCandidateId} />}
 
       {/* Candidates Without Feedback Drawer */}
       <Sheet open={noFeedbackDrawerOpen} onOpenChange={setNoFeedbackDrawerOpen}>
@@ -649,17 +541,11 @@ export default function Acompanhamento() {
           </SheetHeader>
 
           <div className="mt-6 space-y-4">
-            {candidatesWithoutFeedback.length > 0 ? (
-              candidatesWithoutFeedback.map((candidate) => (
-                <Card 
-                  key={candidate.id}
-                  className="cursor-pointer hover:shadow-md transition-all"
-                  onClick={() => {
-                    setSelectedCandidateId(candidate.id);
-                    setCandidateDrawerOpen(true);
-                    setNoFeedbackDrawerOpen(false);
-                  }}
-                >
+            {candidatesWithoutFeedback.length > 0 ? candidatesWithoutFeedback.map(candidate => <Card key={candidate.id} className="cursor-pointer hover:shadow-md transition-all" onClick={() => {
+            setSelectedCandidateId(candidate.id);
+            setCandidateDrawerOpen(true);
+            setNoFeedbackDrawerOpen(false);
+          }}>
                   <CardContent className="p-4">
                     <div className="space-y-2">
                       <div className="flex items-start justify-between">
@@ -678,25 +564,24 @@ export default function Acompanhamento() {
                           {candidate.vaga_titulo}
                         </p>
                         <p className="text-xs text-muted-foreground mt-1">
-                          Solicitado em: {format(new Date(candidate.request_created), "dd/MM/yyyy", { locale: ptBR })}
+                          Solicitado em: {format(new Date(candidate.request_created), "dd/MM/yyyy", {
+                      locale: ptBR
+                    })}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          Expira em: {format(new Date(candidate.request_expires), "dd/MM/yyyy", { locale: ptBR })}
+                          Expira em: {format(new Date(candidate.request_expires), "dd/MM/yyyy", {
+                      locale: ptBR
+                    })}
                         </p>
                       </div>
                     </div>
                   </CardContent>
-                </Card>
-              ))
-            ) : (
-              <div className="text-center py-12">
+                </Card>) : <div className="text-center py-12">
                 <MessageSquare className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
                 <p className="text-muted-foreground">Todos os feedbacks foram respondidos!</p>
-              </div>
-            )}
+              </div>}
           </div>
         </SheetContent>
       </Sheet>
-    </div>
-  );
+    </div>;
 }
