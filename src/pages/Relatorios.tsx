@@ -102,9 +102,23 @@ export default function Relatorios() {
 
   const loadRecruiters = async () => {
     try {
+      // Buscar usuários que têm role de recrutador ou CS
+      const { data: userRoles } = await supabase
+        .from("user_roles")
+        .select("user_id")
+        .in("role", ["recrutador", "cs"]);
+      
+      if (!userRoles || userRoles.length === 0) {
+        setRecruiters([]);
+        return;
+      }
+
+      const userIds = [...new Set(userRoles.map(ur => ur.user_id))];
+
       const { data: profiles } = await supabase
         .from("profiles")
         .select("id, full_name")
+        .in("id", userIds)
         .order("full_name");
       
       if (profiles) setRecruiters(profiles);
@@ -238,15 +252,13 @@ export default function Relatorios() {
 
   const loadRecruiterPerformance = async () => {
     try {
+      // Buscar vagas no período
       const { data: vagas, error: vagasError } = await supabase
         .from("vagas")
-        .select(`
-          id,
-          recrutador_id,
-          profiles!vagas_recrutador_id_fkey (full_name)
-        `)
+        .select("id, recrutador_id, criado_em")
         .gte("criado_em", dateFrom)
-        .lte("criado_em", dateTo);
+        .lte("criado_em", dateTo)
+        .not("recrutador_id", "is", null);
 
       if (vagasError) {
         console.error("Erro ao carregar vagas para performance:", vagasError);
@@ -258,6 +270,20 @@ export default function Relatorios() {
         setRecruiterData([]);
         return;
       }
+
+      // Buscar todos os profiles dos recrutadores únicos
+      const recruiterIds = [...new Set(vagas.map(v => v.recrutador_id).filter(Boolean))];
+      const { data: profiles, error: profilesError } = await supabase
+        .from("profiles")
+        .select("id, full_name")
+        .in("id", recruiterIds);
+
+      if (profilesError) {
+        console.error("Erro ao carregar profiles:", profilesError);
+      }
+
+      // Criar um mapa de id -> nome
+      const profilesMap = new Map(profiles?.map(p => [p.id, p.full_name]) || []);
 
       const { data: candidatos, error: candidatosError } = await supabase
         .from("candidatos")
@@ -275,7 +301,7 @@ export default function Relatorios() {
       const recruiterId = v.recrutador_id;
       if (!recruiterId) return;
       
-      const recruiterName = (v.profiles as any)?.full_name || 'Sem nome';
+      const recruiterName = profilesMap.get(recruiterId) || 'Sem nome';
       
       if (!recruiterStats[recruiterId]) {
         recruiterStats[recruiterId] = {
