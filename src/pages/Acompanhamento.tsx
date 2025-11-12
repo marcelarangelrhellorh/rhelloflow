@@ -3,7 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Clock, Users, Briefcase, MapPin, DollarSign, FileText, Calendar, CheckCircle2 } from "lucide-react";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Clock, Users, Briefcase, MapPin, DollarSign, FileText, Calendar, CheckCircle2, MessageSquare, AlertCircle } from "lucide-react";
 import { format, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { formatSalaryRange } from "@/lib/salaryUtils";
@@ -49,6 +50,16 @@ interface StageHistory {
   job_id: string;
 }
 
+interface CandidateWithoutFeedback {
+  id: string;
+  nome_completo: string;
+  email: string;
+  vaga_relacionada_id: string;
+  vaga_titulo: string;
+  request_created: string;
+  request_expires: string;
+}
+
 export default function Acompanhamento() {
   const [vagas, setVagas] = useState<Vaga[]>([]);
   const [candidatos, setCandidatos] = useState<Candidato[]>([]);
@@ -57,6 +68,8 @@ export default function Acompanhamento() {
   const [selectedVaga, setSelectedVaga] = useState<string | null>(null);
   const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(null);
   const [candidateDrawerOpen, setCandidateDrawerOpen] = useState(false);
+  const [candidatesWithoutFeedback, setCandidatesWithoutFeedback] = useState<CandidateWithoutFeedback[]>([]);
+  const [noFeedbackDrawerOpen, setNoFeedbackDrawerOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -159,6 +172,11 @@ export default function Acompanhamento() {
         setStageHistory([]);
       }
 
+      // Load candidates without feedback
+      if (vagaIds.length > 0) {
+        await loadCandidatesWithoutFeedback(vagaIds);
+      }
+
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
     } finally {
@@ -166,9 +184,90 @@ export default function Acompanhamento() {
     }
   };
 
+  const loadCandidatesWithoutFeedback = async (vagaIds: string[]) => {
+    try {
+      // Get all feedback requests for these vagas
+      const { data: requests, error: requestsError } = await supabase
+        .from("feedback_requests")
+        .select("id, candidato_id, vaga_id, created_at, expires_at")
+        .in("vaga_id", vagaIds)
+        .gt("expires_at", new Date().toISOString())
+        .order("created_at", { ascending: false });
+
+      if (requestsError) throw requestsError;
+
+      if (!requests || requests.length === 0) {
+        setCandidatesWithoutFeedback([]);
+        return;
+      }
+
+      // Get all feedbacks for these requests
+      const requestIds = requests.map(r => r.id);
+      const { data: feedbacks, error: feedbacksError } = await supabase
+        .from("feedbacks")
+        .select("request_id")
+        .in("request_id", requestIds);
+
+      if (feedbacksError) throw feedbacksError;
+
+      // Find requests without feedback
+      const feedbackRequestIds = new Set(feedbacks?.map(f => f.request_id) || []);
+      const requestsWithoutFeedback = requests.filter(r => !feedbackRequestIds.has(r.id));
+
+      if (requestsWithoutFeedback.length === 0) {
+        setCandidatesWithoutFeedback([]);
+        return;
+      }
+
+      // Get candidate and vaga info
+      const candidateIds = [...new Set(requestsWithoutFeedback.map(r => r.candidato_id))];
+      
+      const { data: candidatesData, error: candidatesError } = await supabase
+        .from("candidatos")
+        .select("id, nome_completo, email, vaga_relacionada_id")
+        .in("id", candidateIds);
+
+      if (candidatesError) throw candidatesError;
+
+      const { data: vagasData, error: vagasError } = await supabase
+        .from("vagas")
+        .select("id, titulo")
+        .in("id", vagaIds);
+
+      if (vagasError) throw vagasError;
+
+      // Build the result
+      const vagasMap = new Map(vagasData?.map(v => [v.id, v.titulo]) || []);
+      const candidatesMap = new Map(candidatesData?.map(c => [c.id, c]) || []);
+
+      const result: CandidateWithoutFeedback[] = requestsWithoutFeedback.map(req => {
+        const candidate = candidatesMap.get(req.candidato_id);
+        return {
+          id: req.candidato_id,
+          nome_completo: candidate?.nome_completo || "Desconhecido",
+          email: candidate?.email || "",
+          vaga_relacionada_id: req.vaga_id,
+          vaga_titulo: vagasMap.get(req.vaga_id) || "Vaga não encontrada",
+          request_created: req.created_at,
+          request_expires: req.expires_at,
+        };
+      });
+
+      setCandidatesWithoutFeedback(result);
+    } catch (error) {
+      console.error("Erro ao carregar candidatos sem feedback:", error);
+      setCandidatesWithoutFeedback([]);
+    }
+  };
+
   const selectedVagaData = vagas.find(v => v.id === selectedVaga);
   const vagaCandidatos = candidatos.filter(c => c.vaga_relacionada_id === selectedVaga);
   const vagaHistory = stageHistory.filter(h => h.job_id === selectedVaga);
+
+  // Calculate metrics
+  const totalVagasAbertas = vagas.length;
+  const totalCandidatos = candidatos.length;
+  const totalSemFeedback = candidatesWithoutFeedback.length;
 
   // Get badge variant based on candidate status
   const getStatusBadgeVariant = (status: string) => {
@@ -221,6 +320,56 @@ export default function Acompanhamento() {
           <h1 className="text-3xl font-bold text-foreground">Meus Processos</h1>
           <p className="text-muted-foreground mt-1">Acompanhe o andamento das suas vagas em aberto</p>
         </div>
+
+        {/* Metrics Cards */}
+        {!selectedVaga && (
+          <div className="grid gap-4 sm:grid-cols-3">
+            <Card className="border-2">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">Vagas em Aberto</p>
+                    <p className="text-3xl font-bold text-foreground">{totalVagasAbertas}</p>
+                  </div>
+                  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Briefcase className="h-6 w-6 text-primary" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-2">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">Total de Candidatos</p>
+                    <p className="text-3xl font-bold text-foreground">{totalCandidatos}</p>
+                  </div>
+                  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Users className="h-6 w-6 text-primary" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card 
+              className="border-2 cursor-pointer transition-all hover:shadow-md hover:border-primary/50"
+              onClick={() => setNoFeedbackDrawerOpen(true)}
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">Sem Feedback</p>
+                    <p className="text-3xl font-bold text-foreground">{totalSemFeedback}</p>
+                  </div>
+                  <div className="h-12 w-12 rounded-full bg-orange-500/10 flex items-center justify-center">
+                    <AlertCircle className="h-6 w-6 text-orange-500" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {/* Vagas Overview - Small Cards */}
         {!selectedVaga && (
@@ -488,6 +637,66 @@ export default function Acompanhamento() {
           candidateId={selectedCandidateId}
         />
       )}
+
+      {/* Candidates Without Feedback Drawer */}
+      <Sheet open={noFeedbackDrawerOpen} onOpenChange={setNoFeedbackDrawerOpen}>
+        <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle className="text-2xl">Candidatos Sem Feedback</SheetTitle>
+            <SheetDescription>
+              Lista de candidatos que possuem solicitação de feedback pendente
+            </SheetDescription>
+          </SheetHeader>
+
+          <div className="mt-6 space-y-4">
+            {candidatesWithoutFeedback.length > 0 ? (
+              candidatesWithoutFeedback.map((candidate) => (
+                <Card 
+                  key={candidate.id}
+                  className="cursor-pointer hover:shadow-md transition-all"
+                  onClick={() => {
+                    setSelectedCandidateId(candidate.id);
+                    setCandidateDrawerOpen(true);
+                    setNoFeedbackDrawerOpen(false);
+                  }}
+                >
+                  <CardContent className="p-4">
+                    <div className="space-y-2">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <p className="font-bold text-foreground">{candidate.nome_completo}</p>
+                          <p className="text-sm text-muted-foreground">{candidate.email}</p>
+                        </div>
+                        <Badge variant="outline" className="bg-orange-500/10 text-orange-500 border-orange-500/20">
+                          Pendente
+                        </Badge>
+                      </div>
+
+                      <div className="pt-2 border-t border-border">
+                        <p className="text-sm text-muted-foreground flex items-center gap-2">
+                          <Briefcase className="h-3.5 w-3.5" />
+                          {candidate.vaga_titulo}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Solicitado em: {format(new Date(candidate.request_created), "dd/MM/yyyy", { locale: ptBR })}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Expira em: {format(new Date(candidate.request_expires), "dd/MM/yyyy", { locale: ptBR })}
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <div className="text-center py-12">
+                <MessageSquare className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+                <p className="text-muted-foreground">Todos os feedbacks foram respondidos!</p>
+              </div>
+            )}
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
