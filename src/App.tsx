@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Layout } from "./components/Layout";
+import ErrorBoundary from "./components/ErrorBoundary";
 import Dashboard from "./pages/Dashboard";
 import Vagas from "./pages/Vagas";
 import VagaForm from "./pages/VagaForm";
@@ -32,7 +33,8 @@ import Acompanhamento from "./pages/Acompanhamento";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
-const App = () => <QueryClientProvider client={queryClient}>
+const App = () => <ErrorBoundary>
+  <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
@@ -73,5 +75,6 @@ const App = () => <QueryClientProvider client={queryClient}>
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
-  </QueryClientProvider>;
+  </QueryClientProvider>
+</ErrorBoundary>;
 export default App;
