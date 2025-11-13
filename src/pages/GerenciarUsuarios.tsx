@@ -418,6 +418,38 @@ export default function GerenciarUsuarios() {
       toast.error(`❌ ${error.message}`);
     }
   };
+
+  const handleUpdateEmail = async (userId: string, userName: string, newEmail: string) => {
+    try {
+      const {
+        data: {
+          session
+        }
+      } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/update-user-email`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({
+          userId,
+          newEmail
+        })
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to update email");
+      }
+      toast.success(`✅ Email de ${userName} atualizado com sucesso`);
+      reload();
+    } catch (error: any) {
+      console.error("Erro ao atualizar email:", error);
+      toast.error(`❌ ${error.message}`);
+    }
+  };
+
   const getRoleBadge = (role: string) => {
     const badges = {
       admin: <Badge variant="destructive" className="text-xs px-1.5 py-0">Admin</Badge>,
@@ -570,6 +602,42 @@ export default function GerenciarUsuarios() {
         </DialogContent>
       </Dialog>;
   };
+
+  const EmailEditDialog = ({
+    user
+  }: {
+    user: any;
+  }) => {
+    const [newEmail, setNewEmail] = useState("");
+    const [open, setOpen] = useState(false);
+    const handleSubmit = async () => {
+      await handleUpdateEmail(user.id, user.name, newEmail);
+      setNewEmail("");
+      setOpen(false);
+    };
+    return <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Editar email">
+            <Mail className="h-4 w-4" />
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-base">Editar Email</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="new-email" className="text-sm">Novo Email</Label>
+              <Input id="new-email" type="email" value={newEmail} onChange={e => setNewEmail(e.target.value)} placeholder="email@exemplo.com" className="h-9" />
+            </div>
+            <Button onClick={handleSubmit} disabled={!newEmail || !newEmail.includes('@')} className="w-full h-9">
+              Atualizar Email
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>;
+  };
+
   const internalUsers = users.filter(user => {
     const userRolesList = userRoles[user.id] || [];
     return !userRolesList.includes('client');
@@ -703,6 +771,7 @@ export default function GerenciarUsuarios() {
 
                     <div className="flex items-center gap-1 shrink-0">
                       <RoleEditDialog user={user} />
+                      <EmailEditDialog user={user} />
                       <PasswordResetDialog user={user} />
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
@@ -854,6 +923,7 @@ export default function GerenciarUsuarios() {
 
                           <div className="flex items-center gap-1 shrink-0">
                             <LinkJobDialog client={client} />
+                            <EmailEditDialog user={client} />
                             <PasswordResetDialog user={client} />
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
