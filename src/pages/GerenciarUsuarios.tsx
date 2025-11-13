@@ -238,7 +238,8 @@ export default function GerenciarUsuarios() {
         password: clientFormData.password,
         options: {
           data: {
-            full_name: clientFormData.name
+            full_name: clientFormData.name,
+            role: 'client' // Passa o role nos metadados para o trigger handle_new_user()
           }
         }
       });
@@ -256,17 +257,8 @@ export default function GerenciarUsuarios() {
           throw profileError;
         }
 
-        // Inserir role 'client' na tabela user_roles
-        const {
-          error: roleError
-        } = await supabase.from("user_roles").insert({
-          user_id: authData.user.id,
-          role: "client"
-        });
-        if (roleError) {
-          console.error("Erro ao criar role do cliente:", roleError);
-          throw roleError;
-        }
+        // O role 'client' já foi criado automaticamente pelo trigger handle_new_user()
+        // através dos metadados passados no signUp
       }
       toast.success("✅ Usuário externo criado com sucesso!");
       setShowClientForm(false);
