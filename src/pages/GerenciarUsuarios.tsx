@@ -250,15 +250,33 @@ export default function GerenciarUsuarios() {
           error: profileError
         } = await supabase.from("profiles").update({
           user_type: 'external',
-          empresa: clientFormData.company
+          empresa: clientFormData.company,
+          role: 'client' // Atualizar também a coluna role na tabela profiles
         }).eq("id", authData.user.id);
         if (profileError) {
           console.error("Erro ao atualizar perfil:", profileError);
           throw profileError;
         }
 
-        // O role 'client' já foi criado automaticamente pelo trigger handle_new_user()
-        // através dos metadados passados no signUp
+        // Remover qualquer role incorreto que possa ter sido criado pelo trigger
+        await supabase.from("user_roles")
+          .delete()
+          .eq("user_id", authData.user.id)
+          .neq("role", "client");
+
+        // Inserir role 'client' na tabela user_roles explicitamente
+        const {
+          error: roleError
+        } = await supabase.from("user_roles").upsert({
+          user_id: authData.user.id,
+          role: 'client'
+        }, {
+          onConflict: 'user_id,role'
+        });
+        if (roleError) {
+          console.error("Erro ao criar role client:", roleError);
+          throw roleError;
+        }
       }
       toast.success("✅ Usuário externo criado com sucesso!");
       setShowClientForm(false);
