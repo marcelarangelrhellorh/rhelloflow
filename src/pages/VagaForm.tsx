@@ -40,6 +40,7 @@ export default function VagaForm() {
   const [loading, setLoading] = useState(false);
   const { users: recrutadores } = useUsers('recrutador');
   const { users: csUsers } = useUsers('cs');
+  const { users: clientUsers } = useUsers('client');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   
   const [formData, setFormData] = useState({
@@ -52,6 +53,7 @@ export default function VagaForm() {
     contato_telefone: "",
     recrutador_id: "",
     cs_id: "",
+    cliente_id: "",
     complexidade: "",
     prioridade: "",
     status: "A iniciar",
@@ -97,6 +99,7 @@ export default function VagaForm() {
           contato_telefone: data.contato_telefone || "",
           recrutador_id: data.recrutador_id || "",
           cs_id: data.cs_id || "",
+          cliente_id: data.cliente_id || "",
           complexidade: data.complexidade || "",
           prioridade: data.prioridade || "",
           status: data.status || "A iniciar",
@@ -165,6 +168,7 @@ export default function VagaForm() {
         contato_telefone: formData.contato_telefone || null,
         recrutador_id: formData.recrutador_id || null,
         cs_id: formData.cs_id || null,
+        cliente_id: formData.cliente_id || null,
         complexidade: (formData.complexidade || null) as any,
         prioridade: (formData.prioridade || null) as any,
         status: formData.status as any,
@@ -390,6 +394,23 @@ export default function VagaForm() {
                     {csUsers.map((cs) => (
                       <SelectItem key={cs.id} value={cs.id}>
                         {cs.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="cliente">Cliente (Usuário Externo)</Label>
+                <Select value={formData.cliente_id} onValueChange={(value) => setFormData({ ...formData, cliente_id: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um cliente (opcional)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Nenhum</SelectItem>
+                    {clientUsers.map((client) => (
+                      <SelectItem key={client.id} value={client.id}>
+                        {client.name}
                       </SelectItem>
                     ))}
                   </SelectContent>

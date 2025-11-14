@@ -9,7 +9,7 @@ export interface User {
   roles?: string[]; // Optional roles array
 }
 
-export function useUsers(roleFilter?: 'recrutador' | 'cs' | 'admin' | 'viewer') {
+export function useUsers(roleFilter?: 'recrutador' | 'cs' | 'admin' | 'viewer' | 'client') {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
 
