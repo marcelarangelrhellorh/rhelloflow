@@ -108,7 +108,7 @@ export function CandidateCard({
         {/* Job title if linked */}
         {candidato.vaga_titulo && (
           <div className="mb-3">
-            <Badge variant="outline" className="text-xs font-medium px-2 py-1 text-[#36404a] border-gray-300 bg-white">
+            <Badge variant="outline" className="text-sm font-bold px-2 py-1 text-[#36404a] border-gray-300 bg-white">
               Vaga: {candidato.vaga_titulo}
             </Badge>
           </div>
