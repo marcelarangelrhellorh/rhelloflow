@@ -14,7 +14,6 @@ import ShareJob from "./pages/ShareJob";
 import ClientView from "./pages/ClientView";
 import FeedbackCliente from "./pages/FeedbackCliente";
 import FeedbacksPendentes from "./pages/FeedbacksPendentes";
-import FunilVagas from "./pages/FunilVagas";
 import Candidatos from "./pages/Candidatos";
 import CandidatoForm from "./pages/CandidatoForm";
 import CandidatoDetalhes from "./pages/CandidatoDetalhes";
@@ -51,7 +50,6 @@ const App = () => <ErrorBoundary>
             <Route path="/vagas/nova" element={<VagaForm />} />
             <Route path="/vagas/:id" element={<VagaDetalhes />} />
             <Route path="/vagas/:id/editar" element={<VagaForm />} />
-            <Route path="/funil-vagas" element={<FunilVagas />} />
             <Route path="/candidatos" element={<Candidatos />} />
             <Route path="/candidatos/novo" element={<CandidatoForm />} />
             <Route path="/candidatos/:id" element={<CandidatoDetalhes />} />
