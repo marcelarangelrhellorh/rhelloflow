@@ -83,7 +83,7 @@ export function CandidateCard({
             <Badge 
               variant="outline" 
               className={cn(
-                "text-xs font-medium rounded-md px-2 py-1 w-fit bg-[#faec3e] text-[#00141d] border-[#faec3e]"
+                "text-sm font-bold rounded-md px-2 py-1 w-fit bg-[#faec3e]/20 text-[#00141d] border-[#faec3e]"
               )}
             >
               {candidato.status}
