@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, MessageSquare, X, AlertTriangle, Grid3x3, List, FileSpreadsheet } from "lucide-react";
+import { Plus, MessageSquare, X, AlertTriangle, Grid3x3, List, FileSpreadsheet, LayoutGrid } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -17,6 +17,14 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { usePagination } from "@/hooks/usePagination";
 import { PaginationControls } from "@/components/ui/pagination-controls";
 import { logger } from "@/lib/logger";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+// Importar componentes do Funil
+import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors, closestCenter } from "@dnd-kit/core";
+import { FunnelColumn } from "@/components/FunilCandidatos/FunnelColumn";
+import { CandidateFunnelCard } from "@/components/FunilCandidatos/CandidateFunnelCard";
+import { StatsHeader as FunnelStatsHeader } from "@/components/FunilCandidatos/StatsHeader";
+import { FilterBar as FunnelFilterBar } from "@/components/FunilCandidatos/FilterBar";
 type Candidato = {
   id: string;
   nome_completo: string;
@@ -31,12 +39,35 @@ type Candidato = {
   vaga_relacionada_id: string | null;
   disponibilidade_status?: string | null;
   vaga_titulo?: string | null;
+  criado_em: string;
+  vaga?: {
+    empresa: string | null;
+    recrutador_id: string | null;
+    titulo: string | null;
+  };
 };
+type StatusCandidato = "Banco de Talentos" | "Selecionado" | "Entrevista rhello" | "Reprovado Rhello" | "Aprovado Rhello" | "Entrevistas Solicitante" | "Reprovado Solicitante" | "Aprovado Solicitante" | "Contratado";
+
+const statusColumns: StatusCandidato[] = ["Banco de Talentos", "Selecionado", "Entrevista rhello", "Reprovado Rhello", "Aprovado Rhello", "Entrevistas Solicitante", "Reprovado Solicitante", "Aprovado Solicitante", "Contratado"];
+
+const statusColors: Record<StatusCandidato, string> = {
+  "Banco de Talentos": "bg-info/10 text-info border-info/20",
+  "Selecionado": "bg-[#BBF7D0] text-green-800 border-green-200",
+  "Entrevista rhello": "bg-[#BFDBFE] text-blue-800 border-blue-200",
+  "Reprovado Rhello": "bg-[#FECACA] text-red-800 border-red-200",
+  "Aprovado Rhello": "bg-[#FDE68A] text-yellow-800 border-yellow-200",
+  "Entrevistas Solicitante": "bg-[#E9D5FF] text-purple-800 border-purple-200",
+  "Reprovado Solicitante": "bg-[#FECACA] text-red-800 border-red-200",
+  "Aprovado Solicitante": "bg-[#FDE68A] text-yellow-800 border-yellow-200",
+  "Contratado": "bg-[#D9F99D] text-lime-800 border-lime-200"
+};
+
 export default function Candidatos() {
   const navigate = useNavigate();
-  const {
-    isAdmin
-  } = useUserRole();
+  const { isAdmin } = useUserRole();
+  
+  // Estados comuns
+  const [viewType, setViewType] = useState<"cards" | "funnel">("cards");
   const [candidatos, setCandidatos] = useState<Candidato[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -54,7 +85,23 @@ export default function Candidatos() {
     id: string;
     titulo: string;
     empresa: string;
+    recrutador_id?: string | null;
   }[]>([]);
+  
+  // Estados específicos do funil
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [recrutadorVagaFilter, setRecrutadorVagaFilter] = useState<string>("all");
+  const [recrutadorFilter, setRecrutadorFilter] = useState<string>("all");
+  const [dragOverColumn, setDragOverColumn] = useState<string | null>(null);
+  const [users, setUsers] = useState<Array<{ id: string; name: string }>>([]);
+  
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    })
+  );
 
   // Verificar se há filtro de atenção pela URL
   const searchParams = new URLSearchParams(window.location.search);
@@ -62,13 +109,17 @@ export default function Candidatos() {
   useEffect(() => {
     loadCandidatos();
     loadVagas();
-  }, []);
+    if (viewType === "funnel") {
+      loadUsers();
+    }
+  }, [viewType]);
   const loadVagas = async () => {
     try {
-      const {
-        data,
-        error
-      } = await supabase.from("vagas").select("id, titulo, empresa").is("deleted_at", null).order("titulo");
+      const { data, error } = await supabase
+        .from("vagas")
+        .select("id, titulo, empresa, recrutador_id")
+        .is("deleted_at", null)
+        .order("titulo");
       if (error) throw error;
       setVagas(data || []);
       return data || [];
@@ -76,6 +127,72 @@ export default function Candidatos() {
       logger.error("Erro ao carregar vagas:", error);
       return [];
     }
+  };
+
+  const loadUsers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("users")
+        .select("id, name")
+        .eq("active", true)
+        .order("name");
+      if (error) throw error;
+      setUsers(data || []);
+    } catch (error) {
+      logger.error("Erro ao carregar usuários:", error);
+    }
+  };
+
+  // Métodos específicos do funil
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
+  };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    setDragOverColumn(null);
+    
+    if (!over || active.id === over.id) {
+      setActiveId(null);
+      return;
+    }
+
+    const candidatoId = active.id as string;
+    const newStatus = over.id as StatusCandidato;
+    const candidato = candidatos.find((c) => c.id === candidatoId);
+
+    if (!candidato || candidato.status === newStatus) {
+      setActiveId(null);
+      return;
+    }
+
+    // Atualização otimista
+    setCandidatos((prev) =>
+      prev.map((c) => (c.id === candidatoId ? { ...c, status: newStatus } : c))
+    );
+
+    try {
+      const { error } = await supabase
+        .from("candidatos")
+        .update({ status: newStatus })
+        .eq("id", candidatoId);
+
+      if (error) throw error;
+      toast.success(`Candidato movido para ${newStatus}`);
+    } catch (error) {
+      logger.error("Erro ao mover candidato:", error);
+      toast.error("Erro ao mover candidato");
+      // Reverter mudança otimista
+      setCandidatos((prev) =>
+        prev.map((c) => (c.id === candidatoId ? { ...c, status: candidato.status } : c))
+      );
+    } finally {
+      setActiveId(null);
+    }
+  };
+
+  const getCandidatesByStatus = (status: StatusCandidato) => {
+    return filteredFunnelCandidates.filter((c) => c.status === status);
   };
   const loadCandidatos = async () => {
     try {
@@ -156,6 +273,28 @@ export default function Candidatos() {
       setRequiresApproval(false);
     }
   };
+  // Filtragem para o funil
+  const filteredFunnelCandidates = candidatos.filter((candidato) => {
+    const matchesSearch =
+      searchTerm === "" ||
+      candidato.nome_completo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      candidato.email.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesVaga = vagaFilter === "all" || candidato.vaga_relacionada_id === vagaFilter;
+    const matchesCliente =
+      clienteFilter === "all" ||
+      (candidato.vaga_relacionada_id &&
+        vagas.find((v) => v.id === candidato.vaga_relacionada_id)?.empresa === clienteFilter);
+    const matchesRecrutadorVaga =
+      recrutadorVagaFilter === "all" ||
+      (candidato.vaga_relacionada_id &&
+        vagas.find((v) => v.id === candidato.vaga_relacionada_id)?.recrutador_id === recrutadorVagaFilter);
+    const matchesRecrutador =
+      recrutadorFilter === "all" || candidato.recrutador === recrutadorFilter;
+
+    return matchesSearch && matchesVaga && matchesCliente && matchesRecrutadorVaga && matchesRecrutador;
+  });
+
   const filteredCandidatos = candidatos.filter(candidato => {
     const matchesSearch = candidato.nome_completo.toLowerCase().includes(searchTerm.toLowerCase()) || candidato.email.toLowerCase().includes(searchTerm.toLowerCase()) || candidato.cidade && candidato.cidade.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || candidato.status === statusFilter;
@@ -212,7 +351,11 @@ export default function Candidatos() {
           <div className="flex items-center justify-between mb-3">
             <div>
               <h1 className="text-3xl font-bold text-foreground">Candidatos</h1>
-              <p className="text-base text-muted-foreground">Gerencie todos os candidatos</p>
+              <p className="text-base text-muted-foreground">
+                {viewType === "cards" 
+                  ? "Gerencie todos os candidatos"
+                  : "Visualize o pipeline completo de candidatos"}
+              </p>
             </div>
             <div className="flex gap-2">
               <Button onClick={() => navigate('/candidatos/novo')} className="bg-[#F9EC3F] hover:bg-[#E5D72E] text-[#00141D] font-bold">
@@ -225,70 +368,198 @@ export default function Candidatos() {
               </Button>
             </div>
           </div>
-
-          {/* Stats */}
-          <StatsHeader total={candidatos.length} byStatus={statsByStatus} />
-
-          {/* Filter chip */}
-          {hasActiveFilter && <div className="mt-3 flex items-center gap-2 p-2 bg-purple/10 border border-purple/20 rounded-lg">
-              <MessageSquare className="h-4 w-4 text-purple" />
-              <span className="text-base font-medium">
-                Aguardando feedback do cliente
-              </span>
-              <Button variant="ghost" size="sm" onClick={clearAttentionFilter} className="ml-auto">
-                <X className="h-4 w-4" />
-              </Button>
-            </div>}
-
-          {/* Filters */}
-          <div className="mt-3 flex items-center gap-2">
-            <FilterBar searchTerm={searchTerm} onSearchChange={setSearchTerm} statusFilter={statusFilter} onStatusChange={setStatusFilter} disponibilidadeFilter={disponibilidadeFilter} onDisponibilidadeChange={setDisponibilidadeFilter} vagaFilter={vagaFilter} onVagaChange={setVagaFilter} clienteFilter={clienteFilter} onClienteChange={setClienteFilter} vagas={vagas} clientes={clientes} />
-            
-            <div className="flex gap-2">
-              <Button variant={viewMode === "grid" ? "default" : "outline"} size="icon" onClick={() => setViewMode("grid")} className={viewMode === "grid" ? "bg-[#F9EC3F] text-[#00141D] hover:bg-[#E5D72E]" : ""}>
-                <Grid3x3 className="h-4 w-4" />
-              </Button>
-              <Button variant={viewMode === "list" ? "default" : "outline"} size="icon" onClick={() => setViewMode("list")} className={viewMode === "list" ? "bg-[#F9EC3F] text-[#00141D] hover:bg-[#E5D72E]" : ""}>
-                <List className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
         </div>
       </div>
 
-      {/* Cards Grid */}
-      <div className="px-6 py-4 bg-[t#36404a0f] bg-[#faec3e]/[0.01]">
-        {filteredCandidatos.length === 0 ? <div className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="mb-3 rounded-full bg-primary/10 p-4">
-              <Plus className="h-10 w-10 text-primary" />
-            </div>
-            <h3 className="text-lg font-semibold text-foreground mb-2">
-              Nenhum candidato encontrado
-            </h3>
-            <p className="text-base text-muted-foreground mb-4 max-w-md">
-              Adicione um novo clicando em "+ Novo Candidato"
-            </p>
-            <Button onClick={() => navigate('/candidatos/novo')} className="bg-[#F9EC3F] hover:bg-[#E5D72E] text-[#00141D] font-bold">
-              <Plus className="mr-2 h-4 w-4" />
-              Novo Candidato
-            </Button>
-          </div> : (
-            <>
-              <div className={viewMode === "grid" ? "grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "space-y-4"}>
-                {paginatedCandidatos.map(candidato => <CandidateCard key={candidato.id} candidato={candidato} onView={() => navigate(`/candidatos/${candidato.id}`)} onEdit={() => navigate(`/candidatos/${candidato.id}/editar`)} onDelete={() => setDeletingId(candidato.id)} onLinkJob={() => setLinkingJobId(candidato.id)} viewMode={viewMode} />)}
-              </div>
-              <PaginationControls
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={goToPage}
-                canGoPrevious={canGoPrevious}
-                canGoNext={canGoNext}
-                startIndex={startIndex}
-                endIndex={endIndex}
-                totalItems={filteredCandidatos.length}
+      {/* Toggle de Visualização */}
+      <div className="px-6 pt-4">
+        <Tabs value={viewType} onValueChange={(v) => setViewType(v as "cards" | "funnel")}>
+          <TabsList className="grid w-full max-w-[400px] grid-cols-2">
+            <TabsTrigger value="cards" className="gap-2">
+              <Grid3x3 className="h-4 w-4" />
+              Cards
+            </TabsTrigger>
+            <TabsTrigger value="funnel" className="gap-2">
+              <LayoutGrid className="h-4 w-4" />
+              Funil
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Visualização em Cards */}
+          <TabsContent value="cards" className="space-y-4 mt-4">
+            {/* Stats */}
+            <StatsHeader total={candidatos.length} byStatus={statsByStatus} />
+
+            {/* Filter chip */}
+            {hasActiveFilter && <div className="mt-3 flex items-center gap-2 p-2 bg-purple/10 border border-purple/20 rounded-lg">
+                <MessageSquare className="h-4 w-4 text-purple" />
+                <span className="text-base font-medium">
+                  Aguardando feedback do cliente
+                </span>
+                <Button variant="ghost" size="sm" onClick={clearAttentionFilter} className="ml-auto">
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>}
+
+            {/* Filters */}
+            <div className="mt-3 flex items-center gap-2">
+              <FilterBar 
+                searchTerm={searchTerm} 
+                onSearchChange={setSearchTerm} 
+                statusFilter={statusFilter} 
+                onStatusChange={setStatusFilter} 
+                disponibilidadeFilter={disponibilidadeFilter} 
+                onDisponibilidadeChange={setDisponibilidadeFilter} 
+                vagaFilter={vagaFilter} 
+                onVagaChange={setVagaFilter} 
+                clienteFilter={clienteFilter} 
+                onClienteChange={setClienteFilter} 
+                vagas={vagas} 
+                clientes={clientes} 
               />
-            </>
-          )}
+              
+              <div className="flex gap-2">
+                <Button 
+                  variant={viewMode === "grid" ? "default" : "outline"} 
+                  size="icon" 
+                  onClick={() => setViewMode("grid")} 
+                  className={viewMode === "grid" ? "bg-[#F9EC3F] text-[#00141D] hover:bg-[#E5D72E]" : ""}
+                >
+                  <Grid3x3 className="h-4 w-4" />
+                </Button>
+                <Button 
+                  variant={viewMode === "list" ? "default" : "outline"} 
+                  size="icon" 
+                  onClick={() => setViewMode("list")} 
+                  className={viewMode === "list" ? "bg-[#F9EC3F] text-[#00141D] hover:bg-[#E5D72E]" : ""}
+                >
+                  <List className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Cards Grid */}
+            <div className="px-6 py-4 bg-[#faec3e]/[0.01]">
+              {filteredCandidatos.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <div className="mb-3 rounded-full bg-primary/10 p-4">
+                    <Plus className="h-10 w-10 text-primary" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-foreground mb-2">
+                    Nenhum candidato encontrado
+                  </h3>
+                  <p className="text-base text-muted-foreground mb-4 max-w-md">
+                    Adicione um novo clicando em "+ Novo Candidato"
+                  </p>
+                  <Button onClick={() => navigate('/candidatos/novo')} className="bg-[#F9EC3F] hover:bg-[#E5D72E] text-[#00141D] font-bold">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Novo Candidato
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <div className={viewMode === "grid" ? "grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "space-y-4"}>
+                    {paginatedCandidatos.map(candidato => (
+                      <CandidateCard 
+                        key={candidato.id} 
+                        candidato={candidato} 
+                        onView={() => navigate(`/candidatos/${candidato.id}`)} 
+                        onEdit={() => navigate(`/candidatos/${candidato.id}/editar`)} 
+                        onDelete={() => setDeletingId(candidato.id)} 
+                        onLinkJob={() => setLinkingJobId(candidato.id)} 
+                        viewMode={viewMode} 
+                      />
+                    ))}
+                  </div>
+                  <PaginationControls
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={goToPage}
+                    canGoPrevious={canGoPrevious}
+                    canGoNext={canGoNext}
+                    startIndex={startIndex}
+                    endIndex={endIndex}
+                    totalItems={filteredCandidatos.length}
+                  />
+                </>
+              )}
+            </div>
+          </TabsContent>
+
+          {/* Visualização em Funil */}
+          <TabsContent value="funnel" className="space-y-6 mt-6">
+            <FunnelStatsHeader
+              totalCandidatosAtivos={candidatos.filter(c => c.status !== "Banco de Talentos").length}
+              candidatosBancoTalentos={statsByStatus["Banco de Talentos"] || 0}
+            />
+
+            <FunnelFilterBar
+              searchQuery={searchTerm}
+              onSearchChange={setSearchTerm}
+              vagaFilter={vagaFilter}
+              onVagaChange={setVagaFilter}
+              clienteFilter={clienteFilter}
+              onClienteChange={setClienteFilter}
+              recrutadorVagaFilter={recrutadorVagaFilter}
+              onRecrutadorVagaChange={setRecrutadorVagaFilter}
+              recrutadorFilter={recrutadorFilter}
+              onRecrutadorChange={setRecrutadorFilter}
+              vagas={vagas.map(v => ({ id: v.id, titulo: v.titulo }))}
+              clientes={clientes}
+              recrutadoresVaga={Array.from(new Set(vagas.map(v => v.recrutador_id).filter(Boolean)))}
+              recrutadores={Array.from(new Set(candidatos.map(c => c.recrutador).filter(Boolean))) as string[]}
+              users={users}
+            />
+
+            {loading ? (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">Carregando candidatos...</p>
+              </div>
+            ) : (
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragStart={handleDragStart}
+                onDragEnd={handleDragEnd}
+              >
+                <div className="flex gap-4 overflow-x-auto pb-4 bg-[#36404a]/[0.06]">
+                  {statusColumns.map((status) => {
+                    const candidatosStatus = getCandidatesByStatus(status);
+                    return (
+                      <FunnelColumn
+                        key={status}
+                        status={status}
+                        count={candidatosStatus.length}
+                        colorClass={statusColors[status]}
+                      >
+                        {candidatosStatus.map((candidato) => (
+                          <div key={candidato.id} onClick={() => navigate(`/candidatos/${candidato.id}`)}>
+                            <CandidateFunnelCard
+                              candidato={candidato}
+                              onDragStart={() => {}}
+                            />
+                          </div>
+                        ))}
+                      </FunnelColumn>
+                    );
+                  })}
+                </div>
+
+                <DragOverlay>
+                  {activeId ? (
+                    <div className="w-[300px]">
+                      <CandidateFunnelCard
+                        candidato={candidatos.find((c) => c.id === activeId)!}
+                        onDragStart={() => {}}
+                        isDragging
+                      />
+                    </div>
+                  ) : null}
+                </DragOverlay>
+              </DndContext>
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
 
       {/* Modals */}

@@ -17,7 +17,7 @@ import FeedbacksPendentes from "./pages/FeedbacksPendentes";
 import Candidatos from "./pages/Candidatos";
 import CandidatoForm from "./pages/CandidatoForm";
 import CandidatoDetalhes from "./pages/CandidatoDetalhes";
-import FunilCandidatos from "./pages/FunilCandidatos";
+
 import BancoTalentos from "./pages/BancoTalentos";
 import Scorecards from "./pages/Scorecards";
 import ScorecardForm from "./pages/ScorecardForm";
@@ -54,7 +54,7 @@ const App = () => <ErrorBoundary>
             <Route path="/candidatos/novo" element={<CandidatoForm />} />
             <Route path="/candidatos/:id" element={<CandidatoDetalhes />} />
             <Route path="/candidatos/:id/editar" element={<CandidatoForm />} />
-            <Route path="/funil-candidatos" element={<FunilCandidatos />} />
+            
             <Route path="/banco-talentos" element={<BancoTalentos />} />
             <Route path="/feedbacks-pendentes" element={<FeedbacksPendentes />} />
             <Route path="/scorecards" element={<Scorecards />} />
