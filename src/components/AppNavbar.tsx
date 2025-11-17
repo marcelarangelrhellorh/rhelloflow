@@ -13,7 +13,6 @@ import symbolRhelloLight from "@/assets/symbol-rhello-light.png";
   const menuItems = [
   { title: "Dashboard", url: "/", roles: ["admin", "recrutador", "cs"] },
   { title: "Vagas", url: "/vagas", roles: ["admin", "recrutador", "cs"] },
-  { title: "Funil de Vagas", url: "/funil-vagas", roles: ["admin", "recrutador", "cs"] },
   { title: "Candidatos", url: "/candidatos", roles: ["admin", "recrutador", "cs"] },
   { title: "Funil de Candidatos", url: "/funil-candidatos", roles: ["admin", "recrutador", "cs"] },
   { title: "Banco de Talentos", url: "/banco-talentos", roles: ["admin", "recrutador", "cs"] },
