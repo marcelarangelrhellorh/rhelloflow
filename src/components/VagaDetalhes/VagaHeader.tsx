@@ -29,17 +29,17 @@ export function VagaHeader({
   return (
     <div className="mb-8 flex justify-between items-start">
       <div>
-        <h1 className="text-primary-text-light dark:text-primary-text-dark text-4xl font-black tracking-tight">
+        <h1 className="text-[#00141d] text-3xl font-bold">
           {vaga.titulo}
         </h1>
-        <p className="text-secondary-text-light dark:text-secondary-text-dark text-base font-normal mt-2">
+        <p className="text-[#36404a] text-sm font-normal mt-1">
           {vaga.empresa} • Acompanhe o progresso do processo de contratação
         </p>
-        <div className="flex items-center gap-3 mt-2 flex-wrap">
+        <div className="flex items-center gap-2 mt-3 flex-wrap">
           {(vaga.salario_min || vaga.salario_max || vaga.salario_modalidade) && (
-            <p className="text-secondary-text-light dark:text-secondary-text-dark text-lg font-semibold">
+            <Badge className="bg-[#ffcd00]/20 text-[#00141d] border-[#ffcd00]/30 font-medium text-xs px-3 py-1">
               💰 {formatSalaryRange(vaga.salario_min, vaga.salario_max, vaga.salario_modalidade)}
-            </p>
+            </Badge>
           )}
           {vagaTags.length > 0 && (
             <div className="flex flex-wrap gap-2">
@@ -59,23 +59,23 @@ export function VagaHeader({
       <div className="flex gap-2">
         <button
           onClick={onGenerateClientLink}
-          className="px-4 py-2 dark:bg-background-dark border-2 border-slate-800 text-slate-900 dark:text-slate-100 transition-colors flex items-center gap-2 font-bold rounded-sm hover:bg-slate-100 dark:hover:bg-slate-900"
+          className="px-4 py-2 border border-[#36404a]/30 text-[#00141d] transition-colors flex items-center gap-2 font-medium text-sm rounded-full hover:bg-[#36404a]/5"
         >
-          <span className="material-symbols-outlined text-xl">link</span>
+          <span className="material-symbols-outlined text-lg">link</span>
           Link Cliente
         </button>
         <button
           onClick={onViewDetails}
-          className="px-4 py-2 dark:bg-background-dark border-2 border-primary text-primary-text-light dark:text-primary-text-dark transition-colors flex items-center gap-2 font-bold bg-[#faec3e] rounded-sm"
+          className="px-4 py-2 border border-[#36404a]/30 text-[#00141d] transition-colors flex items-center gap-2 font-medium text-sm rounded-full hover:bg-[#36404a]/5"
         >
-          <span className="material-symbols-outlined text-xl">info</span>
+          <span className="material-symbols-outlined text-lg">visibility</span>
           Ver Detalhes
         </button>
         <button
           onClick={onShare}
-          className="px-4 py-2 text-primary-foreground rounded-md transition-colors flex items-center gap-2 font-bold bg-[#faec3e]"
+          className="px-4 py-2 bg-[#ffcd00] text-[#00141d] rounded-full transition-colors flex items-center gap-2 font-bold text-sm hover:bg-[#ffcd00]/90"
         >
-          <span className="material-symbols-outlined text-xl">share</span>
+          <span className="material-symbols-outlined text-lg">share</span>
           Compartilhar
         </button>
       </div>

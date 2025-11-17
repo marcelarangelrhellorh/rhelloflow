@@ -32,24 +32,23 @@ export function ExternalJobBanner({
   if (!prioridade) missingFields.push("Prioridade");
 
   return (
-    <Alert variant="default" className="bg-warning/10 border-warning">
-      <AlertCircle className="h-4 w-4 text-warning" />
-      <AlertTitle className="text-warning">
+    <Alert variant="default" className="bg-[#ffcd00]/10 border-[#ffcd00] mb-6">
+      <AlertCircle className="h-5 w-5 text-[#ffcd00]" />
+      <AlertTitle className="text-[#00141d] font-bold text-base">
         Vaga criada via formulário externo
       </AlertTitle>
       <AlertDescription className="mt-2 space-y-3">
-        <p className="text-sm">
+        <p className="text-sm text-[#36404a]">
           Esta vaga foi criada externamente e precisa ter os seguintes campos 
           preenchidos antes de iniciar o processo de recrutamento:
         </p>
-        <ul className="text-sm list-disc list-inside space-y-1">
+        <ul className="text-sm text-[#36404a] list-disc list-inside space-y-1">
           {missingFields.map((field) => (
             <li key={field}>{field}</li>
           ))}
         </ul>
         <Button
-          variant="default"
-          size="sm"
+          className="bg-[#ffcd00] text-[#00141d] font-bold hover:bg-[#ffcd00]/90 h-9 px-4 rounded-md"
           onClick={() => navigate(`/vagas/${vagaId}/editar`)}
         >
           Preencher Agora
