@@ -547,14 +547,58 @@ export default function Vagas() {
             )}
           </TabsContent>
 
-          {/* Visualização em Funil - Redirecionar para componente original */}
+          {/* Visualização em Funil */}
           <TabsContent value="funnel" className="space-y-6 mt-6">
-            <div className="text-center py-12">
-              <p className="text-muted-foreground mb-4">Visualização em funil</p>
-              <Button onClick={() => window.location.href = '/funil-vagas'}>
-                Abrir visualização completa do funil
-              </Button>
-            </div>
+            <StatsHeader
+              totalVagasAbertas={vagas.filter(v => v.status_slug !== "concluida" && v.status_slug !== "cancelada").length}
+              mediaDiasAbertos={mediaDiasAbertos}
+              vagasEmAtencao={vagasForaPrazo}
+              totalCandidatosAtivos={totalCandidatosAtivos}
+            />
+
+            <FilterBar
+              searchTerm={searchTerm}
+              onSearchChange={setSearchTerm}
+              recrutadorFilter={recrutadorFilter}
+              onRecrutadorChange={setRecrutadorFilter}
+              clienteFilter={clienteFilter}
+              onClienteChange={setClienteFilter}
+              areaFilter={areaFilter}
+              onAreaChange={setAreaFilter}
+              statusFilter={statusFilter}
+              onStatusChange={setStatusFilter}
+              ordenacao={ordenacao}
+              onOrdenacaoChange={setOrdenacao}
+              recrutadores={recrutadores}
+              clientes={clientes}
+              areas={[]}
+              statusOptions={statusOptions}
+            />
+
+            {loading ? (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">Carregando vagas...</p>
+              </div>
+            ) : (
+              <PipelineBoard
+                stages={JOB_STAGES.filter(s => s.slug !== "cancelada")}
+                jobs={filteredVagas}
+                progresso={(statusSlug: string) => calculateProgress(statusSlug)}
+                onJobMove={handleMoveJob}
+                onJobClick={openJobDrawer}
+                onJobEdit={(id) => navigate(`/vagas/${id}/editar`)}
+                onJobMoveStage={(id) => navigate(`/vagas/${id}/editar`)}
+                onJobDuplicate={() => {}}
+                onJobClose={() => {}}
+              />
+            )}
+
+            <JobDrawer
+              jobId={selectedJobId}
+              open={drawerOpen}
+              onOpenChange={setDrawerOpen}
+              onEdit={() => selectedJobId && navigate(`/vagas/${selectedJobId}/editar`)}
+            />
           </TabsContent>
         </Tabs>
       </div>
