@@ -18,24 +18,29 @@ interface FaixaSalarial {
   salario_min: number | null;
   salario_max: number | null;
 }
-interface EstudoMercado {
-  funcao: string;
+interface EstudoRegional {
   regiao: string;
-  senioridade: string | null;
-  tipos_contratacao: string[];
-  jornada: string | null;
   faixas_salariais: FaixaSalarial[];
-  salario_ofertado: number | null;
-  tipo_contratacao_ofertado: string | null;
   comparacao_oferta: "Abaixo" | "Dentro" | "Acima" | "Sem dado";
   beneficios: string[];
   demanda: "Alta" | "Média" | "Baixa";
+  observacoes: string;
+}
+
+interface EstudoMercado {
+  funcao: string;
+  regioes: string[];
+  senioridade: string | null;
+  tipos_contratacao: string[];
+  jornada: string | null;
+  salario_ofertado: number | null;
+  tipo_contratacao_ofertado: string | null;
+  estudos_regionais: EstudoRegional[];
   tendencia_short: string | null;
   fontes: Array<{
     nome: string;
     url: string;
   }>;
-  observacoes: string;
   raw?: object;
 }
 export default function EstudoMercado() {
@@ -44,15 +49,15 @@ export default function EstudoMercado() {
 
   // Form state
   const [funcao, setFuncao] = useState("");
-  const [regiao, setRegiao] = useState("");
+  const [regioes, setRegioes] = useState<string[]>([]);
   const [senioridade, setSenioridade] = useState("");
   const [tiposContratacao, setTiposContratacao] = useState<string[]>([]);
   const [jornada, setJornada] = useState("");
   const [salarioOfertado, setSalarioOfertado] = useState("");
   const [tipoContratacaoOfertado, setTipoContratacaoOfertado] = useState("");
   const handleGerarEstudo = async () => {
-    if (!funcao || !regiao) {
-      toast.error("Preencha os campos obrigatórios: Função e Região");
+    if (!funcao || regioes.length === 0) {
+      toast.error("Preencha os campos obrigatórios: Função e ao menos uma Região");
       return;
     }
     setLoading(true);
@@ -63,7 +68,7 @@ export default function EstudoMercado() {
       } = await supabase.functions.invoke("gerar-estudo-mercado", {
         body: {
           funcao,
-          regiao,
+          regioes,
           senioridade: senioridade || null,
           tipos_contratacao: tiposContratacao,
           jornada: jornada || null,
