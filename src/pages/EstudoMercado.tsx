@@ -137,33 +137,31 @@ export default function EstudoMercado() {
       };
 
       // ===== CAPA =====
-      // Fundo claro
       doc.setFillColor(...colors.lightBg);
       doc.rect(0, 0, pageWidth, pageHeight, "F");
 
       // Logo da rhello no topo
       try {
-        doc.addImage(logoRhelloDark, 'PNG', pageWidth / 2 - 25, 30, 50, 15);
+        doc.addImage(logoRhelloDark, 'PNG', pageWidth / 2 - 25, 25, 50, 15);
       } catch (e) {
         console.log("Erro ao adicionar logo:", e);
       }
 
       // Título principal
       doc.setTextColor(...colors.darkBlue);
-      doc.setFontSize(28);
+      doc.setFontSize(26);
       doc.setFont("helvetica", "bold");
-      const titulo = `ESTUDO DE MERCADO`;
-      doc.text(titulo, pageWidth / 2, 80, { align: "center" });
+      doc.text("ESTUDO DE MERCADO", pageWidth / 2, 65, { align: "center" });
 
       // Subtítulo com cargo
-      doc.setFontSize(18);
+      doc.setFontSize(16);
       doc.setFont("helvetica", "normal");
-      doc.text(estudo.funcao, pageWidth / 2, 95, { align: "center" });
+      doc.text(estudo.funcao, pageWidth / 2, 78, { align: "center" });
 
       // Data de geração
-      doc.setFontSize(10);
+      doc.setFontSize(9);
       doc.setTextColor(...colors.grayText);
-      doc.text(`Gerado por rhello flow em ${new Date().toLocaleDateString("pt-BR")}`, pageWidth / 2, 110, { align: "center" });
+      doc.text(`Gerado por rhello flow em ${new Date().toLocaleDateString("pt-BR")}`, pageWidth / 2, 90, { align: "center" });
 
       // Símbolo rhello decorativo
       try {
@@ -172,344 +170,310 @@ export default function EstudoMercado() {
         console.log("Erro ao adicionar símbolo:", e);
       }
 
-      // Faixa amarela decorativa no rodapé da capa
+      // Faixa amarela decorativa no rodapé
       doc.setFillColor(...colors.yellowPrimary);
       doc.rect(0, pageHeight - 12, pageWidth, 12, "F");
-
-      // Texto do rodapé
       doc.setTextColor(...colors.darkBlue);
       doc.setFontSize(9);
-      doc.setFont("helvetica", "normal");
       doc.text("rhello flow - Inteligência em recrutamento", pageWidth / 2, pageHeight - 5, { align: "center" });
 
-      // ===== NOVA PÁGINA - CONTEÚDO =====
+      // ===== PÁGINA DE CONTEÚDO =====
       doc.addPage();
       doc.setFillColor(...colors.lightBg);
       doc.rect(0, 0, pageWidth, pageHeight, "F");
-      yPos = 25;
+      yPos = 20;
+
+      // Helper para verificar espaço e adicionar nova página se necessário
+      const checkSpace = (needed: number) => {
+        if (yPos + needed > 270) {
+          doc.addPage();
+          doc.setFillColor(...colors.lightBg);
+          doc.rect(0, 0, pageWidth, pageHeight, "F");
+          yPos = 20;
+        }
+      };
 
       // Helper para adicionar seção com título
       const addSectionTitle = (title: string) => {
-        if (yPos > 260) {
-          doc.addPage();
-          doc.setFillColor(...colors.lightBg);
-          doc.rect(0, 0, pageWidth, pageHeight, "F");
-          yPos = 25;
-        }
+        doc.setDrawColor(...colors.yellowPrimary);
+        doc.setLineWidth(0.8);
+        doc.line(15, yPos, pageWidth - 15, yPos);
         
-        // Linha divisória sutil
-        doc.setDrawColor(...colors.yellowSecondary);
-        doc.setLineWidth(0.5);
-        doc.line(20, yPos - 3, pageWidth - 20, yPos - 3);
-
         doc.setTextColor(...colors.darkBlue);
-        doc.setFontSize(14);
+        doc.setFontSize(12);
         doc.setFont("helvetica", "bold");
-        doc.text(title.toUpperCase(), 20, yPos + 5);
-        yPos += 15;
+        doc.text(title.toUpperCase(), 15, yPos + 7);
+        yPos += 12;
       };
 
-      // Helper para adicionar campo
-      const addField = (label: string, value: string, bold = false) => {
-        doc.setFontSize(10);
-        doc.setTextColor(...colors.grayText);
-        doc.setFont("helvetica", "normal");
-        doc.text(label, 20, yPos);
-        
-        doc.setTextColor(...colors.darkBlue);
-        doc.setFont("helvetica", bold ? "bold" : "normal");
-        doc.text(value, 20, yPos + 6);
-        yPos += 16;
-      };
-
-      // ===== INFORMAÇÕES GERAIS =====
+      // ===== INFORMAÇÕES GERAIS (2 colunas compactas) =====
       addSectionTitle("Informações Gerais");
+      
+      const col1X = 15;
+      const col2X = pageWidth / 2 + 5;
+      const colWidth = pageWidth / 2 - 20;
+      
+      // Box de fundo
+      doc.setFillColor(255, 255, 255);
+      doc.roundedRect(15, yPos - 3, pageWidth - 30, 32, 2, 2, "F");
+      doc.setDrawColor(...colors.yellowSecondary);
+      doc.setLineWidth(0.3);
+      doc.roundedRect(15, yPos - 3, pageWidth - 30, 32, 2, 2, "S");
 
-      // Layout em duas colunas
-      const col1X = 20;
-      const col2X = pageWidth / 2 + 10;
-      const startY = yPos;
-
-      doc.setFontSize(10);
-      doc.setTextColor(...colors.grayText);
-      doc.text("Função", col1X, yPos);
-      doc.setTextColor(...colors.darkBlue);
-      doc.setFont("helvetica", "bold");
-      doc.text(estudo.funcao, col1X, yPos + 6);
-
+      // Coluna 1
+      doc.setFontSize(8);
       doc.setTextColor(...colors.grayText);
       doc.setFont("helvetica", "normal");
-      doc.text("Região", col2X, yPos);
+      doc.text("Função", col1X + 3, yPos + 2);
       doc.setTextColor(...colors.darkBlue);
       doc.setFont("helvetica", "bold");
-      doc.text(estudo.regiao, col2X, yPos + 6);
-      yPos += 16;
+      doc.setFontSize(10);
+      doc.text(estudo.funcao, col1X + 3, yPos + 8);
 
       if (estudo.senioridade) {
+        doc.setFontSize(8);
         doc.setTextColor(...colors.grayText);
         doc.setFont("helvetica", "normal");
-        doc.text("Senioridade", col1X, yPos);
+        doc.text("Senioridade", col1X + 3, yPos + 15);
         doc.setTextColor(...colors.darkBlue);
-        doc.text(estudo.senioridade, col1X, yPos + 6);
+        doc.setFontSize(9);
+        doc.text(estudo.senioridade, col1X + 3, yPos + 20);
       }
+
+      // Coluna 2
+      doc.setFontSize(8);
+      doc.setTextColor(...colors.grayText);
+      doc.setFont("helvetica", "normal");
+      doc.text("Região", col2X + 3, yPos + 2);
+      doc.setTextColor(...colors.darkBlue);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      doc.text(estudo.regiao, col2X + 3, yPos + 8);
 
       if (estudo.jornada) {
+        doc.setFontSize(8);
         doc.setTextColor(...colors.grayText);
         doc.setFont("helvetica", "normal");
-        doc.text("Modelo de Trabalho", col2X, yPos);
+        doc.text("Modelo de Trabalho", col2X + 3, yPos + 15);
         doc.setTextColor(...colors.darkBlue);
-        doc.text(estudo.jornada, col2X, yPos + 6);
+        doc.setFontSize(9);
+        doc.text(estudo.jornada, col2X + 3, yPos + 20);
       }
-      yPos += 16;
 
+      yPos += 36;
+
+      // Tipos de contratação (se houver)
       if (estudo.tipos_contratacao.length > 0) {
+        doc.setFontSize(8);
         doc.setTextColor(...colors.grayText);
-        doc.text("Tipos de Contratação", col1X, yPos);
+        doc.text("Tipos de Contratação", 15, yPos);
         doc.setTextColor(...colors.darkBlue);
-        doc.text(estudo.tipos_contratacao.join(", "), col1X, yPos + 6);
-        yPos += 16;
+        doc.setFontSize(9);
+        doc.text(estudo.tipos_contratacao.join(", "), 15, yPos + 5);
+        yPos += 12;
       }
 
-      yPos += 10;
+      // ===== ANÁLISE SALARIAL E MERCADO (Seção unificada) =====
+      checkSpace(80);
+      addSectionTitle("Análise Salarial e Mercado");
 
-      // ===== FAIXA SALARIAL =====
-      addSectionTitle("Faixa Salarial");
+      // Box principal
+      doc.setFillColor(255, 255, 255);
+      doc.roundedRect(15, yPos - 3, pageWidth - 30, 70, 2, 2, "F");
+      doc.setDrawColor(...colors.yellowSecondary);
+      doc.setLineWidth(0.3);
+      doc.roundedRect(15, yPos - 3, pageWidth - 30, 70, 2, 2, "S");
 
+      // Faixas salariais (layout horizontal compacto)
       estudo.faixas_salariais.forEach((faixa, index) => {
-        if (yPos > 250) {
-          doc.addPage();
-          doc.setFillColor(...colors.lightBg);
-          doc.rect(0, 0, pageWidth, pageHeight, "F");
-          yPos = 25;
-        }
+        const startX = 20 + (index * (pageWidth - 40) / estudo.faixas_salariais.length);
+        const boxWidth = (pageWidth - 40) / estudo.faixas_salariais.length - 5;
 
         if (estudo.faixas_salariais.length > 1) {
-          doc.setFontSize(11);
+          doc.setFontSize(8);
           doc.setFont("helvetica", "bold");
           doc.setTextColor(...colors.darkBlue);
-          doc.text(faixa.tipo_contratacao, 20, yPos);
-          yPos += 10;
+          doc.text(faixa.tipo_contratacao, startX + boxWidth / 2, yPos + 2, { align: "center" });
         }
 
-        // Bloco de salários com fundo branco e borda
-        doc.setFillColor(255, 255, 255); // Fundo branco
-        doc.roundedRect(20, yPos - 5, pageWidth - 40, 30, 3, 3, "F");
-        
-        // Borda amarela sutil
-        doc.setDrawColor(...colors.yellowSecondary);
-        doc.setLineWidth(0.5);
-        doc.roundedRect(20, yPos - 5, pageWidth - 40, 30, 3, 3, "S");
-
-        doc.setFontSize(10);
+        // Valores
+        doc.setFontSize(7);
         doc.setTextColor(...colors.grayText);
         doc.setFont("helvetica", "normal");
-        
-        const salCol1 = 30;
-        const salCol2 = pageWidth / 3 + 10;
-        const salCol3 = (pageWidth / 3) * 2 + 5;
-
-        doc.text("Mínimo", salCol1, yPos + 3);
+        doc.text("Mín", startX + 2, yPos + 10);
         doc.setFont("helvetica", "bold");
         doc.setTextColor(...colors.darkBlue);
-        doc.setFontSize(12);
-        doc.text(formatCurrency(faixa.salario_min), salCol1, yPos + 10);
+        doc.setFontSize(9);
+        doc.text(formatCurrency(faixa.salario_min), startX + 2, yPos + 15);
 
+        doc.setFontSize(7);
         doc.setFont("helvetica", "normal");
-        doc.setFontSize(10);
         doc.setTextColor(...colors.grayText);
-        doc.text("Média", salCol2, yPos + 3);
+        doc.text("Méd", startX + 2, yPos + 22);
         doc.setFont("helvetica", "bold");
         doc.setTextColor(...colors.darkBlue);
-        doc.setFontSize(12);
-        doc.text(formatCurrency(faixa.salario_media), salCol2, yPos + 10);
+        doc.setFontSize(9);
+        doc.text(formatCurrency(faixa.salario_media), startX + 2, yPos + 27);
 
+        doc.setFontSize(7);
         doc.setFont("helvetica", "normal");
-        doc.setFontSize(10);
         doc.setTextColor(...colors.grayText);
-        doc.text("Máximo", salCol3, yPos + 3);
+        doc.text("Máx", startX + 2, yPos + 34);
         doc.setFont("helvetica", "bold");
         doc.setTextColor(...colors.darkBlue);
-        doc.setFontSize(12);
-        doc.text(formatCurrency(faixa.salario_max), salCol3, yPos + 10);
-
-        yPos += 38;
+        doc.setFontSize(9);
+        doc.text(formatCurrency(faixa.salario_max), startX + 2, yPos + 39);
       });
 
-      // Sua oferta
+      // Sua oferta e comparação (lado direito)
       if (estudo.salario_ofertado) {
-        if (yPos > 245) {
-          doc.addPage();
-          doc.setFillColor(...colors.lightBg);
-          doc.rect(0, 0, pageWidth, pageHeight, "F");
-          yPos = 25;
-        }
-
-        doc.setFontSize(11);
-        doc.setFont("helvetica", "bold");
-        doc.setTextColor(...colors.darkBlue);
-        doc.text("Sua Oferta", 20, yPos);
-        yPos += 10;
-
-        // Bloco destacado com fundo branco e borda colorida
+        const ofertaX = pageWidth / 2 + 5;
         const compColor = (estudo.comparacao_oferta === "Acima" ? [34, 197, 94] : 
                          estudo.comparacao_oferta === "Abaixo" ? [239, 68, 68] : 
                          estudo.comparacao_oferta === "Dentro" ? [59, 130, 246] : colors.grayText) as [number, number, number];
         
-        doc.setFillColor(255, 255, 255); // Fundo branco
-        doc.roundedRect(20, yPos - 5, pageWidth - 40, 22, 3, 3, "F");
+        doc.setFontSize(8);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(...colors.darkBlue);
+        doc.text("SUA OFERTA", ofertaX, yPos + 45);
         
-        // Borda colorida de acordo com a comparação
-        doc.setDrawColor(...compColor);
-        doc.setLineWidth(1);
-        doc.roundedRect(20, yPos - 5, pageWidth - 40, 22, 3, 3, "S");
-
-        doc.setFontSize(10);
+        doc.setFontSize(7);
         doc.setTextColor(...colors.grayText);
         doc.setFont("helvetica", "normal");
-        doc.text(`Salário${estudo.tipo_contratacao_ofertado ? ` (${estudo.tipo_contratacao_ofertado})` : ""}`, 30, yPos + 3);
+        doc.text(`${estudo.tipo_contratacao_ofertado || ""}`, ofertaX, yPos + 51);
         
         doc.setFont("helvetica", "bold");
         doc.setTextColor(...colors.darkBlue);
-        doc.setFontSize(12);
-        doc.text(formatCurrency(estudo.salario_ofertado), 30, yPos + 10);
+        doc.setFontSize(11);
+        doc.text(formatCurrency(estudo.salario_ofertado), ofertaX, yPos + 58);
 
-        doc.setFontSize(10);
-        doc.setFont("helvetica", "normal");
+        doc.setFontSize(8);
         doc.setTextColor(...compColor);
-        doc.text(`Comparação: ${estudo.comparacao_oferta}`, pageWidth / 2 + 10, yPos + 7);
-
-        yPos += 28;
+        doc.text(`${estudo.comparacao_oferta}`, ofertaX, yPos + 64);
       }
 
-      yPos += 10;
-
-      // ===== DEMANDA NO MERCADO =====
-      addSectionTitle("Demanda no Mercado");
-
+      // Demanda (canto inferior direito)
       const demandaColor = (estudo.demanda === "Alta" ? [239, 68, 68] : 
                           estudo.demanda === "Média" ? [234, 179, 8] : 
                           [34, 197, 94]) as [number, number, number];
       
-      // Fundo branco com borda colorida
+      doc.setFontSize(7);
+      doc.setTextColor(...colors.grayText);
+      doc.text("DEMANDA", pageWidth - 50, yPos + 45);
+      
+      doc.setFillColor(...demandaColor);
       doc.setFillColor(255, 255, 255);
-      doc.roundedRect(20, yPos - 5, 60, 15, 3, 3, "F");
-      
+      doc.roundedRect(pageWidth - 50, yPos + 47, 35, 12, 2, 2, "F");
       doc.setDrawColor(...demandaColor);
-      doc.setLineWidth(1.5);
-      doc.roundedRect(20, yPos - 5, 60, 15, 3, 3, "S");
+      doc.setLineWidth(1);
+      doc.roundedRect(pageWidth - 50, yPos + 47, 35, 12, 2, 2, "S");
       
-      doc.setFontSize(12);
+      doc.setFontSize(10);
       doc.setFont("helvetica", "bold");
       doc.setTextColor(...demandaColor);
-      doc.text(estudo.demanda, 50, yPos + 3, { align: "center" });
-      yPos += 20;
+      doc.text(estudo.demanda, pageWidth - 32.5, yPos + 55, { align: "center" });
+
+      yPos += 75;
 
       // ===== TENDÊNCIA =====
       if (estudo.tendencia_short) {
+        checkSpace(25);
         addSectionTitle("Tendência");
 
-        doc.setFontSize(10);
+        doc.setFillColor(255, 255, 255);
+        const tendenciaLines = doc.splitTextToSize(estudo.tendencia_short, pageWidth - 40);
+        const boxHeight = Math.max(20, tendenciaLines.length * 5 + 8);
+        
+        doc.roundedRect(15, yPos - 3, pageWidth - 30, boxHeight, 2, 2, "F");
+        doc.setDrawColor(...colors.yellowSecondary);
+        doc.setLineWidth(0.3);
+        doc.roundedRect(15, yPos - 3, pageWidth - 30, boxHeight, 2, 2, "S");
+
+        doc.setFontSize(9);
         doc.setFont("helvetica", "normal");
         doc.setTextColor(...colors.darkBlue);
-        const tendenciaLines = doc.splitTextToSize(estudo.tendencia_short, pageWidth - 50);
-        doc.text(tendenciaLines, 20, yPos);
-        yPos += tendenciaLines.length * 6 + 15;
+        doc.text(tendenciaLines, 20, yPos + 3);
+        yPos += boxHeight + 5;
       }
 
       // ===== BENEFÍCIOS =====
       if (estudo.beneficios.length > 0) {
-        if (yPos > 240) {
-          doc.addPage();
-          doc.setFillColor(...colors.lightBg);
-          doc.rect(0, 0, pageWidth, pageHeight, "F");
-          yPos = 25;
-        }
-
+        checkSpace(30);
         addSectionTitle("Benefícios Mais Comuns");
 
-        // Exibir como badges
-        let xPos = 20;
+        // Grid compacto de badges
+        let xPos = 15;
         let lineY = yPos;
+        const maxWidth = pageWidth - 30;
         
         estudo.beneficios.forEach((beneficio) => {
-          doc.setFontSize(9);
+          doc.setFontSize(8);
           const textWidth = doc.getTextWidth(beneficio);
-          const badgeWidth = textWidth + 8;
+          const badgeWidth = textWidth + 6;
 
-          if (xPos + badgeWidth > pageWidth - 20) {
-            xPos = 20;
-            lineY += 12;
+          if (xPos + badgeWidth > maxWidth + 15) {
+            xPos = 15;
+            lineY += 8;
           }
 
-          if (lineY > 265) {
-            doc.addPage();
-            doc.setFillColor(...colors.lightBg);
-            doc.rect(0, 0, pageWidth, pageHeight, "F");
-            lineY = 25;
-            xPos = 20;
-          }
-
-          // Badge com fundo branco e borda amarela
           doc.setFillColor(255, 255, 255);
-          doc.roundedRect(xPos, lineY - 6, badgeWidth, 10, 2, 2, "F");
-          
+          doc.roundedRect(xPos, lineY - 4, badgeWidth, 7, 1.5, 1.5, "F");
           doc.setDrawColor(...colors.yellowSecondary);
-          doc.setLineWidth(0.5);
-          doc.roundedRect(xPos, lineY - 6, badgeWidth, 10, 2, 2, "S");
+          doc.setLineWidth(0.3);
+          doc.roundedRect(xPos, lineY - 4, badgeWidth, 7, 1.5, 1.5, "S");
           
           doc.setTextColor(...colors.darkBlue);
           doc.setFont("helvetica", "normal");
-          doc.text(beneficio, xPos + 4, lineY);
+          doc.text(beneficio, xPos + 3, lineY + 1);
 
-          xPos += badgeWidth + 5;
+          xPos += badgeWidth + 3;
         });
 
-        yPos = lineY + 15;
+        yPos = lineY + 10;
       }
 
-      // ===== FONTES CONSULTADAS =====
-      if (yPos > 230) {
-        doc.addPage();
-        doc.setFillColor(...colors.lightBg);
-        doc.rect(0, 0, pageWidth, pageHeight, "F");
-        yPos = 25;
-      }
+      // ===== FONTES E OBSERVAÇÕES (seção compacta) =====
+      checkSpace(35);
+      
+      // Fontes em lista compacta
+      if (estudo.fontes.length > 0) {
+        addSectionTitle("Fontes Consultadas");
+        
+        doc.setFontSize(7);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(...colors.grayText);
 
-      addSectionTitle("Fontes Consultadas");
+        estudo.fontes.slice(0, 5).forEach((fonte) => {
+          doc.text(`• ${fonte.nome}`, 20, yPos);
+          yPos += 4;
+        });
 
-      doc.setFontSize(9);
-      doc.setFont("helvetica", "normal");
-      doc.setTextColor(...colors.grayText);
-
-      estudo.fontes.forEach((fonte) => {
-        if (yPos > 270) {
-          doc.addPage();
-          doc.setFillColor(...colors.lightBg);
-          doc.rect(0, 0, pageWidth, pageHeight, "F");
-          yPos = 25;
+        if (estudo.fontes.length > 5) {
+          doc.text(`... e mais ${estudo.fontes.length - 5} fontes`, 20, yPos);
+          yPos += 4;
         }
-        doc.text(`• ${fonte.nome}`, 25, yPos);
-        yPos += 7;
-      });
 
-      yPos += 8;
+        yPos += 6;
+      }
 
-      // ===== OBSERVAÇÕES =====
+      // Observações
       if (estudo.observacoes) {
-        if (yPos > 240) {
-          doc.addPage();
-          doc.setFillColor(...colors.lightBg);
-          doc.rect(0, 0, pageWidth, pageHeight, "F");
-          yPos = 25;
-        }
-
+        checkSpace(20);
         addSectionTitle("Observações");
 
-        doc.setFontSize(10);
+        doc.setFillColor(255, 255, 255);
+        const obsLines = doc.splitTextToSize(estudo.observacoes, pageWidth - 40);
+        const obsHeight = Math.max(15, obsLines.length * 4.5 + 6);
+        
+        doc.roundedRect(15, yPos - 3, pageWidth - 30, obsHeight, 2, 2, "F");
+        doc.setDrawColor(...colors.yellowSecondary);
+        doc.setLineWidth(0.3);
+        doc.roundedRect(15, yPos - 3, pageWidth - 30, obsHeight, 2, 2, "S");
+
+        doc.setFontSize(8);
         doc.setFont("helvetica", "normal");
         doc.setTextColor(...colors.darkBlue);
-        const obsLines = doc.splitTextToSize(estudo.observacoes, pageWidth - 50);
-        doc.text(obsLines, 20, yPos);
+        doc.text(obsLines, 20, yPos + 2);
       }
 
       // ===== RODAPÉ EM TODAS AS PÁGINAS =====
@@ -517,20 +481,25 @@ export default function EstudoMercado() {
       for (let i = 1; i <= totalPages; i++) {
         doc.setPage(i);
         
-        // Linha divisória sutil
         doc.setDrawColor(...colors.yellowSecondary);
         doc.setLineWidth(0.3);
-        doc.line(20, pageHeight - 15, pageWidth - 20, pageHeight - 15);
+        doc.line(15, pageHeight - 12, pageWidth - 15, pageHeight - 12);
         
-        // Texto do rodapé
         doc.setTextColor(...colors.grayText);
-        doc.setFontSize(8);
+        doc.setFontSize(7);
         doc.setFont("helvetica", "normal");
         doc.text(
-          `Gerado automaticamente por rhello flow | www.rhello.com.br`,
+          `Gerado por rhello flow | www.rhello.com.br`,
           pageWidth / 2,
-          pageHeight - 8,
+          pageHeight - 6,
           { align: "center" }
+        );
+        
+        doc.text(
+          `Pág. ${i}/${totalPages}`,
+          pageWidth - 15,
+          pageHeight - 6,
+          { align: "right" }
         );
       }
 
