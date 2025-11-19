@@ -14,7 +14,6 @@ import { toast } from "sonner";
 import { useState, useEffect } from "react";
 import { handleDelete as performDeletion } from "@/lib/deletionUtils";
 import { useUserRole } from "@/hooks/useUserRole";
-
 interface VagaCardProps {
   vaga: {
     id: string;
@@ -35,7 +34,6 @@ interface VagaCardProps {
   onClick?: () => void;
   viewMode?: "grid" | "list";
 }
-
 const statusProgressMap: Record<string, number> = {
   "A iniciar": 10,
   "Discovery": 20,
@@ -60,14 +58,31 @@ const getInitials = (name: string | null): string => {
 };
 
 // Função para obter cor do badge de status
-const getStatusBadgeColor = (status: string): { bg: string; text: string } => {
-  if (status === "Concluído") return { bg: "#D9F99D", text: "#00141D" };
-  if (status === "Cancelada") return { bg: "#FECACA", text: "#00141D" };
-  if (status === "A iniciar") return { bg: "#BBF7D0", text: "#00141D" };
-  if (status.includes("Urgente")) return { bg: "#FCA5A5", text: "#00141D" };
-  return { bg: "#FAEC3E", text: "#00141D" };
+const getStatusBadgeColor = (status: string): {
+  bg: string;
+  text: string;
+} => {
+  if (status === "Concluído") return {
+    bg: "#D9F99D",
+    text: "#00141D"
+  };
+  if (status === "Cancelada") return {
+    bg: "#FECACA",
+    text: "#00141D"
+  };
+  if (status === "A iniciar") return {
+    bg: "#BBF7D0",
+    text: "#00141D"
+  };
+  if (status.includes("Urgente")) return {
+    bg: "#FCA5A5",
+    text: "#00141D"
+  };
+  return {
+    bg: "#FAEC3E",
+    text: "#00141D"
+  };
 };
-
 export function VagaCard({
   vaga,
   draggable = false,
@@ -76,7 +91,9 @@ export function VagaCard({
   viewMode = "grid"
 }: VagaCardProps) {
   const navigate = useNavigate();
-  const { isAdmin } = useUserRole();
+  const {
+    isAdmin
+  } = useUserRole();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deletionReason, setDeletionReason] = useState("");
@@ -85,21 +102,17 @@ export function VagaCard({
   const progress = statusProgressMap[vaga.status] || 0;
   const daysOpen = vaga.criado_em ? getBusinessDaysFromNow(vaga.criado_em) : 0;
   const statusColors = getStatusBadgeColor(vaga.status);
-
   useEffect(() => {
     if (vaga.recrutador_id && !vaga.recrutador) {
       loadRecrutadorName();
     }
   }, [vaga.recrutador_id]);
-
   const loadRecrutadorName = async () => {
     try {
-      const { data, error } = await supabase
-        .from('users')
-        .select('name')
-        .eq('id', vaga.recrutador_id)
-        .single();
-      
+      const {
+        data,
+        error
+      } = await supabase.from('users').select('name').eq('id', vaga.recrutador_id).single();
       if (error) throw error;
       if (data) {
         setRecrutadorName(data.name);
@@ -108,7 +121,6 @@ export function VagaCard({
       console.error('Erro ao carregar nome do recrutador:', error);
     }
   };
-
   const handleClick = () => {
     if (onClick) {
       onClick();
@@ -116,20 +128,16 @@ export function VagaCard({
       navigate(`/vagas/${vaga.id}`);
     }
   };
-
   const handleEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
     navigate(`/vagas/${vaga.id}/editar`);
   };
-
   const handleDelete = async () => {
     if (!isAdmin && !deletionReason.trim()) {
       toast.error("❌ Por favor, informe o motivo da exclusão");
       return;
     }
-
     setIsDeleting(true);
-
     try {
       const preSnapshot = {
         id: vaga.id,
@@ -141,20 +149,11 @@ export function VagaCard({
         salario_min: vaga.salario_min,
         salario_max: vaga.salario_max
       };
-
-      const result = await performDeletion(
-        "job",
-        vaga.id,
-        vaga.titulo,
-        deletionReason.trim() || (isAdmin ? "Exclusão por admin sem motivo especificado" : ""),
-        preSnapshot
-      );
-
+      const result = await performDeletion("job", vaga.id, vaga.titulo, deletionReason.trim() || (isAdmin ? "Exclusão por admin sem motivo especificado" : ""), preSnapshot);
       if (!result.success) {
         toast.error(`❌ ${result.error || "Erro ao excluir a vaga"}`);
         return;
       }
-
       if (result.requiresApproval) {
         setRequiresApproval(true);
         toast.info("⚠️ Esta vaga possui candidatos ativos. Solicitação de exclusão enviada para aprovação de admin.", {
@@ -163,7 +162,6 @@ export function VagaCard({
         setShowDeleteDialog(false);
         return;
       }
-
       toast.success("✅ Vaga marcada para exclusão com sucesso");
       setTimeout(() => window.location.reload(), 1000);
     } catch (error) {
@@ -176,15 +174,8 @@ export function VagaCard({
       }
     }
   };
-
-  return (
-    <>
-      <Card 
-        draggable={draggable} 
-        onDragStart={onDragStart} 
-        onClick={handleClick} 
-        className="relative cursor-pointer bg-[#FFFDF6] border border-gray-200 overflow-hidden rounded-lg shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.01]"
-      >
+  return <>
+      <Card draggable={draggable} onDragStart={onDragStart} onClick={handleClick} className="relative cursor-pointer bg-[#FFFDF6] border border-gray-200 overflow-hidden rounded-lg shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.01]">
         <CardContent className="p-5 space-y-4">
           <div className="space-y-2">
             <div className="flex items-start justify-between gap-2">
@@ -204,9 +195,9 @@ export function VagaCard({
                     Editar vaga
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={e => {
-                    e.stopPropagation();
-                    setShowDeleteDialog(true);
-                  }} className="text-destructive cursor-pointer">
+                  e.stopPropagation();
+                  setShowDeleteDialog(true);
+                }} className="text-destructive cursor-pointer">
                     <Trash2 className="h-4 w-4 mr-2" />
                     Excluir vaga
                   </DropdownMenuItem>
@@ -215,61 +206,51 @@ export function VagaCard({
             </div>
             
             <div className="flex flex-wrap items-center gap-2">
-              <Badge 
-                className="border font-semibold rounded-md px-2 py-0.5 text-xs"
-                style={{
-                  backgroundColor: statusColors.bg,
-                  color: statusColors.text,
-                  borderColor: statusColors.bg
-                }}
-              >
+              <Badge className="border font-semibold rounded-md px-2 py-0.5 text-xs" style={{
+              backgroundColor: statusColors.bg,
+              color: statusColors.text,
+              borderColor: statusColors.bg
+            }}>
                 {vaga.status}
               </Badge>
               
-              {vaga.confidencial && (
-                <Badge className="bg-orange-100 text-orange-700 border-orange-200 border font-semibold rounded-md px-2 py-0.5 text-xs flex items-center gap-1">
+              {vaga.confidencial && <Badge className="bg-orange-100 text-orange-700 border-orange-200 border font-semibold rounded-md px-2 py-0.5 text-xs flex items-center gap-1">
                   <EyeOff className="h-3 w-3" />
                   Entrevistas
-                </Badge>
-              )}
+                </Badge>}
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
-              <p className="text-xs text-[#36404A]">Cliente</p>
+              <p className="text-[#36404A] text-sm font-medium">Cliente</p>
               <p className="text-sm font-semibold text-[#00141D] line-clamp-1">{vaga.empresa}</p>
             </div>
             <div className="space-y-1">
-              <p className="text-xs text-[#36404A]">Recrutador</p>
+              <p className="text-[#36404A] text-sm font-medium">Recrutador</p>
               <p className="text-sm font-semibold text-[#00141D] line-clamp-1">
                 {recrutadorName || "Não atribuído"}
               </p>
             </div>
           </div>
 
-          {(vaga.salario_min || vaga.salario_max) && (
-            <div className="space-y-1">
-              <p className="text-xs text-[#36404A]">Faixa Salarial</p>
+          {(vaga.salario_min || vaga.salario_max) && <div className="space-y-1">
+              <p className="text-[#36404A] text-sm font-medium">Faixa Salarial</p>
               <p className="text-sm font-semibold text-[#00141D]">
                 {formatSalaryRange(vaga.salario_min, vaga.salario_max, vaga.salario_modalidade)}
               </p>
-            </div>
-          )}
+            </div>}
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <p className="text-xs text-[#36404A]">Progresso do Pipeline</p>
+              <p className="text-[#36404A] text-sm font-medium">Progresso do Pipeline</p>
               <p className="text-xs font-bold text-[#00141D]">{progress}%</p>
             </div>
             <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-              <div 
-                className="h-full transition-all duration-300"
-                style={{
-                  width: `${progress}%`,
-                  backgroundColor: "#FFCD00"
-                }}
-              />
+              <div className="h-full transition-all duration-300" style={{
+              width: `${progress}%`,
+              backgroundColor: "#FFCD00"
+            }} />
             </div>
           </div>
 
@@ -277,100 +258,69 @@ export function VagaCard({
             <div className="flex items-center gap-4">
               <div className="flex flex-col items-center">
                 <p className="text-2xl font-bold text-[#00141D]">{vaga.candidatos_count || 0}</p>
-                <p className="text-xs text-[#36404A]">Total de Candidatos</p>
+                <p className="text-[#36404A] text-sm font-medium">Total de Candidatos</p>
               </div>
               <div className="flex flex-col items-center">
                 <p className="text-2xl font-bold text-[#00141D]">{daysOpen}</p>
-                <p className="text-xs text-[#36404A]">Dias em Aberto</p>
+                <p className="text-[#36404A] text-sm font-medium">Dias em Aberto</p>
               </div>
             </div>
 
-            {recrutadorName && (
-              <div 
-                className="flex items-center justify-center w-10 h-10 rounded-full font-bold text-sm"
-                style={{
-                  backgroundColor: "#00141D",
-                  color: "#FFFDF6"
-                }}
-                title={recrutadorName}
-              >
+            {recrutadorName && <div className="flex items-center justify-center w-10 h-10 rounded-full font-bold text-sm" style={{
+            backgroundColor: "#00141D",
+            color: "#FFFDF6"
+          }} title={recrutadorName}>
                 {getInitials(recrutadorName)}
-              </div>
-            )}
+              </div>}
           </div>
         </CardContent>
       </Card>
 
       <AlertDialog open={showDeleteDialog} onOpenChange={() => {
-        setShowDeleteDialog(false);
-        setDeletionReason("");
-        setRequiresApproval(false);
-      }}>
+      setShowDeleteDialog(false);
+      setDeletionReason("");
+      setRequiresApproval(false);
+    }}>
         <AlertDialogContent className="bg-white">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
-              {requiresApproval ? (
-                <>
+              {requiresApproval ? <>
                   <AlertTriangle className="h-5 w-5 text-warning" />
                   Solicitação Enviada
-                </>
-              ) : (
-                <>
+                </> : <>
                   <Trash2 className="h-5 w-5 text-destructive" />
                   Confirmar Exclusão
-                </>
-              )}
+                </>}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {requiresApproval ? (
-                "Sua solicitação de exclusão foi enviada para aprovação de um administrador."
-              ) : (
-                <>
+              {requiresApproval ? "Sua solicitação de exclusão foi enviada para aprovação de um administrador." : <>
                   Tem certeza que deseja excluir a vaga <strong>{vaga.titulo}</strong>?
                   {!isAdmin && " Informe o motivo da exclusão:"}
-                </>
-              )}
+                </>}
             </AlertDialogDescription>
           </AlertDialogHeader>
 
-          {!requiresApproval && !isAdmin && (
-            <div className="space-y-2">
+          {!requiresApproval && !isAdmin && <div className="space-y-2">
               <Label htmlFor="deletion-reason">Motivo da exclusão</Label>
-              <Input
-                id="deletion-reason"
-                value={deletionReason}
-                onChange={(e) => setDeletionReason(e.target.value)}
-                placeholder="Ex: Vaga foi cancelada pelo cliente"
-                className="w-full"
-              />
-            </div>
-          )}
+              <Input id="deletion-reason" value={deletionReason} onChange={e => setDeletionReason(e.target.value)} placeholder="Ex: Vaga foi cancelada pelo cliente" className="w-full" />
+            </div>}
 
           <AlertDialogFooter>
-            {requiresApproval ? (
-              <AlertDialogAction onClick={() => {
-                setShowDeleteDialog(false);
-                setRequiresApproval(false);
-              }}>
+            {requiresApproval ? <AlertDialogAction onClick={() => {
+            setShowDeleteDialog(false);
+            setRequiresApproval(false);
+          }}>
                 Entendi
-              </AlertDialogAction>
-            ) : (
-              <>
+              </AlertDialogAction> : <>
                 <AlertDialogCancel disabled={isDeleting}>
                   Cancelar
                 </AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={handleDelete}
-                  disabled={isDeleting}
-                  className="bg-destructive hover:bg-destructive/90"
-                >
+                <AlertDialogAction onClick={handleDelete} disabled={isDeleting} className="bg-destructive hover:bg-destructive/90">
                   {isDeleting ? "Excluindo..." : "Excluir"}
                 </AlertDialogAction>
-              </>
-            )}
+              </>}
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </>
-  );
+    </>;
 }
