@@ -37,7 +37,7 @@ export function VagaHeader({
         </p>
         <div className="flex items-center gap-2 mt-3 flex-wrap">
           {(vaga.salario_min || vaga.salario_max || vaga.salario_modalidade) && (
-            <Badge className="bg-[#ffcd00]/20 text-[#00141d] border-[#ffcd00]/30 font-medium text-xs px-3 py-1">
+            <Badge className="bg-[#ffcd00]/20 text-[#00141d] border-[#ffcd00]/30 font-bold text-sm px-3 py-1">
               💰 {formatSalaryRange(vaga.salario_min, vaga.salario_max, vaga.salario_modalidade)}
             </Badge>
           )}
