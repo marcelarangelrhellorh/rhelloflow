@@ -500,23 +500,34 @@ export default function EstudoMercado() {
         checkSpace(25);
         addSectionTitle("Tendência Geral");
         
-        doc.setFillColor(255, 255, 255);
-        // Quebrar texto para ocupar toda a largura disponível
-        const tendLines = doc.splitTextToSize(estudo.tendencia_short, maxTextWidth - 10);
-        const tendHeight = Math.max(15, tendLines.length * 5 + 8);
+        // Configurar padding interno uniforme
+        const boxPadding = 5;
+        const textWidth = maxTextWidth - (boxPadding * 2);
         
+        // Quebrar texto respeitando a largura disponível
+        const tendLines = doc.splitTextToSize(estudo.tendencia_short, textWidth);
+        const lineHeight = 5;
+        const tendHeight = (tendLines.length * lineHeight) + (boxPadding * 2) + 3;
+        
+        // Renderizar container
+        doc.setFillColor(255, 255, 255);
         doc.roundedRect(margin, yPos - 3, maxTextWidth, tendHeight, 2, 2, "F");
         doc.setDrawColor(...colors.yellowSecondary);
         doc.setLineWidth(0.3);
         doc.roundedRect(margin, yPos - 3, maxTextWidth, tendHeight, 2, 2, "S");
 
+        // Renderizar texto com padding uniforme
         doc.setFontSize(10);
         doc.setFont("helvetica", "normal");
         doc.setTextColor(...colors.darkBlue);
         
-        // Renderizar texto linha por linha ocupando toda largura
-        tendLines.forEach((linha: string, index: number) => {
-          doc.text(linha, margin + 5, yPos + 3 + (index * 5));
+        let textY = yPos + boxPadding;
+        tendLines.forEach((linha: string) => {
+          doc.text(linha, margin + boxPadding, textY, {
+            maxWidth: textWidth,
+            align: 'left'
+          });
+          textY += lineHeight;
         });
         
         yPos += tendHeight + 10;
