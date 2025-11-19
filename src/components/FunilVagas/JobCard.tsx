@@ -86,10 +86,6 @@ const formatSalaryRange = (min?: number | null, max?: number | null, modalidade?
     salaryText = `Até ${formatCurrency(max)}`;
   }
 
-  if (modalidade) {
-    salaryText += ` (${modalidade})`;
-  }
-
   return salaryText;
 };
 
