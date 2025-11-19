@@ -430,7 +430,7 @@ export default function Candidatos() {
 
             {loading ? <div className="text-center py-12">
                 <p className="text-muted-foreground">Carregando candidatos...</p>
-              </div> : <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd} className="bg-transparent">
+              </div> : <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
                 <div className="flex gap-4 overflow-x-auto pb-4 bg-[#36404a]/[0.06]">
                   {statusColumns.map(status => {
                 const candidatosStatus = getCandidatesByStatus(status);

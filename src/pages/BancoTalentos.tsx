@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Plus, Grid3x3, List } from "lucide-react";
+import { Plus, Grid3x3, List, Search } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { CandidateCard } from "@/components/BancoTalentos/CandidateCard";
@@ -37,6 +38,7 @@ export default function BancoTalentos() {
   const navigate = useNavigate();
   const [candidatos, setCandidatos] = useState<Candidato[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState<string>("");
   const [estadoFilter, setEstadoFilter] = useState<string>("all");
   const [avaliacaoFilter, setAvaliacaoFilter] = useState<string>("all");
   const [tagFilter, setTagFilter] = useState<string>("all");
@@ -105,6 +107,10 @@ export default function BancoTalentos() {
     }
   };
   const filteredCandidatos = candidatos.filter(candidato => {
+    // Filtro de busca por nome
+    const matchesSearch = searchTerm === "" || 
+      candidato.nome_completo.toLowerCase().includes(searchTerm.toLowerCase());
+
     const matchesEstado = estadoFilter === "all" || candidato.estado === estadoFilter;
 
     // Filtro de avaliação
@@ -120,12 +126,12 @@ export default function BancoTalentos() {
       const candidateTags = (candidato as any).tags || [];
       matchesTags = candidateTags.some((ct: any) => ct.tag_id === tagFilter);
     }
-    return matchesEstado && matchesAvaliacao && matchesTags;
+    return matchesSearch && matchesEstado && matchesAvaliacao && matchesTags;
   });
   const getDaysInBank = (dateString: string) => {
     return differenceInDays(new Date(), new Date(dateString));
   };
-  const hasActiveFilters = estadoFilter !== "all" || avaliacaoFilter !== "all" || tagFilter !== "all";
+  const hasActiveFilters = searchTerm !== "" || estadoFilter !== "all" || avaliacaoFilter !== "all" || tagFilter !== "all";
   const handleViewProfile = (candidato: Candidato) => {
     setSelectedCandidate(candidato);
     setShowProfileDrawer(true);
@@ -171,6 +177,17 @@ export default function BancoTalentos() {
       {/* Filtros e busca */}
       <div className="sticky top-20 z-10 bg-background/95 backdrop-blur-sm pb-6 mb-6 border-b">
         <div className="flex flex-wrap gap-4 mb-4">
+          <div className="relative flex-1 min-w-[250px]">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Buscar por nome..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+
           <Select value={avaliacaoFilter} onValueChange={setAvaliacaoFilter}>
             <SelectTrigger className={`w-[200px] ${avaliacaoFilter !== 'all' ? 'border-2 border-primary' : ''}`}>
               <SelectValue placeholder="Avaliação" />
@@ -248,6 +265,7 @@ export default function BancoTalentos() {
               {filteredCandidatos.length} resultado{filteredCandidatos.length !== 1 ? "s" : ""} encontrado{filteredCandidatos.length !== 1 ? "s" : ""}
             </p>
             <Button variant="ghost" size="sm" onClick={() => {
+          setSearchTerm("");
           setEstadoFilter("all");
           setAvaliacaoFilter("all");
           setTagFilter("all");
