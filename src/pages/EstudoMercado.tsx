@@ -423,22 +423,38 @@ export default function EstudoMercado() {
           doc.setTextColor(...colors.grayText);
           
           let xPos = margin + 10;
-          regional.beneficios.slice(0, 4).forEach((beneficio) => {
-            const benLines = doc.splitTextToSize(beneficio, 35);
-            const badgeWidth = Math.min(doc.getTextWidth(benLines[0]) + 8, 38);
+          const maxBadgeWidth = 80; // Largura máxima da badge
+          const availableWidth = pageWidth - margin - 5; // Largura disponível na linha
+          
+          regional.beneficios.slice(0, 6).forEach((beneficio) => {
+            // Calcular largura real do texto sem truncar
+            const textWidth = doc.getTextWidth(beneficio);
+            const badgeWidth = Math.min(textWidth + 8, maxBadgeWidth);
             
-            if (xPos + badgeWidth > pageWidth - margin - 5) {
+            // Se não couber na linha, mover para próxima
+            if (xPos + badgeWidth > availableWidth) {
               xPos = margin + 10;
               faixaY += 7;
             }
 
+            // Renderizar badge
             doc.setFillColor(255, 255, 255);
             doc.roundedRect(xPos, faixaY - 4, badgeWidth, 6, 1, 1, "F");
             doc.setDrawColor(...colors.yellowSecondary);
             doc.setLineWidth(0.2);
             doc.roundedRect(xPos, faixaY - 4, badgeWidth, 6, 1, 1, "S");
             
-            doc.text(benLines[0], xPos + 3, faixaY);
+            // Renderizar texto (truncar com ... se ainda for muito longo)
+            let displayText = beneficio;
+            if (textWidth + 8 > maxBadgeWidth) {
+              // Truncar texto se for mais longo que maxBadgeWidth
+              while (doc.getTextWidth(displayText + "...") > maxBadgeWidth - 8 && displayText.length > 0) {
+                displayText = displayText.slice(0, -1);
+              }
+              displayText = displayText + "...";
+            }
+            
+            doc.text(displayText, xPos + 3, faixaY);
             xPos += badgeWidth + 4;
           });
           
