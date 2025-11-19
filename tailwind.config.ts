@@ -84,10 +84,8 @@ export default {
         },
       },
       fontFamily: {
-        display: ["Hubot Sans", "sans-serif"],
-        sans: ["Work Sans", "system-ui", "-apple-system", "sans-serif"],
-        title: ["Hubot Sans", "sans-serif"],
-        body: ["Work Sans", "sans-serif"],
+        display: ["Manrope", "sans-serif"],
+        sans: ["Manrope", "system-ui", "-apple-system", "sans-serif"],
       },
       borderRadius: {
         DEFAULT: "0.5rem",   /* 8px */
