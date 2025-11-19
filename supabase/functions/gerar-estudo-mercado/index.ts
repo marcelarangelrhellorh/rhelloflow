@@ -17,13 +17,14 @@ Você é o agente de IA da Rhello RH. Sua tarefa é gerar **Estudos de Mercado O
 - Estudos de mercado e relatórios setoriais mais recentes disponíveis publicamente
 - Outras fontes relevantes e atualizadas do mercado brasileiro
 
-**IMPORTANTE SOBRE REGIÕES MÚLTIPLAS:**
+**IMPORTANTE SOBRE REGIÕES E CIDADES:**
 - Você receberá um array de regiões para analisar
-- Gere análises INDEPENDENTES para cada região
-- Se uma cidade específica for informada, use-a para refinar a busca de dados dentro da região
-- Mantenha as fontes ÚNICAS no nível geral (não duplicar por região)
-- A tendência geral é única, mas observe variações regionais
-- Compare os dados entre regiões quando relevante nas observações
+- Se cidades específicas forem informadas, priorize dados dessas cidades sobre dados regionais genéricos
+- Para múltiplas cidades: gere análises INDEPENDENTES para cada cidade (não por região)
+- Se apenas regiões (sem cidades): gere análises por região
+- Mantenha as fontes ÚNICAS no nível geral (não duplicar por região/cidade)
+- A tendência geral é única, mas observe variações regionais/locais
+- Compare os dados entre regiões/cidades quando relevante nas observações
 
 REGRAS GERAIS:
 - RETORNE APENAS UM JSON VÁLIDO (NADA FORA DO JSON).
@@ -111,7 +112,7 @@ Deno.serve(async (req) => {
     const {
       funcao,
       regioes,
-      cidade,
+      cidades,
       senioridade,
       tipos_contratacao,
       jornada,
@@ -129,7 +130,7 @@ Deno.serve(async (req) => {
     const inputPayload = {
       funcao,
       regioes,
-      cidade: cidade || 'Não especificado',
+      cidades: cidades && cidades.length > 0 ? cidades : ['Não especificado'],
       senioridade: senioridade || 'Não especificado',
       tipos_contratacao: tipos_contratacao && tipos_contratacao.length > 0 ? tipos_contratacao : ['Geral'],
       jornada: jornada || 'Não especificado',
