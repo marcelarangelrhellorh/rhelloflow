@@ -415,7 +415,7 @@ export default function EstudoMercado() {
         if (hasBeneficios) {
           doc.setFontSize(10);
           doc.setFont("helvetica", "bold");
-          doc.text("Benefícios:", margin + 5, faixaY);
+          doc.text("Benefícios comumente praticados:", margin + 5, faixaY);
           faixaY += 7;
           
           doc.setFontSize(9);
