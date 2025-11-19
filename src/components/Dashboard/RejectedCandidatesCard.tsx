@@ -139,7 +139,7 @@ export function RejectedCandidatesCard() {
               <p className="text-[42px] font-semibold leading-none text-card-foreground">
                 {loading ? '...' : count}
               </p>
-              <p className="text-[13px] text-muted-foreground">Candidatos em &quot;Reprovado rhello&quot; ou &quot;Reprovado Solicitante&quot; sem receber negativa/retorno</p>
+              <p className="text-muted-foreground text-sm font-medium">Candidatos em &quot;Reprovado rhello&quot; ou &quot;Reprovado Solicitante&quot; sem receber negativa/retorno</p>
               
               {count > 0 && <div className="pt-2">
                   

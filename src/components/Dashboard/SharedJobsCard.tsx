@@ -44,7 +44,7 @@ export function SharedJobsCard() {
               <p className="text-[42px] font-semibold leading-none text-card-foreground">
                 {loading ? '...' : count}
               </p>
-              <p className="text-[13px] text-muted-foreground">Com link de divulgação ativo</p>
+              <p className="text-muted-foreground text-sm font-medium">Com link de divulgação ativo</p>
             </div>
             <div className="rounded-full p-4 bg-info/10 text-info transition-transform duration-150">
               <Share2 className="h-7 w-7" />
