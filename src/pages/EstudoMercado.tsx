@@ -249,8 +249,11 @@ export default function EstudoMercado() {
       // Info Geral
       addSectionTitle("Informações Gerais");
       
-      // Calcular altura dinâmica baseada no conteúdo
-      let infoBoxHeight = 38;
+      // Calcular altura dinâmica baseada no conteúdo - aumentar espaço para Regiões
+      const regioesTextCalc = estudo.regioes.join(", ");
+      const regioesLinesCalc = doc.splitTextToSize(regioesTextCalc, maxTextWidth - 30);
+      let infoBoxHeight = 28 + (regioesLinesCalc.length * 5); // Altura base + linhas de regiões
+      
       if (estudo.tipos_contratacao.length > 0) {
         const tiposText = estudo.tipos_contratacao.join(", ");
         if (tiposText.length > 30) infoBoxHeight += 8;
@@ -270,42 +273,54 @@ export default function EstudoMercado() {
       const col2X = pageWidth / 2 + 5;
       const colWidth = (maxTextWidth / 2) - 10;
       
+      let currentY = yPos + 3;
+      
       // Linha 1: Função e Senioridade
-      doc.text("Função:", col1X, yPos + 3);
+      doc.text("Função:", col1X, currentY);
       doc.setFont("helvetica", "normal");
       const funcaoTextLines = doc.splitTextToSize(estudo.funcao, colWidth - 20);
-      doc.text(funcaoTextLines, col1X + 22, yPos + 3);
+      doc.text(funcaoTextLines, col1X + 22, currentY);
       
       if (estudo.senioridade) {
         doc.setFont("helvetica", "bold");
-        doc.text("Senioridade:", col2X, yPos + 3);
+        doc.text("Senioridade:", col2X, currentY);
         doc.setFont("helvetica", "normal");
         const senioridadeLines = doc.splitTextToSize(estudo.senioridade, colWidth - 30);
-        doc.text(senioridadeLines, col2X + 30, yPos + 3);
+        doc.text(senioridadeLines, col2X + 30, currentY);
       }
 
-      // Linha 2: Regiões e Modelo
-      doc.setFont("helvetica", "bold");
-      doc.text("Regiões:", col1X, yPos + 13);
-      doc.setFont("helvetica", "normal");
-      const regioesText = doc.splitTextToSize(estudo.regioes.join(", "), colWidth - 20);
-      doc.text(regioesText, col1X + 22, yPos + 13);
+      currentY += 10;
 
+      // Linha 2: Regiões (linha completa com mais espaço)
+      doc.setFont("helvetica", "bold");
+      doc.text("Regiões:", col1X, currentY);
+      doc.setFont("helvetica", "normal");
+      const regioesLines = doc.splitTextToSize(estudo.regioes.join(", "), maxTextWidth - 30);
+      doc.text(regioesLines, col1X + 22, currentY);
+      
+      currentY += (regioesLines.length * 5) + 5;
+
+      // Linha 3: Modelo e Tipos de Contratação
       if (estudo.jornada) {
         doc.setFont("helvetica", "bold");
-        doc.text("Modelo:", col2X, yPos + 13);
+        doc.text("Modelo:", col1X, currentY);
         doc.setFont("helvetica", "normal");
-        const jornadaLines = doc.splitTextToSize(estudo.jornada, colWidth - 30);
-        doc.text(jornadaLines, col2X + 30, yPos + 13);
+        // Capitalizar primeira letra
+        const jornadaCapitalized = estudo.jornada.charAt(0).toUpperCase() + estudo.jornada.slice(1);
+        const jornadaLines = doc.splitTextToSize(jornadaCapitalized, colWidth - 30);
+        doc.text(jornadaLines, col1X + 22, currentY);
       }
 
-      // Linha 3: Tipos de Contratação (linha completa)
       if (estudo.tipos_contratacao.length > 0) {
         doc.setFont("helvetica", "bold");
-        doc.text("Tipos de Contratação:", col1X, yPos + 23);
+        doc.text("Tipos de Contratação:", col2X, currentY);
         doc.setFont("helvetica", "normal");
-        const tiposLines = doc.splitTextToSize(estudo.tipos_contratacao.join(", "), maxTextWidth - 60);
-        doc.text(tiposLines, col1X + 52, yPos + 23);
+        // Transformar "pj" em "PJ"
+        const tiposFormatted = estudo.tipos_contratacao.map(tipo => 
+          tipo.toLowerCase() === 'pj' ? 'PJ' : tipo.charAt(0).toUpperCase() + tipo.slice(1).toLowerCase()
+        ).join(", ");
+        const tiposLines = doc.splitTextToSize(tiposFormatted, colWidth - 48);
+        doc.text(tiposLines, col2X + 48, currentY);
       }
 
       yPos += infoBoxHeight + 7;
