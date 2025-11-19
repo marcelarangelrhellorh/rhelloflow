@@ -2,9 +2,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Users, Clock, Check, EyeOff } from "lucide-react";
+import { EyeOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Vaga {
@@ -19,6 +17,9 @@ interface Vaga {
   candidatos_count?: number;
   confidencial?: boolean | null;
   area?: string | null;
+  salario_min?: number | null;
+  salario_max?: number | null;
+  salario_modalidade?: string | null;
   dias_etapa_atual?: number;
 }
 
@@ -63,6 +64,35 @@ const getInitials = (name: string | null): string => {
   return parts[0].substring(0, 2).toUpperCase();
 };
 
+// Função para formatar salário
+const formatSalaryRange = (min?: number | null, max?: number | null, modalidade?: string | null): string => {
+  if (!min && !max) return "";
+  
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(value);
+  };
+
+  let salaryText = "";
+  if (min && max) {
+    salaryText = `${formatCurrency(min)} - ${formatCurrency(max)}`;
+  } else if (min) {
+    salaryText = `A partir de ${formatCurrency(min)}`;
+  } else if (max) {
+    salaryText = `Até ${formatCurrency(max)}`;
+  }
+
+  if (modalidade) {
+    salaryText += ` (${modalidade})`;
+  }
+
+  return salaryText;
+};
+
 export function JobCard({
   vaga,
   diasEmAberto,
@@ -90,158 +120,127 @@ export function JobCard({
   };
 
   const statusColor = statusColors[vaga.status] || { bg: "#757575", text: "#FFFFFF" };
-  const isConcluida = vaga.status === "Concluída";
+  const salaryRange = formatSalaryRange(vaga.salario_min, vaga.salario_max, vaga.salario_modalidade);
 
   return (
-    <TooltipProvider>
-      <div
-        ref={setNodeRef}
-        style={style}
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={cn(
+        "touch-none",
+        isDragging && "opacity-50 z-50"
+      )}
+    >
+      <Card
         className={cn(
-          "touch-none",
-          isDragging && "opacity-50 z-50"
+          "relative cursor-pointer transition-all duration-200 group overflow-hidden",
+          "bg-[#FFFDF6] border border-gray-200 rounded-lg shadow-sm",
+          "hover:shadow-md hover:scale-[1.01]"
         )}
+        onClick={onView}
       >
-        <Card
-          className={cn(
-            "relative cursor-pointer transition-all duration-200 group overflow-hidden",
-            "bg-card border-border rounded-xl shadow-sm",
-            "hover:shadow-md hover:scale-[1.01]"
-          )}
-          onClick={onView}
-          style={{ minHeight: "44px" }}
-        >
-          <div className="relative p-4 space-y-3" {...attributes} {...listeners}>
-            {/* Confidential Indicator */}
+        <div className="relative p-5 space-y-4" {...attributes} {...listeners}>
+          {/* Header: Title */}
+          <div className="flex items-start justify-between gap-2">
+            <h3 className="text-lg font-bold text-[#00141D] leading-tight flex-1 line-clamp-2">
+              {vaga.titulo}
+            </h3>
+          </div>
+
+          {/* Status Badge */}
+          <div className="flex items-center gap-2">
+            <Badge 
+              className="border font-semibold rounded-md px-2 py-0.5 text-xs"
+              style={{
+                backgroundColor: statusColor.bg,
+                color: statusColor.text,
+                borderColor: statusColor.bg
+              }}
+            >
+              {vaga.status}
+            </Badge>
             {vaga.confidencial && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div 
-                    className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-destructive/20 bg-destructive/10 text-destructive backdrop-blur-sm"
-                  >
-                    <EyeOff className="h-3.5 w-3.5" />
-                    <span className="text-sm font-medium hidden sm:inline">
-                      Confidencial
-                    </span>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Vaga confidencial</p>
-                </TooltipContent>
-              </Tooltip>
+              <Badge className="bg-orange-100 text-orange-700 border-orange-200 border font-semibold rounded-md px-2 py-0.5 text-xs flex items-center gap-1">
+                <EyeOff className="h-3 w-3" />
+                Entrevistas
+              </Badge>
             )}
+          </div>
 
-            {/* Header */}
-            <div className="space-y-2">
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex-1 min-w-0">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <h3 
-                        className="font-bold text-base text-card-foreground truncate leading-tight"
-                      >
-                        {vaga.titulo}
-                      </h3>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{vaga.titulo}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </div>
-
-                <Badge
-                  className="text-sm font-semibold whitespace-nowrap px-2.5 py-1 flex items-center gap-1 shrink-0"
-                  style={{
-                    backgroundColor: statusColor.bg,
-                    color: statusColor.text,
-                  }}
-                >
-                  {isConcluida && <Check className="h-3.5 w-3.5" />}
-                  {vaga.status}
-                </Badge>
-              </div>
-
-              {/* Subheader - Cliente/Área */}
-              <div className="flex items-center gap-2">
-                <p 
-                  className="text-sm text-muted-foreground truncate font-bold"
-                >
-                  {vaga.empresa}
-                  {vaga.area && ` • ${vaga.area}`}
-                </p>
-              </div>
+          {/* Two-column layout: Cliente and Recrutador */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <p className="text-[#36404A] text-sm font-medium">Cliente</p>
+              <p className="text-sm font-semibold text-[#00141D] line-clamp-1">{vaga.empresa}</p>
             </div>
-
-            {/* Métricas rápidas */}
-            <div className="flex items-center gap-4 text-sm">
-              <div className="flex items-center gap-1.5 text-muted-foreground font-bold">
-                <Users className="h-4 w-4" />
-                <span>{vaga.candidatos_count || 0} candidatos</span>
-              </div>
-              
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className="flex items-center gap-1.5 text-muted-foreground font-bold">
-                      <Clock className="h-4 w-4" />
-                      <span>{diasEtapaAtual}d nesta etapa</span>
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p className="font-bold">Total em aberto: {diasEmAberto} dias úteis</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
-
-            {/* Progress bar */}
-            <div className="space-y-1.5">
-              <div className="h-1 bg-muted rounded-full overflow-hidden">
-                <div 
-                  className="h-full transition-all duration-300 rounded-full bg-[#FFCD00]"
-                  style={{ width: `${progresso}%` }}
-                />
-              </div>
-              <div className="flex justify-end">
-                <span 
-                  className="text-sm text-muted-foreground font-bold"
-                >
-                  {progresso}% concluído
-                </span>
-              </div>
-            </div>
-
-            {/* Rodapé - Chips de equipe */}
-            <div className="flex flex-wrap gap-2 pt-2 border-t border-border">
-              {vaga.recrutador && (
-                <Badge variant="outline" className="text-sm gap-1.5 font-bold">
-                  <Avatar className="h-5 w-5 bg-[#FFCD00]">
-                    <AvatarFallback 
-                      className="text-[#00141D] text-[10px] font-bold"
-                    >
-                      {getInitials(vaga.recrutador)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span>{vaga.recrutador.split(" ")[0]}</span>
-                </Badge>
-              )}
-              
-              {vaga.cs_responsavel && (
-                <Badge variant="outline" className="text-sm gap-1.5 font-bold">
-                  <Avatar className="h-5 w-5 bg-foreground">
-                    <AvatarFallback 
-                      className="text-background text-[10px] font-bold"
-                    >
-                      {getInitials(vaga.cs_responsavel)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span>{vaga.cs_responsavel.split(" ")[0]}</span>
-                </Badge>
-              )}
+            <div className="space-y-1">
+              <p className="text-[#36404A] text-sm font-medium">Recrutador</p>
+              <p className="text-sm font-semibold text-[#00141D] line-clamp-1">
+                {vaga.recrutador || "Não atribuído"}
+              </p>
             </div>
           </div>
-        </Card>
-      </div>
-    </TooltipProvider>
+
+          {/* Faixa Salarial */}
+          {salaryRange && (
+            <div className="space-y-1">
+              <p className="text-[#36404A] text-sm font-medium">Faixa Salarial</p>
+              <p className="text-sm font-semibold text-[#00141D]">
+                {salaryRange}
+              </p>
+            </div>
+          )}
+
+          {/* Pipeline Progress */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <p className="text-[#36404A] text-sm font-medium">Progresso do Pipeline</p>
+              <p className="text-xs font-bold text-[#00141D]">{progresso}%</p>
+            </div>
+            <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div 
+                className="h-full transition-all duration-300"
+                style={{
+                  width: `${progresso}%`,
+                  backgroundColor: "#FFCD00"
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Bottom Metrics */}
+          <div className="flex items-center justify-between pt-2 border-t border-gray-200">
+            <div className="flex items-center gap-4">
+              <div className="flex flex-col items-center">
+                <p className="text-2xl font-bold text-[#00141D]">{vaga.candidatos_count || 0}</p>
+                <p className="text-[#36404A] text-sm font-medium">Total de Candidatos</p>
+              </div>
+              <div className="flex flex-col items-center">
+                <p className="text-2xl font-bold text-[#00141D]">{diasEmAberto}</p>
+                <p className="text-[#36404A] text-sm font-medium">Dias em Aberto</p>
+              </div>
+              <div className="flex flex-col items-center">
+                <p className="text-2xl font-bold text-[#00141D]">{diasEtapaAtual}</p>
+                <p className="text-[#36404A] text-sm font-medium">Dias na Etapa</p>
+              </div>
+            </div>
+
+            {/* Recruiter Avatar */}
+            {vaga.recrutador && (
+              <div 
+                className="flex items-center justify-center w-10 h-10 rounded-full font-bold text-sm"
+                style={{
+                  backgroundColor: "#00141D",
+                  color: "#FFFDF6"
+                }}
+                title={vaga.recrutador}
+              >
+                {getInitials(vaga.recrutador)}
+              </div>
+            )}
+          </div>
+        </div>
+      </Card>
+    </div>
   );
 }
