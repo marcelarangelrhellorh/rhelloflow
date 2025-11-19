@@ -144,12 +144,12 @@ export function CandidateCard({
 
           <div className="flex items-center gap-2 text-sm text-[#36404A]">
             <User className="h-4 w-4 flex-shrink-0" />
-            <span>{candidate.recruiter_name}</span>
+            <span className="font-semibold">{candidate.recruiter_name}</span>
           </div>
 
           <div className="flex items-center gap-2 text-sm text-[#36404A]">
             <Calendar className="h-4 w-4 flex-shrink-0" />
-            <span>Disponível há {candidate.days_in_bank} dias</span>
+            <span className="font-semibold">Disponível há {candidate.days_in_bank} dias</span>
           </div>
 
           {candidate.mediaRating !== undefined && candidate.mediaRating !== null && candidate.qtdAvaliacoes! > 0 && <div className="flex items-center gap-2 text-sm">
