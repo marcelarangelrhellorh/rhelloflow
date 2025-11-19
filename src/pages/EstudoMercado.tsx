@@ -137,7 +137,6 @@ export default function EstudoMercado() {
   const [tiposContratacao, setTiposContratacao] = useState<string[]>([]);
   const [jornada, setJornada] = useState("");
   const [salarioOfertado, setSalarioOfertado] = useState("");
-  const [tipoContratacaoOfertado, setTipoContratacaoOfertado] = useState("");
   const handleGerarEstudo = async () => {
     if (!funcao || regioes.length === 0) {
       toast.error("Preencha os campos obrigatórios: Função e ao menos uma Região");
@@ -158,8 +157,7 @@ export default function EstudoMercado() {
           senioridade: senioridade || null,
           tipos_contratacao: tiposContratacao,
           jornada: jornada || null,
-          salario_ofertado: salarioOfertado ? parseFloat(salarioOfertado) : null,
-          tipo_contratacao_ofertado: tipoContratacaoOfertado || null
+          salario_ofertado: salarioOfertado ? parseFloat(salarioOfertado) : null
         }
       });
       if (error) throw error;
@@ -688,20 +686,6 @@ export default function EstudoMercado() {
               <div className="space-y-2">
                 <Label htmlFor="salario-ofertado">Salário Ofertado (opcional)</Label>
                 <Input id="salario-ofertado" type="number" placeholder="Ex: 5000" value={salarioOfertado} onChange={e => setSalarioOfertado(e.target.value)} />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="tipo-contratacao-ofertado">Tipo Ofertado (opcional)</Label>
-                <Select value={tipoContratacaoOfertado} onValueChange={setTipoContratacaoOfertado}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o tipo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="clt">CLT</SelectItem>
-                    <SelectItem value="pj">PJ</SelectItem>
-                    <SelectItem value="temporario">Temporário</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
             </div>
 
