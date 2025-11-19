@@ -201,7 +201,7 @@ export default function Candidatos() {
         error
       } = await supabase.from("candidatos").select(`
           *,
-          vagas:vaga_relacionada_id (
+          vaga:vaga_relacionada_id (
             id,
             titulo
           )
@@ -213,7 +213,7 @@ export default function Candidatos() {
       // Enriquecer candidatos com título da vaga
       const candidatosEnriquecidos = (data || []).map((candidato: any) => ({
         ...candidato,
-        vaga_titulo: candidato.vagas?.titulo || null
+        vaga_titulo: candidato.vaga?.titulo || null
       }));
       setCandidatos(candidatosEnriquecidos);
     } catch (error) {
