@@ -47,9 +47,7 @@ type Candidato = {
   };
 };
 type StatusCandidato = "Banco de Talentos" | "Selecionado" | "Entrevista rhello" | "Reprovado Rhello" | "Aprovado Rhello" | "Entrevistas Solicitante" | "Reprovado Solicitante" | "Aprovado Solicitante" | "Contratado";
-
 const statusColumns: StatusCandidato[] = ["Banco de Talentos", "Selecionado", "Entrevista rhello", "Reprovado Rhello", "Aprovado Rhello", "Entrevistas Solicitante", "Reprovado Solicitante", "Aprovado Solicitante", "Contratado"];
-
 const statusColors: Record<StatusCandidato, string> = {
   "Banco de Talentos": "bg-info/10 text-info border-info/20",
   "Selecionado": "bg-[#BBF7D0] text-green-800 border-green-200",
@@ -61,11 +59,12 @@ const statusColors: Record<StatusCandidato, string> = {
   "Aprovado Solicitante": "bg-[#FDE68A] text-yellow-800 border-yellow-200",
   "Contratado": "bg-[#D9F99D] text-lime-800 border-lime-200"
 };
-
 export default function Candidatos() {
   const navigate = useNavigate();
-  const { isAdmin } = useUserRole();
-  
+  const {
+    isAdmin
+  } = useUserRole();
+
   // Estados comuns
   const [viewType, setViewType] = useState<"cards" | "funnel">("cards");
   const [candidatos, setCandidatos] = useState<Candidato[]>([]);
@@ -87,21 +86,21 @@ export default function Candidatos() {
     empresa: string;
     recrutador_id?: string | null;
   }[]>([]);
-  
+
   // Estados específicos do funil
   const [activeId, setActiveId] = useState<string | null>(null);
   const [recrutadorVagaFilter, setRecrutadorVagaFilter] = useState<string>("all");
   const [recrutadorFilter, setRecrutadorFilter] = useState<string>("all");
   const [dragOverColumn, setDragOverColumn] = useState<string | null>(null);
-  const [users, setUsers] = useState<Array<{ id: string; name: string }>>([]);
-  
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    })
-  );
+  const [users, setUsers] = useState<Array<{
+    id: string;
+    name: string;
+  }>>([]);
+  const sensors = useSensors(useSensor(PointerSensor, {
+    activationConstraint: {
+      distance: 8
+    }
+  }));
 
   // Verificar se há filtro de atenção pela URL
   const searchParams = new URLSearchParams(window.location.search);
@@ -115,11 +114,10 @@ export default function Candidatos() {
   }, [viewType]);
   const loadVagas = async () => {
     try {
-      const { data, error } = await supabase
-        .from("vagas")
-        .select("id, titulo, empresa, recrutador_id")
-        .is("deleted_at", null)
-        .order("titulo");
+      const {
+        data,
+        error
+      } = await supabase.from("vagas").select("id, titulo, empresa, recrutador_id").is("deleted_at", null).order("titulo");
       if (error) throw error;
       setVagas(data || []);
       return data || [];
@@ -128,14 +126,12 @@ export default function Candidatos() {
       return [];
     }
   };
-
   const loadUsers = async () => {
     try {
-      const { data, error } = await supabase
-        .from("users")
-        .select("id, name")
-        .eq("active", true)
-        .order("name");
+      const {
+        data,
+        error
+      } = await supabase.from("users").select("id, name").eq("active", true).order("name");
       if (error) throw error;
       setUsers(data || []);
     } catch (error) {
@@ -147,52 +143,51 @@ export default function Candidatos() {
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
   };
-
   const handleDragEnd = async (event: DragEndEvent) => {
-    const { active, over } = event;
+    const {
+      active,
+      over
+    } = event;
     setDragOverColumn(null);
-    
     if (!over || active.id === over.id) {
       setActiveId(null);
       return;
     }
-
     const candidatoId = active.id as string;
     const newStatus = over.id as StatusCandidato;
-    const candidato = candidatos.find((c) => c.id === candidatoId);
-
+    const candidato = candidatos.find(c => c.id === candidatoId);
     if (!candidato || candidato.status === newStatus) {
       setActiveId(null);
       return;
     }
 
     // Atualização otimista
-    setCandidatos((prev) =>
-      prev.map((c) => (c.id === candidatoId ? { ...c, status: newStatus } : c))
-    );
-
+    setCandidatos(prev => prev.map(c => c.id === candidatoId ? {
+      ...c,
+      status: newStatus
+    } : c));
     try {
-      const { error } = await supabase
-        .from("candidatos")
-        .update({ status: newStatus })
-        .eq("id", candidatoId);
-
+      const {
+        error
+      } = await supabase.from("candidatos").update({
+        status: newStatus
+      }).eq("id", candidatoId);
       if (error) throw error;
       toast.success(`Candidato movido para ${newStatus}`);
     } catch (error) {
       logger.error("Erro ao mover candidato:", error);
       toast.error("Erro ao mover candidato");
       // Reverter mudança otimista
-      setCandidatos((prev) =>
-        prev.map((c) => (c.id === candidatoId ? { ...c, status: candidato.status } : c))
-      );
+      setCandidatos(prev => prev.map(c => c.id === candidatoId ? {
+        ...c,
+        status: candidato.status
+      } : c));
     } finally {
       setActiveId(null);
     }
   };
-
   const getCandidatesByStatus = (status: StatusCandidato) => {
-    return filteredFunnelCandidates.filter((c) => c.status === status);
+    return filteredFunnelCandidates.filter(c => c.status === status);
   };
   const loadCandidatos = async () => {
     try {
@@ -274,27 +269,14 @@ export default function Candidatos() {
     }
   };
   // Filtragem para o funil
-  const filteredFunnelCandidates = candidatos.filter((candidato) => {
-    const matchesSearch =
-      searchTerm === "" ||
-      candidato.nome_completo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      candidato.email.toLowerCase().includes(searchTerm.toLowerCase());
-
+  const filteredFunnelCandidates = candidatos.filter(candidato => {
+    const matchesSearch = searchTerm === "" || candidato.nome_completo.toLowerCase().includes(searchTerm.toLowerCase()) || candidato.email.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesVaga = vagaFilter === "all" || candidato.vaga_relacionada_id === vagaFilter;
-    const matchesCliente =
-      clienteFilter === "all" ||
-      (candidato.vaga_relacionada_id &&
-        vagas.find((v) => v.id === candidato.vaga_relacionada_id)?.empresa === clienteFilter);
-    const matchesRecrutadorVaga =
-      recrutadorVagaFilter === "all" ||
-      (candidato.vaga_relacionada_id &&
-        vagas.find((v) => v.id === candidato.vaga_relacionada_id)?.recrutador_id === recrutadorVagaFilter);
-    const matchesRecrutador =
-      recrutadorFilter === "all" || candidato.recrutador === recrutadorFilter;
-
+    const matchesCliente = clienteFilter === "all" || candidato.vaga_relacionada_id && vagas.find(v => v.id === candidato.vaga_relacionada_id)?.empresa === clienteFilter;
+    const matchesRecrutadorVaga = recrutadorVagaFilter === "all" || candidato.vaga_relacionada_id && vagas.find(v => v.id === candidato.vaga_relacionada_id)?.recrutador_id === recrutadorVagaFilter;
+    const matchesRecrutador = recrutadorFilter === "all" || candidato.recrutador === recrutadorFilter;
     return matchesSearch && matchesVaga && matchesCliente && matchesRecrutadorVaga && matchesRecrutador;
   });
-
   const filteredCandidatos = candidatos.filter(candidato => {
     const matchesSearch = candidato.nome_completo.toLowerCase().includes(searchTerm.toLowerCase()) || candidato.email.toLowerCase().includes(searchTerm.toLowerCase()) || candidato.cidade && candidato.cidade.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || candidato.status === statusFilter;
@@ -332,9 +314,8 @@ export default function Candidatos() {
     canGoNext,
     canGoPrevious,
     startIndex,
-    endIndex,
+    endIndex
   } = usePagination(filteredCandidatos, 50);
-
   if (loading) {
     return <div className="flex min-h-screen items-center justify-center" style={{
       backgroundColor: '#FFFBF0'
@@ -352,9 +333,7 @@ export default function Candidatos() {
             <div>
               <h1 className="text-3xl font-bold text-foreground">Candidatos</h1>
               <p className="text-base text-muted-foreground">
-                {viewType === "cards" 
-                  ? "Gerencie todos os candidatos"
-                  : "Visualize o pipeline completo de candidatos"}
+                {viewType === "cards" ? "Gerencie todos os candidatos" : "Visualize o pipeline completo de candidatos"}
               </p>
             </div>
             <div className="flex gap-2">
@@ -373,7 +352,7 @@ export default function Candidatos() {
 
       {/* Toggle de Visualização */}
       <div className="px-6 pt-4">
-        <Tabs value={viewType} onValueChange={(v) => setViewType(v as "cards" | "funnel")}>
+        <Tabs value={viewType} onValueChange={v => setViewType(v as "cards" | "funnel")}>
           <TabsList className="grid w-full max-w-[400px] grid-cols-2">
             <TabsTrigger value="cards" className="gap-2">
               <Grid3x3 className="h-4 w-4" />
@@ -403,36 +382,13 @@ export default function Candidatos() {
 
             {/* Filters */}
             <div className="mt-3 flex items-center gap-2">
-              <FilterBar 
-                searchTerm={searchTerm} 
-                onSearchChange={setSearchTerm} 
-                statusFilter={statusFilter} 
-                onStatusChange={setStatusFilter} 
-                disponibilidadeFilter={disponibilidadeFilter} 
-                onDisponibilidadeChange={setDisponibilidadeFilter} 
-                vagaFilter={vagaFilter} 
-                onVagaChange={setVagaFilter} 
-                clienteFilter={clienteFilter} 
-                onClienteChange={setClienteFilter} 
-                vagas={vagas} 
-                clientes={clientes} 
-              />
+              <FilterBar searchTerm={searchTerm} onSearchChange={setSearchTerm} statusFilter={statusFilter} onStatusChange={setStatusFilter} disponibilidadeFilter={disponibilidadeFilter} onDisponibilidadeChange={setDisponibilidadeFilter} vagaFilter={vagaFilter} onVagaChange={setVagaFilter} clienteFilter={clienteFilter} onClienteChange={setClienteFilter} vagas={vagas} clientes={clientes} />
               
               <div className="flex gap-2">
-                <Button 
-                  variant={viewMode === "grid" ? "default" : "outline"} 
-                  size="icon" 
-                  onClick={() => setViewMode("grid")} 
-                  className={viewMode === "grid" ? "bg-[#F9EC3F] text-[#00141D] hover:bg-[#E5D72E]" : ""}
-                >
+                <Button variant={viewMode === "grid" ? "default" : "outline"} size="icon" onClick={() => setViewMode("grid")} className={viewMode === "grid" ? "bg-[#F9EC3F] text-[#00141D] hover:bg-[#E5D72E]" : ""}>
                   <Grid3x3 className="h-4 w-4" />
                 </Button>
-                <Button 
-                  variant={viewMode === "list" ? "default" : "outline"} 
-                  size="icon" 
-                  onClick={() => setViewMode("list")} 
-                  className={viewMode === "list" ? "bg-[#F9EC3F] text-[#00141D] hover:bg-[#E5D72E]" : ""}
-                >
+                <Button variant={viewMode === "list" ? "default" : "outline"} size="icon" onClick={() => setViewMode("list")} className={viewMode === "list" ? "bg-[#F9EC3F] text-[#00141D] hover:bg-[#E5D72E]" : ""}>
                   <List className="h-4 w-4" />
                 </Button>
               </div>
@@ -440,8 +396,7 @@ export default function Candidatos() {
 
             {/* Cards Grid */}
             <div className="px-6 py-4 bg-[#faec3e]/[0.01]">
-              {filteredCandidatos.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 text-center">
+              {filteredCandidatos.length === 0 ? <div className="flex flex-col items-center justify-center py-12 text-center">
                   <div className="mb-3 rounded-full bg-primary/10 p-4">
                     <Plus className="h-10 w-10 text-primary" />
                   </div>
@@ -455,109 +410,44 @@ export default function Candidatos() {
                     <Plus className="mr-2 h-4 w-4" />
                     Novo Candidato
                   </Button>
-                </div>
-              ) : (
-                <>
+                </div> : <>
                   <div className={viewMode === "grid" ? "grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "space-y-4"}>
-                    {paginatedCandidatos.map(candidato => (
-                      <CandidateCard 
-                        key={candidato.id} 
-                        candidato={candidato} 
-                        onView={() => navigate(`/candidatos/${candidato.id}`)} 
-                        onEdit={() => navigate(`/candidatos/${candidato.id}/editar`)} 
-                        onDelete={() => setDeletingId(candidato.id)} 
-                        onLinkJob={() => setLinkingJobId(candidato.id)} 
-                        viewMode={viewMode} 
-                      />
-                    ))}
+                    {paginatedCandidatos.map(candidato => <CandidateCard key={candidato.id} candidato={candidato} onView={() => navigate(`/candidatos/${candidato.id}`)} onEdit={() => navigate(`/candidatos/${candidato.id}/editar`)} onDelete={() => setDeletingId(candidato.id)} onLinkJob={() => setLinkingJobId(candidato.id)} viewMode={viewMode} />)}
                   </div>
-                  <PaginationControls
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    onPageChange={goToPage}
-                    canGoPrevious={canGoPrevious}
-                    canGoNext={canGoNext}
-                    startIndex={startIndex}
-                    endIndex={endIndex}
-                    totalItems={filteredCandidatos.length}
-                  />
-                </>
-              )}
+                  <PaginationControls currentPage={currentPage} totalPages={totalPages} onPageChange={goToPage} canGoPrevious={canGoPrevious} canGoNext={canGoNext} startIndex={startIndex} endIndex={endIndex} totalItems={filteredCandidatos.length} />
+                </>}
             </div>
           </TabsContent>
 
           {/* Visualização em Funil */}
           <TabsContent value="funnel" className="space-y-6 mt-6">
-            <FunnelStatsHeader
-              totalCandidatosAtivos={candidatos.filter(c => c.status !== "Banco de Talentos").length}
-              candidatosBancoTalentos={statsByStatus["Banco de Talentos"] || 0}
-            />
+            <FunnelStatsHeader totalCandidatosAtivos={candidatos.filter(c => c.status !== "Banco de Talentos").length} candidatosBancoTalentos={statsByStatus["Banco de Talentos"] || 0} />
 
-            <FunnelFilterBar
-              searchQuery={searchTerm}
-              onSearchChange={setSearchTerm}
-              vagaFilter={vagaFilter}
-              onVagaChange={setVagaFilter}
-              clienteFilter={clienteFilter}
-              onClienteChange={setClienteFilter}
-              recrutadorVagaFilter={recrutadorVagaFilter}
-              onRecrutadorVagaChange={setRecrutadorVagaFilter}
-              recrutadorFilter={recrutadorFilter}
-              onRecrutadorChange={setRecrutadorFilter}
-              vagas={vagas.map(v => ({ id: v.id, titulo: v.titulo }))}
-              clientes={clientes}
-              recrutadoresVaga={Array.from(new Set(vagas.map(v => v.recrutador_id).filter(Boolean)))}
-              recrutadores={Array.from(new Set(candidatos.map(c => c.recrutador).filter(Boolean))) as string[]}
-              users={users}
-            />
+            <FunnelFilterBar searchQuery={searchTerm} onSearchChange={setSearchTerm} vagaFilter={vagaFilter} onVagaChange={setVagaFilter} clienteFilter={clienteFilter} onClienteChange={setClienteFilter} recrutadorVagaFilter={recrutadorVagaFilter} onRecrutadorVagaChange={setRecrutadorVagaFilter} recrutadorFilter={recrutadorFilter} onRecrutadorChange={setRecrutadorFilter} vagas={vagas.map(v => ({
+            id: v.id,
+            titulo: v.titulo
+          }))} clientes={clientes} recrutadoresVaga={Array.from(new Set(vagas.map(v => v.recrutador_id).filter(Boolean)))} recrutadores={Array.from(new Set(candidatos.map(c => c.recrutador).filter(Boolean))) as string[]} users={users} />
 
-            {loading ? (
-              <div className="text-center py-12">
+            {loading ? <div className="text-center py-12">
                 <p className="text-muted-foreground">Carregando candidatos...</p>
-              </div>
-            ) : (
-              <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragStart={handleDragStart}
-                onDragEnd={handleDragEnd}
-              >
+              </div> : <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd} className="bg-transparent">
                 <div className="flex gap-4 overflow-x-auto pb-4 bg-[#36404a]/[0.06]">
-                  {statusColumns.map((status) => {
-                    const candidatosStatus = getCandidatesByStatus(status);
-                    return (
-                      <FunnelColumn
-                        key={status}
-                        status={status}
-                        count={candidatosStatus.length}
-                        colorClass={statusColors[status]}
-                      >
-                        {candidatosStatus.map((candidato) => (
-                          <div key={candidato.id} onClick={() => navigate(`/candidatos/${candidato.id}`)}>
-                            <CandidateFunnelCard
-                              candidato={candidato}
-                              onDragStart={() => {}}
-                            />
-                          </div>
-                        ))}
-                      </FunnelColumn>
-                    );
-                  })}
+                  {statusColumns.map(status => {
+                const candidatosStatus = getCandidatesByStatus(status);
+                return <FunnelColumn key={status} status={status} count={candidatosStatus.length} colorClass={statusColors[status]}>
+                        {candidatosStatus.map(candidato => <div key={candidato.id} onClick={() => navigate(`/candidatos/${candidato.id}`)}>
+                            <CandidateFunnelCard candidato={candidato} onDragStart={() => {}} />
+                          </div>)}
+                      </FunnelColumn>;
+              })}
                 </div>
 
                 <DragOverlay>
-                  {activeId ? (
-                    <div className="w-[300px]">
-                      <CandidateFunnelCard
-                        candidato={candidatos.find((c) => c.id === activeId)!}
-                        onDragStart={() => {}}
-                        isDragging
-                      />
-                    </div>
-                  ) : null}
+                  {activeId ? <div className="w-[300px]">
+                      <CandidateFunnelCard candidato={candidatos.find(c => c.id === activeId)!} onDragStart={() => {}} isDragging />
+                    </div> : null}
                 </DragOverlay>
-              </DndContext>
-            )}
+              </DndContext>}
           </TabsContent>
         </Tabs>
       </div>
