@@ -27,6 +27,7 @@ interface EstudoRegional {
   beneficios: string[];
   demanda: "Alta" | "Média" | "Baixa";
   observacoes: string;
+  tendencia: string;
 }
 
 interface EstudoMercado {
@@ -299,18 +300,34 @@ export default function EstudoMercado() {
 
       yPos += 45;
 
-      // Comparativo por Região
+      // Comparativo por Região/Cidade
       estudo.estudos_regionais.forEach((regional) => {
-        checkSpace(70);
+        checkSpace(90);
         
         addSectionTitle(`${regional.regiao}`);
         
+        // Calcular altura dinâmica do box baseado no conteúdo
+        const hasBeneficios = regional.beneficios && regional.beneficios.length > 0;
+        const hasObservacoes = regional.observacoes && regional.observacoes.trim().length > 0;
+        const hasTendencia = regional.tendencia && regional.tendencia.trim().length > 0;
+        
+        let dynamicHeight = 40; // Base
+        if (regional.faixas_salariais.length > 1) dynamicHeight += 18;
+        if (hasBeneficios) dynamicHeight += 18;
+        if (hasObservacoes) {
+          const obsLines = doc.splitTextToSize(regional.observacoes, maxTextWidth - 20);
+          dynamicHeight += (obsLines.length * 5) + 12;
+        }
+        if (hasTendencia) {
+          const tendLines = doc.splitTextToSize(regional.tendencia, maxTextWidth - 20);
+          dynamicHeight += (tendLines.length * 5) + 12;
+        }
+        
         doc.setFillColor(255, 255, 255);
-        const boxHeight = 60 + (regional.faixas_salariais.length > 1 ? 18 : 0);
-        doc.roundedRect(margin, yPos - 3, maxTextWidth, boxHeight, 2, 2, "F");
+        doc.roundedRect(margin, yPos - 3, maxTextWidth, dynamicHeight, 2, 2, "F");
         doc.setDrawColor(...colors.yellowSecondary);
         doc.setLineWidth(0.3);
-        doc.roundedRect(margin, yPos - 3, maxTextWidth, boxHeight, 2, 2, "S");
+        doc.roundedRect(margin, yPos - 3, maxTextWidth, dynamicHeight, 2, 2, "S");
 
         // Faixas Salariais
         doc.setFontSize(11);
@@ -367,9 +384,10 @@ export default function EstudoMercado() {
         doc.text(regional.demanda, margin + 125, faixaY);
         doc.setTextColor(...colors.darkBlue);
 
+        faixaY += 9;
+
         // Benefícios
-        if (regional.beneficios.length > 0) {
-          faixaY += 9;
+        if (hasBeneficios) {
           doc.setFontSize(10);
           doc.setFont("helvetica", "bold");
           doc.text("Benefícios:", margin + 5, faixaY);
@@ -398,9 +416,42 @@ export default function EstudoMercado() {
             doc.text(benLines[0], xPos + 3, faixaY);
             xPos += badgeWidth + 4;
           });
+          
+          faixaY += 9;
         }
 
-        yPos += boxHeight + 10;
+        // Observações (específicas da cidade/região)
+        if (hasObservacoes) {
+          doc.setFontSize(10);
+          doc.setFont("helvetica", "bold");
+          doc.setTextColor(...colors.darkBlue);
+          doc.text("Observações:", margin + 5, faixaY);
+          faixaY += 7;
+          
+          doc.setFontSize(9);
+          doc.setFont("helvetica", "normal");
+          doc.setTextColor(...colors.grayText);
+          const obsLines = doc.splitTextToSize(regional.observacoes, maxTextWidth - 20);
+          doc.text(obsLines, margin + 10, faixaY);
+          faixaY += (obsLines.length * 5) + 4;
+        }
+
+        // Tendência (específica da cidade/região)
+        if (hasTendencia) {
+          doc.setFontSize(10);
+          doc.setFont("helvetica", "bold");
+          doc.setTextColor(...colors.darkBlue);
+          doc.text("Tendência:", margin + 5, faixaY);
+          faixaY += 7;
+          
+          doc.setFontSize(9);
+          doc.setFont("helvetica", "normal");
+          doc.setTextColor(...colors.grayText);
+          const tendLines = doc.splitTextToSize(regional.tendencia, maxTextWidth - 20);
+          doc.text(tendLines, margin + 10, faixaY);
+        }
+
+        yPos += dynamicHeight + 10;
       });
 
       // Tendência Geral
