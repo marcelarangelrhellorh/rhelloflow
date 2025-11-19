@@ -67,7 +67,7 @@ export function VagaTimeline({
                       </div>
 
                       {/* Step Label */}
-                      <p className={`text-center text-xs font-semibold whitespace-nowrap ${step.status === "current" ? "text-[#00141D]" : step.status === "pending" ? "text-[#9CA3AF]" : "text-[#00141D]"}`}>
+                      <p className={`text-center text-sm font-semibold whitespace-nowrap ${step.status === "current" ? "text-[#00141D]" : step.status === "pending" ? "text-[#9CA3AF]" : "text-[#00141D]"}`}>
                         {step.label}
                       </p>
 
