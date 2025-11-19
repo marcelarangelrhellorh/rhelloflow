@@ -501,6 +501,7 @@ export default function EstudoMercado() {
         addSectionTitle("Tendência Geral");
         
         doc.setFillColor(255, 255, 255);
+        // Quebrar texto para ocupar toda a largura disponível
         const tendLines = doc.splitTextToSize(estudo.tendencia_short, maxTextWidth - 10);
         const tendHeight = Math.max(15, tendLines.length * 5 + 8);
         
@@ -513,10 +514,9 @@ export default function EstudoMercado() {
         doc.setFont("helvetica", "normal");
         doc.setTextColor(...colors.darkBlue);
         
-        // Texto justificado ocupando todo o espaço disponível
-        doc.text(tendLines, margin + 5, yPos + 3, { 
-          maxWidth: maxTextWidth - 10,
-          align: 'justify'
+        // Renderizar texto linha por linha ocupando toda largura
+        tendLines.forEach((linha: string, index: number) => {
+          doc.text(linha, margin + 5, yPos + 3 + (index * 5));
         });
         
         yPos += tendHeight + 10;
