@@ -83,6 +83,7 @@ export default function EstudoMercado() {
   // Form state
   const [funcao, setFuncao] = useState("");
   const [regioes, setRegioes] = useState<string[]>([]);
+  const [cidade, setCidade] = useState("");
   const [senioridade, setSenioridade] = useState("");
   const [tiposContratacao, setTiposContratacao] = useState<string[]>([]);
   const [jornada, setJornada] = useState("");
@@ -101,6 +102,7 @@ export default function EstudoMercado() {
         body: {
           funcao,
           regioes,
+          cidade: cidade || null,
           senioridade: senioridade || null,
           tipos_contratacao: tiposContratacao,
           jornada: jornada || null,
@@ -515,6 +517,16 @@ export default function EstudoMercado() {
                   value={regioes}
                   onChange={setRegioes}
                   placeholder="Selecione as regiões..."
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="cidade">Cidade</Label>
+                <Input
+                  id="cidade"
+                  placeholder="Ex: São Paulo, Belo Horizonte"
+                  value={cidade}
+                  onChange={(e) => setCidade(e.target.value)}
                 />
               </div>
 
