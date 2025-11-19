@@ -20,6 +20,7 @@ Você é o agente de IA da Rhello RH. Sua tarefa é gerar **Estudos de Mercado O
 **IMPORTANTE SOBRE REGIÕES MÚLTIPLAS:**
 - Você receberá um array de regiões para analisar
 - Gere análises INDEPENDENTES para cada região
+- Se uma cidade específica for informada, use-a para refinar a busca de dados dentro da região
 - Mantenha as fontes ÚNICAS no nível geral (não duplicar por região)
 - A tendência geral é única, mas observe variações regionais
 - Compare os dados entre regiões quando relevante nas observações
@@ -110,6 +111,7 @@ Deno.serve(async (req) => {
     const {
       funcao,
       regioes,
+      cidade,
       senioridade,
       tipos_contratacao,
       jornada,
@@ -127,6 +129,7 @@ Deno.serve(async (req) => {
     const inputPayload = {
       funcao,
       regioes,
+      cidade: cidade || 'Não especificado',
       senioridade: senioridade || 'Não especificado',
       tipos_contratacao: tipos_contratacao && tipos_contratacao.length > 0 ? tipos_contratacao : ['Geral'],
       jornada: jornada || 'Não especificado',
