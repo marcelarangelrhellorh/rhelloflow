@@ -171,11 +171,13 @@ export function CandidateFunnelCard({
               </div>
 
               {/* Vaga vinculada */}
-              {candidato.vaga?.titulo && <div className="flex items-center gap-2">
-                  <Badge className="text-sm font-medium bg-[#faec3e]/30 text-[#00141D] border border-[#faec3e] hover:bg-[#faec3e]/40">
+              {candidato.vaga?.titulo && (
+                <div className="flex items-center gap-2 mt-1">
+                  <Badge className="text-xs font-semibold bg-[#FFCD00]/20 text-[#00141D] border border-[#FFCD00] hover:bg-[#FFCD00]/30 px-2 py-1">
                     📋 {candidato.vaga.titulo}
                   </Badge>
-                </div>}
+                </div>
+              )}
             </div>
 
             {/* Contact Info & Métricas */}
