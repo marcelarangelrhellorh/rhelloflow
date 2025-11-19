@@ -706,7 +706,7 @@ export default function EstudoMercado() {
             </div>
 
             <div className="flex gap-2 justify-end">
-              <Button onClick={handleGerarEstudo} disabled={loading} className="bg-[#faec3e] text-slate-950 hover:bg-[#ffcd00] h-11 px-6">
+              <Button onClick={handleGerarEstudo} disabled={loading} className="bg-[#faec3e] text-slate-950 hover:bg-[#ffcd00] h-11 px-6 font-semibold">
                 {loading ? <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Gerando...
