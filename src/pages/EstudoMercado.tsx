@@ -512,7 +512,12 @@ export default function EstudoMercado() {
         doc.setFontSize(10);
         doc.setFont("helvetica", "normal");
         doc.setTextColor(...colors.darkBlue);
-        doc.text(tendLines, margin + 5, yPos + 3);
+        
+        // Usar toda a largura disponível (borda a borda)
+        doc.text(tendLines, margin + 5, yPos + 3, { 
+          maxWidth: maxTextWidth - 10,
+          align: 'left'
+        });
         
         yPos += tendHeight + 10;
       }
@@ -522,20 +527,37 @@ export default function EstudoMercado() {
         checkSpace(30);
         addSectionTitle("Fontes Consultadas");
         
-        doc.setFontSize(9);
+        doc.setFontSize(8);
         doc.setFont("helvetica", "normal");
         doc.setTextColor(...colors.grayText);
 
-        estudo.fontes.slice(0, 5).forEach((fonte) => {
-          const fonteLines = doc.splitTextToSize(`• ${fonte.nome}`, maxTextWidth - 10);
-          doc.text(fonteLines, margin + 5, yPos);
-          yPos += fonteLines.length * 5;
+        // Mostrar TODAS as fontes com seus links
+        estudo.fontes.forEach((fonte, index) => {
+          checkSpace(10); // Verificar espaço antes de cada fonte
+          
+          // Nome da fonte em negrito
+          doc.setFont("helvetica", "bold");
+          doc.text(`${index + 1}.`, margin + 5, yPos);
+          
+          doc.setFont("helvetica", "normal");
+          const fonteTextLines = doc.splitTextToSize(fonte.nome, maxTextWidth - 30);
+          doc.text(fonteTextLines, margin + 12, yPos);
+          
+          yPos += fonteTextLines.length * 4;
+          
+          // Link da fonte (se existir)
+          if (fonte.url && fonte.url.trim()) {
+            doc.setFont("helvetica", "italic");
+            doc.setTextColor(0, 0, 255); // Azul para links
+            const urlLines = doc.splitTextToSize(fonte.url, maxTextWidth - 30);
+            doc.text(urlLines, margin + 12, yPos);
+            doc.setTextColor(...colors.grayText); // Voltar para cor padrão
+            
+            yPos += urlLines.length * 4 + 3;
+          } else {
+            yPos += 3;
+          }
         });
-
-        if (estudo.fontes.length > 5) {
-          doc.text(`... e mais ${estudo.fontes.length - 5} fontes`, margin + 5, yPos);
-          yPos += 5;
-        }
 
         yPos += 8;
       }
