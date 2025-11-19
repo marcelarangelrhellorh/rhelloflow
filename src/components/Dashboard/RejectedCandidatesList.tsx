@@ -102,7 +102,7 @@ export function RejectedCandidatesList({
                       <Checkbox checked={selectedIds.size === candidates.length && candidates.length > 0} onCheckedChange={handleSelectAll} />
                     </TableHead>
                     <TableHead className="font-bold">Nome</TableHead>
-                    <TableHead>Vaga</TableHead>
+                    <TableHead className="font-bold">Vaga</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Dias</TableHead>
                     <TableHead>Telefone</TableHead>
