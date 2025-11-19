@@ -175,7 +175,7 @@ export function VagaCard({
     }
   };
   return <>
-      <Card draggable={draggable} onDragStart={onDragStart} onClick={handleClick} className="relative cursor-pointer bg-[#FFFDF6] border border-gray-200 overflow-hidden rounded-lg shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.01]">
+      <Card draggable={draggable} onDragStart={onDragStart} onClick={handleClick} className="relative cursor-pointer bg-[#FFFDF6] border-2 border-[#FFCD00] overflow-hidden rounded-lg shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.01]">
         <CardContent className="p-5 space-y-4">
           <div className="space-y-2">
             <div className="flex items-start justify-between gap-2">
