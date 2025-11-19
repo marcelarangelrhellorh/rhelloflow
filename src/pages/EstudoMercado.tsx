@@ -497,40 +497,45 @@ export default function EstudoMercado() {
 
       // Tendência Geral
       if (estudo.tendencia_short) {
-        checkSpace(25);
+        checkSpace(35);
         addSectionTitle("Tendência Geral");
         
-        // Configurar padding interno uniforme
-        const boxPadding = 5;
-        const textWidth = maxTextWidth - (boxPadding * 2);
+        // Definir padding uniforme (equivalente aos 16px do React-PDF)
+        const boxPadding = 8;
+        const boxWidth = maxTextWidth;
+        const textAreaWidth = boxWidth - (boxPadding * 2);
         
-        // Quebrar texto respeitando a largura disponível
-        const tendLines = doc.splitTextToSize(estudo.tendencia_short, textWidth);
-        const lineHeight = 5;
-        const tendHeight = (tendLines.length * lineHeight) + (boxPadding * 2) + 3;
-        
-        // Renderizar container
-        doc.setFillColor(255, 255, 255);
-        doc.roundedRect(margin, yPos - 3, maxTextWidth, tendHeight, 2, 2, "F");
-        doc.setDrawColor(...colors.yellowSecondary);
-        doc.setLineWidth(0.3);
-        doc.roundedRect(margin, yPos - 3, maxTextWidth, tendHeight, 2, 2, "S");
-
-        // Renderizar texto com padding uniforme
+        // Quebrar texto para ocupar 100% da largura disponível
         doc.setFontSize(10);
         doc.setFont("helvetica", "normal");
+        const tendLines = doc.splitTextToSize(estudo.tendencia_short, textAreaWidth);
+        
+        // Calcular altura da caixa baseada no conteúdo + padding
+        const lineHeight = 5;
+        const contentHeight = tendLines.length * lineHeight;
+        const boxHeight = contentHeight + (boxPadding * 2);
+        
+        // Renderizar container (View do React-PDF)
+        doc.setFillColor(255, 255, 255);
+        doc.roundedRect(margin, yPos - 3, boxWidth, boxHeight, 2, 2, "F");
+        doc.setDrawColor(...colors.yellowSecondary);
+        doc.setLineWidth(0.3);
+        doc.roundedRect(margin, yPos - 3, boxWidth, boxHeight, 2, 2, "S");
+
+        // Renderizar texto ocupando toda área com padding
         doc.setTextColor(...colors.darkBlue);
         
-        let textY = yPos + boxPadding;
+        let currentY = yPos + boxPadding - 3;
         tendLines.forEach((linha: string) => {
-          doc.text(linha, margin + boxPadding, textY, {
-            maxWidth: textWidth,
+          // Renderizar cada linha ocupando toda a largura disponível
+          doc.text(linha, margin + boxPadding, currentY, {
+            maxWidth: textAreaWidth,
             align: 'left'
           });
-          textY += lineHeight;
+          currentY += lineHeight;
         });
         
-        yPos += tendHeight + 10;
+        yPos += boxHeight + 10;
       }
 
       // Fontes
