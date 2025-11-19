@@ -513,10 +513,10 @@ export default function EstudoMercado() {
         doc.setFont("helvetica", "normal");
         doc.setTextColor(...colors.darkBlue);
         
-        // Usar toda a largura disponível (borda a borda)
+        // Texto justificado ocupando todo o espaço disponível
         doc.text(tendLines, margin + 5, yPos + 3, { 
           maxWidth: maxTextWidth - 10,
-          align: 'left'
+          align: 'justify'
         });
         
         yPos += tendHeight + 10;
