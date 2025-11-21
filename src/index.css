@@ -25,8 +25,8 @@ All colors MUST be HSL.
     --accent-foreground: 197 100% 6%;
     
     /* Backgrounds */
-    --background: 50 100% 98%;            /* #fffdf6 */
-    --background-light: 50 100% 98%;
+    --background: 50 100% 96%;            /* creme mais visível */
+    --background-light: 50 100% 96%;
     --background-dark: 197 100% 6%;      /* #00141d */
     
     /* Text Colors */
@@ -36,9 +36,9 @@ All colors MUST be HSL.
     --secondary-text-light: 206 13% 24%; /* #36404a */
     --secondary-text-dark: 206 29% 72%;
 
-    --card: 50 100% 98%;                  /* matches background */
+    --card: 50 100% 96%;                  /* matches background */
     --card-foreground: 197 100% 6%;
-    --popover: 50 100% 98%;               /* matches background */
+    --popover: 50 100% 96%;               /* matches background */
     --popover-foreground: 197 100% 6%;
     
     --secondary: 206 13% 24%;            /* #36404a - gray dark */
