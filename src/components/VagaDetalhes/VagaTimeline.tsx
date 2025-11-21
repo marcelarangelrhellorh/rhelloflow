@@ -47,14 +47,14 @@ export function VagaTimeline({
                 }}>
                       {/* Connector Line */}
                       {index < timelineSteps.length - 1 && <div className="absolute left-1/2 top-[20px] h-[2px] w-[calc(100%+32px)] -translate-y-1/2" style={{
-                    backgroundColor: step.status === "completed" ? "#F9EC3F" : "#E5E7EB",
+                    backgroundColor: step.status === "completed" ? "#ffcd00" : "#E5E7EB",
                     zIndex: 0
                   }} />}
 
                       {/* Step Circle */}
                       <div className="relative z-10 flex h-10 w-10 items-center justify-center rounded-full transition-all mb-3" style={{
-                    backgroundColor: step.status === "pending" ? "#D1D5DB" : step.status === "current" ? "#ffffff" : "#F9EC3F",
-                    border: step.status === "current" ? "3px solid #F9EC3F" : "none"
+                    backgroundColor: step.status === "pending" ? "#D1D5DB" : step.status === "current" ? "#ffffff" : "#ffcd00",
+                    border: step.status === "current" ? "3px solid #ffcd00" : "none"
                   }}>
                         {step.status === "completed" && <span className="material-symbols-outlined text-xl" style={{
                       color: "#00141D"
@@ -62,7 +62,7 @@ export function VagaTimeline({
                             check
                           </span>}
                         {step.status === "current" && <div className="h-4 w-4 rounded-full animate-pulse" style={{
-                      backgroundColor: "#F9EC3F"
+                      backgroundColor: "#ffcd00"
                     }} />}
                       </div>
 
@@ -71,7 +71,7 @@ export function VagaTimeline({
                         {step.label}
                       </p>
 
-                      {step.status === "current" && <p className="text-[10px] text-[#F9EC3F] mt-1 font-medium">Em Progresso</p>}
+                      {step.status === "current" && <p className="text-[10px] text-[#ffcd00] mt-1 font-medium">Em Progresso</p>}
                     </div>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -90,7 +90,7 @@ export function VagaTimeline({
           <span className="text-base font-semibold">Progresso</span>
           <span className="font-semibold">{Math.round(progress)}%</span>
         </div>
-        <Progress value={progress} className="h-2" indicatorClassName="bg-[#F9EC3F]" />
+        <Progress value={progress} className="h-2" indicatorClassName="bg-[#ffcd00]" />
       </div>
     </div>;
 }
