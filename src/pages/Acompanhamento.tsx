@@ -73,30 +73,33 @@ export default function Acompanhamento() {
   
   const loading = loadingVagas;
 
+  // Carregar user ID quando roles estiverem disponíveis
   useEffect(() => {
-    loadUserId();
-  }, []);
+    const loadUserId = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const isClient = roles.includes('client');
+        
+        if (isClient) {
+          setUserId(user.id);
+        }
+      } catch (error) {
+        logger.error('Error loading user ID:', error);
+      }
+    };
+
+    if (roles.length > 0) {
+      loadUserId();
+    }
+  }, [roles]);
 
   useEffect(() => {
     if (vagas.length > 0) {
       loadStageHistory();
     }
   }, [vagas]);
-  // Carregar user ID
-  const loadUserId = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const isClient = roles.includes('client');
-      
-      if (isClient) {
-        setUserId(user.id);
-      }
-    } catch (error) {
-      logger.error('Error loading user ID:', error);
-    }
-  };
 
   const loadStageHistory = async () => {
     try {
