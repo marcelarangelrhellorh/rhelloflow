@@ -60,3 +60,6 @@ verify_jwt = true
 [functions.get-client-view-data]
 verify_jwt = false
 
+[functions.send-notification-email]
+verify_jwt = true
+
