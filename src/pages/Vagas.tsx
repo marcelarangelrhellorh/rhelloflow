@@ -16,7 +16,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StatsHeader } from "@/components/FunilVagas/StatsHeader";
 import { FilterBar } from "@/components/FunilVagas/FilterBar";
 import { PipelineBoard } from "@/components/FunilVagas/PipelineBoard";
-import { JobDrawer } from "@/components/FunilVagas/JobDrawer";
 import { JOB_STAGES, calculateProgress } from "@/lib/jobStages";
 import { logVagaEvento } from "@/lib/vagaEventos";
 import { getBusinessDaysFromNow } from "@/lib/dateUtils";
@@ -56,8 +55,6 @@ export default function Vagas() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   // Estados específicos do funil
-  const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const [mediaDiasAbertos, setMediaDiasAbertos] = useState(0);
   const [vagasForaPrazo, setVagasForaPrazo] = useState(0);
   const [totalCandidatosAtivos, setTotalCandidatosAtivos] = useState(0);
@@ -301,10 +298,6 @@ export default function Vagas() {
       toast.error("Erro ao copiar link");
     }
   };
-  const openJobDrawer = (jobId: string) => {
-    setSelectedJobId(jobId);
-    setDrawerOpen(true);
-  };
 
   // Recarregar ao trocar de visualização
   useEffect(() => {
@@ -436,9 +429,7 @@ export default function Vagas() {
 
             {loading ? <div className="text-center py-12">
                 <p className="text-muted-foreground">Carregando vagas...</p>
-              </div> : <PipelineBoard stages={JOB_STAGES.filter(s => s.slug !== "cancelada")} jobs={filteredVagas} progresso={(statusSlug: string) => calculateProgress(statusSlug)} onJobMove={handleMoveJob} onJobClick={openJobDrawer} onJobEdit={id => navigate(`/vagas/${id}/editar`)} onJobMoveStage={id => navigate(`/vagas/${id}/editar`)} onJobDuplicate={() => {}} onJobClose={() => {}} />}
-
-            <JobDrawer jobId={selectedJobId} open={drawerOpen} onOpenChange={setDrawerOpen} onEdit={() => selectedJobId && navigate(`/vagas/${selectedJobId}/editar`)} />
+              </div> : <PipelineBoard stages={JOB_STAGES.filter(s => s.slug !== "cancelada")} jobs={filteredVagas} progresso={(statusSlug: string) => calculateProgress(statusSlug)} onJobMove={handleMoveJob} onJobClick={id => navigate(`/vagas/${id}`)} onJobEdit={id => navigate(`/vagas/${id}/editar`)} onJobMoveStage={id => navigate(`/vagas/${id}/editar`)} onJobDuplicate={() => {}} onJobClose={() => {}} />}
           </TabsContent>
         </Tabs>
       </div>
