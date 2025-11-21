@@ -368,7 +368,7 @@ export function ScorecardEvaluation({
 
             {/* Actions */}
             <div className="flex gap-2 pt-4 border-t">
-              <Button onClick={handleSave} disabled={saving || !allScoresSet || !recommendation} className="flex-1 bg-[#FFCD00] hover:bg-[#FAEC3E] text-[#00141D] font-semibold">
+              <Button onClick={handleSave} disabled={saving || !allScoresSet || !recommendation} className="flex-1 font-semibold">
                 {saving ? "Salvando..." : "Salvar Avaliação"}
               </Button>
             </div>

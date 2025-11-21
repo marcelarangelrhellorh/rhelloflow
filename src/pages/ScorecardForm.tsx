@@ -303,7 +303,6 @@ export default function ScorecardForm() {
             <Button
               onClick={handleSubmit}
               disabled={loading}
-              className="bg-[#FFCD00] hover:bg-[#FAEC3E] text-[#00141D]"
             >
               {loading ? "Salvando..." : "Salvar Template"}
             </Button>

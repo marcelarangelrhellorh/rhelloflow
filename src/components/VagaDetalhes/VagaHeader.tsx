@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { formatSalaryRange } from "@/lib/salaryUtils";
 import type { Vaga } from "@/hooks/data/useVaga";
 import type { VagaTag } from "@/hooks/data/useVagaTags";
@@ -51,10 +52,10 @@ export function VagaHeader({
           <span className="material-symbols-outlined text-lg">visibility</span>
           Ver Detalhes
         </button>
-        <button onClick={onShare} className="px-4 py-2 bg-[#ffcd00] text-[#00141d] rounded-full transition-colors flex items-center gap-2 font-bold text-sm hover:bg-[#ffcd00]/90">
+        <Button onClick={onShare} className="rounded-full font-bold text-sm">
           <span className="material-symbols-outlined text-lg">share</span>
           Compartilhar
-        </button>
+        </Button>
       </div>
     </div>;
 }

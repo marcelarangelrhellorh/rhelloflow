@@ -39,7 +39,7 @@ export function ExternalJobBanner({
         <ul className="text-sm text-[#36404a] list-disc list-inside space-y-1">
           {missingFields.map(field => <li key={field} className="font-semibold">{field}</li>)}
         </ul>
-        <Button className="bg-[#ffcd00] text-[#00141d] font-bold hover:bg-[#ffcd00]/90 h-9 px-4 rounded-md" onClick={() => navigate(`/vagas/${vagaId}/editar`)}>
+        <Button className="font-bold h-9 px-4 rounded-md" onClick={() => navigate(`/vagas/${vagaId}/editar`)}>
           Preencher Agora
         </Button>
       </AlertDescription>

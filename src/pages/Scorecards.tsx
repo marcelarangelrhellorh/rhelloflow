@@ -176,7 +176,7 @@ export default function Scorecards() {
                 Gerencie templates de avaliação de candidatos
               </p>
             </div>
-            <Button onClick={() => navigate("/scorecards/novo")} className="bg-[#FFCD00] hover:bg-[#FAEC3E] text-[#00141D] font-semibold">
+            <Button onClick={() => navigate("/scorecards/novo")} className="font-semibold">
               <Plus className="mr-2 h-4 w-4" />
               Novo Template
             </Button>
