@@ -6,6 +6,7 @@ import { NotificationBell } from "./NotificationBell";
 import { UserMenu } from "./UserMenu";
 import { ConnectionIndicator } from "./ConnectionIndicator";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet";
+import { SidebarTrigger } from "./ui/sidebar";
 import { useUserRole } from "@/hooks/useUserRole";
 import logoRhelloDark from "@/assets/logo-rhello-dark.png";
 import symbolRhelloDark from "@/assets/symbol-rhello-dark.png";
@@ -53,11 +54,14 @@ export function AppNavbar() {
   }
   return <header className="sticky top-0 z-50 w-full border-b border-[#d4cec6]/40 bg-[#ffcd00]/5 shadow-[0_2px_12px_rgba(0,0,0,0.06)]">
       <div className="flex h-16 items-center px-4 sm:px-6 gap-6 max-w-[1600px] mx-auto">
-        {/* Logo */}
-        <NavLink to="/" className="flex items-center shrink-0">
-          <img alt="rhello" className="h-8 hidden sm:block" loading="lazy" src="/lovable-uploads/730861b1-e6da-47c3-991c-dadbca0b7fa1.png" />
-          <img src={symbolRhelloDark} alt="rhello" className="h-10 w-10 sm:hidden" loading="lazy" />
-        </NavLink>
+        {/* Sidebar Trigger + Logo */}
+        <div className="flex items-center gap-3 shrink-0">
+          <SidebarTrigger className="hidden lg:flex" />
+          <NavLink to="/" className="flex items-center">
+            <img alt="rhello" className="h-8 hidden sm:block" loading="lazy" src="/lovable-uploads/730861b1-e6da-47c3-991c-dadbca0b7fa1.png" />
+            <img src={symbolRhelloDark} alt="rhello" className="h-10 w-10 sm:hidden" loading="lazy" />
+          </NavLink>
+        </div>
 
         {/* Desktop Navigation */}
         <nav className="hidden lg:flex flex-1 items-center justify-center gap-6">
