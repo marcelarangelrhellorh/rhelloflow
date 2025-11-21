@@ -164,7 +164,7 @@ export function NotificationBell() {
           className="relative shrink-0 text-[#00141d] hover:text-[#00141d]/80 hover:bg-[#ffcd00]/10"
           title="Notificações"
         >
-          <Bell className="h-6 w-6" />
+          <Bell className="h-7 w-7" />
           {unreadCount > 0 && (
             <Badge
               variant="destructive"
