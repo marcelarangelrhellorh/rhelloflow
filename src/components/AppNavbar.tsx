@@ -63,22 +63,22 @@ export function AppNavbar() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="flex items-center shrink-0 cursor-pointer hover:opacity-80 transition-opacity">
-              <img alt="rhello" className="h-12 hidden sm:block" loading="lazy" src="/lovable-uploads/730861b1-e6da-47c3-991c-dadbca0b7fa1.png" />
-              <img src={symbolRhelloDark} alt="rhello" className="h-14 w-14 sm:hidden" loading="lazy" />
+              <img alt="rhello" className="h-8 hidden sm:block" loading="lazy" src="/lovable-uploads/730861b1-e6da-47c3-991c-dadbca0b7fa1.png" />
+              <img src={symbolRhelloDark} alt="rhello" className="h-10 w-10 sm:hidden" loading="lazy" />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-56 bg-background">
             <DropdownMenuItem onClick={() => navigate("/scorecards")} className="cursor-pointer">
               <FileText className="mr-2 h-4 w-4" />
-              <span className="font-bold">Scorecards</span>
+              <span className="font-bold text-base">Scorecards</span>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => navigate("/estudo-mercado")} className="cursor-pointer">
               <TrendingUp className="mr-2 h-4 w-4" />
-              <span className="font-bold">Estudo de Mercado</span>
+              <span className="font-bold text-base">Estudo de Mercado</span>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => navigate("/whatsapp-templates")} className="cursor-pointer">
               <MessageSquare className="mr-2 h-4 w-4" />
-              <span className="font-bold">Templates de WhatsApp</span>
+              <span className="font-bold text-base">Templates de WhatsApp</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
