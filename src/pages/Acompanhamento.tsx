@@ -293,6 +293,15 @@ export default function Acompanhamento() {
             </Card>
           </div>}
 
+        {/* Divider */}
+        {!selectedVaga && vagas.length > 0 && (
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-border/50"></div>
+            </div>
+          </div>
+        )}
+
         {/* Vagas Overview - Small Cards */}
         {!selectedVaga && <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {vagas.map(vaga => {
