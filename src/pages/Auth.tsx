@@ -59,7 +59,7 @@ export default function Auth() {
       setLoading(false);
     }
   };
-  return <div className="min-h-screen flex items-center justify-between p-4 md:p-8 lg:p-16 relative overflow-hidden" style={{
+  return <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden" style={{
     backgroundColor: 'rgba(255, 205, 0, 0.05)'
   }}>
       {/* Background decorative elements */}
@@ -68,20 +68,33 @@ export default function Auth() {
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-[#ffcd00]/5 rounded-full blur-3xl" />
       </div>
 
-      {/* Login Card - Left Side */}
-      <Card className="w-full max-w-md relative z-10 border-0 shadow-2xl animate-fade-in ml-0 md:ml-8 lg:ml-16">
-        <CardHeader className="space-y-6 text-center pb-8">
-          <div className="space-y-2">
-            <CardTitle className="text-3xl font-bold" style={{
-            color: 'hsl(var(--foreground))'
-          }}>
-              Bem-vindo
-            </CardTitle>
-            <CardDescription className="text-base font-medium">
-              Entre com suas credenciais para acessar o sistema
-            </CardDescription>
-          </div>
-        </CardHeader>
+      {/* Centered Content */}
+      <div className="flex flex-col items-center gap-8 relative z-10">
+        {/* Rhello Flow Logo - Above Card */}
+        <div className="flex items-center gap-1">
+          <img alt="Rhello RH" className="h-20 w-auto" src="/lovable-uploads/0e3e8693-dfae-4588-8a04-9a33b7dd1eea.png" />
+          <span style={{
+            color: '#00141d',
+            fontFamily: 'Manrope, sans-serif'
+          }} className="text-7xl font-black leading-none">
+            Flow
+          </span>
+        </div>
+
+        {/* Login Card */}
+        <Card className="w-full max-w-md border-0 shadow-2xl animate-fade-in">
+          <CardHeader className="space-y-6 text-center pb-8">
+            <div className="space-y-2">
+              <CardTitle className="text-3xl font-bold" style={{
+              color: 'hsl(var(--foreground))'
+            }}>
+                Bem-vindo
+              </CardTitle>
+              <CardDescription className="text-base font-medium">
+                Entre com suas credenciais para acessar o sistema
+              </CardDescription>
+            </div>
+          </CardHeader>
 
         <CardContent className="pb-8">
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -113,21 +126,11 @@ export default function Auth() {
             </Button>
           </form>
 
-          <div className="mt-6 text-center text-sm text-muted-foreground">
-            Sistema de Recrutamento e Seleção
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Rhello Flow Logo - Right Side */}
-      <div className="hidden lg:flex items-center gap-1 relative z-10 mr-16">
-        <img alt="Rhello RH" className="h-24 w-auto" src="/lovable-uploads/0e3e8693-dfae-4588-8a04-9a33b7dd1eea.png" />
-        <span style={{
-          color: '#faec3e',
-          fontFamily: 'Manrope, sans-serif'
-        }} className="text-8xl font-black leading-none">
-          Flow
-        </span>
+            <div className="mt-6 text-center text-sm text-muted-foreground">
+              Sistema de Recrutamento e Seleção
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>;
 }
