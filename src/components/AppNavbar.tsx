@@ -60,15 +60,15 @@ export function AppNavbar() {
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-56 bg-background">
-            <DropdownMenuItem onClick={() => navigate("/scorecards")} className="cursor-pointer">
+            <DropdownMenuItem onClick={() => navigate("/scorecards")} className="cursor-pointer hover:bg-[#ffcd00]/10">
               <FileText className="mr-2 h-5 w-5 text-[#ffcd00]" />
               <span className="font-bold text-base">Scorecards</span>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate("/estudo-mercado")} className="cursor-pointer">
+            <DropdownMenuItem onClick={() => navigate("/estudo-mercado")} className="cursor-pointer hover:bg-[#ffcd00]/10">
               <TrendingUp className="mr-2 h-5 w-5 text-[#ffcd00]" />
               <span className="font-bold text-base">Estudo de Mercado</span>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate("/whatsapp-templates")} className="cursor-pointer">
+            <DropdownMenuItem onClick={() => navigate("/whatsapp-templates")} className="cursor-pointer hover:bg-[#ffcd00]/10">
               <MessageSquare className="mr-2 h-5 w-5 text-[#ffcd00]" />
               <span className="font-bold text-base">Templates de WhatsApp</span>
             </DropdownMenuItem>

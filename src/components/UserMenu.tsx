@@ -101,19 +101,19 @@ export function UserMenu() {
         
         <DropdownMenuSeparator />
         
-        <DropdownMenuItem className="cursor-pointer py-2.5">
+        <DropdownMenuItem className="cursor-pointer py-2.5 hover:bg-[#ffcd00]/10">
           <User className="mr-2 h-5 w-5" />
           <span className="text-base">Meu perfil</span>
         </DropdownMenuItem>
         
         {isAdmin && (
           <>
-            <DropdownMenuItem className="cursor-pointer py-2.5" onClick={() => navigate("/gerenciar-usuarios")}>
+            <DropdownMenuItem className="cursor-pointer py-2.5 hover:bg-[#ffcd00]/10" onClick={() => navigate("/gerenciar-usuarios")}>
               <Users className="mr-2 h-5 w-5" />
               <span className="text-base">Gerenciar Usuários</span>
             </DropdownMenuItem>
             
-            <DropdownMenuItem className="cursor-pointer py-2.5" onClick={() => navigate("/gerenciar-exclusoes")}>
+            <DropdownMenuItem className="cursor-pointer py-2.5 hover:bg-[#ffcd00]/10" onClick={() => navigate("/gerenciar-exclusoes")}>
               <Trash2 className="mr-2 h-5 w-5" />
               <span className="text-base">Gerenciar Exclusões</span>
               {pendingCount > 0 && (
@@ -121,14 +121,14 @@ export function UserMenu() {
               )}
             </DropdownMenuItem>
             
-            <DropdownMenuItem className="cursor-pointer py-2.5" onClick={() => navigate("/audit-log")}>
+            <DropdownMenuItem className="cursor-pointer py-2.5 hover:bg-[#ffcd00]/10" onClick={() => navigate("/audit-log")}>
               <FileText className="mr-2 h-5 w-5" />
               <span className="text-base">Auditoria</span>
             </DropdownMenuItem>
           </>
         )}
         
-        <DropdownMenuItem className="cursor-pointer py-2.5">
+        <DropdownMenuItem className="cursor-pointer py-2.5 hover:bg-[#ffcd00]/10">
           <Settings className="mr-2 h-5 w-5" />
           <span className="text-base">Configurações</span>
         </DropdownMenuItem>
