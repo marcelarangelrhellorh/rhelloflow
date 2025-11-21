@@ -295,11 +295,7 @@ export default function Acompanhamento() {
 
         {/* Divider */}
         {!selectedVaga && vagas.length > 0 && (
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-border/50"></div>
-            </div>
-          </div>
+          <div className="w-full h-px bg-gradient-to-r from-transparent via-border/30 to-transparent shadow-sm"></div>
         )}
 
         {/* Vagas Overview - Small Cards */}
