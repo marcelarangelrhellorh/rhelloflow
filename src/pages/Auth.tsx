@@ -60,12 +60,12 @@ export default function Auth() {
     }
   };
   return <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden" style={{
-    backgroundColor: '#00141d'
+    backgroundColor: '#fffdf6'
   }}>
       {/* Background decorative elements */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#ffcd00]/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-[#ffcd00]/5 rounded-full blur-3xl" />
       </div>
 
       <Card className="w-full max-w-md relative z-10 border-border/50 shadow-2xl animate-fade-in">
