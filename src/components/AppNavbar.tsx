@@ -54,12 +54,16 @@ export function AppNavbar() {
   }
   return <header className="sticky top-0 z-50 w-full border-b border-[#d4cec6]/40 bg-[#ffcd00]/5 shadow-[0_2px_12px_rgba(0,0,0,0.06)]">
       <div className="flex h-16 items-center px-4 sm:px-6 gap-6 max-w-[1600px] mx-auto">
-        {/* Sidebar Trigger + Logo */}
+        {/* Logo como Sidebar Trigger */}
         <div className="flex items-center gap-3 shrink-0">
-          <SidebarTrigger className="hidden lg:flex" />
-          <NavLink to="/" className="flex items-center">
-            <img alt="rhello" className="h-8 hidden sm:block" loading="lazy" src="/lovable-uploads/730861b1-e6da-47c3-991c-dadbca0b7fa1.png" />
-            <img src={symbolRhelloDark} alt="rhello" className="h-10 w-10 sm:hidden" loading="lazy" />
+          <SidebarTrigger className="hidden lg:flex p-0 hover:bg-transparent">
+            <img src={symbolRhelloDark} alt="rhello" className="h-10 w-10 cursor-pointer" loading="lazy" />
+          </SidebarTrigger>
+          <NavLink to="/" className="flex items-center lg:hidden">
+            <img src={symbolRhelloDark} alt="rhello" className="h-10 w-10" loading="lazy" />
+          </NavLink>
+          <NavLink to="/" className="hidden sm:flex items-center">
+            <img alt="rhello" className="h-8" loading="lazy" src="/lovable-uploads/730861b1-e6da-47c3-991c-dadbca0b7fa1.png" />
           </NavLink>
         </div>
 
