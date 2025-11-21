@@ -304,24 +304,28 @@ export default function Vagas() {
     loadVagas();
   }, [viewType]);
   return <div className="min-h-screen bg-background">
-      <div className="max-w-[1600px] mx-auto p-4 sm:p-6 space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Vagas</h1>
-            <p className="text-muted-foreground mt-1">
-              {viewType === "cards" ? "Gerencie todas as vagas abertas" : "Visualize o pipeline completo de vagas"}
-            </p>
-          </div>
-          <div className="flex gap-3">
-            <Button onClick={() => navigate("/vagas/nova")} className="bg-[#faec3e] text-slate-950 hover:bg-[#faec3e]/90 h-11 px-6 font-semibold">
-              <Plus className="mr-2 h-4 w-4" />
-              Nova Vaga
-            </Button>
+      {/* Header - Fixed */}
+      <div className="sticky top-0 z-20 bg-background border-b border-border shadow-sm">
+        <div className="px-6 py-4">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <h1 className="text-3xl font-bold text-foreground">Vagas</h1>
+              <p className="text-base text-muted-foreground">
+                {viewType === "cards" ? "Gerencie todas as vagas abertas" : "Visualize o pipeline completo de vagas"}
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <Button onClick={() => navigate("/vagas/nova")} className="bg-[#ffcd00] hover:bg-[#ffcd00]/90 text-[#00141d] font-bold h-11 px-6">
+                <Plus className="mr-2 h-4 w-4" />
+                Nova Vaga
+              </Button>
+            </div>
           </div>
         </div>
+      </div>
 
-        {/* Toggle de Visualização */}
+      {/* Toggle de Visualização */}
+      <div className="px-6 pt-4 bg-background">
         <Tabs value={viewType} onValueChange={v => setViewType(v as "cards" | "funnel")}>
           <TabsList className="grid w-full max-w-[400px] grid-cols-2 bg-background border border-border">
             <TabsTrigger value="cards" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-bold">
