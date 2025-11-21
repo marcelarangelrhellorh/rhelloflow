@@ -353,12 +353,12 @@ export default function Candidatos() {
       {/* Toggle de Visualização */}
       <div className="px-6 pt-4">
         <Tabs value={viewType} onValueChange={v => setViewType(v as "cards" | "funnel")}>
-          <TabsList className="grid w-full max-w-[400px] grid-cols-2">
-            <TabsTrigger value="cards" className="gap-2">
+          <TabsList className="grid w-full max-w-[400px] grid-cols-2 bg-background border border-border">
+            <TabsTrigger value="cards" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-bold">
               <Grid3x3 className="h-4 w-4" />
               Cards
             </TabsTrigger>
-            <TabsTrigger value="funnel" className="gap-2">
+            <TabsTrigger value="funnel" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-bold">
               <LayoutGrid className="h-4 w-4" />
               Funil
             </TabsTrigger>
