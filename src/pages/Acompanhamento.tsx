@@ -241,7 +241,7 @@ export default function Acompanhamento() {
 
         {/* Metrics Cards */}
         {!selectedVaga && <div className="grid gap-4 sm:grid-cols-3">
-            <Card className="border-2 border-primary bg-primary/5">
+            <Card className="border-2 border-primary bg-primary/5 shadow-sm">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -255,7 +255,7 @@ export default function Acompanhamento() {
               </CardContent>
             </Card>
 
-            <Card className="border-2 border-primary bg-primary/5">
+            <Card className="border-2 border-primary bg-primary/5 shadow-sm">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -269,7 +269,7 @@ export default function Acompanhamento() {
               </CardContent>
             </Card>
 
-            <Card className="border-2 border-primary bg-primary/5 cursor-pointer transition-all hover:shadow-md hover:border-primary/50" onClick={() => setNoFeedbackDrawerOpen(true)}>
+            <Card className="border-2 border-primary bg-primary/5 shadow-sm cursor-pointer transition-all hover:shadow-md hover:border-primary/50" onClick={() => setNoFeedbackDrawerOpen(true)}>
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -289,7 +289,7 @@ export default function Acompanhamento() {
             {vagas.map(vaga => {
           const vagaCandidatosCount = candidatos.filter(c => c.vaga_relacionada_id === vaga.id).length;
           const currentStage = getStageBySlug(vaga.status);
-          return <Card key={vaga.id} className="cursor-pointer transition-all hover:shadow-md border-2 border-border hover:border-muted-foreground/50" onClick={() => setSelectedVaga(vaga.id)}>
+          return <Card key={vaga.id} className="cursor-pointer transition-all shadow-sm hover:shadow-md border-2 border-border hover:border-muted-foreground/50" onClick={() => setSelectedVaga(vaga.id)}>
                   <CardContent className="p-4">
                     <div className="space-y-2">
                       <div className="flex items-start justify-between gap-2">
@@ -332,7 +332,7 @@ export default function Acompanhamento() {
 
             {/* Info Grid */}
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              <Card className="border-primary">
+              <Card className="border-primary shadow-sm">
                 <CardContent className="p-4">
                   <p className="text-muted-foreground mb-1 text-base font-semibold">Etapa Atual</p>
                   <Badge variant="secondary" className="text-sm bg-[#ffcd00]">
@@ -341,7 +341,7 @@ export default function Acompanhamento() {
                 </CardContent>
               </Card>
 
-              <Card className="border-primary">
+              <Card className="border-primary shadow-sm">
                 <CardContent className="p-4">
                   <p className="text-muted-foreground mb-1 text-base font-semibold">Candidatos</p>
                   <div className="flex items-center gap-2">
@@ -351,7 +351,7 @@ export default function Acompanhamento() {
                 </CardContent>
               </Card>
 
-              <Card className="border-primary">
+              <Card className="border-primary shadow-sm">
                 <CardContent className="p-4">
                   <p className="text-muted-foreground mb-1 text-base font-semibold">Duração</p>
                   <div className="flex items-center gap-2">
@@ -363,7 +363,7 @@ export default function Acompanhamento() {
                 </CardContent>
               </Card>
 
-              {selectedVagaData.modelo_trabalho && <Card className="border-primary">
+              {selectedVagaData.modelo_trabalho && <Card className="border-primary shadow-sm">
                   <CardContent className="p-4">
                     <p className="text-muted-foreground mb-1 text-base font-semibold">Modelo</p>
                     <div className="flex items-center gap-2">
@@ -373,7 +373,7 @@ export default function Acompanhamento() {
                   </CardContent>
                 </Card>}
 
-              {selectedVagaData.regime && <Card className="border-primary">
+              {selectedVagaData.regime && <Card className="border-primary shadow-sm">
                   <CardContent className="p-4">
                     <p className="text-sm text-muted-foreground mb-1">Contratação</p>
                     <div className="flex items-center gap-2">
@@ -383,7 +383,7 @@ export default function Acompanhamento() {
                   </CardContent>
                 </Card>}
 
-              <Card className="border-primary">
+              <Card className="border-primary shadow-sm">
                 <CardContent className="p-4">
                   <p className="text-muted-foreground mb-1 text-base font-semibold">Vaga Publicada</p>
                   <div className="flex items-center gap-2">
@@ -399,7 +399,7 @@ export default function Acompanhamento() {
             </div>
 
             {/* Benefits Section */}
-            {selectedVagaData.beneficios && selectedVagaData.beneficios.length > 0 && <Card>
+            {selectedVagaData.beneficios && selectedVagaData.beneficios.length > 0 && <Card className="shadow-sm">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-2 mb-4">
                     <Briefcase className="h-5 w-5 text-primary" />
@@ -415,7 +415,7 @@ export default function Acompanhamento() {
               </Card>}
 
             {/* Process Timeline */}
-            <Card>
+            <Card className="shadow-sm">
               <CardContent className="p-6">
                 <h3 className="font-semibold text-lg mb-6">Linha do Tempo do Processo</h3>
                 <div className="relative overflow-x-auto pb-4">
@@ -466,7 +466,7 @@ export default function Acompanhamento() {
             </Card>
 
             {/* Candidates List */}
-            {vagaCandidatos.length > 0 && <Card>
+            {vagaCandidatos.length > 0 && <Card className="shadow-sm">
                 <CardContent className="p-6">
                   <h3 className="font-semibold text-lg mb-4">Candidatos ({vagaCandidatos.length})</h3>
                   <div className="space-y-3">
@@ -489,7 +489,7 @@ export default function Acompanhamento() {
           </div>}
 
         {/* Empty State */}
-        {!selectedVaga && vagas.length === 0 && <Card>
+        {!selectedVaga && vagas.length === 0 && <Card className="shadow-sm">
             <CardContent className="p-12 text-center">
               <Briefcase className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
               <p className="text-muted-foreground">Nenhum processo em andamento no momento</p>
@@ -511,7 +511,7 @@ export default function Acompanhamento() {
           </SheetHeader>
 
           <div className="mt-6 space-y-4">
-            {candidatesWithoutFeedback.length > 0 ? candidatesWithoutFeedback.map(candidate => <Card key={candidate.id} className="cursor-pointer hover:shadow-md transition-all" onClick={() => {
+            {candidatesWithoutFeedback.length > 0 ? candidatesWithoutFeedback.map(candidate => <Card key={candidate.id} className="cursor-pointer shadow-sm hover:shadow-md transition-all" onClick={() => {
             setSelectedCandidateId(candidate.id);
             setCandidateDrawerOpen(true);
             setNoFeedbackDrawerOpen(false);
