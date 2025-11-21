@@ -115,7 +115,7 @@ export default function Auth() {
               </div>
             </div>
 
-            <Button type="submit" disabled={loading} className="w-full h-12 text-base font-semibold text-primary-foreground transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] bg-[#faec3e]">
+            <Button type="submit" disabled={loading} className="w-full h-12 text-base font-semibold text-white transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] bg-[#00141d]">
               {loading ? <div className="flex items-center gap-2">
                   <div className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
                   Processando...
