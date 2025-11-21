@@ -123,7 +123,7 @@ export default function ClientView() {
 
         {/* Info Cards */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Card>
+          <Card className="shadow-sm">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Etapa Atual da Contratação
@@ -139,7 +139,7 @@ export default function ClientView() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="shadow-sm">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Candidatos Ativos
@@ -153,7 +153,7 @@ export default function ClientView() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="shadow-sm">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Duração do Processo
@@ -167,7 +167,7 @@ export default function ClientView() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="shadow-sm">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Modelo de Trabalho
@@ -183,7 +183,7 @@ export default function ClientView() {
         </div>
 
         {vaga.tipoContratacao && (
-          <Card>
+          <Card className="shadow-sm">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Formato da Contratação
@@ -196,7 +196,7 @@ export default function ClientView() {
         )}
 
         {/* Timeline */}
-        <Card>
+        <Card className="shadow-sm">
           <CardHeader>
             <CardTitle>Linha do Tempo do Processo</CardTitle>
           </CardHeader>
@@ -255,7 +255,7 @@ export default function ClientView() {
 
         {/* Recent Activity */}
         {timeline.length > 0 && (
-          <Card>
+          <Card className="shadow-sm">
             <CardHeader>
               <CardTitle>Atividade Recente</CardTitle>
             </CardHeader>
