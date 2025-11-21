@@ -333,15 +333,15 @@ export default function Candidatos() {
               </p>
             </div>
             <div className="flex gap-2">
-              <Button onClick={() => navigate('/banco-talentos')} variant="outline" className="font-bold border-primary text-primary hover:bg-primary hover:text-primary-foreground">
+              <Button onClick={() => navigate('/banco-talentos')} className="bg-[#ffcd00] hover:bg-[#ffcd00]/90 text-[#00141d] font-bold">
                 <Users className="mr-2 h-4 w-4" />
                 Banco de Talentos
               </Button>
-              <Button onClick={() => navigate('/candidatos/novo')} className="bg-[#F9EC3F] hover:bg-[#E5D72E] text-[#00141D] font-bold">
+              <Button onClick={() => navigate('/candidatos/novo')} className="bg-[#ffcd00] hover:bg-[#ffcd00]/90 text-[#00141d] font-bold">
                 <Plus className="mr-2 h-4 w-4" />
                 Novo Candidato
               </Button>
-              <Button onClick={() => setImportModalOpen(true)} variant="outline" className="font-bold">
+              <Button onClick={() => setImportModalOpen(true)} className="bg-[#ffcd00] hover:bg-[#ffcd00]/90 text-[#00141d] font-bold">
                 <FileSpreadsheet className="mr-2 h-4 w-4" />
                 Importar XLS
               </Button>
