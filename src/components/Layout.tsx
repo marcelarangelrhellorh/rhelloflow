@@ -1,4 +1,6 @@
 import { AppNavbar } from "./AppNavbar";
+import { AppSidebar } from "./AppSidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { Outlet, Navigate, useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -55,10 +57,17 @@ export function Layout() {
   if (!user) {
     return <Navigate to="/login" replace />;
   }
-  return <div className="min-h-screen w-full">
-      <AppNavbar />
-      <main className="bg-background-light min-h-screen bg-[z#] bg-[#ffcd00]/[0.03]">
-        <Outlet />
-      </main>
-    </div>;
+  return (
+    <SidebarProvider defaultOpen={false}>
+      <div className="min-h-screen w-full flex">
+        <AppSidebar />
+        <div className="flex-1 flex flex-col w-full">
+          <AppNavbar />
+          <main className="bg-background-light min-h-screen bg-[#ffcd00]/[0.03] flex-1">
+            <Outlet />
+          </main>
+        </div>
+      </div>
+    </SidebarProvider>
+  );
 }
