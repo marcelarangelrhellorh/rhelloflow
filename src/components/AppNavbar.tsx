@@ -28,14 +28,6 @@ const menuItems = [{
   url: "/candidatos",
   roles: ["admin", "recrutador", "cs"]
 }, {
-  title: "Scorecards",
-  url: "/scorecards",
-  roles: ["admin", "recrutador", "cs"]
-}, {
-  title: "Estudo de Mercado",
-  url: "/estudo-mercado",
-  roles: ["admin", "recrutador", "cs"]
-}, {
   title: "Relatórios",
   url: "/relatorios",
   roles: ["admin", "recrutador", "cs"]
