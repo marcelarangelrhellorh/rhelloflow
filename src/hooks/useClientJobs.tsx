@@ -37,16 +37,12 @@ export function useClientJobs(userId: string | undefined) {
   return useQuery({
     queryKey: ['client-jobs', userId],
     queryFn: async (): Promise<ClientJob[]> => {
-      logger.info('useClientJobs: Starting query', { userId });
-      
       if (!userId) {
-        logger.warn('useClientJobs: No userId provided');
         return [];
       }
 
       try {
         // Primeiro, buscar empresa_id do usuário
-        logger.info('useClientJobs: Fetching profile', { userId });
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('empresa_id')
@@ -58,15 +54,11 @@ export function useClientJobs(userId: string | undefined) {
           throw profileError;
         }
         
-        logger.info('useClientJobs: Profile fetched', { profile });
-        
         if (!profile?.empresa_id) {
-          logger.warn('useClientJobs: No empresa_id found');
           return [];
         }
 
         // Buscar todas as vagas da empresa
-        logger.info('useClientJobs: Fetching jobs', { empresa_id: profile.empresa_id });
         const { data, error } = await supabase
           .from('vagas')
           .select(`
@@ -96,8 +88,6 @@ export function useClientJobs(userId: string | undefined) {
           logger.error('useClientJobs: Vagas error', error);
           throw error;
         }
-        
-        logger.info('useClientJobs: Jobs fetched', { count: data?.length || 0 });
         
         return (data || []) as any[];
       } catch (error) {
