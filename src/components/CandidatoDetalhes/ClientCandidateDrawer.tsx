@@ -45,6 +45,16 @@ interface FeedbackRequest {
   expires_at: string;
 }
 
+interface Scorecard {
+  id: string;
+  total_score: number;
+  match_percentage: number;
+  recommendation: string;
+  comments: string | null;
+  created_at: string;
+  evaluator_name: string | null;
+}
+
 interface ClientCandidateDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -55,6 +65,7 @@ export function ClientCandidateDrawer({ open, onOpenChange, candidateId }: Clien
   const [candidate, setCandidate] = useState<any>(null);
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [feedbackRequests, setFeedbackRequests] = useState<FeedbackRequest[]>([]);
+  const [scorecards, setScorecards] = useState<Scorecard[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -97,6 +108,43 @@ export function ClientCandidateDrawer({ open, onOpenChange, candidateId }: Clien
       if (requestsError) throw requestsError;
       setFeedbackRequests(requestsData || []);
 
+      // Load scorecards
+      const { data: scorecardsData, error: scorecardsError } = await supabase
+        .from("candidate_scorecards")
+        .select(`
+          id,
+          total_score,
+          match_percentage,
+          recommendation,
+          comments,
+          created_at,
+          evaluator_id
+        `)
+        .eq("candidate_id", candidateId)
+        .order("created_at", { ascending: false });
+
+      if (scorecardsError) throw scorecardsError;
+
+      // Get evaluator names
+      if (scorecardsData && scorecardsData.length > 0) {
+        const evaluatorIds = [...new Set(scorecardsData.map(s => s.evaluator_id))];
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, full_name")
+          .in("id", evaluatorIds);
+
+        const profilesMap = new Map(profiles?.map(p => [p.id, p.full_name]) || []);
+        
+        const scorecardsWithNames = scorecardsData.map(scorecard => ({
+          ...scorecard,
+          evaluator_name: profilesMap.get(scorecard.evaluator_id) || null
+        }));
+
+        setScorecards(scorecardsWithNames);
+      } else {
+        setScorecards([]);
+      }
+
     } catch (error) {
       logger.error("Erro ao carregar dados do candidato:", error);
     } finally {
@@ -114,6 +162,15 @@ export function ClientCandidateDrawer({ open, onOpenChange, candidateId }: Clien
 
   const getFeedbackLink = (token: string) => {
     return `${window.location.origin}/feedback/${token}`;
+  };
+
+  const getRecommendationBadge = (recommendation: string) => {
+    const variants = {
+      'yes': { label: 'Recomendado', variant: 'default' as const },
+      'maybe': { label: 'Talvez', variant: 'secondary' as const },
+      'no': { label: 'Não Recomendado', variant: 'destructive' as const }
+    };
+    return variants[recommendation as keyof typeof variants] || { label: recommendation, variant: 'outline' as const };
   };
 
   if (loading || !candidate) {
@@ -174,20 +231,91 @@ export function ClientCandidateDrawer({ open, onOpenChange, candidateId }: Clien
             )}
           </div>
 
-          {candidate.curriculo_link && (
+          {(candidate.curriculo_link || candidate.curriculo_url) && (
             <>
               <Separator />
               <div className="space-y-3">
+                <h4 className="font-semibold text-foreground text-lg flex items-center gap-2">
+                  <Download className="h-5 w-5" />
+                  Currículo
+                </h4>
                 <Button 
                   className="w-full"
                   variant="outline"
                   asChild
                 >
-                  <a href={candidate.curriculo_link} target="_blank" rel="noopener noreferrer">
+                  <a 
+                    href={candidate.curriculo_link || candidate.curriculo_url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    download
+                  >
                     <Download className="mr-2 h-4 w-4" />
                     Baixar Currículo
                   </a>
                 </Button>
+              </div>
+            </>
+          )}
+
+          {/* Seção de Scorecards */}
+          {scorecards.length > 0 && (
+            <>
+              <Separator />
+              <div className="space-y-4">
+                <h4 className="font-semibold text-foreground text-lg flex items-center gap-2">
+                  <Briefcase className="h-5 w-5" />
+                  Avaliações (Scorecards)
+                </h4>
+
+                <div className="space-y-3">
+                  {scorecards.map((scorecard) => {
+                    const recommendation = getRecommendationBadge(scorecard.recommendation);
+                    
+                    return (
+                      <Card key={scorecard.id}>
+                        <CardContent className="p-4">
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <Badge variant={recommendation.variant} className="text-xs font-semibold">
+                                {recommendation.label}
+                              </Badge>
+                              <span className="text-xs text-muted-foreground">
+                                {format(new Date(scorecard.created_at), "dd/MM/yyyy", { locale: ptBR })}
+                              </span>
+                            </div>
+
+                            {scorecard.evaluator_name && (
+                              <p className="text-sm text-muted-foreground">
+                                Avaliador: {scorecard.evaluator_name}
+                              </p>
+                            )}
+
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="space-y-1">
+                                <p className="text-xs text-muted-foreground">Score Total</p>
+                                <p className="text-2xl font-bold text-primary">{scorecard.total_score}%</p>
+                              </div>
+                              <div className="space-y-1">
+                                <p className="text-xs text-muted-foreground">Match</p>
+                                <p className="text-2xl font-bold text-primary">{scorecard.match_percentage}%</p>
+                              </div>
+                            </div>
+
+                            {scorecard.comments && (
+                              <div className="space-y-1">
+                                <p className="text-xs text-muted-foreground font-semibold">Comentários:</p>
+                                <p className="text-sm text-foreground whitespace-pre-wrap">
+                                  {scorecard.comments}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
               </div>
             </>
           )}
