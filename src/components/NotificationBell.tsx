@@ -161,10 +161,10 @@ export function NotificationBell() {
         <Button 
           variant="ghost" 
           size="icon" 
-          className="relative shrink-0 text-white hover:text-[#F9EC3F] hover:bg-white/10"
+          className="relative shrink-0 text-[#00141d] hover:text-[#00141d]/80 hover:bg-[#ffcd00]/10"
           title="Notificações"
         >
-          <Bell className="h-5 w-5" />
+          <Bell className="h-6 w-6" />
           {unreadCount > 0 && (
             <Badge
               variant="destructive"
