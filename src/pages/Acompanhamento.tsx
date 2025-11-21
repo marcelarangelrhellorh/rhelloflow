@@ -214,16 +214,15 @@ export default function Acompanhamento() {
     setCandidateDrawerOpen(true);
   };
 
+  // Check if candidate has pending feedback request
+  const hasPendingFeedback = (candidateId: string) => {
+    return candidatesWithoutFeedback.some(c => c.id === candidateId);
+  };
+
   // Calculate progress and timeline based on current status
   const getTimelineSteps = (currentStatus: string) => {
     // Normalize status: try to match by slug or name
     const currentStage = getStageBySlug(currentStatus) || getStageByName(currentStatus);
-    
-    logger.info('Timeline Debug:', {
-      currentStatus,
-      currentStage,
-      allStages: JOB_STAGES.filter(s => s.kind === "normal")
-    });
     
     return JOB_STAGES.filter(stage => stage.kind === "normal").map(stage => {
       const isCompleted = currentStage ? stage.order <= currentStage.order : false;
@@ -484,9 +483,20 @@ export default function Acompanhamento() {
                 <CardContent className="p-6">
                   <h3 className="font-semibold text-lg mb-4">Candidatos ({vagaCandidatos.length})</h3>
                   <div className="space-y-3">
-                    {vagaCandidatos.map(candidato => <div key={candidato.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleCandidateClick(candidato.id)}>
-                        <div>
-                          <p className="text-foreground text-base font-semibold">{candidato.nome_completo}</p>
+                    {vagaCandidatos.map(candidato => {
+                      const isPendingFeedback = hasPendingFeedback(candidato.id);
+                      
+                      return <div key={candidato.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleCandidateClick(candidato.id)}>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <p className="text-foreground text-base font-semibold">{candidato.nome_completo}</p>
+                            {isPendingFeedback && (
+                              <Badge variant="outline" className="bg-orange-500/10 text-orange-500 border-orange-500/20 text-xs px-2 py-0.5">
+                                <MessageSquare className="h-3 w-3 mr-1" />
+                                Feedback Pendente
+                              </Badge>
+                            )}
+                          </div>
                           <p className="text-muted-foreground text-base font-medium">
                             Desde {format(new Date(candidato.criado_em), "dd/MM/yyyy", {
                       locale: ptBR
@@ -496,7 +506,8 @@ export default function Acompanhamento() {
                         <Badge variant={getStatusBadgeVariant(candidato.status)} className="text-base font-semibold bg-[#ffcd00]/[0.36]">
                           {candidato.status}
                         </Badge>
-                      </div>)}
+                      </div>;
+                    })}
                   </div>
                 </CardContent>
               </Card>}
