@@ -67,9 +67,9 @@ export function AppNavbar() {
         <nav className="hidden lg:flex flex-1 items-center justify-center gap-6">
           {visibleMenuItems.map(item => <NavLink key={item.title} to={item.url} end={item.url === "/"} className={({
           isActive
-        }) => `px-3 py-2 text-base font-medium transition-all duration-200 ease-in-out whitespace-nowrap relative ${isActive ? "text-primary font-semibold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-primary after:rounded-t-md" : "text-foreground hover:bg-primary/10 hover:text-primary rounded-lg"}`} style={{
+        }) => `px-3 py-2 text-base font-bold transition-all duration-200 ease-in-out whitespace-nowrap relative ${isActive ? "text-primary font-bold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-primary after:rounded-t-md" : "text-foreground hover:bg-primary/10 hover:text-primary rounded-lg"}`} style={{
           fontFamily: 'Manrope, sans-serif',
-          fontWeight: 500,
+          fontWeight: 700,
           fontSize: '16px'
         }}>
               {item.title}
@@ -107,7 +107,7 @@ export function AppNavbar() {
               <nav className="mt-8 flex flex-col gap-2">
                 {visibleMenuItems.map(item => <NavLink key={item.title} to={item.url} end={item.url === "/"} onClick={() => setMobileMenuOpen(false)} className={({
                 isActive
-              }) => `flex items-center px-4 py-3 rounded-lg text-sm font-medium transition-all ${isActive ? "bg-primary/20 text-primary font-semibold" : "text-foreground hover:bg-muted"}`}>
+              }) => `flex items-center px-4 py-3 rounded-lg text-sm font-bold transition-all ${isActive ? "bg-primary/20 text-primary font-bold" : "text-foreground hover:bg-muted"}`}>
                     <span>{item.title}</span>
                   </NavLink>)}
               </nav>
