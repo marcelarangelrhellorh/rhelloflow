@@ -303,7 +303,7 @@ export default function Vagas() {
   useEffect(() => {
     loadVagas();
   }, [viewType]);
-  return <div className="min-h-screen" style={{backgroundColor: '#00141d'}}>
+  return <div className="min-h-screen bg-background">
       <div className="max-w-[1600px] mx-auto p-4 sm:p-6 space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -406,19 +406,6 @@ export default function Vagas() {
                   Limpar filtro
                 </Button>
               </div>}
-
-            {/* Cards */}
-            {loading ? <div className="text-center py-12">
-                <p className="text-muted-foreground">Carregando vagas...</p>
-              </div> : paginatedData.length === 0 ? <div className="text-center py-12">
-                <p className="text-muted-foreground">Nenhuma vaga encontrada</p>
-              </div> : <>
-                <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" : "space-y-4"}>
-                  {paginatedData.map(vaga => <VagaCard key={vaga.id} vaga={vaga} onClick={() => handleCardClick(vaga.id)} viewMode={viewMode} />)}
-                </div>
-
-                <PaginationControls currentPage={currentPage} totalPages={totalPages} onPageChange={goToPage} canGoNext={canGoNext} canGoPrevious={canGoPrevious} startIndex={startIndex} endIndex={endIndex} totalItems={totalItems} />
-              </>}
           </TabsContent>
 
           {/* Visualização em Funil */}
@@ -426,12 +413,38 @@ export default function Vagas() {
             <StatsHeader totalVagasAbertas={vagas.filter(v => v.status_slug !== "concluida" && v.status_slug !== "cancelada").length} mediaDiasAbertos={mediaDiasAbertos} vagasEmAtencao={vagasForaPrazo} totalCandidatosAtivos={totalCandidatosAtivos} />
 
             <FilterBar searchTerm={searchTerm} onSearchChange={setSearchTerm} recrutadorFilter={recrutadorFilter} onRecrutadorChange={setRecrutadorFilter} clienteFilter={clienteFilter} onClienteChange={setClienteFilter} areaFilter={areaFilter} onAreaChange={setAreaFilter} statusFilter={statusFilter} onStatusChange={setStatusFilter} ordenacao={ordenacao} onOrdenacaoChange={setOrdenacao} recrutadores={recrutadores} clientes={clientes} areas={[]} statusOptions={statusOptions} />
-
-            {loading ? <div className="text-center py-12">
-                <p className="text-muted-foreground">Carregando vagas...</p>
-              </div> : <PipelineBoard stages={JOB_STAGES.filter(s => s.slug !== "cancelada")} jobs={filteredVagas} progresso={(statusSlug: string) => calculateProgress(statusSlug)} onJobMove={handleMoveJob} onJobClick={id => navigate(`/vagas/${id}`)} onJobEdit={id => navigate(`/vagas/${id}/editar`)} onJobMoveStage={id => navigate(`/vagas/${id}/editar`)} onJobDuplicate={() => {}} onJobClose={() => {}} />}
           </TabsContent>
         </Tabs>
+      </div>
+
+      {/* Área de Conteúdo com Background Escuro */}
+      <div style={{backgroundColor: '#00141d'}} className="min-h-[60vh]">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 pb-6">
+          <Tabs value={viewType}>
+            <TabsContent value="cards" className="mt-0">
+              {/* Cards */}
+              {loading ? <div className="text-center py-12">
+                  <p className="text-[#FFFDF6]">Carregando vagas...</p>
+                </div> : paginatedData.length === 0 ? <div className="text-center py-12">
+                  <p className="text-[#FFFDF6]">Nenhuma vaga encontrada</p>
+                </div> : <>
+                  <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pt-6" : "space-y-4 pt-6"}>
+                    {paginatedData.map(vaga => <VagaCard key={vaga.id} vaga={vaga} onClick={() => handleCardClick(vaga.id)} viewMode={viewMode} />)}
+                  </div>
+
+                  <div className="mt-6">
+                    <PaginationControls currentPage={currentPage} totalPages={totalPages} onPageChange={goToPage} canGoNext={canGoNext} canGoPrevious={canGoPrevious} startIndex={startIndex} endIndex={endIndex} totalItems={totalItems} />
+                  </div>
+                 </>}
+            </TabsContent>
+
+            <TabsContent value="funnel" className="mt-0">
+              {loading ? <div className="text-center py-12">
+                  <p className="text-[#FFFDF6]">Carregando vagas...</p>
+                </div> : <div className="pt-6"><PipelineBoard stages={JOB_STAGES.filter(s => s.slug !== "cancelada")} jobs={filteredVagas} progresso={(statusSlug: string) => calculateProgress(statusSlug)} onJobMove={handleMoveJob} onJobClick={id => navigate(`/vagas/${id}`)} onJobEdit={id => navigate(`/vagas/${id}/editar`)} onJobMoveStage={id => navigate(`/vagas/${id}/editar`)} onJobDuplicate={() => {}} onJobClose={() => {}} /></div>}
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
     </div>;
 }

@@ -317,15 +317,11 @@ export default function Candidatos() {
     endIndex
   } = usePagination(filteredCandidatos, 50);
   if (loading) {
-    return <div className="flex min-h-screen items-center justify-center" style={{
-      backgroundColor: '#00141d'
-    }}>
+    return <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
       </div>;
   }
-  return <div className="min-h-screen" style={{
-    backgroundColor: '#00141d'
-  }}>
+  return <div className="min-h-screen bg-background">
       {/* Header - Fixed */}
       <div className="sticky top-0 z-20 bg-background border-b border-border shadow-sm">
         <div className="px-6 py-4">
@@ -351,7 +347,7 @@ export default function Candidatos() {
       </div>
 
       {/* Toggle de Visualização */}
-      <div className="px-6 pt-4">
+      <div className="px-6 pt-4 bg-background">
         <Tabs value={viewType} onValueChange={v => setViewType(v as "cards" | "funnel")}>
           <TabsList className="grid w-full max-w-[400px] grid-cols-2 bg-background border border-border">
             <TabsTrigger value="cards" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-bold">
@@ -393,30 +389,6 @@ export default function Candidatos() {
                 </Button>
               </div>
             </div>
-
-            {/* Cards Grid */}
-            <div className="px-6 py-4 bg-[#faec3e]/[0.01]">
-              {filteredCandidatos.length === 0 ? <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <div className="mb-3 rounded-full bg-primary/10 p-4">
-                    <Plus className="h-10 w-10 text-primary" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-foreground mb-2">
-                    Nenhum candidato encontrado
-                  </h3>
-                  <p className="text-base text-muted-foreground mb-4 max-w-md">
-                    Adicione um novo clicando em "+ Novo Candidato"
-                  </p>
-                  <Button onClick={() => navigate('/candidatos/novo')} className="bg-[#F9EC3F] hover:bg-[#E5D72E] text-[#00141D] font-bold">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Novo Candidato
-                  </Button>
-                </div> : <>
-                  <div className={viewMode === "grid" ? "grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "space-y-4"}>
-                    {paginatedCandidatos.map(candidato => <CandidateCard key={candidato.id} candidato={candidato} onView={() => navigate(`/candidatos/${candidato.id}`)} onEdit={() => navigate(`/candidatos/${candidato.id}/editar`)} onDelete={() => setDeletingId(candidato.id)} onLinkJob={() => setLinkingJobId(candidato.id)} viewMode={viewMode} />)}
-                  </div>
-                  <PaginationControls currentPage={currentPage} totalPages={totalPages} onPageChange={goToPage} canGoPrevious={canGoPrevious} canGoNext={canGoNext} startIndex={startIndex} endIndex={endIndex} totalItems={filteredCandidatos.length} />
-                </>}
-            </div>
           </TabsContent>
 
           {/* Visualização em Funil */}
@@ -427,29 +399,66 @@ export default function Candidatos() {
             id: v.id,
             titulo: v.titulo
           }))} clientes={clientes} recrutadoresVaga={Array.from(new Set(vagas.map(v => v.recrutador_id).filter(Boolean)))} recrutadores={Array.from(new Set(candidatos.map(c => c.recrutador).filter(Boolean))) as string[]} users={users} />
-
-            {loading ? <div className="text-center py-12">
-                <p className="text-muted-foreground">Carregando candidatos...</p>
-              </div> : <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-                <div className="flex gap-4 overflow-x-auto pb-4 bg-[#36404a]/[0.06]">
-                  {statusColumns.map(status => {
-                const candidatosStatus = getCandidatesByStatus(status);
-                return <FunnelColumn key={status} status={status} count={candidatosStatus.length} colorClass={statusColors[status]}>
-                        {candidatosStatus.map(candidato => <div key={candidato.id} onClick={() => navigate(`/candidatos/${candidato.id}`)}>
-                            <CandidateFunnelCard candidato={candidato} onDragStart={() => {}} />
-                          </div>)}
-                      </FunnelColumn>;
-              })}
-                </div>
-
-                <DragOverlay>
-                  {activeId ? <div className="w-[300px]">
-                      <CandidateFunnelCard candidato={candidatos.find(c => c.id === activeId)!} onDragStart={() => {}} isDragging />
-                    </div> : null}
-                </DragOverlay>
-              </DndContext>}
           </TabsContent>
         </Tabs>
+      </div>
+
+      {/* Área de Conteúdo com Background Escuro */}
+      <div style={{backgroundColor: '#00141d'}} className="min-h-[60vh]">
+        <div className="px-6 pb-6">
+          <Tabs value={viewType}>
+            <TabsContent value="cards" className="mt-0">
+              {/* Cards Grid */}
+              <div className="py-4">
+                {filteredCandidatos.length === 0 ? <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <div className="mb-3 rounded-full bg-primary/10 p-4">
+                      <Plus className="h-10 w-10 text-primary" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-[#FFFDF6] mb-2">
+                      Nenhum candidato encontrado
+                    </h3>
+                    <p className="text-base text-[#FFFDF6]/70 mb-4 max-w-md">
+                      Adicione um novo clicando em "+ Novo Candidato"
+                    </p>
+                    <Button onClick={() => navigate('/candidatos/novo')} className="bg-[#F9EC3F] hover:bg-[#E5D72E] text-[#00141D] font-bold">
+                      <Plus className="mr-2 h-4 w-4" />
+                      Novo Candidato
+                    </Button>
+                  </div> : <>
+                    <div className={viewMode === "grid" ? "grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pt-6" : "space-y-4 pt-6"}>
+                      {paginatedCandidatos.map(candidato => <CandidateCard key={candidato.id} candidato={candidato} onView={() => navigate(`/candidatos/${candidato.id}`)} onEdit={() => navigate(`/candidatos/${candidato.id}/editar`)} onDelete={() => setDeletingId(candidato.id)} onLinkJob={() => setLinkingJobId(candidato.id)} viewMode={viewMode} />)}
+                    </div>
+                    <div className="mt-6">
+                      <PaginationControls currentPage={currentPage} totalPages={totalPages} onPageChange={goToPage} canGoPrevious={canGoPrevious} canGoNext={canGoNext} startIndex={startIndex} endIndex={endIndex} totalItems={filteredCandidatos.length} />
+                    </div>
+                  </>}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="funnel" className="mt-0">
+              {loading ? <div className="text-center py-12">
+                  <p className="text-[#FFFDF6]">Carregando candidatos...</p>
+                </div> : <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+                  <div className="flex gap-4 overflow-x-auto pb-4 pt-6">
+                    {statusColumns.map(status => {
+                  const candidatosStatus = getCandidatesByStatus(status);
+                  return <FunnelColumn key={status} status={status} count={candidatosStatus.length} colorClass={statusColors[status]}>
+                          {candidatosStatus.map(candidato => <div key={candidato.id} onClick={() => navigate(`/candidatos/${candidato.id}`)}>
+                              <CandidateFunnelCard candidato={candidato} onDragStart={() => {}} />
+                            </div>)}
+                        </FunnelColumn>;
+                })}
+                  </div>
+
+                  <DragOverlay>
+                    {activeId ? <div className="w-[300px]">
+                        <CandidateFunnelCard candidato={candidatos.find(c => c.id === activeId)!} onDragStart={() => {}} isDragging />
+                      </div> : null}
+                  </DragOverlay>
+                </DndContext>}
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
 
       {/* Modals */}
