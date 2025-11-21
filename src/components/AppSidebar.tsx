@@ -31,25 +31,24 @@ const menuItems = [
 
 export function AppSidebar() {
   const { state } = useSidebar();
-  const collapsed = state === "collapsed";
+  const isCollapsed = state === "collapsed";
 
   return (
     <Sidebar
-      className={collapsed ? "w-14" : "w-60"}
       collapsible="icon"
       side="left"
     >
-      <SidebarContent className="bg-[#fffdf6]">
+      <SidebarContent className="bg-[#fffdf6] pt-4">
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild tooltip={item.title}>
                     <NavLink 
                       to={item.url} 
                       className={({ isActive }) => 
-                        `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                        `flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
                           isActive 
                             ? "bg-[#ffcd00] text-[#00141d] font-bold" 
                             : "text-[#00141d] hover:bg-[#ffcd00]/20"
@@ -57,7 +56,7 @@ export function AppSidebar() {
                       }
                     >
                       <item.icon className="h-5 w-5 shrink-0" />
-                      {!collapsed && <span className="font-semibold">{item.title}</span>}
+                      <span className="font-semibold">{item.title}</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
