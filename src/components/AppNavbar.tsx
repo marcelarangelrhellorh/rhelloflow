@@ -38,7 +38,7 @@ export function AppNavbar() {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/10 bg-background shadow-[0_2px_12px_rgba(0,0,0,0.06)]">
+    <header className="sticky top-0 z-50 w-full border-b border-[#d4cec6]/40 bg-background shadow-[0_2px_12px_rgba(0,0,0,0.06)]">
       <div className="flex h-16 items-center px-4 sm:px-6 gap-6 max-w-[1600px] mx-auto">
         {/* Logo */}
         <NavLink to="/" className="flex items-center shrink-0">
