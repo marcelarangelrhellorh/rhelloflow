@@ -168,21 +168,26 @@ const WhatsAppTemplates = () => {
       resetForm();
     }
   };
-  return <div className="container mx-auto py-8 space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Templates de WhatsApp</h1>
-            <p className="text-muted-foreground mt-2">
-              Gerencie os templates de mensagens do WhatsApp
-            </p>
-          </div>
-          <Dialog open={isDialogOpen} onOpenChange={handleDialogOpenChange}>
-            <DialogTrigger asChild>
-              <Button className="font-semibold">
-                <Plus className="h-4 w-4 mr-2" />
-                Novo Template
-              </Button>
-            </DialogTrigger>
+  return <div className="min-h-screen" style={{
+    backgroundColor: '#FFFBF0'
+  }}>
+      {/* Header - Fixed */}
+      <div className="sticky top-0 z-20 bg-white border-b border-gray-200 shadow-sm">
+        <div className="px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-[#00141D]">Templates de WhatsApp</h1>
+              <p className="text-base text-[#36404A] mt-1">
+                Gerencie os templates de mensagens do WhatsApp
+              </p>
+            </div>
+            <Dialog open={isDialogOpen} onOpenChange={handleDialogOpenChange}>
+              <DialogTrigger asChild>
+                <Button className="bg-[#FFCD00] hover:bg-[#FAEC3E] text-[#00141D] font-bold">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Novo Template
+                </Button>
+              </DialogTrigger>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <form onSubmit={handleSubmit}>
                 <DialogHeader>
@@ -248,8 +253,12 @@ const WhatsAppTemplates = () => {
               </form>
             </DialogContent>
           </Dialog>
+          </div>
         </div>
+      </div>
 
+      {/* Content Area */}
+      <div className="px-6 py-6">
         {isLoading ? <div className="flex items-center justify-center py-12">
             <p className="text-muted-foreground">Carregando templates...</p>
           </div> : templates && templates.length > 0 ? <div className="grid gap-4 md:grid-cols-2">
@@ -297,6 +306,7 @@ const WhatsAppTemplates = () => {
               </Button>
             </CardContent>
           </Card>}
-      </div>;
+      </div>
+    </div>;
 };
 export default WhatsAppTemplates;
