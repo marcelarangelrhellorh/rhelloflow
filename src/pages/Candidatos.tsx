@@ -318,13 +318,13 @@ export default function Candidatos() {
   } = usePagination(filteredCandidatos, 50);
   if (loading) {
     return <div className="flex min-h-screen items-center justify-center" style={{
-      backgroundColor: '#FFFBF0'
+      backgroundColor: '#00141d'
     }}>
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
       </div>;
   }
   return <div className="min-h-screen" style={{
-    backgroundColor: '#FFFBF0'
+    backgroundColor: '#00141d'
   }}>
       {/* Header - Fixed */}
       <div className="sticky top-0 z-20 bg-background border-b border-border shadow-sm">
