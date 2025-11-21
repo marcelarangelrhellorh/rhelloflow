@@ -407,8 +407,8 @@ export default function Candidatos() {
         </Tabs>
       </div>
 
-      {/* Área de Conteúdo com Background Escuro */}
-      <div style={{backgroundColor: '#00141d'}} className="min-h-[60vh]">
+      {/* Área de Conteúdo com Background Amarelo */}
+      <div className="min-h-[60vh] bg-[#ffcd00]/10">
         <div className="px-6 pb-6">
           <Tabs value={viewType}>
             <TabsContent value="cards" className="mt-0">
