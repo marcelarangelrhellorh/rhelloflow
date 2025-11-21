@@ -1,11 +1,17 @@
 import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { Menu, X, FileText, TrendingUp, MessageSquare } from "lucide-react";
 import { Button } from "./ui/button";
 import { NotificationBell } from "./NotificationBell";
 import { UserMenu } from "./UserMenu";
 import { ConnectionIndicator } from "./ConnectionIndicator";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
 import { useUserRole } from "@/hooks/useUserRole";
 import logoRhelloDark from "@/assets/logo-rhello-dark.png";
 import symbolRhelloDark from "@/assets/symbol-rhello-dark.png";
@@ -53,11 +59,29 @@ export function AppNavbar() {
   }
   return <header className="sticky top-0 z-50 w-full border-b border-[#d4cec6]/40 bg-[#ffcd00]/5 shadow-[0_2px_12px_rgba(0,0,0,0.06)]">
       <div className="flex h-16 items-center px-4 sm:px-6 gap-6 max-w-[1600px] mx-auto">
-        {/* Logo */}
-        <NavLink to="/" className="flex items-center shrink-0">
-          <img alt="rhello" className="h-8 hidden sm:block" loading="lazy" src="/lovable-uploads/730861b1-e6da-47c3-991c-dadbca0b7fa1.png" />
-          <img src={symbolRhelloDark} alt="rhello" className="h-10 w-10 sm:hidden" loading="lazy" />
-        </NavLink>
+        {/* Logo com Dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="flex items-center shrink-0 cursor-pointer hover:opacity-80 transition-opacity">
+              <img alt="rhello" className="h-8 hidden sm:block" loading="lazy" src="/lovable-uploads/730861b1-e6da-47c3-991c-dadbca0b7fa1.png" />
+              <img src={symbolRhelloDark} alt="rhello" className="h-10 w-10 sm:hidden" loading="lazy" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-56 bg-background">
+            <DropdownMenuItem onClick={() => navigate("/scorecards")} className="cursor-pointer">
+              <FileText className="mr-2 h-4 w-4" />
+              <span>Scorecards</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate("/estudo-mercado")} className="cursor-pointer">
+              <TrendingUp className="mr-2 h-4 w-4" />
+              <span>Estudo de Mercado</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate("/whatsapp-templates")} className="cursor-pointer">
+              <MessageSquare className="mr-2 h-4 w-4" />
+              <span>Templates de WhatsApp</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         {/* Desktop Navigation */}
         <nav className="hidden lg:flex flex-1 items-center justify-center gap-6">
