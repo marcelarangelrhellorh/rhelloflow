@@ -295,7 +295,7 @@ export default function Acompanhamento() {
 
         {/* Divider */}
         {!selectedVaga && vagas.length > 0 && (
-          <div className="w-full h-px bg-gradient-to-r from-transparent via-border/30 to-transparent shadow-sm"></div>
+          <div className="w-full h-px bg-gradient-to-r from-transparent via-border/60 to-transparent shadow-md"></div>
         )}
 
         {/* Vagas Overview - Small Cards */}
