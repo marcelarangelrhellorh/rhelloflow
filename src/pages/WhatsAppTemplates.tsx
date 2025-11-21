@@ -253,7 +253,7 @@ const WhatsAppTemplates = () => {
         {isLoading ? <div className="flex items-center justify-center py-12">
             <p className="text-muted-foreground">Carregando templates...</p>
           </div> : templates && templates.length > 0 ? <div className="grid gap-4 md:grid-cols-2">
-            {templates.map(template => <Card key={template.id}>
+            {templates.map(template => <Card key={template.id} className="border-[#00141d]">
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="space-y-1 flex-1">
