@@ -22,10 +22,6 @@ const menuItems = [{
   url: "/candidatos",
   roles: ["admin", "recrutador", "cs"]
 }, {
-  title: "Banco de Talentos",
-  url: "/banco-talentos",
-  roles: ["admin", "recrutador", "cs"]
-}, {
   title: "Scorecards",
   url: "/scorecards",
   roles: ["admin", "recrutador", "cs"]
