@@ -8,7 +8,7 @@ import { Clock, Users, Briefcase, MapPin, DollarSign, FileText, Calendar, CheckC
 import { format, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { formatSalaryRange } from "@/lib/salaryUtils";
-import { JOB_STAGES, calculateProgress, getStageBySlug } from "@/lib/jobStages";
+import { JOB_STAGES, calculateProgress, getStageBySlug, getStageByName } from "@/lib/jobStages";
 import { cn } from "@/lib/utils";
 import { ClientCandidateDrawer } from "@/components/CandidatoDetalhes/ClientCandidateDrawer";
 import { useClientJobs, useJobCandidates } from "@/hooks/useClientJobs";
@@ -216,13 +216,22 @@ export default function Acompanhamento() {
 
   // Calculate progress and timeline based on current status
   const getTimelineSteps = (currentStatus: string) => {
-    const currentStage = getStageBySlug(currentStatus);
+    // Normalize status: try to match by slug or name
+    const currentStage = getStageBySlug(currentStatus) || getStageByName(currentStatus);
+    
+    logger.info('Timeline Debug:', {
+      currentStatus,
+      currentStage,
+      allStages: JOB_STAGES.filter(s => s.kind === "normal")
+    });
+    
     return JOB_STAGES.filter(stage => stage.kind === "normal").map(stage => {
-      const isCompleted = stage.order < (currentStage?.order || 0);
-      const isCurrent = stage.slug === currentStatus;
+      const isCompleted = currentStage ? stage.order <= currentStage.order : false;
+      const isCurrent = stage.slug === currentStage?.slug;
+      
       return {
         label: stage.name,
-        status: isCompleted ? "completed" : isCurrent ? "current" : "pending" as const
+        status: isCompleted && !isCurrent ? "completed" : isCurrent ? "current" : "pending" as const
       };
     });
   };
