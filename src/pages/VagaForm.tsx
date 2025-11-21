@@ -407,7 +407,6 @@ export default function VagaForm() {
                     <SelectValue placeholder="Selecione um cliente (opcional)" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Nenhum</SelectItem>
                     {clientUsers.map((client) => (
                       <SelectItem key={client.id} value={client.id}>
                         {client.name}
