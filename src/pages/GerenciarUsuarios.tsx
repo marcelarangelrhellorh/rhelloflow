@@ -113,17 +113,17 @@ export default function GerenciarUsuarios() {
       if (usersError) throw usersError;
       setClients(clientUsers || []);
 
-      // Carregar vagas de cada cliente pela empresa vinculada
+      // Carregar vagas de cada cliente pela empresa_id vinculada
       const jobsMap: Record<string, any[]> = {};
       for (const client of clientUsers || []) {
-        // Buscar empresa do perfil
+        // Buscar empresa_id do perfil
         const {
           data: profile
-        } = await supabase.from("profiles").select("empresa").eq("id", client.id).single();
-        if (profile?.empresa) {
+        } = await supabase.from("profiles").select("empresa_id").eq("id", client.id).single();
+        if (profile?.empresa_id) {
           const {
             data: jobs
-          } = await supabase.from("vagas").select("id, titulo, empresa, status").eq("empresa", profile.empresa);
+          } = await supabase.from("vagas").select("id, titulo, empresa, status").eq("empresa_id", profile.empresa_id);
           jobsMap[client.id] = jobs || [];
         }
       }
@@ -149,11 +149,11 @@ export default function GerenciarUsuarios() {
       const {
         data,
         error
-      } = await supabase.from("vagas").select("empresa").not("empresa", "is", null);
+      } = await supabase.from("empresas").select("nome").order("nome");
       if (error) throw error;
       if (data) {
-        const uniqueCompanies = [...new Set(data.map(v => v.empresa).filter(Boolean))] as string[];
-        setAvailableCompanies(uniqueCompanies);
+        const companyNames = data.map(e => e.nome).filter(Boolean) as string[];
+        setAvailableCompanies(companyNames);
       }
     } catch (error) {
       console.error("Erro ao carregar empresas:", error);
@@ -229,6 +229,29 @@ export default function GerenciarUsuarios() {
   const handleClientSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      // Verificar se a empresa existe ou criar uma nova
+      let empresaId: string;
+      
+      const { data: existingEmpresa } = await supabase
+        .from("empresas")
+        .select("id")
+        .eq("nome", clientFormData.company)
+        .single();
+      
+      if (existingEmpresa) {
+        empresaId = existingEmpresa.id;
+      } else {
+        // Criar nova empresa
+        const { data: newEmpresa, error: empresaError } = await supabase
+          .from("empresas")
+          .insert({ nome: clientFormData.company })
+          .select()
+          .single();
+        
+        if (empresaError) throw empresaError;
+        empresaId = newEmpresa.id;
+      }
+
       // Criar usuário externo no auth
       const {
         data: authData,
@@ -239,7 +262,7 @@ export default function GerenciarUsuarios() {
         options: {
           data: {
             full_name: clientFormData.name,
-            role: 'client' // Passa o role nos metadados para o trigger handle_new_user()
+            role: 'client'
           }
         }
       });
@@ -251,7 +274,8 @@ export default function GerenciarUsuarios() {
         } = await supabase.from("profiles").update({
           user_type: 'external',
           empresa: clientFormData.company,
-          role: 'client' // Atualizar também a coluna role na tabela profiles
+          empresa_id: empresaId,
+          role: 'client'
         }).eq("id", authData.user.id);
         if (profileError) {
           console.error("Erro ao atualizar perfil:", profileError);
@@ -296,20 +320,20 @@ export default function GerenciarUsuarios() {
   };
   const handleLinkJob = async (clientId: string, jobId: string) => {
     try {
-      // Buscar empresa do cliente
+      // Buscar empresa_id do cliente
       const {
         data: profile
-      } = await supabase.from("profiles").select("empresa").eq("id", clientId).single();
-      if (!profile?.empresa) {
+      } = await supabase.from("profiles").select("empresa_id").eq("id", clientId).single();
+      if (!profile?.empresa_id) {
         toast.error("❌ Usuário externo sem empresa vinculada");
         return;
       }
 
-      // Vincular vaga atualizando a empresa da vaga
+      // Vincular vaga atualizando empresa_id da vaga
       const {
         error
       } = await supabase.from("vagas").update({
-        empresa: profile.empresa
+        empresa_id: profile.empresa_id
       }).eq("id", jobId);
       if (error) throw error;
       toast.success("✅ Vaga vinculada ao cliente com sucesso!");
@@ -325,7 +349,7 @@ export default function GerenciarUsuarios() {
       const {
         error
       } = await supabase.from("vagas").update({
-        cliente_id: null
+        empresa_id: null
       }).eq("id", jobId);
       if (error) throw error;
       toast.success("✅ Vaga desvinculada do cliente!");

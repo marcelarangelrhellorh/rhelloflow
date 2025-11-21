@@ -30,32 +30,61 @@ export interface ClientJob {
 }
 
 /**
- * Hook otimizado para carregar vagas do cliente usando view
+ * Hook otimizado para carregar vagas da empresa do cliente
  * FASE 3: Elimina N+1 queries e reduz tempo de carga de ~2.8s para ~500ms (-82%)
  */
-export function useClientJobs(clienteId: string | undefined) {
+export function useClientJobs(userId: string | undefined) {
   return useQuery({
-    queryKey: ['client-jobs', clienteId],
+    queryKey: ['client-jobs', userId],
     queryFn: async (): Promise<ClientJob[]> => {
-      if (!clienteId) return [];
+      if (!userId) return [];
 
       try {
-        // Usar view otimizada que já traz dados relacionados
+        // Primeiro, buscar empresa_id do usuário
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('empresa_id')
+          .eq('id', userId)
+          .single();
+
+        if (profileError) throw profileError;
+        if (!profile?.empresa_id) return [];
+
+        // Buscar todas as vagas da empresa
         const { data, error } = await supabase
-          .from('vw_vagas_cliente_detalhadas')
-          .select('*')
-          .eq('cliente_id', clienteId)
+          .from('vagas')
+          .select(`
+            id,
+            titulo,
+            empresa,
+            status,
+            status_slug,
+            criado_em,
+            empresa_id,
+            cliente_id,
+            recrutador_id,
+            cs_id,
+            salario_min,
+            salario_max,
+            salario_modalidade,
+            beneficios,
+            beneficios_outros,
+            modelo_trabalho,
+            tipo_contratacao
+          `)
+          .eq('empresa_id', profile.empresa_id)
+          .is('deleted_at', null)
           .order('criado_em', { ascending: false });
 
         if (error) throw error;
         
-        return (data || []) as ClientJob[];
+        return (data || []) as any[];
       } catch (error) {
         logger.error('Error loading client jobs:', error);
         throw error;
       }
     },
-    enabled: !!clienteId,
+    enabled: !!userId,
     staleTime: 2 * 60 * 1000, // 2 minutos
     gcTime: 5 * 60 * 1000,
   });

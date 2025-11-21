@@ -541,6 +541,30 @@ export type Database = {
         }
         Relationships: []
       }
+      empresas: {
+        Row: {
+          cnpj: string | null
+          created_at: string | null
+          id: string
+          nome: string
+          updated_at: string | null
+        }
+        Insert: {
+          cnpj?: string | null
+          created_at?: string | null
+          id?: string
+          nome: string
+          updated_at?: string | null
+        }
+        Update: {
+          cnpj?: string | null
+          created_at?: string | null
+          id?: string
+          nome?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       estudos: {
         Row: {
           beneficios_cliente: string[] | null
@@ -1387,6 +1411,7 @@ export type Database = {
         Row: {
           created_at: string | null
           empresa: string | null
+          empresa_id: string | null
           full_name: string
           id: string
           role: string | null
@@ -1395,6 +1420,7 @@ export type Database = {
         Insert: {
           created_at?: string | null
           empresa?: string | null
+          empresa_id?: string | null
           full_name: string
           id: string
           role?: string | null
@@ -1403,12 +1429,21 @@ export type Database = {
         Update: {
           created_at?: string | null
           empresa?: string | null
+          empresa_id?: string | null
           full_name?: string
           id?: string
           role?: string | null
           user_type?: Database["public"]["Enums"]["user_type"] | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       public_job_submissions_log: {
         Row: {
@@ -2018,6 +2053,7 @@ export type Database = {
           deletion_type: string | null
           dias_semana: string[] | null
           empresa: string
+          empresa_id: string | null
           horario_fim: string | null
           horario_inicio: string | null
           id: string
@@ -2066,6 +2102,7 @@ export type Database = {
           deletion_type?: string | null
           dias_semana?: string[] | null
           empresa: string
+          empresa_id?: string | null
           horario_fim?: string | null
           horario_inicio?: string | null
           id?: string
@@ -2116,6 +2153,7 @@ export type Database = {
           deletion_type?: string | null
           dias_semana?: string[] | null
           empresa?: string
+          empresa_id?: string | null
           horario_fim?: string | null
           horario_inicio?: string | null
           id?: string
@@ -2167,6 +2205,13 @@ export type Database = {
             columns: ["cs_id"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vagas_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
             referencedColumns: ["id"]
           },
           {

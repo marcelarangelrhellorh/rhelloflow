@@ -76,7 +76,13 @@ export default function Acompanhamento() {
   useEffect(() => {
     loadUserId();
   }, []);
-  // FASE 3: Carregar apenas user ID - views já trazem dados otimizados
+
+  useEffect(() => {
+    if (vagas.length > 0) {
+      loadStageHistory();
+    }
+  }, [vagas]);
+  // Carregar user ID
   const loadUserId = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -86,7 +92,6 @@ export default function Acompanhamento() {
       
       if (isClient) {
         setUserId(user.id);
-        loadStageHistory();
       }
     } catch (error) {
       logger.error('Error loading user ID:', error);
