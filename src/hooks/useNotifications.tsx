@@ -42,6 +42,20 @@ export const useNotifications = () => {
 
       if (error) throw error;
 
+      // Enviar email em background (não aguarda para não bloquear)
+      supabase.functions.invoke('send-notification-email', {
+        body: {
+          user_id: userId,
+          kind,
+          title,
+          body,
+          job_id: jobId,
+        },
+      }).catch((emailError) => {
+        console.warn('Failed to send notification email:', emailError);
+        // Não mostra erro ao usuário, pois a notificação foi criada com sucesso
+      });
+
       return data;
     } catch (error) {
       console.error('Error creating notification:', error);
@@ -74,6 +88,21 @@ export const useNotifications = () => {
       });
 
       if (error) throw error;
+
+      // Enviar emails em background para todos os usuários
+      userIds.forEach((userId) => {
+        supabase.functions.invoke('send-notification-email', {
+          body: {
+            user_id: userId,
+            kind,
+            title,
+            body,
+            job_id: jobId,
+          },
+        }).catch((emailError) => {
+          console.warn(`Failed to send notification email to user ${userId}:`, emailError);
+        });
+      });
 
       return data || 0;
     } catch (error) {
