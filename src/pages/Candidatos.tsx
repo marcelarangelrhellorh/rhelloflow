@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, MessageSquare, X, AlertTriangle, Grid3x3, List, FileSpreadsheet, LayoutGrid } from "lucide-react";
+import { Plus, MessageSquare, X, AlertTriangle, Grid3x3, List, FileSpreadsheet, LayoutGrid, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -333,6 +333,10 @@ export default function Candidatos() {
               </p>
             </div>
             <div className="flex gap-2">
+              <Button onClick={() => navigate('/banco-talentos')} variant="outline" className="font-bold border-primary text-primary hover:bg-primary hover:text-primary-foreground">
+                <Users className="mr-2 h-4 w-4" />
+                Banco de Talentos
+              </Button>
               <Button onClick={() => navigate('/candidatos/novo')} className="bg-[#F9EC3F] hover:bg-[#E5D72E] text-[#00141D] font-bold">
                 <Plus className="mr-2 h-4 w-4" />
                 Novo Candidato
