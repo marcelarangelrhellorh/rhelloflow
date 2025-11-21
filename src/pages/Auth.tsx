@@ -72,7 +72,7 @@ export default function Auth() {
         <CardHeader className="space-y-6 text-center pb-8">
           {/* Logo Rhello + Flow */}
           <div className="flex items-center justify-center gap-1 mb-2">
-            <img src={logoDark} alt="Rhello RH" className="h-16 w-auto" />
+            <img alt="Rhello RH" className="h-16 w-auto" src="/lovable-uploads/0e3e8693-dfae-4588-8a04-9a33b7dd1eea.png" />
             <span style={{
             color: 'hsl(var(--background-dark))',
             fontFamily: 'Manrope, sans-serif'
