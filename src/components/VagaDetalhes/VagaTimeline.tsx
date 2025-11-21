@@ -71,7 +71,7 @@ export function VagaTimeline({
                         {step.label}
                       </p>
 
-                      {step.status === "current" && <p className="text-[10px] text-[#ffcd00] mt-1 font-medium">Em Progresso</p>}
+                      {step.status === "current" && <p className="text-[#ffcd00] mt-1 text-sm font-semibold">Em Progresso</p>}
                     </div>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -88,7 +88,7 @@ export function VagaTimeline({
       <div className="mt-4 px-4">
         <div className="flex items-center justify-between text-xs text-secondary-text-light dark:text-secondary-text-dark mb-1">
           <span className="text-base font-semibold">Progresso</span>
-          <span className="font-semibold">{Math.round(progress)}%</span>
+          <span className="font-semibold text-base">{Math.round(progress)}%</span>
         </div>
         <Progress value={progress} className="h-2" indicatorClassName="bg-[#ffcd00]" />
       </div>
