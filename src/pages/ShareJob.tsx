@@ -215,7 +215,7 @@ export default function ShareJob() {
             </div>
             <Button
               onClick={() => setModalOpen(true)}
-              className="hidden md:flex bg-[#FFCD00] hover:bg-[#FAEC3E] text-[#00141D] font-bold rounded-full px-6"
+              className="hidden md:flex font-bold rounded-full px-6"
             >
               Candidatar-se
             </Button>
@@ -272,7 +272,7 @@ export default function ShareJob() {
               <Button
                 onClick={() => setModalOpen(true)}
                 size="lg"
-                className="bg-[#FFCD00] hover:bg-[#FAEC3E] text-[#00141D] font-bold rounded-full px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all"
+                className="font-bold rounded-full px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all"
               >
                 Candidatar-se
               </Button>
