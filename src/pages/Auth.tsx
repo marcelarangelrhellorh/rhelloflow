@@ -60,7 +60,7 @@ export default function Auth() {
     }
   };
   return <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden" style={{
-    backgroundColor: '#fffdf6'
+    backgroundColor: '#fffef8'
   }}>
       {/* Background decorative elements */}
       <div className="absolute inset-0 overflow-hidden">
