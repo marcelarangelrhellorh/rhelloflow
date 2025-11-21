@@ -8,7 +8,7 @@ import { ConnectionIndicator } from "./ConnectionIndicator";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet";
 import { useUserRole } from "@/hooks/useUserRole";
 import logoRhelloDark from "@/assets/logo-rhello-dark.png";
-import symbolRhelloLight from "@/assets/symbol-rhello-light.png";
+import symbolRhelloDark from "@/assets/symbol-rhello-dark.png";
 
   const menuItems = [
   { title: "Dashboard", url: "/", roles: ["admin", "recrutador", "cs"] },
@@ -38,18 +38,18 @@ export function AppNavbar() {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-[#00141d] shadow-sm">
+    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background shadow-sm">
       <div className="flex h-16 items-center px-4 sm:px-6 gap-6 max-w-[1600px] mx-auto">
         {/* Logo */}
         <NavLink to="/" className="flex items-center shrink-0">
           <img 
-            src={symbolRhelloLight} 
+            src={symbolRhelloDark} 
             alt="rhello" 
             className="h-8 hidden sm:block"
             loading="lazy"
           />
           <img 
-            src={symbolRhelloLight} 
+            src={symbolRhelloDark} 
             alt="rhello" 
             className="h-10 w-10 sm:hidden"
             loading="lazy"
@@ -66,8 +66,8 @@ export function AppNavbar() {
               className={({ isActive }) =>
                 `px-3 py-2 text-base font-medium transition-all duration-200 ease-in-out whitespace-nowrap relative ${
                   isActive
-                    ? "text-[#F9EC3F] font-semibold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#F9EC3F] after:rounded-t-md"
-                    : "text-white hover:bg-white/10 hover:text-[#F9EC3F] rounded-lg"
+                    ? "text-primary font-semibold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-primary after:rounded-t-md"
+                    : "text-foreground hover:bg-primary/10 hover:text-primary rounded-lg"
                 }`
               }
               style={{ fontFamily: 'Manrope, sans-serif', fontWeight: 500, fontSize: '16px' }}
@@ -103,11 +103,11 @@ export function AppNavbar() {
               <SheetHeader>
                 <SheetTitle className="flex items-center gap-2">
                   <img 
-                    src={symbolRhelloLight} 
+                    src={symbolRhelloDark} 
                     alt="rhello" 
                     className="h-8 w-8"
                   />
-                  <span className="text-base font-bold text-[#00141D]">
+                  <span className="text-base font-bold text-foreground">
                     rhello
                   </span>
                 </SheetTitle>
@@ -123,8 +123,8 @@ export function AppNavbar() {
                     className={({ isActive }) =>
                       `flex items-center px-4 py-3 rounded-lg text-sm font-medium transition-all ${
                         isActive
-                          ? "bg-[#F9EC3F]/20 text-[#00141D] font-semibold"
-                          : "text-[#36404A] hover:bg-muted"
+                          ? "bg-primary/20 text-primary font-semibold"
+                          : "text-foreground hover:bg-muted"
                       }`
                     }
                   >
