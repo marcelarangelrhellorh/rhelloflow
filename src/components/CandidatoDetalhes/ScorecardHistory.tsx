@@ -194,7 +194,7 @@ export function ScorecardHistory({
           </div>
           <div className="text-right">
             <div className="text-3xl font-bold">{Math.round(averageScore)}%</div>
-            <p className="text-sm font-medium text-muted-foreground">Match médio</p>
+            <p className="text-sm text-muted-foreground font-semibold">Match médio</p>
           </div>
         </div>
       </CardHeader>
@@ -217,7 +217,7 @@ export function ScorecardHistory({
                     <div className="text-4xl font-bold text-primary">
                       {scorecard.match_percentage}%
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1">Match Score</p>
+                    <p className="text-muted-foreground mt-1 text-sm font-semibold">Match Score</p>
                   </div>
                 </div>
 
@@ -233,7 +233,7 @@ export function ScorecardHistory({
                       <p className="font-semibold text-base">{scorecard.evaluator_name}</p>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <User className="h-4 w-4" />
-                        <span>Avaliador</span>
+                        <span className="text-sm">Avaliador</span>
                       </div>
                     </div>
                   </div>
@@ -273,7 +273,7 @@ export function ScorecardHistory({
                   <p className="text-sm font-bold">Critérios Avaliados:</p>
                   <div className="space-y-3">
                     {scorecard.evaluations.slice(0, 3).map((evaluation, index) => <div key={index} className="flex items-center justify-between text-sm py-1">
-                        <span className="text-muted-foreground font-medium">{evaluation.criteria_name}</span>
+                        <span className="text-muted-foreground text-sm font-semibold">{evaluation.criteria_name}</span>
                         <div className="flex items-center gap-1">
                           {[1, 2, 3, 4, 5].map(star => <Star key={star} className={cn("h-4 w-4", star <= evaluation.score ? "fill-[#FFCD00] text-[#FFCD00]" : "text-gray-300")} />)}
                         </div>

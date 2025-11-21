@@ -158,10 +158,10 @@ export function FeedbackList({
             <div className="mb-4 rounded-full bg-muted/20 p-4">
               <MessageSquare className="h-8 w-8 text-muted-foreground" />
             </div>
-            <p className="text-sm text-muted-foreground mb-4">
+            <p className="text-sm text-muted-foreground mb-4 font-semibold">
               Nenhum feedback registrado ainda
             </p>
-            <Button onClick={onAddFeedback} variant="outline" size="sm">
+            <Button onClick={onAddFeedback} variant="outline" size="sm" className="font-semibold">
               <Plus className="mr-2 h-4 w-4" />
               Adicionar Primeiro Feedback
             </Button>
