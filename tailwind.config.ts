@@ -84,8 +84,8 @@ export default {
         },
       },
       fontFamily: {
-        display: ["Manrope", "sans-serif"],
-        sans: ["Manrope", "system-ui", "-apple-system", "sans-serif"],
+        display: ["Space Grotesk", "Manrope", "sans-serif"],
+        sans: ["Space Grotesk", "Manrope", "system-ui", "-apple-system", "sans-serif"],
         azo: ["Space Grotesk", "Manrope", "sans-serif"],
       },
       borderRadius: {
