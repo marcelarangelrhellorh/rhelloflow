@@ -280,15 +280,20 @@ export default function Acompanhamento() {
               </CardContent>
             </Card>
 
-            <Card className="border-2 border-primary bg-primary/5 shadow-sm cursor-pointer transition-all hover:shadow-md hover:border-primary/50" onClick={() => setNoFeedbackDrawerOpen(true)}>
+            <Card className="border-2 border-orange-500 bg-orange-500/5 shadow-sm cursor-pointer transition-all hover:shadow-lg hover:border-orange-600 hover:bg-orange-500/10 group" onClick={() => setNoFeedbackDrawerOpen(true)}>
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-muted-foreground mb-1 font-semibold text-base">Sem Feedback</p>
+                    <p className="text-muted-foreground mb-1 font-semibold text-base">Candidatos Aguardando Seu Feedback</p>
                     <p className="text-3xl font-bold text-foreground">{totalSemFeedback}</p>
+                    {totalSemFeedback > 0 && (
+                      <p className="text-xs text-orange-600 font-semibold mt-2 group-hover:text-orange-700">
+                        Clique para dar feedback
+                      </p>
+                    )}
                   </div>
-                  <div className="h-12 w-12 rounded-full bg-orange-500/10 flex items-center justify-center">
-                    <AlertCircle className="h-6 w-6 text-orange-500" />
+                  <div className="h-12 w-12 rounded-full bg-orange-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <MessageSquare className="h-6 w-6 text-white" />
                   </div>
                 </div>
               </CardContent>
@@ -532,51 +537,72 @@ export default function Acompanhamento() {
       <Sheet open={noFeedbackDrawerOpen} onOpenChange={setNoFeedbackDrawerOpen}>
         <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
           <SheetHeader>
-            <SheetTitle className="text-2xl">Candidatos Sem Feedback</SheetTitle>
+            <SheetTitle className="text-2xl flex items-center gap-2">
+              <MessageSquare className="h-6 w-6 text-orange-500" />
+              Candidatos Aguardando Feedback
+            </SheetTitle>
             <SheetDescription>
-              Lista de candidatos que possuem solicitação de feedback pendente
+              Clique em um candidato para acessar o link de feedback e enviar sua avaliação
             </SheetDescription>
           </SheetHeader>
 
           <div className="mt-6 space-y-4">
-            {candidatesWithoutFeedback.length > 0 ? candidatesWithoutFeedback.map(candidate => <Card key={candidate.id} className="cursor-pointer shadow-sm hover:shadow-md transition-all" onClick={() => {
+            {candidatesWithoutFeedback.length > 0 ? candidatesWithoutFeedback.map(candidate => <Card key={candidate.id} className="cursor-pointer shadow-sm hover:shadow-md transition-all border-2 border-border hover:border-orange-500 group" onClick={() => {
             setSelectedCandidateId(candidate.id);
             setCandidateDrawerOpen(true);
             setNoFeedbackDrawerOpen(false);
           }}>
-                  <CardContent className="p-4 rounded-sm bg-transparent">
-                    <div className="space-y-2">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <p className="font-bold text-foreground">{candidate.nome_completo}</p>
+                  <CardContent className="p-4">
+                    <div className="space-y-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1">
+                          <p className="font-bold text-foreground text-lg group-hover:text-orange-600 transition-colors">{candidate.nome_completo}</p>
                           <p className="text-muted-foreground font-medium text-sm">{candidate.email}</p>
                         </div>
-                        <Badge variant="outline" className="bg-orange-500/10 text-orange-500 border-orange-500/20">
+                        <Badge className="bg-orange-500 text-white border-orange-600 font-semibold shadow-sm">
                           Pendente
                         </Badge>
                       </div>
 
-                      <div className="pt-2 border-t border-border">
-                        <p className="flex items-center gap-2 text-base font-semibold text-[#00141d]">
-                          <Briefcase className="h-3.5 w-3.5" />
+                      <div className="pt-3 border-t border-border">
+                        <p className="flex items-center gap-2 text-base font-bold text-foreground mb-2">
+                          <Briefcase className="h-4 w-4 text-primary" />
                           {candidate.vaga_titulo}
                         </p>
-                        <p className="text-muted-foreground mt-1 text-sm font-medium">
-                          Solicitado em: {format(new Date(candidate.request_created), "dd/MM/yyyy", {
+                        <div className="flex items-center gap-4 text-sm">
+                          <p className="text-muted-foreground font-medium">
+                            <span className="font-semibold">Solicitado:</span> {format(new Date(candidate.request_created), "dd/MM/yyyy", {
                       locale: ptBR
                     })}
-                        </p>
-                        <p className="text-muted-foreground text-sm font-medium">
-                          Expira em: {format(new Date(candidate.request_expires), "dd/MM/yyyy", {
+                          </p>
+                          <p className="text-muted-foreground font-medium">
+                            <span className="font-semibold">Expira:</span> {format(new Date(candidate.request_expires), "dd/MM/yyyy", {
                       locale: ptBR
                     })}
-                        </p>
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="pt-2">
+                        <Button 
+                          className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedCandidateId(candidate.id);
+                            setCandidateDrawerOpen(true);
+                            setNoFeedbackDrawerOpen(false);
+                          }}
+                        >
+                          <MessageSquare className="h-4 w-4 mr-2" />
+                          Dar Feedback Agora
+                        </Button>
                       </div>
                     </div>
                   </CardContent>
                 </Card>) : <div className="text-center py-12">
                 <MessageSquare className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-                <p className="text-muted-foreground">Todos os feedbacks foram respondidos!</p>
+                <p className="text-muted-foreground font-medium text-lg">Todos os feedbacks foram respondidos!</p>
+                <p className="text-muted-foreground text-sm mt-2">Não há solicitações de feedback pendentes no momento.</p>
               </div>}
           </div>
         </SheetContent>
