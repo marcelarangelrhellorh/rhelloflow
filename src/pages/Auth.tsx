@@ -74,9 +74,7 @@ export default function Auth() {
         {/* Rhello Flow Logo - Above Card */}
         <div className="flex items-center gap-1">
           <img alt="Rhello RH" className="h-28 w-auto" src="/lovable-uploads/0e3e8693-dfae-4588-8a04-9a33b7dd1eea.png" />
-          <span style={{
-          color: '#00141d'
-        }} className="text-8xl font-black leading-none font-azo">
+          <span className="text-8xl font-black leading-none font-azo text-foreground">
             flow
           </span>
         </div>
