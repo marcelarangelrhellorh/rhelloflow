@@ -491,11 +491,11 @@ export default function Acompanhamento() {
                       
                       return <div key={candidato.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleCandidateClick(candidato.id)}>
                         <div className="flex-1">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <p className="text-foreground text-base font-semibold">{candidato.nome_completo}</p>
                             {isPendingFeedback && (
-                              <Badge variant="outline" className="bg-orange-500/10 text-orange-500 border-orange-500/20 text-xs px-2 py-0.5">
-                                <MessageSquare className="h-3 w-3 mr-1" />
+                              <Badge className="bg-orange-500 text-white border-orange-600 text-sm px-3 py-1 font-bold shadow-sm">
+                                <MessageSquare className="h-4 w-4 mr-1.5" />
                                 Feedback Pendente
                               </Badge>
                             )}
