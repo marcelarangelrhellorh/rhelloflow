@@ -14,7 +14,7 @@ import {
 } from "./ui/dropdown-menu";
 import { useUserRole } from "@/hooks/useUserRole";
 import logoRhelloDark from "@/assets/logo-rhello-dark.png";
-import symbolRhelloDark from "@/assets/symbol-rhello-dark.png";
+import symbolRhelloNew from "@/assets/symbol-rhello-new.png";
 const menuItems = [{
   title: "Dashboard",
   url: "/",
@@ -56,7 +56,7 @@ export function AppNavbar() {
           <DropdownMenuTrigger asChild>
             <button className="flex items-center shrink-0 cursor-pointer hover:opacity-80 transition-opacity">
               <img alt="rhello" className="h-8 hidden sm:block" loading="lazy" src="/lovable-uploads/730861b1-e6da-47c3-991c-dadbca0b7fa1.png" />
-              <img src={symbolRhelloDark} alt="rhello" className="h-10 w-10 sm:hidden" loading="lazy" />
+              <img src={symbolRhelloNew} alt="rhello" className="h-10 w-10 sm:hidden" loading="lazy" />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-56 bg-background">
@@ -109,7 +109,7 @@ export function AppNavbar() {
             <SheetContent side="left" className="w-72">
               <SheetHeader>
                 <SheetTitle className="flex items-center gap-2">
-                  <img src={symbolRhelloDark} alt="rhello" className="h-8 w-8" />
+                  <img src={symbolRhelloNew} alt="rhello" className="h-8 w-8" />
                   <span className="text-base font-bold text-foreground">
                     rhello
                   </span>
