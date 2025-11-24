@@ -82,8 +82,8 @@ export function UserMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="focus:outline-none">
-        <Avatar className="h-9 w-9 cursor-pointer ring-2 ring-border hover:ring-primary transition-all">
-          <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
+        <Avatar className="h-9 w-9 cursor-pointer ring-2 ring-border hover:ring-foreground transition-all">
+          <AvatarFallback className="bg-foreground text-background font-semibold">
             {getInitials(userName)}
           </AvatarFallback>
         </Avatar>
