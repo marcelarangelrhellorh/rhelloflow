@@ -55,7 +55,7 @@ export function AppNavbar() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="flex items-center shrink-0 cursor-pointer hover:opacity-80 transition-opacity">
-              <img alt="rhello" className="h-8 hidden sm:block" loading="lazy" src={logoRhelloDark} />
+              <img alt="rhello" className="h-10 w-10 hidden sm:block" loading="lazy" src={symbolRhelloNew} />
               <img src={symbolRhelloNew} alt="rhello" className="h-10 w-10 sm:hidden" loading="lazy" />
             </button>
           </DropdownMenuTrigger>
