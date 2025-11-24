@@ -75,9 +75,8 @@ export default function Auth() {
         <div className="flex items-center gap-1">
           <img alt="Rhello RH" className="h-28 w-auto" src="/lovable-uploads/0e3e8693-dfae-4588-8a04-9a33b7dd1eea.png" />
           <span style={{
-            color: '#00141d',
-            fontFamily: 'Manrope, sans-serif'
-          }} className="text-8xl font-black leading-none">
+            color: '#00141d'
+          }} className="text-8xl font-black leading-none font-azo">
             Flow
           </span>
         </div>
