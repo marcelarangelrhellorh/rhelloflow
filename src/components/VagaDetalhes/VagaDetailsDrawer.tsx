@@ -43,7 +43,7 @@ export function VagaDetailsDrawer({
         <div className="space-y-6">
           {/* Informações Gerais */}
           <div className="bg-muted/30 rounded-lg p-6">
-            <h3 className="text-xl font-bold mb-4"> Informações Gerais</h3>
+            <h3 className="text-2xl font-bold mb-4">Informações Gerais</h3>
 
             <div className="space-y-4">
               <div>
@@ -54,7 +54,7 @@ export function VagaDetailsDrawer({
               <div>
                 <p className="text-sm font-medium text-muted-foreground mb-1">Empresa</p>
                 <p className="text-base">
-                  {vaga.confidencial ? "🔒 Confidencial" : vaga.empresa}
+                  {vaga.confidencial ? "Confidencial" : vaga.empresa}
                 </p>
                 {vaga.confidencial && vaga.motivo_confidencial && <p className="text-sm text-muted-foreground mt-1">{vaga.motivo_confidencial}</p>}
               </div>
@@ -63,16 +63,16 @@ export function VagaDetailsDrawer({
                   <p className="text-sm font-medium text-muted-foreground mb-1">
                     Recrutador Responsável
                   </p>
-                  <p className="text-base">👤 {vaga.recrutador}</p>
+                  <p className="text-base">{vaga.recrutador}</p>
                 </div>}
 
               {vaga.cs_responsavel && <div>
                   <p className="text-sm font-medium text-muted-foreground mb-1">CS Responsável</p>
-                  <p className="text-base">👥 {vaga.cs_responsavel}</p>
+                  <p className="text-base">{vaga.cs_responsavel}</p>
                 </div>}
 
               {vaga.contato_nome && <div className="pt-4 border-t space-y-3">
-                  <h4 className="text-base font-semibold">📞 Contato do Solicitante</h4>
+                  <h4 className="text-lg font-bold">Contato do Solicitante</h4>
 
                   <div>
                     <p className="text-sm font-medium text-muted-foreground mb-1">Nome</p>
@@ -101,12 +101,12 @@ export function VagaDetailsDrawer({
               <div className="grid grid-cols-2 gap-4">
                 {vaga.complexidade && <div>
                     <p className="text-sm font-medium text-muted-foreground mb-1">Complexidade</p>
-                    <p className="text-base">⚙️ {vaga.complexidade}</p>
+                    <p className="text-base">{vaga.complexidade}</p>
                   </div>}
 
                 {vaga.prioridade && <div>
                     <p className="text-sm font-medium text-muted-foreground mb-1">Prioridade</p>
-                    <p className="text-base">🔥 {vaga.prioridade}</p>
+                    <p className="text-base">{vaga.prioridade}</p>
                   </div>}
               </div>
 
@@ -114,7 +114,7 @@ export function VagaDetailsDrawer({
                   <p className="text-sm font-medium text-muted-foreground mb-1">
                     Modelo de Trabalho
                   </p>
-                  <p className="text-base">🏢 {vaga.modelo_trabalho}</p>
+                  <p className="text-base">{vaga.modelo_trabalho}</p>
                 </div>}
 
               {(vaga.horario_inicio || vaga.horario_fim) && <div>
@@ -122,7 +122,7 @@ export function VagaDetailsDrawer({
                     Horário de Trabalho
                   </p>
                   <p className="text-base">
-                    🕐 {vaga.horario_inicio || "?"} às {vaga.horario_fim || "?"}
+                    {vaga.horario_inicio || "?"} às {vaga.horario_fim || "?"}
                   </p>
                   {vaga.dias_semana && vaga.dias_semana.length > 0 && <p className="text-sm text-muted-foreground mt-1">
                       {vaga.dias_semana.join(", ")}
@@ -133,25 +133,25 @@ export function VagaDetailsDrawer({
 
           {/* Responsabilidades */}
           {vaga.responsabilidades && <div className="bg-muted/30 rounded-lg p-6">
-              <h3 className="text-xl font-bold mb-4">📋 Responsabilidades</h3>
+              <h3 className="text-2xl font-bold mb-4">Responsabilidades</h3>
               <div className="text-base whitespace-pre-wrap">{vaga.responsabilidades}</div>
             </div>}
 
           {/* Requisitos Obrigatórios */}
           {vaga.requisitos_obrigatorios && <div className="bg-muted/30 rounded-lg p-6">
-              <h3 className="text-xl font-bold mb-4">✅ Requisitos Obrigatórios</h3>
+              <h3 className="text-2xl font-bold mb-4">Requisitos Obrigatórios</h3>
               <div className="text-base whitespace-pre-wrap">{vaga.requisitos_obrigatorios}</div>
             </div>}
 
           {/* Requisitos Desejáveis */}
           {vaga.requisitos_desejaveis && <div className="bg-muted/30 rounded-lg p-6">
-              <h3 className="text-xl font-bold mb-4">⭐ Requisitos Desejáveis</h3>
+              <h3 className="text-2xl font-bold mb-4">Requisitos Desejáveis</h3>
               <div className="text-base whitespace-pre-wrap">{vaga.requisitos_desejaveis}</div>
             </div>}
 
           {/* Benefícios */}
           {vaga.beneficios && vaga.beneficios.length > 0 && <div className="bg-muted/30 rounded-lg p-6">
-              <h3 className="text-xl font-bold mb-4">🎁 Benefícios</h3>
+              <h3 className="text-2xl font-bold mb-4">Benefícios</h3>
               <div className="flex flex-wrap gap-2">
                 {vaga.beneficios.map((beneficio, index) => <span key={index} className="px-3 py-1 bg-primary/10 text-primary-text-light dark:text-primary-text-dark rounded-full text-sm font-medium">
                     {beneficio}
@@ -162,13 +162,13 @@ export function VagaDetailsDrawer({
 
           {/* Observações */}
           {vaga.observacoes && <div className="bg-muted/30 rounded-lg p-6">
-              <h3 className="text-xl font-bold mb-4">📝 Observações</h3>
+              <h3 className="text-2xl font-bold mb-4">Observações</h3>
               <div className="text-base whitespace-pre-wrap">{vaga.observacoes}</div>
             </div>}
 
           {/* Tags */}
           <div className="bg-muted/30 rounded-lg p-6">
-            <h3 className="text-xl font-bold mb-4">🏷️ Tags</h3>
+            <h3 className="text-2xl font-bold mb-4">Tags</h3>
             <TagPicker selectedTags={selectedTags} onChange={onTagsChange} />
             <div className="mt-4 flex justify-end">
               <button onClick={onSaveTags} disabled={savingTags} className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium">
