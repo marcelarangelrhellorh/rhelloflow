@@ -79,7 +79,7 @@ export function AppNavbar() {
         <nav className="hidden lg:flex flex-1 items-center justify-center gap-6">
           {visibleMenuItems.map(item => <NavLink key={item.title} to={item.url} end={item.url === "/"} className={({
           isActive
-        }) => `px-3 py-2 text-base font-bold transition-all duration-200 ease-in-out whitespace-nowrap relative ${isActive ? "text-primary font-bold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-primary after:rounded-t-md" : "text-[#00141d] hover:bg-primary/10 hover:text-primary rounded-lg"}`} style={{
+        }) => `px-3 py-2 text-base font-bold transition-all duration-200 ease-in-out whitespace-nowrap relative ${isActive ? "text-foreground font-bold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-foreground after:rounded-t-md" : "text-[#00141d]/70 hover:bg-[#00141d]/10 hover:text-foreground rounded-lg"}`} style={{
           fontFamily: 'Manrope, sans-serif',
           fontWeight: 700,
           fontSize: '16px'
