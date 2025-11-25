@@ -158,22 +158,28 @@ export function useDeleteTask() {
   });
 }
 
-export function useOverdueTasks() {
+export function useOverdueTasks(isAdmin: boolean = false) {
   return useQuery({
-    queryKey: ["tasks-overdue"],
+    queryKey: ["tasks-overdue", isAdmin],
     queryFn: async () => {
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) throw new Error("Usuário não autenticado");
 
       const now = new Date().toISOString();
 
-      const { data, error } = await supabase
+      let query = supabase
         .from("tasks")
         .select("*")
-        .eq("assignee_id", userData.user.id)
         .neq("status", "done")
         .lt("due_date", now)
         .not("due_date", "is", null);
+
+      // Se não for admin, filtrar apenas tarefas do usuário
+      if (!isAdmin) {
+        query = query.eq("assignee_id", userData.user.id);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
       return data as Task[];

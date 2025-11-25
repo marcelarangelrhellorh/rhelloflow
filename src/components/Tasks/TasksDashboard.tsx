@@ -1,10 +1,12 @@
 import { AlertCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useOverdueTasks } from "@/hooks/useTasks";
+import { useUserRole } from "@/hooks/useUserRole";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function TasksDashboard() {
-  const { data: overdueTasks, isLoading } = useOverdueTasks();
+  const { isAdmin } = useUserRole();
+  const { data: overdueTasks, isLoading } = useOverdueTasks(isAdmin);
 
   if (isLoading) {
     return (
@@ -23,7 +25,7 @@ export default function TasksDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-muted-foreground">
-                Tarefas Atrasadas
+                Tarefas Atrasadas {isAdmin && "(Total do Sistema)"}
               </p>
               <h3 className="text-3xl font-bold text-red-600 mt-2">
                 {overdueCount}
