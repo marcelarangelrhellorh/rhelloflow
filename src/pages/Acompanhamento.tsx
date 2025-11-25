@@ -95,15 +95,9 @@ export default function Acompanhamento() {
     }
   }, [roles]);
 
-  useEffect(() => {
-    if (vagas.length > 0) {
-      loadStageHistory();
-    }
-  }, [vagas]);
-
-  const loadStageHistory = async () => {
+  const loadStageHistory = async (jobsList: typeof vagas) => {
     try {
-      const vagaIds = vagas.map(v => v.id);
+      const vagaIds = jobsList.map(v => v.id);
       if (vagaIds.length === 0) return;
 
       const { data: historyData, error: historyError } = await supabase
@@ -121,6 +115,12 @@ export default function Acompanhamento() {
       logger.error("Error loading stage history:", error);
     }
   };
+
+  useEffect(() => {
+    if (vagas.length > 0) {
+      loadStageHistory(vagas);
+    }
+  }, [vagas]);
   const loadCandidatesWithoutFeedback = async (vagaIds: string[]) => {
     try {
       const { data: requests, error: requestsError } = await supabase
