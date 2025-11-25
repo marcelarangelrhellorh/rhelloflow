@@ -13,6 +13,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import TaskModal from "@/components/Tasks/TaskModal";
 import TaskCard from "@/components/Tasks/TaskCard";
 import TaskKanban from "@/components/Tasks/TaskKanban";
+import TasksDashboard from "@/components/Tasks/TasksDashboard";
 import { Task, TaskFilters, useTasks, useDeleteTask, useUpdateTask } from "@/hooks/useTasks";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -192,6 +193,9 @@ export default function Tarefas() {
 
       {/* Content */}
       <div className="container mx-auto px-6 py-8">
+        {/* Dashboard */}
+        <TasksDashboard />
+
         {isLoading ? (
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
