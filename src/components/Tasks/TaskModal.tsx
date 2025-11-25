@@ -283,15 +283,14 @@ export default function TaskModal({ open, onClose, task }: TaskModalProps) {
                 name="assignee_id"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Responsável</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <FormLabel>Responsável (opcional)</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value || undefined}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Selecione o responsável" />
+                          <SelectValue placeholder="Nenhum responsável" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">Nenhum</SelectItem>
                         {users?.map((user) => (
                           <SelectItem key={user.id} value={user.id}>
                             {user.full_name}
@@ -314,14 +313,13 @@ export default function TaskModal({ open, onClose, task }: TaskModalProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Vaga</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value || undefined}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Selecione uma vaga" />
+                          <SelectValue placeholder="Nenhuma vaga" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">Nenhuma</SelectItem>
                         {vagas?.map((vaga) => (
                           <SelectItem key={vaga.id} value={vaga.id}>
                             {vaga.titulo}
@@ -340,14 +338,13 @@ export default function TaskModal({ open, onClose, task }: TaskModalProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Empresa</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value || undefined}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Selecione uma empresa" />
+                          <SelectValue placeholder="Nenhuma empresa" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">Nenhuma</SelectItem>
                         {empresas?.map((empresa) => (
                           <SelectItem key={empresa.id} value={empresa.id}>
                             {empresa.nome}
@@ -366,14 +363,13 @@ export default function TaskModal({ open, onClose, task }: TaskModalProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Candidato</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value || undefined}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Selecione um candidato" />
+                          <SelectValue placeholder="Nenhum candidato" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">Nenhum</SelectItem>
                         {candidatos?.map((candidato) => (
                           <SelectItem key={candidato.id} value={candidato.id}>
                             {candidato.nome_completo}

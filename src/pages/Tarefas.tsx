@@ -127,7 +127,7 @@ export default function Tarefas() {
               }
             >
               <SelectTrigger className="w-full md:w-[180px]">
-                <SelectValue placeholder="Status" />
+                <SelectValue placeholder="Todos os status" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos os status</SelectItem>
@@ -144,7 +144,7 @@ export default function Tarefas() {
               }
             >
               <SelectTrigger className="w-full md:w-[180px]">
-                <SelectValue placeholder="Prioridade" />
+                <SelectValue placeholder="Todas prioridades" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todas prioridades</SelectItem>
@@ -162,7 +162,7 @@ export default function Tarefas() {
               }
             >
               <SelectTrigger className="w-full md:w-[200px]">
-                <SelectValue placeholder="Responsável" />
+                <SelectValue placeholder="Todos responsáveis" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos responsáveis</SelectItem>
