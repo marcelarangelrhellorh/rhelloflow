@@ -157,3 +157,26 @@ export function useDeleteTask() {
     },
   });
 }
+
+export function useOverdueTasks() {
+  return useQuery({
+    queryKey: ["tasks-overdue"],
+    queryFn: async () => {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) throw new Error("Usuário não autenticado");
+
+      const now = new Date().toISOString();
+
+      const { data, error } = await supabase
+        .from("tasks")
+        .select("*")
+        .eq("assignee_id", userData.user.id)
+        .neq("status", "done")
+        .lt("due_date", now)
+        .not("due_date", "is", null);
+
+      if (error) throw error;
+      return data as Task[];
+    },
+  });
+}
