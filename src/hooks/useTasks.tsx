@@ -186,3 +186,29 @@ export function useOverdueTasks(isAdmin: boolean = false) {
     },
   });
 }
+
+export function usePriorityTasks(priority: TaskPriority, isAdmin: boolean = false) {
+  return useQuery({
+    queryKey: ["tasks-priority", priority, isAdmin],
+    queryFn: async () => {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) throw new Error("Usuário não autenticado");
+
+      let query = supabase
+        .from("tasks")
+        .select("*")
+        .eq("priority", priority)
+        .neq("status", "done");
+
+      // Se não for admin, filtrar apenas tarefas do usuário
+      if (!isAdmin) {
+        query = query.eq("assignee_id", userData.user.id);
+      }
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+      return data as Task[];
+    },
+  });
+}
