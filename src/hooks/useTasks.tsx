@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { syncTaskToGoogleCalendar } from "@/hooks/useGoogleCalendar";
 
 export type TaskStatus = 'to_do' | 'in_progress' | 'done';
 export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
@@ -101,6 +102,17 @@ export function useCreateTask() {
         .single();
 
       if (error) throw error;
+
+      // Sincronizar com Google Calendar se conectado
+      const accessToken = localStorage.getItem("google_calendar_token");
+      if (accessToken && data.due_date) {
+        try {
+          await syncTaskToGoogleCalendar("create", data, accessToken);
+        } catch (error) {
+          console.error("Erro ao sincronizar com Google Calendar:", error);
+        }
+      }
+
       return data;
     },
     onSuccess: () => {
@@ -128,6 +140,17 @@ export function useUpdateTask() {
         .single();
 
       if (error) throw error;
+
+      // Sincronizar com Google Calendar se conectado
+      const accessToken = localStorage.getItem("google_calendar_token");
+      if (accessToken && data.due_date) {
+        try {
+          await syncTaskToGoogleCalendar("update", data, accessToken);
+        } catch (error) {
+          console.error("Erro ao sincronizar com Google Calendar:", error);
+        }
+      }
+
       return data;
     },
     onSuccess: () => {
@@ -145,8 +168,25 @@ export function useDeleteTask() {
 
   return useMutation({
     mutationFn: async (id: string) => {
+      // Buscar tarefa antes de deletar para sincronizar com Google Calendar
+      const { data: task } = await supabase
+        .from("tasks")
+        .select("*")
+        .eq("id", id)
+        .single();
+
       const { error } = await supabase.from("tasks").delete().eq("id", id);
       if (error) throw error;
+
+      // Sincronizar com Google Calendar se conectado
+      const accessToken = localStorage.getItem("google_calendar_token");
+      if (accessToken && task) {
+        try {
+          await syncTaskToGoogleCalendar("delete", task, accessToken);
+        } catch (error) {
+          console.error("Erro ao sincronizar com Google Calendar:", error);
+        }
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
