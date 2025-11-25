@@ -56,6 +56,7 @@ interface CandidateWithoutFeedback {
   vaga_titulo: string;
   request_created: string;
   request_expires: string;
+  token: string;
 }
 export default function Acompanhamento() {
   const { roles } = useUserRole();
@@ -125,7 +126,7 @@ export default function Acompanhamento() {
     try {
       const { data: requests, error: requestsError } = await supabase
         .from("feedback_requests")
-        .select("id, candidato_id, vaga_id, created_at, expires_at")
+        .select("id, candidato_id, vaga_id, created_at, expires_at, token")
         .in("vaga_id", vagaIds)
         .gt("expires_at", new Date().toISOString())
         .order("created_at", { ascending: false });
@@ -180,7 +181,8 @@ export default function Acompanhamento() {
           vaga_relacionada_id: req.vaga_id,
           vaga_titulo: vagasMap.get(req.vaga_id) || "Vaga não encontrada",
           request_created: req.created_at,
-          request_expires: req.expires_at
+          request_expires: req.expires_at,
+          token: req.token
         };
       });
       setCandidatesWithoutFeedback(result);
@@ -588,9 +590,7 @@ export default function Acompanhamento() {
                           className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setSelectedCandidateId(candidate.id);
-                            setCandidateDrawerOpen(true);
-                            setNoFeedbackDrawerOpen(false);
+                            window.open(`/feedback/${candidate.token}`, '_blank');
                           }}
                         >
                           <MessageSquare className="h-4 w-4 mr-2" />
