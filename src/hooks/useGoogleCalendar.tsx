@@ -20,6 +20,23 @@ export function useGoogleCalendar(): GoogleCalendarHook {
     const checkAuthAndToken = async () => {
       console.log('📅 Google Calendar: Verificando autenticação e tokens');
       
+      // Primeiro, tentar restaurar sessão salva antes do OAuth
+      const savedSession = sessionStorage.getItem("supabase_session_before_oauth");
+      if (savedSession) {
+        console.log('🔄 Google Calendar: Restaurando sessão Supabase...');
+        try {
+          const { access_token, refresh_token } = JSON.parse(savedSession);
+          await supabase.auth.setSession({
+            access_token,
+            refresh_token
+          });
+          sessionStorage.removeItem("supabase_session_before_oauth");
+          console.log('✅ Google Calendar: Sessão Supabase restaurada!');
+        } catch (error) {
+          console.error('❌ Google Calendar: Erro ao restaurar sessão:', error);
+        }
+      }
+      
       // Verificar se usuário está autenticado no Supabase
       const { data: { session } } = await supabase.auth.getSession();
       console.log('📅 Google Calendar: Sessão Supabase:', session ? 'ATIVA' : 'INATIVA');
