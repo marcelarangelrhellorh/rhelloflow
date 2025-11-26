@@ -19,17 +19,23 @@ export function useGoogleCalendar(): GoogleCalendarHook {
   useEffect(() => {
     const checkAuthAndToken = async () => {
       console.log('📅 Google Calendar: Verificando autenticação e tokens');
+      console.log('📅 Google Calendar: URL atual:', window.location.href);
+      console.log('📅 Google Calendar: Hash:', window.location.hash);
       
       // Primeiro, tentar restaurar sessão salva antes do OAuth
       const savedSession = sessionStorage.getItem("supabase_session_before_oauth");
+      console.log('📅 Google Calendar: Sessão salva encontrada?', !!savedSession);
+      
       if (savedSession) {
         console.log('🔄 Google Calendar: Restaurando sessão Supabase...');
+        console.log('🔄 Google Calendar: Dados da sessão:', savedSession);
         try {
           const { access_token, refresh_token } = JSON.parse(savedSession);
-          await supabase.auth.setSession({
+          const { data, error } = await supabase.auth.setSession({
             access_token,
             refresh_token
           });
+          console.log('✅ Google Calendar: Resultado setSession:', { data, error });
           sessionStorage.removeItem("supabase_session_before_oauth");
           console.log('✅ Google Calendar: Sessão Supabase restaurada!');
         } catch (error) {
@@ -105,10 +111,15 @@ export function useGoogleCalendar(): GoogleCalendarHook {
     supabase.auth.getSession().then(({ data: { session } }) => {
       console.log("💾 Salvando informação da sessão antes do redirect OAuth:", session ? 'SESSÃO ATIVA' : 'SEM SESSÃO');
       if (session) {
-        sessionStorage.setItem("supabase_session_before_oauth", JSON.stringify({
+        const sessionData = {
           access_token: session.access_token,
           refresh_token: session.refresh_token
-        }));
+        };
+        console.log("💾 Dados da sessão a serem salvos:", sessionData);
+        sessionStorage.setItem("supabase_session_before_oauth", JSON.stringify(sessionData));
+        console.log("💾 Sessão salva no sessionStorage");
+      } else {
+        console.warn("⚠️ Nenhuma sessão ativa para salvar antes do OAuth");
       }
     });
     
