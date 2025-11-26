@@ -17,27 +17,57 @@ export function useGoogleCalendar(): GoogleCalendarHook {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    // Verificar se há token armazenado
-    const storedToken = localStorage.getItem("google_calendar_token");
-    if (storedToken) {
-      setAccessToken(storedToken);
-      setIsConnected(true);
-    }
-
-    // Verificar se retornou do OAuth
-    const params = new URLSearchParams(window.location.hash.substring(1));
-    const token = params.get("access_token");
-
-    if (token) {
-      localStorage.setItem("google_calendar_token", token);
-      setAccessToken(token);
-      setIsConnected(true);
-      // Limpar URL
-      window.history.replaceState({}, document.title, window.location.pathname);
+    const checkAuthAndToken = async () => {
+      // Verificar se usuário está autenticado no Supabase
+      const { data: { session } } = await supabase.auth.getSession();
       
-      // Disparar evento customizado para notificar sucesso
-      window.dispatchEvent(new CustomEvent('google-calendar-connected'));
-    }
+      if (!session) {
+        // Se não há sessão, salvar token temporariamente se existir
+        const params = new URLSearchParams(window.location.hash.substring(1));
+        const token = params.get("access_token");
+        
+        if (token) {
+          sessionStorage.setItem("pending_google_calendar_token", token);
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+        return;
+      }
+
+      // Usuário está autenticado - processar tokens
+      
+      // Verificar se há token pendente do OAuth
+      const pendingToken = sessionStorage.getItem("pending_google_calendar_token");
+      if (pendingToken) {
+        sessionStorage.removeItem("pending_google_calendar_token");
+        localStorage.setItem("google_calendar_token", pendingToken);
+        setAccessToken(pendingToken);
+        setIsConnected(true);
+        window.dispatchEvent(new CustomEvent('google-calendar-connected'));
+        return;
+      }
+
+      // Verificar se retornou do OAuth
+      const params = new URLSearchParams(window.location.hash.substring(1));
+      const token = params.get("access_token");
+
+      if (token) {
+        localStorage.setItem("google_calendar_token", token);
+        setAccessToken(token);
+        setIsConnected(true);
+        window.history.replaceState({}, document.title, window.location.pathname);
+        window.dispatchEvent(new CustomEvent('google-calendar-connected'));
+        return;
+      }
+
+      // Verificar se há token armazenado
+      const storedToken = localStorage.getItem("google_calendar_token");
+      if (storedToken) {
+        setAccessToken(storedToken);
+        setIsConnected(true);
+      }
+    };
+
+    checkAuthAndToken();
   }, []);
 
   const connect = () => {
