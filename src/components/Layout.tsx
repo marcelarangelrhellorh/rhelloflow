@@ -14,12 +14,15 @@ export function Layout() {
   const location = useLocation();
 
   useEffect(() => {
+    console.log('🔐 Layout: Iniciando setup de autenticação');
+    
     // Set up auth state listener FIRST
     const {
       data: {
         subscription
       }
     } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('🔐 Layout: Auth state change detectado:', event, session ? 'com sessão' : 'sem sessão');
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -31,6 +34,7 @@ export function Layout() {
         session
       }
     }) => {
+      console.log('🔐 Layout: Sessão inicial carregada:', session ? 'com sessão' : 'sem sessão');
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
