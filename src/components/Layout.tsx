@@ -16,30 +16,47 @@ export function Layout() {
   useEffect(() => {
     console.log('🔐 Layout: Iniciando setup de autenticação');
     
-    // Set up auth state listener FIRST
-    const {
-      data: {
-        subscription
-      }
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('🔐 Layout: Auth state change detectado:', event, session ? 'com sessão' : 'sem sessão');
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    // Verificar se estamos voltando do OAuth do Google
+    const hasGoogleOAuthToken = window.location.hash.includes('access_token');
+    const hasSavedSession = sessionStorage.getItem("supabase_session_before_oauth");
+    
+    if (hasGoogleOAuthToken && hasSavedSession) {
+      console.log('🔐 Layout: Detectado retorno do OAuth, aguardando restauração da sessão...');
+      // Dar tempo para o useGoogleCalendar restaurar a sessão
+      setTimeout(() => {
+        initAuth();
+      }, 500);
+    } else {
+      initAuth();
+    }
+    
+    function initAuth() {
+      // Set up auth state listener FIRST
+      const {
+        data: {
+          subscription
+        }
+      } = supabase.auth.onAuthStateChange((event, session) => {
+        console.log('🔐 Layout: Auth state change detectado:', event, session ? 'com sessão' : 'sem sessão');
+        setSession(session);
+        setUser(session?.user ?? null);
+        setLoading(false);
+      });
 
-    // THEN check for existing session
-    supabase.auth.getSession().then(({
-      data: {
-        session
-      }
-    }) => {
-      console.log('🔐 Layout: Sessão inicial carregada:', session ? 'com sessão' : 'sem sessão');
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-    return () => subscription.unsubscribe();
+      // THEN check for existing session
+      supabase.auth.getSession().then(({
+        data: {
+          session
+        }
+      }) => {
+        console.log('🔐 Layout: Sessão inicial carregada:', session ? 'com sessão' : 'sem sessão');
+        setSession(session);
+        setUser(session?.user ?? null);
+        setLoading(false);
+      });
+      
+      return () => subscription.unsubscribe();
+    }
   }, []);
 
   // Redirecionar clientes para /acompanhamento
