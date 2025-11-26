@@ -38,6 +38,9 @@ export function useGoogleCalendar(): GoogleCalendarHook {
   }, []);
 
   const connect = () => {
+    console.log("🔗 Redirect URI sendo usado:", REDIRECT_URI);
+    console.log("🔑 Client ID:", GOOGLE_CLIENT_ID);
+    
     const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?${new URLSearchParams(
       {
         client_id: GOOGLE_CLIENT_ID,
@@ -48,6 +51,7 @@ export function useGoogleCalendar(): GoogleCalendarHook {
       }
     )}`;
 
+    console.log("🌐 URL completa:", authUrl);
     window.location.href = authUrl;
   };
 
