@@ -34,6 +34,9 @@ export function useGoogleCalendar(): GoogleCalendarHook {
       setIsConnected(true);
       // Limpar URL
       window.history.replaceState({}, document.title, window.location.pathname);
+      
+      // Disparar evento customizado para notificar sucesso
+      window.dispatchEvent(new CustomEvent('google-calendar-connected'));
     }
   }, []);
 
