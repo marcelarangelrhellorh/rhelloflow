@@ -209,7 +209,13 @@ export function useOverdueTasks(isAdmin: boolean = false) {
 
       let query = supabase
         .from("tasks")
-        .select("*")
+        .select(`
+          *,
+          assignee:profiles!tasks_assignee_id_fkey(id, full_name),
+          vaga:vagas(id, titulo),
+          empresa:empresas(id, nome),
+          candidato:candidatos(id, nome_completo)
+        `)
         .neq("status", "done")
         .lt("due_date", now)
         .not("due_date", "is", null);
@@ -236,7 +242,13 @@ export function usePriorityTasks(priority: TaskPriority, isAdmin: boolean = fals
 
       let query = supabase
         .from("tasks")
-        .select("*")
+        .select(`
+          *,
+          assignee:profiles!tasks_assignee_id_fkey(id, full_name),
+          vaga:vagas(id, titulo),
+          empresa:empresas(id, nome),
+          candidato:candidatos(id, nome_completo)
+        `)
         .eq("priority", priority)
         .neq("status", "done");
 
