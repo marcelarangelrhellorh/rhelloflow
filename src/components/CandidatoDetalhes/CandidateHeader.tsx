@@ -140,7 +140,7 @@ export function CandidateHeader({
 
               {/* Seletor de Etapa */}
               <Select value={status} onValueChange={onStatusChange}>
-                <SelectTrigger className="w-full sm:w-[280px] h-9 text-sm border-gray-200 dark:border-secondary-text-light/20 bg-white dark:bg-background-dark hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors">
+                <SelectTrigger className="w-full sm:w-[280px] h-10 text-base border-gray-200 dark:border-secondary-text-light/20 bg-white dark:bg-background-dark hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors">
                   <SelectValue>
                     <span className="text-secondary-text-light dark:text-secondary-text-dark">Etapa:</span>{" "}
                     <span className="font-semibold text-primary-text-light dark:text-primary-text-dark">{status}</span>
