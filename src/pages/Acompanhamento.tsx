@@ -1,11 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Clock, Users, Briefcase, MapPin, DollarSign, FileText, Calendar, CheckCircle2, MessageSquare, AlertCircle, UserPlus, ArrowRightLeft, Activity, PartyPopper } from "lucide-react";
-import { format, differenceInDays } from "date-fns";
+import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Clock, Users, Briefcase, MapPin, DollarSign, FileText, Calendar, CheckCircle2, MessageSquare, AlertCircle, UserPlus, ArrowRightLeft, Activity, PartyPopper, Search, CalendarIcon, X } from "lucide-react";
+import { format, differenceInDays, isAfter, isBefore, startOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { formatSalaryRange } from "@/lib/salaryUtils";
 import { JOB_STAGES, calculateProgress, getStageBySlug, getStageByName } from "@/lib/jobStages";
@@ -70,6 +73,8 @@ export default function Acompanhamento() {
   const [candidateDrawerOpen, setCandidateDrawerOpen] = useState(false);
   const [candidatesWithoutFeedback, setCandidatesWithoutFeedback] = useState<CandidateWithoutFeedback[]>([]);
   const [noFeedbackDrawerOpen, setNoFeedbackDrawerOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [dateFilter, setDateFilter] = useState<Date | undefined>(undefined);
 
   // FASE 3: Usar hooks otimizados com views materializadas
   const {
@@ -199,6 +204,22 @@ export default function Acompanhamento() {
   const vagaCandidatos = candidatos.filter(c => c.vaga_relacionada_id === selectedVaga);
   const vagaHistory = stageHistory.filter(h => h.job_id === selectedVaga);
 
+  // Filter vagas based on search and date
+  const filteredVagas = useMemo(() => {
+    return vagas.filter(vaga => {
+      // Text search filter
+      const matchesSearch = searchTerm === "" || 
+        vaga.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        vaga.empresa.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      // Date filter - show vagas created on or after selected date
+      const matchesDate = !dateFilter || 
+        !isBefore(startOfDay(new Date(vaga.criado_em)), startOfDay(dateFilter));
+      
+      return matchesSearch && matchesDate;
+    });
+  }, [vagas, searchTerm, dateFilter]);
+
   // Calculate metrics
   const totalVagasAbertas = vagas.length;
   const totalSemFeedback = candidatesWithoutFeedback.length;
@@ -287,17 +308,84 @@ export default function Acompanhamento() {
             </Card>
           </div>}
 
-        {/* Divider with instruction */}
+        {/* Divider with instruction and filters */}
         {!selectedVaga && vagas.length > 0 && (
           <div className="space-y-4">
             <div className="w-full h-0.5 bg-muted-foreground/30"></div>
             <p className="text-muted-foreground font-medium text-base">Para acessar os detalhes da vaga, clique sobre ela</p>
+            
+            {/* Search Filters */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Pesquisar por título ou empresa..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+                {searchTerm && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0"
+                    onClick={() => setSearchTerm("")}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+              
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full sm:w-[200px] justify-start text-left font-normal",
+                      !dateFilter && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {dateFilter ? format(dateFilter, "dd/MM/yyyy", { locale: ptBR }) : "Filtrar por data"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <CalendarComponent
+                    mode="single"
+                    selected={dateFilter}
+                    onSelect={setDateFilter}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                    locale={ptBR}
+                  />
+                </PopoverContent>
+              </Popover>
+              
+              {dateFilter && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setDateFilter(undefined)}
+                  className="text-muted-foreground"
+                >
+                  <X className="h-4 w-4 mr-1" />
+                  Limpar data
+                </Button>
+              )}
+            </div>
+            
+            {/* Results count */}
+            {(searchTerm || dateFilter) && (
+              <p className="text-sm text-muted-foreground">
+                {filteredVagas.length} vaga{filteredVagas.length !== 1 ? 's' : ''} encontrada{filteredVagas.length !== 1 ? 's' : ''}
+              </p>
+            )}
           </div>
         )}
 
         {/* Vagas Overview - Small Cards */}
         {!selectedVaga && <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {vagas.map(vaga => {
+            {filteredVagas.map(vaga => {
           const vagaCandidatosCount = candidatos.filter(c => c.vaga_relacionada_id === vaga.id).length;
           const currentStage = getStageBySlug(vaga.status);
           return <Card key={vaga.id} className="cursor-pointer transition-all shadow-sm hover:shadow-md border-2 border-border hover:border-muted-foreground/50" onClick={() => setSelectedVaga(vaga.id)}>
