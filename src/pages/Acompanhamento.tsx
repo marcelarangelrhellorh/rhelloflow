@@ -564,7 +564,7 @@ export default function Acompanhamento() {
         </div>
 
         {/* Right Sidebar - Recent Activities */}
-        {selectedVaga && vagaEventos.length > 0 && <div className="w-80 lg:w-96 flex-shrink-0 border-l border-border bg-muted/30 p-6 hidden lg:block">
+        {selectedVaga && vagaEventos.length > 0 && <div className="fixed right-0 top-16 w-80 lg:w-96 h-[calc(100vh-4rem)] border-l border-border bg-muted/30 p-6 hidden lg:block">
           <div className="sticky top-6">
             <div className="flex items-center gap-2 mb-4">
               <Activity className="h-5 w-5 text-primary" />
