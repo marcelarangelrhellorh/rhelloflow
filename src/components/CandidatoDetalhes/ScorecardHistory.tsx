@@ -160,14 +160,14 @@ export function ScorecardHistory({
     }
   }
   if (loading) {
-    return <Card>
+    return <Card className="border border-[#ffcd00]">
         <CardContent className="flex items-center justify-center py-8">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         </CardContent>
       </Card>;
   }
   if (scorecards.length === 0) {
-    return <Card>
+    return <Card className="border border-[#ffcd00]">
         <CardHeader>
           <CardTitle>Histórico de Avaliações</CardTitle>
           <CardDescription className="font-semibold">Scorecards preenchidos para este candidato</CardDescription>
@@ -183,7 +183,7 @@ export function ScorecardHistory({
 
   // Calculate average score
   const averageScore = scorecards.reduce((sum, s) => sum + s.match_percentage, 0) / scorecards.length;
-  return <Card>
+  return <Card className="border border-[#ffcd00]">
       <CardHeader>
         <div className="flex items-start justify-between">
           <div>
