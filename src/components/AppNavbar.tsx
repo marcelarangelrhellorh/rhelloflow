@@ -38,7 +38,7 @@ const menuItems = [{
 }, {
   title: "Processos",
   url: "/acompanhamento",
-  roles: ["admin", "client"]
+  roles: ["client"]
 }];
 export function AppNavbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
