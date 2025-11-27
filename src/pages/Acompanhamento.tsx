@@ -523,7 +523,7 @@ export default function Acompanhamento() {
             </Card>
 
             {/* Candidates List */}
-            {vagaCandidatos.length > 0 && <Card className="shadow-sm">
+            {vagaCandidatos.length > 0 && <Card className="shadow-sm max-w-4xl">
                 <CardContent className="p-6">
                   <h3 className="font-semibold text-lg mb-4">Candidatos ({vagaCandidatos.length})</h3>
                   <div className="space-y-3">
