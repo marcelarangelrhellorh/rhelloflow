@@ -312,7 +312,7 @@ export default function Acompanhamento() {
             {/* Search Filters */}
             <div className="flex flex-col sm:flex-row gap-3">
               <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Search className="text-muted-foreground font-medium text-lg" />
                 <Input placeholder="Pesquisar por título ou empresa..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10" />
                 {searchTerm && <Button variant="ghost" size="sm" className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0" onClick={() => setSearchTerm("")}>
                     <X className="h-4 w-4" />
