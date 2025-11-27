@@ -105,7 +105,7 @@ export function VagaTasksCard({
               Tarefas
             </p>
           </div>
-          <Button size="sm" variant="outline" onClick={handleNewTask} className="h-7 gap-1 text-sm font-semibold">
+          <Button size="sm" variant="outline" onClick={handleNewTask} className="h-7 gap-1 text-sm font-semibold bg-[#00141D] text-white hover:bg-[#00141D]/90 border-[#00141D]">
             <Plus className="h-3 w-3" />
             Nova
           </Button>
