@@ -151,7 +151,7 @@ export function TaskDetailDrawer({
 
           {/* Actions */}
           <div className="flex flex-col gap-3">
-            <Button onClick={handleComplete} disabled={updateTask.isPending} className={cn("w-full gap-2", task.status === "done" ? "bg-muted hover:bg-muted/80 text-foreground" : "bg-green-600 hover:bg-green-700 text-white")}>
+            <Button onClick={handleComplete} disabled={updateTask.isPending} className={cn("w-full gap-2 text-base font-semibold", task.status === "done" ? "bg-muted hover:bg-muted/80 text-foreground" : "bg-green-600 hover:bg-green-700 text-white")}>
               <CheckCircle2 className="h-4 w-4" />
               {task.status === "done" ? "Reabrir Tarefa" : "Marcar como Concluída"}
             </Button>
