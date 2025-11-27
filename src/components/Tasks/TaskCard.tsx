@@ -100,10 +100,10 @@ export default function TaskCard({
             <CheckCircle2 className="h-4 w-4 mr-1" />
             {task.status === 'done' ? 'Reabrir' : 'Concluir'}
           </Button>
-          <Button size="sm" variant="ghost" onClick={() => onEdit(task)}>
+          <Button size="sm" variant="ghost" onClick={() => onEdit(task)} className="text-base">
             Editar
           </Button>
-          <Button size="sm" variant="ghost" className="text-red-600" onClick={() => onDelete(task.id)}>
+          <Button size="sm" variant="ghost" onClick={() => onDelete(task.id)} className="text-red-600 font-semibold">
             Excluir
           </Button>
         </div>
