@@ -47,7 +47,7 @@ Localização: ${[cidade, estado].filter(Boolean).join(", ") || "Não informada"
   };
 
   return (
-    <div className="rounded-lg border border-gray-200 dark:border-secondary-text-light/20 bg-white dark:bg-background-dark shadow-sm">
+    <div className="rounded-lg border-2 border-[#ffcd00] bg-white dark:bg-background-dark shadow-sm">
       <div className="p-6 pb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
