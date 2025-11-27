@@ -475,41 +475,7 @@ export default function Acompanhamento() {
               </CardContent>
             </Card>
 
-            {/* Candidates List */}
-            {vagaCandidatos.length > 0 && <Card className="shadow-sm">
-                <CardContent className="p-6">
-                  <h3 className="font-semibold text-lg mb-4">Candidatos ({vagaCandidatos.length})</h3>
-                  <div className="space-y-3">
-                    {vagaCandidatos.map(candidato => {
-                      const isPendingFeedback = hasPendingFeedback(candidato.id);
-                      
-                      return <div key={candidato.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleCandidateClick(candidato.id)}>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <p className="text-foreground text-base font-semibold">{candidato.nome_completo}</p>
-                            {isPendingFeedback && (
-                              <Badge className="bg-orange-500 text-white border-orange-600 text-sm px-3 py-1 font-bold shadow-sm">
-                                <MessageSquare className="h-4 w-4 mr-1.5" />
-                                Feedback Pendente
-                              </Badge>
-                            )}
-                          </div>
-                          <p className="text-muted-foreground text-base font-medium">
-                            Desde {format(new Date(candidato.criado_em), "dd/MM/yyyy", {
-                      locale: ptBR
-                    })}
-                          </p>
-                        </div>
-                        <Badge variant={getStatusBadgeVariant(candidato.status)} className="text-base font-semibold bg-[#ffcd00]/[0.36]">
-                          {candidato.status}
-                        </Badge>
-                      </div>;
-                    })}
-                  </div>
-                </CardContent>
-              </Card>}
-
-            {/* Recent Activities */}
+            {/* Recent Activities - Moved up for better visibility */}
             {vagaEventos.length > 0 && (
               <Card className="shadow-sm">
                 <CardContent className="p-6">
@@ -556,6 +522,40 @@ export default function Acompanhamento() {
                 </CardContent>
               </Card>
             )}
+
+            {/* Candidates List */}
+            {vagaCandidatos.length > 0 && <Card className="shadow-sm">
+                <CardContent className="p-6">
+                  <h3 className="font-semibold text-lg mb-4">Candidatos ({vagaCandidatos.length})</h3>
+                  <div className="space-y-3">
+                    {vagaCandidatos.map(candidato => {
+                      const isPendingFeedback = hasPendingFeedback(candidato.id);
+                      
+                      return <div key={candidato.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleCandidateClick(candidato.id)}>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <p className="text-foreground text-base font-semibold">{candidato.nome_completo}</p>
+                            {isPendingFeedback && (
+                              <Badge className="bg-orange-500 text-white border-orange-600 text-sm px-3 py-1 font-bold shadow-sm">
+                                <MessageSquare className="h-4 w-4 mr-1.5" />
+                                Feedback Pendente
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-muted-foreground text-base font-medium">
+                            Desde {format(new Date(candidato.criado_em), "dd/MM/yyyy", {
+                      locale: ptBR
+                    })}
+                          </p>
+                        </div>
+                        <Badge variant={getStatusBadgeVariant(candidato.status)} className="text-base font-semibold bg-[#ffcd00]/[0.36]">
+                          {candidato.status}
+                        </Badge>
+                      </div>;
+                    })}
+                  </div>
+                </CardContent>
+              </Card>}
           </div>}
 
         {/* Empty State */}
