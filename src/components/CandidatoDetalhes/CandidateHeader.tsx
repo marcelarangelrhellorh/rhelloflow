@@ -166,22 +166,22 @@ export function CandidateHeader({
 
           {/* Right Side - Action Buttons */}
           <div className="flex flex-wrap gap-2">
-            <Button onClick={onSendWhatsApp} variant="outline" size="sm" className="font-semibold border-gray-200 dark:border-secondary-text-light/20 text-success hover:bg-success/10">
+            <Button onClick={onSendWhatsApp} variant="outline" className="font-semibold text-base border-gray-200 dark:border-secondary-text-light/20 text-success hover:bg-success/10">
               <MessageCircle className="mr-2 h-4 w-4" />
               WhatsApp
             </Button>
 
-            <Button onClick={onEdit} size="sm" className="font-semibold">
+            <Button onClick={onEdit} className="font-semibold text-base">
               <Edit className="mr-2 h-4 w-4" />
               Editar
             </Button>
 
-            <Button onClick={onRelocate} variant="outline" size="sm" className="font-semibold border-gray-200 dark:border-secondary-text-light/20">
+            <Button onClick={onRelocate} variant="outline" className="font-semibold text-base border-gray-200 dark:border-secondary-text-light/20">
               <RefreshCw className="mr-2 h-4 w-4" />
               Realocar
             </Button>
 
-            <Button onClick={onDelete} variant="destructive" size="sm" className="font-semibold">
+            <Button onClick={onDelete} variant="destructive" className="font-semibold text-base">
               <Trash2 className="mr-2 h-4 w-4" />
               Excluir
             </Button>
