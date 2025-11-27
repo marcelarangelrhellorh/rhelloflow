@@ -50,7 +50,7 @@ export default function TaskCard({
             <h3 className={cn("font-semibold text-lg", task.status === 'done' && "line-through")}>
               {task.title}
             </h3>
-            {task.description && <p className="text-sm text-muted-foreground mt-1">{task.description}</p>}
+            {task.description && <p className="text-muted-foreground mt-1 text-base font-medium text-left">{task.description}</p>}
           </div>
           <Badge className={`text-sm font-semibold ${priorityColors[task.priority]}`}>
             {priorityLabels[task.priority]}
