@@ -397,7 +397,7 @@ export default function Acompanhamento() {
             <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 max-w-4xl">
               <Card className="border-primary shadow-sm">
                 <CardContent className="p-3">
-                  <p className="text-muted-foreground mb-1 text-sm font-semibold">Etapa Atual</p>
+                  <p className="text-muted-foreground mb-1 font-semibold text-base">Etapa Atual</p>
                   <Badge variant="secondary" className="text-xs bg-[#ffcd00]">
                     {getStageBySlug(selectedVagaData.status)?.name || selectedVagaData.status}
                   </Badge>
@@ -406,7 +406,7 @@ export default function Acompanhamento() {
 
               <Card className="border-primary shadow-sm">
                 <CardContent className="p-3">
-                  <p className="text-muted-foreground mb-1 text-sm font-semibold">Candidatos</p>
+                  <p className="text-muted-foreground mb-1 font-semibold text-base">Candidatos</p>
                   <div className="flex items-center gap-2">
                     <Users className="h-4 w-4 text-muted-foreground" />
                     <span className="text-base font-semibold">{vagaCandidatos.length}</span>
@@ -416,7 +416,7 @@ export default function Acompanhamento() {
 
               <Card className="border-primary shadow-sm">
                 <CardContent className="p-3">
-                  <p className="text-muted-foreground mb-1 text-sm font-semibold">Duração</p>
+                  <p className="text-muted-foreground mb-1 font-semibold text-base">Duração</p>
                   <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4 text-muted-foreground" />
                     <span className="text-base font-semibold">
@@ -428,7 +428,7 @@ export default function Acompanhamento() {
 
               {selectedVagaData.modelo_trabalho && <Card className="border-primary shadow-sm">
                   <CardContent className="p-3">
-                    <p className="text-muted-foreground mb-1 text-sm font-semibold">Modelo</p>
+                    <p className="text-muted-foreground mb-1 font-semibold text-base">Modelo</p>
                     <div className="flex items-center gap-2">
                       <MapPin className="h-4 w-4 text-muted-foreground" />
                       <span className="text-base font-semibold">{selectedVagaData.modelo_trabalho}</span>
@@ -448,10 +448,10 @@ export default function Acompanhamento() {
 
               <Card className="border-primary shadow-sm">
                 <CardContent className="p-3">
-                  <p className="text-muted-foreground mb-1 text-sm font-semibold">Vaga Publicada</p>
+                  <p className="text-muted-foreground mb-1 font-semibold text-base">Vaga Publicada</p>
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <span className="font-medium text-sm">
+                    <span className="font-medium text-base">
                       {format(new Date(selectedVagaData.criado_em), "dd/MM/yyyy", {
                       locale: ptBR
                     })}
@@ -466,7 +466,7 @@ export default function Acompanhamento() {
                 <CardContent className="p-4">
                   <div className="flex items-center gap-2 mb-3">
                     <Briefcase className="h-4 w-4 text-primary" />
-                    <h3 className="font-semibold text-base">Benefícios Oferecidos</h3>
+                    <h3 className="font-semibold text-lg">Benefícios Oferecidos</h3>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {selectedVagaData.beneficios.map((beneficio, index) => <Badge key={index} variant="outline" className="bg-primary/10 text-primary border-primary/20 text-sm font-semibold">
@@ -480,7 +480,7 @@ export default function Acompanhamento() {
             {/* Process Timeline */}
             <Card className="shadow-sm max-w-5xl">
               <CardContent className="p-5">
-                <h3 className="font-semibold text-base mb-5">Linha do Tempo do Processo</h3>
+                <h3 className="font-semibold mb-5 text-lg text-left">Linha do Tempo do Processo</h3>
                 <div className="relative overflow-x-auto pb-3">
                   {/* Horizontal line background */}
                   <div className="absolute top-4 left-4 right-4 h-0.5 bg-border z-0" />
