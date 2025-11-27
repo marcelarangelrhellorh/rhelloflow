@@ -373,7 +373,7 @@ export default function Acompanhamento() {
         {/* Selected Vaga Details */}
         {selectedVaga && selectedVagaData && <div className="space-y-6">
             {/* Back Button */}
-            <Button variant="ghost" onClick={() => setSelectedVaga(null)} className="mb-4">
+            <Button variant="ghost" onClick={() => setSelectedVaga(null)} className="mb-4 text-base">
               ← Voltar para Meus Processos
             </Button>
 
