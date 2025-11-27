@@ -263,7 +263,7 @@ export default function Acompanhamento() {
       </div>;
   }
   return <div className="min-h-screen bg-background">
-      <div className="flex justify-center">
+      <div className="flex">
         {/* Main Content */}
         <div className="flex-1 max-w-4xl p-6 space-y-6">
         {/* Header */}
@@ -308,7 +308,7 @@ export default function Acompanhamento() {
 
         {/* Divider with instruction and filters */}
         {!selectedVaga && vagas.length > 0 && <div className="space-y-4 mt-6">
-            <div className="w-full h-px shadow-[0_2px_8px_0_rgba(0,0,0,0.15),0_1px_4px_-1px_rgba(0,0,0,0.1)]"></div>
+            <div className="w-full h-px bg-border"></div>
             <p className="text-muted-foreground font-medium text-base">Para acessar os detalhes da vaga, clique sobre ela</p>
             
             {/* Search Filters */}
