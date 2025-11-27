@@ -115,8 +115,9 @@ export function useCreateTask() {
 
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["vaga-tasks"] });
       toast.success("Tarefa criada com sucesso");
     },
     onError: (error) => {
@@ -155,6 +156,7 @@ export function useUpdateTask() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["vaga-tasks"] });
       toast.success("Tarefa atualizada com sucesso");
     },
     onError: (error) => {
@@ -190,6 +192,7 @@ export function useDeleteTask() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["vaga-tasks"] });
       toast.success("Tarefa excluída com sucesso");
     },
     onError: (error) => {
