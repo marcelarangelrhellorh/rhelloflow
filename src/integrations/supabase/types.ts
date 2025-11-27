@@ -157,6 +157,13 @@ export type Database = {
             foreignKeyName: "candidate_scorecards_candidate_id_fkey"
             columns: ["candidate_id"]
             isOneToOne: false
+            referencedRelation: "candidatos_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidate_scorecards_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
             referencedRelation: "view_candidate_tags"
             referencedColumns: ["candidate_id"]
           },
@@ -249,6 +256,13 @@ export type Database = {
             columns: ["candidate_id"]
             isOneToOne: false
             referencedRelation: "candidatos_active"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidate_tags_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidatos_public_view"
             referencedColumns: ["id"]
           },
           {
@@ -735,6 +749,13 @@ export type Database = {
             foreignKeyName: "feedback_requests_candidato_id_fkey"
             columns: ["candidato_id"]
             isOneToOne: false
+            referencedRelation: "candidatos_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_requests_candidato_id_fkey"
+            columns: ["candidato_id"]
+            isOneToOne: false
             referencedRelation: "view_candidate_tags"
             referencedColumns: ["candidate_id"]
           },
@@ -874,6 +895,13 @@ export type Database = {
             foreignKeyName: "feedbacks_candidato_id_fkey"
             columns: ["candidato_id"]
             isOneToOne: false
+            referencedRelation: "candidatos_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedbacks_candidato_id_fkey"
+            columns: ["candidato_id"]
+            isOneToOne: false
             referencedRelation: "view_candidate_tags"
             referencedColumns: ["candidate_id"]
           },
@@ -1004,6 +1032,13 @@ export type Database = {
             columns: ["candidato_id"]
             isOneToOne: false
             referencedRelation: "candidatos_active"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "historico_candidatos_candidato_id_fkey"
+            columns: ["candidato_id"]
+            isOneToOne: false
+            referencedRelation: "candidatos_public_view"
             referencedColumns: ["id"]
           },
           {
@@ -1399,6 +1434,13 @@ export type Database = {
             columns: ["candidato_id"]
             isOneToOne: false
             referencedRelation: "candidatos_active"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_candidato_id"
+            columns: ["candidato_id"]
+            isOneToOne: false
+            referencedRelation: "candidatos_public_view"
             referencedColumns: ["id"]
           },
           {
@@ -2022,6 +2064,13 @@ export type Database = {
             foreignKeyName: "tasks_candidato_id_fkey"
             columns: ["candidato_id"]
             isOneToOne: false
+            referencedRelation: "candidatos_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_candidato_id_fkey"
+            columns: ["candidato_id"]
+            isOneToOne: false
             referencedRelation: "view_candidate_tags"
             referencedColumns: ["candidate_id"]
           },
@@ -2547,6 +2596,13 @@ export type Database = {
             foreignKeyName: "whatsapp_sends_candidate_id_fkey"
             columns: ["candidate_id"]
             isOneToOne: false
+            referencedRelation: "candidatos_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whatsapp_sends_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
             referencedRelation: "view_candidate_tags"
             referencedColumns: ["candidate_id"]
           },
@@ -2882,6 +2938,71 @@ export type Database = {
           },
         ]
       }
+      candidatos_public_view: {
+        Row: {
+          area: Database["public"]["Enums"]["area_candidato"] | null
+          cidade: string | null
+          criado_em: string | null
+          estado: string | null
+          id: string | null
+          nivel: Database["public"]["Enums"]["nivel_candidato"] | null
+          nome_completo: string | null
+          status: Database["public"]["Enums"]["status_candidato"] | null
+          vaga_relacionada_id: string | null
+        }
+        Insert: {
+          area?: Database["public"]["Enums"]["area_candidato"] | null
+          cidade?: string | null
+          criado_em?: string | null
+          estado?: string | null
+          id?: string | null
+          nivel?: Database["public"]["Enums"]["nivel_candidato"] | null
+          nome_completo?: string | null
+          status?: Database["public"]["Enums"]["status_candidato"] | null
+          vaga_relacionada_id?: string | null
+        }
+        Update: {
+          area?: Database["public"]["Enums"]["area_candidato"] | null
+          cidade?: string | null
+          criado_em?: string | null
+          estado?: string | null
+          id?: string | null
+          nivel?: Database["public"]["Enums"]["nivel_candidato"] | null
+          nome_completo?: string | null
+          status?: Database["public"]["Enums"]["status_candidato"] | null
+          vaga_relacionada_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidatos_vaga_relacionada_id_fkey"
+            columns: ["vaga_relacionada_id"]
+            isOneToOne: false
+            referencedRelation: "vagas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidatos_vaga_relacionada_id_fkey"
+            columns: ["vaga_relacionada_id"]
+            isOneToOne: false
+            referencedRelation: "vagas_active"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidatos_vaga_relacionada_id_fkey"
+            columns: ["vaga_relacionada_id"]
+            isOneToOne: false
+            referencedRelation: "vagas_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidatos_vaga_relacionada_id_fkey"
+            columns: ["vaga_relacionada_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_cliente_detalhadas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dashboard_last30: {
         Row: {
           feedbacks_pendentes: number | null
@@ -2999,6 +3120,13 @@ export type Database = {
             columns: ["candidato_id"]
             isOneToOne: false
             referencedRelation: "candidatos_active"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedbacks_candidato_id_fkey"
+            columns: ["candidato_id"]
+            isOneToOne: false
+            referencedRelation: "candidatos_public_view"
             referencedColumns: ["id"]
           },
           {
@@ -3369,6 +3497,13 @@ export type Database = {
             foreignKeyName: "feedbacks_candidato_id_fkey"
             columns: ["candidato_id"]
             isOneToOne: false
+            referencedRelation: "candidatos_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedbacks_candidato_id_fkey"
+            columns: ["candidato_id"]
+            isOneToOne: false
             referencedRelation: "view_candidate_tags"
             referencedColumns: ["candidate_id"]
           },
@@ -3488,6 +3623,7 @@ export type Database = {
         Returns: number
       }
       can_manage_user_roles: { Args: never; Returns: boolean }
+      can_submit_feedback: { Args: { p_request_id: string }; Returns: boolean }
       can_view_analytics: { Args: never; Returns: boolean }
       cleanup_expired_pdf_imports: { Args: never; Returns: undefined }
       cleanup_old_submission_logs: { Args: never; Returns: undefined }
