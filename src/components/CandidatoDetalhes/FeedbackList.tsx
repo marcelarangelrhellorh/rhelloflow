@@ -140,7 +140,7 @@ export function FeedbackList({
             Feedbacks <span className="font-normal text-muted-foreground">({feedbacks.length})</span>
           </CardTitle>
           <div className="flex gap-2">
-            {onSolicitarFeedback && <Button onClick={onSolicitarFeedback} size="sm" variant="outline" className="font-semibold">
+            {onSolicitarFeedback && <Button onClick={onSolicitarFeedback} size="sm" variant="outline" className="font-semibold bg-[#00141d] text-background">
                 <Send className="mr-2 h-4 w-4" />
                 Solicitar Feedback
               </Button>}
