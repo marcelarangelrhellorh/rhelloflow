@@ -8,49 +8,75 @@ import { CheckCircle2, Clock, Circle, AlertTriangle, Calendar, User, Briefcase, 
 import { cn } from "@/lib/utils";
 import { Task, TaskStatus, TaskPriority, useUpdateTask } from "@/hooks/useTasks";
 import { isPast, isToday } from "date-fns";
-
 interface TaskDetailDrawerProps {
   task: Task | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onEdit: (task: Task) => void;
 }
-
-const priorityConfig: Record<TaskPriority, { label: string; class: string }> = {
-  low: { label: "Baixa", class: "bg-gray-100 text-gray-700" },
-  medium: { label: "Média", class: "bg-blue-100 text-blue-700" },
-  high: { label: "Alta", class: "bg-orange-100 text-orange-700" },
-  urgent: { label: "Urgente", class: "bg-red-100 text-red-700" },
+const priorityConfig: Record<TaskPriority, {
+  label: string;
+  class: string;
+}> = {
+  low: {
+    label: "Baixa",
+    class: "bg-gray-100 text-gray-700"
+  },
+  medium: {
+    label: "Média",
+    class: "bg-blue-100 text-blue-700"
+  },
+  high: {
+    label: "Alta",
+    class: "bg-orange-100 text-orange-700"
+  },
+  urgent: {
+    label: "Urgente",
+    class: "bg-red-100 text-red-700"
+  }
 };
-
-const statusConfig: Record<TaskStatus, { label: string; icon: typeof Circle; class: string }> = {
-  to_do: { label: "A Fazer", icon: Circle, class: "text-muted-foreground" },
-  in_progress: { label: "Em Andamento", icon: Clock, class: "text-blue-500" },
-  done: { label: "Concluída", icon: CheckCircle2, class: "text-green-500" },
+const statusConfig: Record<TaskStatus, {
+  label: string;
+  icon: typeof Circle;
+  class: string;
+}> = {
+  to_do: {
+    label: "A Fazer",
+    icon: Circle,
+    class: "text-muted-foreground"
+  },
+  in_progress: {
+    label: "Em Andamento",
+    icon: Clock,
+    class: "text-blue-500"
+  },
+  done: {
+    label: "Concluída",
+    icon: CheckCircle2,
+    class: "text-green-500"
+  }
 };
-
-export function TaskDetailDrawer({ task, open, onOpenChange, onEdit }: TaskDetailDrawerProps) {
+export function TaskDetailDrawer({
+  task,
+  open,
+  onOpenChange,
+  onEdit
+}: TaskDetailDrawerProps) {
   const updateTask = useUpdateTask();
-
   if (!task) return null;
-
   const StatusIcon = statusConfig[task.status].icon;
   const isOverdue = task.due_date && isPast(new Date(task.due_date)) && !isToday(new Date(task.due_date)) && task.status !== "done";
-
   const handleComplete = async () => {
     await updateTask.mutateAsync({
       id: task.id,
-      status: task.status === "done" ? "to_do" : "done",
+      status: task.status === "done" ? "to_do" : "done"
     });
   };
-
   const handleEditClick = () => {
     onOpenChange(false);
     onEdit(task);
   };
-
-  return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+  return <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full sm:max-w-md">
         <SheetHeader className="pb-4">
           <div className="flex items-start justify-between gap-4">
@@ -71,19 +97,15 @@ export function TaskDetailDrawer({ task, open, onOpenChange, onEdit }: TaskDetai
           <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
             <StatusIcon className={cn("h-5 w-5", statusConfig[task.status].class)} />
             <div>
-              <p className="text-xs text-muted-foreground">Status</p>
+              <p className="text-muted-foreground text-base font-semibold">Status</p>
               <p className="font-medium">{statusConfig[task.status].label}</p>
             </div>
           </div>
 
           {/* Description */}
           <div>
-            <p className="text-sm font-semibold text-muted-foreground mb-2">Descrição</p>
-            {task.description ? (
-              <p className="text-base leading-relaxed whitespace-pre-wrap">{task.description}</p>
-            ) : (
-              <p className="text-base text-muted-foreground italic">Nenhuma descrição informada</p>
-            )}
+            <p className="font-semibold text-muted-foreground mb-2 text-base">Descrição</p>
+            {task.description ? <p className="text-base leading-relaxed whitespace-pre-wrap">{task.description}</p> : <p className="text-base text-muted-foreground italic">Nenhuma descrição informada</p>}
           </div>
 
           <Separator />
@@ -94,15 +116,13 @@ export function TaskDetailDrawer({ task, open, onOpenChange, onEdit }: TaskDetai
             <div className="flex items-start gap-3">
               <Calendar className={cn("h-5 w-5 mt-0.5", isOverdue ? "text-red-500" : "text-muted-foreground")} />
               <div>
-                <p className="text-xs text-muted-foreground">Prazo</p>
-                {task.due_date ? (
-                  <p className={cn("font-medium text-sm", isOverdue && "text-red-600")}>
+                <p className="text-muted-foreground text-base font-semibold">Prazo</p>
+                {task.due_date ? <p className={cn("font-medium text-sm", isOverdue && "text-red-600")}>
                     {isOverdue && <AlertTriangle className="h-3 w-3 inline mr-1" />}
-                    {format(new Date(task.due_date), "dd/MM/yyyy", { locale: ptBR })}
-                  </p>
-                ) : (
-                  <p className="text-sm text-muted-foreground">Não definido</p>
-                )}
+                    {format(new Date(task.due_date), "dd/MM/yyyy", {
+                  locale: ptBR
+                })}
+                  </p> : <p className="text-sm text-muted-foreground">Não definido</p>}
               </div>
             </div>
 
@@ -110,48 +130,33 @@ export function TaskDetailDrawer({ task, open, onOpenChange, onEdit }: TaskDetai
             <div className="flex items-start gap-3">
               <User className="h-5 w-5 mt-0.5 text-muted-foreground" />
               <div>
-                <p className="text-xs text-muted-foreground">Responsável</p>
-                <p className="font-medium text-sm">
+                <p className="text-muted-foreground text-base font-semibold">Responsável</p>
+                <p className="font-medium text-base">
                   {task.assignee?.full_name || "Não atribuído"}
                 </p>
               </div>
             </div>
 
             {/* Job Link */}
-            {task.vaga && (
-              <div className="flex items-start gap-3 col-span-2">
+            {task.vaga && <div className="flex items-start gap-3 col-span-2">
                 <Briefcase className="h-5 w-5 mt-0.5 text-muted-foreground" />
                 <div>
-                  <p className="text-xs text-muted-foreground">Vaga Vinculada</p>
-                  <p className="font-medium text-sm">{task.vaga.titulo}</p>
+                  <p className="text-muted-foreground text-base font-semibold">Vaga Vinculada</p>
+                  <p className="font-medium text-base">{task.vaga.titulo}</p>
                 </div>
-              </div>
-            )}
+              </div>}
           </div>
 
           <Separator />
 
           {/* Actions */}
           <div className="flex flex-col gap-3">
-            <Button
-              onClick={handleComplete}
-              disabled={updateTask.isPending}
-              className={cn(
-                "w-full gap-2",
-                task.status === "done" 
-                  ? "bg-muted hover:bg-muted/80 text-foreground" 
-                  : "bg-green-600 hover:bg-green-700 text-white"
-              )}
-            >
+            <Button onClick={handleComplete} disabled={updateTask.isPending} className={cn("w-full gap-2", task.status === "done" ? "bg-muted hover:bg-muted/80 text-foreground" : "bg-green-600 hover:bg-green-700 text-white")}>
               <CheckCircle2 className="h-4 w-4" />
               {task.status === "done" ? "Reabrir Tarefa" : "Marcar como Concluída"}
             </Button>
 
-            <Button
-              variant="outline"
-              onClick={handleEditClick}
-              className="w-full gap-2"
-            >
+            <Button variant="outline" onClick={handleEditClick} className="w-full gap-2 text-base font-medium">
               <Edit className="h-4 w-4" />
               Editar Tarefa
             </Button>
@@ -159,10 +164,11 @@ export function TaskDetailDrawer({ task, open, onOpenChange, onEdit }: TaskDetai
 
           {/* Metadata */}
           <div className="text-xs text-muted-foreground pt-4 border-t">
-            <p>Criada em {format(new Date(task.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}</p>
+            <p className="text-base">Criada em {format(new Date(task.created_at), "dd/MM/yyyy 'às' HH:mm", {
+              locale: ptBR
+            })}</p>
           </div>
         </div>
       </SheetContent>
-    </Sheet>
-  );
+    </Sheet>;
 }
