@@ -306,7 +306,7 @@ export default function Acompanhamento() {
 
         {/* Divider with instruction and filters */}
         {!selectedVaga && vagas.length > 0 && <div className="space-y-4">
-            <div className="w-full h-px shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)]"></div>
+            <div className="w-full h-px shadow-[0_2px_8px_0_rgba(0,0,0,0.15),0_1px_4px_-1px_rgba(0,0,0,0.1)]"></div>
             <p className="text-muted-foreground font-medium text-base">Para acessar os detalhes da vaga, clique sobre ela</p>
             
             {/* Search Filters */}
