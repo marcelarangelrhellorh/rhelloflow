@@ -77,12 +77,14 @@ export function TaskDetailDrawer({ task, open, onOpenChange, onEdit }: TaskDetai
           </div>
 
           {/* Description */}
-          {task.description && (
-            <div>
-              <p className="text-sm text-muted-foreground mb-2">Descrição</p>
-              <p className="text-sm leading-relaxed">{task.description}</p>
-            </div>
-          )}
+          <div>
+            <p className="text-sm font-semibold text-muted-foreground mb-2">Descrição</p>
+            {task.description ? (
+              <p className="text-base leading-relaxed whitespace-pre-wrap">{task.description}</p>
+            ) : (
+              <p className="text-base text-muted-foreground italic">Nenhuma descrição informada</p>
+            )}
+          </div>
 
           <Separator />
 
