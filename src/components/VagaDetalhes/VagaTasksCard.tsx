@@ -96,7 +96,7 @@ export function VagaTasksCard({
       </div>;
   }
   return <>
-      <div className="flex flex-col gap-3 rounded-lg p-6 bg-white dark:bg-background-dark border border-gray-200 dark:border-secondary-text-light/20 shadow-sm">
+      <div className="flex flex-col gap-3 rounded-lg p-6 bg-white dark:bg-background-dark border-2 border-primary shadow-sm">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <CheckSquare className="h-5 w-5 text-primary" />
