@@ -20,11 +20,11 @@ export function VagaKPICards({
           Etapa Atual da Contratação
         </p>
         <Select value={vaga.status_slug || "a_iniciar"} onValueChange={onStatusChange} disabled={vaga.status_slug === "concluida"}>
-          <SelectTrigger className="w-full bg-white dark:bg-background-dark border-border hover:bg-primary/5 transition-colors text-sm">
+          <SelectTrigger className="w-full bg-white dark:bg-background-dark border-border hover:bg-primary/5 transition-colors text-base font-medium">
             <SelectValue />
           </SelectTrigger>
           <SelectContent className="bg-popover z-50">
-            {JOB_STAGES.map(stage => <SelectItem key={stage.id} value={stage.slug} className="cursor-pointer hover:bg-primary/10 text-sm">
+            {JOB_STAGES.map(stage => <SelectItem key={stage.id} value={stage.slug} className="cursor-pointer hover:bg-primary/10 text-base">
                 <span className={vaga.status_slug === stage.slug ? "font-bold" : ""}>
                   {vaga.status_slug === stage.slug && "✅ "}
                   {stage.name}
