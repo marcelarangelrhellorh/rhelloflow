@@ -133,13 +133,13 @@ export function RejectedCandidatesCard() {
           <div className="flex items-start justify-between">
             <div className="space-y-2 flex-1">
               <div className="flex items-center gap-2">
-                <p className="text-sm text-muted-foreground font-semibold">Candidatos reprovados sem feedback </p>
+                <p className="text-muted-foreground font-semibold text-base">Candidatos reprovados sem feedback </p>
                 {count > 0}
               </div>
               <p className="text-[42px] font-semibold leading-none text-card-foreground">
                 {loading ? '...' : count}
               </p>
-              <p className="text-muted-foreground text-sm font-medium">Candidatos em &quot;Reprovado rhello&quot; ou &quot;Reprovado Solicitante&quot; sem receber negativa/retorno</p>
+              <p className="text-muted-foreground font-medium text-base">Candidatos em &quot;Reprovado rhello&quot; ou &quot;Reprovado Solicitante&quot; sem receber negativa/retorno</p>
               
               {count > 0 && <div className="pt-2">
                   
