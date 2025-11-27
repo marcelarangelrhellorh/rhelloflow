@@ -116,7 +116,7 @@ export function VagaTasksCard({
             {pendingTasks.length}
           </span>
           <span className="text-sm text-muted-foreground font-semibold">pendente{pendingTasks.length !== 1 ? "s" : ""}</span>
-          {overdueTasks.length > 0 && <Badge variant="destructive" className="text-sm gap-1">
+          {overdueTasks.length > 0 && <Badge variant="destructive" className="text-base gap-1 whitespace-nowrap">
               <AlertTriangle className="h-4 w-4" />
               {overdueTasks.length} atrasada{overdueTasks.length !== 1 ? "s" : ""}
             </Badge>}
