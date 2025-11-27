@@ -394,32 +394,32 @@ export default function Acompanhamento() {
               </div>}
 
             {/* Info Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 max-w-4xl">
               <Card className="border-primary shadow-sm">
-                <CardContent className="p-4">
-                  <p className="text-muted-foreground mb-1 text-base font-semibold">Etapa Atual</p>
-                  <Badge variant="secondary" className="text-sm bg-[#ffcd00]">
+                <CardContent className="p-3">
+                  <p className="text-muted-foreground mb-1 text-sm font-semibold">Etapa Atual</p>
+                  <Badge variant="secondary" className="text-xs bg-[#ffcd00]">
                     {getStageBySlug(selectedVagaData.status)?.name || selectedVagaData.status}
                   </Badge>
                 </CardContent>
               </Card>
 
               <Card className="border-primary shadow-sm">
-                <CardContent className="p-4">
-                  <p className="text-muted-foreground mb-1 text-base font-semibold">Candidatos</p>
+                <CardContent className="p-3">
+                  <p className="text-muted-foreground mb-1 text-sm font-semibold">Candidatos</p>
                   <div className="flex items-center gap-2">
                     <Users className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-lg font-semibold">{vagaCandidatos.length}</span>
+                    <span className="text-base font-semibold">{vagaCandidatos.length}</span>
                   </div>
                 </CardContent>
               </Card>
 
               <Card className="border-primary shadow-sm">
-                <CardContent className="p-4">
-                  <p className="text-muted-foreground mb-1 text-base font-semibold">Duração</p>
+                <CardContent className="p-3">
+                  <p className="text-muted-foreground mb-1 text-sm font-semibold">Duração</p>
                   <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-lg font-semibold">
+                    <span className="text-base font-semibold">
                       {differenceInDays(new Date(), new Date(selectedVagaData.criado_em))} Dias
                     </span>
                   </div>
@@ -427,31 +427,31 @@ export default function Acompanhamento() {
               </Card>
 
               {selectedVagaData.modelo_trabalho && <Card className="border-primary shadow-sm">
-                  <CardContent className="p-4">
-                    <p className="text-muted-foreground mb-1 text-base font-semibold">Modelo</p>
+                  <CardContent className="p-3">
+                    <p className="text-muted-foreground mb-1 text-sm font-semibold">Modelo</p>
                     <div className="flex items-center gap-2">
                       <MapPin className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-lg font-semibold">{selectedVagaData.modelo_trabalho}</span>
+                      <span className="text-base font-semibold">{selectedVagaData.modelo_trabalho}</span>
                     </div>
                   </CardContent>
                 </Card>}
 
               {selectedVagaData.regime && <Card className="border-primary shadow-sm">
-                  <CardContent className="p-4">
+                  <CardContent className="p-3">
                     <p className="text-sm text-muted-foreground mb-1">Contratação</p>
                     <div className="flex items-center gap-2">
                       <FileText className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-lg font-semibold">{selectedVagaData.regime}</span>
+                      <span className="text-base font-semibold">{selectedVagaData.regime}</span>
                     </div>
                   </CardContent>
                 </Card>}
 
               <Card className="border-primary shadow-sm">
-                <CardContent className="p-4">
-                  <p className="text-muted-foreground mb-1 text-base font-semibold">Vaga Publicada</p>
+                <CardContent className="p-3">
+                  <p className="text-muted-foreground mb-1 text-sm font-semibold">Vaga Publicada</p>
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <span className="font-medium text-base">
+                    <span className="font-medium text-sm">
                       {format(new Date(selectedVagaData.criado_em), "dd/MM/yyyy", {
                       locale: ptBR
                     })}
