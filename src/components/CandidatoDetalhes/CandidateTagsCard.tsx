@@ -103,7 +103,7 @@ export function CandidateTagsCard({
     } catch (error: any) {
       logger.error("Erro ao adicionar tags:", error);
       toast.error("Erro ao adicionar tags");
-    } finally{
+    } finally {
       setSaving(false);
     }
   };
@@ -171,7 +171,7 @@ export function CandidateTagsCard({
             {Object.entries(groupedTags).map(([category, categoryTags]) => {
           const categoryInfo = categoryLabels[category as keyof typeof categoryLabels];
           return <div key={category}>
-                  <h4 className="text-sm font-semibold mb-2 text-muted-foreground">
+                  <h4 className="font-semibold mb-2 text-muted-foreground text-base text-left">
                     {categoryInfo.label}
                   </h4>
                   <div className="flex flex-wrap gap-2">
