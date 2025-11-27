@@ -121,9 +121,9 @@ export function CandidateCard({
           </div>}
 
         {/* Recruiter */}
-        {candidato.recrutador && <div className="flex items-center gap-2 text-sm text-[#36404a]">
+        {candidato.recrutador && <div className="flex items-center gap-2 text-[#36404a]">
             <User className="h-4 w-4 flex-shrink-0" />
-            <span className="truncate">{candidato.recrutador}</span>
+            <span className="truncate text-base font-medium">{candidato.recrutador}</span>
           </div>}
 
         {/* Quick Actions */}
