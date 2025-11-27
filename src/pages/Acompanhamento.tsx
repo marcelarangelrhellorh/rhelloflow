@@ -462,18 +462,18 @@ export default function Acompanhamento() {
             </div>
 
             {/* Benefits Section */}
-            {selectedVagaData.beneficios && selectedVagaData.beneficios.length > 0 && <Card className="shadow-sm">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Briefcase className="h-5 w-5 text-primary" />
-                    <h3 className="font-semibold text-lg">Benefícios Oferecidos</h3>
+            {selectedVagaData.beneficios && selectedVagaData.beneficios.length > 0 && <Card className="shadow-sm max-w-md">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Briefcase className="h-4 w-4 text-primary" />
+                    <h3 className="font-semibold text-base">Benefícios Oferecidos</h3>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    {selectedVagaData.beneficios.map((beneficio, index) => <Badge key={index} variant="outline" className="bg-primary/10 text-primary border-primary/20 text-base font-semibold">
+                    {selectedVagaData.beneficios.map((beneficio, index) => <Badge key={index} variant="outline" className="bg-primary/10 text-primary border-primary/20 text-sm font-semibold">
                         {beneficio}
                       </Badge>)}
                   </div>
-                  {selectedVagaData.beneficios_outros && <p className="text-sm text-muted-foreground mt-3">{selectedVagaData.beneficios_outros}</p>}
+                  {selectedVagaData.beneficios_outros && <p className="text-xs text-muted-foreground mt-2">{selectedVagaData.beneficios_outros}</p>}
                 </CardContent>
               </Card>}
 
