@@ -97,7 +97,7 @@ export default function Tarefas() {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
               <h1 className="text-3xl font-bold text-[#00141d]">Tarefas</h1>
-              <p className="text-sm text-muted-foreground mt-1">
+              <p className="text-base text-muted-foreground mt-1">
                 Gerencie suas tarefas e mantenha o fluxo de trabalho organizado
               </p>
             </div>
