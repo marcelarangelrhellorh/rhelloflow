@@ -61,7 +61,7 @@ export default function TaskCard({
         <div className="space-y-2 text-sm text-muted-foreground">
           {task.due_date && <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4" />
-              <span className={isOverdue ? "text-red-600 font-semibold" : ""}>
+              <span className={`text-base ${isOverdue ? "text-red-600 font-semibold" : ""}`}>
                 {format(new Date(task.due_date), "dd 'de' MMMM 'às' HH:mm", {
               locale: ptBR
             })}
