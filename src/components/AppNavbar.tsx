@@ -28,12 +28,12 @@ const menuItems = [{
   url: "/candidatos",
   roles: ["admin", "recrutador", "cs"]
 }, {
-  title: "Tarefas",
-  url: "/tarefas",
-  roles: ["admin", "recrutador", "cs"]
-}, {
   title: "Relatórios",
   url: "/relatorios",
+  roles: ["admin", "recrutador", "cs"]
+}, {
+  title: "Tarefas",
+  url: "/tarefas",
   roles: ["admin", "recrutador", "cs"]
 }, {
   title: "Processos",
