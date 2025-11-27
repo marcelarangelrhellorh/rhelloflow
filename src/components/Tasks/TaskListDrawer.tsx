@@ -74,6 +74,15 @@ export default function TaskListDrawer({
                   </div>
                 </div>
 
+                {task.assignee && (
+                  <div className="mt-2 flex items-center gap-2">
+                    <div className="h-6 w-6 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-medium">
+                      {task.assignee.full_name?.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
+                    </div>
+                    <span className="text-sm font-medium">{task.assignee.full_name}</span>
+                  </div>
+                )}
+
                 {task.description && (
                   <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
                     {task.description}
@@ -86,13 +95,6 @@ export default function TaskListDrawer({
                       <Calendar className="h-4 w-4" />
                       {format(new Date(task.due_date), "dd/MM/yyyy", { locale: ptBR })}
                       {isOverdue(task.due_date) && " (Atrasada)"}
-                    </div>
-                  )}
-
-                  {task.assignee && (
-                    <div className="flex items-center gap-1">
-                      <User className="h-4 w-4" />
-                      {task.assignee.full_name}
                     </div>
                   )}
 
