@@ -163,11 +163,11 @@ export default function BancoTalentos() {
           </div>
         </div>
         <div className="flex gap-2">
-          <Button onClick={() => navigate('/candidatos/novo')} className="bg-[#F9EC3F] hover:bg-[#E5D72E] text-[#00141D] font-bold">
+          <Button onClick={() => navigate('/candidatos/novo')} className="bg-[#00141D] hover:bg-[#00141D]/90 text-white font-bold">
             <Plus className="mr-2 h-5 w-5" />
             Adicionar Candidato
           </Button>
-          <Button onClick={() => setImportModalOpen(true)} variant="outline" className="font-bold text-[0#] text-slate-950 bg-[t#] bg-[#faec3e]">
+          <Button onClick={() => setImportModalOpen(true)} className="bg-[#00141D] hover:bg-[#00141D]/90 text-white font-bold">
             <Plus className="mr-2 h-5 w-5" />
             Importar Planilha XLS
           </Button>
@@ -284,7 +284,7 @@ export default function BancoTalentos() {
           <p className="text-base text-muted-foreground mb-6">
             Cadastre novos ou acompanhe os processos em andamento.
           </p>
-          <Button onClick={() => navigate('/candidatos/novo')} className="bg-[#F9EC3F] hover:bg-[#E5D72E] text-[#00141D] font-bold">
+          <Button onClick={() => navigate('/candidatos/novo')} className="bg-[#00141D] hover:bg-[#00141D]/90 text-white font-bold">
             <Plus className="mr-2 h-5 w-5" />
             Adicionar Primeiro Candidato
           </Button>
