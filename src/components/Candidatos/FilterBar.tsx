@@ -53,29 +53,29 @@ export function FilterBar({
             placeholder="🔍 Buscar candidatos por nome, e-mail ou cidade..."
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-10 text-base"
+            className="pl-10 text-base font-semibold"
           />
         </div>
 
         <Select value={disponibilidadeFilter} onValueChange={onDisponibilidadeChange}>
-          <SelectTrigger className="w-full sm:w-[180px] bg-background text-base">
+          <SelectTrigger className="w-full sm:w-[180px] bg-background text-base font-semibold">
             <SelectValue placeholder="Disponibilidade" />
           </SelectTrigger>
           <SelectContent className="bg-popover z-50">
-            <SelectItem value="all" className="text-base">Todos</SelectItem>
-            <SelectItem value="disponível" className="text-base">✅ Disponíveis</SelectItem>
-            <SelectItem value="não_disponível" className="text-base">❌ Não disponíveis</SelectItem>
+            <SelectItem value="all" className="text-base font-semibold">Todos</SelectItem>
+            <SelectItem value="disponível" className="text-base font-semibold">✅ Disponíveis</SelectItem>
+            <SelectItem value="não_disponível" className="text-base font-semibold">❌ Não disponíveis</SelectItem>
           </SelectContent>
         </Select>
 
         <Select value={statusFilter} onValueChange={onStatusChange}>
-          <SelectTrigger className="w-full sm:w-[180px] bg-background text-base">
+          <SelectTrigger className="w-full sm:w-[180px] bg-background text-base font-semibold">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent className="bg-popover z-50">
-            <SelectItem value="all" className="text-base">Todos os status</SelectItem>
+            <SelectItem value="all" className="text-base font-semibold">Todos os status</SelectItem>
             {statusOptions.map((status) => (
-              <SelectItem key={status} value={status} className="text-base">
+              <SelectItem key={status} value={status} className="text-base font-semibold">
                 {status}
               </SelectItem>
             ))}
@@ -83,14 +83,14 @@ export function FilterBar({
         </Select>
 
         <Select value={vagaFilter} onValueChange={onVagaChange}>
-          <SelectTrigger className="w-full sm:w-[180px] bg-background text-base">
+          <SelectTrigger className="w-full sm:w-[180px] bg-background text-base font-semibold">
             <Briefcase className="h-4 w-4 mr-2 text-[#36404A]" />
             <SelectValue placeholder="Vaga" />
           </SelectTrigger>
           <SelectContent className="bg-popover z-50">
-            <SelectItem value="all" className="text-base">Todas as vagas</SelectItem>
+            <SelectItem value="all" className="text-base font-semibold">Todas as vagas</SelectItem>
             {vagas.map((vaga) => (
-              <SelectItem key={vaga.id} value={vaga.id} className="text-base">
+              <SelectItem key={vaga.id} value={vaga.id} className="text-base font-semibold">
                 {vaga.titulo}
               </SelectItem>
             ))}
@@ -98,14 +98,14 @@ export function FilterBar({
         </Select>
 
         <Select value={clienteFilter} onValueChange={onClienteChange}>
-          <SelectTrigger className="w-full sm:w-[180px] bg-background text-base">
+          <SelectTrigger className="w-full sm:w-[180px] bg-background text-base font-semibold">
             <Building2 className="h-4 w-4 mr-2 text-[#36404A]" />
             <SelectValue placeholder="Cliente" />
           </SelectTrigger>
           <SelectContent className="bg-popover z-50">
-            <SelectItem value="all" className="text-base">Todos os clientes</SelectItem>
+            <SelectItem value="all" className="text-base font-semibold">Todos os clientes</SelectItem>
             {clientes.map((cliente) => (
-              <SelectItem key={cliente} value={cliente} className="text-base">
+              <SelectItem key={cliente} value={cliente} className="text-base font-semibold">
                 {cliente}
               </SelectItem>
             ))}
