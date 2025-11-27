@@ -478,29 +478,29 @@ export default function Acompanhamento() {
               </Card>}
 
             {/* Process Timeline */}
-            <Card className="shadow-sm">
-              <CardContent className="p-6">
-                <h3 className="font-semibold text-lg mb-6">Linha do Tempo do Processo</h3>
-                <div className="relative overflow-x-auto pb-4">
+            <Card className="shadow-sm max-w-3xl">
+              <CardContent className="p-4">
+                <h3 className="font-semibold text-base mb-4">Linha do Tempo do Processo</h3>
+                <div className="relative overflow-x-auto pb-3">
                   {/* Horizontal line background */}
-                  <div className="absolute top-5 left-5 right-5 h-0.5 bg-border z-0" />
+                  <div className="absolute top-4 left-4 right-4 h-0.5 bg-border z-0" />
                   
-                  <div className="flex items-start gap-0 relative min-w-max px-5">
-                    {getTimelineSteps(selectedVagaData.status).map((step, index, array) => <div key={index} className="flex flex-col items-center flex-1 min-w-[120px] relative">
+                  <div className="flex items-start gap-0 relative min-w-max px-4">
+                    {getTimelineSteps(selectedVagaData.status).map((step, index, array) => <div key={index} className="flex flex-col items-center flex-1 min-w-[90px] relative">
                         {/* Active connector line - shows when previous step is completed */}
-                        {index > 0 && array[index - 1].status === "completed" && <div className="absolute top-5 right-1/2 w-full h-0.5 bg-primary z-10" />}
+                        {index > 0 && array[index - 1].status === "completed" && <div className="absolute top-4 right-1/2 w-full h-0.5 bg-primary z-10" />}
                         
                         {/* Half active line for current step */}
-                        {step.status === "current" && index > 0 && <div className="absolute top-5 right-1/2 w-full h-0.5 bg-primary z-10" />}
+                        {step.status === "current" && index > 0 && <div className="absolute top-4 right-1/2 w-full h-0.5 bg-primary z-10" />}
                         
                         {/* Circle */}
-                        <div className={cn("relative z-20 w-10 h-10 rounded-full flex items-center justify-center mb-3 transition-all", step.status === "completed" && "bg-primary", step.status === "current" && "bg-primary animate-pulse", step.status === "pending" && "bg-border")}>
-                          {step.status === "completed" && <CheckCircle2 className="h-5 w-5 text-primary-foreground" />}
-                          {step.status === "current" && <div className="w-3 h-3 bg-primary-foreground rounded-full" />}
+                        <div className={cn("relative z-20 w-8 h-8 rounded-full flex items-center justify-center mb-2 transition-all", step.status === "completed" && "bg-primary", step.status === "current" && "bg-primary animate-pulse", step.status === "pending" && "bg-border")}>
+                          {step.status === "completed" && <CheckCircle2 className="h-4 w-4 text-primary-foreground" />}
+                          {step.status === "current" && <div className="w-2 h-2 bg-primary-foreground rounded-full" />}
                         </div>
 
                         {/* Label */}
-                        <p className={cn("text-sm text-center font-semibold leading-tight", step.status === "pending" ? "text-muted-foreground" : "text-foreground")}>
+                        <p className={cn("text-xs text-center font-semibold leading-tight", step.status === "pending" ? "text-muted-foreground" : "text-foreground")}>
                           {step.label}
                         </p>
                       </div>)}
@@ -508,12 +508,12 @@ export default function Acompanhamento() {
                 </div>
 
                 {/* Progress Bar */}
-                <div className="mt-6">
-                  <div className="flex items-center justify-between text-sm mb-2">
+                <div className="mt-4">
+                  <div className="flex items-center justify-between text-xs mb-1">
                     <span className="text-muted-foreground font-semibold">Progresso</span>
                     <span className="font-semibold">{calculateProgress(selectedVagaData.status)}%</span>
                   </div>
-                  <div className="w-full bg-border rounded-full h-2 overflow-hidden">
+                  <div className="w-full bg-border rounded-full h-1.5 overflow-hidden">
                     <div className="bg-primary h-full transition-all duration-500 rounded-full" style={{
                     width: `${calculateProgress(selectedVagaData.status)}%`
                   }} />
