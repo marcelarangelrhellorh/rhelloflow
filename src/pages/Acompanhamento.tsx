@@ -254,35 +254,35 @@ export default function Acompanhamento() {
         </div>
 
         {/* Metrics Cards */}
-        {!selectedVaga && <div className="grid gap-4 sm:grid-cols-2">
+        {!selectedVaga && <div className="grid gap-4 sm:grid-cols-2 max-w-lg">
             <Card className="border-2 border-primary bg-primary/5 shadow-sm">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-muted-foreground mb-1 font-semibold text-base">Vagas em Aberto</p>
-                    <p className="text-3xl font-bold text-foreground">{totalVagasAbertas}</p>
+                    <p className="text-muted-foreground mb-1 font-semibold text-sm">Vagas em Aberto</p>
+                    <p className="text-2xl font-bold text-foreground">{totalVagasAbertas}</p>
                   </div>
-                  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Briefcase className="h-6 w-6 text-primary" />
+                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <Briefcase className="h-5 w-5 text-primary" />
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             <Card className="border-2 border-orange-500 bg-orange-500/5 shadow-sm cursor-pointer transition-all hover:shadow-lg hover:border-orange-600 hover:bg-orange-500/10 group" onClick={() => setNoFeedbackDrawerOpen(true)}>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-muted-foreground mb-1 font-semibold text-base">Candidatos Aguardando Seu Feedback</p>
-                    <p className="text-3xl font-bold text-foreground">{totalSemFeedback}</p>
+                    <p className="text-muted-foreground mb-1 font-semibold text-sm">Aguardando Feedback</p>
+                    <p className="text-2xl font-bold text-foreground">{totalSemFeedback}</p>
                     {totalSemFeedback > 0 && (
-                      <p className="text-xs text-orange-600 font-semibold mt-2 group-hover:text-orange-700">
+                      <p className="text-xs text-orange-600 font-semibold mt-1 group-hover:text-orange-700">
                         Clique para dar feedback
                       </p>
                     )}
                   </div>
-                  <div className="h-12 w-12 rounded-full bg-orange-500 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <MessageSquare className="h-6 w-6 text-white" />
+                  <div className="h-10 w-10 rounded-full bg-orange-500 flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0">
+                    <MessageSquare className="h-5 w-5 text-white" />
                   </div>
                 </div>
               </CardContent>
