@@ -510,7 +510,7 @@ export default function Acompanhamento() {
                 {/* Progress Bar */}
                 <div className="mt-4">
                   <div className="flex items-center justify-between text-xs mb-1">
-                    <span className="text-muted-foreground font-semibold">Progresso</span>
+                    <span className="text-muted-foreground font-semibold text-base">Progresso</span>
                     <span className="font-semibold">{calculateProgress(selectedVagaData.status)}%</span>
                   </div>
                   <div className="w-full bg-border rounded-full h-1.5 overflow-hidden">
