@@ -14,6 +14,7 @@ import TaskModal from "@/components/Tasks/TaskModal";
 import TaskCard from "@/components/Tasks/TaskCard";
 import TaskKanban from "@/components/Tasks/TaskKanban";
 import TasksDashboard from "@/components/Tasks/TasksDashboard";
+import { TaskDetailDrawer } from "@/components/VagaDetalhes/TaskDetailDrawer";
 import { GoogleCalendarButton } from "@/components/Tasks/GoogleCalendarButton";
 import { Task, TaskFilters, useTasks, useDeleteTask, useUpdateTask } from "@/hooks/useTasks";
 import { useQuery } from "@tanstack/react-query";
@@ -36,6 +37,8 @@ export default function Tarefas() {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
+  const [detailDrawerOpen, setDetailDrawerOpen] = useState(false);
+  const [taskForDetail, setTaskForDetail] = useState<Task | null>(null);
 
   const [filters, setFilters] = useState<TaskFilters>({
     status: undefined,
@@ -87,6 +90,11 @@ export default function Tarefas() {
   const handleNewTask = () => {
     setSelectedTask(null);
     setModalOpen(true);
+  };
+
+  const handleTaskClick = (task: Task) => {
+    setTaskForDetail(task);
+    setDetailDrawerOpen(true);
   };
 
   return (
@@ -218,7 +226,7 @@ export default function Tarefas() {
             </Button>
           </div>
         ) : view === "kanban" ? (
-          <TaskKanban tasks={tasks} onEdit={handleEdit} onDelete={handleDelete} />
+          <TaskKanban tasks={tasks} onEdit={handleEdit} onDelete={handleDelete} onTaskClick={handleTaskClick} />
         ) : (
           <div className="space-y-4">
             {tasks.map((task) => (
@@ -228,6 +236,7 @@ export default function Tarefas() {
                 onEdit={handleEdit}
                 onDelete={handleDelete}
                 onToggleComplete={handleToggleComplete}
+                onCardClick={handleTaskClick}
               />
             ))}
           </div>
@@ -236,6 +245,13 @@ export default function Tarefas() {
 
       {/* Modals */}
       <TaskModal open={modalOpen} onClose={() => setModalOpen(false)} task={selectedTask} />
+      
+      <TaskDetailDrawer
+        task={taskForDetail}
+        open={detailDrawerOpen}
+        onOpenChange={setDetailDrawerOpen}
+        onEdit={handleEdit}
+      />
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
