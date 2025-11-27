@@ -216,7 +216,7 @@ export function VagaCard({
               
               {vaga.confidencial && <Badge className="bg-orange-100 text-orange-700 border-orange-200 border font-semibold rounded-md px-2 py-0.5 text-xs flex items-center gap-1">
                   <EyeOff className="h-3 w-3" />
-                  Entrevistas
+                  Confidencial
                 </Badge>}
             </div>
           </div>
