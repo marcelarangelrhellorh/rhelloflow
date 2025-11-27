@@ -53,29 +53,29 @@ export function FilterBar({
             placeholder="🔍 Buscar candidatos por nome, e-mail ou cidade..."
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-10"
+            className="pl-10 text-base"
           />
         </div>
 
         <Select value={disponibilidadeFilter} onValueChange={onDisponibilidadeChange}>
-          <SelectTrigger className="w-full sm:w-[180px] bg-background">
+          <SelectTrigger className="w-full sm:w-[180px] bg-background text-base">
             <SelectValue placeholder="Disponibilidade" />
           </SelectTrigger>
           <SelectContent className="bg-popover z-50">
-            <SelectItem value="all">Todos</SelectItem>
-            <SelectItem value="disponível">✅ Disponíveis</SelectItem>
-            <SelectItem value="não_disponível">❌ Não disponíveis</SelectItem>
+            <SelectItem value="all" className="text-base">Todos</SelectItem>
+            <SelectItem value="disponível" className="text-base">✅ Disponíveis</SelectItem>
+            <SelectItem value="não_disponível" className="text-base">❌ Não disponíveis</SelectItem>
           </SelectContent>
         </Select>
 
         <Select value={statusFilter} onValueChange={onStatusChange}>
-          <SelectTrigger className="w-full sm:w-[180px] bg-background">
+          <SelectTrigger className="w-full sm:w-[180px] bg-background text-base">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent className="bg-popover z-50">
-            <SelectItem value="all">Todos os status</SelectItem>
+            <SelectItem value="all" className="text-base">Todos os status</SelectItem>
             {statusOptions.map((status) => (
-              <SelectItem key={status} value={status}>
+              <SelectItem key={status} value={status} className="text-base">
                 {status}
               </SelectItem>
             ))}
@@ -83,14 +83,14 @@ export function FilterBar({
         </Select>
 
         <Select value={vagaFilter} onValueChange={onVagaChange}>
-          <SelectTrigger className="w-full sm:w-[180px] bg-background">
+          <SelectTrigger className="w-full sm:w-[180px] bg-background text-base">
             <Briefcase className="h-4 w-4 mr-2 text-[#36404A]" />
             <SelectValue placeholder="Vaga" />
           </SelectTrigger>
           <SelectContent className="bg-popover z-50">
-            <SelectItem value="all">Todas as vagas</SelectItem>
+            <SelectItem value="all" className="text-base">Todas as vagas</SelectItem>
             {vagas.map((vaga) => (
-              <SelectItem key={vaga.id} value={vaga.id}>
+              <SelectItem key={vaga.id} value={vaga.id} className="text-base">
                 {vaga.titulo}
               </SelectItem>
             ))}
@@ -98,14 +98,14 @@ export function FilterBar({
         </Select>
 
         <Select value={clienteFilter} onValueChange={onClienteChange}>
-          <SelectTrigger className="w-full sm:w-[180px] bg-background">
+          <SelectTrigger className="w-full sm:w-[180px] bg-background text-base">
             <Building2 className="h-4 w-4 mr-2 text-[#36404A]" />
             <SelectValue placeholder="Cliente" />
           </SelectTrigger>
           <SelectContent className="bg-popover z-50">
-            <SelectItem value="all">Todos os clientes</SelectItem>
+            <SelectItem value="all" className="text-base">Todos os clientes</SelectItem>
             {clientes.map((cliente) => (
-              <SelectItem key={cliente} value={cliente}>
+              <SelectItem key={cliente} value={cliente} className="text-base">
                 {cliente}
               </SelectItem>
             ))}
