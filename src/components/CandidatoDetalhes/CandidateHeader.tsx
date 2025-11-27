@@ -112,7 +112,7 @@ export function CandidateHeader({
                 <Badge
                   variant={isContratado ? "default" : "outline"}
                   className={cn(
-                    "text-sm font-semibold flex-shrink-0",
+                    "text-base font-semibold flex-shrink-0",
                     isContratado && "bg-success text-success-foreground hover:bg-success/90 border-success",
                     !isContratado && (statusColors[status] || statusColors["Banco de Talentos"])
                   )}
