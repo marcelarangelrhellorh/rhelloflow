@@ -42,11 +42,11 @@ export default function TasksDashboard({ onTaskClick }: TasksDashboardProps) {
   const getDrawerData = () => {
     switch (activeDrawer) {
       case "overdue":
-        return { title: `Tarefas Atrasadas${isAdmin ? " (Sistema)" : ""}`, tasks: overdueTasks || [] };
+        return { title: `Tarefas Atrasadas${isAdmin ? " (Geral)" : ""}`, tasks: overdueTasks || [] };
       case "high":
-        return { title: `Prioridade Alta${isAdmin ? " (Sistema)" : ""}`, tasks: highTasks || [] };
+        return { title: `Prioridade Alta${isAdmin ? " (Geral)" : ""}`, tasks: highTasks || [] };
       case "urgent":
-        return { title: `Prioridade Urgente${isAdmin ? " (Sistema)" : ""}`, tasks: urgentTasks || [] };
+        return { title: `Prioridade Urgente${isAdmin ? " (Geral)" : ""}`, tasks: urgentTasks || [] };
       default:
         return { title: "", tasks: [] };
     }
@@ -64,8 +64,8 @@ export default function TasksDashboard({ onTaskClick }: TasksDashboardProps) {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">
-                  Tarefas Atrasadas {isAdmin && "(Sistema)"}
+              <p className="text-sm font-medium text-muted-foreground">
+                  Tarefas Atrasadas {isAdmin && "(Geral)"}
                 </p>
                 <h3 className="text-3xl font-bold text-red-600 mt-2">
                   {overdueCount}
@@ -85,8 +85,8 @@ export default function TasksDashboard({ onTaskClick }: TasksDashboardProps) {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">
-                  Prioridade Alta {isAdmin && "(Sistema)"}
+              <p className="text-sm font-medium text-muted-foreground">
+                  Prioridade Alta {isAdmin && "(Geral)"}
                 </p>
                 <h3 className="text-3xl font-bold text-orange-600 mt-2">
                   {highCount}
@@ -106,8 +106,8 @@ export default function TasksDashboard({ onTaskClick }: TasksDashboardProps) {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">
-                  Prioridade Urgente {isAdmin && "(Sistema)"}
+              <p className="text-sm font-medium text-muted-foreground">
+                  Prioridade Urgente {isAdmin && "(Geral)"}
                 </p>
                 <h3 className="text-3xl font-bold text-red-700 mt-2">
                   {urgentCount}
