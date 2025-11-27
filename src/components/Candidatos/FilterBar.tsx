@@ -45,9 +45,9 @@ export function FilterBar({
   clientes,
 }: FilterBarProps) {
   return (
-    <div className="sticky top-0 z-10 bg-background border-b border-border pb-4">
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <div className="relative flex-1">
+    <div className="sticky top-0 z-10 bg-background border-b border-border pb-4 w-full">
+      <div className="flex flex-col gap-3 sm:flex-row w-full">
+        <div className="relative flex-1 min-w-0">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="🔍 Buscar candidatos por nome, e-mail ou cidade..."
@@ -58,7 +58,7 @@ export function FilterBar({
         </div>
 
         <Select value={disponibilidadeFilter} onValueChange={onDisponibilidadeChange}>
-          <SelectTrigger className="w-full sm:w-[180px] bg-background text-base font-semibold">
+          <SelectTrigger className="w-full sm:flex-1 sm:min-w-[140px] bg-background text-base font-semibold">
             <SelectValue placeholder="Disponibilidade" />
           </SelectTrigger>
           <SelectContent className="bg-popover z-50">
@@ -69,7 +69,7 @@ export function FilterBar({
         </Select>
 
         <Select value={statusFilter} onValueChange={onStatusChange}>
-          <SelectTrigger className="w-full sm:w-[180px] bg-background text-base font-semibold">
+          <SelectTrigger className="w-full sm:flex-1 sm:min-w-[140px] bg-background text-base font-semibold">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent className="bg-popover z-50">
@@ -83,7 +83,7 @@ export function FilterBar({
         </Select>
 
         <Select value={vagaFilter} onValueChange={onVagaChange}>
-          <SelectTrigger className="w-full sm:w-[180px] bg-background text-base font-semibold">
+          <SelectTrigger className="w-full sm:flex-1 sm:min-w-[140px] bg-background text-base font-semibold">
             <Briefcase className="h-4 w-4 mr-2 text-[#36404A]" />
             <SelectValue placeholder="Vaga" />
           </SelectTrigger>
@@ -98,7 +98,7 @@ export function FilterBar({
         </Select>
 
         <Select value={clienteFilter} onValueChange={onClienteChange}>
-          <SelectTrigger className="w-full sm:w-[180px] bg-background text-base font-semibold">
+          <SelectTrigger className="w-full sm:flex-1 sm:min-w-[140px] bg-background text-base font-semibold">
             <Building2 className="h-4 w-4 mr-2 text-[#36404A]" />
             <SelectValue placeholder="Cliente" />
           </SelectTrigger>
