@@ -80,12 +80,12 @@ export default function TaskCard({
 
           {task.vaga && <div className="flex items-center gap-2">
               <Briefcase className="h-4 w-4" />
-              <span className="truncate">{task.vaga.titulo}</span>
+              <span className="truncate text-base font-medium">{task.vaga.titulo}</span>
             </div>}
 
           {task.empresa && <div className="flex items-center gap-2">
               <Building2 className="h-4 w-4" />
-              <span className="truncate">{task.empresa.nome}</span>
+              <span className="truncate text-base font-medium">{task.empresa.nome}</span>
             </div>}
 
           {task.candidato && <div className="flex items-center gap-2">
