@@ -287,8 +287,13 @@ export default function Acompanhamento() {
             </Card>
           </div>}
 
-        {/* Divider */}
-        {!selectedVaga && vagas.length > 0 && <div className="w-full h-px bg-gradient-to-r from-transparent via-border/60 to-transparent shadow-md"></div>}
+        {/* Divider with instruction */}
+        {!selectedVaga && vagas.length > 0 && (
+          <div className="space-y-4">
+            <div className="w-full h-px bg-gradient-to-r from-transparent via-border/60 to-transparent shadow-md"></div>
+            <p className="text-muted-foreground font-medium text-base">Para acessar os detalhes da vaga, clique sobre ela</p>
+          </div>
+        )}
 
         {/* Vagas Overview - Small Cards */}
         {!selectedVaga && <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
