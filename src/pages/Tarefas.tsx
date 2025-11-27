@@ -198,7 +198,7 @@ export default function Tarefas() {
       {/* Content */}
       <div className="container mx-auto px-6 py-8">
         {/* Dashboard */}
-        <TasksDashboard />
+        <TasksDashboard onTaskClick={handleEdit} />
 
         {isLoading ? (
           <div className="space-y-4">
