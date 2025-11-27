@@ -299,7 +299,7 @@ export default function CandidatoDetalhes() {
 
       {/* Content */}
       <main className="flex-1 px-6 sm:px-10 lg:px-20 py-8 bg-[6404a0f] bg-[#faec3e]/[0.01]">
-        <div className="max-w-7xl space-y-6 my-0 mx-0">
+        <div className="max-w-7xl space-y-6 mx-auto">
           {/* Simplified Header with Stats */}
           <CandidateHeader nome={candidato.nome_completo} status={candidato.status} nivel={candidato.nivel} area={candidato.area} cidade={candidato.cidade} estado={candidato.estado} onEdit={() => navigate(`/candidatos/${id}/editar`)} onDelete={() => setDeleteDialogOpen(true)} onRelocate={() => setRelocateModalOpen(true)} onStatusChange={handleStatusChange} onSendWhatsApp={() => setWhatsappModalOpen(true)} />
 
