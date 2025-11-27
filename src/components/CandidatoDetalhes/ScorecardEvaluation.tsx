@@ -223,7 +223,7 @@ export function ScorecardEvaluation({
     percentage
   } = calculateScore();
   const allScoresSet = evaluations.length > 0 && evaluations.every(ev => ev.score > 0);
-  return <Card>
+  return <Card className="border border-[#ffcd00]">
       <CardHeader>
         <CardTitle className="text-xl font-bold">Nova Avaliação - Scorecard</CardTitle>
         <CardDescription className="text-base">
