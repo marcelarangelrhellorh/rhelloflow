@@ -117,12 +117,12 @@ export function TaskDetailDrawer({
               <Calendar className={cn("h-5 w-5 mt-0.5", isOverdue ? "text-red-500" : "text-muted-foreground")} />
               <div>
                 <p className="text-muted-foreground text-base font-semibold">Prazo</p>
-                {task.due_date ? <p className={cn("font-medium text-sm", isOverdue && "text-red-600")}>
+                {task.due_date ? <p className={cn("font-medium text-base", isOverdue && "text-red-600")}>
                     {isOverdue && <AlertTriangle className="h-3 w-3 inline mr-1" />}
                     {format(new Date(task.due_date), "dd/MM/yyyy", {
                   locale: ptBR
                 })}
-                  </p> : <p className="text-sm text-muted-foreground">Não definido</p>}
+                  </p> : <p className="text-base text-muted-foreground">Não definido</p>}
               </div>
             </div>
 
