@@ -44,15 +44,15 @@ export function VagaHeader({
         </div>
       </div>
       <div className="flex gap-2">
-        <button onClick={onGenerateClientLink} className="px-4 py-2 border border-[#36404a]/30 text-[#00141d] transition-colors flex items-center gap-2 text-sm rounded-full hover:bg-[#36404a]/5 font-semibold">
+        <Button onClick={onGenerateClientLink} variant="outline" className="rounded-full font-bold text-sm min-w-[140px]">
           <span className="material-symbols-outlined text-lg">link</span>
           Link Cliente
-        </button>
-        <button onClick={onViewDetails} className="px-4 py-2 border border-[#36404a]/30 text-[#00141d] transition-colors flex items-center gap-2 text-sm rounded-full hover:bg-[#36404a]/5 font-semibold">
+        </Button>
+        <Button onClick={onViewDetails} variant="outline" className="rounded-full font-bold text-sm min-w-[140px]">
           <span className="material-symbols-outlined text-lg">visibility</span>
           Ver Detalhes
-        </button>
-        <Button onClick={onShare} className="rounded-full font-bold text-sm">
+        </Button>
+        <Button onClick={onShare} className="rounded-full font-bold text-sm min-w-[140px]">
           <span className="material-symbols-outlined text-lg">share</span>
           Compartilhar
         </Button>
