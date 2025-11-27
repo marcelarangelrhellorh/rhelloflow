@@ -371,7 +371,9 @@ export default function Acompanhamento() {
           </div>}
 
         {/* Selected Vaga Details */}
-        {selectedVaga && selectedVagaData && <div className="space-y-6">
+        {selectedVaga && selectedVagaData && <div className="flex gap-6">
+            {/* Main Content - Left Column */}
+            <div className="flex-1 space-y-6">
             {/* Back Button */}
             <Button variant="ghost" onClick={() => setSelectedVaga(null)} className="mb-4 text-base">
               ← Voltar para Meus Processos
@@ -475,62 +477,93 @@ export default function Acompanhamento() {
                 </CardContent>
               </Card>}
 
-            {/* Process Timeline and Activities Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Process Timeline */}
-              <Card className="shadow-sm">
-                <CardContent className="p-6">
-                  <h3 className="font-semibold text-lg mb-6">Linha do Tempo do Processo</h3>
-                  <div className="relative overflow-x-auto pb-4">
-                    {/* Horizontal line background */}
-                    <div className="absolute top-5 left-5 right-5 h-0.5 bg-border z-0" />
-                    
-                    <div className="flex items-start gap-0 relative min-w-max px-5">
-                      {getTimelineSteps(selectedVagaData.status).map((step, index, array) => <div key={index} className="flex flex-col items-center flex-1 min-w-[120px] relative">
-                          {/* Active connector line - shows when previous step is completed */}
-                          {index > 0 && array[index - 1].status === "completed" && <div className="absolute top-5 right-1/2 w-full h-0.5 bg-primary z-10" />}
-                          
-                          {/* Half active line for current step */}
-                          {step.status === "current" && index > 0 && <div className="absolute top-5 right-1/2 w-full h-0.5 bg-primary z-10" />}
-                          
-                          {/* Circle */}
-                          <div className={cn("relative z-20 w-10 h-10 rounded-full flex items-center justify-center mb-3 transition-all", step.status === "completed" && "bg-primary", step.status === "current" && "bg-primary animate-pulse", step.status === "pending" && "bg-border")}>
-                            {step.status === "completed" && <CheckCircle2 className="h-5 w-5 text-primary-foreground" />}
-                            {step.status === "current" && <div className="w-3 h-3 bg-primary-foreground rounded-full" />}
-                          </div>
+            {/* Process Timeline */}
+            <Card className="shadow-sm">
+              <CardContent className="p-6">
+                <h3 className="font-semibold text-lg mb-6">Linha do Tempo do Processo</h3>
+                <div className="relative overflow-x-auto pb-4">
+                  {/* Horizontal line background */}
+                  <div className="absolute top-5 left-5 right-5 h-0.5 bg-border z-0" />
+                  
+                  <div className="flex items-start gap-0 relative min-w-max px-5">
+                    {getTimelineSteps(selectedVagaData.status).map((step, index, array) => <div key={index} className="flex flex-col items-center flex-1 min-w-[120px] relative">
+                        {/* Active connector line - shows when previous step is completed */}
+                        {index > 0 && array[index - 1].status === "completed" && <div className="absolute top-5 right-1/2 w-full h-0.5 bg-primary z-10" />}
+                        
+                        {/* Half active line for current step */}
+                        {step.status === "current" && index > 0 && <div className="absolute top-5 right-1/2 w-full h-0.5 bg-primary z-10" />}
+                        
+                        {/* Circle */}
+                        <div className={cn("relative z-20 w-10 h-10 rounded-full flex items-center justify-center mb-3 transition-all", step.status === "completed" && "bg-primary", step.status === "current" && "bg-primary animate-pulse", step.status === "pending" && "bg-border")}>
+                          {step.status === "completed" && <CheckCircle2 className="h-5 w-5 text-primary-foreground" />}
+                          {step.status === "current" && <div className="w-3 h-3 bg-primary-foreground rounded-full" />}
+                        </div>
 
-                          {/* Label */}
-                          <p className={cn("text-sm text-center font-semibold leading-tight", step.status === "pending" ? "text-muted-foreground" : "text-foreground")}>
-                            {step.label}
-                          </p>
-                        </div>)}
-                    </div>
+                        {/* Label */}
+                        <p className={cn("text-sm text-center font-semibold leading-tight", step.status === "pending" ? "text-muted-foreground" : "text-foreground")}>
+                          {step.label}
+                        </p>
+                      </div>)}
                   </div>
+                </div>
 
-                  {/* Progress Bar */}
-                  <div className="mt-6">
-                    <div className="flex items-center justify-between text-sm mb-2">
-                      <span className="text-muted-foreground font-semibold">Progresso</span>
-                      <span className="font-semibold">{calculateProgress(selectedVagaData.status)}%</span>
-                    </div>
-                    <div className="w-full bg-border rounded-full h-2 overflow-hidden">
-                      <div className="bg-primary h-full transition-all duration-500 rounded-full" style={{
-                    width: `${calculateProgress(selectedVagaData.status)}%`
-                  }} />
-                    </div>
+                {/* Progress Bar */}
+                <div className="mt-6">
+                  <div className="flex items-center justify-between text-sm mb-2">
+                    <span className="text-muted-foreground font-semibold">Progresso</span>
+                    <span className="font-semibold">{calculateProgress(selectedVagaData.status)}%</span>
+                  </div>
+                  <div className="w-full bg-border rounded-full h-2 overflow-hidden">
+                    <div className="bg-primary h-full transition-all duration-500 rounded-full" style={{
+                  width: `${calculateProgress(selectedVagaData.status)}%`
+                }} />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Candidates List */}
+            {vagaCandidatos.length > 0 && <Card className="shadow-sm">
+                <CardContent className="p-6">
+                  <h3 className="font-semibold text-lg mb-4">Candidatos ({vagaCandidatos.length})</h3>
+                  <div className="space-y-3">
+                    {vagaCandidatos.map(candidato => {
+                const isPendingFeedback = hasPendingFeedback(candidato.id);
+                return <div key={candidato.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleCandidateClick(candidato.id)}>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <p className="text-foreground text-base font-semibold">{candidato.nome_completo}</p>
+                            {isPendingFeedback && <Badge className="bg-orange-500 text-white border-orange-600 text-sm px-3 py-1 font-bold shadow-sm">
+                                <MessageSquare className="h-4 w-4 mr-1.5" />
+                                Feedback Pendente
+                              </Badge>}
+                          </div>
+                          <p className="text-muted-foreground text-base font-medium">
+                            Desde {format(new Date(candidato.criado_em), "dd/MM/yyyy", {
+                        locale: ptBR
+                      })}
+                          </p>
+                        </div>
+                        <Badge variant={getStatusBadgeVariant(candidato.status)} className="text-base font-semibold bg-[#ffcd00]/[0.36]">
+                          {candidato.status}
+                        </Badge>
+                      </div>;
+              })}
                   </div>
                 </CardContent>
-              </Card>
+              </Card>}
+            </div>
 
-              {/* Recent Activities */}
-              {vagaEventos.length > 0 && <Card className="shadow-sm">
-                  <CardContent className="p-6">
-                    <div className="flex items-center gap-2 mb-4">
-                      <Activity className="h-5 w-5 text-primary" />
-                      <h3 className="font-semibold text-lg">Atividades Recentes</h3>
-                    </div>
-                    <div className="space-y-4 max-h-[300px] overflow-y-auto">
-                      {vagaEventos.slice(0, 10).map(evento => {
+            {/* Right Column - Recent Activities */}
+            {vagaEventos.length > 0 && <div className="w-80 lg:w-96 flex-shrink-0">
+              <Card className="shadow-sm sticky top-6">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Activity className="h-5 w-5 text-primary" />
+                    <h3 className="font-semibold text-lg">Atividades Recentes</h3>
+                  </div>
+                  <div className="space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto">
+                    {vagaEventos.slice(0, 10).map(evento => {
                   const getEventIcon = () => {
                     switch (evento.tipo) {
                       case "CANDIDATO_ADICIONADO":
@@ -586,41 +619,10 @@ export default function Acompanhamento() {
                             </div>
                           </div>;
                 })}
-                    </div>
-                  </CardContent>
-                </Card>}
-            </div>
-
-            {/* Candidates List */}
-            {vagaCandidatos.length > 0 && <Card className="shadow-sm">
-                <CardContent className="p-6">
-                  <h3 className="font-semibold text-lg mb-4">Candidatos ({vagaCandidatos.length})</h3>
-                  <div className="space-y-3">
-                    {vagaCandidatos.map(candidato => {
-                const isPendingFeedback = hasPendingFeedback(candidato.id);
-                return <div key={candidato.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleCandidateClick(candidato.id)}>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <p className="text-foreground text-base font-semibold">{candidato.nome_completo}</p>
-                            {isPendingFeedback && <Badge className="bg-orange-500 text-white border-orange-600 text-sm px-3 py-1 font-bold shadow-sm">
-                                <MessageSquare className="h-4 w-4 mr-1.5" />
-                                Feedback Pendente
-                              </Badge>}
-                          </div>
-                          <p className="text-muted-foreground text-base font-medium">
-                            Desde {format(new Date(candidato.criado_em), "dd/MM/yyyy", {
-                        locale: ptBR
-                      })}
-                          </p>
-                        </div>
-                        <Badge variant={getStatusBadgeVariant(candidato.status)} className="text-base font-semibold bg-[#ffcd00]/[0.36]">
-                          {candidato.status}
-                        </Badge>
-                      </div>;
-              })}
                   </div>
                 </CardContent>
-              </Card>}
+              </Card>
+            </div>}
           </div>}
 
         {/* Empty State */}
