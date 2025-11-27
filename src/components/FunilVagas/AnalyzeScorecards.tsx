@@ -412,7 +412,7 @@ export function AnalyzeScorecards({
     }
   };
   return <>
-      <Button onClick={() => setOpen(true)} variant="default" className="gap-2 bg-[#faec3e] text-foreground font-semibold">
+      <Button onClick={() => setOpen(true)} variant="default" className="gap-2 bg-[#00141D] text-white hover:bg-[#00141D]/90 font-semibold">
         <Sparkles className="h-4 w-4" />
         Analisar scorecards (IA)
       </Button>
