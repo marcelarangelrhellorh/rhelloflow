@@ -265,7 +265,7 @@ export default function Acompanhamento() {
   return <div className="min-h-screen bg-background">
       <div className="flex">
         {/* Main Content */}
-        <div className="flex-1 p-6 space-y-6 max-w-[calc(100%-24rem)] mx-[130px] shadow-md">
+        <div className="flex-1 p-6 space-y-6 max-w-[calc(100%-24rem)] mx-[130px] shadow-none">
         {/* Header */}
         <div>
           <h1 className="text-3xl font-bold text-foreground">Meus Processos</h1>
