@@ -475,118 +475,121 @@ export default function Acompanhamento() {
                 </CardContent>
               </Card>}
 
-            {/* Process Timeline */}
-            <Card className="shadow-sm">
-              <CardContent className="p-6">
-                <h3 className="font-semibold text-lg mb-6">Linha do Tempo do Processo</h3>
-                <div className="relative overflow-x-auto pb-4">
-                  {/* Horizontal line background */}
-                  <div className="absolute top-5 left-5 right-5 h-0.5 bg-border z-0" />
-                  
-                  <div className="flex items-start gap-0 relative min-w-max px-5">
-                    {getTimelineSteps(selectedVagaData.status).map((step, index, array) => <div key={index} className="flex flex-col items-center flex-1 min-w-[120px] relative">
-                        {/* Active connector line - shows when previous step is completed */}
-                        {index > 0 && array[index - 1].status === "completed" && <div className="absolute top-5 right-1/2 w-full h-0.5 bg-primary z-10" />}
-                        
-                        {/* Half active line for current step */}
-                        {step.status === "current" && index > 0 && <div className="absolute top-5 right-1/2 w-full h-0.5 bg-primary z-10" />}
-                        
-                        {/* Circle */}
-                        <div className={cn("relative z-20 w-10 h-10 rounded-full flex items-center justify-center mb-3 transition-all", step.status === "completed" && "bg-primary", step.status === "current" && "bg-primary animate-pulse", step.status === "pending" && "bg-border")}>
-                          {step.status === "completed" && <CheckCircle2 className="h-5 w-5 text-primary-foreground" />}
-                          {step.status === "current" && <div className="w-3 h-3 bg-primary-foreground rounded-full" />}
-                        </div>
-
-                        {/* Label */}
-                        <p className={cn("text-xs text-center font-medium leading-tight", step.status === "pending" ? "text-muted-foreground" : "text-foreground")}>
-                          {step.label}
-                        </p>
-                      </div>)}
-                  </div>
-                </div>
-
-                {/* Progress Bar */}
-                <div className="mt-6">
-                  <div className="flex items-center justify-between text-sm mb-2">
-                    <span className="text-muted-foreground font-semibold">Progresso</span>
-                    <span className="font-semibold">{calculateProgress(selectedVagaData.status)}%</span>
-                  </div>
-                  <div className="w-full bg-border rounded-full h-2 overflow-hidden">
-                    <div className="bg-primary h-full transition-all duration-500 rounded-full" style={{
-                  width: `${calculateProgress(selectedVagaData.status)}%`
-                }} />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Recent Activities - Moved up for better visibility */}
-            {vagaEventos.length > 0 && <Card className="shadow-sm">
+            {/* Process Timeline and Activities Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Process Timeline */}
+              <Card className="shadow-sm">
                 <CardContent className="p-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Activity className="h-5 w-5 text-primary" />
-                    <h3 className="font-semibold text-lg">Atividades Recentes</h3>
+                  <h3 className="font-semibold text-lg mb-6">Linha do Tempo do Processo</h3>
+                  <div className="relative overflow-x-auto pb-4">
+                    {/* Horizontal line background */}
+                    <div className="absolute top-5 left-5 right-5 h-0.5 bg-border z-0" />
+                    
+                    <div className="flex items-start gap-0 relative min-w-max px-5">
+                      {getTimelineSteps(selectedVagaData.status).map((step, index, array) => <div key={index} className="flex flex-col items-center flex-1 min-w-[120px] relative">
+                          {/* Active connector line - shows when previous step is completed */}
+                          {index > 0 && array[index - 1].status === "completed" && <div className="absolute top-5 right-1/2 w-full h-0.5 bg-primary z-10" />}
+                          
+                          {/* Half active line for current step */}
+                          {step.status === "current" && index > 0 && <div className="absolute top-5 right-1/2 w-full h-0.5 bg-primary z-10" />}
+                          
+                          {/* Circle */}
+                          <div className={cn("relative z-20 w-10 h-10 rounded-full flex items-center justify-center mb-3 transition-all", step.status === "completed" && "bg-primary", step.status === "current" && "bg-primary animate-pulse", step.status === "pending" && "bg-border")}>
+                            {step.status === "completed" && <CheckCircle2 className="h-5 w-5 text-primary-foreground" />}
+                            {step.status === "current" && <div className="w-3 h-3 bg-primary-foreground rounded-full" />}
+                          </div>
+
+                          {/* Label */}
+                          <p className={cn("text-xs text-center font-medium leading-tight", step.status === "pending" ? "text-muted-foreground" : "text-foreground")}>
+                            {step.label}
+                          </p>
+                        </div>)}
+                    </div>
                   </div>
-                  <div className="space-y-4">
-                    {vagaEventos.slice(0, 10).map(evento => {
-                const getEventIcon = () => {
-                  switch (evento.tipo) {
-                    case "CANDIDATO_ADICIONADO":
-                      return {
-                        icon: UserPlus,
-                        bgClass: "bg-green-500/20",
-                        textClass: "text-green-600 dark:text-green-400"
-                      };
-                    case "CANDIDATO_MOVIDO":
-                      return {
-                        icon: ArrowRightLeft,
-                        bgClass: "bg-blue-500/20",
-                        textClass: "text-blue-600 dark:text-blue-400"
-                      };
-                    case "ETAPA_ALTERADA":
-                      return {
-                        icon: CheckCircle2,
-                        bgClass: "bg-blue-500/20",
-                        textClass: "text-blue-600 dark:text-blue-400"
-                      };
-                    case "FEEDBACK_ADICIONADO":
-                      return {
-                        icon: MessageSquare,
-                        bgClass: "bg-orange-500/20",
-                        textClass: "text-orange-600 dark:text-orange-400"
-                      };
-                    default:
-                      return {
-                        icon: Activity,
-                        bgClass: "bg-gray-500/20",
-                        textClass: "text-gray-600 dark:text-gray-400"
-                      };
-                  }
-                };
-                const {
-                  icon: Icon,
-                  bgClass,
-                  textClass
-                } = getEventIcon();
-                return <div key={evento.id} className="flex items-start gap-3">
-                          <div className={cn("flex-shrink-0 mt-0.5 size-8 rounded-full flex items-center justify-center", bgClass)}>
-                            <Icon className={cn("h-4 w-4", textClass)} />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-foreground font-medium text-sm">
-                              {evento.descricao}
-                            </p>
-                            <p className="text-muted-foreground text-xs mt-0.5">
-                              {format(new Date(evento.created_at), "d 'de' MMMM 'às' HH:mm", {
-                        locale: ptBR
-                      })}
-                            </p>
-                          </div>
-                        </div>;
-              })}
+
+                  {/* Progress Bar */}
+                  <div className="mt-6">
+                    <div className="flex items-center justify-between text-sm mb-2">
+                      <span className="text-muted-foreground font-semibold">Progresso</span>
+                      <span className="font-semibold">{calculateProgress(selectedVagaData.status)}%</span>
+                    </div>
+                    <div className="w-full bg-border rounded-full h-2 overflow-hidden">
+                      <div className="bg-primary h-full transition-all duration-500 rounded-full" style={{
+                    width: `${calculateProgress(selectedVagaData.status)}%`
+                  }} />
+                    </div>
                   </div>
                 </CardContent>
-              </Card>}
+              </Card>
+
+              {/* Recent Activities */}
+              {vagaEventos.length > 0 && <Card className="shadow-sm">
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Activity className="h-5 w-5 text-primary" />
+                      <h3 className="font-semibold text-lg">Atividades Recentes</h3>
+                    </div>
+                    <div className="space-y-4 max-h-[300px] overflow-y-auto">
+                      {vagaEventos.slice(0, 10).map(evento => {
+                  const getEventIcon = () => {
+                    switch (evento.tipo) {
+                      case "CANDIDATO_ADICIONADO":
+                        return {
+                          icon: UserPlus,
+                          bgClass: "bg-green-500/20",
+                          textClass: "text-green-600 dark:text-green-400"
+                        };
+                      case "CANDIDATO_MOVIDO":
+                        return {
+                          icon: ArrowRightLeft,
+                          bgClass: "bg-blue-500/20",
+                          textClass: "text-blue-600 dark:text-blue-400"
+                        };
+                      case "ETAPA_ALTERADA":
+                        return {
+                          icon: CheckCircle2,
+                          bgClass: "bg-blue-500/20",
+                          textClass: "text-blue-600 dark:text-blue-400"
+                        };
+                      case "FEEDBACK_ADICIONADO":
+                        return {
+                          icon: MessageSquare,
+                          bgClass: "bg-orange-500/20",
+                          textClass: "text-orange-600 dark:text-orange-400"
+                        };
+                      default:
+                        return {
+                          icon: Activity,
+                          bgClass: "bg-gray-500/20",
+                          textClass: "text-gray-600 dark:text-gray-400"
+                        };
+                    }
+                  };
+                  const {
+                    icon: Icon,
+                    bgClass,
+                    textClass
+                  } = getEventIcon();
+                  return <div key={evento.id} className="flex items-start gap-3">
+                            <div className={cn("flex-shrink-0 mt-0.5 size-8 rounded-full flex items-center justify-center", bgClass)}>
+                              <Icon className={cn("h-4 w-4", textClass)} />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-foreground font-medium text-sm">
+                                {evento.descricao}
+                              </p>
+                              <p className="text-muted-foreground text-xs mt-0.5">
+                                {format(new Date(evento.created_at), "d 'de' MMMM 'às' HH:mm", {
+                          locale: ptBR
+                        })}
+                              </p>
+                            </div>
+                          </div>;
+                })}
+                    </div>
+                  </CardContent>
+                </Card>}
+            </div>
 
             {/* Candidates List */}
             {vagaCandidatos.length > 0 && <Card className="shadow-sm">
