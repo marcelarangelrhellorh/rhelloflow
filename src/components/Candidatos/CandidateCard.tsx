@@ -81,9 +81,9 @@ export function CandidateCard({
           </div>
 
           {candidato.disponibilidade_status && <div className="flex-shrink-0">
-              {candidato.disponibilidade_status === 'disponível' ? <Badge className="text-xs font-medium rounded-full px-2 py-1 bg-[#C9F4C7] text-[#1B5E20] hover:bg-[#C9F4C7]/90 border-0">
+              {candidato.disponibilidade_status === 'disponível' ? <Badge className="text-sm font-semibold rounded-full px-2 py-1 bg-[#C9F4C7] text-[#1B5E20] hover:bg-[#C9F4C7]/90 border-0">
                   Disponível
-                </Badge> : candidato.disponibilidade_status === 'não_disponível' ? <Badge className="text-xs font-medium rounded-full px-2 py-1 bg-[#FFD6D6] text-[#B71C1C] hover:bg-[#FFD6D6]/90 border-0">
+                </Badge> : candidato.disponibilidade_status === 'não_disponível' ? <Badge className="text-sm font-semibold rounded-full px-2 py-1 bg-[#FFD6D6] text-[#B71C1C] hover:bg-[#FFD6D6]/90 border-0">
                   Indisponível
                 </Badge> : null}
             </div>}
