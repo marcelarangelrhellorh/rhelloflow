@@ -192,6 +192,13 @@ export type Database = {
             foreignKeyName: "candidate_scorecards_vaga_id_fkey"
             columns: ["vaga_id"]
             isOneToOne: false
+            referencedRelation: "vagas_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidate_scorecards_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
             referencedRelation: "vw_vagas_cliente_detalhadas"
             referencedColumns: ["id"]
           },
@@ -418,6 +425,13 @@ export type Database = {
             foreignKeyName: "candidatos_vaga_relacionada_id_fkey"
             columns: ["vaga_relacionada_id"]
             isOneToOne: false
+            referencedRelation: "vagas_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidatos_vaga_relacionada_id_fkey"
+            columns: ["vaga_relacionada_id"]
+            isOneToOne: false
             referencedRelation: "vw_vagas_cliente_detalhadas"
             referencedColumns: ["id"]
           },
@@ -476,6 +490,13 @@ export type Database = {
             columns: ["vaga_id"]
             isOneToOne: false
             referencedRelation: "vagas_active"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_view_links_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vagas_public_view"
             referencedColumns: ["id"]
           },
           {
@@ -742,6 +763,13 @@ export type Database = {
             foreignKeyName: "feedback_requests_vaga_id_fkey"
             columns: ["vaga_id"]
             isOneToOne: false
+            referencedRelation: "vagas_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_requests_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
             referencedRelation: "vw_vagas_cliente_detalhadas"
             referencedColumns: ["id"]
           },
@@ -881,6 +909,13 @@ export type Database = {
             foreignKeyName: "feedbacks_vaga_id_fkey"
             columns: ["vaga_id"]
             isOneToOne: false
+            referencedRelation: "vagas_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedbacks_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
             referencedRelation: "vw_vagas_cliente_detalhadas"
             referencedColumns: ["id"]
           },
@@ -1003,6 +1038,13 @@ export type Database = {
             foreignKeyName: "historico_candidatos_vaga_id_fkey"
             columns: ["vaga_id"]
             isOneToOne: false
+            referencedRelation: "vagas_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "historico_candidatos_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
             referencedRelation: "vw_vagas_cliente_detalhadas"
             referencedColumns: ["id"]
           },
@@ -1082,6 +1124,13 @@ export type Database = {
             foreignKeyName: "import_logs_vaga_id_fkey"
             columns: ["vaga_id"]
             isOneToOne: false
+            referencedRelation: "vagas_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "import_logs_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
             referencedRelation: "vw_vagas_cliente_detalhadas"
             referencedColumns: ["id"]
           },
@@ -1132,6 +1181,13 @@ export type Database = {
             columns: ["job_id"]
             isOneToOne: false
             referencedRelation: "vagas_active"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_stage_history_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "vagas_public_view"
             referencedColumns: ["id"]
           },
           {
@@ -1190,6 +1246,13 @@ export type Database = {
             foreignKeyName: "notificacoes_vaga_id_fkey"
             columns: ["vaga_id"]
             isOneToOne: false
+            referencedRelation: "vagas_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notificacoes_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
             referencedRelation: "vw_vagas_cliente_detalhadas"
             referencedColumns: ["id"]
           },
@@ -1239,6 +1302,13 @@ export type Database = {
             columns: ["job_id"]
             isOneToOne: false
             referencedRelation: "vagas_active"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "vagas_public_view"
             referencedColumns: ["id"]
           },
           {
@@ -1357,6 +1427,13 @@ export type Database = {
             columns: ["vaga_id"]
             isOneToOne: false
             referencedRelation: "vagas_active"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_vaga_id"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vagas_public_view"
             referencedColumns: ["id"]
           },
           {
@@ -1519,6 +1596,13 @@ export type Database = {
             columns: ["vaga_id"]
             isOneToOne: false
             referencedRelation: "vagas_active"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scorecard_analysis_logs_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vagas_public_view"
             referencedColumns: ["id"]
           },
           {
@@ -1817,6 +1901,13 @@ export type Database = {
             foreignKeyName: "share_links_vaga_id_fkey"
             columns: ["vaga_id"]
             isOneToOne: false
+            referencedRelation: "vagas_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "share_links_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
             referencedRelation: "vw_vagas_cliente_detalhadas"
             referencedColumns: ["id"]
           },
@@ -1973,6 +2064,13 @@ export type Database = {
             foreignKeyName: "tasks_vaga_id_fkey"
             columns: ["vaga_id"]
             isOneToOne: false
+            referencedRelation: "vagas_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
             referencedRelation: "vw_vagas_cliente_detalhadas"
             referencedColumns: ["id"]
           },
@@ -2078,6 +2176,13 @@ export type Database = {
             foreignKeyName: "vacancy_tags_vacancy_id_fkey"
             columns: ["vacancy_id"]
             isOneToOne: false
+            referencedRelation: "vagas_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vacancy_tags_vacancy_id_fkey"
+            columns: ["vacancy_id"]
+            isOneToOne: false
             referencedRelation: "vw_vagas_cliente_detalhadas"
             referencedColumns: ["id"]
           },
@@ -2124,6 +2229,13 @@ export type Database = {
             columns: ["vaga_id"]
             isOneToOne: false
             referencedRelation: "vagas_active"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vaga_eventos_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vagas_public_view"
             referencedColumns: ["id"]
           },
           {
@@ -2463,6 +2575,13 @@ export type Database = {
             foreignKeyName: "whatsapp_sends_vacancy_id_fkey"
             columns: ["vacancy_id"]
             isOneToOne: false
+            referencedRelation: "vagas_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whatsapp_sends_vacancy_id_fkey"
+            columns: ["vacancy_id"]
+            isOneToOne: false
             referencedRelation: "vw_vagas_cliente_detalhadas"
             referencedColumns: ["id"]
           },
@@ -2610,6 +2729,13 @@ export type Database = {
             foreignKeyName: "candidatos_vaga_relacionada_id_fkey"
             columns: ["vaga_relacionada_id"]
             isOneToOne: false
+            referencedRelation: "vagas_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidatos_vaga_relacionada_id_fkey"
+            columns: ["vaga_relacionada_id"]
+            isOneToOne: false
             referencedRelation: "vw_vagas_cliente_detalhadas"
             referencedColumns: ["id"]
           },
@@ -2738,6 +2864,13 @@ export type Database = {
             columns: ["vaga_relacionada_id"]
             isOneToOne: false
             referencedRelation: "vagas_active"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidatos_vaga_relacionada_id_fkey"
+            columns: ["vaga_relacionada_id"]
+            isOneToOne: false
+            referencedRelation: "vagas_public_view"
             referencedColumns: ["id"]
           },
           {
@@ -2901,6 +3034,13 @@ export type Database = {
             columns: ["vaga_id"]
             isOneToOne: false
             referencedRelation: "vagas_active"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedbacks_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vagas_public_view"
             referencedColumns: ["id"]
           },
           {
@@ -3102,6 +3242,75 @@ export type Database = {
           },
         ]
       }
+      vagas_public_view: {
+        Row: {
+          beneficios: string[] | null
+          beneficios_outros: string | null
+          criado_em: string | null
+          empresa: string | null
+          id: string | null
+          modelo_trabalho: Database["public"]["Enums"]["modelo_trabalho"] | null
+          requisitos_desejaveis: string | null
+          requisitos_obrigatorios: string | null
+          responsabilidades: string | null
+          salario_max: number | null
+          salario_min: number | null
+          salario_modalidade: string | null
+          status: Database["public"]["Enums"]["status_vaga"] | null
+          status_slug: string | null
+          tipo_contratacao: string | null
+          titulo: string | null
+        }
+        Insert: {
+          beneficios?: string[] | null
+          beneficios_outros?: string | null
+          criado_em?: string | null
+          empresa?: string | null
+          id?: string | null
+          modelo_trabalho?:
+            | Database["public"]["Enums"]["modelo_trabalho"]
+            | null
+          requisitos_desejaveis?: string | null
+          requisitos_obrigatorios?: string | null
+          responsabilidades?: string | null
+          salario_max?: never
+          salario_min?: never
+          salario_modalidade?: string | null
+          status?: Database["public"]["Enums"]["status_vaga"] | null
+          status_slug?: string | null
+          tipo_contratacao?: string | null
+          titulo?: string | null
+        }
+        Update: {
+          beneficios?: string[] | null
+          beneficios_outros?: string | null
+          criado_em?: string | null
+          empresa?: string | null
+          id?: string | null
+          modelo_trabalho?:
+            | Database["public"]["Enums"]["modelo_trabalho"]
+            | null
+          requisitos_desejaveis?: string | null
+          requisitos_obrigatorios?: string | null
+          responsabilidades?: string | null
+          salario_max?: never
+          salario_min?: never
+          salario_modalidade?: string | null
+          status?: Database["public"]["Enums"]["status_vaga"] | null
+          status_slug?: string | null
+          tipo_contratacao?: string | null
+          titulo?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_vagas_status_slug"
+            columns: ["status_slug"]
+            isOneToOne: false
+            referencedRelation: "vaga_status_ref"
+            referencedColumns: ["slug"]
+          },
+        ]
+      }
       view_candidate_tags: {
         Row: {
           added_at: string | null
@@ -3202,6 +3411,13 @@ export type Database = {
             columns: ["vaga_relacionada_id"]
             isOneToOne: false
             referencedRelation: "vagas_active"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidatos_vaga_relacionada_id_fkey"
+            columns: ["vaga_relacionada_id"]
+            isOneToOne: false
+            referencedRelation: "vagas_public_view"
             referencedColumns: ["id"]
           },
           {
@@ -3319,6 +3535,20 @@ export type Database = {
         Returns: string
       }
       get_latest_audit_event_hash: { Args: never; Returns: string }
+      get_recruitment_kpis_secure: {
+        Args: never
+        Returns: {
+          calculated_at: string | null
+          kpis_data: Json | null
+          metric_type: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "mv_recruitment_kpis"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       get_share_link_by_token: {
         Args: { p_token: string }
         Returns: {
