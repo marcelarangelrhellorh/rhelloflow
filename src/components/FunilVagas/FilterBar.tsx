@@ -54,19 +54,19 @@ export function FilterBar({
           placeholder="Buscar vaga..."
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="h-9 pl-9 text-sm bg-white border-gray-200 text-[#00141D] placeholder:text-[#36404A]"
+          className="h-10 pl-9 text-base font-medium bg-white border-gray-200 text-[#00141D] placeholder:text-[#36404A]"
         />
       </div>
 
       <Select value={recrutadorFilter} onValueChange={onRecrutadorChange}>
-        <SelectTrigger className="h-9 w-full sm:flex-1 sm:min-w-[140px] bg-white border-gray-200 text-sm">
+        <SelectTrigger className="h-10 w-full sm:flex-1 sm:min-w-[140px] bg-white border-gray-200 text-base font-medium">
           <User className="h-4 w-4 mr-2 text-[#36404A]" />
           <SelectValue placeholder="Recrutador" />
         </SelectTrigger>
         <SelectContent className="bg-white z-50">
-          <SelectItem value="all">Todos recrutadores</SelectItem>
+          <SelectItem value="all" className="text-base font-medium">Todos recrutadores</SelectItem>
           {recrutadores.map((rec) => (
-            <SelectItem key={rec} value={rec}>
+            <SelectItem key={rec} value={rec} className="text-base font-medium">
               {rec}
             </SelectItem>
           ))}
@@ -74,14 +74,14 @@ export function FilterBar({
       </Select>
 
       <Select value={clienteFilter} onValueChange={onClienteChange}>
-        <SelectTrigger className="h-9 w-full sm:flex-1 sm:min-w-[140px] bg-white border-gray-200 text-sm">
+        <SelectTrigger className="h-10 w-full sm:flex-1 sm:min-w-[140px] bg-white border-gray-200 text-base font-medium">
           <Building2 className="h-4 w-4 mr-2 text-[#36404A]" />
           <SelectValue placeholder="Cliente" />
         </SelectTrigger>
         <SelectContent className="bg-white z-50">
-          <SelectItem value="all">Todos clientes</SelectItem>
+          <SelectItem value="all" className="text-base font-medium">Todos clientes</SelectItem>
           {clientes.map((cli) => (
-            <SelectItem key={cli} value={cli}>
+            <SelectItem key={cli} value={cli} className="text-base font-medium">
               {cli}
             </SelectItem>
           ))}
@@ -89,14 +89,14 @@ export function FilterBar({
       </Select>
 
       <Select value={statusFilter} onValueChange={onStatusChange}>
-        <SelectTrigger className="h-9 w-full sm:flex-1 sm:min-w-[140px] bg-white border-gray-200 text-sm">
+        <SelectTrigger className="h-10 w-full sm:flex-1 sm:min-w-[140px] bg-white border-gray-200 text-base font-medium">
           <Tag className="h-4 w-4 mr-2 text-[#36404A]" />
           <SelectValue placeholder="Status" />
         </SelectTrigger>
         <SelectContent className="bg-white z-50">
-          <SelectItem value="all">Todos os status</SelectItem>
+          <SelectItem value="all" className="text-base font-medium">Todos os status</SelectItem>
           {statusOptions.map((status) => (
-            <SelectItem key={status.slug} value={status.label}>
+            <SelectItem key={status.slug} value={status.label} className="text-base font-medium">
               {status.label}
             </SelectItem>
           ))}
@@ -104,15 +104,15 @@ export function FilterBar({
       </Select>
 
       <Select value={ordenacao} onValueChange={onOrdenacaoChange}>
-        <SelectTrigger className="h-9 w-full sm:flex-1 sm:min-w-[140px] bg-white border-gray-200 text-sm">
+        <SelectTrigger className="h-10 w-full sm:flex-1 sm:min-w-[140px] bg-white border-gray-200 text-base font-medium">
           <ListFilter className="h-4 w-4 mr-2 text-[#36404A]" />
           <SelectValue placeholder="Ordenar" />
         </SelectTrigger>
         <SelectContent className="bg-white z-50">
-          <SelectItem value="recentes">Mais recentes</SelectItem>
-          <SelectItem value="antigas">Mais antigas</SelectItem>
-          <SelectItem value="candidatos">Mais candidatos</SelectItem>
-          <SelectItem value="dias">Dias em aberto</SelectItem>
+          <SelectItem value="recentes" className="text-base font-medium">Mais recentes</SelectItem>
+          <SelectItem value="antigas" className="text-base font-medium">Mais antigas</SelectItem>
+          <SelectItem value="candidatos" className="text-base font-medium">Mais candidatos</SelectItem>
+          <SelectItem value="dias" className="text-base font-medium">Dias em aberto</SelectItem>
         </SelectContent>
       </Select>
     </div>
