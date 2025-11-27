@@ -13,7 +13,6 @@ import { VagaTimeline } from "@/components/VagaDetalhes/VagaTimeline";
 import { VagaCandidatesTable } from "@/components/VagaDetalhes/VagaCandidatesTable";
 import { VagaActivityLog } from "@/components/VagaDetalhes/VagaActivityLog";
 import { VagaDetailsDrawer } from "@/components/VagaDetalhes/VagaDetailsDrawer";
-import { VagaTasksSection } from "@/components/VagaDetalhes/VagaTasksSection";
 import { toast } from "@/hooks/use-toast";
 
 // Custom hooks with React Query
@@ -192,11 +191,6 @@ export default function VagaDetalhes() {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
-              <VagaTasksSection
-                vagaId={vaga.id}
-                vagaTitulo={vaga.titulo}
-              />
-
               <VagaTimeline
                 currentStatusSlug={vaga.status_slug || "a_iniciar"}
                 progress={progress}
