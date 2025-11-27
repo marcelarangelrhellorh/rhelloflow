@@ -217,7 +217,7 @@ export function ScorecardHistory({
                     <div className="text-4xl font-bold text-primary">
                       {scorecard.match_percentage}%
                     </div>
-                    <p className="text-muted-foreground mt-1 text-sm font-semibold">Match Score</p>
+                    <p className="text-muted-foreground mt-1 font-semibold text-base">Match Score</p>
                   </div>
                 </div>
 
@@ -233,14 +233,14 @@ export function ScorecardHistory({
                       <p className="font-semibold text-base">{scorecard.evaluator_name}</p>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <User className="h-4 w-4" />
-                        <span className="text-sm">Avaliador</span>
+                        <span className="text-base">Avaliador</span>
                       </div>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-2 text-sm text-muted-foreground shrink-0">
                     <Calendar className="h-4 w-4" />
-                    <span className="font-medium">
+                    <span className="font-medium text-base">
                       {format(new Date(scorecard.created_at), "dd MMM yyyy", {
                     locale: ptBR
                   })}
@@ -270,15 +270,15 @@ export function ScorecardHistory({
 
                 {/* Evaluations Summary */}
                 <div className="space-y-3 pt-2">
-                  <p className="text-sm font-bold">Critérios Avaliados:</p>
+                  <p className="font-bold text-base">Critérios Avaliados:</p>
                   <div className="space-y-3">
                     {scorecard.evaluations.slice(0, 3).map((evaluation, index) => <div key={index} className="flex items-center justify-between text-sm py-1">
-                        <span className="text-muted-foreground text-sm font-semibold">{evaluation.criteria_name}</span>
+                        <span className="text-muted-foreground font-semibold text-base">{evaluation.criteria_name}</span>
                         <div className="flex items-center gap-1">
                           {[1, 2, 3, 4, 5].map(star => <Star key={star} className={cn("h-4 w-4", star <= evaluation.score ? "fill-[#FFCD00] text-[#FFCD00]" : "text-gray-300")} />)}
                         </div>
                       </div>)}
-                    {scorecard.evaluations.length > 3 && <p className="text-xs text-muted-foreground pt-1">
+                    {scorecard.evaluations.length > 3 && <p className="text-muted-foreground pt-1 text-base">
                         +{scorecard.evaluations.length - 3} critérios adicionais
                       </p>}
                   </div>
