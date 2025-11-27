@@ -61,7 +61,7 @@ export function VagaKPICards({ vaga, candidatos, daysOpen, onStatusChange }: Vag
         <p className="text-secondary-text-light dark:text-secondary-text-dark text-sm font-semibold">
           Duração do Processo
         </p>
-        <p className="text-primary-text-light dark:text-primary-text-dark text-2xl font-bold">
+        <p className="text-primary-text-light dark:text-primary-text-dark text-lg font-bold">
           {daysOpen} Dias
         </p>
       </div>
