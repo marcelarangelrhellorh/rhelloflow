@@ -114,7 +114,7 @@ export function VagaActivityLog({ eventos, candidatoContratado, vagaStatus }: Va
                 <p className="text-primary-text-light dark:text-primary-text-dark font-medium text-base">
                   {activity.description}
                 </p>
-                <p className="text-secondary-text-light dark:text-secondary-text-dark text-sm">
+                <p className="text-secondary-text-light dark:text-secondary-text-dark text-sm font-semibold">
                   {activity.date}
                 </p>
               </div>
