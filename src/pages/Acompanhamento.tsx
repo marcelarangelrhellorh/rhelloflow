@@ -290,7 +290,7 @@ export default function Acompanhamento() {
         {/* Divider with instruction */}
         {!selectedVaga && vagas.length > 0 && (
           <div className="space-y-4">
-            <div className="w-full h-px bg-gradient-to-r from-transparent via-border/60 to-transparent shadow-md"></div>
+            <div className="w-full h-0.5 bg-muted-foreground/30"></div>
             <p className="text-muted-foreground font-medium text-base">Para acessar os detalhes da vaga, clique sobre ela</p>
           </div>
         )}
