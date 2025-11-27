@@ -80,7 +80,7 @@ Localização: ${[cidade, estado].filter(Boolean).join(", ") || "Não informada"
         <div className="flex items-center justify-between group hover:bg-primary/5 dark:hover:bg-primary/10 -mx-2 px-2 py-2 rounded transition-colors">
           <div className="flex items-center gap-2 flex-1 min-w-0">
             <Mail className="h-4 w-4 text-secondary-text-light dark:text-secondary-text-dark flex-shrink-0" />
-            <span className="text-sm text-primary-text-light dark:text-primary-text-dark truncate">{email}</span>
+            <span className="text-base text-primary-text-light dark:text-primary-text-dark truncate">{email}</span>
           </div>
           <Button
             variant="ghost"
