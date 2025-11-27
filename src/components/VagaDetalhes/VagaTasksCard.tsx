@@ -130,7 +130,7 @@ export function VagaTasksCard({
           return <div key={task.id} className={cn("flex items-center gap-2 p-2 rounded-md border text-sm cursor-pointer hover:bg-muted/50 transition-colors", overdue && "border-red-200 bg-red-50/50")} onClick={() => handleTaskClick(task)}>
                   <StatusIcon className={cn("h-4 w-4 flex-shrink-0", task.status === "in_progress" ? "text-blue-500" : "text-muted-foreground")} />
                   <span className="truncate flex-1 font-medium text-base">{task.title}</span>
-                  {task.due_date && <span className={cn("text-xs", overdue ? "text-red-600" : "text-muted-foreground")}>
+                  {task.due_date && <span className={cn("text-sm font-medium", overdue ? "text-red-600" : "text-muted-foreground")}>
                       {format(new Date(task.due_date), "dd/MM", {
                 locale: ptBR
               })}
