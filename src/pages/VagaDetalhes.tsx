@@ -13,6 +13,7 @@ import { VagaTimeline } from "@/components/VagaDetalhes/VagaTimeline";
 import { VagaCandidatesTable } from "@/components/VagaDetalhes/VagaCandidatesTable";
 import { VagaActivityLog } from "@/components/VagaDetalhes/VagaActivityLog";
 import { VagaDetailsDrawer } from "@/components/VagaDetalhes/VagaDetailsDrawer";
+import { VagaTasksCard } from "@/components/VagaDetalhes/VagaTasksCard";
 import { toast } from "@/hooks/use-toast";
 
 // Custom hooks with React Query
@@ -135,9 +136,10 @@ export default function VagaDetalhes() {
   const progress = calculateProgress(vaga.status_slug || "a_iniciar");
 
   return (
-    <div className="relative flex min-h-screen w-full flex-col font-display bg-background-light dark:bg-background-dark">
-      <main className="flex-1 px-6 sm:px-10 lg:px-20 py-8">
-        <div className="mx-auto max-w-7xl">
+    <div className="relative flex min-h-screen w-full font-display bg-background-light dark:bg-background-dark">
+      {/* Main Content */}
+      <main className="flex-1 px-6 sm:px-10 lg:px-16 py-8">
+        <div className="mx-auto max-w-6xl">
           {/* External Job Banner */}
           {vaga.source === "externo" && (
             <div className="mb-6">
@@ -232,6 +234,14 @@ export default function VagaDetalhes() {
           </div>
         </div>
       </main>
+
+      {/* Right Sidebar - Tasks */}
+      <aside className="hidden xl:flex w-80 flex-shrink-0 flex-col border-l border-border bg-white dark:bg-background-dark p-6 sticky top-0 h-screen overflow-y-auto">
+        <h2 className="text-lg font-bold text-primary-text-light dark:text-primary-text-dark mb-4">
+          Tarefas da Vaga
+        </h2>
+        <VagaTasksCard vagaId={vaga.id} vagaTitulo={vaga.titulo} />
+      </aside>
     </div>
   );
 }

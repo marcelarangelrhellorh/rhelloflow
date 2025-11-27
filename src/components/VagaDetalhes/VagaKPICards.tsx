@@ -2,7 +2,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { JOB_STAGES } from "@/lib/jobStages";
 import type { Vaga } from "@/hooks/data/useVaga";
 import type { Candidato } from "@/hooks/data/useCandidatos";
-import { VagaTasksCard } from "./VagaTasksCard";
 interface VagaKPICardsProps {
   vaga: Vaga;
   candidatos: Candidato[];
@@ -73,7 +72,5 @@ export function VagaKPICards({
           {vaga.tipo_contratacao || "Não informado"}
         </p>
       </div>
-
-      <VagaTasksCard vagaId={vaga.id} vagaTitulo={vaga.titulo} />
     </div>;
 }
