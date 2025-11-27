@@ -52,7 +52,7 @@ export default function TaskCard({
             </h3>
             {task.description && <p className="text-sm text-muted-foreground mt-1">{task.description}</p>}
           </div>
-          <Badge className={priorityColors[task.priority]}>
+          <Badge className={`text-sm font-medium ${priorityColors[task.priority]}`}>
             {priorityLabels[task.priority]}
           </Badge>
         </div>
