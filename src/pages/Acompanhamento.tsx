@@ -481,11 +481,11 @@ export default function Acompanhamento() {
             <Card className="shadow-sm max-w-6xl">
               <CardContent className="p-5">
                 <h3 className="font-semibold mb-5 text-lg text-left">Linha do Tempo do Processo</h3>
-                <div className="relative pb-3">
+                <div className="relative overflow-x-auto pb-3">
                   {/* Horizontal line background */}
-                  <div className="absolute top-4 left-0 right-0 h-0.5 bg-border z-0" />
+                  <div className="absolute top-4 left-4 right-4 h-0.5 bg-border z-0" />
                   
-                  <div className="flex items-start justify-between relative w-full">
+                  <div className="flex items-start gap-0 relative min-w-max px-4">
                     {getTimelineSteps(selectedVagaData.status).map((step, index, array) => <div key={index} className="flex flex-col items-center flex-1 min-w-[100px] relative">
                         {/* Active connector line - shows when previous step is completed */}
                         {index > 0 && array[index - 1].status === "completed" && <div className="absolute top-4 right-1/2 w-full h-0.5 bg-primary z-10" />}
