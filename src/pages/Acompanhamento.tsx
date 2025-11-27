@@ -321,7 +321,7 @@ export default function Acompanhamento() {
               
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className={cn("w-full sm:w-[200px] justify-start text-left font-normal", !dateFilter && "text-muted-foreground")}>
+                  <Button variant="outline" className={cn("w-full sm:w-[200px] justify-start text-left font-medium text-base", !dateFilter && "text-muted-foreground")}>
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {dateFilter ? format(dateFilter, "dd/MM/yyyy", {
                   locale: ptBR
