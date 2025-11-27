@@ -45,19 +45,19 @@ export function FilterBar({
           placeholder="Buscar candidato..."
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="h-9 pl-9 text-sm bg-white border-gray-200 text-[#00141D] placeholder:text-[#36404A]"
+          className="h-10 pl-9 text-base font-medium bg-white border-gray-200 text-[#00141D] placeholder:text-[#36404A]"
         />
       </div>
 
       <Select value={vagaFilter} onValueChange={onVagaChange}>
-        <SelectTrigger className="h-9 w-full sm:flex-1 sm:min-w-[140px] bg-white border-gray-200 text-sm">
+        <SelectTrigger className="h-10 w-full sm:flex-1 sm:min-w-[140px] bg-white border-gray-200 text-base font-medium">
           <Briefcase className="h-4 w-4 mr-2 text-[#36404A]" />
           <SelectValue placeholder="Vaga" />
         </SelectTrigger>
         <SelectContent className="bg-white z-50">
-          <SelectItem value="all">Todas as vagas</SelectItem>
+          <SelectItem value="all" className="text-base font-medium">Todas as vagas</SelectItem>
           {vagas.map((vaga) => (
-            <SelectItem key={vaga.id} value={vaga.id}>
+            <SelectItem key={vaga.id} value={vaga.id} className="text-base font-medium">
               {vaga.titulo}
             </SelectItem>
           ))}
@@ -65,14 +65,14 @@ export function FilterBar({
       </Select>
 
       <Select value={clienteFilter} onValueChange={onClienteChange}>
-        <SelectTrigger className="h-9 w-full sm:flex-1 sm:min-w-[140px] bg-white border-gray-200 text-sm">
+        <SelectTrigger className="h-10 w-full sm:flex-1 sm:min-w-[140px] bg-white border-gray-200 text-base font-medium">
           <Building2 className="h-4 w-4 mr-2 text-[#36404A]" />
           <SelectValue placeholder="Cliente" />
         </SelectTrigger>
         <SelectContent className="bg-white z-50">
-          <SelectItem value="all">Todos os clientes</SelectItem>
+          <SelectItem value="all" className="text-base font-medium">Todos os clientes</SelectItem>
           {clientes.map((cliente) => (
-            <SelectItem key={cliente} value={cliente}>
+            <SelectItem key={cliente} value={cliente} className="text-base font-medium">
               {cliente}
             </SelectItem>
           ))}
@@ -80,16 +80,16 @@ export function FilterBar({
       </Select>
 
       <Select value={recrutadorVagaFilter} onValueChange={onRecrutadorVagaChange}>
-        <SelectTrigger className="h-9 w-full sm:flex-1 sm:min-w-[140px] bg-white border-gray-200 text-sm">
+        <SelectTrigger className="h-10 w-full sm:flex-1 sm:min-w-[140px] bg-white border-gray-200 text-base font-medium">
           <UserCircle className="h-4 w-4 mr-2 text-[#36404A]" />
           <SelectValue placeholder="Recrutador da Vaga" />
         </SelectTrigger>
         <SelectContent className="bg-white z-50">
-          <SelectItem value="all">Todos recrutadores</SelectItem>
+          <SelectItem value="all" className="text-base font-medium">Todos recrutadores</SelectItem>
           {recrutadoresVaga.map((recId) => {
             const user = users.find(u => u.id === recId);
             return (
-              <SelectItem key={recId} value={recId}>
+              <SelectItem key={recId} value={recId} className="text-base font-medium">
                 {user?.name || recId}
               </SelectItem>
             );
@@ -98,14 +98,14 @@ export function FilterBar({
       </Select>
 
       <Select value={recrutadorFilter} onValueChange={onRecrutadorChange}>
-        <SelectTrigger className="h-9 w-full sm:flex-1 sm:min-w-[140px] bg-white border-gray-200 text-sm">
+        <SelectTrigger className="h-10 w-full sm:flex-1 sm:min-w-[140px] bg-white border-gray-200 text-base font-medium">
           <User className="h-4 w-4 mr-2 text-[#36404A]" />
           <SelectValue placeholder="Recrutador" />
         </SelectTrigger>
         <SelectContent className="bg-white z-50">
-          <SelectItem value="all">Todos recrutadores</SelectItem>
+          <SelectItem value="all" className="text-base font-medium">Todos recrutadores</SelectItem>
           {recrutadores.map((rec) => (
-            <SelectItem key={rec} value={rec}>
+            <SelectItem key={rec} value={rec} className="text-base font-medium">
               {rec}
             </SelectItem>
           ))}

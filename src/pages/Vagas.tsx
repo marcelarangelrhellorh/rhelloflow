@@ -341,49 +341,49 @@ export default function Vagas() {
           {/* Visualização em Cards */}
           <TabsContent value="cards" className="space-y-6 mt-6">
             {/* Filtros e Busca */}
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-col sm:flex-row gap-4 w-full">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                <Input placeholder="Buscar por título ou empresa..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10" />
+                <Input placeholder="Buscar por título ou empresa..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 text-base font-medium" />
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-1">
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-[180px]">
+                  <SelectTrigger className="flex-1 text-base font-medium">
                     <SelectValue placeholder="Status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Todos os status</SelectItem>
-                    {statusOptions.map(status => <SelectItem key={status.slug} value={status.label}>
+                    <SelectItem value="all" className="text-base font-medium">Todos os status</SelectItem>
+                    {statusOptions.map(status => <SelectItem key={status.slug} value={status.label} className="text-base font-medium">
                         {status.label}
                       </SelectItem>)}
                   </SelectContent>
                 </Select>
 
                 <Select value={recrutadorFilter} onValueChange={setRecrutadorFilter}>
-                  <SelectTrigger className="w-[180px]">
+                  <SelectTrigger className="flex-1 text-base font-medium">
                     <SelectValue placeholder="Recrutador" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Todos</SelectItem>
-                    {recrutadores.map(rec => <SelectItem key={rec} value={rec}>
+                    <SelectItem value="all" className="text-base font-medium">Todos</SelectItem>
+                    {recrutadores.map(rec => <SelectItem key={rec} value={rec} className="text-base font-medium">
                         {rec}
                       </SelectItem>)}
                   </SelectContent>
                 </Select>
 
                 <Select value={clienteFilter} onValueChange={setClienteFilter}>
-                  <SelectTrigger className="w-[180px]">
+                  <SelectTrigger className="flex-1 text-base font-medium">
                     <SelectValue placeholder="Cliente" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Todos</SelectItem>
-                    {clientes.map(cliente => <SelectItem key={cliente} value={cliente}>
+                    <SelectItem value="all" className="text-base font-medium">Todos</SelectItem>
+                    {clientes.map(cliente => <SelectItem key={cliente} value={cliente} className="text-base font-medium">
                         {cliente}
                       </SelectItem>)}
                   </SelectContent>
                 </Select>
 
-                <div className="flex border rounded-lg overflow-hidden">
+                <div className="flex border rounded-lg overflow-hidden shrink-0">
                   <Button variant={viewMode === "grid" ? "default" : "ghost"} size="icon" onClick={() => setViewMode("grid")} className="rounded-none">
                     <Grid3x3 className="h-4 w-4" />
                   </Button>
