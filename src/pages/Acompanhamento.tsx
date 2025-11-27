@@ -575,10 +575,10 @@ export default function Acompanhamento() {
                               <Icon className={cn("h-4 w-4", textClass)} />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-foreground font-medium text-sm">
+                              <p className="text-foreground font-medium text-base text-left">
                                 {evento.descricao}
                               </p>
-                              <p className="text-muted-foreground text-xs mt-0.5">
+                              <p className="text-muted-foreground mt-0.5 text-sm font-semibold">
                                 {format(new Date(evento.created_at), "d 'de' MMMM 'às' HH:mm", {
                           locale: ptBR
                         })}
