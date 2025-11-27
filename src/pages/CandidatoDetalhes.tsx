@@ -288,7 +288,7 @@ export default function CandidatoDetalhes() {
       backgroundColor: 'rgba(255, 251, 240, 0.95)'
     }}>
         <div className="px-6 sm:px-10 lg:px-20 py-4">
-          <Button variant="ghost" size="sm" onClick={() => navigate("/candidatos")} className="text-secondary-text-light dark:text-secondary-text-dark">
+          <Button variant="ghost" size="sm" onClick={() => navigate("/candidatos")} className="text-secondary-text-light dark:text-secondary-text-dark text-base">
             <ArrowLeft className="mr-2 h-4 w-4" />
             <span className="hidden sm:inline">Candidatos</span>
             <span className="mx-2">/</span>
