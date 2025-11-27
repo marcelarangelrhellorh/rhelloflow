@@ -65,7 +65,7 @@ export function VagaKPICards({
         </p>
       </div>
 
-      <div className="flex flex-col rounded-lg p-3 bg-white dark:bg-background-dark border border-gray-200 dark:border-secondary-text-light/20 shadow-sm gap-[2px] pl-[12px]">
+      <div className="flex flex-col gap-1 rounded-lg p-4 bg-white dark:bg-background-dark border border-gray-200 dark:border-secondary-text-light/20 shadow-sm">
         <p className="text-secondary-text-light dark:text-secondary-text-dark text-base font-semibold">
           Formato da Contratação
         </p>
