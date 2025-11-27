@@ -37,7 +37,7 @@ export function VagaHeader({
               💰 {formatSalaryRange(vaga.salario_min, vaga.salario_max, vaga.salario_modalidade)}
             </Badge>}
           {vagaTags.length > 0 && <div className="flex flex-wrap gap-2">
-              {vagaTags.map(tag => <Badge key={tag.id} variant="outline" className={categoryColors[tag.category] || "bg-gray-100 text-gray-800 border-gray-300"}>
+              {vagaTags.map(tag => <Badge key={tag.id} variant="outline" className={`text-sm ${categoryColors[tag.category] || "bg-gray-100 text-gray-800 border-gray-300"}`}>
                   {tag.label}
                 </Badge>)}
             </div>}
