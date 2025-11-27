@@ -197,7 +197,6 @@ export default function Acompanhamento() {
 
   // Calculate metrics
   const totalVagasAbertas = vagas.length;
-  const totalCandidatos = candidatos.length;
   const totalSemFeedback = candidatesWithoutFeedback.length;
 
   // Get badge variant based on candidate status
@@ -253,7 +252,7 @@ export default function Acompanhamento() {
         </div>
 
         {/* Metrics Cards */}
-        {!selectedVaga && <div className="grid gap-4 sm:grid-cols-3">
+        {!selectedVaga && <div className="grid gap-4 sm:grid-cols-2">
             <Card className="border-2 border-primary bg-primary/5 shadow-sm">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
@@ -263,20 +262,6 @@ export default function Acompanhamento() {
                   </div>
                   <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
                     <Briefcase className="h-6 w-6 text-primary" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-2 border-primary bg-primary/5 shadow-sm">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-muted-foreground mb-1 font-semibold text-base">Total de Candidatos</p>
-                    <p className="text-3xl font-bold text-foreground">{totalCandidatos}</p>
-                  </div>
-                  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Users className="h-6 w-6 text-primary" />
                   </div>
                 </div>
               </CardContent>
