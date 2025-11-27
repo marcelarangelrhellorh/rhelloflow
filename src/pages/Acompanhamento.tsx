@@ -500,7 +500,7 @@ export default function Acompanhamento() {
                         </div>
 
                         {/* Label */}
-                        <p className={cn("text-xs text-center font-semibold leading-tight", step.status === "pending" ? "text-muted-foreground" : "text-foreground")}>
+                        <p className={cn("text-sm text-center font-semibold leading-tight", step.status === "pending" ? "text-muted-foreground" : "text-foreground")}>
                           {step.label}
                         </p>
                       </div>)}
