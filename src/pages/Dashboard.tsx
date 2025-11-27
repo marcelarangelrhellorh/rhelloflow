@@ -78,7 +78,7 @@ const KPICard = ({
           <div className="space-y-2 flex-1">
             <p className="text-sm text-muted-foreground font-semibold">{title}</p>
             <p className="text-[42px] font-semibold leading-none text-card-foreground">{value}</p>
-            <p className="text-muted-foreground text-sm font-medium">{subtitle}</p>
+            <p className="text-muted-foreground font-medium text-base">{subtitle}</p>
           </div>
           <div className={`
               rounded-full p-4 ${iconBgColor} ${iconColor}
