@@ -13,6 +13,7 @@ import { VagaTimeline } from "@/components/VagaDetalhes/VagaTimeline";
 import { VagaCandidatesTable } from "@/components/VagaDetalhes/VagaCandidatesTable";
 import { VagaActivityLog } from "@/components/VagaDetalhes/VagaActivityLog";
 import { VagaDetailsDrawer } from "@/components/VagaDetalhes/VagaDetailsDrawer";
+import { VagaTasksSection } from "@/components/VagaDetalhes/VagaTasksSection";
 import { toast } from "@/hooks/use-toast";
 
 // Custom hooks with React Query
@@ -222,7 +223,12 @@ export default function VagaDetalhes() {
               />
             </div>
 
-            <div className="lg:col-span-1">
+            <div className="lg:col-span-1 space-y-6">
+              <VagaTasksSection
+                vagaId={vaga.id}
+                vagaTitulo={vaga.titulo}
+              />
+              
               <VagaActivityLog
                 eventos={eventos}
                 candidatoContratado={candidatoContratado}
