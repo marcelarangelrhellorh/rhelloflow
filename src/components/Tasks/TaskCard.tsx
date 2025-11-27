@@ -44,11 +44,7 @@ export default function TaskCard({
   const getInitials = (name: string) => {
     return name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
   };
-  return <Card 
-    className={cn("p-4 hover:shadow-md transition-shadow border-l-4 cursor-pointer", task.status === 'done' && "opacity-60", isOverdue && "border-l-red-500", !isOverdue && task.priority === 'urgent' && "border-l-red-500", !isOverdue && task.priority === 'high' && "border-l-orange-500", !isOverdue && task.priority === 'medium' && "border-l-yellow-500", !isOverdue && task.priority === 'low' && "border-l-blue-500")} 
-    draggable={draggable}
-    onClick={() => onCardClick?.(task)}
-  >
+  return <Card className={cn("p-4 hover:shadow-md transition-shadow border-l-4 cursor-pointer", task.status === 'done' && "opacity-60", isOverdue && "border-l-red-500", !isOverdue && task.priority === 'urgent' && "border-l-red-500", !isOverdue && task.priority === 'high' && "border-l-orange-500", !isOverdue && task.priority === 'medium' && "border-l-yellow-500", !isOverdue && task.priority === 'low' && "border-l-blue-500")} draggable={draggable} onClick={() => onCardClick?.(task)}>
       <div className="space-y-3">
         {/* Header */}
         <div className="flex items-start justify-between gap-2">
@@ -80,7 +76,7 @@ export default function TaskCard({
                   {getInitials(task.assignee.full_name)}
                 </AvatarFallback>
               </Avatar>
-              <span className="text-base font-medium">{task.assignee.full_name}</span>
+              <span className="text-base font-semibold">{task.assignee.full_name}</span>
             </div>}
 
           {task.vaga && <div className="flex items-center gap-2">
@@ -100,7 +96,7 @@ export default function TaskCard({
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-2 pt-2 border-t" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center gap-2 pt-2 border-t" onClick={e => e.stopPropagation()}>
           <Button size="sm" variant={task.status === 'done' ? "outline" : "default"} className={task.status !== 'done' ? "bg-[#ffcd00] hover:bg-[#ffcd00]/90 text-black font-semibold" : ""} onClick={() => onToggleComplete(task)}>
             <CheckCircle2 className="h-4 w-4 mr-1" />
             {task.status === 'done' ? 'Reabrir' : 'Concluir'}

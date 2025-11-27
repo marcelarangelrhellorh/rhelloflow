@@ -2,13 +2,7 @@ import { useState } from "react";
 import { Plus, Search, LayoutGrid, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import TaskModal from "@/components/Tasks/TaskModal";
 import TaskCard from "@/components/Tasks/TaskCard";
@@ -20,17 +14,7 @@ import { Task, TaskFilters, useTasks, useDeleteTask, useUpdateTask } from "@/hoo
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 export default function Tarefas() {
   const [view, setView] = useState<"list" | "kanban">("kanban");
   const [modalOpen, setModalOpen] = useState(false);
@@ -39,41 +23,41 @@ export default function Tarefas() {
   const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
   const [detailDrawerOpen, setDetailDrawerOpen] = useState(false);
   const [taskForDetail, setTaskForDetail] = useState<Task | null>(null);
-
   const [filters, setFilters] = useState<TaskFilters>({
     status: undefined,
     priority: undefined,
     assignee_id: undefined,
-    search: undefined,
+    search: undefined
   });
-
-  const { data: tasks, isLoading } = useTasks(filters);
+  const {
+    data: tasks,
+    isLoading
+  } = useTasks(filters);
   const deleteTask = useDeleteTask();
   const updateTask = useUpdateTask();
 
   // Load users for filter
-  const { data: users } = useQuery({
+  const {
+    data: users
+  } = useQuery({
     queryKey: ["users-for-filter"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("id, full_name")
-        .order("full_name");
+      const {
+        data,
+        error
+      } = await supabase.from("profiles").select("id, full_name").order("full_name");
       if (error) throw error;
       return data;
-    },
+    }
   });
-
   const handleEdit = (task: Task) => {
     setSelectedTask(task);
     setModalOpen(true);
   };
-
   const handleDelete = (id: string) => {
     setTaskToDelete(id);
     setDeleteDialogOpen(true);
   };
-
   const confirmDelete = async () => {
     if (taskToDelete) {
       await deleteTask.mutateAsync(taskToDelete);
@@ -81,24 +65,22 @@ export default function Tarefas() {
       setTaskToDelete(null);
     }
   };
-
   const handleToggleComplete = async (task: Task) => {
     const newStatus = task.status === 'done' ? 'to_do' : 'done';
-    await updateTask.mutateAsync({ id: task.id, status: newStatus });
+    await updateTask.mutateAsync({
+      id: task.id,
+      status: newStatus
+    });
   };
-
   const handleNewTask = () => {
     setSelectedTask(null);
     setModalOpen(true);
   };
-
   const handleTaskClick = (task: Task) => {
     setTaskForDetail(task);
     setDetailDrawerOpen(true);
   };
-
-  return (
-    <div className="min-h-screen bg-[#FFFBF0]">
+  return <div className="min-h-screen bg-[#FFFBF0]">
       {/* Header */}
       <div className="bg-white border-b shadow-sm sticky top-0 z-10">
         <div className="container mx-auto px-6 py-4">
@@ -111,10 +93,7 @@ export default function Tarefas() {
             </div>
             <div className="flex gap-2">
               <GoogleCalendarButton />
-              <Button
-                onClick={handleNewTask}
-                className="bg-[#ffcd00] hover:bg-[#ffcd00]/90 text-black font-semibold"
-              >
+              <Button onClick={handleNewTask} className="bg-[#ffcd00] hover:bg-[#ffcd00]/90 text-black font-semibold text-base">
                 <Plus className="h-5 w-5 mr-2" />
                 Nova Tarefa
               </Button>
@@ -125,20 +104,16 @@ export default function Tarefas() {
           <div className="flex flex-col md:flex-row gap-4 mt-6">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Buscar tarefas..."
-                className="pl-10"
-                value={filters.search || ""}
-                onChange={(e) => setFilters({ ...filters, search: e.target.value || undefined })}
-              />
+              <Input placeholder="Buscar tarefas..." className="pl-10" value={filters.search || ""} onChange={e => setFilters({
+              ...filters,
+              search: e.target.value || undefined
+            })} />
             </div>
 
-            <Select
-              value={filters.status || "all"}
-              onValueChange={(value) =>
-                setFilters({ ...filters, status: value === "all" ? undefined : value as any })
-              }
-            >
+            <Select value={filters.status || "all"} onValueChange={value => setFilters({
+            ...filters,
+            status: value === "all" ? undefined : value as any
+          })}>
               <SelectTrigger className="w-full md:w-[180px] text-base font-medium">
                 <SelectValue placeholder="Todos os status" />
               </SelectTrigger>
@@ -150,12 +125,10 @@ export default function Tarefas() {
               </SelectContent>
             </Select>
 
-            <Select
-              value={filters.priority || "all"}
-              onValueChange={(value) =>
-                setFilters({ ...filters, priority: value === "all" ? undefined : value as any })
-              }
-            >
+            <Select value={filters.priority || "all"} onValueChange={value => setFilters({
+            ...filters,
+            priority: value === "all" ? undefined : value as any
+          })}>
               <SelectTrigger className="w-full md:w-[180px] text-base font-medium">
                 <SelectValue placeholder="Todas prioridades" />
               </SelectTrigger>
@@ -168,26 +141,22 @@ export default function Tarefas() {
               </SelectContent>
             </Select>
 
-            <Select
-              value={filters.assignee_id || "all"}
-              onValueChange={(value) =>
-                setFilters({ ...filters, assignee_id: value === "all" ? undefined : value })
-              }
-            >
+            <Select value={filters.assignee_id || "all"} onValueChange={value => setFilters({
+            ...filters,
+            assignee_id: value === "all" ? undefined : value
+          })}>
               <SelectTrigger className="w-full md:w-[200px] text-base font-medium">
                 <SelectValue placeholder="Todos responsáveis" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos responsáveis</SelectItem>
-                {users?.map((user) => (
-                  <SelectItem key={user.id} value={user.id}>
+                {users?.map(user => <SelectItem key={user.id} value={user.id}>
                     {user.full_name}
-                  </SelectItem>
-                ))}
+                  </SelectItem>)}
               </SelectContent>
             </Select>
 
-            <Tabs value={view} onValueChange={(v) => setView(v as "list" | "kanban")}>
+            <Tabs value={view} onValueChange={v => setView(v as "list" | "kanban")}>
               <TabsList>
                 <TabsTrigger value="kanban">
                   <LayoutGrid className="h-4 w-4 mr-2" />
@@ -208,50 +177,23 @@ export default function Tarefas() {
         {/* Dashboard */}
         <TasksDashboard onTaskClick={handleEdit} />
 
-        {isLoading ? (
-          <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-40 w-full" />
-            ))}
-          </div>
-        ) : !tasks || tasks.length === 0 ? (
-          <div className="text-center py-16">
+        {isLoading ? <div className="space-y-4">
+            {[1, 2, 3].map(i => <Skeleton key={i} className="h-40 w-full" />)}
+          </div> : !tasks || tasks.length === 0 ? <div className="text-center py-16">
             <p className="text-muted-foreground text-lg mb-4">Nenhuma tarefa encontrada</p>
-            <Button
-              onClick={handleNewTask}
-              className="bg-[#ffcd00] hover:bg-[#ffcd00]/90 text-black font-semibold"
-            >
+            <Button onClick={handleNewTask} className="bg-[#ffcd00] hover:bg-[#ffcd00]/90 text-black font-semibold">
               <Plus className="h-5 w-5 mr-2" />
               Criar sua primeira tarefa
             </Button>
-          </div>
-        ) : view === "kanban" ? (
-          <TaskKanban tasks={tasks} onEdit={handleEdit} onDelete={handleDelete} onTaskClick={handleTaskClick} />
-        ) : (
-          <div className="space-y-4">
-            {tasks.map((task) => (
-              <TaskCard
-                key={task.id}
-                task={task}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                onToggleComplete={handleToggleComplete}
-                onCardClick={handleTaskClick}
-              />
-            ))}
-          </div>
-        )}
+          </div> : view === "kanban" ? <TaskKanban tasks={tasks} onEdit={handleEdit} onDelete={handleDelete} onTaskClick={handleTaskClick} /> : <div className="space-y-4">
+            {tasks.map(task => <TaskCard key={task.id} task={task} onEdit={handleEdit} onDelete={handleDelete} onToggleComplete={handleToggleComplete} onCardClick={handleTaskClick} />)}
+          </div>}
       </div>
 
       {/* Modals */}
       <TaskModal open={modalOpen} onClose={() => setModalOpen(false)} task={selectedTask} />
       
-      <TaskDetailDrawer
-        task={taskForDetail}
-        open={detailDrawerOpen}
-        onOpenChange={setDetailDrawerOpen}
-        onEdit={handleEdit}
-      />
+      <TaskDetailDrawer task={taskForDetail} open={detailDrawerOpen} onOpenChange={setDetailDrawerOpen} onEdit={handleEdit} />
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
@@ -263,15 +205,11 @@ export default function Tarefas() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmDelete}
-              className="bg-red-600 hover:bg-red-700"
-            >
+            <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">
               Excluir
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
-  );
+    </div>;
 }
