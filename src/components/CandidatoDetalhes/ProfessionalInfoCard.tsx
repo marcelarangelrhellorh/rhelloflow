@@ -189,7 +189,7 @@ export function ProfessionalInfoCard({
       <CardHeader>
         <CardTitle className="text-lg">Informações Profissionais</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 shadow-md">
         {/* Grid Layout */}
         <div className="grid gap-4 sm:grid-cols-2">
           {/* Pretensão Salarial */}

@@ -198,7 +198,7 @@ export function ScorecardHistory({
           </div>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="shadow-lg">
         <div className="grid grid-cols-1 gap-6">
           {scorecards.map(scorecard => {
           const recConfig = recommendationConfig[scorecard.recommendation];

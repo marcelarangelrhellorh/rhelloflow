@@ -304,13 +304,13 @@ export default function CandidatoDetalhes() {
           <CandidateHeader nome={candidato.nome_completo} status={candidato.status} nivel={candidato.nivel} area={candidato.area} cidade={candidato.cidade} estado={candidato.estado} onEdit={() => navigate(`/candidatos/${id}/editar`)} onDelete={() => setDeleteDialogOpen(true)} onRelocate={() => setRelocateModalOpen(true)} onStatusChange={handleStatusChange} onSendWhatsApp={() => setWhatsappModalOpen(true)} />
 
           {/* Compact Stats Row */}
-          <StatsBar criadoEm={candidato.criado_em} ultimoFeedback={stats.ultimoFeedback} processosParticipados={stats.totalProcessos} mediaAvaliacao={stats.mediaRating} qtdAvaliacoes={stats.qtdAvaliacoes} totalFeedbacks={stats.totalFeedbacks} />
+          <StatsBar criadoEm={candidato.criado_em} ultimoFeedback={stats.ultimoFeedback} processosParticipados={stats.totalProcessos} mediaAvaliacao={stats.mediaRating} qtdAvaliacoes={stats.qtdAvaliacoes} totalFeedbacks={stats.totalFeedbacks} className="shadow-sm" />
 
           {/* Two Column Layout - Top */}
           <div className="grid gap-6 lg:grid-cols-12">
             {/* Left Sidebar - Contact & Tags */}
-            <div className="lg:col-span-3 space-y-6 mx-0 py-0 my-0">
-              <ContactCard email={candidato.email} telefone={candidato.telefone} cidade={candidato.cidade} estado={candidato.estado} linkedin={candidato.linkedin} curriculoLink={candidato.curriculo_link} isFromPublicLink={!!candidato.source_link_id} />
+            <div className="lg:col-span-3 space-y-6 mx-0 py-0 my-0 shadow-none">
+              <ContactCard email={candidato.email} telefone={candidato.telefone} cidade={candidato.cidade} estado={candidato.estado} linkedin={candidato.linkedin} curriculoLink={candidato.curriculo_link} isFromPublicLink={!!candidato.source_link_id} className="shadow-lg" />
 
               <CandidateTagsCard candidateId={id!} />
             </div>
