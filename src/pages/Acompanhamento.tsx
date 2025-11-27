@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Clock, Users, Briefcase, MapPin, DollarSign, FileText, Calendar, CheckCircle2, MessageSquare, AlertCircle } from "lucide-react";
+import { Clock, Users, Briefcase, MapPin, DollarSign, FileText, Calendar, CheckCircle2, MessageSquare, AlertCircle, UserPlus, ArrowRightLeft, Activity, PartyPopper } from "lucide-react";
 import { format, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { formatSalaryRange } from "@/lib/salaryUtils";
@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { ClientCandidateDrawer } from "@/components/CandidatoDetalhes/ClientCandidateDrawer";
 import { useClientJobs, useJobCandidates } from "@/hooks/useClientJobs";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useVagaEventosQuery } from "@/hooks/data/useVagaEventosQuery";
 import { logger } from "@/lib/logger";
 interface Vaga {
   id: string;
@@ -71,6 +72,7 @@ export default function Acompanhamento() {
   // FASE 3: Usar hooks otimizados com views materializadas
   const { data: vagas = [], isLoading: loadingVagas } = useClientJobs(userId || undefined);
   const { data: candidatos = [] } = useJobCandidates(selectedVaga || undefined);
+  const { eventos: vagaEventos } = useVagaEventosQuery(selectedVaga || undefined);
   
   const loading = loadingVagas;
 
@@ -506,6 +508,54 @@ export default function Acompanhamento() {
                   </div>
                 </CardContent>
               </Card>}
+
+            {/* Recent Activities */}
+            {vagaEventos.length > 0 && (
+              <Card className="shadow-sm">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Activity className="h-5 w-5 text-primary" />
+                    <h3 className="font-semibold text-lg">Atividades Recentes</h3>
+                  </div>
+                  <div className="space-y-4">
+                    {vagaEventos.slice(0, 10).map((evento) => {
+                      const getEventIcon = () => {
+                        switch (evento.tipo) {
+                          case "CANDIDATO_ADICIONADO":
+                            return { icon: UserPlus, bgClass: "bg-green-500/20", textClass: "text-green-600 dark:text-green-400" };
+                          case "CANDIDATO_MOVIDO":
+                            return { icon: ArrowRightLeft, bgClass: "bg-blue-500/20", textClass: "text-blue-600 dark:text-blue-400" };
+                          case "ETAPA_ALTERADA":
+                            return { icon: CheckCircle2, bgClass: "bg-blue-500/20", textClass: "text-blue-600 dark:text-blue-400" };
+                          case "FEEDBACK_ADICIONADO":
+                            return { icon: MessageSquare, bgClass: "bg-orange-500/20", textClass: "text-orange-600 dark:text-orange-400" };
+                          default:
+                            return { icon: Activity, bgClass: "bg-gray-500/20", textClass: "text-gray-600 dark:text-gray-400" };
+                        }
+                      };
+                      
+                      const { icon: Icon, bgClass, textClass } = getEventIcon();
+                      
+                      return (
+                        <div key={evento.id} className="flex items-start gap-3">
+                          <div className={cn("flex-shrink-0 mt-0.5 size-8 rounded-full flex items-center justify-center", bgClass)}>
+                            <Icon className={cn("h-4 w-4", textClass)} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-foreground font-medium text-sm">
+                              {evento.descricao}
+                            </p>
+                            <p className="text-muted-foreground text-xs mt-0.5">
+                              {format(new Date(evento.created_at), "d 'de' MMMM 'às' HH:mm", { locale: ptBR })}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>}
 
         {/* Empty State */}
