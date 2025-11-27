@@ -47,8 +47,8 @@ export function FilterBar({
   statusOptions,
 }: FilterBarProps) {
   return (
-    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3 overflow-x-auto pb-2">
-      <div className="relative flex-1 min-w-[200px]">
+    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3 w-full pb-2">
+      <div className="relative flex-1 min-w-0">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#36404A]" />
         <Input
           placeholder="Buscar vaga..."
@@ -59,7 +59,7 @@ export function FilterBar({
       </div>
 
       <Select value={recrutadorFilter} onValueChange={onRecrutadorChange}>
-        <SelectTrigger className="h-9 w-full sm:w-[180px] bg-white border-gray-200 text-sm">
+        <SelectTrigger className="h-9 w-full sm:flex-1 sm:min-w-[140px] bg-white border-gray-200 text-sm">
           <User className="h-4 w-4 mr-2 text-[#36404A]" />
           <SelectValue placeholder="Recrutador" />
         </SelectTrigger>
@@ -74,7 +74,7 @@ export function FilterBar({
       </Select>
 
       <Select value={clienteFilter} onValueChange={onClienteChange}>
-        <SelectTrigger className="h-9 w-full sm:w-[180px] bg-white border-gray-200 text-sm">
+        <SelectTrigger className="h-9 w-full sm:flex-1 sm:min-w-[140px] bg-white border-gray-200 text-sm">
           <Building2 className="h-4 w-4 mr-2 text-[#36404A]" />
           <SelectValue placeholder="Cliente" />
         </SelectTrigger>
@@ -89,7 +89,7 @@ export function FilterBar({
       </Select>
 
       <Select value={statusFilter} onValueChange={onStatusChange}>
-        <SelectTrigger className="h-9 w-full sm:w-[180px] bg-white border-gray-200 text-sm">
+        <SelectTrigger className="h-9 w-full sm:flex-1 sm:min-w-[140px] bg-white border-gray-200 text-sm">
           <Tag className="h-4 w-4 mr-2 text-[#36404A]" />
           <SelectValue placeholder="Status" />
         </SelectTrigger>
@@ -104,7 +104,7 @@ export function FilterBar({
       </Select>
 
       <Select value={ordenacao} onValueChange={onOrdenacaoChange}>
-        <SelectTrigger className="h-9 w-full sm:w-[180px] bg-white border-gray-200 text-sm">
+        <SelectTrigger className="h-9 w-full sm:flex-1 sm:min-w-[140px] bg-white border-gray-200 text-sm">
           <ListFilter className="h-4 w-4 mr-2 text-[#36404A]" />
           <SelectValue placeholder="Ordenar" />
         </SelectTrigger>
