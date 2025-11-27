@@ -48,9 +48,10 @@ interface TaskModalProps {
   open: boolean;
   onClose: () => void;
   task?: Task | null;
+  defaultVagaId?: string | null;
 }
 
-export default function TaskModal({ open, onClose, task }: TaskModalProps) {
+export default function TaskModal({ open, onClose, task, defaultVagaId }: TaskModalProps) {
   const createTask = useCreateTask();
   const updateTask = useUpdateTask();
 
@@ -125,7 +126,8 @@ export default function TaskModal({ open, onClose, task }: TaskModalProps) {
   });
 
   useEffect(() => {
-    if (task) {
+    if (task && task.id) {
+      // Editing existing task
       form.reset({
         title: task.title,
         description: task.description || "",
@@ -138,6 +140,7 @@ export default function TaskModal({ open, onClose, task }: TaskModalProps) {
         candidato_id: task.candidato_id || "",
       });
     } else {
+      // Creating new task
       form.reset({
         title: "",
         description: "",
@@ -145,12 +148,14 @@ export default function TaskModal({ open, onClose, task }: TaskModalProps) {
         priority: "medium",
         due_date: "",
         assignee_id: "",
-        vaga_id: "",
+        vaga_id: defaultVagaId || "",
         empresa_id: "",
         candidato_id: "",
       });
     }
-  }, [task, form]);
+  }, [task, defaultVagaId, form]);
+
+  const isEditing = task && task.id;
 
   const onSubmit = async (data: TaskFormData) => {
     const taskData = {
@@ -162,7 +167,7 @@ export default function TaskModal({ open, onClose, task }: TaskModalProps) {
       candidato_id: data.candidato_id || null,
     };
 
-    if (task) {
+    if (isEditing) {
       await updateTask.mutateAsync({ id: task.id, ...taskData });
     } else {
       await createTask.mutateAsync(taskData);
@@ -176,7 +181,7 @@ export default function TaskModal({ open, onClose, task }: TaskModalProps) {
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">
-            {task ? "Editar Tarefa" : "Nova Tarefa"}
+            {isEditing ? "Editar Tarefa" : "Nova Tarefa"}
           </DialogTitle>
         </DialogHeader>
 
@@ -392,7 +397,7 @@ export default function TaskModal({ open, onClose, task }: TaskModalProps) {
                 className="bg-[#ffcd00] hover:bg-[#ffcd00]/90 text-black font-semibold"
                 disabled={createTask.isPending || updateTask.isPending}
               >
-                {task ? "Salvar Alterações" : "Criar Tarefa"}
+                {isEditing ? "Salvar Alterações" : "Criar Tarefa"}
               </Button>
             </div>
           </form>
