@@ -61,6 +61,7 @@ export function VagaTasksCard({
   const [detailDrawerOpen, setDetailDrawerOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const pendingTasks = tasks.filter(t => t.status !== "done");
+  const completedTasks = tasks.filter(t => t.status === "done");
   const overdueTasks = pendingTasks.filter(t => t.due_date && isPast(new Date(t.due_date)) && !isToday(new Date(t.due_date)));
   const handleTaskClick = (task: Task) => {
     setSelectedTask(task);
@@ -113,23 +114,24 @@ export function VagaTasksCard({
         {/* Stats Row */}
         <div className="flex items-center gap-3">
           <span className="text-2xl font-bold text-primary-text-light dark:text-primary-text-dark">
-            {pendingTasks.length}
+            {tasks.length}
           </span>
-          <span className="text-sm text-muted-foreground font-semibold">pendente{pendingTasks.length !== 1 ? "s" : ""}</span>
+          <span className="text-sm text-muted-foreground font-semibold">tarefa{tasks.length !== 1 ? "s" : ""}</span>
           {overdueTasks.length > 0 && <Badge variant="destructive" className="text-base gap-1 whitespace-nowrap">
               <AlertTriangle className="h-4 w-4" />
               {overdueTasks.length} atrasada{overdueTasks.length !== 1 ? "s" : ""}
             </Badge>}
         </div>
 
-        {/* Quick Task List - show max 3 */}
-        {pendingTasks.length > 0 && <div className="space-y-2 mt-2 max-h-32 overflow-y-auto">
-            {pendingTasks.slice(0, 3).map(task => {
+        {/* Task List - show all tasks */}
+        {tasks.length > 0 && <div className="space-y-2 mt-2 max-h-48 overflow-y-auto">
+            {tasks.map(task => {
           const StatusIcon = statusConfig[task.status].icon;
-          const overdue = isOverdue(task.due_date);
-          return <div key={task.id} className={cn("flex items-center gap-2 p-2 rounded-md border text-sm cursor-pointer hover:bg-muted/50 transition-colors", overdue && "border-red-200 bg-red-50/50")} onClick={() => handleTaskClick(task)}>
-                  <StatusIcon className={cn("h-4 w-4 flex-shrink-0", task.status === "in_progress" ? "text-blue-500" : "text-muted-foreground")} />
-                  <span className="truncate flex-1 font-medium text-base">{task.title}</span>
+          const overdue = isOverdue(task.due_date) && task.status !== "done";
+          const isDone = task.status === "done";
+          return <div key={task.id} className={cn("flex items-center gap-2 p-2 rounded-md border text-sm cursor-pointer hover:bg-muted/50 transition-colors", overdue && "border-red-200 bg-red-50/50", isDone && "opacity-60 bg-muted/30")} onClick={() => handleTaskClick(task)}>
+                  <StatusIcon className={cn("h-4 w-4 flex-shrink-0", task.status === "done" ? "text-green-500" : task.status === "in_progress" ? "text-blue-500" : "text-muted-foreground")} />
+                  <span className={cn("truncate flex-1 font-medium text-base", isDone && "line-through")}>{task.title}</span>
                   {task.due_date && <span className={cn("text-sm font-medium", overdue ? "text-red-600" : "text-muted-foreground")}>
                       {format(new Date(task.due_date), "dd/MM", {
                 locale: ptBR
@@ -137,9 +139,6 @@ export function VagaTasksCard({
                     </span>}
                 </div>;
         })}
-            {pendingTasks.length > 3 && <p className="text-xs text-muted-foreground text-center py-1">
-                +{pendingTasks.length - 3} mais
-              </p>}
           </div>}
 
         {tasks.length === 0 && <p className="text-sm text-muted-foreground">
