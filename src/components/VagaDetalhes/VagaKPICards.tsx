@@ -67,7 +67,7 @@ export function VagaKPICards({ vaga, candidatos, daysOpen, onStatusChange }: Vag
       </div>
 
       <div className="flex flex-col gap-2 rounded-lg p-6 bg-white dark:bg-background-dark border border-gray-200 dark:border-secondary-text-light/20 shadow-sm">
-        <p className="text-secondary-text-light dark:text-secondary-text-dark text-base font-medium">
+        <p className="text-secondary-text-light dark:text-secondary-text-dark text-base font-semibold">
           Modelo de Trabalho
         </p>
         <p className="text-primary-text-light dark:text-primary-text-dark text-2xl font-bold">
