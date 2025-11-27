@@ -263,7 +263,10 @@ export default function Acompanhamento() {
       </div>;
   }
   return <div className="min-h-screen bg-background">
-      <div className="mx-auto max-w-7xl p-6 space-y-6">
+      <div className="flex">
+        {/* Main Content */}
+        <div className="flex-1 p-6 space-y-6">
+          <div className="max-w-5xl">
         {/* Header */}
         <div>
           <h1 className="text-3xl font-bold text-foreground">Meus Processos</h1>
@@ -271,7 +274,7 @@ export default function Acompanhamento() {
         </div>
 
         {/* Metrics Cards */}
-        {!selectedVaga && <div className="grid gap-4 sm:grid-cols-2 max-w-xl">
+        {!selectedVaga && <div className="grid gap-4 sm:grid-cols-2 max-w-xl mt-6">
             <Card className="border-2 border-primary bg-primary/5 shadow-sm">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between gap-3">
@@ -305,7 +308,7 @@ export default function Acompanhamento() {
           </div>}
 
         {/* Divider with instruction and filters */}
-        {!selectedVaga && vagas.length > 0 && <div className="space-y-4">
+        {!selectedVaga && vagas.length > 0 && <div className="space-y-4 mt-6">
             <div className="w-full h-px shadow-[0_2px_8px_0_rgba(0,0,0,0.15),0_1px_4px_-1px_rgba(0,0,0,0.1)]"></div>
             <p className="text-muted-foreground font-medium text-base">Para acessar os detalhes da vaga, clique sobre ela</p>
             
@@ -346,7 +349,7 @@ export default function Acompanhamento() {
           </div>}
 
         {/* Vagas Overview - Small Cards */}
-        {!selectedVaga && <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {!selectedVaga && <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mt-6">
             {filteredVagas.map(vaga => {
           const vagaCandidatosCount = candidatos.filter(c => c.vaga_relacionada_id === vaga.id).length;
           const currentStage = getStageBySlug(vaga.status);
@@ -371,9 +374,7 @@ export default function Acompanhamento() {
           </div>}
 
         {/* Selected Vaga Details */}
-        {selectedVaga && selectedVagaData && <div className="flex gap-6">
-            {/* Main Content - Left Column */}
-            <div className="flex-1 space-y-6">
+        {selectedVaga && selectedVagaData && <div className="space-y-6 mt-6">
             {/* Back Button */}
             <Button variant="ghost" onClick={() => setSelectedVaga(null)} className="mb-4 text-base">
               ← Voltar para Meus Processos
@@ -552,86 +553,85 @@ export default function Acompanhamento() {
                   </div>
                 </CardContent>
               </Card>}
-            </div>
-
-            {/* Right Column - Recent Activities */}
-            {vagaEventos.length > 0 && <div className="w-80 lg:w-96 flex-shrink-0">
-              <Card className="shadow-sm sticky top-6">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Activity className="h-5 w-5 text-primary" />
-                    <h3 className="font-semibold text-lg">Atividades Recentes</h3>
-                  </div>
-                  <div className="space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto">
-                    {vagaEventos.slice(0, 10).map(evento => {
-                  const getEventIcon = () => {
-                    switch (evento.tipo) {
-                      case "CANDIDATO_ADICIONADO":
-                        return {
-                          icon: UserPlus,
-                          bgClass: "bg-green-500/20",
-                          textClass: "text-green-600 dark:text-green-400"
-                        };
-                      case "CANDIDATO_MOVIDO":
-                        return {
-                          icon: ArrowRightLeft,
-                          bgClass: "bg-blue-500/20",
-                          textClass: "text-blue-600 dark:text-blue-400"
-                        };
-                      case "ETAPA_ALTERADA":
-                        return {
-                          icon: CheckCircle2,
-                          bgClass: "bg-blue-500/20",
-                          textClass: "text-blue-600 dark:text-blue-400"
-                        };
-                      case "FEEDBACK_ADICIONADO":
-                        return {
-                          icon: MessageSquare,
-                          bgClass: "bg-orange-500/20",
-                          textClass: "text-orange-600 dark:text-orange-400"
-                        };
-                      default:
-                        return {
-                          icon: Activity,
-                          bgClass: "bg-gray-500/20",
-                          textClass: "text-gray-600 dark:text-gray-400"
-                        };
-                    }
-                  };
-                  const {
-                    icon: Icon,
-                    bgClass,
-                    textClass
-                  } = getEventIcon();
-                  return <div key={evento.id} className="flex items-start gap-3">
-                            <div className={cn("flex-shrink-0 mt-0.5 size-8 rounded-full flex items-center justify-center", bgClass)}>
-                              <Icon className={cn("h-4 w-4", textClass)} />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-foreground font-medium text-base text-left">
-                                {evento.descricao}
-                              </p>
-                              <p className="text-muted-foreground mt-0.5 text-sm font-semibold">
-                                {format(new Date(evento.created_at), "d 'de' MMMM 'às' HH:mm", {
-                          locale: ptBR
-                        })}
-                              </p>
-                            </div>
-                          </div>;
-                })}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>}
           </div>}
 
         {/* Empty State */}
-        {!selectedVaga && vagas.length === 0 && <Card className="shadow-sm">
+        {!selectedVaga && vagas.length === 0 && <Card className="shadow-sm mt-6">
             <CardContent className="p-12 text-center">
               <Briefcase className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
               <p className="text-muted-foreground">Nenhum processo em andamento no momento</p>
             </CardContent>
           </Card>}
+          </div>
+        </div>
+
+        {/* Right Sidebar - Recent Activities */}
+        {selectedVaga && vagaEventos.length > 0 && <div className="w-80 lg:w-96 flex-shrink-0 border-l border-border bg-muted/30 p-6 hidden lg:block">
+          <div className="sticky top-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Activity className="h-5 w-5 text-primary" />
+              <h3 className="font-semibold text-lg">Atividades Recentes</h3>
+            </div>
+            <div className="space-y-4 max-h-[calc(100vh-150px)] overflow-y-auto">
+              {vagaEventos.slice(0, 15).map(evento => {
+                const getEventIcon = () => {
+                  switch (evento.tipo) {
+                    case "CANDIDATO_ADICIONADO":
+                      return {
+                        icon: UserPlus,
+                        bgClass: "bg-green-500/20",
+                        textClass: "text-green-600 dark:text-green-400"
+                      };
+                    case "CANDIDATO_MOVIDO":
+                      return {
+                        icon: ArrowRightLeft,
+                        bgClass: "bg-blue-500/20",
+                        textClass: "text-blue-600 dark:text-blue-400"
+                      };
+                    case "ETAPA_ALTERADA":
+                      return {
+                        icon: CheckCircle2,
+                        bgClass: "bg-blue-500/20",
+                        textClass: "text-blue-600 dark:text-blue-400"
+                      };
+                    case "FEEDBACK_ADICIONADO":
+                      return {
+                        icon: MessageSquare,
+                        bgClass: "bg-orange-500/20",
+                        textClass: "text-orange-600 dark:text-orange-400"
+                      };
+                    default:
+                      return {
+                        icon: Activity,
+                        bgClass: "bg-gray-500/20",
+                        textClass: "text-gray-600 dark:text-gray-400"
+                      };
+                  }
+                };
+                const {
+                  icon: Icon,
+                  bgClass,
+                  textClass
+                } = getEventIcon();
+                return <div key={evento.id} className="flex items-start gap-3">
+                  <div className={cn("flex-shrink-0 mt-0.5 size-8 rounded-full flex items-center justify-center", bgClass)}>
+                    <Icon className={cn("h-4 w-4", textClass)} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-foreground font-medium text-base text-left">
+                      {evento.descricao}
+                    </p>
+                    <p className="text-muted-foreground mt-0.5 text-sm font-semibold">
+                      {format(new Date(evento.created_at), "d 'de' MMMM 'às' HH:mm", {
+                        locale: ptBR
+                      })}
+                    </p>
+                  </div>
+                </div>;
+              })}
+            </div>
+          </div>
+        </div>}
       </div>
 
       {/* Candidate Details Drawer */}
