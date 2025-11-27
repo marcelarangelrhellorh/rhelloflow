@@ -263,10 +263,9 @@ export default function Acompanhamento() {
       </div>;
   }
   return <div className="min-h-screen bg-background">
-      <div className="flex">
+      <div className="flex justify-center">
         {/* Main Content */}
-        <div className="flex-1 p-6 space-y-6">
-          <div className="max-w-5xl">
+        <div className="flex-1 max-w-4xl p-6 space-y-6">
         {/* Header */}
         <div>
           <h1 className="text-3xl font-bold text-foreground">Meus Processos</h1>
@@ -562,7 +561,6 @@ export default function Acompanhamento() {
               <p className="text-muted-foreground">Nenhum processo em andamento no momento</p>
             </CardContent>
           </Card>}
-          </div>
         </div>
 
         {/* Right Sidebar - Recent Activities */}
