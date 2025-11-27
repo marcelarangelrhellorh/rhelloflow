@@ -15,7 +15,7 @@ export function VagaKPICards({ vaga, candidatos, daysOpen, onStatusChange }: Vag
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
       <div className="flex flex-col gap-3 rounded-lg p-6 bg-white dark:bg-background-dark border border-gray-200 dark:border-secondary-text-light/20 shadow-sm">
-        <p className="text-secondary-text-light dark:text-secondary-text-dark text-base font-medium">
+        <p className="text-secondary-text-light dark:text-secondary-text-dark text-base font-semibold">
           Etapa Atual da Contratação
         </p>
         <Select
