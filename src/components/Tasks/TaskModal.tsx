@@ -36,10 +36,8 @@ const taskSchema = z.object({
   status: z.enum(['to_do', 'in_progress', 'done']),
   priority: z.enum(['low', 'medium', 'high', 'urgent']),
   due_date: z.string().optional(),
-  assignee_id: z.string().optional(),
+  assignee_id: z.string().min(1, "Responsável é obrigatório"),
   vaga_id: z.string().optional(),
-  empresa_id: z.string().optional(),
-  candidato_id: z.string().optional(),
 });
 
 type TaskFormData = z.infer<typeof taskSchema>;
@@ -65,8 +63,6 @@ export default function TaskModal({ open, onClose, task, defaultVagaId }: TaskMo
       due_date: "",
       assignee_id: "",
       vaga_id: "",
-      empresa_id: "",
-      candidato_id: "",
     },
   });
 
@@ -97,34 +93,6 @@ export default function TaskModal({ open, onClose, task, defaultVagaId }: TaskMo
     },
   });
 
-  // Load empresas for select
-  const { data: empresas } = useQuery({
-    queryKey: ["empresas-for-tasks"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("empresas")
-        .select("id, nome")
-        .order("nome");
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  // Load candidatos for select
-  const { data: candidatos } = useQuery({
-    queryKey: ["candidatos-for-tasks"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("candidatos")
-        .select("id, nome_completo")
-        .is("deleted_at", null)
-        .order("nome_completo")
-        .limit(100);
-      if (error) throw error;
-      return data;
-    },
-  });
-
   useEffect(() => {
     if (task && task.id) {
       // Editing existing task
@@ -136,8 +104,6 @@ export default function TaskModal({ open, onClose, task, defaultVagaId }: TaskMo
         due_date: task.due_date ? new Date(task.due_date).toISOString().slice(0, 16) : "",
         assignee_id: task.assignee_id || "",
         vaga_id: task.vaga_id || "",
-        empresa_id: task.empresa_id || "",
-        candidato_id: task.candidato_id || "",
       });
     } else {
       // Creating new task
@@ -149,8 +115,6 @@ export default function TaskModal({ open, onClose, task, defaultVagaId }: TaskMo
         due_date: "",
         assignee_id: "",
         vaga_id: defaultVagaId || "",
-        empresa_id: "",
-        candidato_id: "",
       });
     }
   }, [task, defaultVagaId, form]);
@@ -163,8 +127,6 @@ export default function TaskModal({ open, onClose, task, defaultVagaId }: TaskMo
       due_date: data.due_date ? new Date(data.due_date).toISOString() : null,
       assignee_id: data.assignee_id || null,
       vaga_id: data.vaga_id || null,
-      empresa_id: data.empresa_id || null,
-      candidato_id: data.candidato_id || null,
     };
 
     if (isEditing) {
@@ -288,11 +250,11 @@ export default function TaskModal({ open, onClose, task, defaultVagaId }: TaskMo
                 name="assignee_id"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Responsável (opcional)</FormLabel>
+                    <FormLabel>Responsável *</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value || undefined}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Nenhum responsável" />
+                          <SelectValue placeholder="Selecione o responsável" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -328,56 +290,6 @@ export default function TaskModal({ open, onClose, task, defaultVagaId }: TaskMo
                         {vagas?.map((vaga) => (
                           <SelectItem key={vaga.id} value={vaga.id}>
                             {vaga.titulo}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="empresa_id"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Empresa</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value || undefined}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Nenhuma empresa" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {empresas?.map((empresa) => (
-                          <SelectItem key={empresa.id} value={empresa.id}>
-                            {empresa.nome}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="candidato_id"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Candidato</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value || undefined}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Nenhum candidato" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {candidatos?.map((candidato) => (
-                          <SelectItem key={candidato.id} value={candidato.id}>
-                            {candidato.nome_completo}
                           </SelectItem>
                         ))}
                       </SelectContent>
