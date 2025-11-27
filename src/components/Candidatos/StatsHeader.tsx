@@ -14,28 +14,28 @@ export function StatsHeader({
   const contratadoCount = byStatus["Contratado"] || 0;
   return <div className="flex flex-wrap items-center gap-3 py-3">
       <div className="flex items-center gap-2">
-        <Users className="h-4 w-4 text-[#36404a]" />
-        <span className="text-[#36404a] text-sm font-semibold">{total} candidatos</span>
+        <Users className="h-5 w-5 text-[#36404a]" />
+        <span className="text-[#36404a] text-base font-semibold">{total} candidatos</span>
       </div>
       
-      {activeCount > 0 && <div className="flex items-center gap-1.5 text-sm text-[#36404a]">
+      {activeCount > 0 && <div className="flex items-center gap-1.5 text-base text-[#36404a]">
           <span className="inline-block w-2 h-2 rounded-full bg-green-500"></span>
-          <span className="text-sm font-semibold">{activeCount} ativos</span>
+          <span className="text-base font-semibold">{activeCount} ativos</span>
         </div>}
       
-      {entrevistasCount > 0 && <div className="flex items-center gap-1.5 text-sm text-[#36404a]">
+      {entrevistasCount > 0 && <div className="flex items-center gap-1.5 text-base text-[#36404a]">
           <span className="inline-block w-2 h-2 rounded-full bg-purple-500"></span>
-          <span className="text-sm font-semibold">{entrevistasCount} entrevistas solicitante</span>
+          <span className="text-base font-semibold">{entrevistasCount} entrevistas solicitante</span>
         </div>}
       
-      {reprovadoRhelloCount > 0 && <div className="flex items-center gap-1.5 text-sm text-[#36404a]">
+      {reprovadoRhelloCount > 0 && <div className="flex items-center gap-1.5 text-base text-[#36404a]">
           <span className="inline-block w-2 h-2 rounded-full bg-purple-500"></span>
-          <span>{reprovadoRhelloCount} reprovado rhello</span>
+          <span className="text-base font-semibold">{reprovadoRhelloCount} reprovado rhello</span>
         </div>}
       
-      {contratadoCount > 0 && <div className="flex items-center gap-1.5 text-sm text-[#36404a]">
+      {contratadoCount > 0 && <div className="flex items-center gap-1.5 text-base text-[#36404a]">
           <span className="inline-block w-2 h-2 rounded-full bg-purple-500"></span>
-          <span className="text-sm font-semibold">{contratadoCount} contratado</span>
+          <span className="text-base font-semibold">{contratadoCount} contratado</span>
         </div>}
     </div>;
 }
