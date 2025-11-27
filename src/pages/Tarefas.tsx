@@ -131,7 +131,7 @@ export default function Tarefas() {
                 setFilters({ ...filters, status: value === "all" ? undefined : value as any })
               }
             >
-              <SelectTrigger className="w-full md:w-[180px]">
+              <SelectTrigger className="w-full md:w-[180px] text-base font-medium">
                 <SelectValue placeholder="Todos os status" />
               </SelectTrigger>
               <SelectContent>
@@ -148,7 +148,7 @@ export default function Tarefas() {
                 setFilters({ ...filters, priority: value === "all" ? undefined : value as any })
               }
             >
-              <SelectTrigger className="w-full md:w-[180px]">
+              <SelectTrigger className="w-full md:w-[180px] text-base font-medium">
                 <SelectValue placeholder="Todas prioridades" />
               </SelectTrigger>
               <SelectContent>
@@ -166,7 +166,7 @@ export default function Tarefas() {
                 setFilters({ ...filters, assignee_id: value === "all" ? undefined : value })
               }
             >
-              <SelectTrigger className="w-full md:w-[200px]">
+              <SelectTrigger className="w-full md:w-[200px] text-base font-medium">
                 <SelectValue placeholder="Todos responsáveis" />
               </SelectTrigger>
               <SelectContent>
