@@ -206,7 +206,7 @@ export function VagaCard({
             </div>
             
             <div className="flex flex-wrap items-center gap-2">
-              <Badge className="border font-semibold rounded-md px-2 py-0.5 text-xs" style={{
+              <Badge className="border font-semibold rounded-md px-2 py-1 text-sm" style={{
               backgroundColor: statusColors.bg,
               color: statusColors.text,
               borderColor: statusColors.bg
@@ -214,8 +214,8 @@ export function VagaCard({
                 {vaga.status}
               </Badge>
               
-              {vaga.confidencial && <Badge className="bg-orange-100 text-orange-700 border-orange-200 border font-semibold rounded-md px-2 py-0.5 text-xs flex items-center gap-1">
-                  <EyeOff className="h-3 w-3" />
+              {vaga.confidencial && <Badge className="bg-orange-100 text-orange-700 border-orange-200 border font-semibold rounded-md px-2 py-1 text-sm flex items-center gap-1">
+                  <EyeOff className="h-3.5 w-3.5" />
                   Confidencial
                 </Badge>}
             </div>
