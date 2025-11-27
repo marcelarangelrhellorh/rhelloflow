@@ -478,7 +478,7 @@ export default function Acompanhamento() {
               </Card>}
 
             {/* Process Timeline */}
-            <Card className="shadow-sm">
+            <Card className="shadow-sm max-w-5xl">
               <CardContent className="p-5">
                 <h3 className="font-semibold text-base mb-5">Linha do Tempo do Processo</h3>
                 <div className="relative overflow-x-auto pb-3">
