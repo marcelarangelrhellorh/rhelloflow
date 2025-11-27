@@ -265,7 +265,7 @@ export default function Acompanhamento() {
   return <div className="min-h-screen bg-background">
       <div className="flex">
         {/* Main Content */}
-        <div className="flex-1 p-6 space-y-6 max-w-[calc(100%-24rem)]">
+        <div className="flex-1 p-6 space-y-6 max-w-[calc(100%-24rem)] mx-[130px] shadow-md">
         {/* Header */}
         <div>
           <h1 className="text-3xl font-bold text-foreground">Meus Processos</h1>
@@ -274,8 +274,8 @@ export default function Acompanhamento() {
 
         {/* Metrics Cards */}
         {!selectedVaga && <div className="grid gap-4 sm:grid-cols-2 max-w-xl mt-6">
-            <Card className="border-2 border-primary bg-primary/5 shadow-sm">
-              <CardContent className="p-4">
+            <Card className="border-2 border-primary bg-primary/5 mx-0 px-0 shadow-md">
+              <CardContent className="p-4 shadow-none">
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="text-muted-foreground mb-1 font-semibold text-lg">Vagas em Aberto</p>
@@ -288,7 +288,7 @@ export default function Acompanhamento() {
               </CardContent>
             </Card>
 
-            <Card className="border-2 border-orange-500 bg-orange-500/5 shadow-sm cursor-pointer transition-all hover:shadow-lg hover:border-orange-600 hover:bg-orange-500/10 group" onClick={() => setNoFeedbackDrawerOpen(true)}>
+            <Card onClick={() => setNoFeedbackDrawerOpen(true)} className="border-2 border-orange-500 bg-orange-500/5 cursor-pointer transition-all hover:border-orange-600 hover:bg-orange-500/10 group shadow-md">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between gap-3">
                   <div>
@@ -326,8 +326,8 @@ export default function Acompanhamento() {
                   <Button variant="outline" className={cn("w-full sm:w-[200px] justify-start text-left font-medium text-base", !dateFilter && "text-muted-foreground")}>
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {dateFilter ? format(dateFilter, "dd/MM/yyyy", {
-                  locale: ptBR
-                }) : "Filtrar por data"}
+                    locale: ptBR
+                  }) : "Filtrar por data"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -350,10 +350,10 @@ export default function Acompanhamento() {
         {/* Vagas Overview - Small Cards */}
         {!selectedVaga && <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mt-6">
             {filteredVagas.map(vaga => {
-          const vagaCandidatosCount = candidatos.filter(c => c.vaga_relacionada_id === vaga.id).length;
-          const currentStage = getStageBySlug(vaga.status);
-          return <Card key={vaga.id} className="cursor-pointer transition-all shadow-sm hover:shadow-md border-2 border-border hover:border-muted-foreground/50" onClick={() => setSelectedVaga(vaga.id)}>
-                  <CardContent className="p-4">
+            const vagaCandidatosCount = candidatos.filter(c => c.vaga_relacionada_id === vaga.id).length;
+            const currentStage = getStageBySlug(vaga.status);
+            return <Card key={vaga.id} className="cursor-pointer transition-all shadow-sm hover:shadow-md border-2 border-border hover:border-muted-foreground/50" onClick={() => setSelectedVaga(vaga.id)}>
+                  <CardContent className="p-4 shadow-md">
                     <div className="space-y-2">
                       <div className="flex items-start justify-between gap-2">
                         <h3 className="font-semibold text-foreground line-clamp-2 text-base">{vaga.titulo}</h3>
@@ -369,7 +369,7 @@ export default function Acompanhamento() {
                     </div>
                   </CardContent>
                 </Card>;
-        })}
+          })}
           </div>}
 
         {/* Selected Vaga Details */}
@@ -453,8 +453,8 @@ export default function Acompanhamento() {
                     <Calendar className="h-4 w-4 text-muted-foreground" />
                     <span className="font-medium text-base">
                       {format(new Date(selectedVagaData.criado_em), "dd/MM/yyyy", {
-                    locale: ptBR
-                  })}
+                      locale: ptBR
+                    })}
                     </span>
                   </div>
                 </CardContent>
@@ -515,8 +515,8 @@ export default function Acompanhamento() {
                   </div>
                   <div className="w-full bg-border rounded-full h-2 overflow-hidden">
                     <div className="bg-primary h-full transition-all duration-500 rounded-full" style={{
-                  width: `${calculateProgress(selectedVagaData.status)}%`
-                }} />
+                    width: `${calculateProgress(selectedVagaData.status)}%`
+                  }} />
                   </div>
                 </div>
               </CardContent>
@@ -528,8 +528,8 @@ export default function Acompanhamento() {
                   <h3 className="font-semibold text-lg mb-4">Candidatos ({vagaCandidatos.length})</h3>
                   <div className="space-y-3">
                     {vagaCandidatos.map(candidato => {
-                const isPendingFeedback = hasPendingFeedback(candidato.id);
-                return <div key={candidato.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleCandidateClick(candidato.id)}>
+                  const isPendingFeedback = hasPendingFeedback(candidato.id);
+                  return <div key={candidato.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleCandidateClick(candidato.id)}>
                         <div className="flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
                             <p className="text-foreground text-base font-semibold">{candidato.nome_completo}</p>
@@ -540,15 +540,15 @@ export default function Acompanhamento() {
                           </div>
                           <p className="text-muted-foreground text-base font-medium">
                             Desde {format(new Date(candidato.criado_em), "dd/MM/yyyy", {
-                        locale: ptBR
-                      })}
+                          locale: ptBR
+                        })}
                           </p>
                         </div>
                         <Badge variant={getStatusBadgeVariant(candidato.status)} className="text-base font-semibold bg-[#ffcd00]/[0.36]">
                           {candidato.status}
                         </Badge>
                       </div>;
-              })}
+                })}
                   </div>
                 </CardContent>
               </Card>}
@@ -572,46 +572,46 @@ export default function Acompanhamento() {
             </div>
             <div className="space-y-4 max-h-[calc(100vh-150px)] overflow-y-auto">
               {vagaEventos.slice(0, 15).map(evento => {
-                const getEventIcon = () => {
-                  switch (evento.tipo) {
-                    case "CANDIDATO_ADICIONADO":
-                      return {
-                        icon: UserPlus,
-                        bgClass: "bg-green-500/20",
-                        textClass: "text-green-600 dark:text-green-400"
-                      };
-                    case "CANDIDATO_MOVIDO":
-                      return {
-                        icon: ArrowRightLeft,
-                        bgClass: "bg-blue-500/20",
-                        textClass: "text-blue-600 dark:text-blue-400"
-                      };
-                    case "ETAPA_ALTERADA":
-                      return {
-                        icon: CheckCircle2,
-                        bgClass: "bg-blue-500/20",
-                        textClass: "text-blue-600 dark:text-blue-400"
-                      };
-                    case "FEEDBACK_ADICIONADO":
-                      return {
-                        icon: MessageSquare,
-                        bgClass: "bg-orange-500/20",
-                        textClass: "text-orange-600 dark:text-orange-400"
-                      };
-                    default:
-                      return {
-                        icon: Activity,
-                        bgClass: "bg-gray-500/20",
-                        textClass: "text-gray-600 dark:text-gray-400"
-                      };
-                  }
-                };
-                const {
-                  icon: Icon,
-                  bgClass,
-                  textClass
-                } = getEventIcon();
-                return <div key={evento.id} className="flex items-start gap-3">
+              const getEventIcon = () => {
+                switch (evento.tipo) {
+                  case "CANDIDATO_ADICIONADO":
+                    return {
+                      icon: UserPlus,
+                      bgClass: "bg-green-500/20",
+                      textClass: "text-green-600 dark:text-green-400"
+                    };
+                  case "CANDIDATO_MOVIDO":
+                    return {
+                      icon: ArrowRightLeft,
+                      bgClass: "bg-blue-500/20",
+                      textClass: "text-blue-600 dark:text-blue-400"
+                    };
+                  case "ETAPA_ALTERADA":
+                    return {
+                      icon: CheckCircle2,
+                      bgClass: "bg-blue-500/20",
+                      textClass: "text-blue-600 dark:text-blue-400"
+                    };
+                  case "FEEDBACK_ADICIONADO":
+                    return {
+                      icon: MessageSquare,
+                      bgClass: "bg-orange-500/20",
+                      textClass: "text-orange-600 dark:text-orange-400"
+                    };
+                  default:
+                    return {
+                      icon: Activity,
+                      bgClass: "bg-gray-500/20",
+                      textClass: "text-gray-600 dark:text-gray-400"
+                    };
+                }
+              };
+              const {
+                icon: Icon,
+                bgClass,
+                textClass
+              } = getEventIcon();
+              return <div key={evento.id} className="flex items-start gap-3">
                   <div className={cn("flex-shrink-0 mt-0.5 size-8 rounded-full flex items-center justify-center", bgClass)}>
                     <Icon className={cn("h-4 w-4", textClass)} />
                   </div>
@@ -621,12 +621,12 @@ export default function Acompanhamento() {
                     </p>
                     <p className="text-muted-foreground mt-0.5 text-sm font-semibold">
                       {format(new Date(evento.created_at), "d 'de' MMMM 'às' HH:mm", {
-                        locale: ptBR
-                      })}
+                      locale: ptBR
+                    })}
                     </p>
                   </div>
                 </div>;
-              })}
+            })}
             </div>
           </div>
         </div>}
