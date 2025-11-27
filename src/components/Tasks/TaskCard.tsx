@@ -66,7 +66,7 @@ export default function TaskCard({
               locale: ptBR
             })}
               </span>
-              {isOverdue && <Badge variant="destructive" className="text-xs">Atrasada</Badge>}
+              {isOverdue && <Badge variant="destructive" className="text-sm font-medium">Atrasada</Badge>}
             </div>}
 
           {task.assignee && <div className="flex items-center gap-2">
