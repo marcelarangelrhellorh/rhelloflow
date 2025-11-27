@@ -37,7 +37,7 @@ export function GoogleCalendarButton() {
       onClick={handleToggle}
       variant={isConnected ? "default" : "outline"}
       size="sm"
-      className="gap-2"
+      className="gap-2 text-base"
     >
       {isConnected ? (
         <>
