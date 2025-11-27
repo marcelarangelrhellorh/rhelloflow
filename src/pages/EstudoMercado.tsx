@@ -825,7 +825,7 @@ export default function EstudoMercado() {
                   <Card>
                     <CardContent className="pt-6">
                       <ul className="space-y-2">
-                        {estudo.fontes.map((fonte, idx) => <li key={idx} className="text-sm text-muted-foreground">
+                        {estudo.fontes.map((fonte, idx) => <li key={idx} className="text-base text-muted-foreground">
                             • {fonte.nome}
                           </li>)}
                       </ul>
