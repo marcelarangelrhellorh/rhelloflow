@@ -75,11 +75,11 @@ export function VagaKPICards({ vaga, candidatos, daysOpen, onStatusChange }: Vag
         </p>
       </div>
 
-      <div className="flex flex-col gap-1 rounded-lg p-4 bg-white dark:bg-background-dark border border-gray-200 dark:border-secondary-text-light/20 shadow-sm">
+      <div className="flex flex-col gap-1 rounded-lg p-3 bg-white dark:bg-background-dark border border-gray-200 dark:border-secondary-text-light/20 shadow-sm">
         <p className="text-secondary-text-light dark:text-secondary-text-dark text-sm font-medium">
           Formato da Contratação
         </p>
-        <p className="text-primary-text-light dark:text-primary-text-dark text-xl font-bold">
+        <p className="text-primary-text-light dark:text-primary-text-dark text-lg font-bold">
           {vaga.tipo_contratacao || "Não informado"}
         </p>
       </div>
