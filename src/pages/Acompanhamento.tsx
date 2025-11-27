@@ -273,7 +273,7 @@ export default function Acompanhamento() {
         </div>
 
         {/* Metrics Cards */}
-        {!selectedVaga && <div className="grid gap-4 sm:grid-cols-2 max-w-xl mt-6">
+        {!selectedVaga && <div className="grid gap-4 sm:grid-cols-2 max-w-3xl mt-6">
             <Card className="border-2 border-primary bg-primary/5 mx-0 px-0 shadow-md">
               <CardContent className="p-4 shadow-none">
                 <div className="flex items-center justify-between gap-3">
