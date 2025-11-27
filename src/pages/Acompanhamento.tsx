@@ -208,14 +208,10 @@ export default function Acompanhamento() {
   const filteredVagas = useMemo(() => {
     return vagas.filter(vaga => {
       // Text search filter
-      const matchesSearch = searchTerm === "" || 
-        vaga.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        vaga.empresa.toLowerCase().includes(searchTerm.toLowerCase());
-      
+      const matchesSearch = searchTerm === "" || vaga.titulo.toLowerCase().includes(searchTerm.toLowerCase()) || vaga.empresa.toLowerCase().includes(searchTerm.toLowerCase());
+
       // Date filter - show vagas created on or after selected date
-      const matchesDate = !dateFilter || 
-        !isBefore(startOfDay(new Date(vaga.criado_em)), startOfDay(dateFilter));
-      
+      const matchesDate = !dateFilter || !isBefore(startOfDay(new Date(vaga.criado_em)), startOfDay(dateFilter));
       return matchesSearch && matchesDate;
     });
   }, [vagas, searchTerm, dateFilter]);
@@ -271,7 +267,7 @@ export default function Acompanhamento() {
         {/* Header */}
         <div>
           <h1 className="text-3xl font-bold text-foreground">Meus Processos</h1>
-          <p className="text-muted-foreground mt-1 font-medium">Acompanhe o andamento das suas vagas em aberto</p>
+          <p className="text-muted-foreground mt-1 font-medium text-base">Acompanhe o andamento das suas vagas em aberto</p>
         </div>
 
         {/* Metrics Cards */}
@@ -309,8 +305,7 @@ export default function Acompanhamento() {
           </div>}
 
         {/* Divider with instruction and filters */}
-        {!selectedVaga && vagas.length > 0 && (
-          <div className="space-y-4">
+        {!selectedVaga && vagas.length > 0 && <div className="space-y-4">
             <div className="w-full h-0.5 bg-muted-foreground/30"></div>
             <p className="text-muted-foreground font-medium text-base">Para acessar os detalhes da vaga, clique sobre ela</p>
             
@@ -318,70 +313,37 @@ export default function Acompanhamento() {
             <div className="flex flex-col sm:flex-row gap-3">
               <div className="relative flex-1 max-w-md">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Pesquisar por título ou empresa..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-                {searchTerm && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0"
-                    onClick={() => setSearchTerm("")}
-                  >
+                <Input placeholder="Pesquisar por título ou empresa..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10" />
+                {searchTerm && <Button variant="ghost" size="sm" className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0" onClick={() => setSearchTerm("")}>
                     <X className="h-4 w-4" />
-                  </Button>
-                )}
+                  </Button>}
               </div>
               
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full sm:w-[200px] justify-start text-left font-normal",
-                      !dateFilter && "text-muted-foreground"
-                    )}
-                  >
+                  <Button variant="outline" className={cn("w-full sm:w-[200px] justify-start text-left font-normal", !dateFilter && "text-muted-foreground")}>
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {dateFilter ? format(dateFilter, "dd/MM/yyyy", { locale: ptBR }) : "Filtrar por data"}
+                    {dateFilter ? format(dateFilter, "dd/MM/yyyy", {
+                  locale: ptBR
+                }) : "Filtrar por data"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
-                  <CalendarComponent
-                    mode="single"
-                    selected={dateFilter}
-                    onSelect={setDateFilter}
-                    initialFocus
-                    className={cn("p-3 pointer-events-auto")}
-                    locale={ptBR}
-                  />
+                  <CalendarComponent mode="single" selected={dateFilter} onSelect={setDateFilter} initialFocus className={cn("p-3 pointer-events-auto")} locale={ptBR} />
                 </PopoverContent>
               </Popover>
               
-              {dateFilter && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setDateFilter(undefined)}
-                  className="text-muted-foreground"
-                >
+              {dateFilter && <Button variant="ghost" size="sm" onClick={() => setDateFilter(undefined)} className="text-muted-foreground">
                   <X className="h-4 w-4 mr-1" />
                   Limpar data
-                </Button>
-              )}
+                </Button>}
             </div>
             
             {/* Results count */}
-            {(searchTerm || dateFilter) && (
-              <p className="text-sm text-muted-foreground">
+            {(searchTerm || dateFilter) && <p className="text-sm text-muted-foreground">
                 {filteredVagas.length} vaga{filteredVagas.length !== 1 ? 's' : ''} encontrada{filteredVagas.length !== 1 ? 's' : ''}
-              </p>
-            )}
-          </div>
-        )}
+              </p>}
+          </div>}
 
         {/* Vagas Overview - Small Cards */}
         {!selectedVaga && <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
