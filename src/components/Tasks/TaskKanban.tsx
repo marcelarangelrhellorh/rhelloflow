@@ -5,6 +5,7 @@ interface TaskKanbanProps {
   tasks: Task[];
   onEdit: (task: Task) => void;
   onDelete: (id: string) => void;
+  onTaskClick?: (task: Task) => void;
 }
 const columns: {
   status: TaskStatus;
@@ -26,7 +27,8 @@ const columns: {
 export default function TaskKanban({
   tasks,
   onEdit,
-  onDelete
+  onDelete,
+  onTaskClick
 }: TaskKanbanProps) {
   const updateTask = useUpdateTask();
   const handleToggleComplete = async (task: Task) => {
@@ -68,7 +70,7 @@ export default function TaskKanban({
 
             <div className="space-y-3">
               {columnTasks.map(task => <div key={task.id} draggable onDragStart={e => handleDragStart(e, task.id)} className="cursor-move">
-                  <TaskCard task={task} onEdit={onEdit} onDelete={onDelete} onToggleComplete={handleToggleComplete} draggable />
+                  <TaskCard task={task} onEdit={onEdit} onDelete={onDelete} onToggleComplete={handleToggleComplete} onCardClick={onTaskClick} draggable />
                 </div>)}
               {columnTasks.length === 0 && <Card className="p-8 text-center text-muted-foreground border-dashed">
                   Nenhuma tarefa
