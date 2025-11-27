@@ -223,11 +223,11 @@ export function VagaCard({
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
-              <p className="text-[#36404A] text-sm font-medium">Cliente</p>
+              <p className="text-[#36404A] text-base font-semibold">Cliente</p>
               <p className="text-sm font-semibold text-[#00141D] line-clamp-1">{vaga.empresa}</p>
             </div>
             <div className="space-y-1">
-              <p className="text-[#36404A] text-sm font-medium">Recrutador</p>
+              <p className="text-[#36404A] text-base font-semibold">Recrutador</p>
               <p className="text-sm font-semibold text-[#00141D] line-clamp-1">
                 {recrutadorName || "Não atribuído"}
               </p>
@@ -235,7 +235,7 @@ export function VagaCard({
           </div>
 
           {(vaga.salario_min || vaga.salario_max) && <div className="space-y-1">
-              <p className="text-[#36404A] text-sm font-medium">Faixa Salarial</p>
+              <p className="text-[#36404A] text-base font-semibold">Faixa Salarial</p>
               <p className="text-sm font-semibold text-[#00141D]">
                 {formatSalaryRange(vaga.salario_min, vaga.salario_max, vaga.salario_modalidade)}
               </p>
@@ -243,8 +243,8 @@ export function VagaCard({
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <p className="text-[#36404A] text-sm font-medium">Progresso do Pipeline</p>
-              <p className="text-xs font-bold text-[#00141D]">{progress}%</p>
+              <p className="text-[#36404A] font-semibold text-sm">Progresso do Pipeline</p>
+              <p className="font-bold text-[#00141D] text-sm">{progress}%</p>
             </div>
             <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
               <div className="h-full transition-all duration-300" style={{
@@ -258,11 +258,11 @@ export function VagaCard({
             <div className="flex items-center gap-4">
               <div className="flex flex-col items-center">
                 <p className="text-2xl font-bold text-[#00141D]">{vaga.candidatos_count || 0}</p>
-                <p className="text-[#36404A] text-sm font-medium">Total de Candidatos</p>
+                <p className="text-[#36404A] text-sm font-semibold">Total de Candidatos</p>
               </div>
               <div className="flex flex-col items-center">
                 <p className="text-2xl font-bold text-[#00141D]">{daysOpen}</p>
-                <p className="text-[#36404A] text-sm font-medium">Dias em Aberto</p>
+                <p className="text-[#36404A] text-sm font-semibold">Dias em Aberto</p>
               </div>
             </div>
 
