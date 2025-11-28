@@ -8,6 +8,7 @@ import TaskModal from "@/components/Tasks/TaskModal";
 import TaskCard from "@/components/Tasks/TaskCard";
 import TaskKanban from "@/components/Tasks/TaskKanban";
 import TasksDashboard from "@/components/Tasks/TasksDashboard";
+import GoogleCalendarSettings from "@/components/Tasks/GoogleCalendarSettings";
 import { TaskDetailDrawer } from "@/components/VagaDetalhes/TaskDetailDrawer";
 import { Task, TaskFilters, useTasks, useDeleteTask, useUpdateTask } from "@/hooks/useTasks";
 import { useQuery } from "@tanstack/react-query";
@@ -173,8 +174,15 @@ export default function Tarefas() {
 
       {/* Content */}
       <div className="container mx-auto px-6 py-8">
-        {/* Dashboard */}
-        <TasksDashboard onTaskClick={handleEdit} />
+        {/* Header section with Dashboard and Calendar Settings */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+          <div className="lg:col-span-3">
+            <TasksDashboard onTaskClick={handleEdit} />
+          </div>
+          <div className="lg:col-span-1">
+            <GoogleCalendarSettings />
+          </div>
+        </div>
 
         {isLoading ? <div className="space-y-4">
             {[1, 2, 3].map(i => <Skeleton key={i} className="h-40 w-full" />)}
