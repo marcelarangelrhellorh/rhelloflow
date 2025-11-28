@@ -179,7 +179,7 @@ export default function CalendarView({ meetings, onEventClick }: CalendarViewPro
       <style>{`
         .rbc-calendar {
           font-family: inherit;
-          min-height: 650px;
+          min-height: 800px;
         }
         
         /* Header styling */
@@ -445,7 +445,7 @@ export default function CalendarView({ meetings, onEventClick }: CalendarViewPro
         events={events}
         startAccessor="start"
         endAccessor="end"
-        style={{ height: 650 }}
+        style={{ height: 800 }}
         messages={messages}
         views={[Views.MONTH, Views.WEEK, Views.DAY, Views.AGENDA]}
         defaultView={Views.MONTH}
