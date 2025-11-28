@@ -54,11 +54,7 @@ export default function TaskCard({
             <h3 className={cn("font-semibold text-lg", task.status === 'done' && "line-through")}>
               {task.title}
             </h3>
-            <TaskSyncIndicator 
-              isSynced={task.google_calendar_synced}
-              lastSync={task.google_calendar_last_sync}
-              syncEnabled={task.sync_enabled}
-            />
+            <TaskSyncIndicator isSynced={task.google_calendar_synced} lastSync={task.google_calendar_last_sync} syncEnabled={task.sync_enabled} />
           </div>
           <Badge className={`text-sm font-semibold ${priorityColors[task.priority]}`}>
             {priorityLabels[task.priority]}
@@ -108,7 +104,7 @@ export default function TaskCard({
             <CheckCircle2 className="h-4 w-4 mr-1" />
             {task.status === 'done' ? 'Reabrir' : 'Concluir'}
           </Button>
-          <Button size="sm" variant="ghost" onClick={() => onEdit(task)} className="text-base">
+          <Button size="sm" variant="ghost" onClick={() => onEdit(task)} className="text-base font-semibold">
             Editar
           </Button>
           <SyncTaskToCalendar task={task} />

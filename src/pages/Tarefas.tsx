@@ -17,7 +17,6 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-
 export default function Tarefas() {
   const [view, setView] = useState<"list" | "kanban" | "calendar">("kanban");
   const [taskModalOpen, setTaskModalOpen] = useState(false);
@@ -54,7 +53,6 @@ export default function Tarefas() {
       return data;
     }
   });
-
   const handleEdit = (task: Task) => {
     setSelectedTask(task);
     if (task.task_type === 'meeting') {
@@ -63,12 +61,10 @@ export default function Tarefas() {
       setTaskModalOpen(true);
     }
   };
-
   const handleDelete = (id: string) => {
     setTaskToDelete(id);
     setDeleteDialogOpen(true);
   };
-
   const confirmDelete = async () => {
     if (taskToDelete) {
       await deleteTask.mutateAsync(taskToDelete);
@@ -76,7 +72,6 @@ export default function Tarefas() {
       setTaskToDelete(null);
     }
   };
-
   const handleToggleComplete = async (task: Task) => {
     const newStatus = task.status === 'done' ? 'to_do' : 'done';
     await updateTask.mutateAsync({
@@ -84,17 +79,14 @@ export default function Tarefas() {
       status: newStatus
     });
   };
-
   const handleNewTask = () => {
     setSelectedTask(null);
     setTaskModalOpen(true);
   };
-
   const handleNewMeeting = () => {
     setSelectedTask(null);
     setMeetingModalOpen(true);
   };
-
   const handleTaskClick = (task: Task) => {
     setTaskForDetail(task);
     setDetailDrawerOpen(true);
@@ -102,11 +94,9 @@ export default function Tarefas() {
 
   // Filter only synced meetings for calendar view (meetings with google_calendar_event_id)
   const syncedMeetings = useMemo(() => {
-    return tasks?.filter(task => 
-      task.task_type === 'meeting' && task.google_calendar_event_id
-    ) || [];
+    return tasks?.filter(task => task.task_type === 'meeting' && task.google_calendar_event_id) || [];
   }, [tasks]);
-  
+
   // All meetings for empty state check
   const allMeetings = useMemo(() => {
     return tasks?.filter(task => task.task_type === 'meeting') || [];
@@ -124,7 +114,7 @@ export default function Tarefas() {
             </div>
             <div className="flex gap-2">
               <GoogleCalendarButton />
-              <Button onClick={handleNewMeeting} variant="outline" className="gap-2 text-base font-medium">
+              <Button onClick={handleNewMeeting} variant="outline" className="gap-2 text-base font-semibold bg-[#00141d] text-white">
                 <Video className="h-5 w-5" />
                 Nova Reunião
               </Button>
@@ -214,47 +204,29 @@ export default function Tarefas() {
       {/* Content */}
       <div className="container mx-auto px-6 py-8">
         {/* Dashboard - hide on calendar view */}
-        {view !== "calendar" && (
-          <div className="mb-8">
+        {view !== "calendar" && <div className="mb-8">
             <TasksDashboard onTaskClick={handleEdit} />
-          </div>
-        )}
+          </div>}
 
-        {isLoading ? (
-          <div className="space-y-4">
+        {isLoading ? <div className="space-y-4">
             {[1, 2, 3].map(i => <Skeleton key={i} className="h-40 w-full" />)}
-          </div>
-        ) : view === "calendar" ? (
-          syncedMeetings.length === 0 ? (
-            <div className="text-center py-16">
+          </div> : view === "calendar" ? syncedMeetings.length === 0 ? <div className="text-center py-16">
               <p className="text-muted-foreground text-lg mb-4">
-                {allMeetings.length === 0 
-                  ? "Nenhuma reunião agendada" 
-                  : "Nenhuma reunião sincronizada com o Google Calendar"}
+                {allMeetings.length === 0 ? "Nenhuma reunião agendada" : "Nenhuma reunião sincronizada com o Google Calendar"}
               </p>
               <Button onClick={handleNewMeeting} variant="outline" className="gap-2">
                 <Video className="h-5 w-5" />
                 {allMeetings.length === 0 ? "Criar sua primeira reunião" : "Criar e sincronizar reunião"}
               </Button>
-            </div>
-          ) : (
-            <CalendarView meetings={syncedMeetings} onEventClick={handleTaskClick} />
-          )
-        ) : !tasks || tasks.length === 0 ? (
-          <div className="text-center py-16">
+            </div> : <CalendarView meetings={syncedMeetings} onEventClick={handleTaskClick} /> : !tasks || tasks.length === 0 ? <div className="text-center py-16">
             <p className="text-muted-foreground text-lg mb-4">Nenhuma tarefa encontrada</p>
             <Button onClick={handleNewTask} className="bg-[#ffcd00] hover:bg-[#ffcd00]/90 text-black font-semibold">
               <Plus className="h-5 w-5 mr-2" />
               Criar sua primeira tarefa
             </Button>
-          </div>
-        ) : view === "kanban" ? (
-          <TaskKanban tasks={tasks} onEdit={handleEdit} onDelete={handleDelete} onTaskClick={handleTaskClick} />
-        ) : (
-          <div className="space-y-4">
+          </div> : view === "kanban" ? <TaskKanban tasks={tasks} onEdit={handleEdit} onDelete={handleDelete} onTaskClick={handleTaskClick} /> : <div className="space-y-4">
             {tasks.map(task => <TaskCard key={task.id} task={task} onEdit={handleEdit} onDelete={handleDelete} onToggleComplete={handleToggleComplete} onCardClick={handleTaskClick} />)}
-          </div>
-        )}
+          </div>}
       </div>
 
       {/* Modals */}

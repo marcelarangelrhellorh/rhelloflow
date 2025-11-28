@@ -70,10 +70,10 @@ export default function TasksDashboard({
   return <>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <Card className="border-red-200 bg-red-50/50 cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveDrawer("overdue")}>
-          <CardContent className="pt-6">
+          <CardContent className="pt-6 shadow-lg">
             <div className="flex items-center justify-between">
               <div>
-              <p className="font-medium text-muted-foreground text-base">
+              <p className="text-muted-foreground text-base font-semibold">
                   Tarefas Atrasadas {isAdmin && "(Geral)"}
                 </p>
                 <h3 className="text-3xl font-bold text-red-600 mt-2">
@@ -88,10 +88,10 @@ export default function TasksDashboard({
         </Card>
 
         <Card className="border-orange-200 bg-orange-50/50 cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveDrawer("high")}>
-          <CardContent className="pt-6">
+          <CardContent className="pt-6 shadow-lg">
             <div className="flex items-center justify-between">
               <div>
-              <p className="font-medium text-muted-foreground text-base">
+              <p className="text-muted-foreground text-base font-semibold">
                   Prioridade Alta {isAdmin && "(Geral)"}
                 </p>
                 <h3 className="text-3xl font-bold text-orange-600 mt-2">
@@ -106,10 +106,10 @@ export default function TasksDashboard({
         </Card>
 
         <Card className="border-red-300 bg-red-100/50 cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveDrawer("urgent")}>
-          <CardContent className="pt-6">
+          <CardContent className="pt-6 shadow-lg">
             <div className="flex items-center justify-between">
               <div>
-              <p className="font-medium text-muted-foreground text-base">
+              <p className="text-muted-foreground text-base font-semibold">
                   Prioridade Urgente {isAdmin && "(Geral)"}
                 </p>
                 <h3 className="text-3xl font-bold text-red-700 mt-2">
