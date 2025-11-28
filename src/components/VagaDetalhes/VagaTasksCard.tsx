@@ -12,6 +12,7 @@ import { TaskDetailDrawer } from "./TaskDetailDrawer";
 interface VagaTasksCardProps {
   vagaId: string;
   vagaTitulo: string;
+  className?: string;
 }
 const priorityConfig: Record<TaskPriority, {
   label: string;
@@ -49,7 +50,8 @@ const statusConfig: Record<TaskStatus, {
 };
 export function VagaTasksCard({
   vagaId,
-  vagaTitulo
+  vagaTitulo,
+  className
 }: VagaTasksCardProps) {
   const {
     data: tasks = [],
@@ -97,7 +99,7 @@ export function VagaTasksCard({
       </div>;
   }
   return <>
-      <div className="flex flex-col gap-3 rounded-lg p-6 bg-white dark:bg-background-dark border-2 border-primary shadow-sm">
+      <div className={cn("flex flex-col gap-3 rounded-lg p-6 bg-white dark:bg-background-dark border border-transparent shadow-sm", className)}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <CheckSquare className="h-5 w-5 text-primary" />
@@ -124,7 +126,7 @@ export function VagaTasksCard({
         </div>
 
         {/* Task List - show all tasks */}
-        {tasks.length > 0 && <div className="space-y-2 mt-2 max-h-48 overflow-y-auto">
+        {tasks.length > 0 && <div className="space-y-2 mt-2 max-h-80 overflow-y-auto">
             {tasks.map(task => {
           const StatusIcon = statusConfig[task.status].icon;
           const overdue = isOverdue(task.due_date) && task.status !== "done";
