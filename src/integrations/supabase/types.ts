@@ -2054,6 +2054,7 @@ export type Database = {
       tasks: {
         Row: {
           assignee_id: string | null
+          attendee_emails: string[] | null
           calendar_id: string | null
           candidato_id: string | null
           created_at: string | null
@@ -2065,6 +2066,7 @@ export type Database = {
           google_calendar_event_id: string | null
           google_calendar_last_sync: string | null
           google_calendar_synced: boolean | null
+          google_meet_link: string | null
           id: string
           priority: string | null
           reminder_minutes: number | null
@@ -2077,6 +2079,7 @@ export type Database = {
         }
         Insert: {
           assignee_id?: string | null
+          attendee_emails?: string[] | null
           calendar_id?: string | null
           candidato_id?: string | null
           created_at?: string | null
@@ -2088,6 +2091,7 @@ export type Database = {
           google_calendar_event_id?: string | null
           google_calendar_last_sync?: string | null
           google_calendar_synced?: boolean | null
+          google_meet_link?: string | null
           id?: string
           priority?: string | null
           reminder_minutes?: number | null
@@ -2100,6 +2104,7 @@ export type Database = {
         }
         Update: {
           assignee_id?: string | null
+          attendee_emails?: string[] | null
           calendar_id?: string | null
           candidato_id?: string | null
           created_at?: string | null
@@ -2111,6 +2116,7 @@ export type Database = {
           google_calendar_event_id?: string | null
           google_calendar_last_sync?: string | null
           google_calendar_synced?: boolean | null
+          google_meet_link?: string | null
           id?: string
           priority?: string | null
           reminder_minutes?: number | null

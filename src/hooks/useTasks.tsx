@@ -28,6 +28,8 @@ export interface Task {
   start_time: string | null;
   end_time: string | null;
   reminder_minutes: number | null;
+  attendee_emails: string[] | null;
+  google_meet_link: string | null;
   // Relations
   assignee?: {
     id: string;

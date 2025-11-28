@@ -48,6 +48,7 @@ const taskSchema = z.object({
   start_time: z.string().optional(),
   end_time: z.string().optional(),
   reminder_minutes: z.number().optional(),
+  attendee_emails: z.string().optional(), // Comma-separated emails
 });
 
 type TaskFormData = z.infer<typeof taskSchema>;
@@ -79,6 +80,7 @@ export default function TaskModal({ open, onClose, task, defaultVagaId }: TaskMo
       start_time: "09:00",
       end_time: "10:00",
       reminder_minutes: 30,
+      attendee_emails: "",
     },
   });
 
@@ -124,6 +126,7 @@ export default function TaskModal({ open, onClose, task, defaultVagaId }: TaskMo
         start_time: task.start_time || "09:00",
         end_time: task.end_time || "10:00",
         reminder_minutes: task.reminder_minutes || 30,
+        attendee_emails: task.attendee_emails?.join(", ") || "",
       });
     } else {
       // Creating new task
@@ -139,6 +142,7 @@ export default function TaskModal({ open, onClose, task, defaultVagaId }: TaskMo
         start_time: "09:00",
         end_time: "10:00",
         reminder_minutes: 30,
+        attendee_emails: "",
       });
     }
   }, [task, defaultVagaId, form]);
@@ -147,6 +151,11 @@ export default function TaskModal({ open, onClose, task, defaultVagaId }: TaskMo
   const syncEnabled = form.watch("sync_enabled");
 
   const onSubmit = async (data: TaskFormData) => {
+    // Parse attendee emails from comma-separated string
+    const attendeeEmails = data.attendee_emails
+      ? data.attendee_emails.split(',').map(e => e.trim()).filter(e => e.includes('@'))
+      : [];
+
     const taskData = {
       ...data,
       due_date: data.due_date ? new Date(data.due_date).toISOString() : null,
@@ -155,6 +164,7 @@ export default function TaskModal({ open, onClose, task, defaultVagaId }: TaskMo
       start_time: data.start_time || null,
       end_time: data.end_time || null,
       reminder_minutes: data.reminder_minutes || 30,
+      attendee_emails: attendeeEmails,
     };
 
     let savedTask: any;
@@ -370,58 +380,80 @@ export default function TaskModal({ open, onClose, task, defaultVagaId }: TaskMo
                 />
 
                 {syncEnabled && (
-                  <div className="grid grid-cols-3 gap-4 pl-6">
-                    <FormField
-                      control={form.control}
-                      name="start_time"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Horário início</FormLabel>
-                          <FormControl>
-                            <Input type="time" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="end_time"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Horário término</FormLabel>
-                          <FormControl>
-                            <Input type="time" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="reminder_minutes"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Lembrete</FormLabel>
-                          <Select 
-                            onValueChange={(val) => field.onChange(parseInt(val))} 
-                            value={field.value?.toString() || "30"}
-                          >
+                  <div className="space-y-4 pl-6">
+                    <div className="grid grid-cols-3 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="start_time"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Horário início</FormLabel>
                             <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Lembrete" />
-                              </SelectTrigger>
+                              <Input type="time" {...field} />
                             </FormControl>
-                            <SelectContent>
-                              <SelectItem value="5">5 minutos antes</SelectItem>
-                              <SelectItem value="15">15 minutos antes</SelectItem>
-                              <SelectItem value="30">30 minutos antes</SelectItem>
-                              <SelectItem value="60">1 hora antes</SelectItem>
-                              <SelectItem value="1440">1 dia antes</SelectItem>
-                            </SelectContent>
-                          </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="end_time"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Horário término</FormLabel>
+                            <FormControl>
+                              <Input type="time" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="reminder_minutes"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Lembrete</FormLabel>
+                            <Select 
+                              onValueChange={(val) => field.onChange(parseInt(val))} 
+                              value={field.value?.toString() || "30"}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Lembrete" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="5">5 minutos antes</SelectItem>
+                                <SelectItem value="15">15 minutos antes</SelectItem>
+                                <SelectItem value="30">30 minutos antes</SelectItem>
+                                <SelectItem value="60">1 hora antes</SelectItem>
+                                <SelectItem value="1440">1 dia antes</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <FormField
+                      control={form.control}
+                      name="attendee_emails"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Participantes (e-mails)</FormLabel>
+                          <FormControl>
+                            <Input 
+                              placeholder="email1@exemplo.com, email2@exemplo.com" 
+                              {...field} 
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Adicione e-mails separados por vírgula. Um link do Google Meet será gerado e os convites serão enviados automaticamente.
+                          </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}

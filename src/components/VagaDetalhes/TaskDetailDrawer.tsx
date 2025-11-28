@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { format, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CheckCircle2, Clock, Circle, AlertTriangle, Calendar, User, Briefcase, Edit, ExternalLink } from "lucide-react";
+import { CheckCircle2, Clock, Circle, AlertTriangle, Calendar, User, Briefcase, Edit, ExternalLink, Video, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Task, TaskStatus, TaskPriority, useUpdateTask } from "@/hooks/useTasks";
 import { isPast, isToday } from "date-fns";
@@ -152,6 +152,38 @@ export function TaskDetailDrawer({
                   <p className="font-medium text-base">{task.vaga.titulo}</p>
                 </div>
               </div>}
+
+            {/* Google Meet Link */}
+            {task.google_meet_link && (
+              <div className="flex items-start gap-3 col-span-2">
+                <Video className="h-5 w-5 mt-0.5 text-blue-500" />
+                <div>
+                  <p className="text-muted-foreground text-base font-semibold">Link do Meet</p>
+                  <a 
+                    href={task.google_meet_link} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="font-medium text-base text-blue-600 hover:underline flex items-center gap-1"
+                  >
+                    Entrar na reunião
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                </div>
+              </div>
+            )}
+
+            {/* Attendees */}
+            {task.attendee_emails && task.attendee_emails.length > 0 && (
+              <div className="flex items-start gap-3 col-span-2">
+                <Users className="h-5 w-5 mt-0.5 text-muted-foreground" />
+                <div>
+                  <p className="text-muted-foreground text-base font-semibold">Participantes</p>
+                  <p className="font-medium text-base">
+                    {task.attendee_emails.join(", ")}
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
 
           <Separator />
