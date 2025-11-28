@@ -119,7 +119,7 @@ export function VagaTasksCard({
             {tasks.length}
           </span>
           <span className="text-muted-foreground font-semibold text-xs">tarefa{tasks.length !== 1 ? "s" : ""}</span>
-          {overdueTasks.length > 0 && <Badge variant="destructive" className="text-base gap-1 whitespace-nowrap">
+          {overdueTasks.length > 0 && <Badge variant="destructive" className="text-base gap-1 whitespace-nowrap px-[10px] mx-[100px]">
               <AlertTriangle className="h-4 w-4" />
               {overdueTasks.length} atrasada{overdueTasks.length !== 1 ? "s" : ""}
             </Badge>}
