@@ -11,6 +11,19 @@ interface GoogleCalendarEvent {
   htmlLink?: string;
 }
 
+interface SyncedCalendarEvent {
+  id: string;
+  title: string;
+  description: string;
+  start: string;
+  end: string;
+  allDay: boolean;
+  location: string;
+  meetLink: string;
+  attendees: string[];
+  isFromSystem: boolean;
+}
+
 interface UseGoogleCalendarReturn {
   isConnected: boolean;
   isLoading: boolean;
@@ -18,6 +31,7 @@ interface UseGoogleCalendarReturn {
   connectCalendar: () => Promise<void>;
   disconnectCalendar: () => Promise<void>;
   getEvents: (startDate: string, endDate: string) => Promise<GoogleCalendarEvent[]>;
+  getSyncedEvents: (timeMin?: string, timeMax?: string) => Promise<SyncedCalendarEvent[]>;
   createEvent: (eventData: CreateEventData) => Promise<GoogleCalendarEvent | null>;
   updateEvent: (eventId: string, eventData: Partial<CreateEventData>) => Promise<GoogleCalendarEvent | null>;
   deleteEvent: (eventId: string) => Promise<boolean>;
@@ -245,6 +259,24 @@ export function useGoogleCalendar(): UseGoogleCalendarReturn {
     }
   }, []);
 
+  const getSyncedEvents = useCallback(async (timeMin?: string, timeMax?: string): Promise<SyncedCalendarEvent[]> => {
+    try {
+      const { data, error } = await supabase.functions.invoke('get-calendar-events', {
+        body: { timeMin, timeMax },
+      });
+
+      if (error) {
+        console.error('Error fetching synced events:', error);
+        return [];
+      }
+
+      return data.events || [];
+    } catch (error) {
+      console.error('Error fetching synced events:', error);
+      return [];
+    }
+  }, []);
+
   return {
     isConnected,
     isLoading,
@@ -252,6 +284,7 @@ export function useGoogleCalendar(): UseGoogleCalendarReturn {
     connectCalendar,
     disconnectCalendar,
     getEvents,
+    getSyncedEvents,
     createEvent,
     updateEvent,
     deleteEvent,
