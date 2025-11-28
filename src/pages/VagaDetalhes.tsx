@@ -185,15 +185,15 @@ export default function VagaDetalhes() {
             </div>
 
             <div className="lg:col-span-1 space-y-6">
-              <VagaActivityLog eventos={eventos} candidatoContratado={candidatoContratado} vagaStatus={vaga.status} className="px-0 mx-0" />
+              <VagaActivityLog eventos={eventos} candidatoContratado={candidatoContratado} vagaStatus={vaga.status} />
             </div>
           </div>
         </div>
       </main>
 
       {/* Right Sidebar - Tasks */}
-      <aside className="hidden xl:flex w-96 flex-shrink-0 flex-col border-l border-border bg-white dark:bg-background-dark p-6 sticky top-0 h-screen overflow-y-auto">
-        <h2 className="text-lg font-bold text-primary-text-light dark:text-primary-text-dark mb-4">
+      <aside className="hidden xl:flex w-96 flex-shrink-0 flex-col border-l border-border bg-white dark:bg-background-dark p-4 sticky top-0 h-screen overflow-y-auto">
+        <h2 className="text-lg font-bold text-primary-text-light dark:text-primary-text-dark mb-2">
           Tarefas da Vaga
         </h2>
         <VagaTasksCard vagaId={vaga.id} vagaTitulo={vaga.titulo} />
