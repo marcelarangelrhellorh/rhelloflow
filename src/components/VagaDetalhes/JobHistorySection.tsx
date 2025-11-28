@@ -169,7 +169,7 @@ export function JobHistorySection({
                   <label className="font-medium text-foreground mb-1 block text-base">
                     Título (opcional)
                   </label>
-                  <Input value={formTitle} onChange={e => setFormTitle(e.target.value)} placeholder="Ex: Reunião com cliente, Atualização de requisitos..." className="bg-background" />
+                  <Input value={formTitle} onChange={e => setFormTitle(e.target.value)} placeholder="Ex: Reunião com cliente, Atualização de requisitos..." className="bg-background text-base" />
                 </div>
                 <div>
                   <label className="font-medium text-foreground mb-1 block text-base">
