@@ -41,7 +41,7 @@ export function useGoogleCalendar(): UseGoogleCalendarReturn {
   const [lastSync, setLastSync] = useState<string | null>(null);
 
   const getRedirectUri = useCallback(() => {
-    return `${window.location.origin}/auth/google-callback`;
+    return `${window.location.origin}/auth/callback`;
   }, []);
 
   const refreshStatus = useCallback(async () => {
