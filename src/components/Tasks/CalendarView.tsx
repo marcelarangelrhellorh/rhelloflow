@@ -8,9 +8,7 @@ import { Video, Clock } from 'lucide-react';
 
 // Set moment locale to Portuguese
 moment.locale('pt-br');
-
 const localizer = momentLocalizer(moment);
-
 interface CalendarEvent {
   id: string;
   title: string;
@@ -18,29 +16,29 @@ interface CalendarEvent {
   end: Date;
   resource: Task;
 }
-
 interface CalendarViewProps {
   meetings: Task[];
   onEventClick: (task: Task) => void;
 }
 
 // Custom event component with better visibility
-const EventComponent = ({ event }: { event: CalendarEvent }) => {
+const EventComponent = ({
+  event
+}: {
+  event: CalendarEvent;
+}) => {
   const startTime = moment(event.start).format('HH:mm');
   const endTime = moment(event.end).format('HH:mm');
-  
-  return (
-    <div className="flex flex-col gap-0.5 p-1 h-full overflow-hidden">
+  return <div className="flex flex-col gap-0.5 p-1 h-full overflow-hidden">
       <div className="flex items-center gap-1.5">
         <Video className="h-3.5 w-3.5 flex-shrink-0 text-white" />
         <span className="font-semibold text-sm truncate text-white">{event.title}</span>
       </div>
       <div className="flex items-center gap-1 text-white/80">
         <Clock className="h-3 w-3 flex-shrink-0" />
-        <span className="text-xs">{startTime} - {endTime}</span>
+        <span className="font-semibold text-sm">{startTime} - {endTime}</span>
       </div>
-    </div>
-  );
+    </div>;
 };
 
 // Messages in Portuguese
@@ -58,31 +56,26 @@ const messages = {
   event: 'Reunião',
   noEventsInRange: 'Nenhuma reunião agendada neste período.',
   showMore: (total: number) => `+ ${total} reunião(ões)`,
-  work_week: 'Semana útil',
+  work_week: 'Semana útil'
 };
 
 // Custom toolbar component
-const CustomToolbar = ({ label, onNavigate, onView, view }: any) => {
-  return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6 pb-4 border-b border-border">
+const CustomToolbar = ({
+  label,
+  onNavigate,
+  onView,
+  view
+}: any) => {
+  return <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6 pb-4 border-b border-border">
       <div className="flex items-center gap-2">
-        <button
-          onClick={() => onNavigate('TODAY')}
-          className="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
-        >
+        <button onClick={() => onNavigate('TODAY')} className="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
           Hoje
         </button>
         <div className="flex items-center border border-border rounded-lg overflow-hidden">
-          <button
-            onClick={() => onNavigate('PREV')}
-            className="px-3 py-2 text-sm font-medium hover:bg-muted transition-colors"
-          >
+          <button onClick={() => onNavigate('PREV')} className="px-3 py-2 text-sm font-medium hover:bg-muted transition-colors">
             ←
           </button>
-          <button
-            onClick={() => onNavigate('NEXT')}
-            className="px-3 py-2 text-sm font-medium hover:bg-muted transition-colors border-l border-border"
-          >
+          <button onClick={() => onNavigate('NEXT')} className="px-3 py-2 text-sm font-medium hover:bg-muted transition-colors border-l border-border">
             →
           </button>
         </div>
@@ -91,54 +84,45 @@ const CustomToolbar = ({ label, onNavigate, onView, view }: any) => {
       <h2 className="text-xl font-bold text-foreground capitalize">{label}</h2>
       
       <div className="flex items-center border border-border rounded-lg overflow-hidden">
-        {[
-          { key: Views.MONTH, label: 'Mês' },
-          { key: Views.WEEK, label: 'Semana' },
-          { key: Views.DAY, label: 'Dia' },
-          { key: Views.AGENDA, label: 'Lista' },
-        ].map((item, index) => (
-          <button
-            key={item.key}
-            onClick={() => onView(item.key)}
-            className={`px-4 py-2 text-sm font-medium transition-colors ${
-              index > 0 ? 'border-l border-border' : ''
-            } ${
-              view === item.key
-                ? 'bg-primary text-primary-foreground'
-                : 'hover:bg-muted'
-            }`}
-          >
+        {[{
+        key: Views.MONTH,
+        label: 'Mês'
+      }, {
+        key: Views.WEEK,
+        label: 'Semana'
+      }, {
+        key: Views.DAY,
+        label: 'Dia'
+      }, {
+        key: Views.AGENDA,
+        label: 'Lista'
+      }].map((item, index) => <button key={item.key} onClick={() => onView(item.key)} className={`px-4 py-2 text-sm font-medium transition-colors ${index > 0 ? 'border-l border-border' : ''} ${view === item.key ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'}`}>
             {item.label}
-          </button>
-        ))}
+          </button>)}
       </div>
-    </div>
-  );
+    </div>;
 };
-
-export default function CalendarView({ meetings, onEventClick }: CalendarViewProps) {
+export default function CalendarView({
+  meetings,
+  onEventClick
+}: CalendarViewProps) {
   // Convert meetings to calendar events
   const events: CalendarEvent[] = useMemo(() => {
-    return meetings
-      .filter(meeting => meeting.due_date && meeting.start_time)
-      .map(meeting => {
-        const dateStr = meeting.due_date!;
-        const startTime = meeting.start_time || '09:00';
-        const endTime = meeting.end_time || '10:00';
-        
-        const start = moment(`${dateStr} ${startTime}`, 'YYYY-MM-DD HH:mm').toDate();
-        const end = moment(`${dateStr} ${endTime}`, 'YYYY-MM-DD HH:mm').toDate();
-        
-        return {
-          id: meeting.id,
-          title: meeting.title,
-          start,
-          end,
-          resource: meeting,
-        };
-      });
+    return meetings.filter(meeting => meeting.due_date && meeting.start_time).map(meeting => {
+      const dateStr = meeting.due_date!;
+      const startTime = meeting.start_time || '09:00';
+      const endTime = meeting.end_time || '10:00';
+      const start = moment(`${dateStr} ${startTime}`, 'YYYY-MM-DD HH:mm').toDate();
+      const end = moment(`${dateStr} ${endTime}`, 'YYYY-MM-DD HH:mm').toDate();
+      return {
+        id: meeting.id,
+        title: meeting.title,
+        start,
+        end,
+        resource: meeting
+      };
+    });
   }, [meetings]);
-
   const handleSelectEvent = (event: CalendarEvent) => {
     onEventClick(event.resource);
   };
@@ -147,7 +131,6 @@ export default function CalendarView({ meetings, onEventClick }: CalendarViewPro
   const eventStyleGetter = (event: CalendarEvent) => {
     const task = event.resource;
     const isCompleted = task.status === 'done';
-    
     return {
       style: {
         backgroundColor: isCompleted ? 'hsl(var(--muted))' : 'hsl(var(--primary))',
@@ -159,8 +142,8 @@ export default function CalendarView({ meetings, onEventClick }: CalendarViewPro
         fontSize: '13px',
         fontWeight: 500,
         boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-        cursor: 'pointer',
-      },
+        cursor: 'pointer'
+      }
     };
   };
 
@@ -169,13 +152,11 @@ export default function CalendarView({ meetings, onEventClick }: CalendarViewPro
     const isToday = moment(date).isSame(moment(), 'day');
     return {
       style: {
-        backgroundColor: isToday ? 'hsl(var(--primary) / 0.05)' : undefined,
-      },
+        backgroundColor: isToday ? 'hsl(var(--primary) / 0.05)' : undefined
+      }
     };
   };
-
-  return (
-    <div className="bg-card rounded-xl border border-border shadow-sm p-6">
+  return <div className="bg-card rounded-xl border border-border shadow-sm p-6">
       <style>{`
         .rbc-calendar {
           font-family: inherit;
@@ -440,41 +421,32 @@ export default function CalendarView({ meetings, onEventClick }: CalendarViewPro
         }
       `}</style>
       
-      <Calendar
-        localizer={localizer}
-        events={events}
-        startAccessor="start"
-        endAccessor="end"
-        style={{ height: 800 }}
-        messages={messages}
-        views={[Views.MONTH, Views.WEEK, Views.DAY, Views.AGENDA]}
-        defaultView={Views.MONTH}
-        onSelectEvent={handleSelectEvent}
-        eventPropGetter={eventStyleGetter}
-        dayPropGetter={dayPropGetter}
-        components={{
-          event: EventComponent,
-          toolbar: CustomToolbar,
-        }}
-        popup
-        selectable={false}
-        step={30}
-        timeslots={2}
-        min={moment().set({ hour: 7, minute: 0 }).toDate()}
-        max={moment().set({ hour: 22, minute: 0 }).toDate()}
-        formats={{
-          dayFormat: 'ddd DD/MM',
-          weekdayFormat: 'ddd',
-          monthHeaderFormat: 'MMMM [de] YYYY',
-          dayHeaderFormat: 'dddd, DD [de] MMMM',
-          dayRangeHeaderFormat: ({ start, end }) =>
-            `${moment(start).format('DD MMM')} - ${moment(end).format('DD MMM YYYY')}`,
-          agendaDateFormat: 'ddd, DD/MM',
-          agendaTimeFormat: 'HH:mm',
-          agendaTimeRangeFormat: ({ start, end }) =>
-            `${moment(start).format('HH:mm')} - ${moment(end).format('HH:mm')}`,
-        }}
-      />
-    </div>
-  );
+      <Calendar localizer={localizer} events={events} startAccessor="start" endAccessor="end" style={{
+      height: 800
+    }} messages={messages} views={[Views.MONTH, Views.WEEK, Views.DAY, Views.AGENDA]} defaultView={Views.MONTH} onSelectEvent={handleSelectEvent} eventPropGetter={eventStyleGetter} dayPropGetter={dayPropGetter} components={{
+      event: EventComponent,
+      toolbar: CustomToolbar
+    }} popup selectable={false} step={30} timeslots={2} min={moment().set({
+      hour: 7,
+      minute: 0
+    }).toDate()} max={moment().set({
+      hour: 22,
+      minute: 0
+    }).toDate()} formats={{
+      dayFormat: 'ddd DD/MM',
+      weekdayFormat: 'ddd',
+      monthHeaderFormat: 'MMMM [de] YYYY',
+      dayHeaderFormat: 'dddd, DD [de] MMMM',
+      dayRangeHeaderFormat: ({
+        start,
+        end
+      }) => `${moment(start).format('DD MMM')} - ${moment(end).format('DD MMM YYYY')}`,
+      agendaDateFormat: 'ddd, DD/MM',
+      agendaTimeFormat: 'HH:mm',
+      agendaTimeRangeFormat: ({
+        start,
+        end
+      }) => `${moment(start).format('HH:mm')} - ${moment(end).format('HH:mm')}`
+    }} />
+    </div>;
 }
