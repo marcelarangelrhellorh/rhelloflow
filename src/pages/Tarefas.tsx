@@ -114,11 +114,11 @@ export default function Tarefas() {
             </div>
             <div className="flex gap-2">
               <GoogleCalendarButton />
-              <Button onClick={handleNewMeeting} variant="outline" className="gap-2 text-base font-semibold bg-[#00141d] text-white">
+              <Button onClick={handleNewMeeting} variant="outline" className="gap-2 font-semibold bg-[#00141d] text-white text-sm">
                 <Video className="h-5 w-5" />
                 Nova Reunião
               </Button>
-              <Button onClick={handleNewTask} className="bg-[#ffcd00] hover:bg-[#ffcd00]/90 text-black font-semibold text-base">
+              <Button onClick={handleNewTask} className="bg-[#ffcd00] hover:bg-[#ffcd00]/90 text-black font-semibold text-sm">
                 <ListTodo className="h-5 w-5 mr-2" />
                 Nova Tarefa
               </Button>

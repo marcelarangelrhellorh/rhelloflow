@@ -43,7 +43,7 @@ export default function GoogleCalendarButton() {
     return <>
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="outline" className="gap-2 border-green-200 bg-green-50 hover:bg-green-100 text-green-700">
+            <Button variant="outline" className="gap-2 border-green-200 bg-green-50 hover:bg-green-100 text-green-700 text-sm">
               <CheckCircle2 className="h-4 w-4" />
               <span className="hidden sm:inline text-base font-semibold">Google Conectado</span>
             </Button>
