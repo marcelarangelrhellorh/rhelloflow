@@ -315,7 +315,7 @@ export default function Vagas() {
               </p>
             </div>
             <div className="flex gap-3">
-              <Button onClick={() => navigate("/vagas/nova")} className="bg-[#ffcd00] hover:bg-[#ffcd00]/90 text-[#00141d] font-bold h-11 px-6">
+              <Button onClick={() => navigate("/vagas/nova")} className="bg-[#ffcd00] hover:bg-[#ffcd00]/90 text-[#00141d] font-bold h-11 text-sm px-[10px] mx-0">
                 <Plus className="mr-2 h-4 w-4" />
                 Nova Vaga
               </Button>
