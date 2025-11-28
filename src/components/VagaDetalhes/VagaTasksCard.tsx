@@ -102,8 +102,8 @@ export function VagaTasksCard({
       <div className={cn("flex flex-col gap-3 rounded-lg p-6 bg-white dark:bg-background-dark border border-transparent shadow-sm", className)}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <CheckSquare className="h-5 w-5 text-primary" />
-            <p className="text-secondary-text-light dark:text-secondary-text-dark text-base font-medium">
+            <CheckSquare className="text-primary w-[30px] h-[30px]" />
+            <p className="text-secondary-text-light dark:text-secondary-text-dark font-semibold text-xl">
               Tarefas
             </p>
           </div>
@@ -118,7 +118,7 @@ export function VagaTasksCard({
           <span className="text-2xl font-bold text-primary-text-light dark:text-primary-text-dark">
             {tasks.length}
           </span>
-          <span className="text-sm text-muted-foreground font-semibold">tarefa{tasks.length !== 1 ? "s" : ""}</span>
+          <span className="text-muted-foreground font-semibold text-xs">tarefa{tasks.length !== 1 ? "s" : ""}</span>
           {overdueTasks.length > 0 && <Badge variant="destructive" className="text-base gap-1 whitespace-nowrap">
               <AlertTriangle className="h-4 w-4" />
               {overdueTasks.length} atrasada{overdueTasks.length !== 1 ? "s" : ""}
