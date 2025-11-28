@@ -213,10 +213,12 @@ export default function Tarefas() {
 
       {/* Content */}
       <div className="container mx-auto px-6 py-8">
-        {/* Dashboard */}
-        <div className="mb-8">
-          <TasksDashboard onTaskClick={handleEdit} />
-        </div>
+        {/* Dashboard - hide on calendar view */}
+        {view !== "calendar" && (
+          <div className="mb-8">
+            <TasksDashboard onTaskClick={handleEdit} />
+          </div>
+        )}
 
         {isLoading ? (
           <div className="space-y-4">
