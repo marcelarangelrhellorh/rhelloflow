@@ -1,14 +1,16 @@
 import { useState } from 'react';
-import { Calendar, Link2, Unlink, CheckCircle2 } from 'lucide-react';
+import { Calendar, Link2, Unlink, CheckCircle2, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useGoogleCalendar } from '@/hooks/useGoogleCalendar';
+import { useTaskSync } from '@/hooks/useTaskSync';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 export default function GoogleCalendarButton() {
   const { isConnected, isLoading, lastSync, connectCalendar, disconnectCalendar } = useGoogleCalendar();
+  const { syncAllTasks, isSyncing } = useTaskSync();
   const [showDisconnectDialog, setShowDisconnectDialog] = useState(false);
   const [isDisconnecting, setIsDisconnecting] = useState(false);
 
@@ -21,6 +23,10 @@ export default function GoogleCalendarButton() {
     await disconnectCalendar();
     setIsDisconnecting(false);
     setShowDisconnectDialog(false);
+  };
+
+  const handleSyncAll = async () => {
+    await syncAllTasks();
   };
 
   if (isLoading) {
@@ -42,8 +48,8 @@ export default function GoogleCalendarButton() {
               <span className="hidden sm:inline">Google Calendar</span>
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-64" align="end">
-            <div className="space-y-3">
+          <PopoverContent className="w-72" align="end">
+            <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <Calendar className="h-5 w-5 text-primary" />
                 <span className="font-semibold">Google Calendar</span>
@@ -57,15 +63,31 @@ export default function GoogleCalendarButton() {
                   Última sincronização: {formatDistanceToNow(new Date(lastSync), { addSuffix: true, locale: ptBR })}
                 </p>
               )}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowDisconnectDialog(true)}
-                className="w-full text-destructive hover:text-destructive"
-              >
-                <Unlink className="h-4 w-4 mr-2" />
-                Desconectar
-              </Button>
+              <div className="space-y-2 pt-2 border-t">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleSyncAll}
+                  disabled={isSyncing}
+                  className="w-full"
+                >
+                  {isSyncing ? (
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                  )}
+                  Sincronizar Todas as Tarefas
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowDisconnectDialog(true)}
+                  className="w-full text-destructive hover:text-destructive"
+                >
+                  <Unlink className="h-4 w-4 mr-2" />
+                  Desconectar
+                </Button>
+              </div>
             </div>
           </PopoverContent>
         </Popover>

@@ -1970,6 +1970,57 @@ export type Database = {
           },
         ]
       }
+      sync_logs: {
+        Row: {
+          action: string
+          created_at: string | null
+          details: Json | null
+          error_message: string | null
+          google_event_id: string | null
+          id: string
+          status: string
+          task_id: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          details?: Json | null
+          error_message?: string | null
+          google_event_id?: string | null
+          id?: string
+          status?: string
+          task_id?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          details?: Json | null
+          error_message?: string | null
+          google_event_id?: string | null
+          id?: string
+          status?: string
+          task_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sync_logs_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sync_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tags: {
         Row: {
           active: boolean | null
@@ -2003,45 +2054,69 @@ export type Database = {
       tasks: {
         Row: {
           assignee_id: string | null
+          calendar_id: string | null
           candidato_id: string | null
           created_at: string | null
           created_by: string | null
           description: string | null
           due_date: string | null
           empresa_id: string | null
+          end_time: string | null
+          google_calendar_event_id: string | null
+          google_calendar_last_sync: string | null
+          google_calendar_synced: boolean | null
           id: string
           priority: string | null
+          reminder_minutes: number | null
+          start_time: string | null
           status: string | null
+          sync_enabled: boolean | null
           title: string
           updated_at: string | null
           vaga_id: string | null
         }
         Insert: {
           assignee_id?: string | null
+          calendar_id?: string | null
           candidato_id?: string | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
           due_date?: string | null
           empresa_id?: string | null
+          end_time?: string | null
+          google_calendar_event_id?: string | null
+          google_calendar_last_sync?: string | null
+          google_calendar_synced?: boolean | null
           id?: string
           priority?: string | null
+          reminder_minutes?: number | null
+          start_time?: string | null
           status?: string | null
+          sync_enabled?: boolean | null
           title: string
           updated_at?: string | null
           vaga_id?: string | null
         }
         Update: {
           assignee_id?: string | null
+          calendar_id?: string | null
           candidato_id?: string | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
           due_date?: string | null
           empresa_id?: string | null
+          end_time?: string | null
+          google_calendar_event_id?: string | null
+          google_calendar_last_sync?: string | null
+          google_calendar_synced?: boolean | null
           id?: string
           priority?: string | null
+          reminder_minutes?: number | null
+          start_time?: string | null
           status?: string | null
+          sync_enabled?: boolean | null
           title?: string
           updated_at?: string | null
           vaga_id?: string | null

@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Task } from "@/hooks/useTasks";
 import { cn } from "@/lib/utils";
 import SyncTaskToCalendar from "./SyncTaskToCalendar";
+import { TaskSyncIndicator } from "./TaskSyncIndicator";
 interface TaskCardProps {
   task: Task;
   onEdit: (task: Task) => void;
@@ -49,10 +50,15 @@ export default function TaskCard({
       <div className="space-y-3">
         {/* Header */}
         <div className="flex items-start justify-between gap-2">
-          <div className="flex-1">
+          <div className="flex-1 flex items-center gap-2">
             <h3 className={cn("font-semibold text-lg", task.status === 'done' && "line-through")}>
               {task.title}
             </h3>
+            <TaskSyncIndicator 
+              isSynced={task.google_calendar_synced}
+              lastSync={task.google_calendar_last_sync}
+              syncEnabled={task.sync_enabled}
+            />
           </div>
           <Badge className={`text-sm font-semibold ${priorityColors[task.priority]}`}>
             {priorityLabels[task.priority]}
