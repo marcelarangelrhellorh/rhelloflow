@@ -92,6 +92,11 @@ export default function Tarefas() {
     setDetailDrawerOpen(true);
   };
 
+  // Filter only tasks (not meetings) for Kanban and List views
+  const onlyTasks = useMemo(() => {
+    return tasks?.filter(task => task.task_type !== 'meeting') || [];
+  }, [tasks]);
+
   // Filter only synced meetings for calendar view (meetings with google_calendar_event_id)
   const syncedMeetings = useMemo(() => {
     return tasks?.filter(task => task.task_type === 'meeting' && task.google_calendar_event_id) || [];
@@ -218,14 +223,14 @@ export default function Tarefas() {
                 <Video className="h-5 w-5" />
                 {allMeetings.length === 0 ? "Criar sua primeira reunião" : "Criar e sincronizar reunião"}
               </Button>
-            </div> : <CalendarView meetings={syncedMeetings} onEventClick={handleTaskClick} /> : !tasks || tasks.length === 0 ? <div className="text-center py-16">
+            </div> : <CalendarView meetings={syncedMeetings} onEventClick={handleTaskClick} /> : onlyTasks.length === 0 ? <div className="text-center py-16">
             <p className="text-muted-foreground text-lg mb-4">Nenhuma tarefa encontrada</p>
             <Button onClick={handleNewTask} className="bg-[#ffcd00] hover:bg-[#ffcd00]/90 text-black font-semibold">
               <Plus className="h-5 w-5 mr-2" />
               Criar sua primeira tarefa
             </Button>
-          </div> : view === "kanban" ? <TaskKanban tasks={tasks} onEdit={handleEdit} onDelete={handleDelete} onTaskClick={handleTaskClick} /> : <div className="space-y-4">
-            {tasks.map(task => <TaskCard key={task.id} task={task} onEdit={handleEdit} onDelete={handleDelete} onToggleComplete={handleToggleComplete} onCardClick={handleTaskClick} />)}
+          </div> : view === "kanban" ? <TaskKanban tasks={onlyTasks} onEdit={handleEdit} onDelete={handleDelete} onTaskClick={handleTaskClick} /> : <div className="space-y-4">
+            {onlyTasks.map(task => <TaskCard key={task.id} task={task} onEdit={handleEdit} onDelete={handleDelete} onToggleComplete={handleToggleComplete} onCardClick={handleTaskClick} />)}
           </div>}
       </div>
 
