@@ -1,8 +1,5 @@
 project_id = "feclxfhohmovmxqxyexz"
 
-[functions.sync-google-calendar]
-verify_jwt = true
-
 [functions.submit-public-job]
 verify_jwt = false
 
