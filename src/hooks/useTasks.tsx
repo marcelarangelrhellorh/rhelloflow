@@ -19,6 +19,16 @@ export interface Task {
   candidato_id: string | null;
   created_at: string;
   updated_at: string;
+  // Google Calendar sync fields
+  google_calendar_event_id: string | null;
+  google_calendar_synced: boolean;
+  google_calendar_last_sync: string | null;
+  sync_enabled: boolean;
+  calendar_id: string | null;
+  start_time: string | null;
+  end_time: string | null;
+  reminder_minutes: number | null;
+  // Relations
   assignee?: {
     id: string;
     full_name: string;

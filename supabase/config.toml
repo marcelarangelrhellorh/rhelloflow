@@ -72,3 +72,9 @@ verify_jwt = true
 [functions.google-calendar-api]
 verify_jwt = true
 
+[functions.sync-task-to-calendar]
+verify_jwt = true
+
+[functions.bulk-sync-tasks]
+verify_jwt = true
+

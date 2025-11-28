@@ -1,92 +1,92 @@
 import { useState } from 'react';
-import { Calendar, Loader2 } from 'lucide-react';
+import { Calendar, RefreshCw, ExternalLink, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Task } from '@/hooks/useTasks';
+import { useTaskSync } from '@/hooks/useTaskSync';
 import { useGoogleCalendar } from '@/hooks/useGoogleCalendar';
 import { toast } from 'sonner';
-import { Task } from '@/hooks/useTasks';
+import { cn } from '@/lib/utils';
 
 interface SyncTaskToCalendarProps {
   task: Task;
   variant?: 'icon' | 'button';
+  className?: string;
 }
 
-export default function SyncTaskToCalendar({ task, variant = 'icon' }: SyncTaskToCalendarProps) {
-  const { isConnected, createEvent, isLoading: calendarLoading } = useGoogleCalendar();
+export default function SyncTaskToCalendar({ task, variant = 'icon', className }: SyncTaskToCalendarProps) {
   const [isSyncing, setIsSyncing] = useState(false);
+  const { syncTask } = useTaskSync();
+  const { isConnected, isLoading: calendarLoading } = useGoogleCalendar();
+
+  if (!isConnected || calendarLoading) {
+    return null;
+  }
 
   const handleSync = async (e: React.MouseEvent) => {
     e.stopPropagation();
     
-    if (!isConnected) {
-      toast.error('Conecte seu Google Calendar primeiro nas configurações');
-      return;
-    }
-
     if (!task.due_date) {
       toast.error('A tarefa precisa ter uma data de vencimento para sincronizar');
       return;
     }
 
+    if (!task.sync_enabled) {
+      toast.info('Sincronização desabilitada para esta tarefa');
+      return;
+    }
+
     setIsSyncing(true);
     
-    try {
-      const startDateTime = new Date(task.due_date);
-      const endDateTime = new Date(startDateTime.getTime() + 60 * 60 * 1000); // 1 hour duration
+    const action = task.google_calendar_event_id ? 'update' : 'create';
+    const result = await syncTask(task.id, action);
+    
+    if (!result.success && result.error) {
+      toast.error(result.error);
+    }
+    
+    setIsSyncing(false);
+  };
 
-      const eventData = {
-        summary: task.title,
-        description: task.description || `Tarefa: ${task.title}\nPrioridade: ${task.priority}\nStatus: ${task.status}`,
-        start: {
-          dateTime: startDateTime.toISOString(),
-          timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        },
-        end: {
-          dateTime: endDateTime.toISOString(),
-          timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        },
-        reminders: {
-          useDefault: false,
-          overrides: [
-            { method: 'popup', minutes: 30 },
-            { method: 'email', minutes: 60 },
-          ],
-        },
-      };
-
-      const result = await createEvent(eventData);
-      
-      if (result) {
-        toast.success('Tarefa sincronizada com o Google Calendar');
-      }
-    } catch (error) {
-      console.error('Error syncing task:', error);
-      toast.error('Erro ao sincronizar com o Google Calendar');
-    } finally {
-      setIsSyncing(false);
+  const handleOpenInCalendar = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (task.google_calendar_event_id) {
+      window.open(
+        `https://calendar.google.com/calendar/r/eventedit/${task.google_calendar_event_id}`,
+        '_blank'
+      );
     }
   };
 
-  if (!isConnected) {
-    return null;
-  }
-
   if (variant === 'button') {
     return (
-      <Button
-        onClick={handleSync}
-        disabled={isSyncing || calendarLoading || !task.due_date}
-        variant="outline"
-        size="sm"
-        className="gap-2"
-      >
-        {isSyncing ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
-        ) : (
-          <Calendar className="h-4 w-4" />
+      <div className={cn("flex gap-2", className)}>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={handleSync}
+          disabled={isSyncing || !task.sync_enabled || !task.due_date}
+          className="gap-2"
+        >
+          {isSyncing ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Calendar className="h-4 w-4" />
+          )}
+          {task.google_calendar_synced ? 'Atualizar no Calendar' : 'Adicionar ao Calendar'}
+        </Button>
+        {task.google_calendar_event_id && (
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={handleOpenInCalendar}
+            className="gap-2"
+          >
+            <ExternalLink className="h-4 w-4" />
+            Ver no Calendar
+          </Button>
         )}
-        Adicionar ao Calendário
-      </Button>
+      </div>
     );
   }
 
@@ -94,21 +94,29 @@ export default function SyncTaskToCalendar({ task, variant = 'icon' }: SyncTaskT
     <Tooltip>
       <TooltipTrigger asChild>
         <Button
-          onClick={handleSync}
-          disabled={isSyncing || calendarLoading || !task.due_date}
+          size="sm"
           variant="ghost"
-          size="icon"
-          className="h-8 w-8"
+          onClick={handleSync}
+          disabled={isSyncing || !task.sync_enabled || !task.due_date}
+          className={cn("px-2", className)}
         >
           {isSyncing ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
+          ) : task.google_calendar_synced ? (
+            <Calendar className="h-4 w-4 text-green-500" />
           ) : (
-            <Calendar className="h-4 w-4 text-muted-foreground hover:text-primary" />
+            <Calendar className="h-4 w-4 text-muted-foreground" />
           )}
         </Button>
       </TooltipTrigger>
       <TooltipContent>
-        {task.due_date ? 'Adicionar ao Google Calendar' : 'Defina uma data de vencimento primeiro'}
+        {!task.due_date 
+          ? 'Defina uma data de vencimento primeiro'
+          : !task.sync_enabled
+          ? 'Sincronização desabilitada'
+          : task.google_calendar_synced
+          ? 'Sincronizado - Clique para atualizar'
+          : 'Adicionar ao Google Calendar'}
       </TooltipContent>
     </Tooltip>
   );

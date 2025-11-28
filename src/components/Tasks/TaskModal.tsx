@@ -15,6 +15,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -26,9 +27,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Task, TaskPriority, TaskStatus, useCreateTask, useUpdateTask } from "@/hooks/useTasks";
+import { useTaskSync } from "@/hooks/useTaskSync";
+import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Calendar } from "lucide-react";
 
 const taskSchema = z.object({
   title: z.string().min(1, "Título é obrigatório"),
@@ -38,6 +43,11 @@ const taskSchema = z.object({
   due_date: z.string().optional(),
   assignee_id: z.string().min(1, "Responsável é obrigatório"),
   vaga_id: z.string().optional(),
+  // Sync fields
+  sync_enabled: z.boolean().default(true),
+  start_time: z.string().optional(),
+  end_time: z.string().optional(),
+  reminder_minutes: z.number().optional(),
 });
 
 type TaskFormData = z.infer<typeof taskSchema>;
@@ -52,6 +62,8 @@ interface TaskModalProps {
 export default function TaskModal({ open, onClose, task, defaultVagaId }: TaskModalProps) {
   const createTask = useCreateTask();
   const updateTask = useUpdateTask();
+  const { syncTask, isCalendarConnected } = useTaskSync();
+  const { isConnected: calendarConnected } = useGoogleCalendar();
 
   const form = useForm<TaskFormData>({
     resolver: zodResolver(taskSchema),
@@ -63,6 +75,10 @@ export default function TaskModal({ open, onClose, task, defaultVagaId }: TaskMo
       due_date: "",
       assignee_id: "",
       vaga_id: "",
+      sync_enabled: true,
+      start_time: "09:00",
+      end_time: "10:00",
+      reminder_minutes: 30,
     },
   });
 
@@ -104,6 +120,10 @@ export default function TaskModal({ open, onClose, task, defaultVagaId }: TaskMo
         due_date: task.due_date ? new Date(task.due_date).toISOString().slice(0, 16) : "",
         assignee_id: task.assignee_id || "",
         vaga_id: task.vaga_id || "",
+        sync_enabled: task.sync_enabled ?? true,
+        start_time: task.start_time || "09:00",
+        end_time: task.end_time || "10:00",
+        reminder_minutes: task.reminder_minutes || 30,
       });
     } else {
       // Creating new task
@@ -115,11 +135,16 @@ export default function TaskModal({ open, onClose, task, defaultVagaId }: TaskMo
         due_date: "",
         assignee_id: "",
         vaga_id: defaultVagaId || "",
+        sync_enabled: true,
+        start_time: "09:00",
+        end_time: "10:00",
+        reminder_minutes: 30,
       });
     }
   }, [task, defaultVagaId, form]);
 
   const isEditing = task && task.id;
+  const syncEnabled = form.watch("sync_enabled");
 
   const onSubmit = async (data: TaskFormData) => {
     const taskData = {
@@ -127,12 +152,27 @@ export default function TaskModal({ open, onClose, task, defaultVagaId }: TaskMo
       due_date: data.due_date ? new Date(data.due_date).toISOString() : null,
       assignee_id: data.assignee_id || null,
       vaga_id: data.vaga_id || null,
+      start_time: data.start_time || null,
+      end_time: data.end_time || null,
+      reminder_minutes: data.reminder_minutes || 30,
     };
 
+    let savedTask: any;
+    
     if (isEditing) {
-      await updateTask.mutateAsync({ id: task.id, ...taskData });
+      savedTask = await updateTask.mutateAsync({ id: task.id, ...taskData });
+      
+      // Auto-sync if connected and enabled
+      if (calendarConnected && data.sync_enabled && data.due_date) {
+        syncTask(task.id, 'update');
+      }
     } else {
-      await createTask.mutateAsync(taskData);
+      savedTask = await createTask.mutateAsync(taskData);
+      
+      // Auto-sync new task if connected and enabled
+      if (calendarConnected && data.sync_enabled && data.due_date && savedTask?.id) {
+        syncTask(savedTask.id, 'create');
+      }
     }
 
     onClose();
@@ -299,6 +339,97 @@ export default function TaskModal({ open, onClose, task, defaultVagaId }: TaskMo
                 )}
               />
             </div>
+
+            {/* Google Calendar Sync Options */}
+            {calendarConnected && (
+              <div className="space-y-4 border-t pt-4">
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-5 w-5 text-primary" />
+                  <h3 className="font-semibold">Google Calendar</h3>
+                </div>
+                
+                <FormField
+                  control={form.control}
+                  name="sync_enabled"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel>Sincronizar com Google Calendar</FormLabel>
+                        <FormDescription>
+                          Esta tarefa será automaticamente adicionada ao seu calendário
+                        </FormDescription>
+                      </div>
+                    </FormItem>
+                  )}
+                />
+
+                {syncEnabled && (
+                  <div className="grid grid-cols-3 gap-4 pl-6">
+                    <FormField
+                      control={form.control}
+                      name="start_time"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Horário início</FormLabel>
+                          <FormControl>
+                            <Input type="time" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="end_time"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Horário término</FormLabel>
+                          <FormControl>
+                            <Input type="time" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="reminder_minutes"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Lembrete</FormLabel>
+                          <Select 
+                            onValueChange={(val) => field.onChange(parseInt(val))} 
+                            value={field.value?.toString() || "30"}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Lembrete" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="5">5 minutos antes</SelectItem>
+                              <SelectItem value="15">15 minutos antes</SelectItem>
+                              <SelectItem value="30">30 minutos antes</SelectItem>
+                              <SelectItem value="60">1 hora antes</SelectItem>
+                              <SelectItem value="1440">1 dia antes</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                )}
+              </div>
+            )}
 
             <div className="flex justify-end gap-2 pt-4">
               <Button type="button" variant="outline" onClick={onClose}>

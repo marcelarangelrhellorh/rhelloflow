@@ -2,13 +2,14 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { format } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CheckCircle2, Clock, Circle, AlertTriangle, Calendar, User, Briefcase, Edit } from "lucide-react";
+import { CheckCircle2, Clock, Circle, AlertTriangle, Calendar, User, Briefcase, Edit, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Task, TaskStatus, TaskPriority, useUpdateTask } from "@/hooks/useTasks";
 import { isPast, isToday } from "date-fns";
 import SyncTaskToCalendar from "@/components/Tasks/SyncTaskToCalendar";
+import { TaskSyncIndicator } from "@/components/Tasks/TaskSyncIndicator";
 interface TaskDetailDrawerProps {
   task: Task | null;
   open: boolean;
@@ -88,8 +89,13 @@ export function TaskDetailDrawer({
               </Badge>
             </div>
           </div>
-          <SheetTitle className="text-left text-xl font-bold mt-2">
+          <SheetTitle className="text-left text-xl font-bold mt-2 flex items-center gap-2">
             {task.title}
+            <TaskSyncIndicator 
+              isSynced={task.google_calendar_synced}
+              lastSync={task.google_calendar_last_sync}
+              syncEnabled={task.sync_enabled}
+            />
           </SheetTitle>
         </SheetHeader>
 
