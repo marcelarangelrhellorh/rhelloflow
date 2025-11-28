@@ -14,6 +14,7 @@ import { VagaCandidatesTable } from "@/components/VagaDetalhes/VagaCandidatesTab
 import { VagaActivityLog } from "@/components/VagaDetalhes/VagaActivityLog";
 import { VagaDetailsDrawer } from "@/components/VagaDetalhes/VagaDetailsDrawer";
 import { VagaTasksCard } from "@/components/VagaDetalhes/VagaTasksCard";
+import { JobHistorySection } from "@/components/VagaDetalhes/JobHistorySection";
 import { toast } from "@/hooks/use-toast";
 
 // Custom hooks with React Query
@@ -160,6 +161,8 @@ export default function VagaDetalhes() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
               <VagaTimeline currentStatusSlug={vaga.status_slug || "a_iniciar"} progress={progress} />
+
+              <JobHistorySection vagaId={vaga.id} />
 
               {vaga.status === "Concluído" && candidatoContratado && <div className="mb-8 p-6 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border-2 border-green-500 dark:border-green-400 rounded-lg shadow-sm">
                   <div className="flex items-center gap-3">
