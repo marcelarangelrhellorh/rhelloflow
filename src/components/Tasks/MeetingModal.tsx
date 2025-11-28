@@ -41,7 +41,7 @@ const meetingSchema = z.object({
   start_time: z.string().min(1, "Horário de início é obrigatório"),
   end_time: z.string().min(1, "Horário de término é obrigatório"),
   assignee_id: z.string().min(1, "Responsável é obrigatório"),
-  vaga_id: z.string().optional(),
+  vaga_id: z.string().min(1, "Vaga é obrigatória"),
   attendee_emails: z.string().optional(),
   reminder_minutes: z.number().default(30),
 });
@@ -348,7 +348,7 @@ export default function MeetingModal({ open, onClose, task, defaultVagaId }: Mee
               name="vaga_id"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Vincular a Vaga (opcional)</FormLabel>
+                  <FormLabel>Vincular a Vaga *</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value || undefined}>
                     <FormControl>
                       <SelectTrigger>
