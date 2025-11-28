@@ -185,7 +185,7 @@ export default function VagaDetalhes() {
             </div>
 
             <div className="lg:col-span-1 space-y-6">
-              <VagaActivityLog eventos={eventos} candidatoContratado={candidatoContratado} vagaStatus={vaga.status} />
+              <VagaActivityLog eventos={eventos} candidatoContratado={candidatoContratado} vagaStatus={vaga.status} className="px-0 mx-0" />
             </div>
           </div>
         </div>
