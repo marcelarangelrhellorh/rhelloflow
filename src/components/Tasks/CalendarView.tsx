@@ -2,8 +2,9 @@ import { useMemo } from 'react';
 import { Calendar, momentLocalizer, Views } from 'react-big-calendar';
 import moment from 'moment';
 import 'moment/locale/pt-br';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { Task } from '@/hooks/useTasks';
-import { Video } from 'lucide-react';
+import { Video, Clock } from 'lucide-react';
 
 // Set moment locale to Portuguese
 moment.locale('pt-br');
@@ -23,29 +24,96 @@ interface CalendarViewProps {
   onEventClick: (task: Task) => void;
 }
 
-// Custom event component
-const EventComponent = ({ event }: { event: CalendarEvent }) => (
-  <div className="flex items-center gap-1 text-xs">
-    <Video className="h-3 w-3 flex-shrink-0" />
-    <span className="truncate">{event.title}</span>
-  </div>
-);
+// Custom event component with better visibility
+const EventComponent = ({ event }: { event: CalendarEvent }) => {
+  const startTime = moment(event.start).format('HH:mm');
+  const endTime = moment(event.end).format('HH:mm');
+  
+  return (
+    <div className="flex flex-col gap-0.5 p-1 h-full overflow-hidden">
+      <div className="flex items-center gap-1.5">
+        <Video className="h-3.5 w-3.5 flex-shrink-0 text-white" />
+        <span className="font-semibold text-sm truncate text-white">{event.title}</span>
+      </div>
+      <div className="flex items-center gap-1 text-white/80">
+        <Clock className="h-3 w-3 flex-shrink-0" />
+        <span className="text-xs">{startTime} - {endTime}</span>
+      </div>
+    </div>
+  );
+};
 
 // Messages in Portuguese
 const messages = {
-  allDay: 'Dia todo',
-  previous: 'Anterior',
-  next: 'Próximo',
+  allDay: 'Dia inteiro',
+  previous: '← Anterior',
+  next: 'Próximo →',
   today: 'Hoje',
   month: 'Mês',
   week: 'Semana',
   day: 'Dia',
-  agenda: 'Agenda',
+  agenda: 'Lista',
   date: 'Data',
-  time: 'Hora',
-  event: 'Evento',
-  noEventsInRange: 'Não há reuniões neste período.',
-  showMore: (total: number) => `+${total} mais`,
+  time: 'Horário',
+  event: 'Reunião',
+  noEventsInRange: 'Nenhuma reunião agendada neste período.',
+  showMore: (total: number) => `+ ${total} reunião(ões)`,
+  work_week: 'Semana útil',
+};
+
+// Custom toolbar component
+const CustomToolbar = ({ label, onNavigate, onView, view }: any) => {
+  return (
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6 pb-4 border-b border-border">
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => onNavigate('TODAY')}
+          className="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+        >
+          Hoje
+        </button>
+        <div className="flex items-center border border-border rounded-lg overflow-hidden">
+          <button
+            onClick={() => onNavigate('PREV')}
+            className="px-3 py-2 text-sm font-medium hover:bg-muted transition-colors"
+          >
+            ←
+          </button>
+          <button
+            onClick={() => onNavigate('NEXT')}
+            className="px-3 py-2 text-sm font-medium hover:bg-muted transition-colors border-l border-border"
+          >
+            →
+          </button>
+        </div>
+      </div>
+      
+      <h2 className="text-xl font-bold text-foreground capitalize">{label}</h2>
+      
+      <div className="flex items-center border border-border rounded-lg overflow-hidden">
+        {[
+          { key: Views.MONTH, label: 'Mês' },
+          { key: Views.WEEK, label: 'Semana' },
+          { key: Views.DAY, label: 'Dia' },
+          { key: Views.AGENDA, label: 'Lista' },
+        ].map((item, index) => (
+          <button
+            key={item.key}
+            onClick={() => onView(item.key)}
+            className={`px-4 py-2 text-sm font-medium transition-colors ${
+              index > 0 ? 'border-l border-border' : ''
+            } ${
+              view === item.key
+                ? 'bg-primary text-primary-foreground'
+                : 'hover:bg-muted'
+            }`}
+          >
+            {item.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
 };
 
 export default function CalendarView({ meetings, onEventClick }: CalendarViewProps) {
@@ -82,159 +150,330 @@ export default function CalendarView({ meetings, onEventClick }: CalendarViewPro
     
     return {
       style: {
-        backgroundColor: isCompleted ? '#94a3b8' : '#00141d',
-        borderRadius: '4px',
-        opacity: isCompleted ? 0.6 : 1,
-        color: 'white',
+        backgroundColor: isCompleted ? 'hsl(var(--muted))' : 'hsl(var(--primary))',
+        borderRadius: '6px',
+        opacity: isCompleted ? 0.7 : 1,
+        color: isCompleted ? 'hsl(var(--muted-foreground))' : 'hsl(var(--primary-foreground))',
         border: 'none',
-        fontSize: '12px',
-        padding: '2px 4px',
+        padding: '4px 8px',
+        fontSize: '13px',
+        fontWeight: 500,
+        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+        cursor: 'pointer',
+      },
+    };
+  };
+
+  // Day cell styling
+  const dayPropGetter = (date: Date) => {
+    const isToday = moment(date).isSame(moment(), 'day');
+    return {
+      style: {
+        backgroundColor: isToday ? 'hsl(var(--primary) / 0.05)' : undefined,
       },
     };
   };
 
   return (
-    <div className="bg-white rounded-lg border shadow-sm p-4">
+    <div className="bg-card rounded-xl border border-border shadow-sm p-6">
       <style>{`
         .rbc-calendar {
           font-family: inherit;
+          min-height: 650px;
         }
+        
+        /* Header styling */
         .rbc-header {
-          padding: 8px 4px;
+          padding: 12px 8px;
           font-weight: 600;
-          font-size: 14px;
-          color: #00141d;
-          background: #f8f9fa;
-          border-bottom: 1px solid #e5e7eb;
+          font-size: 13px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          color: hsl(var(--muted-foreground));
+          background: hsl(var(--muted) / 0.3);
+          border-bottom: 1px solid hsl(var(--border)) !important;
         }
+        
+        /* Month view */
         .rbc-month-view {
-          border: 1px solid #e5e7eb;
-          border-radius: 8px;
+          border: 1px solid hsl(var(--border));
+          border-radius: 12px;
           overflow: hidden;
+          background: hsl(var(--card));
         }
+        
+        .rbc-month-row {
+          min-height: 120px;
+        }
+        
         .rbc-day-bg {
-          background: white;
+          background: hsl(var(--card));
+          transition: background-color 0.2s;
         }
+        
+        .rbc-day-bg:hover {
+          background: hsl(var(--muted) / 0.3);
+        }
+        
         .rbc-day-bg + .rbc-day-bg {
-          border-left: 1px solid #e5e7eb;
+          border-left: 1px solid hsl(var(--border));
         }
+        
         .rbc-month-row + .rbc-month-row {
-          border-top: 1px solid #e5e7eb;
+          border-top: 1px solid hsl(var(--border));
         }
+        
         .rbc-off-range-bg {
-          background: #f8f9fa;
+          background: hsl(var(--muted) / 0.2);
         }
+        
         .rbc-today {
-          background-color: #fffbeb !important;
+          background-color: hsl(var(--primary) / 0.08) !important;
         }
-        .rbc-toolbar {
-          margin-bottom: 16px;
-          gap: 8px;
-          flex-wrap: wrap;
-        }
-        .rbc-toolbar button {
-          padding: 8px 16px;
-          border: 1px solid #e5e7eb;
-          background: white;
-          color: #00141d;
-          font-weight: 500;
-          border-radius: 6px;
-          font-size: 14px;
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-        .rbc-toolbar button:hover {
-          background: #f8f9fa;
-          border-color: #d1d5db;
-        }
-        .rbc-toolbar button.rbc-active {
-          background: #ffcd00;
-          border-color: #ffcd00;
-          color: #00141d;
-          font-weight: 600;
-        }
-        .rbc-toolbar-label {
-          font-weight: 700;
-          font-size: 18px;
-          color: #00141d;
-          text-transform: capitalize;
-        }
-        .rbc-event {
-          cursor: pointer;
-        }
-        .rbc-event:hover {
-          opacity: 0.9;
-        }
-        .rbc-show-more {
-          color: #00141d;
-          font-weight: 500;
-          font-size: 12px;
-        }
+        
+        /* Date cell */
         .rbc-date-cell {
           text-align: right;
-          padding: 4px 8px;
+          padding: 8px 12px;
           font-size: 14px;
-          color: #64748b;
+          font-weight: 500;
+          color: hsl(var(--muted-foreground));
         }
+        
         .rbc-date-cell.rbc-now {
           font-weight: 700;
-          color: #00141d;
+          color: hsl(var(--primary));
         }
+        
+        .rbc-date-cell.rbc-now > a {
+          background: hsl(var(--primary));
+          color: hsl(var(--primary-foreground));
+          padding: 4px 8px;
+          border-radius: 50%;
+          display: inline-block;
+          min-width: 28px;
+          text-align: center;
+        }
+        
+        /* Events */
+        .rbc-event {
+          cursor: pointer;
+          transition: transform 0.15s, box-shadow 0.15s;
+          min-height: 28px;
+        }
+        
+        .rbc-event:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
+        }
+        
+        .rbc-event:focus {
+          outline: 2px solid hsl(var(--ring));
+          outline-offset: 2px;
+        }
+        
+        .rbc-event-content {
+          font-size: 13px;
+          font-weight: 500;
+        }
+        
+        .rbc-row-segment {
+          padding: 2px 4px;
+        }
+        
+        /* Show more link */
+        .rbc-show-more {
+          color: hsl(var(--primary));
+          font-weight: 600;
+          font-size: 12px;
+          padding: 4px 8px;
+          background: hsl(var(--primary) / 0.1);
+          border-radius: 4px;
+          margin: 2px 4px;
+        }
+        
+        .rbc-show-more:hover {
+          background: hsl(var(--primary) / 0.2);
+        }
+        
+        /* Week and Day views */
         .rbc-time-view {
-          border: 1px solid #e5e7eb;
-          border-radius: 8px;
+          border: 1px solid hsl(var(--border));
+          border-radius: 12px;
           overflow: hidden;
+          background: hsl(var(--card));
         }
+        
         .rbc-time-header {
-          border-bottom: 1px solid #e5e7eb;
+          border-bottom: 1px solid hsl(var(--border));
         }
+        
+        .rbc-time-header-content {
+          border-left: 1px solid hsl(var(--border));
+        }
+        
         .rbc-time-content {
           border-top: none;
         }
-        .rbc-timeslot-group {
-          border-bottom: 1px solid #f1f5f9;
+        
+        .rbc-time-content > * + * > * {
+          border-left: 1px solid hsl(var(--border));
         }
+        
+        .rbc-timeslot-group {
+          border-bottom: 1px solid hsl(var(--border) / 0.5);
+          min-height: 60px;
+        }
+        
         .rbc-time-slot {
           font-size: 12px;
-          color: #94a3b8;
+          color: hsl(var(--muted-foreground));
+          padding: 4px 8px;
         }
+        
+        .rbc-label {
+          font-size: 12px;
+          font-weight: 500;
+          color: hsl(var(--muted-foreground));
+          padding: 8px;
+        }
+        
         .rbc-current-time-indicator {
-          background-color: #ef4444;
+          background-color: hsl(var(--destructive));
+          height: 2px;
         }
+        
+        .rbc-current-time-indicator::before {
+          content: '';
+          position: absolute;
+          left: -6px;
+          top: -4px;
+          width: 10px;
+          height: 10px;
+          background: hsl(var(--destructive));
+          border-radius: 50%;
+        }
+        
+        /* Agenda view */
         .rbc-agenda-view {
-          border: 1px solid #e5e7eb;
-          border-radius: 8px;
+          border: 1px solid hsl(var(--border));
+          border-radius: 12px;
           overflow: hidden;
+          background: hsl(var(--card));
         }
-        .rbc-agenda-table {
+        
+        .rbc-agenda-view table.rbc-agenda-table {
           border: none;
         }
+        
+        .rbc-agenda-view table.rbc-agenda-table thead > tr > th {
+          padding: 12px 16px;
+          font-weight: 600;
+          font-size: 13px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          color: hsl(var(--muted-foreground));
+          background: hsl(var(--muted) / 0.3);
+          border-bottom: 1px solid hsl(var(--border));
+        }
+        
+        .rbc-agenda-view table.rbc-agenda-table tbody > tr > td {
+          padding: 12px 16px;
+          border-bottom: 1px solid hsl(var(--border) / 0.5);
+          vertical-align: middle;
+        }
+        
+        .rbc-agenda-view table.rbc-agenda-table tbody > tr:hover {
+          background: hsl(var(--muted) / 0.3);
+        }
+        
         .rbc-agenda-date-cell,
         .rbc-agenda-time-cell {
-          padding: 8px 12px;
           font-size: 14px;
+          font-weight: 500;
           white-space: nowrap;
+          color: hsl(var(--foreground));
         }
+        
         .rbc-agenda-event-cell {
+          font-size: 14px;
+          font-weight: 500;
+        }
+        
+        /* Toolbar override (hidden since we use custom) */
+        .rbc-toolbar {
+          display: none;
+        }
+        
+        /* Overlay styling */
+        .rbc-overlay {
+          background: hsl(var(--card));
+          border: 1px solid hsl(var(--border));
+          border-radius: 8px;
+          box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+          padding: 8px;
+          z-index: 50;
+        }
+        
+        .rbc-overlay-header {
           padding: 8px 12px;
+          font-weight: 600;
+          font-size: 14px;
+          border-bottom: 1px solid hsl(var(--border));
+          margin-bottom: 8px;
+          color: hsl(var(--foreground));
+        }
+        
+        /* Selected slot */
+        .rbc-slot-selection {
+          background: hsl(var(--primary) / 0.2);
+          border: 1px dashed hsl(var(--primary));
+        }
+        
+        /* All day row */
+        .rbc-allday-cell {
+          min-height: 40px;
+        }
+        
+        .rbc-row-bg {
+          border-bottom: 1px solid hsl(var(--border));
         }
       `}</style>
+      
       <Calendar
         localizer={localizer}
         events={events}
         startAccessor="start"
         endAccessor="end"
-        style={{ height: 600 }}
+        style={{ height: 650 }}
         messages={messages}
         views={[Views.MONTH, Views.WEEK, Views.DAY, Views.AGENDA]}
         defaultView={Views.MONTH}
         onSelectEvent={handleSelectEvent}
         eventPropGetter={eventStyleGetter}
+        dayPropGetter={dayPropGetter}
         components={{
           event: EventComponent,
+          toolbar: CustomToolbar,
         }}
         popup
         selectable={false}
+        step={30}
+        timeslots={2}
+        min={moment().set({ hour: 7, minute: 0 }).toDate()}
+        max={moment().set({ hour: 22, minute: 0 }).toDate()}
+        formats={{
+          dayFormat: 'ddd DD/MM',
+          weekdayFormat: 'ddd',
+          monthHeaderFormat: 'MMMM [de] YYYY',
+          dayHeaderFormat: 'dddd, DD [de] MMMM',
+          dayRangeHeaderFormat: ({ start, end }) =>
+            `${moment(start).format('DD MMM')} - ${moment(end).format('DD MMM YYYY')}`,
+          agendaDateFormat: 'ddd, DD/MM',
+          agendaTimeFormat: 'HH:mm',
+          agendaTimeRangeFormat: ({ start, end }) =>
+            `${moment(start).format('HH:mm')} - ${moment(end).format('HH:mm')}`,
+        }}
       />
     </div>
   );
