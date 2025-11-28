@@ -193,9 +193,7 @@ export default function VagaDetalhes() {
 
       {/* Right Sidebar - Tasks */}
       <aside className="hidden xl:flex w-96 flex-shrink-0 flex-col border-l border-border bg-white dark:bg-background-dark p-4 sticky top-0 h-screen overflow-y-auto">
-        <h2 className="text-lg font-bold text-primary-text-light dark:text-primary-text-dark mb-2">
-          Tarefas da Vaga
-        </h2>
+        
         <VagaTasksCard vagaId={vaga.id} vagaTitulo={vaga.titulo} />
       </aside>
     </div>;
