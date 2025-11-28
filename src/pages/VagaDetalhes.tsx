@@ -189,7 +189,7 @@ export default function VagaDetalhes() {
       </main>
 
       {/* Right Sidebar - Tasks */}
-      <aside className="hidden xl:flex w-96 flex-shrink-0 flex-col border-l border-transparent bg-white dark:bg-background-dark p-6 sticky top-0 h-screen overflow-y-auto">
+      <aside className="hidden xl:flex w-96 flex-shrink-0 flex-col border-l border-border bg-white dark:bg-background-dark p-6 sticky top-0 h-screen overflow-y-auto">
         <h2 className="text-lg font-bold text-primary-text-light dark:text-primary-text-dark mb-4">
           Tarefas da Vaga
         </h2>
