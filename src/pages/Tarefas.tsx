@@ -100,8 +100,15 @@ export default function Tarefas() {
     setDetailDrawerOpen(true);
   };
 
-  // Filter only meetings for calendar view
-  const meetings = useMemo(() => {
+  // Filter only synced meetings for calendar view (meetings with google_calendar_event_id)
+  const syncedMeetings = useMemo(() => {
+    return tasks?.filter(task => 
+      task.task_type === 'meeting' && task.google_calendar_event_id
+    ) || [];
+  }, [tasks]);
+  
+  // All meetings for empty state check
+  const allMeetings = useMemo(() => {
     return tasks?.filter(task => task.task_type === 'meeting') || [];
   }, [tasks]);
   return <div className="min-h-screen bg-[#FFFBF0]">
@@ -216,16 +223,20 @@ export default function Tarefas() {
             {[1, 2, 3].map(i => <Skeleton key={i} className="h-40 w-full" />)}
           </div>
         ) : view === "calendar" ? (
-          meetings.length === 0 ? (
+          syncedMeetings.length === 0 ? (
             <div className="text-center py-16">
-              <p className="text-muted-foreground text-lg mb-4">Nenhuma reunião agendada</p>
+              <p className="text-muted-foreground text-lg mb-4">
+                {allMeetings.length === 0 
+                  ? "Nenhuma reunião agendada" 
+                  : "Nenhuma reunião sincronizada com o Google Calendar"}
+              </p>
               <Button onClick={handleNewMeeting} variant="outline" className="gap-2">
                 <Video className="h-5 w-5" />
-                Criar sua primeira reunião
+                {allMeetings.length === 0 ? "Criar sua primeira reunião" : "Criar e sincronizar reunião"}
               </Button>
             </div>
           ) : (
-            <CalendarView meetings={meetings} onEventClick={handleTaskClick} />
+            <CalendarView meetings={syncedMeetings} onEventClick={handleTaskClick} />
           )
         ) : !tasks || tasks.length === 0 ? (
           <div className="text-center py-16">
