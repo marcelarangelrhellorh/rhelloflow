@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { Plus, Search, LayoutGrid, List } from "lucide-react";
+import { Plus, Search, LayoutGrid, List, Video, ListTodo } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import TaskModal from "@/components/Tasks/TaskModal";
+import MeetingModal from "@/components/Tasks/MeetingModal";
 import TaskCard from "@/components/Tasks/TaskCard";
 import TaskKanban from "@/components/Tasks/TaskKanban";
 import TasksDashboard from "@/components/Tasks/TasksDashboard";
@@ -18,7 +19,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 
 export default function Tarefas() {
   const [view, setView] = useState<"list" | "kanban">("kanban");
-  const [modalOpen, setModalOpen] = useState(false);
+  const [taskModalOpen, setTaskModalOpen] = useState(false);
+  const [meetingModalOpen, setMeetingModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
@@ -51,14 +53,21 @@ export default function Tarefas() {
       return data;
     }
   });
+
   const handleEdit = (task: Task) => {
     setSelectedTask(task);
-    setModalOpen(true);
+    if (task.task_type === 'meeting') {
+      setMeetingModalOpen(true);
+    } else {
+      setTaskModalOpen(true);
+    }
   };
+
   const handleDelete = (id: string) => {
     setTaskToDelete(id);
     setDeleteDialogOpen(true);
   };
+
   const confirmDelete = async () => {
     if (taskToDelete) {
       await deleteTask.mutateAsync(taskToDelete);
@@ -66,6 +75,7 @@ export default function Tarefas() {
       setTaskToDelete(null);
     }
   };
+
   const handleToggleComplete = async (task: Task) => {
     const newStatus = task.status === 'done' ? 'to_do' : 'done';
     await updateTask.mutateAsync({
@@ -73,10 +83,17 @@ export default function Tarefas() {
       status: newStatus
     });
   };
+
   const handleNewTask = () => {
     setSelectedTask(null);
-    setModalOpen(true);
+    setTaskModalOpen(true);
   };
+
+  const handleNewMeeting = () => {
+    setSelectedTask(null);
+    setMeetingModalOpen(true);
+  };
+
   const handleTaskClick = (task: Task) => {
     setTaskForDetail(task);
     setDetailDrawerOpen(true);
@@ -94,8 +111,12 @@ export default function Tarefas() {
             </div>
             <div className="flex gap-2">
               <GoogleCalendarButton />
+              <Button onClick={handleNewMeeting} variant="outline" className="gap-2 text-base font-medium">
+                <Video className="h-5 w-5" />
+                Nova Reunião
+              </Button>
               <Button onClick={handleNewTask} className="bg-[#ffcd00] hover:bg-[#ffcd00]/90 text-black font-semibold text-base">
-                <Plus className="h-5 w-5 mr-2" />
+                <ListTodo className="h-5 w-5 mr-2" />
                 Nova Tarefa
               </Button>
             </div>
@@ -194,7 +215,8 @@ export default function Tarefas() {
       </div>
 
       {/* Modals */}
-      <TaskModal open={modalOpen} onClose={() => setModalOpen(false)} task={selectedTask} />
+      <TaskModal open={taskModalOpen} onClose={() => setTaskModalOpen(false)} task={selectedTask} />
+      <MeetingModal open={meetingModalOpen} onClose={() => setMeetingModalOpen(false)} task={selectedTask} />
       
       <TaskDetailDrawer task={taskForDetail} open={detailDrawerOpen} onOpenChange={setDetailDrawerOpen} onEdit={handleEdit} />
 

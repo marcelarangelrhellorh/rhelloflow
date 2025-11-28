@@ -2067,12 +2067,17 @@ export type Database = {
           google_calendar_last_sync: string | null
           google_calendar_synced: boolean | null
           google_meet_link: string | null
+          google_task_id: string | null
+          google_task_last_sync: string | null
+          google_task_list_id: string | null
+          google_task_synced: boolean | null
           id: string
           priority: string | null
           reminder_minutes: number | null
           start_time: string | null
           status: string | null
           sync_enabled: boolean | null
+          task_type: string | null
           title: string
           updated_at: string | null
           vaga_id: string | null
@@ -2092,12 +2097,17 @@ export type Database = {
           google_calendar_last_sync?: string | null
           google_calendar_synced?: boolean | null
           google_meet_link?: string | null
+          google_task_id?: string | null
+          google_task_last_sync?: string | null
+          google_task_list_id?: string | null
+          google_task_synced?: boolean | null
           id?: string
           priority?: string | null
           reminder_minutes?: number | null
           start_time?: string | null
           status?: string | null
           sync_enabled?: boolean | null
+          task_type?: string | null
           title: string
           updated_at?: string | null
           vaga_id?: string | null
@@ -2117,12 +2127,17 @@ export type Database = {
           google_calendar_last_sync?: string | null
           google_calendar_synced?: boolean | null
           google_meet_link?: string | null
+          google_task_id?: string | null
+          google_task_last_sync?: string | null
+          google_task_list_id?: string | null
+          google_task_synced?: boolean | null
           id?: string
           priority?: string | null
           reminder_minutes?: number | null
           start_time?: string | null
           status?: string | null
           sync_enabled?: boolean | null
+          task_type?: string | null
           title?: string
           updated_at?: string | null
           vaga_id?: string | null

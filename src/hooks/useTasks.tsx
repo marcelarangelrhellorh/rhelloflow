@@ -5,6 +5,8 @@ import { toast } from "sonner";
 export type TaskStatus = 'to_do' | 'in_progress' | 'done';
 export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
 
+export type TaskType = 'task' | 'meeting';
+
 export interface Task {
   id: string;
   title: string;
@@ -19,7 +21,9 @@ export interface Task {
   candidato_id: string | null;
   created_at: string;
   updated_at: string;
-  // Google Calendar sync fields
+  // Task type: 'task' (Google Tasks API) or 'meeting' (Google Calendar API)
+  task_type: TaskType;
+  // Google Calendar sync fields (for meetings)
   google_calendar_event_id: string | null;
   google_calendar_synced: boolean;
   google_calendar_last_sync: string | null;
@@ -30,6 +34,11 @@ export interface Task {
   reminder_minutes: number | null;
   attendee_emails: string[] | null;
   google_meet_link: string | null;
+  // Google Tasks sync fields (for tasks)
+  google_task_id: string | null;
+  google_task_synced: boolean;
+  google_task_last_sync: string | null;
+  google_task_list_id: string | null;
   // Relations
   assignee?: {
     id: string;

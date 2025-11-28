@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Calendar, Link2, Unlink, CheckCircle2, RefreshCw } from 'lucide-react';
+import { Calendar, Link2, Unlink, CheckCircle2, RefreshCw, ListTodo } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -45,19 +45,31 @@ export default function GoogleCalendarButton() {
           <PopoverTrigger asChild>
             <Button variant="outline" className="gap-2 border-green-200 bg-green-50 hover:bg-green-100 text-green-700">
               <CheckCircle2 className="h-4 w-4" />
-              <span className="hidden sm:inline">Google Calendar</span>
+              <span className="hidden sm:inline">Google Conectado</span>
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-72" align="end">
+          <PopoverContent className="w-80" align="end">
             <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <Calendar className="h-5 w-5 text-primary" />
-                <span className="font-semibold">Google Calendar</span>
+                <span className="font-semibold">Google Calendar & Tasks</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-green-600">
                 <CheckCircle2 className="h-4 w-4" />
                 Conectado
               </div>
+              
+              <div className="text-xs text-muted-foreground space-y-1 py-2 border-y">
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-3 w-3" />
+                  <span><strong>Reuniões</strong> → Google Calendar (com Meet)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <ListTodo className="h-3 w-3" />
+                  <span><strong>Tarefas</strong> → Google Tasks</span>
+                </div>
+              </div>
+
               {lastSync && (
                 <p className="text-xs text-muted-foreground">
                   Última sincronização: {formatDistanceToNow(new Date(lastSync), { addSuffix: true, locale: ptBR })}
@@ -76,7 +88,7 @@ export default function GoogleCalendarButton() {
                   ) : (
                     <RefreshCw className="h-4 w-4 mr-2" />
                   )}
-                  Sincronizar Todas as Tarefas
+                  Sincronizar Tudo
                 </Button>
                 <Button
                   variant="outline"
@@ -95,9 +107,9 @@ export default function GoogleCalendarButton() {
         <AlertDialog open={showDisconnectDialog} onOpenChange={setShowDisconnectDialog}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Desconectar Google Calendar?</AlertDialogTitle>
+              <AlertDialogTitle>Desconectar Google?</AlertDialogTitle>
               <AlertDialogDescription>
-                Isso irá remover a conexão com o Google Calendar. Suas tarefas não serão mais sincronizadas automaticamente.
+                Isso irá remover a conexão com o Google Calendar e Tasks. Suas tarefas e reuniões não serão mais sincronizadas automaticamente.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
