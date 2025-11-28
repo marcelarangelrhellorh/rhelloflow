@@ -106,7 +106,12 @@ function taskToCalendarEvent(task: any) {
     'low': '2', // Green
   };
 
-  return {
+  // Prepare attendees list
+  const attendees = (task.attendee_emails || [])
+    .filter((email: string) => email && email.includes('@'))
+    .map((email: string) => ({ email }));
+
+  const event: any = {
     summary: task.title,
     description: task.description || '',
     start: {
@@ -133,11 +138,32 @@ function taskToCalendarEvent(task: any) {
       },
     },
   };
+
+  // Add attendees if any
+  if (attendees.length > 0) {
+    event.attendees = attendees;
+    event.guestsCanModify = false;
+    event.guestsCanInviteOthers = false;
+    event.sendUpdates = 'all'; // Send email invitations to all attendees
+  }
+
+  // Add Google Meet conference
+  event.conferenceData = {
+    createRequest: {
+      requestId: `rhello-${task.id}-${Date.now()}`,
+      conferenceSolutionKey: {
+        type: 'hangoutsMeet',
+      },
+    },
+  };
+
+  return event;
 }
 
 async function createCalendarEvent(accessToken: string, event: any, calendarId: string = 'primary'): Promise<any> {
+  // Add conferenceDataVersion=1 to enable Meet link creation
   const response = await fetch(
-    `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`,
+    `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events?conferenceDataVersion=1&sendUpdates=all`,
     {
       method: 'POST',
       headers: {
@@ -157,8 +183,9 @@ async function createCalendarEvent(accessToken: string, event: any, calendarId: 
 }
 
 async function updateCalendarEvent(accessToken: string, eventId: string, event: any, calendarId: string = 'primary'): Promise<any> {
+  // Add conferenceDataVersion=1 and sendUpdates for attendee notifications
   const response = await fetch(
-    `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events/${encodeURIComponent(eventId)}`,
+    `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events/${encodeURIComponent(eventId)}?conferenceDataVersion=1&sendUpdates=all`,
     {
       method: 'PUT',
       headers: {
@@ -279,13 +306,19 @@ serve(async (req) => {
         result = await createCalendarEvent(accessToken, event, calendarId);
         googleEventId = result.id;
 
-        // Update task with event ID
+        // Extract Meet link if created
+        const meetLink = result.conferenceData?.entryPoints?.find(
+          (ep: any) => ep.entryPointType === 'video'
+        )?.uri || result.hangoutLink || null;
+
+        // Update task with event ID and Meet link
         await supabaseAdmin
           .from('tasks')
           .update({
             google_calendar_event_id: googleEventId,
             google_calendar_synced: true,
             google_calendar_last_sync: new Date().toISOString(),
+            google_meet_link: meetLink,
           })
           .eq('id', task_id);
 
@@ -299,7 +332,13 @@ serve(async (req) => {
           // Update existing event
           const event = taskToCalendarEvent(task);
           result = await updateCalendarEvent(accessToken, task.google_calendar_event_id, event, calendarId);
+          googleEventId = task.google_calendar_event_id;
         }
+
+        // Extract Meet link if created/exists
+        const meetLink = result.conferenceData?.entryPoints?.find(
+          (ep: any) => ep.entryPointType === 'video'
+        )?.uri || result.hangoutLink || null;
 
         // Update task sync status
         await supabaseAdmin
@@ -307,6 +346,7 @@ serve(async (req) => {
           .update({
             google_calendar_event_id: googleEventId,
             google_calendar_synced: true,
+            google_meet_link: meetLink,
             google_calendar_last_sync: new Date().toISOString(),
           })
           .eq('id', task_id);
