@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Task } from "@/hooks/useTasks";
 import { cn } from "@/lib/utils";
+import SyncTaskToCalendar from "./SyncTaskToCalendar";
 interface TaskCardProps {
   task: Task;
   onEdit: (task: Task) => void;
@@ -104,6 +105,7 @@ export default function TaskCard({
           <Button size="sm" variant="ghost" onClick={() => onEdit(task)} className="text-base">
             Editar
           </Button>
+          <SyncTaskToCalendar task={task} />
           <Button size="sm" variant="ghost" onClick={() => onDelete(task.id)} className="text-red-600 font-semibold">
             Excluir
           </Button>

@@ -1532,6 +1532,11 @@ export type Database = {
           empresa: string | null
           empresa_id: string | null
           full_name: string
+          google_access_token: string | null
+          google_calendar_connected: boolean | null
+          google_calendar_last_sync: string | null
+          google_refresh_token: string | null
+          google_token_expires_at: string | null
           id: string
           role: string | null
           user_type: Database["public"]["Enums"]["user_type"] | null
@@ -1541,6 +1546,11 @@ export type Database = {
           empresa?: string | null
           empresa_id?: string | null
           full_name: string
+          google_access_token?: string | null
+          google_calendar_connected?: boolean | null
+          google_calendar_last_sync?: string | null
+          google_refresh_token?: string | null
+          google_token_expires_at?: string | null
           id: string
           role?: string | null
           user_type?: Database["public"]["Enums"]["user_type"] | null
@@ -1550,6 +1560,11 @@ export type Database = {
           empresa?: string | null
           empresa_id?: string | null
           full_name?: string
+          google_access_token?: string | null
+          google_calendar_connected?: boolean | null
+          google_calendar_last_sync?: string | null
+          google_refresh_token?: string | null
+          google_token_expires_at?: string | null
           id?: string
           role?: string | null
           user_type?: Database["public"]["Enums"]["user_type"] | null

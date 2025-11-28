@@ -8,6 +8,7 @@ import { CheckCircle2, Clock, Circle, AlertTriangle, Calendar, User, Briefcase, 
 import { cn } from "@/lib/utils";
 import { Task, TaskStatus, TaskPriority, useUpdateTask } from "@/hooks/useTasks";
 import { isPast, isToday } from "date-fns";
+import SyncTaskToCalendar from "@/components/Tasks/SyncTaskToCalendar";
 interface TaskDetailDrawerProps {
   task: Task | null;
   open: boolean;
@@ -155,6 +156,8 @@ export function TaskDetailDrawer({
               <CheckCircle2 className="h-4 w-4" />
               {task.status === "done" ? "Reabrir Tarefa" : "Marcar como Concluída"}
             </Button>
+
+            <SyncTaskToCalendar task={task} variant="button" />
 
             <Button variant="outline" onClick={handleEditClick} className="w-full gap-2 text-base font-medium">
               <Edit className="h-4 w-4" />

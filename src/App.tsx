@@ -29,6 +29,7 @@ import WhatsAppTemplates from "./pages/WhatsAppTemplates";
 import Relatorios from "./pages/Relatorios";
 import Acompanhamento from "./pages/Acompanhamento";
 import Tarefas from "./pages/Tarefas";
+import GoogleCalendarCallback from "./pages/GoogleCalendarCallback";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -39,6 +40,7 @@ const App = () => <ErrorBoundary>
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Auth />} />
+          <Route path="/auth/google-callback" element={<GoogleCalendarCallback />} />
           <Route path="/solicitar-vaga" element={<PublicVagaForm />} />
           <Route path="/share/:token" element={<ShareJob />} />
           <Route path="/client-view/:token" element={<ClientView />} />
