@@ -40,7 +40,7 @@ const App = () => <ErrorBoundary>
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Auth />} />
-          <Route path="/auth/google-callback" element={<GoogleCalendarCallback />} />
+          <Route path="/auth/callback" element={<GoogleCalendarCallback />} />
           <Route path="/solicitar-vaga" element={<PublicVagaForm />} />
           <Route path="/share/:token" element={<ShareJob />} />
           <Route path="/client-view/:token" element={<ClientView />} />
