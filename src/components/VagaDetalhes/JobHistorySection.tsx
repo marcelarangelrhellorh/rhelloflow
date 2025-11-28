@@ -145,7 +145,7 @@ export function JobHistorySection({
           {isExpanded ? <ChevronDown className="h-5 w-5 text-muted-foreground" /> : <ChevronRight className="h-5 w-5 text-muted-foreground" />}
           <History className="h-5 w-5 text-primary" />
           <span className="font-semibold text-foreground">Histórico</span>
-          {records.length > 0 && <span className="ml-2 text-sm text-muted-foreground">
+          {records.length > 0 && <span className="ml-2 text-muted-foreground text-base font-semibold">
               ({records.length} registro{records.length !== 1 ? "s" : ""})
             </span>}
         </div>
@@ -215,18 +215,18 @@ export function JobHistorySection({
               {records.map(record => <div key={record.id} className="p-4 rounded-lg border border-border bg-background hover:bg-muted/30 transition-colors">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold text-foreground truncate">
+                      <h4 className="font-semibold text-foreground truncate text-base">
                         {record.title || "Sem título"}
                       </h4>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-                        <span>
+                        <span className="text-base font-medium">
                           {format(new Date(record.created_at), "dd 'de' MMMM 'de' yyyy 'às' HH:mm", {
                     locale: ptBR
                   })}
                         </span>
                         {record.user_name && <>
                             <span>•</span>
-                            <span>{record.user_name}</span>
+                            <span className="text-base font-medium">{record.user_name}</span>
                           </>}
                       </div>
                       <div className="mt-2 text-sm text-foreground/80 line-clamp-3 prose prose-sm max-w-none [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4" dangerouslySetInnerHTML={{
