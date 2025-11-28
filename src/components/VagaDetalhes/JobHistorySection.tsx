@@ -166,13 +166,13 @@ export function JobHistorySection({
           {showForm && <div className="mb-6 p-4 rounded-lg border border-border bg-muted/30">
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium text-foreground mb-1 block">
+                  <label className="font-medium text-foreground mb-1 block text-base">
                     Título (opcional)
                   </label>
                   <Input value={formTitle} onChange={e => setFormTitle(e.target.value)} placeholder="Ex: Reunião com cliente, Atualização de requisitos..." className="bg-background" />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-foreground mb-1 block">
+                  <label className="font-medium text-foreground mb-1 block text-base">
                     Conteúdo *
                   </label>
                   <div className="bg-background rounded-md border border-input">
@@ -180,11 +180,11 @@ export function JobHistorySection({
                   </div>
                 </div>
                 <div className="flex justify-end gap-2">
-                  <Button variant="outline" onClick={handleCancel} disabled={isSaving}>
+                  <Button variant="outline" onClick={handleCancel} disabled={isSaving} className="text-sm font-semibold">
                     <X className="h-4 w-4 mr-1" />
                     Cancelar
                   </Button>
-                  <Button onClick={handleSave} disabled={isSaving || !formContent.trim()} className="bg-primary hover:bg-primary/90">
+                  <Button onClick={handleSave} disabled={isSaving || !formContent.trim()} className="font-semibold bg-[#00141d]">
                     <Save className="h-4 w-4 mr-1" />
                     {isSaving ? "Salvando..." : "Salvar"}
                   </Button>
