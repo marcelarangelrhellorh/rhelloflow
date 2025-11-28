@@ -8,7 +8,7 @@ import TaskModal from "@/components/Tasks/TaskModal";
 import TaskCard from "@/components/Tasks/TaskCard";
 import TaskKanban from "@/components/Tasks/TaskKanban";
 import TasksDashboard from "@/components/Tasks/TasksDashboard";
-import GoogleCalendarSettings from "@/components/Tasks/GoogleCalendarSettings";
+import GoogleCalendarButton from "@/components/Tasks/GoogleCalendarButton";
 import { TaskDetailDrawer } from "@/components/VagaDetalhes/TaskDetailDrawer";
 import { Task, TaskFilters, useTasks, useDeleteTask, useUpdateTask } from "@/hooks/useTasks";
 import { useQuery } from "@tanstack/react-query";
@@ -93,6 +93,7 @@ export default function Tarefas() {
               </p>
             </div>
             <div className="flex gap-2">
+              <GoogleCalendarButton />
               <Button onClick={handleNewTask} className="bg-[#ffcd00] hover:bg-[#ffcd00]/90 text-black font-semibold text-base">
                 <Plus className="h-5 w-5 mr-2" />
                 Nova Tarefa
@@ -174,14 +175,9 @@ export default function Tarefas() {
 
       {/* Content */}
       <div className="container mx-auto px-6 py-8">
-        {/* Header section with Dashboard and Calendar Settings */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
-          <div className="lg:col-span-3">
-            <TasksDashboard onTaskClick={handleEdit} />
-          </div>
-          <div className="lg:col-span-1">
-            <GoogleCalendarSettings />
-          </div>
+        {/* Dashboard */}
+        <div className="mb-8">
+          <TasksDashboard onTaskClick={handleEdit} />
         </div>
 
         {isLoading ? <div className="space-y-4">
