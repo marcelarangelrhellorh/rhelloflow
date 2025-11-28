@@ -229,7 +229,7 @@ export function JobHistorySection({
                             <span className="text-base font-medium">{record.user_name}</span>
                           </>}
                       </div>
-                      <div className="mt-2 text-sm text-foreground/80 line-clamp-3 prose prose-sm max-w-none [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4" dangerouslySetInnerHTML={{
+                      <div className="mt-2 text-base text-foreground/80 line-clamp-3 prose prose-base max-w-none [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4" dangerouslySetInnerHTML={{
                 __html: record.content
               }} />
                     </div>

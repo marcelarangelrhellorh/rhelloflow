@@ -181,7 +181,7 @@ export default function VagaDetalhes() {
                   </div>
                 </div>}
 
-              <VagaCandidatesTable candidatos={candidatos} vagaId={vaga.id} vagaTitulo={vaga.titulo} className="my-[50px] py-0" />
+              <VagaCandidatesTable candidatos={candidatos} vagaId={vaga.id} vagaTitulo={vaga.titulo} />
             </div>
 
             <div className="lg:col-span-1 space-y-6">
