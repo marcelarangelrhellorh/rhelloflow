@@ -142,7 +142,7 @@ export default function VagaDetalhes() {
   return <div className="relative flex min-h-screen w-full font-display bg-background-light dark:bg-background-dark">
       {/* Main Content */}
       <main className="flex-1 px-6 sm:px-10 lg:px-16 py-8">
-        <div className="mx-auto max-w-6xl">
+        <div className="max-w-6xl mx-0 py-0 px-0">
           {/* External Job Banner */}
           {vaga.source === "externo" && <div className="mb-6">
               <ExternalJobBanner vagaId={vaga.id} recrutador={vaga.recrutador} csResponsavel={vaga.cs_responsavel} complexidade={vaga.complexidade} prioridade={vaga.prioridade} />
@@ -181,7 +181,7 @@ export default function VagaDetalhes() {
                   </div>
                 </div>}
 
-              <VagaCandidatesTable candidatos={candidatos} vagaId={vaga.id} vagaTitulo={vaga.titulo} />
+              <VagaCandidatesTable candidatos={candidatos} vagaId={vaga.id} vagaTitulo={vaga.titulo} className="my-[50px] py-0" />
             </div>
 
             <div className="lg:col-span-1 space-y-6">
