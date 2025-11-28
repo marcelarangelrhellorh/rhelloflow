@@ -45,9 +45,11 @@ serve(async (req) => {
     }
 
     // Build Google OAuth URL
+    // Include both Calendar and Tasks API scopes
     const scopes = [
       'https://www.googleapis.com/auth/calendar.readonly',
       'https://www.googleapis.com/auth/calendar.events',
+      'https://www.googleapis.com/auth/tasks', // Google Tasks API scope
     ];
 
     const state = btoa(JSON.stringify({ userId: user.id, timestamp: Date.now() }));

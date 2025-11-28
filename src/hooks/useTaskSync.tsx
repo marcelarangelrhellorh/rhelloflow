@@ -6,7 +6,9 @@ import { useGoogleCalendar } from './useGoogleCalendar';
 interface SyncResult {
   success: boolean;
   google_event_id?: string;
+  google_task_id?: string;
   event_link?: string;
+  task_link?: string;
   error?: string;
 }
 
@@ -25,12 +27,13 @@ export function useTaskSync() {
   const [syncErrors, setSyncErrors] = useState<string[]>([]);
   const { isConnected, refreshStatus } = useGoogleCalendar();
 
+  // Sync task to Google Calendar (for meetings)
   const syncTask = useCallback(async (
     taskId: string, 
     action: 'create' | 'update' | 'delete'
   ): Promise<SyncResult> => {
     if (!isConnected) {
-      return { success: false, error: 'Google Calendar não conectado' };
+      return { success: false, error: 'Google não conectado' };
     }
 
     setIsSyncing(true);
@@ -40,7 +43,7 @@ export function useTaskSync() {
       });
 
       if (error) {
-        const errorMsg = error.message || 'Erro na sincronização';
+        const errorMsg = error.message || 'Erro na sincronização com Calendar';
         setSyncErrors(prev => [...prev.slice(-4), errorMsg]);
         return { success: false, error: errorMsg };
       }
@@ -64,9 +67,49 @@ export function useTaskSync() {
     }
   }, [isConnected]);
 
+  // Sync task to Google Tasks (for tasks)
+  const syncTaskToGoogleTasks = useCallback(async (
+    taskId: string, 
+    action: 'create' | 'update' | 'delete'
+  ): Promise<SyncResult> => {
+    if (!isConnected) {
+      return { success: false, error: 'Google não conectado' };
+    }
+
+    setIsSyncing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('sync-task-to-google-tasks', {
+        body: { task_id: taskId, action },
+      });
+
+      if (error) {
+        const errorMsg = error.message || 'Erro na sincronização com Tasks';
+        setSyncErrors(prev => [...prev.slice(-4), errorMsg]);
+        return { success: false, error: errorMsg };
+      }
+
+      if (data.error) {
+        setSyncErrors(prev => [...prev.slice(-4), data.error]);
+        return { success: false, error: data.error };
+      }
+
+      return {
+        success: true,
+        google_task_id: data.google_task_id,
+        task_link: data.task_link,
+      };
+    } catch (err: any) {
+      const errorMsg = err.message || 'Erro inesperado na sincronização';
+      setSyncErrors(prev => [...prev.slice(-4), errorMsg]);
+      return { success: false, error: errorMsg };
+    } finally {
+      setIsSyncing(false);
+    }
+  }, [isConnected]);
+
   const syncAllTasks = useCallback(async (): Promise<BulkSyncResult> => {
     if (!isConnected) {
-      toast.error('Google Calendar não conectado');
+      toast.error('Google não conectado');
       return { success: false };
     }
 
@@ -82,9 +125,9 @@ export function useTaskSync() {
       }
 
       if (data.success) {
-        toast.success(`Sincronização concluída: ${data.results.synced} tarefas sincronizadas`);
+        toast.success(`Sincronização concluída: ${data.results.synced} itens sincronizados`);
         if (data.results.errors > 0) {
-          toast.warning(`${data.results.errors} tarefas com erro`);
+          toast.warning(`${data.results.errors} itens com erro`);
         }
       }
 
@@ -107,6 +150,7 @@ export function useTaskSync() {
 
   return {
     syncTask,
+    syncTaskToGoogleTasks,
     syncAllTasks,
     isSyncing,
     syncErrors,

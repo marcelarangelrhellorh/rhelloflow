@@ -75,6 +75,9 @@ verify_jwt = true
 [functions.sync-task-to-calendar]
 verify_jwt = true
 
+[functions.sync-task-to-google-tasks]
+verify_jwt = true
+
 [functions.bulk-sync-tasks]
 verify_jwt = true
 
