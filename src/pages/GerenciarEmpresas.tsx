@@ -9,15 +9,7 @@ import { Building2, Plus, Search, Eye, Pencil, LayoutGrid, List } from "lucide-r
 import { EmpresaFormModal } from "@/components/Empresas/EmpresaFormModal";
 import { EmpresaDetailsDrawer } from "@/components/Empresas/EmpresaDetailsDrawer";
 import { toast } from "sonner";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 type Empresa = {
   id: string;
   nome: string;
@@ -32,7 +24,6 @@ type Empresa = {
   created_at: string;
   data_primeiro_contato: string | null;
 };
-
 export default function GerenciarEmpresas() {
   const [searchTerm, setSearchTerm] = useState("");
   const [formModalOpen, setFormModalOpen] = useState(false);
@@ -40,49 +31,44 @@ export default function GerenciarEmpresas() {
   const [selectedEmpresa, setSelectedEmpresa] = useState<Empresa | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>("todos");
   const [viewMode, setViewMode] = useState<"cards" | "list">("cards");
-
-  const { data: empresas, isLoading, refetch } = useQuery({
+  const {
+    data: empresas,
+    isLoading,
+    refetch
+  } = useQuery({
     queryKey: ["empresas", searchTerm, filterStatus],
     queryFn: async () => {
-      let query = supabase
-        .from("empresas")
-        .select("*")
-        .order("nome");
-
+      let query = supabase.from("empresas").select("*").order("nome");
       if (searchTerm) {
         query = query.or(`nome.ilike.%${searchTerm}%,cnpj.ilike.%${searchTerm}%`);
       }
-
       if (filterStatus !== "todos") {
         query = query.eq("status", filterStatus);
       }
-
-      const { data, error } = await query;
+      const {
+        data,
+        error
+      } = await query;
       if (error) throw error;
       return data as Empresa[];
-    },
+    }
   });
-
   const handleEdit = (empresa: Empresa) => {
     setSelectedEmpresa(empresa);
     setFormModalOpen(true);
   };
-
   const handleViewDetails = (empresa: Empresa) => {
     setSelectedEmpresa(empresa);
     setDetailsDrawerOpen(true);
   };
-
   const handleCloseModal = () => {
     setFormModalOpen(false);
     setSelectedEmpresa(null);
   };
-
   const handleSuccess = () => {
     refetch();
     toast.success("Empresa salva com sucesso!");
   };
-
   const getStatusColor = (status: string | null) => {
     switch (status) {
       case "ativo":
@@ -95,9 +81,7 @@ export default function GerenciarEmpresas() {
         return "bg-gray-100 text-gray-800 border-gray-200";
     }
   };
-
-  return (
-    <div className="min-h-screen bg-[#FFFBF0] p-4 sm:p-6 lg:p-8">
+  return <div className="min-h-screen bg-[#FFFBF0] p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -110,13 +94,10 @@ export default function GerenciarEmpresas() {
               Cadastro completo de empresas e histórico de processos
             </p>
           </div>
-          <Button
-            onClick={() => {
-              setSelectedEmpresa(null);
-              setFormModalOpen(true);
-            }}
-            className="bg-[#00141D] hover:bg-[#00141D]/90 text-white font-semibold"
-          >
+          <Button onClick={() => {
+          setSelectedEmpresa(null);
+          setFormModalOpen(true);
+        }} className="bg-[#00141D] hover:bg-[#00141D]/90 text-white font-semibold">
             <Plus className="mr-2 h-4 w-4" />
             Novo Cliente
           </Button>
@@ -126,59 +107,28 @@ export default function GerenciarEmpresas() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#36404A]" />
-            <Input
-              placeholder="Buscar por nome ou CNPJ..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
+            <Input placeholder="Buscar por nome ou CNPJ..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10" />
           </div>
           <div className="flex gap-2 justify-between">
             <div className="flex gap-2">
-              <Button
-                variant={filterStatus === "todos" ? "default" : "outline"}
-                onClick={() => setFilterStatus("todos")}
-                className={filterStatus === "todos" ? "bg-[#00141D] text-white" : ""}
-              >
+              <Button variant={filterStatus === "todos" ? "default" : "outline"} onClick={() => setFilterStatus("todos")} className={filterStatus === "todos" ? "bg-[#00141D] text-white" : ""}>
                 Todos
               </Button>
-              <Button
-                variant={filterStatus === "ativo" ? "default" : "outline"}
-                onClick={() => setFilterStatus("ativo")}
-                className={filterStatus === "ativo" ? "bg-green-600 text-white" : ""}
-              >
+              <Button variant={filterStatus === "ativo" ? "default" : "outline"} onClick={() => setFilterStatus("ativo")} className={filterStatus === "ativo" ? "bg-green-600 text-white" : ""}>
                 Ativos
               </Button>
-              <Button
-                variant={filterStatus === "prospect" ? "default" : "outline"}
-                onClick={() => setFilterStatus("prospect")}
-                className={filterStatus === "prospect" ? "bg-blue-600 text-white" : ""}
-              >
+              <Button variant={filterStatus === "prospect" ? "default" : "outline"} onClick={() => setFilterStatus("prospect")} className={filterStatus === "prospect" ? "bg-blue-600 text-white" : ""}>
                 Prospects
               </Button>
-              <Button
-                variant={filterStatus === "inativo" ? "default" : "outline"}
-                onClick={() => setFilterStatus("inativo")}
-                className={filterStatus === "inativo" ? "bg-gray-600 text-white" : ""}
-              >
+              <Button variant={filterStatus === "inativo" ? "default" : "outline"} onClick={() => setFilterStatus("inativo")} className={filterStatus === "inativo" ? "bg-gray-600 text-white" : ""}>
                 Inativos
               </Button>
             </div>
             <div className="flex gap-1 border rounded-md">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setViewMode("cards")}
-                className={viewMode === "cards" ? "bg-muted" : ""}
-              >
+              <Button variant="ghost" size="sm" onClick={() => setViewMode("cards")} className={viewMode === "cards" ? "bg-muted" : ""}>
                 <LayoutGrid className="h-4 w-4" />
               </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setViewMode("list")}
-                className={viewMode === "list" ? "bg-muted" : ""}
-              >
+              <Button variant="ghost" size="sm" onClick={() => setViewMode("list")} className={viewMode === "list" ? "bg-muted" : ""}>
                 <List className="h-4 w-4" />
               </Button>
             </div>
@@ -186,80 +136,51 @@ export default function GerenciarEmpresas() {
         </div>
 
         {/* List */}
-        {isLoading ? (
-          <div className="flex justify-center items-center h-64">
+        {isLoading ? <div className="flex justify-center items-center h-64">
             <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-          </div>
-        ) : empresas && empresas.length > 0 ? (
-          viewMode === "cards" ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {empresas.map((empresa) => (
-                <Card
-                  key={empresa.id}
-                  className="p-4 hover:shadow-lg transition-shadow cursor-pointer border-gray-300"
-                >
+          </div> : empresas && empresas.length > 0 ? viewMode === "cards" ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {empresas.map(empresa => <Card key={empresa.id} className="p-4 transition-shadow cursor-pointer border-gray-300 shadow-xl">
                   <div className="space-y-3">
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
                         <h3 className="font-bold text-lg text-[#00141D] line-clamp-1">
                           {empresa.nome}
                         </h3>
-                        {empresa.cnpj && (
-                          <p className="text-sm text-[#36404A]">CNPJ: {empresa.cnpj}</p>
-                        )}
+                        {empresa.cnpj && <p className="text-sm text-[#36404A]">CNPJ: {empresa.cnpj}</p>}
                       </div>
                       <Badge className={getStatusColor(empresa.status)}>
                         {(empresa.status || "ativo").charAt(0).toUpperCase() + (empresa.status || "ativo").slice(1)}
                       </Badge>
                     </div>
 
-                    {empresa.setor && (
-                      <p className="text-sm text-[#36404A]">
+                    {empresa.setor && <p className="text-sm text-[#36404A]">
                         <span className="font-semibold">Setor:</span> {empresa.setor}
-                      </p>
-                    )}
+                      </p>}
 
-                    {empresa.porte && (
-                      <p className="text-sm text-[#36404A]">
+                    {empresa.porte && <p className="text-sm text-[#36404A]">
                         <span className="font-semibold">Porte:</span> {empresa.porte}
-                      </p>
-                    )}
+                      </p>}
 
-                    {(empresa.cidade || empresa.estado) && (
-                      <p className="text-sm text-[#36404A]">
+                    {(empresa.cidade || empresa.estado) && <p className="text-sm text-[#36404A]">
                         <span className="font-semibold">Localização:</span>{" "}
                         {empresa.cidade}
                         {empresa.cidade && empresa.estado && ", "}
                         {empresa.estado}
-                      </p>
-                    )}
+                      </p>}
 
                     <div className="flex gap-2 pt-2 border-t border-gray-200">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleViewDetails(empresa)}
-                        className="flex-1"
-                      >
+                      <Button size="sm" variant="outline" onClick={() => handleViewDetails(empresa)} className="flex-1">
                         <Eye className="mr-1 h-3 w-3" />
                         Detalhes
                       </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleEdit(empresa)}
-                        className="flex-1"
-                      >
+                      <Button size="sm" variant="outline" onClick={() => handleEdit(empresa)} className="flex-1">
                         <Pencil className="mr-1 h-3 w-3" />
                         Editar
                       </Button>
                     </div>
                   </div>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <Card className="border-gray-300">
+                </Card>)}
+            </div> : <Card className="border-gray-300">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -273,8 +194,7 @@ export default function GerenciarEmpresas() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {empresas.map((empresa) => (
-                    <TableRow key={empresa.id}>
+                  {empresas.map(empresa => <TableRow key={empresa.id}>
                       <TableCell className="font-semibold text-[#00141D]">
                         {empresa.nome}
                       </TableCell>
@@ -288,9 +208,7 @@ export default function GerenciarEmpresas() {
                         {empresa.porte || "-"}
                       </TableCell>
                       <TableCell className="text-[#36404A]">
-                        {empresa.cidade && empresa.estado
-                          ? `${empresa.cidade}, ${empresa.estado}`
-                          : empresa.cidade || empresa.estado || "-"}
+                        {empresa.cidade && empresa.estado ? `${empresa.cidade}, ${empresa.estado}` : empresa.cidade || empresa.estado || "-"}
                       </TableCell>
                       <TableCell>
                         <Badge className={getStatusColor(empresa.status)}>
@@ -299,53 +217,30 @@ export default function GerenciarEmpresas() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex gap-2 justify-end">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleViewDetails(empresa)}
-                          >
+                          <Button size="sm" variant="ghost" onClick={() => handleViewDetails(empresa)}>
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleEdit(empresa)}
-                          >
+                          <Button size="sm" variant="ghost" onClick={() => handleEdit(empresa)}>
                             <Pencil className="h-4 w-4" />
                           </Button>
                         </div>
                       </TableCell>
-                    </TableRow>
-                  ))}
+                    </TableRow>)}
                 </TableBody>
               </Table>
-            </Card>
-          )
-        ) : (
-          <Card className="p-8 text-center">
+            </Card> : <Card className="p-8 text-center">
             <Building2 className="h-12 w-12 text-[#36404A] mx-auto mb-4" />
             <p className="text-[#36404A]">
               Nenhum cliente encontrado. Cadastre o primeiro cliente!
             </p>
-          </Card>
-        )}
+          </Card>}
       </div>
 
-      <EmpresaFormModal
-        open={formModalOpen}
-        onClose={handleCloseModal}
-        empresa={selectedEmpresa}
-        onSuccess={handleSuccess}
-      />
+      <EmpresaFormModal open={formModalOpen} onClose={handleCloseModal} empresa={selectedEmpresa} onSuccess={handleSuccess} />
 
-      <EmpresaDetailsDrawer
-        open={detailsDrawerOpen}
-        onClose={() => {
-          setDetailsDrawerOpen(false);
-          setSelectedEmpresa(null);
-        }}
-        empresaId={selectedEmpresa?.id || ""}
-      />
-    </div>
-  );
+      <EmpresaDetailsDrawer open={detailsDrawerOpen} onClose={() => {
+      setDetailsDrawerOpen(false);
+      setSelectedEmpresa(null);
+    }} empresaId={selectedEmpresa?.id || ""} />
+    </div>;
 }
