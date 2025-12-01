@@ -209,7 +209,7 @@ export default function GerenciarEmpresas() {
                         )}
                       </div>
                       <Badge className={getStatusColor(empresa.status)}>
-                        {empresa.status || "ativo"}
+                        {(empresa.status || "ativo").charAt(0).toUpperCase() + (empresa.status || "ativo").slice(1)}
                       </Badge>
                     </div>
 
@@ -294,7 +294,7 @@ export default function GerenciarEmpresas() {
                       </TableCell>
                       <TableCell>
                         <Badge className={getStatusColor(empresa.status)}>
-                          {empresa.status || "ativo"}
+                          {(empresa.status || "ativo").charAt(0).toUpperCase() + (empresa.status || "ativo").slice(1)}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
