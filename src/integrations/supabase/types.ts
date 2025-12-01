@@ -648,24 +648,72 @@ export type Database = {
       }
       empresas: {
         Row: {
+          cep: string | null
+          cidade: string | null
           cnpj: string | null
+          contato_principal_cargo: string | null
+          contato_principal_email: string | null
+          contato_principal_nome: string | null
+          contato_principal_telefone: string | null
           created_at: string | null
+          data_primeiro_contato: string | null
+          email: string | null
+          endereco: string | null
+          estado: string | null
           id: string
           nome: string
+          observacoes: string | null
+          porte: string | null
+          setor: string | null
+          site: string | null
+          status: string | null
+          telefone: string | null
           updated_at: string | null
         }
         Insert: {
+          cep?: string | null
+          cidade?: string | null
           cnpj?: string | null
+          contato_principal_cargo?: string | null
+          contato_principal_email?: string | null
+          contato_principal_nome?: string | null
+          contato_principal_telefone?: string | null
           created_at?: string | null
+          data_primeiro_contato?: string | null
+          email?: string | null
+          endereco?: string | null
+          estado?: string | null
           id?: string
           nome: string
+          observacoes?: string | null
+          porte?: string | null
+          setor?: string | null
+          site?: string | null
+          status?: string | null
+          telefone?: string | null
           updated_at?: string | null
         }
         Update: {
+          cep?: string | null
+          cidade?: string | null
           cnpj?: string | null
+          contato_principal_cargo?: string | null
+          contato_principal_email?: string | null
+          contato_principal_nome?: string | null
+          contato_principal_telefone?: string | null
           created_at?: string | null
+          data_primeiro_contato?: string | null
+          email?: string | null
+          endereco?: string | null
+          estado?: string | null
           id?: string
           nome?: string
+          observacoes?: string | null
+          porte?: string | null
+          setor?: string | null
+          site?: string | null
+          status?: string | null
+          telefone?: string | null
           updated_at?: string | null
         }
         Relationships: []
