@@ -399,12 +399,12 @@ const WhatsAppTemplates = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Nome</TableHead>
-                    <TableHead>Chave</TableHead>
-                    <TableHead>Descrição</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Criador</TableHead>
-                    <TableHead className="text-right">Ações</TableHead>
+                    <TableHead className="font-bold">Nome</TableHead>
+                    <TableHead className="font-bold">Chave</TableHead>
+                    <TableHead className="font-bold">Descrição</TableHead>
+                    <TableHead className="font-bold">Status</TableHead>
+                    <TableHead className="font-bold">Criador</TableHead>
+                    <TableHead className="text-right font-bold">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
