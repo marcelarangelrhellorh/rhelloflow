@@ -29,6 +29,7 @@ import WhatsAppTemplates from "./pages/WhatsAppTemplates";
 import Relatorios from "./pages/Relatorios";
 import Acompanhamento from "./pages/Acompanhamento";
 import Tarefas from "./pages/Tarefas";
+import GerenciarEmpresas from "./pages/GerenciarEmpresas";
 import GoogleCalendarCallback from "./pages/GoogleCalendarCallback";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
@@ -70,6 +71,7 @@ const App = () => <ErrorBoundary>
             <Route path="/relatorios" element={<Relatorios />} />
             <Route path="/acompanhamento" element={<Acompanhamento />} />
             <Route path="/tarefas" element={<Tarefas />} />
+            <Route path="/gerenciar-empresas" element={<GerenciarEmpresas />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

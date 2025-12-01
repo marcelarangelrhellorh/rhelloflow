@@ -23,6 +23,10 @@ const menuItems = [{
   url: "/candidatos",
   roles: ["admin", "recrutador", "cs"]
 }, {
+  title: "Clientes",
+  url: "/gerenciar-empresas",
+  roles: ["admin"]
+}, {
   title: "Tarefas",
   url: "/tarefas",
   roles: ["admin", "recrutador", "cs"]
