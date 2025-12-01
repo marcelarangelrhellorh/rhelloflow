@@ -38,7 +38,7 @@ const App = () => <ErrorBoundary>
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/login" element={<Auth />} className="bg-[#ffcc00]/15" />
+          <Route path="/login" element={<Auth />} className="bg-[#9da4b0]/[0.18]" />
           <Route path="/auth/callback" element={<GoogleCalendarCallback />} />
           <Route path="/solicitar-vaga" element={<PublicVagaForm />} />
           <Route path="/share/:token" element={<ShareJob />} />
