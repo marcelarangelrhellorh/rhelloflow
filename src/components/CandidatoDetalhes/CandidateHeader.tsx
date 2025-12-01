@@ -16,13 +16,14 @@ interface CandidateHeaderProps {
   onStatusChange: (newStatus: string) => void;
   onSendWhatsApp: () => void;
 }
-const ETAPAS_DISPONIVEIS = ["Banco de Talentos", "Selecionado", "Entrevista rhello", "Aprovado rhello", "Reprovado rhello", "Entrevistas Solicitante", "Aprovado Solicitante", "Reprovado Solicitante", "Contratado"] as const;
+const ETAPAS_DISPONIVEIS = ["Banco de Talentos", "Selecionado", "Entrevista rhello", "Aprovado rhello", "Reprovado rhello", "Shortlist", "Entrevistas Solicitante", "Aprovado Solicitante", "Reprovado Solicitante", "Contratado"] as const;
 const statusColors: Record<string, string> = {
   "Banco de Talentos": "bg-muted/10 text-muted-foreground border-muted",
   "Selecionado": "bg-primary/10 text-primary border-primary/20",
   "Entrevista rhello": "bg-warning/10 text-warning border-warning/20",
   "Enviado ao Cliente": "bg-info/10 text-info border-info/20",
   "Entrevista com Cliente": "bg-warning/10 text-warning border-warning/20",
+  "Shortlist": "bg-indigo-100/50 text-indigo-700 border-indigo-200",
   "Entrevistas Solicitante": "bg-info/10 text-info border-info/20",
   "Feedback Cliente": "bg-warning/10 text-warning border-warning/20",
   "Aguardando Retorno": "bg-muted/10 text-muted-foreground border-muted",

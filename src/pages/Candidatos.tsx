@@ -46,14 +46,15 @@ type Candidato = {
     titulo: string | null;
   };
 };
-type StatusCandidato = "Banco de Talentos" | "Selecionado" | "Entrevista rhello" | "Reprovado Rhello" | "Aprovado Rhello" | "Entrevistas Solicitante" | "Reprovado Solicitante" | "Aprovado Solicitante" | "Contratado";
-const statusColumns: StatusCandidato[] = ["Banco de Talentos", "Selecionado", "Entrevista rhello", "Reprovado Rhello", "Aprovado Rhello", "Entrevistas Solicitante", "Reprovado Solicitante", "Aprovado Solicitante", "Contratado"];
+type StatusCandidato = "Banco de Talentos" | "Selecionado" | "Entrevista rhello" | "Reprovado Rhello" | "Aprovado Rhello" | "Shortlist" | "Entrevistas Solicitante" | "Reprovado Solicitante" | "Aprovado Solicitante" | "Contratado";
+const statusColumns: StatusCandidato[] = ["Banco de Talentos", "Selecionado", "Entrevista rhello", "Reprovado Rhello", "Aprovado Rhello", "Shortlist", "Entrevistas Solicitante", "Reprovado Solicitante", "Aprovado Solicitante", "Contratado"];
 const statusColors: Record<StatusCandidato, string> = {
   "Banco de Talentos": "bg-info/10 text-info border-info/20",
   "Selecionado": "bg-[#BBF7D0] text-green-800 border-green-200",
   "Entrevista rhello": "bg-[#BFDBFE] text-blue-800 border-blue-200",
   "Reprovado Rhello": "bg-[#FECACA] text-red-800 border-red-200",
   "Aprovado Rhello": "bg-[#FDE68A] text-yellow-800 border-yellow-200",
+  "Shortlist": "bg-[#C7D2FE] text-indigo-800 border-indigo-200",
   "Entrevistas Solicitante": "bg-[#E9D5FF] text-purple-800 border-purple-200",
   "Reprovado Solicitante": "bg-[#FECACA] text-red-800 border-red-200",
   "Aprovado Solicitante": "bg-[#FDE68A] text-yellow-800 border-yellow-200",
