@@ -115,7 +115,7 @@ export default function GerenciarEmpresas() {
               setSelectedEmpresa(null);
               setFormModalOpen(true);
             }}
-            className="bg-[#ffcd00] hover:bg-[#ffcd00]/90 text-black font-semibold"
+            className="bg-[#00141D] hover:bg-[#00141D]/90 text-white font-semibold"
           >
             <Plus className="mr-2 h-4 w-4" />
             Novo Cliente
