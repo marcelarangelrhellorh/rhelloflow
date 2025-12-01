@@ -3,27 +3,24 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { AnalyzeScorecards } from "@/components/FunilVagas/AnalyzeScorecards";
 import type { Candidato } from "@/hooks/data/useCandidatos";
-
 interface VagaCandidatesTableProps {
   candidatos: Candidato[];
   vagaId: string;
   vagaTitulo: string;
 }
-
-export function VagaCandidatesTable({ candidatos, vagaId, vagaTitulo }: VagaCandidatesTableProps) {
+export function VagaCandidatesTable({
+  candidatos,
+  vagaId,
+  vagaTitulo
+}: VagaCandidatesTableProps) {
   const navigate = useNavigate();
-
   const getStatusBadgeClass = (status: string) => {
-    if (status === "Oferta Enviada")
-      return "bg-green-500/20 text-green-800 dark:text-green-300";
-    if (status === "1ª Entrevista")
-      return "bg-blue-500/20 text-blue-800 dark:text-blue-300";
+    if (status === "Oferta Enviada") return "bg-green-500/20 text-green-800 dark:text-green-300";
+    if (status === "1ª Entrevista") return "bg-blue-500/20 text-blue-800 dark:text-blue-300";
     return "bg-primary/20 text-primary-text-light dark:text-primary-text-dark";
   };
-
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
+  return <div>
+      <div className="flex items-center justify-between mb-6 py-0 my-[40px]">
         <h2 className="text-primary-text-light dark:text-primary-text-dark text-3xl font-bold tracking-tight">
           Candidatos Ativos
         </h2>
@@ -41,45 +38,30 @@ export function VagaCandidatesTable({ candidatos, vagaId, vagaTitulo }: VagaCand
             </tr>
           </thead>
           <tbody className="text-primary-text-light dark:text-primary-text-dark text-base">
-            {candidatos.length === 0 ? (
-              <tr>
+            {candidatos.length === 0 ? <tr>
                 <td colSpan={4} className="p-8 text-center text-secondary-text-light dark:text-secondary-text-dark">
                   Nenhum candidato relacionado a esta vaga
                 </td>
-              </tr>
-            ) : (
-              candidatos.map((candidato, index) => (
-                <tr
-                  key={candidato.id}
-                  className={index < candidatos.length - 1 ? "border-b border-gray-200 dark:border-secondary-text-light/20" : ""}
-                >
+              </tr> : candidatos.map((candidato, index) => <tr key={candidato.id} className={index < candidatos.length - 1 ? "border-b border-gray-200 dark:border-secondary-text-light/20" : ""}>
                   <td className="p-4 font-semibold text-base">{candidato.nome_completo}</td>
                   <td className="p-4">
-                    <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-semibold ${getStatusBadgeClass(
-                        candidato.status
-                      )}`}
-                    >
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-semibold ${getStatusBadgeClass(candidato.status)}`}>
                       {candidato.status}
                     </span>
                   </td>
                   <td className="p-4 text-secondary-text-light dark:text-secondary-text-dark text-base font-medium">
-                    {format(new Date(candidato.criado_em), "d 'de' MMM", { locale: ptBR })}
+                    {format(new Date(candidato.criado_em), "d 'de' MMM", {
+                locale: ptBR
+              })}
                   </td>
                   <td className="p-4 text-right">
-                    <button
-                      onClick={() => navigate(`/candidatos/${candidato.id}`)}
-                      className="text-primary font-bold text-base hover:brightness-95 transition-all"
-                    >
+                    <button onClick={() => navigate(`/candidatos/${candidato.id}`)} className="text-primary font-bold text-base hover:brightness-95 transition-all">
                       Visualizar
                     </button>
                   </td>
-                </tr>
-              ))
-            )}
+                </tr>)}
           </tbody>
         </table>
       </div>
-    </div>
-  );
+    </div>;
 }

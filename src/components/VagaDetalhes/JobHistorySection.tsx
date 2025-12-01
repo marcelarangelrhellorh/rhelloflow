@@ -144,7 +144,7 @@ export function JobHistorySection({
         <div className="flex items-center gap-2">
           {isExpanded ? <ChevronDown className="h-5 w-5 text-muted-foreground" /> : <ChevronRight className="h-5 w-5 text-muted-foreground" />}
           <History className="h-5 w-5 text-primary" />
-          <span className="font-semibold text-foreground">Histórico</span>
+          <span className="font-semibold text-foreground text-base">Histórico</span>
           {records.length > 0 && <span className="ml-2 text-muted-foreground text-base font-semibold">
               ({records.length} registro{records.length !== 1 ? "s" : ""})
             </span>}
