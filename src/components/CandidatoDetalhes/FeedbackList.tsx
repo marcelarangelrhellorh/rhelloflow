@@ -21,7 +21,6 @@ interface Feedback {
 }
 interface FeedbackListProps {
   candidatoId: string;
-  onAddFeedback: () => void;
   onSolicitarFeedback?: () => void;
 }
 const disposicaoColors = {
@@ -36,7 +35,6 @@ const disposicaoIcons = {
 };
 export function FeedbackList({
   candidatoId,
-  onAddFeedback,
   onSolicitarFeedback
 }: FeedbackListProps) {
   const {
@@ -139,16 +137,12 @@ export function FeedbackList({
           <CardTitle className="text-xl font-bold">
             Feedbacks do Cliente    <span className="font-normal text-muted-foreground">({feedbacks.length})</span>
           </CardTitle>
-          <div className="flex gap-2">
-            {onSolicitarFeedback && <Button onClick={onSolicitarFeedback} size="sm" variant="outline" className="font-semibold bg-[#00141d] text-background">
-                <Send className="mr-2 h-4 w-4" />
-                Solicitar Feedback
-              </Button>}
-            <Button onClick={onAddFeedback} size="sm" className="font-semibold">
-              <Plus className="mr-2 h-4 w-4" />
-              Novo Feedback
+          {onSolicitarFeedback && (
+            <Button onClick={onSolicitarFeedback} size="sm" className="font-semibold bg-[#00141d] text-background hover:bg-[#00141d]/90">
+              <Send className="mr-2 h-4 w-4" />
+              Solicitar Feedback
             </Button>
-          </div>
+          )}
         </div>
       </CardHeader>
       <CardContent>
@@ -158,13 +152,9 @@ export function FeedbackList({
             <div className="mb-4 rounded-full bg-muted/20 p-4">
               <MessageSquare className="h-8 w-8 text-muted-foreground" />
             </div>
-            <p className="text-muted-foreground mb-4 text-base font-medium">
+            <p className="text-muted-foreground text-base font-medium">
               Nenhum feedback registrado ainda
             </p>
-            <Button onClick={onAddFeedback} variant="outline" size="sm" className="font-semibold">
-              <Plus className="mr-2 h-4 w-4" />
-              Adicionar Primeiro Feedback
-            </Button>
           </div> : <div className="space-y-4">
             {feedbacks.map(feedback => <div key={feedback.id} className="group rounded-lg border-2 border-border bg-card p-5 transition-all hover:shadow-lg hover:border-primary/20">
                 {/* Header com tipo e data */}

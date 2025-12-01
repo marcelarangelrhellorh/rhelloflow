@@ -10,7 +10,6 @@ import { StatsBar } from "@/components/CandidatoDetalhes/StatsBar";
 import { ContactCard } from "@/components/CandidatoDetalhes/ContactCard";
 import { ProfessionalInfoCard } from "@/components/CandidatoDetalhes/ProfessionalInfoCard";
 import { FeedbackList } from "@/components/CandidatoDetalhes/FeedbackList";
-import { FeedbackModal } from "@/components/CandidatoDetalhes/FeedbackModal";
 import { SolicitarFeedbackModal } from "@/components/CandidatoDetalhes/SolicitarFeedbackModal";
 import { ScorecardEvaluation } from "@/components/CandidatoDetalhes/ScorecardEvaluation";
 import { ScorecardHistory } from "@/components/CandidatoDetalhes/ScorecardHistory";
@@ -81,7 +80,6 @@ export default function CandidatoDetalhes() {
   const [loading, setLoading] = useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [relocateModalOpen, setRelocateModalOpen] = useState(false);
-  const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
   const [solicitarFeedbackModalOpen, setSolicitarFeedbackModalOpen] = useState(false);
   const [whatsappModalOpen, setWhatsappModalOpen] = useState(false);
   useEffect(() => {
@@ -323,7 +321,7 @@ export default function CandidatoDetalhes() {
 
           {/* Feedbacks and WhatsApp History - Side by Side */}
           <div className="grid gap-6 lg:grid-cols-2">
-            <FeedbackList candidatoId={id!} onAddFeedback={() => setFeedbackModalOpen(true)} onSolicitarFeedback={() => setSolicitarFeedbackModalOpen(true)} />
+            <FeedbackList candidatoId={id!} onSolicitarFeedback={() => setSolicitarFeedbackModalOpen(true)} />
             <WhatsAppHistory candidateId={id!} />
           </div>
 
@@ -362,11 +360,6 @@ export default function CandidatoDetalhes() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      {/* Feedback Modal */}
-      <FeedbackModal open={feedbackModalOpen} onOpenChange={setFeedbackModalOpen} candidatoId={id!} vagaId={candidato.vaga_relacionada_id} etapaAtual={candidato.status} onSuccess={() => {
-      loadCandidato();
-    }} />
 
       {/* Solicitar Feedback Modal */}
       <SolicitarFeedbackModal open={solicitarFeedbackModalOpen} onOpenChange={setSolicitarFeedbackModalOpen} candidatoId={id!} vagaId={candidato.vaga_relacionada_id} candidatoNome={candidato.nome_completo} />
