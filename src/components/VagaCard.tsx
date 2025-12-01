@@ -176,103 +176,205 @@ export function VagaCard({
   };
   return <>
       <Card draggable={draggable} onDragStart={onDragStart} onClick={handleClick} className="relative cursor-pointer bg-[#FFFDF6] border border-gray-200 overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-200 hover:scale-[1.01]">
-        <CardContent className="p-5 space-y-4">
-          <div className="space-y-2">
-            <div className="flex items-start justify-between gap-2">
-              <h3 className="text-lg font-bold text-[#00141D] leading-tight flex-1 line-clamp-2">
-                {vaga.titulo}
-              </h3>
-              
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild onClick={e => e.stopPropagation()}>
-                  <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 text-[#36404A] hover:text-[#00141D]">
-                    <MoreVertical className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48 bg-white">
-                  <DropdownMenuItem onClick={handleEdit} className="cursor-pointer">
-                    <Edit className="h-4 w-4 mr-2" />
-                    Editar vaga
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={e => {
-                  e.stopPropagation();
-                  setShowDeleteDialog(true);
-                }} className="text-destructive cursor-pointer">
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Excluir vaga
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-            
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge className="border font-semibold rounded-md px-2 py-1 text-sm" style={{
-              backgroundColor: statusColors.bg,
-              color: statusColors.text,
-              borderColor: statusColors.bg
-            }}>
-                {vaga.status}
-              </Badge>
-              
-              {vaga.confidencial && <Badge className="bg-orange-100 text-orange-700 border-orange-200 border font-semibold rounded-md px-2 py-1 text-sm flex items-center gap-1">
-                  <EyeOff className="h-3.5 w-3.5" />
-                  Confidencial
-                </Badge>}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <p className="text-[#36404A] text-base font-semibold">Cliente</p>
-              <p className="text-sm font-semibold text-[#00141D] line-clamp-1">{vaga.empresa}</p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-[#36404A] text-base font-semibold">Recrutador</p>
-              <p className="text-sm font-semibold text-[#00141D] line-clamp-1">
-                {recrutadorName || "Não atribuído"}
-              </p>
-            </div>
-          </div>
-
-          {(vaga.salario_min || vaga.salario_max) && <div className="space-y-1">
-              <p className="text-[#36404A] text-base font-semibold">Faixa Salarial</p>
-              <p className="text-sm font-semibold text-[#00141D]">
-                {formatSalaryRange(vaga.salario_min, vaga.salario_max, vaga.salario_modalidade)}
-              </p>
-            </div>}
-
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <p className="text-[#36404A] font-semibold text-sm">Progresso do Pipeline</p>
-              <p className="font-bold text-[#00141D] text-sm">{progress}%</p>
-            </div>
-            <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-              <div className="h-full transition-all duration-300" style={{
-              width: `${progress}%`,
-              backgroundColor: "#FFCD00"
-            }} />
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between pt-2 border-t border-gray-200">
+        <CardContent className={viewMode === "list" ? "p-4" : "p-5 space-y-4"}>
+          {viewMode === "list" ? (
+            // Layout horizontal compacto para visualização em lista
             <div className="flex items-center gap-4">
-              <div className="flex flex-col items-center">
-                <p className="text-2xl font-bold text-[#00141D]">{vaga.candidatos_count || 0}</p>
-                <p className="text-[#36404A] text-sm font-semibold">Total de Candidatos</p>
+              {/* Coluna 1: Título e Status */}
+              <div className="flex-1 min-w-0 space-y-2">
+                <div className="flex items-start justify-between gap-2">
+                  <h3 className="text-base font-bold text-[#00141D] leading-tight line-clamp-1 flex-1">
+                    {vaga.titulo}
+                  </h3>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild onClick={e => e.stopPropagation()}>
+                      <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 text-[#36404A] hover:text-[#00141D]">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48 bg-white">
+                      <DropdownMenuItem onClick={handleEdit} className="cursor-pointer">
+                        <Edit className="h-4 w-4 mr-2" />
+                        Editar vaga
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={e => {
+                        e.stopPropagation();
+                        setShowDeleteDialog(true);
+                      }} className="text-destructive cursor-pointer">
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Excluir vaga
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge className="border font-semibold rounded-md px-2 py-0.5 text-xs" style={{
+                    backgroundColor: statusColors.bg,
+                    color: statusColors.text,
+                    borderColor: statusColors.bg
+                  }}>
+                    {vaga.status}
+                  </Badge>
+                  {vaga.confidencial && (
+                    <Badge className="bg-orange-100 text-orange-700 border-orange-200 border font-semibold rounded-md px-2 py-0.5 text-xs flex items-center gap-1">
+                      <EyeOff className="h-3 w-3" />
+                      Confidencial
+                    </Badge>
+                  )}
+                </div>
               </div>
-              <div className="flex flex-col items-center">
-                <p className="text-2xl font-bold text-[#00141D]">{daysOpen}</p>
-                <p className="text-[#36404A] text-sm font-semibold">Dias em Aberto</p>
-              </div>
-            </div>
 
-            {recrutadorName && <div className="flex items-center justify-center w-10 h-10 rounded-full font-bold text-sm" style={{
-            backgroundColor: "#00141D",
-            color: "#FFFDF6"
-          }} title={recrutadorName}>
-                {getInitials(recrutadorName)}
-              </div>}
-          </div>
+              {/* Coluna 2: Cliente e Recrutador */}
+              <div className="flex gap-6">
+                <div className="space-y-0.5">
+                  <p className="text-[#36404A] text-xs font-semibold">Cliente</p>
+                  <p className="text-sm font-semibold text-[#00141D] line-clamp-1 max-w-[150px]">{vaga.empresa}</p>
+                </div>
+                <div className="space-y-0.5">
+                  <p className="text-[#36404A] text-xs font-semibold">Recrutador</p>
+                  <p className="text-sm font-semibold text-[#00141D] line-clamp-1 max-w-[150px]">
+                    {recrutadorName || "Não atribuído"}
+                  </p>
+                </div>
+              </div>
+
+              {/* Coluna 3: Progresso */}
+              <div className="w-[200px] space-y-1">
+                <div className="flex items-center justify-between">
+                  <p className="text-[#36404A] font-semibold text-xs">Progresso</p>
+                  <p className="font-bold text-[#00141D] text-xs">{progress}%</p>
+                </div>
+                <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div className="h-full transition-all duration-300" style={{
+                    width: `${progress}%`,
+                    backgroundColor: "#FFCD00"
+                  }} />
+                </div>
+              </div>
+
+              {/* Coluna 4: Métricas */}
+              <div className="flex items-center gap-4">
+                <div className="text-center">
+                  <p className="text-xl font-bold text-[#00141D]">{vaga.candidatos_count || 0}</p>
+                  <p className="text-[#36404A] text-xs font-semibold">Candidatos</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xl font-bold text-[#00141D]">{daysOpen}</p>
+                  <p className="text-[#36404A] text-xs font-semibold">Dias</p>
+                </div>
+              </div>
+
+              {/* Avatar do recrutador */}
+              {recrutadorName && (
+                <div className="flex items-center justify-center w-9 h-9 rounded-full font-bold text-sm shrink-0" style={{
+                  backgroundColor: "#00141D",
+                  color: "#FFFDF6"
+                }} title={recrutadorName}>
+                  {getInitials(recrutadorName)}
+                </div>
+              )}
+            </div>
+          ) : (
+            // Layout vertical para visualização em grid (mantido original)
+            <>
+              <div className="space-y-2">
+                <div className="flex items-start justify-between gap-2">
+                  <h3 className="text-lg font-bold text-[#00141D] leading-tight flex-1 line-clamp-2">
+                    {vaga.titulo}
+                  </h3>
+                  
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild onClick={e => e.stopPropagation()}>
+                      <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 text-[#36404A] hover:text-[#00141D]">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48 bg-white">
+                      <DropdownMenuItem onClick={handleEdit} className="cursor-pointer">
+                        <Edit className="h-4 w-4 mr-2" />
+                        Editar vaga
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={e => {
+                        e.stopPropagation();
+                        setShowDeleteDialog(true);
+                      }} className="text-destructive cursor-pointer">
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Excluir vaga
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+                
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge className="border font-semibold rounded-md px-2 py-1 text-sm" style={{
+                    backgroundColor: statusColors.bg,
+                    color: statusColors.text,
+                    borderColor: statusColors.bg
+                  }}>
+                    {vaga.status}
+                  </Badge>
+                  
+                  {vaga.confidencial && <Badge className="bg-orange-100 text-orange-700 border-orange-200 border font-semibold rounded-md px-2 py-1 text-sm flex items-center gap-1">
+                      <EyeOff className="h-3.5 w-3.5" />
+                      Confidencial
+                    </Badge>}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <p className="text-[#36404A] text-base font-semibold">Cliente</p>
+                  <p className="text-sm font-semibold text-[#00141D] line-clamp-1">{vaga.empresa}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-[#36404A] text-base font-semibold">Recrutador</p>
+                  <p className="text-sm font-semibold text-[#00141D] line-clamp-1">
+                    {recrutadorName || "Não atribuído"}
+                  </p>
+                </div>
+              </div>
+
+              {(vaga.salario_min || vaga.salario_max) && <div className="space-y-1">
+                  <p className="text-[#36404A] text-base font-semibold">Faixa Salarial</p>
+                  <p className="text-sm font-semibold text-[#00141D]">
+                    {formatSalaryRange(vaga.salario_min, vaga.salario_max, vaga.salario_modalidade)}
+                  </p>
+                </div>}
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <p className="text-[#36404A] font-semibold text-sm">Progresso do Pipeline</p>
+                  <p className="font-bold text-[#00141D] text-sm">{progress}%</p>
+                </div>
+                <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div className="h-full transition-all duration-300" style={{
+                    width: `${progress}%`,
+                    backgroundColor: "#FFCD00"
+                  }} />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-2 border-t border-gray-200">
+                <div className="flex items-center gap-4">
+                  <div className="flex flex-col items-center">
+                    <p className="text-2xl font-bold text-[#00141D]">{vaga.candidatos_count || 0}</p>
+                    <p className="text-[#36404A] text-sm font-semibold">Total de Candidatos</p>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <p className="text-2xl font-bold text-[#00141D]">{daysOpen}</p>
+                    <p className="text-[#36404A] text-sm font-semibold">Dias em Aberto</p>
+                  </div>
+                </div>
+
+                {recrutadorName && <div className="flex items-center justify-center w-10 h-10 rounded-full font-bold text-sm" style={{
+                  backgroundColor: "#00141D",
+                  color: "#FFFDF6"
+                }} title={recrutadorName}>
+                    {getInitials(recrutadorName)}
+                  </div>}
+              </div>
+            </>
+          )}
         </CardContent>
       </Card>
 
