@@ -6,12 +6,7 @@ import { NotificationBell } from "./NotificationBell";
 import { UserMenu } from "./UserMenu";
 import { ConnectionIndicator } from "./ConnectionIndicator";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { useUserRole } from "@/hooks/useUserRole";
 import logoRhelloDark from "@/assets/logo-rhello-dark.png";
 import symbolRhelloNew from "@/assets/symbol-rhello-new.png";
@@ -54,14 +49,11 @@ export function AppNavbar() {
     return null;
   }
   return <header className="sticky top-0 z-50 w-full border-b border-[#d4cec6]/40 bg-primary shadow-[0_2px_12px_rgba(0,0,0,0.06)]">
-      <div className="flex h-16 items-center px-4 sm:px-6 gap-6 max-w-[1600px] mx-auto">
+      <div className="flex h-16 items-center px-4 gap-6 max-w-[1600px] mx-auto sm:px-0">
         {/* Logo - Com Dropdown para usuários internos, sem dropdown para clientes */}
-        {roles.includes('client') ? (
-          <div className="flex items-center shrink-0">
+        {roles.includes('client') ? <div className="flex items-center shrink-0">
             <img alt="rhello" className="h-10 w-10" loading="lazy" src={symbolRhelloNew} />
-          </div>
-        ) : (
-          <DropdownMenu>
+          </div> : <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="flex items-center shrink-0 cursor-pointer hover:opacity-80 transition-opacity">
                 <img alt="rhello" className="h-10 w-10 hidden sm:block" loading="lazy" src={symbolRhelloNew} />
@@ -82,8 +74,7 @@ export function AppNavbar() {
                 <span className="font-bold text-base">Templates de WhatsApp</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
-          </DropdownMenu>
-        )}
+          </DropdownMenu>}
 
         {/* Desktop Navigation */}
         <nav className="hidden lg:flex flex-1 items-center justify-center gap-6">
