@@ -148,7 +148,14 @@ export function VagaTasksCard({
           </p>}
       </div>
 
-      <TaskDetailDrawer task={selectedTask} open={detailDrawerOpen} onOpenChange={setDetailDrawerOpen} onEdit={handleEditTask} />
+      <TaskDetailDrawer 
+        task={selectedTask} 
+        open={detailDrawerOpen} 
+        onOpenChange={setDetailDrawerOpen} 
+        onEdit={handleEditTask}
+        onDelete={() => {}}
+        onToggleComplete={() => {}}
+      />
 
       <TaskModal open={modalOpen} onClose={handleCloseModal} task={editingTask} defaultVagaId={defaultVagaId} />
     </>;

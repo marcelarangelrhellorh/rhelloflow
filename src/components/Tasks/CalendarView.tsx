@@ -14,11 +14,24 @@ interface CalendarEvent {
   title: string;
   start: Date;
   end: Date;
-  resource: Task;
+  resource?: Task;
+  isExternal?: boolean;
+  description?: string;
+  meetLink?: string;
 }
+
 interface CalendarViewProps {
   meetings: Task[];
-  onEventClick: (task: Task) => void;
+  externalEvents?: Array<{
+    id: string;
+    title: string;
+    start: string;
+    end: string;
+    description?: string;
+    meetLink?: string;
+    isFromSystem: boolean;
+  }>;
+  onEventClick: (task: Task | null, externalEvent?: any) => void;
 }
 
 // Custom event component with better visibility
@@ -104,33 +117,86 @@ const CustomToolbar = ({
 };
 export default function CalendarView({
   meetings,
+  externalEvents = [],
   onEventClick
 }: CalendarViewProps) {
-  // Convert meetings to calendar events
+  // Convert meetings and external events to calendar events
   const events: CalendarEvent[] = useMemo(() => {
-    return meetings.filter(meeting => meeting.due_date && meeting.start_time).map(meeting => {
-      const dateStr = meeting.due_date!;
-      const startTime = meeting.start_time || '09:00';
-      const endTime = meeting.end_time || '10:00';
-      const start = moment(`${dateStr} ${startTime}`, 'YYYY-MM-DD HH:mm').toDate();
-      const end = moment(`${dateStr} ${endTime}`, 'YYYY-MM-DD HH:mm').toDate();
-      return {
-        id: meeting.id,
-        title: meeting.title,
-        start,
-        end,
-        resource: meeting
-      };
-    });
-  }, [meetings]);
+    // System meetings
+    const systemEvents = meetings
+      .filter(meeting => meeting.due_date && meeting.start_time)
+      .map(meeting => {
+        const dateStr = meeting.due_date!;
+        const startTime = meeting.start_time || '09:00';
+        const endTime = meeting.end_time || '10:00';
+        const start = moment(`${dateStr} ${startTime}`, 'YYYY-MM-DD HH:mm').toDate();
+        const end = moment(`${dateStr} ${endTime}`, 'YYYY-MM-DD HH:mm').toDate();
+        return {
+          id: meeting.id,
+          title: meeting.title,
+          start,
+          end,
+          resource: meeting,
+          isExternal: false,
+        };
+      });
+
+    // External Calendar events (not created in system)
+    const calendarEvents = externalEvents
+      .filter(event => !event.isFromSystem) // Only non-system events
+      .map(event => {
+        const start = moment(event.start).toDate();
+        const end = moment(event.end).toDate();
+        return {
+          id: event.id,
+          title: event.title,
+          start,
+          end,
+          isExternal: true,
+          description: event.description,
+          meetLink: event.meetLink,
+        };
+      });
+
+    return [...systemEvents, ...calendarEvents];
+  }, [meetings, externalEvents]);
   const handleSelectEvent = (event: CalendarEvent) => {
-    onEventClick(event.resource);
+    if (event.isExternal) {
+      onEventClick(null, {
+        id: event.id,
+        title: event.title,
+        description: event.description || '',
+        start: event.start,
+        end: event.end,
+        meetLink: event.meetLink,
+      });
+    } else if (event.resource) {
+      onEventClick(event.resource);
+    }
   };
 
   // Custom styling for events
   const eventStyleGetter = (event: CalendarEvent) => {
+    if (event.isExternal) {
+      // External events from Google Calendar
+      return {
+        style: {
+          backgroundColor: 'hsl(var(--secondary))',
+          borderRadius: '6px',
+          opacity: 0.85,
+          color: 'hsl(var(--secondary-foreground))',
+          border: '1px dashed hsl(var(--border))',
+          padding: '4px 8px',
+          fontSize: '13px',
+          fontWeight: 500,
+          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+          cursor: 'pointer'
+        }
+      };
+    }
+
     const task = event.resource;
-    const isCompleted = task.status === 'done';
+    const isCompleted = task?.status === 'done';
     return {
       style: {
         backgroundColor: isCompleted ? 'hsl(var(--muted))' : 'hsl(var(--primary))',
