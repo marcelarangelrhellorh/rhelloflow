@@ -53,7 +53,7 @@ export function AppNavbar() {
     return null;
   }
   return <header className="sticky top-0 z-50 w-full border-b border-[#d4cec6]/40 bg-primary shadow-[0_2px_12px_rgba(0,0,0,0.06)]">
-      <div className="flex h-14 sm:h-16 items-center px-3 sm:px-6 lg:px-8 gap-2 sm:gap-4 lg:gap-6 max-w-[1800px] mx-auto">
+      <div className="flex h-14 sm:h-16 items-center px-3 sm:px-6 lg:px-8 gap-2 sm:gap-4 lg:gap-6 w-full">
         {/* Logo - Com Dropdown para usuários internos, sem dropdown para clientes */}
         {roles.includes('client') ? <div className="flex items-center shrink-0">
             <img alt="rhello" className="h-8 w-8 sm:h-10 sm:w-10" loading="lazy" src={symbolRhelloNew} />
