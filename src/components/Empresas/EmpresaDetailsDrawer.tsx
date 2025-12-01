@@ -111,15 +111,15 @@ export function EmpresaDetailsDrawer({
 
           {/* KPIs */}
           <div className="grid grid-cols-3 gap-4">
-            <Card className="p-4 text-center border-gray-300">
+            <Card className="p-4 text-center border-gray-300 shadow-lg">
               <div className="text-2xl font-bold text-[#00141D]">{vagasAbertas}</div>
               <div className="text-sm text-[#36404A]">Vagas Abertas</div>
             </Card>
-            <Card className="p-4 text-center border-gray-300">
+            <Card className="p-4 text-center border-gray-300 shadow-lg">
               <div className="text-2xl font-bold text-[#00141D]">{vagasConcluidas}</div>
               <div className="text-sm text-[#36404A]">Vagas Concluídas</div>
             </Card>
-            <Card className="p-4 text-center border-gray-300">
+            <Card className="p-4 text-center border-gray-300 shadow-lg">
               <div className="text-2xl font-bold text-[#00141D]">{totalContratacoes}</div>
               <div className="text-sm text-[#36404A]">Contratações</div>
             </Card>
@@ -250,7 +250,7 @@ export function EmpresaDetailsDrawer({
                   Histórico de Processos ({vagas.length})
                 </h3>
                 <div className="space-y-2 border-[#ffcd00]">
-                  {vagas.map(vaga => <Card key={vaga.id} className="p-3 border-[#ffcd00]">
+                  {vagas.map(vaga => <Card key={vaga.id} className="p-3 border-[#ffcd00] shadow-lg">
                       <div className="flex justify-between items-start">
                         <div>
                           <div className="font-medium text-[#00141D]">
