@@ -16,7 +16,6 @@ import FeedbacksPendentes from "./pages/FeedbacksPendentes";
 import Candidatos from "./pages/Candidatos";
 import CandidatoForm from "./pages/CandidatoForm";
 import CandidatoDetalhes from "./pages/CandidatoDetalhes";
-
 import BancoTalentos from "./pages/BancoTalentos";
 import Scorecards from "./pages/Scorecards";
 import ScorecardForm from "./pages/ScorecardForm";
@@ -33,14 +32,13 @@ import GerenciarEmpresas from "./pages/GerenciarEmpresas";
 import GoogleCalendarCallback from "./pages/GoogleCalendarCallback";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
-
 const App = () => <ErrorBoundary>
   <TooltipProvider>
       <Toaster />
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/login" element={<Auth />} />
+          <Route path="/login" element={<Auth />} className="bg-[#ffcc00]/15" />
           <Route path="/auth/callback" element={<GoogleCalendarCallback />} />
           <Route path="/solicitar-vaga" element={<PublicVagaForm />} />
           <Route path="/share/:token" element={<ShareJob />} />
