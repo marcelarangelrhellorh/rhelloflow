@@ -85,6 +85,76 @@ export type Database = {
           },
         ]
       }
+      candidate_notes: {
+        Row: {
+          candidate_id: string
+          content: string
+          created_at: string
+          id: string
+          title: string | null
+          user_id: string
+        }
+        Insert: {
+          candidate_id: string
+          content: string
+          created_at?: string
+          id?: string
+          title?: string | null
+          user_id: string
+        }
+        Update: {
+          candidate_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          title?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_notes_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates_with_tags"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidate_notes_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidatos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidate_notes_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidatos_active"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidate_notes_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidatos_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidate_notes_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "view_candidate_tags"
+            referencedColumns: ["candidate_id"]
+          },
+          {
+            foreignKeyName: "candidate_notes_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "vw_candidatos_por_vaga"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       candidate_scorecards: {
         Row: {
           candidate_id: string
