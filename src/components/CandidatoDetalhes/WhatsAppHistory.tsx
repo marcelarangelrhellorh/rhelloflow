@@ -94,7 +94,7 @@ export function WhatsAppHistory({
       </Card>;
   }
   if (sends.length === 0) {
-    return <Card className="shadow-lg border-gray-300">
+    return <Card className="shadow-lg border-gray-400">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <MessageSquare className="h-5 w-5" />

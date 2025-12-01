@@ -72,7 +72,7 @@ export function CandidateHeader({
           </div>
         </div>}
 
-      <div className="rounded-lg border dark:border-secondary-text-light/20 bg-white dark:bg-background-dark p-6 shadow-md border-gray-300">
+      <div className="rounded-lg border dark:border-secondary-text-light/20 bg-white dark:bg-background-dark p-6 shadow-md border-gray-400">
         <div className="flex flex-col sm:flex-row gap-4 sm:items-start sm:justify-between">
           {/* Left Side - Candidate Info */}
           <div className="flex gap-4 flex-1 min-w-0">
