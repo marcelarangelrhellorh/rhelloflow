@@ -220,7 +220,7 @@ const WhatsAppTemplates = () => {
             </div>
             <Dialog open={isDialogOpen} onOpenChange={handleDialogOpenChange}>
               <DialogTrigger asChild>
-                <Button className="bg-[#FFCD00] hover:bg-[#FAEC3E] text-[#00141D] font-bold">
+                <Button className="bg-[#00141D] hover:bg-[#00141D]/90 text-white font-bold">
                   <Plus className="h-4 w-4 mr-2" />
                   Novo Template
                 </Button>
