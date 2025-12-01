@@ -41,9 +41,13 @@ const meetingSchema = z.object({
   start_time: z.string().min(1, "Horário de início é obrigatório"),
   end_time: z.string().min(1, "Horário de término é obrigatório"),
   assignee_id: z.string().min(1, "Responsável é obrigatório"),
-  vaga_id: z.string().min(1, "Vaga é obrigatória"),
+  vaga_id: z.string().optional(),
+  candidato_id: z.string().optional(),
   attendee_emails: z.string().optional(),
   reminder_minutes: z.number().default(30),
+}).refine((data) => data.vaga_id || data.candidato_id, {
+  message: "É necessário vincular a reunião a uma vaga ou candidato",
+  path: ["vaga_id"],
 });
 
 type MeetingFormData = z.infer<typeof meetingSchema>;
@@ -53,9 +57,11 @@ interface MeetingModalProps {
   onClose: () => void;
   task?: Task | null;
   defaultVagaId?: string | null;
+  defaultCandidateId?: string | null;
+  candidateName?: string;
 }
 
-export default function MeetingModal({ open, onClose, task, defaultVagaId }: MeetingModalProps) {
+export default function MeetingModal({ open, onClose, task, defaultVagaId, defaultCandidateId, candidateName }: MeetingModalProps) {
   const createTask = useCreateTask();
   const updateTask = useUpdateTask();
   const { syncTask } = useTaskSync();
@@ -71,6 +77,7 @@ export default function MeetingModal({ open, onClose, task, defaultVagaId }: Mee
       end_time: "10:00",
       assignee_id: "",
       vaga_id: "",
+      candidato_id: "",
       attendee_emails: "",
       reminder_minutes: 30,
     },
@@ -114,6 +121,7 @@ export default function MeetingModal({ open, onClose, task, defaultVagaId }: Mee
         end_time: task.end_time || "10:00",
         assignee_id: task.assignee_id || "",
         vaga_id: task.vaga_id || "",
+        candidato_id: task.candidato_id || "",
         attendee_emails: task.attendee_emails?.join(", ") || "",
         reminder_minutes: task.reminder_minutes || 30,
       });
@@ -126,11 +134,12 @@ export default function MeetingModal({ open, onClose, task, defaultVagaId }: Mee
         end_time: "10:00",
         assignee_id: "",
         vaga_id: defaultVagaId || "",
+        candidato_id: defaultCandidateId || "",
         attendee_emails: "",
         reminder_minutes: 30,
       });
     }
-  }, [task, defaultVagaId, form]);
+  }, [task, defaultVagaId, defaultCandidateId, form]);
 
   const isEditing = task && task.id && task.task_type === 'meeting';
 
@@ -151,6 +160,7 @@ export default function MeetingModal({ open, onClose, task, defaultVagaId }: Mee
       due_date: dueDateTime.toISOString(),
       assignee_id: data.assignee_id || null,
       vaga_id: data.vaga_id || null,
+      candidato_id: data.candidato_id || null,
       start_time: data.start_time,
       end_time: data.end_time,
       reminder_minutes: data.reminder_minutes,
@@ -348,7 +358,7 @@ export default function MeetingModal({ open, onClose, task, defaultVagaId }: Mee
               name="vaga_id"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Vincular a Vaga *</FormLabel>
+                  <FormLabel>Vincular a Vaga {!defaultCandidateId && "*"}</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value || undefined}>
                     <FormControl>
                       <SelectTrigger>
@@ -363,6 +373,11 @@ export default function MeetingModal({ open, onClose, task, defaultVagaId }: Mee
                       ))}
                     </SelectContent>
                   </Select>
+                  {defaultCandidateId && candidateName && (
+                    <FormDescription>
+                      Reunião com {candidateName}
+                    </FormDescription>
+                  )}
                   <FormMessage />
                 </FormItem>
               )}
