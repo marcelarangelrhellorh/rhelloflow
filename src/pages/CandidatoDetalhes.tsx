@@ -320,6 +320,9 @@ export default function CandidatoDetalhes() {
             </div>
           </div>
 
+          {/* Candidate Notes Section */}
+          <CandidateNotesSection candidateId={id!} />
+
           {/* Feedbacks and WhatsApp History - Side by Side */}
           <div className="grid gap-6 lg:grid-cols-2">
             <FeedbackList candidatoId={id!} onSolicitarFeedback={() => setSolicitarFeedbackModalOpen(true)} />
@@ -336,9 +339,6 @@ export default function CandidatoDetalhes() {
 
             <HistoryTimeline historico={historico} onVagaClick={vagaId => navigate(`/vagas/${vagaId}`)} />
           </div>
-
-          {/* Candidate Notes Section */}
-          <CandidateNotesSection candidateId={id!} />
         </div>
       </main>
 
