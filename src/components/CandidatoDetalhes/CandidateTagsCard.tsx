@@ -147,7 +147,7 @@ export function CandidateTagsCard({
     acc[tag.category].push(tag);
     return acc;
   }, {} as Record<string, CandidateTag[]>);
-  return <Card className="my-[50px] shadow-lg border border-gray-400">
+  return <Card className="my-[50px] shadow-md border border-gray-300">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">

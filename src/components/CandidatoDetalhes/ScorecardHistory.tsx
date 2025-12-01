@@ -162,14 +162,14 @@ export function ScorecardHistory({
     }
   }
   if (loading) {
-    return <Card className="border border-gray-400">
+    return <Card className="border border-gray-300 shadow-md">
         <CardContent className="flex items-center justify-center py-8">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         </CardContent>
       </Card>;
   }
   if (scorecards.length === 0) {
-    return <Card className="border border-gray-400">
+    return <Card className="border border-gray-300 shadow-md">
         <CardHeader>
           <CardTitle>Histórico de Avaliações</CardTitle>
           <CardDescription className="text-base font-medium">Scorecards preenchidos para este candidato</CardDescription>
@@ -186,8 +186,8 @@ export function ScorecardHistory({
   // Calculate average score
   const averageScore = scorecards.reduce((sum, s) => sum + s.match_percentage, 0) / scorecards.length;
   return <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <Card className="border border-gray-400">
-        <CardHeader className="border-gray-400">
+      <Card className="border border-gray-300 shadow-md">
+        <CardHeader className="border-gray-300">
           <CollapsibleTrigger className="w-full">
             <div className="flex items-start justify-between">
               <div className="text-left">

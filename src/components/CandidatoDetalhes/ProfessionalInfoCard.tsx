@@ -185,7 +185,7 @@ export function ProfessionalInfoCard({
       toast.error("Erro ao atualizar vaga relacionada");
     }
   };
-  return <Card className="border border-gray-400">
+  return <Card className="border border-gray-300 shadow-md">
       <CardHeader>
         <CardTitle className="text-lg">Informações Profissionais</CardTitle>
       </CardHeader>
