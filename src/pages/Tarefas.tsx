@@ -17,6 +17,8 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
+import moment from "moment";
 export default function Tarefas() {
   const [view, setView] = useState<"list" | "kanban" | "calendar">("kanban");
   const [taskModalOpen, setTaskModalOpen] = useState(false);
@@ -26,6 +28,7 @@ export default function Tarefas() {
   const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
   const [detailDrawerOpen, setDetailDrawerOpen] = useState(false);
   const [taskForDetail, setTaskForDetail] = useState<Task | null>(null);
+  const [externalEventDetail, setExternalEventDetail] = useState<any>(null);
   const [filters, setFilters] = useState<TaskFilters>({
     status: undefined,
     priority: undefined,
@@ -38,6 +41,18 @@ export default function Tarefas() {
   } = useTasks(filters);
   const deleteTask = useDeleteTask();
   const updateTask = useUpdateTask();
+  const { getSyncedEvents } = useGoogleCalendar();
+
+  // Fetch external calendar events
+  const { data: externalEvents } = useQuery({
+    queryKey: ['calendar-events'],
+    queryFn: async () => {
+      const timeMin = moment().subtract(3, 'months').toISOString();
+      const timeMax = moment().add(3, 'months').toISOString();
+      return await getSyncedEvents(timeMin, timeMax);
+    },
+    refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes
+  });
 
   // Load users for filter
   const {
@@ -87,8 +102,14 @@ export default function Tarefas() {
     setSelectedTask(null);
     setMeetingModalOpen(true);
   };
-  const handleTaskClick = (task: Task) => {
-    setTaskForDetail(task);
+  const handleTaskClick = (task: Task | null, externalEvent?: any) => {
+    if (externalEvent) {
+      setExternalEventDetail(externalEvent);
+      setTaskForDetail(null);
+    } else if (task) {
+      setTaskForDetail(task);
+      setExternalEventDetail(null);
+    }
     setDetailDrawerOpen(true);
   };
 
@@ -223,7 +244,7 @@ export default function Tarefas() {
                 <Video className="h-5 w-5" />
                 {allMeetings.length === 0 ? "Criar sua primeira reunião" : "Criar e sincronizar reunião"}
               </Button>
-            </div> : <CalendarView meetings={syncedMeetings} onEventClick={handleTaskClick} /> : onlyTasks.length === 0 ? <div className="text-center py-16">
+            </div> : <CalendarView meetings={syncedMeetings} externalEvents={externalEvents} onEventClick={handleTaskClick} /> : onlyTasks.length === 0 ? <div className="text-center py-16">
             <p className="text-muted-foreground text-lg mb-4">Nenhuma tarefa encontrada</p>
             <Button onClick={handleNewTask} className="bg-[#ffcd00] hover:bg-[#ffcd00]/90 text-black font-semibold">
               <Plus className="h-5 w-5 mr-2" />
@@ -238,7 +259,40 @@ export default function Tarefas() {
       <TaskModal open={taskModalOpen} onClose={() => setTaskModalOpen(false)} task={selectedTask} />
       <MeetingModal open={meetingModalOpen} onClose={() => setMeetingModalOpen(false)} task={selectedTask} />
       
-      <TaskDetailDrawer task={taskForDetail} open={detailDrawerOpen} onOpenChange={setDetailDrawerOpen} onEdit={handleEdit} />
+      {taskForDetail && (
+        <TaskDetailDrawer 
+          task={taskForDetail} 
+          open={detailDrawerOpen} 
+          onOpenChange={open => {
+            setDetailDrawerOpen(open);
+            if (!open) {
+              setTaskForDetail(null);
+              setExternalEventDetail(null);
+            }
+          }} 
+          onEdit={handleEdit} 
+          onDelete={() => taskForDetail && handleDelete(taskForDetail.id)} 
+          onToggleComplete={() => taskForDetail && handleToggleComplete(taskForDetail)} 
+        />
+      )}
+
+      {externalEventDetail && (
+        <TaskDetailDrawer 
+          task={null}
+          externalEvent={externalEventDetail}
+          open={detailDrawerOpen} 
+          onOpenChange={open => {
+            setDetailDrawerOpen(open);
+            if (!open) {
+              setTaskForDetail(null);
+              setExternalEventDetail(null);
+            }
+          }} 
+          onEdit={() => {}}
+          onDelete={() => {}}
+          onToggleComplete={() => {}}
+        />
+      )}
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>

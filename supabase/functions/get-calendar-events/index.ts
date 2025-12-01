@@ -201,9 +201,8 @@ serve(async (req) => {
 
     const syncedEventIds = new Set(syncedTasks?.map(t => t.google_event_id) || []);
 
-    // Transform events to a standard format
+    // Transform events to a standard format - include ALL events now
     const events = (calendarData.items || [])
-      .filter((event: any) => syncedEventIds.has(event.id)) // Only return events synced from our system
       .map((event: any) => ({
         id: event.id,
         title: event.summary || "Sem título",
@@ -214,7 +213,7 @@ serve(async (req) => {
         location: event.location || "",
         meetLink: event.hangoutLink || event.conferenceData?.entryPoints?.[0]?.uri || "",
         attendees: event.attendees?.map((a: any) => a.email) || [],
-        isFromSystem: true,
+        isFromSystem: syncedEventIds.has(event.id), // Mark if it came from our system
       }));
 
     return new Response(JSON.stringify({ events }), {

@@ -176,6 +176,8 @@ export function CandidateMeetingsCard({ candidateId, candidateName, className }:
         open={detailDrawerOpen}
         onOpenChange={setDetailDrawerOpen}
         onEdit={handleEditMeeting}
+        onDelete={() => {}}
+        onToggleComplete={() => {}}
       />
 
       <MeetingModal
