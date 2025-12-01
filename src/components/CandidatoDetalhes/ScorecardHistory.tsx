@@ -4,7 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Star, User, Calendar, Target } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Star, User, Calendar, Target, ChevronDown } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -79,6 +80,7 @@ export function ScorecardHistory({
 }: ScorecardHistoryProps) {
   const [scorecards, setScorecards] = useState<Scorecard[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   useEffect(() => {
     loadScorecards();
   }, [candidateId]);
@@ -183,22 +185,29 @@ export function ScorecardHistory({
 
   // Calculate average score
   const averageScore = scorecards.reduce((sum, s) => sum + s.match_percentage, 0) / scorecards.length;
-  return <Card className="border border-[#ffcd00]">
-      <CardHeader>
-        <div className="flex items-start justify-between">
-          <div>
-            <CardTitle className="text-xl font-bold">Histórico de Avaliações</CardTitle>
-            <CardDescription className="text-base">
-              <span className="font-semibold">{scorecards.length}</span> {scorecards.length === 1 ? "avaliação" : "avaliações"} recebidas
-            </CardDescription>
-          </div>
-          <div className="text-right">
-            <div className="text-3xl font-bold">{Math.round(averageScore)}%</div>
-            <p className="text-sm text-muted-foreground font-semibold">Match médio</p>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="shadow-lg">
+  return <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+      <Card className="border border-[#ffcd00]">
+        <CardHeader>
+          <CollapsibleTrigger className="w-full">
+            <div className="flex items-start justify-between">
+              <div className="text-left">
+                <div className="flex items-center gap-2">
+                  <CardTitle className="text-xl font-bold">Histórico de Avaliações</CardTitle>
+                  <ChevronDown className={cn("h-5 w-5 transition-transform duration-200", isOpen && "rotate-180")} />
+                </div>
+                <CardDescription className="text-base">
+                  <span className="font-semibold">{scorecards.length}</span> {scorecards.length === 1 ? "avaliação" : "avaliações"} recebidas
+                </CardDescription>
+              </div>
+              <div className="text-right">
+                <div className="text-3xl font-bold">{Math.round(averageScore)}%</div>
+                <p className="text-sm text-muted-foreground font-semibold">Match médio</p>
+              </div>
+            </div>
+          </CollapsibleTrigger>
+        </CardHeader>
+        <CollapsibleContent>
+          <CardContent className="shadow-lg">
         <div className="grid grid-cols-1 gap-6">
           {scorecards.map(scorecard => {
           const recConfig = recommendationConfig[scorecard.recommendation];
@@ -285,7 +294,9 @@ export function ScorecardHistory({
                 </div>
               </div>;
         })}
-        </div>
-      </CardContent>
-    </Card>;
+          </div>
+        </CardContent>
+        </CollapsibleContent>
+      </Card>
+    </Collapsible>;
 }
