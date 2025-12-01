@@ -18,6 +18,7 @@ import { LinkToJobModal } from "@/components/BancoTalentos/LinkToJobModal";
 import { CandidateTagsCard } from "@/components/CandidatoDetalhes/CandidateTagsCard";
 import { SendWhatsAppModal } from "@/components/CandidatoDetalhes/SendWhatsAppModal";
 import { WhatsAppHistory } from "@/components/CandidatoDetalhes/WhatsAppHistory";
+import { CandidateNotesSection } from "@/components/CandidatoDetalhes/CandidateNotesSection";
 type Candidato = {
   id: string;
   nome_completo: string;
@@ -335,6 +336,9 @@ export default function CandidatoDetalhes() {
 
             <HistoryTimeline historico={historico} onVagaClick={vagaId => navigate(`/vagas/${vagaId}`)} />
           </div>
+
+          {/* Candidate Notes Section */}
+          <CandidateNotesSection candidateId={id!} />
         </div>
       </main>
 
