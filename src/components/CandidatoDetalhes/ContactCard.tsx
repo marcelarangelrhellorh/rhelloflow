@@ -70,7 +70,7 @@ Localização: ${[cidade, estado].filter(Boolean).join(", ") || "Não informada"
           </Button>
         </div>
         {isFromPublicLink && (
-          <p className="text-xs text-secondary-text-light dark:text-secondary-text-dark mt-2">
+          <p className="text-sm text-secondary-text-light dark:text-secondary-text-dark mt-2 font-medium">
             Informações enviadas pelo candidato
           </p>
         )}
