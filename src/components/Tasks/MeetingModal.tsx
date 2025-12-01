@@ -102,7 +102,7 @@ export default function MeetingModal({ open, onClose, task, defaultVagaId, defau
     queryFn: async () => {
       const { data, error } = await supabase
         .from("vagas")
-        .select("id, titulo")
+        .select("id, titulo, empresa")
         .is("deleted_at", null)
         .order("titulo");
       if (error) throw error;
@@ -368,7 +368,7 @@ export default function MeetingModal({ open, onClose, task, defaultVagaId, defau
                     <SelectContent>
                       {vagas?.map((vaga) => (
                         <SelectItem key={vaga.id} value={vaga.id}>
-                          {vaga.titulo}
+                          {vaga.titulo} - {vaga.empresa}
                         </SelectItem>
                       ))}
                     </SelectContent>
