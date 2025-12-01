@@ -103,12 +103,12 @@ export function HistoryTimeline({
                           </div>}
 
                         {/* Feedback */}
-                        {item.feedback && <p className="text-sm text-card-foreground bg-muted/20 rounded p-2 mt-2">
+                        {item.feedback && <p className="text-sm text-card-foreground bg-muted/20 rounded p-2 mt-2 font-medium">
                             {item.feedback}
                           </p>}
 
                         {/* Duration */}
-                        {reversedIndex < historico.length - 1 && item.data && historico[reversedIndex + 1].data && <p className="text-xs text-primary font-medium mt-2 flex items-center gap-1">
+                        {reversedIndex < historico.length - 1 && item.data && historico[reversedIndex + 1].data && <p className="text-xs mt-2 flex items-center gap-1 text-[#00141d] font-semibold">
                             <span className="inline-block h-1 w-1 rounded-full bg-primary"></span>
                             Duração: {calculateDuration(historico[reversedIndex + 1].data, item.data)}
                           </p>}

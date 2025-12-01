@@ -137,7 +137,7 @@ export function FeedbackList({
       <CardHeader className="mx-[10px]">
         <div className="flex items-center justify-between px-0 mx-[14px]">
           <CardTitle className="text-xl font-bold">
-            Feedbacks <span className="font-normal text-muted-foreground">({feedbacks.length})</span>
+            Feedbacks do Cliente    <span className="font-normal text-muted-foreground">({feedbacks.length})</span>
           </CardTitle>
           <div className="flex gap-2">
             {onSolicitarFeedback && <Button onClick={onSolicitarFeedback} size="sm" variant="outline" className="font-semibold bg-[#00141d] text-background">
