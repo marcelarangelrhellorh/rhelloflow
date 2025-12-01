@@ -94,7 +94,7 @@ export default function TaskModal({ open, onClose, task, defaultVagaId }: TaskMo
     queryFn: async () => {
       const { data, error } = await supabase
         .from("vagas")
-        .select("id, titulo")
+        .select("id, titulo, empresa")
         .is("deleted_at", null)
         .order("titulo");
       if (error) throw error;
@@ -313,7 +313,7 @@ export default function TaskModal({ open, onClose, task, defaultVagaId }: TaskMo
                     <SelectContent>
                       {vagas?.map((vaga) => (
                         <SelectItem key={vaga.id} value={vaga.id}>
-                          {vaga.titulo}
+                          {vaga.titulo} - {vaga.empresa}
                         </SelectItem>
                       ))}
                     </SelectContent>
