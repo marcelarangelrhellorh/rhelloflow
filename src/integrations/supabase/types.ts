@@ -4080,6 +4080,7 @@ export type Database = {
       status_candidato:
         | "Banco de Talentos"
         | "Selecionado"
+        | "Shortlist"
         | "Entrevista rhello"
         | "Reprovado rhello"
         | "Aprovado rhello"
@@ -4272,6 +4273,7 @@ export const Constants = {
       status_candidato: [
         "Banco de Talentos",
         "Selecionado",
+        "Shortlist",
         "Entrevista rhello",
         "Reprovado rhello",
         "Aprovado rhello",
