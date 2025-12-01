@@ -109,7 +109,7 @@ export default function Tarefas() {
   return <div className="min-h-screen bg-[#FFFBF0]">
       {/* Header */}
       <div className="bg-white border-b shadow-sm sticky top-0 z-10">
-        <div className="container mx-auto px-6 py-4">
+        <div className="container py-4 px-0 mx-0">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
               <h1 className="text-3xl font-bold text-[#00141d]">Tarefas</h1>
