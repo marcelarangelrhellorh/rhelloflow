@@ -187,7 +187,7 @@ export function ScorecardHistory({
   const averageScore = scorecards.reduce((sum, s) => sum + s.match_percentage, 0) / scorecards.length;
   return <Collapsible open={isOpen} onOpenChange={setIsOpen}>
       <Card className="border border-[#ffcd00]">
-        <CardHeader>
+        <CardHeader className="border-gray-300">
           <CollapsibleTrigger className="w-full">
             <div className="flex items-start justify-between">
               <div className="text-left">
@@ -210,8 +210,8 @@ export function ScorecardHistory({
           <CardContent className="shadow-lg">
         <div className="grid grid-cols-1 gap-6">
           {scorecards.map(scorecard => {
-          const recConfig = recommendationConfig[scorecard.recommendation];
-          return <div key={scorecard.id} className="border rounded-lg p-8 space-y-6 hover:shadow-md transition-shadow">
+              const recConfig = recommendationConfig[scorecard.recommendation];
+              return <div key={scorecard.id} className="border rounded-lg p-8 space-y-6 hover:shadow-md transition-shadow">
                 {/* Header com título e pontuação */}
                 <div className="flex items-start justify-between gap-6 pb-4 border-b">
                   <div className="space-y-1">
@@ -251,8 +251,8 @@ export function ScorecardHistory({
                     <Calendar className="h-4 w-4" />
                     <span className="font-medium text-base">
                       {format(new Date(scorecard.created_at), "dd MMM yyyy", {
-                    locale: ptBR
-                  })}
+                        locale: ptBR
+                      })}
                     </span>
                   </div>
                 </div>
@@ -293,7 +293,7 @@ export function ScorecardHistory({
                   </div>
                 </div>
               </div>;
-        })}
+            })}
           </div>
         </CardContent>
         </CollapsibleContent>

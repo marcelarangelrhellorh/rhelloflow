@@ -131,18 +131,16 @@ export function FeedbackList({
       year: "numeric"
     });
   };
-  return <Card className="h-full px-0 py-0 shadow-lg border-[#ffcd00]">
+  return <Card className="h-full px-0 py-0 shadow-lg border-gray-300">
       <CardHeader className="mx-[10px]">
         <div className="flex items-center justify-between px-0 mx-[14px]">
           <CardTitle className="text-xl font-bold">
             Feedbacks do Cliente    <span className="font-normal text-muted-foreground">({feedbacks.length})</span>
           </CardTitle>
-          {onSolicitarFeedback && (
-            <Button onClick={onSolicitarFeedback} size="sm" className="font-semibold bg-[#00141d] text-background hover:bg-[#00141d]/90">
+          {onSolicitarFeedback && <Button onClick={onSolicitarFeedback} size="sm" className="font-semibold bg-[#00141d] text-background hover:bg-[#00141d]/90">
               <Send className="mr-2 h-4 w-4" />
               Solicitar Feedback
-            </Button>
-          )}
+            </Button>}
         </div>
       </CardHeader>
       <CardContent>
