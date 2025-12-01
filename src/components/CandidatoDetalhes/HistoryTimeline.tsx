@@ -46,7 +46,7 @@ export function HistoryTimeline({
     const days = businessDaysBetween(startDate, endDate);
     return days > 0 ? `${days} dias` : "< 1 dia";
   };
-  return <Card className="shadow-lg border-[#ffcd00]">
+  return <Card className="shadow-lg border-gray-300">
       <CardHeader>
         <CardTitle className="text-lg">Histórico de Processos</CardTitle>
       </CardHeader>

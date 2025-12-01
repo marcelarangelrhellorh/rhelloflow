@@ -153,7 +153,7 @@ export function CandidateNotesSection({ candidateId }: CandidateNotesSectionProp
   };
 
   return (
-    <div className="mt-8 rounded-lg border border-border bg-card">
+    <div className="mt-8 rounded-lg border border-gray-300 bg-card">
       {/* Header - Always visible */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
