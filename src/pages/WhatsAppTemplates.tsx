@@ -10,8 +10,10 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, MessageSquare } from "lucide-react";
+import { Plus, Pencil, Trash2, MessageSquare, Search, Grid3x3, List, User } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 interface WhatsAppTemplate {
   id: string;
   key: string;
@@ -21,6 +23,8 @@ interface WhatsAppTemplate {
   active: boolean;
   created_at: string;
   updated_at: string;
+  created_by: string;
+  creator_name?: string;
 }
 interface TemplateFormData {
   key: string;
@@ -33,6 +37,9 @@ const WhatsAppTemplates = () => {
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<WhatsAppTemplate | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [creatorFilter, setCreatorFilter] = useState<string>("all");
+  const [viewMode, setViewMode] = useState<"cards" | "list">("cards");
   const [formData, setFormData] = useState<TemplateFormData>({
     key: "",
     name: "",
@@ -49,11 +56,22 @@ const WhatsAppTemplates = () => {
       const {
         data,
         error
-      } = await supabase.from("whatsapp_templates").select("*").order("created_at", {
-        ascending: false
-      });
+      } = await supabase
+        .from("whatsapp_templates")
+        .select(`
+          *,
+          creator:created_by (
+            full_name
+          )
+        `)
+        .order("created_at", {
+          ascending: false
+        });
       if (error) throw error;
-      return data as WhatsAppTemplate[];
+      return (data || []).map((template: any) => ({
+        ...template,
+        creator_name: template.creator?.full_name || 'Desconhecido'
+      })) as WhatsAppTemplate[];
     }
   });
   const createMutation = useMutation({
@@ -168,12 +186,31 @@ const WhatsAppTemplates = () => {
       resetForm();
     }
   };
+
+  // Filtrar templates
+  const filteredTemplates = templates?.filter(template => {
+    const matchesSearch = searchTerm === "" || 
+      template.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      template.key.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      template.description?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesCreator = creatorFilter === "all" || 
+      template.created_by === creatorFilter;
+    
+    return matchesSearch && matchesCreator;
+  }) || [];
+
+  // Obter lista única de criadores
+  const creators = Array.from(new Set(templates?.map(t => ({ 
+    id: t.created_by, 
+    name: t.creator_name || 'Desconhecido' 
+  })).map(c => JSON.stringify(c)))).map(c => JSON.parse(c));
   return <div className="min-h-screen" style={{
     backgroundColor: '#FFFBF0'
   }}>
       {/* Header - Fixed */}
       <div className="sticky top-0 z-20 bg-white border-b border-gray-200 shadow-sm">
-        <div className="px-6 py-4">
+        <div className="px-6 py-4 space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-[#00141D]">Templates de WhatsApp</h1>
@@ -254,15 +291,71 @@ const WhatsAppTemplates = () => {
             </DialogContent>
           </Dialog>
           </div>
+
+          {/* Filtros e Toggle de Visualização */}
+          <div className="flex items-center gap-4">
+            <div className="flex-1 flex items-center gap-4">
+              {/* Busca por nome */}
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar por nome ou chave..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+
+              {/* Filtro por criador */}
+              <Select value={creatorFilter} onValueChange={setCreatorFilter}>
+                <SelectTrigger className="w-[220px]">
+                  <User className="h-4 w-4 mr-2" />
+                  <SelectValue placeholder="Criador" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos os criadores</SelectItem>
+                  {creators.map((creator) => (
+                    <SelectItem key={creator.id} value={creator.id}>
+                      {creator.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Toggle de visualização */}
+            <div className="flex gap-2">
+              <Button
+                variant={viewMode === "cards" ? "default" : "outline"}
+                size="icon"
+                onClick={() => setViewMode("cards")}
+                className={viewMode === "cards" ? "bg-[#FFCD00] hover:bg-[#FAEC3E] text-[#00141D]" : ""}
+              >
+                <Grid3x3 className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === "list" ? "default" : "outline"}
+                size="icon"
+                onClick={() => setViewMode("list")}
+                className={viewMode === "list" ? "bg-[#FFCD00] hover:bg-[#FAEC3E] text-[#00141D]" : ""}
+              >
+                <List className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Content Area */}
       <div className="px-6 py-6">
-        {isLoading ? <div className="flex items-center justify-center py-12">
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
             <p className="text-muted-foreground">Carregando templates...</p>
-          </div> : templates && templates.length > 0 ? <div className="grid gap-4 md:grid-cols-2">
-            {templates.map(template => <Card key={template.id} className="border-[#00141d]">
+          </div>
+        ) : filteredTemplates.length > 0 ? (
+          viewMode === "cards" ? (
+            <div className="grid gap-4 md:grid-cols-2">
+              {filteredTemplates.map(template => <Card key={template.id} className="border-[#00141d]">
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="space-y-1 flex-1">
@@ -292,20 +385,92 @@ const WhatsAppTemplates = () => {
                   <div className="bg-muted p-3 rounded-md">
                     <p className="whitespace-pre-wrap text-base font-medium font-sans">{template.content}</p>
                   </div>
+                  <div className="mt-3 pt-3 border-t">
+                    <p className="text-xs text-muted-foreground flex items-center gap-1">
+                      <User className="h-3 w-3" />
+                      Criado por: {template.creator_name}
+                    </p>
+                  </div>
                 </CardContent>
               </Card>)}
-          </div> : <Card>
+            </div>
+          ) : (
+            <Card>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nome</TableHead>
+                    <TableHead>Chave</TableHead>
+                    <TableHead>Descrição</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Criador</TableHead>
+                    <TableHead className="text-right">Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredTemplates.map(template => (
+                    <TableRow key={template.id}>
+                      <TableCell className="font-medium">
+                        <div className="flex items-center gap-2">
+                          <MessageSquare className="h-4 w-4 text-primary" />
+                          {template.name}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <code className="text-xs bg-muted px-2 py-1 rounded">
+                          {template.key}
+                        </code>
+                      </TableCell>
+                      <TableCell className="max-w-xs truncate">
+                        {template.description || '-'}
+                      </TableCell>
+                      <TableCell>
+                        {template.active ? (
+                          <Badge variant="default">Ativo</Badge>
+                        ) : (
+                          <Badge variant="secondary">Inativo</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1 text-sm">
+                          <User className="h-3 w-3" />
+                          {template.creator_name}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex gap-2 justify-end">
+                          <Button size="icon" variant="ghost" onClick={() => handleEdit(template)}>
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button size="icon" variant="ghost" onClick={() => handleDelete(template.id)}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Card>
+          )
+        ) : (
+          <Card>
             <CardContent className="flex flex-col items-center justify-center py-12">
               <MessageSquare className="h-12 w-12 text-muted-foreground mb-4" />
               <p className="text-muted-foreground mb-4">
-                Nenhum template cadastrado
+                {templates && templates.length > 0 
+                  ? "Nenhum template encontrado com os filtros aplicados"
+                  : "Nenhum template cadastrado"}
               </p>
-              <Button onClick={() => setIsDialogOpen(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Criar Primeiro Template
-              </Button>
+              {(!templates || templates.length === 0) && (
+                <Button onClick={() => setIsDialogOpen(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Criar Primeiro Template
+                </Button>
+              )}
             </CardContent>
-          </Card>}
+          </Card>
+        )}
       </div>
     </div>;
 };
