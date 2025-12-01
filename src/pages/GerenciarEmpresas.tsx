@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Plus, Search, Eye, Pencil, LayoutGrid, List } from "lucide-react";
+import { Building2, Plus, Search, Eye, Pencil, LayoutGrid, List, FileSpreadsheet } from "lucide-react";
 import { EmpresaFormModal } from "@/components/Empresas/EmpresaFormModal";
 import { EmpresaDetailsDrawer } from "@/components/Empresas/EmpresaDetailsDrawer";
+import { ImportEmpresasModal } from "@/components/Empresas/ImportEmpresasModal";
 import { toast } from "sonner";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 type Empresa = {
@@ -31,6 +32,7 @@ export default function GerenciarEmpresas() {
   const [selectedEmpresa, setSelectedEmpresa] = useState<Empresa | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>("todos");
   const [viewMode, setViewMode] = useState<"cards" | "list">("cards");
+  const [importModalOpen, setImportModalOpen] = useState(false);
   const {
     data: empresas,
     isLoading,
@@ -94,13 +96,19 @@ export default function GerenciarEmpresas() {
               Cadastro completo de empresas e histórico de processos
             </p>
           </div>
-          <Button onClick={() => {
-          setSelectedEmpresa(null);
-          setFormModalOpen(true);
-        }} className="bg-[#00141D] hover:bg-[#00141D]/90 text-white font-semibold">
-            <Plus className="mr-2 h-4 w-4" />
-            Novo Cliente
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={() => setImportModalOpen(true)} variant="outline" className="font-semibold">
+              <FileSpreadsheet className="mr-2 h-4 w-4" />
+              Importar Excel
+            </Button>
+            <Button onClick={() => {
+              setSelectedEmpresa(null);
+              setFormModalOpen(true);
+            }} className="bg-[#00141D] hover:bg-[#00141D]/90 text-white font-semibold">
+              <Plus className="mr-2 h-4 w-4" />
+              Novo Cliente
+            </Button>
+          </div>
         </div>
 
         {/* Filters and View Toggle */}
@@ -239,8 +247,10 @@ export default function GerenciarEmpresas() {
       <EmpresaFormModal open={formModalOpen} onClose={handleCloseModal} empresa={selectedEmpresa} onSuccess={handleSuccess} />
 
       <EmpresaDetailsDrawer open={detailsDrawerOpen} onClose={() => {
-      setDetailsDrawerOpen(false);
-      setSelectedEmpresa(null);
-    }} empresaId={selectedEmpresa?.id || ""} />
+        setDetailsDrawerOpen(false);
+        setSelectedEmpresa(null);
+      }} empresaId={selectedEmpresa?.id || ""} />
+
+      <ImportEmpresasModal open={importModalOpen} onOpenChange={setImportModalOpen} onSuccess={refetch} />
     </div>;
 }
