@@ -100,7 +100,7 @@ export default function TaskCard({
 
         {/* Actions */}
         <div className="flex items-center gap-2 pt-2 border-t" onClick={e => e.stopPropagation()}>
-          <Button size="sm" variant={task.status === 'done' ? "outline" : "default"} className={task.status !== 'done' ? "bg-[#ffcd00] hover:bg-[#ffcd00]/90 text-black font-semibold" : ""} onClick={() => onToggleComplete(task)}>
+          <Button size="sm" variant={task.status === 'done' ? "outline" : "default"} className={task.status !== 'done' ? "bg-[#00141d] hover:bg-[#00141d]/90 text-white font-semibold" : ""} onClick={() => onToggleComplete(task)}>
             <CheckCircle2 className="h-4 w-4 mr-1" />
             {task.status === 'done' ? 'Reabrir' : 'Concluir'}
           </Button>
