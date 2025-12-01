@@ -99,7 +99,7 @@ export function CandidateHeader({
                 
                 {(cidade || estado) && <div className="flex items-center gap-1.5">
                     <MapPin className="h-4 w-4" />
-                    <span>{[cidade, estado].filter(Boolean).join(", ")}</span>
+                    <span className="font-semibold">{[cidade, estado].filter(Boolean).join(", ")}</span>
                   </div>}
               </div>
 
