@@ -292,10 +292,23 @@ export default function GerenciarEmpresas() {
 
       <EmpresaFormModal open={formModalOpen} onClose={handleCloseModal} empresa={selectedEmpresa} onSuccess={handleSuccess} />
 
-      <EmpresaDetailsDrawer open={detailsDrawerOpen} onClose={() => {
-      setDetailsDrawerOpen(false);
-      setSelectedEmpresa(null);
-    }} empresaId={selectedEmpresa?.id || ""} />
+      <EmpresaDetailsDrawer
+        open={detailsDrawerOpen}
+        onClose={() => {
+          setDetailsDrawerOpen(false);
+          setSelectedEmpresa(null);
+        }}
+        empresaId={selectedEmpresa?.id || ""}
+        onEdit={() => {
+          setDetailsDrawerOpen(false);
+          if (selectedEmpresa) {
+            handleEdit(selectedEmpresa);
+          }
+        }}
+        onDeleted={() => {
+          refetch();
+        }}
+      />
 
       <ImportEmpresasModal open={importModalOpen} onOpenChange={setImportModalOpen} onSuccess={refetch} />
     </div>;

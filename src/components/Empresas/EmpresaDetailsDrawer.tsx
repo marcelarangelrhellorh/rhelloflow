@@ -1,22 +1,43 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Building2, Mail, Phone, Globe, MapPin, User, Briefcase, FileText, TrendingUp, Users } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Building2, Mail, Phone, Globe, MapPin, User, Briefcase, FileText, TrendingUp, Users, Pencil, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { toast } from "sonner";
+
 interface EmpresaDetailsDrawerProps {
   open: boolean;
   onClose: () => void;
   empresaId: string;
+  onEdit?: () => void;
+  onDeleted?: () => void;
 }
 export function EmpresaDetailsDrawer({
   open,
   onClose,
-  empresaId
+  empresaId,
+  onEdit,
+  onDeleted,
 }: EmpresaDetailsDrawerProps) {
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const {
     data: empresa
   } = useQuery({
@@ -84,14 +105,63 @@ export function EmpresaDetailsDrawer({
         return "bg-gray-100 text-gray-800 border-gray-200";
     }
   };
-  return <Sheet open={open} onOpenChange={onClose}>
-      <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
-        <SheetHeader>
-          <SheetTitle className="flex items-center gap-2 text-2xl">
-            <Building2 className="h-6 w-6" />
-            {empresa.nome}
-          </SheetTitle>
-        </SheetHeader>
+
+  const handleDelete = async () => {
+    if (!empresaId) return;
+    
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase
+        .from("empresas")
+        .delete()
+        .eq("id", empresaId);
+
+      if (error) throw error;
+
+      toast.success("Cliente excluído com sucesso!");
+      setShowDeleteDialog(false);
+      onClose();
+      onDeleted?.();
+    } catch (error: any) {
+      toast.error(error.message || "Erro ao excluir cliente");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  return (
+    <>
+      <Sheet open={open} onOpenChange={onClose}>
+        <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
+          <SheetHeader>
+            <div className="flex items-center justify-between">
+              <SheetTitle className="flex items-center gap-2 text-2xl">
+                <Building2 className="h-6 w-6" />
+                {empresa.nome}
+              </SheetTitle>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    onClose();
+                    onEdit?.();
+                  }}
+                >
+                  <Pencil className="h-4 w-4 mr-1" />
+                  Editar
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => setShowDeleteDialog(true)}
+                >
+                  <Trash2 className="h-4 w-4 mr-1" />
+                  Excluir
+                </Button>
+              </div>
+            </div>
+          </SheetHeader>
 
         <div className="space-y-6 mt-6">
           {/* Status e Métricas */}
@@ -297,5 +367,28 @@ export function EmpresaDetailsDrawer({
             </>}
         </div>
       </SheetContent>
-    </Sheet>;
+    </Sheet>
+
+    <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Excluir cliente</AlertDialogTitle>
+          <AlertDialogDescription>
+            Tem certeza que deseja excluir o cliente "{empresa?.nome}"? Esta ação não pode ser desfeita.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={handleDelete}
+            disabled={isDeleting}
+            className="bg-red-600 hover:bg-red-700"
+          >
+            {isDeleting ? "Excluindo..." : "Excluir"}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  </>
+  );
 }
