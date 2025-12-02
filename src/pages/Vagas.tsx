@@ -423,7 +423,7 @@ export default function Vagas() {
 
       {/* Área de Conteúdo com Background Amarelo */}
       <div className="min-h-[60vh] bg-transparent">
-        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 pb-6">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 pb-6 bg-[#36404a]/[0.09]">
           <Tabs value={viewType}>
             <TabsContent value="cards" className="mt-0">
               {/* Cards */}
