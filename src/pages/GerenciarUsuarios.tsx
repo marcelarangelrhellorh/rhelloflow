@@ -685,7 +685,7 @@ export default function GerenciarUsuarios() {
               Gerencie usuários rhello (internos) e usuários externos (clientes)
             </p>
           </div>
-          <Button onClick={() => navigate("/vagas")} variant="outline" size="sm" className="font-semibold">
+          <Button onClick={() => navigate("/vagas")} size="sm" className="font-semibold bg-[#00141D] text-white hover:bg-[#00141D]/90">
             Voltar
           </Button>
         </div>
