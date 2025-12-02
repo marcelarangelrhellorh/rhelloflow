@@ -84,7 +84,7 @@ export default function GerenciarEmpresas() {
     }
   };
   return <div className="min-h-screen bg-[#FFFBF0] p-4 sm:p-6 lg:p-8">
-      <div className="max-w-7xl space-y-6 mx-0 px-0">
+      <div className="w-full space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
