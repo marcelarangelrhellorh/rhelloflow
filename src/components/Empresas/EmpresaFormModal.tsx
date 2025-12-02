@@ -1,7 +1,8 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { useQuery } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
@@ -26,8 +27,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
+import { X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+
+interface ClientUser {
+  id: string;
+  full_name: string;
+  empresa_id: string | null;
+}
 
 const empresaSchema = z.object({
   nome: z.string().min(1, "Nome é obrigatório"),
@@ -64,6 +74,45 @@ export function EmpresaFormModal({
   empresa,
   onSuccess,
 }: EmpresaFormModalProps) {
+  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
+
+  // Buscar usuários com role 'client'
+  const { data: clientUsers = [] } = useQuery({
+    queryKey: ["client-users-for-linking"],
+    queryFn: async () => {
+      // Buscar IDs de usuários com role 'client'
+      const { data: roleData, error: roleError } = await supabase
+        .from("user_roles")
+        .select("user_id")
+        .eq("role", "client");
+
+      if (roleError) throw roleError;
+      if (!roleData || roleData.length === 0) return [];
+
+      const userIds = roleData.map((r) => r.user_id);
+
+      // Buscar profiles desses usuários
+      const { data: profiles, error: profileError } = await supabase
+        .from("profiles")
+        .select("id, full_name, empresa_id")
+        .in("id", userIds);
+
+      if (profileError) throw profileError;
+      return profiles as ClientUser[];
+    },
+    enabled: open,
+  });
+
+  // Usuários disponíveis (não vinculados ou vinculados a esta empresa)
+  const availableUsers = clientUsers.filter(
+    (user) => !user.empresa_id || user.empresa_id === empresa?.id
+  );
+
+  // Usuários já vinculados a esta empresa (para edição)
+  const linkedUsers = clientUsers.filter(
+    (user) => user.empresa_id === empresa?.id
+  );
+
   const form = useForm<EmpresaFormData>({
     resolver: zodResolver(empresaSchema),
     defaultValues: {
@@ -107,6 +156,8 @@ export function EmpresaFormModal({
         contato_principal_telefone: empresa.contato_principal_telefone || "",
         observacoes: empresa.observacoes || "",
       });
+      // Setar usuários já vinculados
+      setSelectedUserIds(linkedUsers.map((u) => u.id));
     } else {
       form.reset({
         nome: "",
@@ -126,8 +177,17 @@ export function EmpresaFormModal({
         contato_principal_telefone: "",
         observacoes: "",
       });
+      setSelectedUserIds([]);
     }
-  }, [empresa, form]);
+  }, [empresa, form, linkedUsers.length]);
+
+  const toggleUserSelection = (userId: string) => {
+    setSelectedUserIds((prev) =>
+      prev.includes(userId)
+        ? prev.filter((id) => id !== userId)
+        : [...prev, userId]
+    );
+  };
 
   const onSubmit = async (data: EmpresaFormData) => {
     try {
@@ -137,6 +197,8 @@ export function EmpresaFormModal({
         contato_principal_email: data.contato_principal_email || null,
       };
 
+      let empresaId = empresa?.id;
+
       if (empresa?.id) {
         const { error } = await supabase
           .from("empresas")
@@ -145,9 +207,42 @@ export function EmpresaFormModal({
 
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("empresas").insert(empresaData);
+        const { data: newEmpresa, error } = await supabase
+          .from("empresas")
+          .insert(empresaData)
+          .select("id")
+          .single();
 
         if (error) throw error;
+        empresaId = newEmpresa.id;
+      }
+
+      // Atualizar vinculações de usuários
+      if (empresaId) {
+        // Desvincular usuários que foram removidos
+        const previousUserIds = linkedUsers.map((u) => u.id);
+        const usersToUnlink = previousUserIds.filter(
+          (id) => !selectedUserIds.includes(id)
+        );
+        const usersToLink = selectedUserIds.filter(
+          (id) => !previousUserIds.includes(id)
+        );
+
+        // Desvincular
+        if (usersToUnlink.length > 0) {
+          await supabase
+            .from("profiles")
+            .update({ empresa_id: null })
+            .in("id", usersToUnlink);
+        }
+
+        // Vincular novos
+        if (usersToLink.length > 0) {
+          await supabase
+            .from("profiles")
+            .update({ empresa_id: empresaId })
+            .in("id", usersToLink);
+        }
       }
 
       onSuccess();
@@ -448,6 +543,62 @@ export function EmpresaFormModal({
                   )}
                 />
               </div>
+            </div>
+
+            {/* Usuários Externos Vinculados */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-[#00141D]">
+                Usuários Externos Vinculados
+              </h3>
+              
+              {availableUsers.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  Nenhum usuário externo disponível para vincular.
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {selectedUserIds.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      {selectedUserIds.map((userId) => {
+                        const user = clientUsers.find((u) => u.id === userId);
+                        return user ? (
+                          <Badge
+                            key={userId}
+                            variant="secondary"
+                            className="flex items-center gap-1"
+                          >
+                            {user.full_name}
+                            <X
+                              className="h-3 w-3 cursor-pointer"
+                              onClick={() => toggleUserSelection(userId)}
+                            />
+                          </Badge>
+                        ) : null;
+                      })}
+                    </div>
+                  )}
+                  <div className="border rounded-md p-3 max-h-40 overflow-y-auto space-y-2">
+                    {availableUsers.map((user) => (
+                      <div
+                        key={user.id}
+                        className="flex items-center space-x-2"
+                      >
+                        <Checkbox
+                          id={user.id}
+                          checked={selectedUserIds.includes(user.id)}
+                          onCheckedChange={() => toggleUserSelection(user.id)}
+                        />
+                        <label
+                          htmlFor={user.id}
+                          className="text-sm font-medium leading-none cursor-pointer"
+                        >
+                          {user.full_name}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Observações */}
