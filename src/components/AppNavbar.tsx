@@ -86,7 +86,8 @@ export function AppNavbar() {
         }) => `px-2 xl:px-3 py-2 text-sm xl:text-base font-bold transition-all duration-200 ease-in-out whitespace-nowrap relative ${isActive ? "text-[#00141d] font-bold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-[#00141d] after:rounded-t-md" : "text-[#00141d] hover:bg-[#00141d]/10 rounded-lg"}`} style={{
           fontFamily: 'Manrope, sans-serif',
           fontWeight: 700
-        }}>Análises{item.title}
+        }}>
+              {item.title}
             </NavLink>)}
         </nav>
 
