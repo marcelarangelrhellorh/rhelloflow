@@ -89,7 +89,7 @@ export default function TodayMeetingsSidebar({ onEventClick }: TodayMeetingsSide
   };
 
   return (
-    <div className="w-64 flex-shrink-0">
+    <div className="w-56 flex-shrink-0">
       <Card className="h-fit shadow-sm">
         <CardHeader className="p-3 pb-2">
           <CardTitle className="text-sm font-semibold flex items-center gap-2 text-[#00141d]">
