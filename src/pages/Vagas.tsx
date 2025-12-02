@@ -325,7 +325,7 @@ export default function Vagas() {
       </div>
 
       {/* Toggle de Visualização */}
-      <div className="px-6 pt-4 bg-[#36404a]">
+      <div className="px-6 pt-4 bg-[#36404a]/[0.41]">
         <Tabs value={viewType} onValueChange={v => setViewType(v as "cards" | "funnel")}>
           <TabsList className="grid w-full max-w-[400px] grid-cols-2 bg-background border border-border">
             <TabsTrigger value="cards" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-bold">
@@ -422,7 +422,7 @@ export default function Vagas() {
       </div>
 
       {/* Área de Conteúdo com Background Amarelo */}
-      <div className="min-h-[60vh] bg-[#36404a]">
+      <div className="min-h-[60vh] bg-[#36404a]/[0.44]">
         <div className="max-w-[1600px] mx-auto px-4 sm:px-6 pb-6">
           <Tabs value={viewType}>
             <TabsContent value="cards" className="mt-0">
