@@ -67,17 +67,26 @@ export function ClientPipelineBoard({
   };
   const activeEmpresa = activeId ? empresas.find(e => e.id === activeId) : null;
   const activeStage = activeEmpresa ? CLIENT_STAGES.find(s => s.slug === (activeEmpresa.pipeline_stage || "novo_negocio")) : null;
-  return <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd} className="bg-[#36404a]/[0.13]">
-      <div className="flex gap-3 overflow-x-auto pb-4" style={{
-      minWidth: "max-content"
-    }}>
-        {CLIENT_STAGES.map(stage => <ClientPipelineColumn key={stage.id} stage={stage} empresas={getEmpresasByStage(stage.slug)} onClientClick={onClientClick} />)}
+  return (
+    <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+      <div className="flex gap-3 overflow-x-auto pb-4" style={{ minWidth: "max-content" }}>
+        {CLIENT_STAGES.map(stage => (
+          <ClientPipelineColumn 
+            key={stage.id} 
+            stage={stage} 
+            empresas={getEmpresasByStage(stage.slug)} 
+            onClientClick={onClientClick} 
+          />
+        ))}
       </div>
 
       <DragOverlay>
-        {activeEmpresa && activeStage ? <div className="w-[280px]">
+        {activeEmpresa && activeStage ? (
+          <div className="w-[280px]">
             <ClientFunnelCard empresa={activeEmpresa} stageColor={activeStage.color} onClick={() => {}} isDragging />
-          </div> : null}
+          </div>
+        ) : null}
       </DragOverlay>
-    </DndContext>;
+    </DndContext>
+  );
 }
