@@ -78,7 +78,7 @@ export default function GerenciarEmpresas() {
       case "ativo":
         return "bg-green-100 text-green-800 border-green-200";
       case "inativo":
-        return "bg-gray-100 text-gray-800 border-gray-200";
+        return "bg-red-100 text-red-800 border-red-200";
       case "prospect":
         return "bg-blue-100 text-blue-800 border-blue-200";
       default:
@@ -144,7 +144,7 @@ export default function GerenciarEmpresas() {
               <Button variant={filterStatus === "prospect" ? "default" : "outline"} onClick={() => setFilterStatus("prospect")} className={filterStatus === "prospect" ? "bg-blue-600 text-white" : ""}>
                 Prospects
               </Button>
-              <Button variant={filterStatus === "inativo" ? "default" : "outline"} onClick={() => setFilterStatus("inativo")} className={filterStatus === "inativo" ? "bg-gray-600 text-white" : ""}>
+              <Button variant={filterStatus === "inativo" ? "default" : "outline"} onClick={() => setFilterStatus("inativo")} className={filterStatus === "inativo" ? "bg-red-600 text-white" : ""}>
                 Inativos
               </Button>
             </div>
