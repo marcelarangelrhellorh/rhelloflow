@@ -67,8 +67,7 @@ export function ClientPipelineBoard({
   };
   const activeEmpresa = activeId ? empresas.find(e => e.id === activeId) : null;
   const activeStage = activeEmpresa ? CLIENT_STAGES.find(s => s.slug === (activeEmpresa.pipeline_stage || "novo_negocio")) : null;
-  return <div className="bg-[#36404a]/[0.13] p-4 rounded-lg">
-    <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+  return <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd} className="bg-[#36404a]/[0.13]">
       <div className="flex gap-3 overflow-x-auto pb-4" style={{
       minWidth: "max-content"
     }}>
@@ -80,6 +79,5 @@ export function ClientPipelineBoard({
             <ClientFunnelCard empresa={activeEmpresa} stageColor={activeStage.color} onClick={() => {}} isDragging />
           </div> : null}
       </DragOverlay>
-    </DndContext>
-  </div>;
+    </DndContext>;
 }
