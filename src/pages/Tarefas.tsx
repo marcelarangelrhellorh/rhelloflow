@@ -21,7 +21,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
 import moment from "moment";
-
 export default function Tarefas() {
   const [view, setView] = useState<"list" | "kanban" | "calendar">("kanban");
   const [taskModalOpen, setTaskModalOpen] = useState(false);
@@ -243,7 +242,7 @@ export default function Tarefas() {
 
         <div className="flex flex-col xl:flex-row gap-6 xl:gap-8">
           {/* Main content */}
-          <div className="flex-1 min-w-0 max-w-full xl:max-w-[calc(100%-280px)]">
+          <div className="flex-1 min-w-0 max-w-full xl:max-w-[calc(100%-280px)] px-[100px] mx-[100px]">
             {isLoading ? <div className="space-y-4">
                 {[1, 2, 3].map(i => <Skeleton key={i} className="h-40 w-full" />)}
               </div> : view === "calendar" ? syncedMeetings.length === 0 ? <div className="text-center py-16">
@@ -266,15 +265,15 @@ export default function Tarefas() {
           </div>
 
           {/* Today's meetings sidebar - adapts to screen size */}
-          {view !== "calendar" && (
-            <div className="flex flex-col items-stretch gap-4 w-full xl:w-64 flex-shrink-0 self-start">
+          {view !== "calendar" && <div className="flex flex-col items-stretch gap-4 w-full xl:w-64 flex-shrink-0 self-start">
               <div className="xl:hidden w-full h-px bg-border" />
-              <div className="hidden xl:block w-px bg-[#ffcd00]/60 absolute left-0 top-0 bottom-0" style={{ display: 'none' }} />
-              <div className="xl:border-l-2 xl:border-[#ffcd00]/40 xl:pl-6">
-                <TodayMeetingsSidebar onEventClick={(event) => handleTaskClick(null, event)} />
+              <div className="hidden xl:block w-px bg-[#ffcd00]/60 absolute left-0 top-0 bottom-0" style={{
+            display: 'none'
+          }} />
+              <div className="xl:border-l-2 xl:border-[#ffcd00]/40 xl:pl-6 px-0 mx-0">
+                <TodayMeetingsSidebar onEventClick={event => handleTaskClick(null, event)} />
               </div>
-            </div>
-          )}
+            </div>}
         </div>
       </div>
 
