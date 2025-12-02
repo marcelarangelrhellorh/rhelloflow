@@ -130,7 +130,7 @@ export default function Tarefas() {
   return <div className="min-h-screen bg-[#FFFBF0]">
       {/* Header */}
       <div className="bg-white border-b shadow-sm sticky top-0 z-10">
-        <div className="container py-4 px-0 mx-0">
+        <div className="w-full py-4 px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
             <div>
               <h1 className="text-3xl font-bold text-[#00141d]">Tarefas</h1>
@@ -228,7 +228,7 @@ export default function Tarefas() {
       </div>
 
       {/* Content */}
-      <div className="container mx-auto px-6 py-8">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
         {/* Dashboard - hide on calendar view */}
         {view !== "calendar" && <div className="mb-8">
             <TasksDashboard onTaskClick={handleEdit} />
