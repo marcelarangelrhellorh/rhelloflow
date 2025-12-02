@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
 import TaskModal from "@/components/Tasks/TaskModal";
 import MeetingModal from "@/components/Tasks/MeetingModal";
 import TaskCard from "@/components/Tasks/TaskCard";
@@ -11,6 +12,7 @@ import TaskKanban from "@/components/Tasks/TaskKanban";
 import TasksDashboard from "@/components/Tasks/TasksDashboard";
 import GoogleCalendarButton from "@/components/Tasks/GoogleCalendarButton";
 import CalendarView from "@/components/Tasks/CalendarView";
+import TodayMeetingsSidebar from "@/components/Tasks/TodayMeetingsSidebar";
 import { TaskDetailDrawer } from "@/components/VagaDetalhes/TaskDetailDrawer";
 import { Task, TaskFilters, useTasks, useDeleteTask, useUpdateTask } from "@/hooks/useTasks";
 import { useQuery } from "@tanstack/react-query";
@@ -19,6 +21,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
 import moment from "moment";
+
 export default function Tarefas() {
   const [view, setView] = useState<"list" | "kanban" | "calendar">("kanban");
   const [taskModalOpen, setTaskModalOpen] = useState(false);
@@ -238,25 +241,38 @@ export default function Tarefas() {
             <TasksDashboard onTaskClick={handleEdit} />
           </div>}
 
-        {isLoading ? <div className="space-y-4">
-            {[1, 2, 3].map(i => <Skeleton key={i} className="h-40 w-full" />)}
-          </div> : view === "calendar" ? syncedMeetings.length === 0 ? <div className="text-center py-16">
-              <p className="text-muted-foreground text-lg mb-4">
-                {allMeetings.length === 0 ? "Nenhuma reunião agendada" : "Nenhuma reunião sincronizada com o Google Calendar"}
-              </p>
-              <Button onClick={handleNewMeeting} variant="outline" className="gap-2">
-                <Video className="h-5 w-5" />
-                {allMeetings.length === 0 ? "Criar sua primeira reunião" : "Criar e sincronizar reunião"}
-              </Button>
-            </div> : <CalendarView meetings={syncedMeetings} externalEvents={externalEvents} onEventClick={handleTaskClick} /> : onlyTasks.length === 0 ? <div className="text-center py-16">
-            <p className="text-muted-foreground text-lg mb-4">Nenhuma tarefa encontrada</p>
-            <Button onClick={handleNewTask} className="bg-[#ffcd00] hover:bg-[#ffcd00]/90 text-black font-semibold">
-              <Plus className="h-5 w-5 mr-2" />
-              Criar sua primeira tarefa
-            </Button>
-          </div> : view === "kanban" ? <TaskKanban tasks={onlyTasks} onEdit={handleEdit} onDelete={handleDelete} onTaskClick={handleTaskClick} /> : <div className="space-y-4">
-            {onlyTasks.map(task => <TaskCard key={task.id} task={task} onEdit={handleEdit} onDelete={handleDelete} onToggleComplete={handleToggleComplete} onCardClick={handleTaskClick} />)}
-          </div>}
+        <div className="flex gap-4">
+          {/* Main content */}
+          <div className="flex-1 min-w-0">
+            {isLoading ? <div className="space-y-4">
+                {[1, 2, 3].map(i => <Skeleton key={i} className="h-40 w-full" />)}
+              </div> : view === "calendar" ? syncedMeetings.length === 0 ? <div className="text-center py-16">
+                  <p className="text-muted-foreground text-lg mb-4">
+                    {allMeetings.length === 0 ? "Nenhuma reunião agendada" : "Nenhuma reunião sincronizada com o Google Calendar"}
+                  </p>
+                  <Button onClick={handleNewMeeting} variant="outline" className="gap-2">
+                    <Video className="h-5 w-5" />
+                    {allMeetings.length === 0 ? "Criar sua primeira reunião" : "Criar e sincronizar reunião"}
+                  </Button>
+                </div> : <CalendarView meetings={syncedMeetings} externalEvents={externalEvents} onEventClick={handleTaskClick} /> : onlyTasks.length === 0 ? <div className="text-center py-16">
+                <p className="text-muted-foreground text-lg mb-4">Nenhuma tarefa encontrada</p>
+                <Button onClick={handleNewTask} className="bg-[#ffcd00] hover:bg-[#ffcd00]/90 text-black font-semibold">
+                  <Plus className="h-5 w-5 mr-2" />
+                  Criar sua primeira tarefa
+                </Button>
+              </div> : view === "kanban" ? <TaskKanban tasks={onlyTasks} onEdit={handleEdit} onDelete={handleDelete} onTaskClick={handleTaskClick} /> : <div className="space-y-4">
+                {onlyTasks.map(task => <TaskCard key={task.id} task={task} onEdit={handleEdit} onDelete={handleDelete} onToggleComplete={handleToggleComplete} onCardClick={handleTaskClick} />)}
+              </div>}
+          </div>
+
+          {/* Today's meetings sidebar - only show on kanban/list views */}
+          {view !== "calendar" && (
+            <>
+              <Separator orientation="vertical" className="h-auto" />
+              <TodayMeetingsSidebar onEventClick={(event) => handleTaskClick(null, event)} />
+            </>
+          )}
+        </div>
       </div>
 
       {/* Modals */}
