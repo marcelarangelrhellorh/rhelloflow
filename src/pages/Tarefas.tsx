@@ -242,7 +242,7 @@ export default function Tarefas() {
 
         <div className="flex flex-col xl:flex-row gap-6 xl:gap-8">
           {/* Main content */}
-          <div className="flex-1 min-w-0 max-w-full xl:max-w-[calc(100%-280px)] px-[100px] mx-[100px]">
+          <div className="flex-1 min-w-0 flex justify-center">
             {isLoading ? <div className="space-y-4">
                 {[1, 2, 3].map(i => <Skeleton key={i} className="h-40 w-full" />)}
               </div> : view === "calendar" ? syncedMeetings.length === 0 ? <div className="text-center py-16">

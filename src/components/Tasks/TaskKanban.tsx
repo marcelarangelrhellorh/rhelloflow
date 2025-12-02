@@ -55,24 +55,24 @@ export default function TaskKanban({
       });
     }
   };
-  return <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-5xl">
+  return <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl">
       {columns.map(column => {
       const columnTasks = tasks.filter(task => task.status === column.status);
-      return <div key={column.status} className="flex flex-col gap-2" onDragOver={handleDragOver} onDrop={e => handleDrop(e, column.status)}>
-            <Card className={`p-3 border-t-4 ${column.color}`}>
+      return <div key={column.status} className="flex flex-col gap-3" onDragOver={handleDragOver} onDrop={e => handleDrop(e, column.status)}>
+            <Card className={`p-4 border-t-4 ${column.color}`}>
               <div className="flex items-center justify-between">
-                <h3 className="font-bold text-sm">{column.label}</h3>
-                <span className="text-muted-foreground bg-muted px-2 py-0.5 rounded text-sm font-semibold">
+                <h3 className="font-bold text-base">{column.label}</h3>
+                <span className="text-muted-foreground bg-muted px-3 py-1 rounded text-base font-semibold">
                   {columnTasks.length}
                 </span>
               </div>
             </Card>
 
-            <div className="space-y-2">
+            <div className="space-y-3">
               {columnTasks.map(task => <div key={task.id} draggable onDragStart={e => handleDragStart(e, task.id)} className="cursor-move">
                   <TaskCard task={task} onEdit={onEdit} onDelete={onDelete} onToggleComplete={handleToggleComplete} onCardClick={onTaskClick} draggable />
                 </div>)}
-              {columnTasks.length === 0 && <Card className="p-6 text-center text-muted-foreground border-dashed text-sm">
+              {columnTasks.length === 0 && <Card className="p-8 text-center text-muted-foreground border-dashed text-base">
                   Nenhuma tarefa
                 </Card>}
             </div>
