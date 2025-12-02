@@ -287,11 +287,11 @@ export default function CandidatoDetalhes() {
       <div className="sticky top-0 z-10 backdrop-blur-sm border-b border-gray-200 dark:border-secondary-text-light/20" style={{
       backgroundColor: 'rgba(255, 251, 240, 0.95)'
     }}>
-        <div className="px-6 sm:px-10 lg:px-20 py-4">
-          <Button variant="ghost" size="sm" onClick={() => navigate("/candidatos")} className="text-secondary-text-light dark:text-secondary-text-dark text-base">
-            <ArrowLeft className="mr-2 h-4 w-4" />
+        <div className="px-4 sm:px-6 lg:px-10 py-2">
+          <Button variant="ghost" size="sm" onClick={() => navigate("/candidatos")} className="text-secondary-text-light dark:text-secondary-text-dark text-sm">
+            <ArrowLeft className="mr-1 h-3 w-3" />
             <span className="hidden sm:inline">Candidatos</span>
-            <span className="mx-2">/</span>
+            <span className="mx-1">/</span>
             <span className="font-medium text-primary-text-light dark:text-primary-text-dark">{candidato.nome_completo}</span>
           </Button>
         </div>
