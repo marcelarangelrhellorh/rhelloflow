@@ -231,23 +231,19 @@ export default function GerenciarUsuarios() {
     try {
       // Verificar se a empresa existe ou criar uma nova
       let empresaId: string;
-      
-      const { data: existingEmpresa } = await supabase
-        .from("empresas")
-        .select("id")
-        .eq("nome", clientFormData.company)
-        .single();
-      
+      const {
+        data: existingEmpresa
+      } = await supabase.from("empresas").select("id").eq("nome", clientFormData.company).single();
       if (existingEmpresa) {
         empresaId = existingEmpresa.id;
       } else {
         // Criar nova empresa
-        const { data: newEmpresa, error: empresaError } = await supabase
-          .from("empresas")
-          .insert({ nome: clientFormData.company })
-          .select()
-          .single();
-        
+        const {
+          data: newEmpresa,
+          error: empresaError
+        } = await supabase.from("empresas").insert({
+          nome: clientFormData.company
+        }).select().single();
         if (empresaError) throw empresaError;
         empresaId = newEmpresa.id;
       }
@@ -283,10 +279,7 @@ export default function GerenciarUsuarios() {
         }
 
         // Remover qualquer role incorreto que possa ter sido criado pelo trigger
-        await supabase.from("user_roles")
-          .delete()
-          .eq("user_id", authData.user.id)
-          .neq("role", "client");
+        await supabase.from("user_roles").delete().eq("user_id", authData.user.id).neq("role", "client");
 
         // Inserir role 'client' na tabela user_roles explicitamente
         const {
@@ -460,7 +453,6 @@ export default function GerenciarUsuarios() {
       toast.error(`❌ ${error.message}`);
     }
   };
-
   const handleUpdateEmail = async (userId: string, userName: string, newEmail: string) => {
     try {
       const {
@@ -491,7 +483,6 @@ export default function GerenciarUsuarios() {
       toast.error(`❌ ${error.message}`);
     }
   };
-
   const getRoleBadge = (role: string) => {
     const badges = {
       admin: <Badge variant="destructive" className="text-xs px-1.5 py-0">Admin</Badge>,
@@ -644,7 +635,6 @@ export default function GerenciarUsuarios() {
         </DialogContent>
       </Dialog>;
   };
-
   const EmailEditDialog = ({
     user
   }: {
@@ -679,7 +669,6 @@ export default function GerenciarUsuarios() {
         </DialogContent>
       </Dialog>;
   };
-
   const internalUsers = users.filter(user => {
     const userRolesList = userRoles[user.id] || [];
     return !userRolesList.includes('client');
@@ -689,7 +678,7 @@ export default function GerenciarUsuarios() {
         <div className="mb-6 flex items-center justify-between">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2 text-foreground">
-              <Users className="h-6 w-6 md:h-7 md:w-7" />
+              
               Gerenciar Usuários
             </h1>
             <p className="text-muted-foreground mt-1 text-base">
