@@ -147,16 +147,16 @@ export function CandidateTagsCard({
     acc[tag.category].push(tag);
     return acc;
   }, {} as Record<string, CandidateTag[]>);
-  return <Card className="my-[50px] shadow-md border border-gray-300">
+  return <Card className="my-[50px] shadow-md border border-gray-300 overflow-visible">
       <CardHeader>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <TagIcon className="h-5 w-5" />
-            <CardTitle>Tags</CardTitle>
+            <TagIcon className="h-5 w-5 shrink-0" />
+            <CardTitle className="text-sm">Tags</CardTitle>
           </div>
-          <Button size="sm" onClick={() => setAddModalOpen(true)} className="font-semibold">
-            <Plus className="h-4 w-4 mr-1" />
-            Adicionar Tags
+          <Button size="sm" onClick={() => setAddModalOpen(true)} className="font-semibold text-xs shrink-0">
+            <Plus className="h-3 w-3 mr-1" />
+            Adicionar
           </Button>
         </div>
       </CardHeader>
