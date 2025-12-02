@@ -990,7 +990,7 @@ export default function GerenciarUsuarios() {
                               </span>
                             </div>
                             <div className="space-y-1.5">
-                              {clientJobs[client.id].map(job => <div key={job.id} className="flex items-center justify-between p-2 bg-accent/30 rounded text-sm">
+                              {clientJobs[client.id].map(job => <div key={job.id} className="flex items-center justify-between p-2 bg-[#36404A] rounded text-sm text-white">
                                   <div className="flex-1 min-w-0">
                                     <p className="font-medium truncate">{job.titulo}</p>
                                     <p className="text-muted-foreground truncate">{job.empresa}</p>
