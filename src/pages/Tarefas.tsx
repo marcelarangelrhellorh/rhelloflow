@@ -234,7 +234,7 @@ export default function Tarefas() {
       </div>
 
       {/* Content */}
-      <div className="w-full px-4 sm:px-6 lg:px-8 py-8 bg-[#36404a]/[0.09] overflow-x-hidden">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-8 overflow-x-hidden bg-transparent">
         {/* Dashboard + Meetings sidebar row - hide on calendar view */}
         {view !== "calendar" && <div className="mb-8 flex flex-col xl:flex-row justify-center items-start gap-6 xl:gap-8">
             <TasksDashboard onTaskClick={handleEdit} />

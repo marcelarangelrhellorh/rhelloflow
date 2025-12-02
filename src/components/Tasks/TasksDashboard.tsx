@@ -70,7 +70,7 @@ export default function TasksDashboard({
   return <>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 max-w-4xl">
         <Card className="border-red-200 bg-red-50/50 cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveDrawer("overdue")}>
-          <CardContent className="p-5">
+          <CardContent className="p-5 shadow-lg">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-muted-foreground text-sm font-semibold">
@@ -88,7 +88,7 @@ export default function TasksDashboard({
         </Card>
 
         <Card className="border-orange-200 bg-orange-50/50 cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveDrawer("high")}>
-          <CardContent className="p-5">
+          <CardContent className="p-5 shadow-lg">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-muted-foreground text-sm font-semibold">
@@ -106,7 +106,7 @@ export default function TasksDashboard({
         </Card>
 
         <Card className="border-red-300 bg-red-100/50 cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveDrawer("urgent")}>
-          <CardContent className="p-5">
+          <CardContent className="p-5 shadow-lg">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-muted-foreground text-sm font-semibold">
