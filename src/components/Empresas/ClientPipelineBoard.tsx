@@ -4,6 +4,7 @@ import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { CLIENT_STAGES, ClientStage } from "@/lib/clientStages";
 import { ClientPipelineColumn } from "./ClientPipelineColumn";
 import { ClientFunnelCard } from "./ClientFunnelCard";
+import { DualScrollContainer } from "@/components/ui/dual-scroll-container";
 interface Empresa {
   id: string;
   nome: string;
@@ -69,11 +70,13 @@ export function ClientPipelineBoard({
   const activeStage = activeEmpresa ? CLIENT_STAGES.find(s => s.slug === (activeEmpresa.pipeline_stage || "novo_negocio")) : null;
   return <div className="bg-[#36404a]/[0.09]">
     <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-      <div className="flex gap-3 overflow-x-auto pb-4" style={{
-      minWidth: "max-content"
-    }}>
-        {CLIENT_STAGES.map(stage => <ClientPipelineColumn key={stage.id} stage={stage} empresas={getEmpresasByStage(stage.slug)} onClientClick={onClientClick} />)}
-      </div>
+      <DualScrollContainer>
+        <div className="flex gap-3 pb-4" style={{
+        minWidth: "max-content"
+      }}>
+          {CLIENT_STAGES.map(stage => <ClientPipelineColumn key={stage.id} stage={stage} empresas={getEmpresasByStage(stage.slug)} onClientClick={onClientClick} />)}
+        </div>
+      </DualScrollContainer>
 
       <DragOverlay>
         {activeEmpresa && activeStage ? <div className="w-[280px]">
