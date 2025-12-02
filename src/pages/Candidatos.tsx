@@ -18,6 +18,7 @@ import { usePagination } from "@/hooks/usePagination";
 import { PaginationControls } from "@/components/ui/pagination-controls";
 import { logger } from "@/lib/logger";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DualScrollContainer } from "@/components/ui/dual-scroll-container";
 
 // Importar componentes do Funil
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors, closestCenter } from "@dnd-kit/core";
@@ -446,16 +447,18 @@ export default function Candidatos() {
               {loading ? <div className="text-center py-12">
                   <p className="text-[#FFFDF6]">Carregando candidatos...</p>
                 </div> : <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-                  <div className="flex gap-4 overflow-x-auto pb-4 pt-6">
-                    {statusColumns.map(status => {
-                  const candidatosStatus = getCandidatesByStatus(status);
-                  return <FunnelColumn key={status} status={status} count={candidatosStatus.length} colorClass={statusColors[status]}>
-                          {candidatosStatus.map(candidato => <div key={candidato.id} onClick={() => navigate(`/candidatos/${candidato.id}`)}>
-                              <CandidateFunnelCard candidato={candidato} onDragStart={() => {}} />
-                            </div>)}
-                        </FunnelColumn>;
-                })}
-                  </div>
+                  <DualScrollContainer>
+                    <div className="flex gap-4 pb-4 pt-6">
+                      {statusColumns.map(status => {
+                    const candidatosStatus = getCandidatesByStatus(status);
+                    return <FunnelColumn key={status} status={status} count={candidatosStatus.length} colorClass={statusColors[status]}>
+                            {candidatosStatus.map(candidato => <div key={candidato.id} onClick={() => navigate(`/candidatos/${candidato.id}`)}>
+                                <CandidateFunnelCard candidato={candidato} onDragStart={() => {}} />
+                              </div>)}
+                          </FunnelColumn>;
+                  })}
+                    </div>
+                  </DualScrollContainer>
 
                   <DragOverlay>
                     {activeId ? <div className="w-[300px]">
