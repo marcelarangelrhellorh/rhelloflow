@@ -241,9 +241,9 @@ export default function Tarefas() {
             <TasksDashboard onTaskClick={handleEdit} />
           </div>}
 
-        <div className="flex gap-4 overflow-hidden">
+        <div className="flex flex-col xl:flex-row gap-4">
           {/* Main content */}
-          <div className="flex-1 min-w-0 overflow-x-auto">
+          <div className="flex-1 min-w-0">
             {isLoading ? <div className="space-y-4">
                 {[1, 2, 3].map(i => <Skeleton key={i} className="h-40 w-full" />)}
               </div> : view === "calendar" ? syncedMeetings.length === 0 ? <div className="text-center py-16">
@@ -265,10 +265,11 @@ export default function Tarefas() {
               </div>}
           </div>
 
-          {/* Today's meetings sidebar - only show on kanban/list views and larger screens */}
+          {/* Today's meetings sidebar - adapts to screen size */}
           {view !== "calendar" && (
-            <div className="hidden lg:flex items-start gap-4 flex-shrink-0">
-              <Separator orientation="vertical" className="h-auto min-h-[200px]" />
+            <div className="flex xl:flex-col items-start gap-4 flex-shrink-0">
+              <Separator orientation="horizontal" className="xl:hidden w-full" />
+              <Separator orientation="vertical" className="hidden xl:block h-auto min-h-[200px]" />
               <TodayMeetingsSidebar onEventClick={(event) => handleTaskClick(null, event)} />
             </div>
           )}
