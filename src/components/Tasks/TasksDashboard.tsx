@@ -70,7 +70,7 @@ export default function TasksDashboard({
   return <>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4 max-w-3xl">
         <Card className="border-red-200 bg-red-50/50 cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveDrawer("overdue")}>
-          <CardContent className="p-3">
+          <CardContent className="p-3 bg-white border-purple-400">
             <div className="flex items-center justify-between gap-2">
               <div>
                 <p className="text-muted-foreground text-xs font-semibold">
