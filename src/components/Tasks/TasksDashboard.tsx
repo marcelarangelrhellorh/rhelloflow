@@ -69,7 +69,7 @@ export default function TasksDashboard({
   const drawerData = getDrawerData();
   return <>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4 max-w-3xl">
-        <Card className="border bg-background cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveDrawer("overdue")}>
+        <Card className="border-red-200 bg-red-50/50 cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveDrawer("overdue")}>
           <CardContent className="p-3">
             <div className="flex items-center justify-between gap-2">
               <div>
@@ -87,7 +87,7 @@ export default function TasksDashboard({
           </CardContent>
         </Card>
 
-        <Card className="border bg-background cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveDrawer("high")}>
+        <Card className="border-orange-200 bg-orange-50/50 cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveDrawer("high")}>
           <CardContent className="p-3">
             <div className="flex items-center justify-between gap-2">
               <div>
@@ -105,7 +105,7 @@ export default function TasksDashboard({
           </CardContent>
         </Card>
 
-        <Card className="border bg-background cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveDrawer("urgent")}>
+        <Card className="border-red-300 bg-red-100/50 cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveDrawer("urgent")}>
           <CardContent className="p-3">
             <div className="flex items-center justify-between gap-2">
               <div>
