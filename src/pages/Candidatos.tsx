@@ -412,7 +412,7 @@ export default function Candidatos() {
 
       {/* Área de Conteúdo com Background Amarelo */}
       <div className="min-h-[60vh] bg-[#ffcd00]/5">
-        <div className="px-6 pb-6">
+        <div className="px-6 pb-6 bg-[#36404a]/[0.12]">
           <Tabs value={viewType}>
             <TabsContent value="cards" className="mt-0">
               {/* Cards Grid */}
