@@ -311,14 +311,14 @@ export default function CandidatoDetalhes() {
           {/* Two Column Layout - Top */}
           <div className="grid gap-6 lg:grid-cols-12">
             {/* Left Sidebar - Contact & Tags */}
-            <div className="lg:col-span-3 space-y-6 mx-0 py-0 my-0 shadow-none">
+            <div className="lg:col-span-4 space-y-6 mx-0 py-0 my-0 shadow-none">
               <ContactCard email={candidato.email} telefone={candidato.telefone} cidade={candidato.cidade} estado={candidato.estado} linkedin={candidato.linkedin} curriculoLink={candidato.curriculo_link} isFromPublicLink={!!candidato.source_link_id} />
 
               <CandidateTagsCard candidateId={id!} />
             </div>
 
             {/* Main Content - Professional Info */}
-            <div className="lg:col-span-9">
+            <div className="lg:col-span-8">
               <ProfessionalInfoCard pretensaoSalarial={candidato.pretensao_salarial} vagaTitulo={vaga?.titulo || null} vagaId={candidato.vaga_relacionada_id} dataCadastro={candidato.criado_em} nivel={candidato.nivel} area={candidato.area} curriculoUrl={candidato.curriculo_url} portfolioUrl={candidato.portfolio_url} disponibilidadeMudanca={candidato.disponibilidade_mudanca} disponibilidadeStatus={candidato.disponibilidade_status} pontosFortes={candidato.pontos_fortes} pontosDesenvolver={candidato.pontos_desenvolver} parecerFinal={candidato.parecer_final} origem={candidato.origem} candidatoId={id!} experienciaProfissional={(candidato as any).experiencia_profissional || null} idiomas={(candidato as any).idiomas || null} onUpdate={loadCandidato} onVagaClick={() => vaga && navigate(`/vagas/${vaga.id}`)} />
             </div>
           </div>
