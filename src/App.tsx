@@ -46,7 +46,7 @@ const App = () => <ErrorBoundary>
           <Route path="/feedback/:token" element={<FeedbackCliente />} />
           <Route element={<Layout />}>
             <Route path="/" element={<Dashboard />} />
-            <Route path="/vagas" element={<Vagas />} />
+            <Route path="/vagas" element={<Vagas />} className="bg-[#36404a]/[0.12]" />
             <Route path="/vagas/nova" element={<VagaForm />} />
             <Route path="/vagas/:id" element={<VagaDetalhes />} />
             <Route path="/vagas/:id/editar" element={<VagaForm />} />
