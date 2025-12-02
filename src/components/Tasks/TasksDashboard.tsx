@@ -68,56 +68,56 @@ export default function TasksDashboard({
   };
   const drawerData = getDrawerData();
   return <>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4 max-w-3xl">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 max-w-4xl">
         <Card className="border-red-200 bg-red-50/50 cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveDrawer("overdue")}>
-          <CardContent className="p-3">
-            <div className="flex items-center justify-between gap-2">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-muted-foreground text-xs font-semibold">
+                <p className="text-muted-foreground text-sm font-semibold">
                   Tarefas Atrasadas {isAdmin && "(Geral)"}
                 </p>
-                <h3 className="text-xl font-bold text-red-600 mt-1">
+                <h3 className="text-3xl font-bold text-red-600 mt-2">
                   {overdueCount}
                 </h3>
               </div>
-              <div className="h-8 w-8 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
-                <AlertCircle className="h-4 w-4 text-red-600" />
+              <div className="h-12 w-12 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                <AlertCircle className="h-6 w-6 text-red-600" />
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card className="border-orange-200 bg-orange-50/50 cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveDrawer("high")}>
-          <CardContent className="p-3">
-            <div className="flex items-center justify-between gap-2">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-muted-foreground text-xs font-semibold">
+                <p className="text-muted-foreground text-sm font-semibold">
                   Prioridade Alta {isAdmin && "(Geral)"}
                 </p>
-                <h3 className="text-xl font-bold text-orange-600 mt-1">
+                <h3 className="text-3xl font-bold text-orange-600 mt-2">
                   {highCount}
                 </h3>
               </div>
-              <div className="h-8 w-8 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
-                <AlertTriangle className="h-4 w-4 text-orange-600" />
+              <div className="h-12 w-12 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
+                <AlertTriangle className="h-6 w-6 text-orange-600" />
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card className="border-red-300 bg-red-100/50 cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveDrawer("urgent")}>
-          <CardContent className="p-3">
-            <div className="flex items-center justify-between gap-2">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-muted-foreground text-xs font-semibold">
+                <p className="text-muted-foreground text-sm font-semibold">
                   Prioridade Urgente {isAdmin && "(Geral)"}
                 </p>
-                <h3 className="text-xl font-bold text-red-700 mt-1">
+                <h3 className="text-3xl font-bold text-red-700 mt-2">
                   {urgentCount}
                 </h3>
               </div>
-              <div className="h-8 w-8 rounded-full bg-red-200 flex items-center justify-center flex-shrink-0">
-                <Flame className="h-4 w-4 text-red-700" />
+              <div className="h-12 w-12 rounded-full bg-red-200 flex items-center justify-center flex-shrink-0">
+                <Flame className="h-6 w-6 text-red-700" />
               </div>
             </div>
           </CardContent>
