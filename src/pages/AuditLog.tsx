@@ -159,9 +159,7 @@ export default function AuditLog() {
           <Shield className="h-8 w-8 text-primary" />
           <div>
             <h1 className="text-3xl font-bold">Log de Auditoria</h1>
-            <p className="text-muted-foreground">
-              Trilha de auditoria de segurança imutável para todas as ações críticas
-            </p>
+            <p className="text-muted-foreground">Trilha de auditoria de segurança para todas as ações críticas</p>
           </div>
         </div>
         <div className="flex gap-2">
