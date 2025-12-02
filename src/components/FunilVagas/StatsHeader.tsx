@@ -13,7 +13,7 @@ export function StatsHeader({
 }: StatsHeaderProps) {
   return <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
       {/* Total de vagas abertas */}
-      <div className="flex items-center justify-between h-[60px] px-4 bg-white rounded-lg border border-gray-200 shadow-sm">
+      <div className="flex items-center justify-between h-[60px] px-4 bg-white rounded-lg border border-gray-200 shadow-md">
         <div className="flex-1">
           <p className="text-[#36404A] font-medium text-sm">Vagas Abertas</p>
           <p className="text-xl font-bold text-[#00141D]">{totalVagasAbertas}</p>
@@ -24,7 +24,7 @@ export function StatsHeader({
       </div>
 
       {/* Média de dias abertos */}
-      <div className="flex items-center justify-between h-[60px] px-4 bg-white rounded-lg border border-gray-200 shadow-sm">
+      <div className="flex items-center justify-between h-[60px] px-4 bg-white rounded-lg border border-gray-200 shadow-md">
         <div className="flex-1">
           <p className="text-[#36404A] font-medium text-sm">Média Dias</p>
           <p className="text-xl font-bold text-[#00141D]">{mediaDiasAbertos}</p>
@@ -35,7 +35,7 @@ export function StatsHeader({
       </div>
 
       {/* Vagas fora do prazo */}
-      <div className="flex items-center justify-between h-[60px] px-4 bg-white rounded-lg border border-gray-200 shadow-sm">
+      <div className="flex items-center justify-between h-[60px] px-4 bg-white rounded-lg border border-gray-200 shadow-md">
         <div className="flex-1">
           <p className="text-[#36404A] font-medium text-sm">Fora do Prazo</p>
           <p className="text-xl font-bold text-[#00141D]">{vagasEmAtencao}</p>
@@ -46,7 +46,7 @@ export function StatsHeader({
       </div>
 
       {/* Candidatos ativos */}
-      <div className="flex items-center justify-between h-[60px] px-4 bg-white rounded-lg border border-gray-200 shadow-sm">
+      <div className="flex items-center justify-between h-[60px] px-4 bg-white rounded-lg border border-gray-200 shadow-md">
         <div className="flex-1">
           <p className="text-[#36404A] font-medium text-sm">Candidatos</p>
           <p className="text-xl font-bold text-[#00141D]">{totalCandidatosAtivos}</p>
