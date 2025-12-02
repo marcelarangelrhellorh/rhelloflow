@@ -84,12 +84,12 @@ export default function GerenciarEmpresas() {
     }
   };
   return <div className="min-h-screen bg-[#FFFBF0] p-4 sm:p-6 lg:p-8">
-      <div className="max-w-7xl mx-auto space-y-6">
+      <div className="max-w-7xl space-y-6 mx-0 px-0">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-3xl font-bold text-[#00141D] flex items-center gap-2">
-              <Building2 className="h-8 w-8" />
+              
               Gerenciar Clientes
             </h1>
             <p className="text-[#36404A] mt-1">
@@ -102,9 +102,9 @@ export default function GerenciarEmpresas() {
               Importar Excel
             </Button>
             <Button onClick={() => {
-              setSelectedEmpresa(null);
-              setFormModalOpen(true);
-            }} className="bg-[#00141D] hover:bg-[#00141D]/90 text-white font-semibold">
+            setSelectedEmpresa(null);
+            setFormModalOpen(true);
+          }} className="bg-[#00141D] hover:bg-[#00141D]/90 text-white font-semibold">
               <Plus className="mr-2 h-4 w-4" />
               Novo Cliente
             </Button>
@@ -247,9 +247,9 @@ export default function GerenciarEmpresas() {
       <EmpresaFormModal open={formModalOpen} onClose={handleCloseModal} empresa={selectedEmpresa} onSuccess={handleSuccess} />
 
       <EmpresaDetailsDrawer open={detailsDrawerOpen} onClose={() => {
-        setDetailsDrawerOpen(false);
-        setSelectedEmpresa(null);
-      }} empresaId={selectedEmpresa?.id || ""} />
+      setDetailsDrawerOpen(false);
+      setSelectedEmpresa(null);
+    }} empresaId={selectedEmpresa?.id || ""} />
 
       <ImportEmpresasModal open={importModalOpen} onOpenChange={setImportModalOpen} onSuccess={refetch} />
     </div>;
