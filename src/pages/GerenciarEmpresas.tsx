@@ -5,12 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Plus, Search, Eye, Pencil, LayoutGrid, List, FileSpreadsheet } from "lucide-react";
+import { Building2, Plus, Search, Eye, Pencil, LayoutGrid, List, FileSpreadsheet, Kanban } from "lucide-react";
 import { EmpresaFormModal } from "@/components/Empresas/EmpresaFormModal";
 import { EmpresaDetailsDrawer } from "@/components/Empresas/EmpresaDetailsDrawer";
 import { ImportEmpresasModal } from "@/components/Empresas/ImportEmpresasModal";
+import { ClientPipelineBoard } from "@/components/Empresas/ClientPipelineBoard";
 import { toast } from "sonner";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+
 type Empresa = {
   id: string;
   nome: string;
@@ -24,6 +26,7 @@ type Empresa = {
   estado: string | null;
   created_at: string;
   data_primeiro_contato: string | null;
+  pipeline_stage?: string | null;
 };
 export default function GerenciarEmpresas() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -31,7 +34,7 @@ export default function GerenciarEmpresas() {
   const [detailsDrawerOpen, setDetailsDrawerOpen] = useState(false);
   const [selectedEmpresa, setSelectedEmpresa] = useState<Empresa | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>("todos");
-  const [viewMode, setViewMode] = useState<"cards" | "list">("cards");
+  const [viewMode, setViewMode] = useState<"cards" | "list" | "funnel">("cards");
   const [importModalOpen, setImportModalOpen] = useState(false);
   const {
     data: empresas,
@@ -81,6 +84,22 @@ export default function GerenciarEmpresas() {
         return "bg-blue-100 text-blue-800 border-blue-200";
       default:
         return "bg-gray-100 text-gray-800 border-gray-200";
+    }
+  };
+
+  const handleClientMove = async (empresaId: string, fromSlug: string, toSlug: string) => {
+    try {
+      const { error } = await supabase
+        .from("empresas")
+        .update({ pipeline_stage: toSlug })
+        .eq("id", empresaId);
+
+      if (error) throw error;
+
+      toast.success("Cliente movido com sucesso!");
+      refetch();
+    } catch (error) {
+      toast.error("Erro ao mover cliente");
     }
   };
   return <div className="min-h-screen bg-[#FFFBF0] p-4 sm:p-6 lg:p-8">
@@ -139,15 +158,31 @@ export default function GerenciarEmpresas() {
               <Button variant="ghost" size="sm" onClick={() => setViewMode("list")} className={viewMode === "list" ? "bg-muted" : ""}>
                 <List className="h-4 w-4" />
               </Button>
+              <Button variant="ghost" size="sm" onClick={() => setViewMode("funnel")} className={viewMode === "funnel" ? "bg-muted" : ""}>
+                <Kanban className="h-4 w-4" />
+              </Button>
             </div>
           </div>
         </div>
 
-        {/* List */}
-        {isLoading ? <div className="flex justify-center items-center h-64">
+        {/* Content */}
+        {isLoading ? (
+          <div className="flex justify-center items-center h-64">
             <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-          </div> : empresas && empresas.length > 0 ? viewMode === "cards" ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {empresas.map(empresa => <Card key={empresa.id} className="p-4 transition-shadow cursor-pointer border-gray-300 shadow-xl">
+          </div>
+        ) : empresas && empresas.length > 0 ? (
+          viewMode === "funnel" ? (
+            <div className="overflow-x-auto">
+              <ClientPipelineBoard
+                empresas={empresas}
+                onClientClick={handleViewDetails}
+                onClientMove={handleClientMove}
+              />
+            </div>
+          ) : viewMode === "cards" ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {empresas.map((empresa) => (
+                <Card key={empresa.id} className="p-4 transition-shadow cursor-pointer border-gray-300 shadow-xl">
                   <div className="space-y-3">
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
@@ -161,20 +196,26 @@ export default function GerenciarEmpresas() {
                       </Badge>
                     </div>
 
-                    {empresa.setor && <p className="text-sm text-[#36404A]">
+                    {empresa.setor && (
+                      <p className="text-sm text-[#36404A]">
                         <span className="font-semibold">Setor:</span> {empresa.setor}
-                      </p>}
+                      </p>
+                    )}
 
-                    {empresa.porte && <p className="text-sm text-[#36404A]">
+                    {empresa.porte && (
+                      <p className="text-sm text-[#36404A]">
                         <span className="font-semibold">Porte:</span> {empresa.porte}
-                      </p>}
+                      </p>
+                    )}
 
-                    {(empresa.cidade || empresa.estado) && <p className="text-sm text-[#36404A]">
+                    {(empresa.cidade || empresa.estado) && (
+                      <p className="text-sm text-[#36404A]">
                         <span className="font-semibold">Localização:</span>{" "}
                         {empresa.cidade}
                         {empresa.cidade && empresa.estado && ", "}
                         {empresa.estado}
-                      </p>}
+                      </p>
+                    )}
 
                     <div className="flex gap-2 pt-2 border-t border-gray-200">
                       <Button size="sm" variant="outline" onClick={() => handleViewDetails(empresa)} className="flex-1">
@@ -187,8 +228,11 @@ export default function GerenciarEmpresas() {
                       </Button>
                     </div>
                   </div>
-                </Card>)}
-            </div> : <Card className="border-gray-300">
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <Card className="border-gray-300">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -202,21 +246,18 @@ export default function GerenciarEmpresas() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {empresas.map(empresa => <TableRow key={empresa.id}>
+                  {empresas.map((empresa) => (
+                    <TableRow key={empresa.id}>
                       <TableCell className="font-semibold text-[#00141D]">
                         {empresa.nome}
                       </TableCell>
+                      <TableCell className="text-[#36404A]">{empresa.cnpj || "-"}</TableCell>
+                      <TableCell className="text-[#36404A]">{empresa.setor || "-"}</TableCell>
+                      <TableCell className="text-[#36404A]">{empresa.porte || "-"}</TableCell>
                       <TableCell className="text-[#36404A]">
-                        {empresa.cnpj || "-"}
-                      </TableCell>
-                      <TableCell className="text-[#36404A]">
-                        {empresa.setor || "-"}
-                      </TableCell>
-                      <TableCell className="text-[#36404A]">
-                        {empresa.porte || "-"}
-                      </TableCell>
-                      <TableCell className="text-[#36404A]">
-                        {empresa.cidade && empresa.estado ? `${empresa.cidade}, ${empresa.estado}` : empresa.cidade || empresa.estado || "-"}
+                        {empresa.cidade && empresa.estado
+                          ? `${empresa.cidade}, ${empresa.estado}`
+                          : empresa.cidade || empresa.estado || "-"}
                       </TableCell>
                       <TableCell>
                         <Badge className={getStatusColor(empresa.status)}>
@@ -233,15 +274,20 @@ export default function GerenciarEmpresas() {
                           </Button>
                         </div>
                       </TableCell>
-                    </TableRow>)}
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
-            </Card> : <Card className="p-8 text-center">
+            </Card>
+          )
+        ) : (
+          <Card className="p-8 text-center">
             <Building2 className="h-12 w-12 text-[#36404A] mx-auto mb-4" />
             <p className="text-[#36404A]">
               Nenhum cliente encontrado. Cadastre o primeiro cliente!
             </p>
-          </Card>}
+          </Card>
+        )}
       </div>
 
       <EmpresaFormModal open={formModalOpen} onClose={handleCloseModal} empresa={selectedEmpresa} onSuccess={handleSuccess} />

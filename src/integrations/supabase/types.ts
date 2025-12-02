@@ -663,6 +663,7 @@ export type Database = {
           id: string
           nome: string
           observacoes: string | null
+          pipeline_stage: string | null
           porte: string | null
           setor: string | null
           site: string | null
@@ -686,6 +687,7 @@ export type Database = {
           id?: string
           nome: string
           observacoes?: string | null
+          pipeline_stage?: string | null
           porte?: string | null
           setor?: string | null
           site?: string | null
@@ -709,6 +711,7 @@ export type Database = {
           id?: string
           nome?: string
           observacoes?: string | null
+          pipeline_stage?: string | null
           porte?: string | null
           setor?: string | null
           site?: string | null
