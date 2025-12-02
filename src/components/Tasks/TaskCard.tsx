@@ -46,7 +46,7 @@ export default function TaskCard({
   const getInitials = (name: string) => {
     return name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
   };
-  return <Card className={cn("p-3 hover:shadow-md transition-shadow cursor-pointer", task.status === 'done' && "opacity-60")} draggable={draggable} onClick={() => onCardClick?.(task)}>
+  return <Card className={cn("p-3 hover:shadow-md transition-shadow cursor-pointer max-w-2xl", task.status === 'done' && "opacity-60")} draggable={draggable} onClick={() => onCardClick?.(task)}>
       <div className="space-y-2">
         {/* Header */}
         <div className="flex items-start justify-between gap-2">
