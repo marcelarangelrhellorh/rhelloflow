@@ -31,7 +31,7 @@ const menuItems = [{
   url: "/tarefas",
   roles: ["admin", "recrutador", "cs"]
 }, {
-  title: "Relatórios",
+  title: "Análises",
   url: "/relatorios",
   roles: ["admin", "recrutador", "cs"]
 }, {
