@@ -240,9 +240,9 @@ export default function Tarefas() {
             <TasksDashboard onTaskClick={handleEdit} />
           </div>}
 
-        <div className="flex flex-col xl:flex-row gap-6 xl:gap-8">
+        <div className="flex flex-col xl:flex-row gap-6 xl:gap-8 justify-center w-full">
           {/* Main content */}
-          <div className="flex-1 min-w-0 flex justify-center">
+          <div className="flex justify-center">
             {isLoading ? <div className="space-y-4">
                 {[1, 2, 3].map(i => <Skeleton key={i} className="h-40 w-full" />)}
               </div> : view === "calendar" ? syncedMeetings.length === 0 ? <div className="text-center py-16">
