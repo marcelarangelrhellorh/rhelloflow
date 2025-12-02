@@ -73,7 +73,7 @@ export default function TasksDashboard({
           <CardContent className="p-3">
             <div className="flex items-center justify-between gap-2">
               <div>
-                <p className="text-muted-foreground text-xs font-medium">
+                <p className="text-muted-foreground text-xs font-semibold">
                   Tarefas Atrasadas {isAdmin && "(Geral)"}
                 </p>
                 <h3 className="text-xl font-bold text-red-600 mt-1">
@@ -91,7 +91,7 @@ export default function TasksDashboard({
           <CardContent className="p-3">
             <div className="flex items-center justify-between gap-2">
               <div>
-                <p className="text-muted-foreground text-xs font-medium">
+                <p className="text-muted-foreground text-xs font-semibold">
                   Prioridade Alta {isAdmin && "(Geral)"}
                 </p>
                 <h3 className="text-xl font-bold text-orange-600 mt-1">
@@ -109,7 +109,7 @@ export default function TasksDashboard({
           <CardContent className="p-3">
             <div className="flex items-center justify-between gap-2">
               <div>
-                <p className="text-muted-foreground text-xs font-medium">
+                <p className="text-muted-foreground text-xs font-semibold">
                   Prioridade Urgente {isAdmin && "(Geral)"}
                 </p>
                 <h3 className="text-xl font-bold text-red-700 mt-1">
