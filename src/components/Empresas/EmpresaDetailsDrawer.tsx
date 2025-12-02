@@ -16,10 +16,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Building2, Mail, Phone, Globe, MapPin, User, Briefcase, FileText, TrendingUp, Users, Pencil, Trash2 } from "lucide-react";
+import { Building2, Mail, Phone, Globe, MapPin, User, Briefcase, FileText, TrendingUp, Users, Pencil, Trash2, UserCircle } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 interface EmpresaDetailsDrawerProps {
   open: boolean;
@@ -68,6 +69,22 @@ export function EmpresaDetailsDrawer({
     },
     enabled: !!empresaId && open
   });
+
+  const {
+    data: linkedUsers
+  } = useQuery({
+    queryKey: ["empresa-linked-users", empresaId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, full_name, created_at")
+        .eq("empresa_id", empresaId);
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!empresaId && open
+  });
+
   const {
     data: contratacoes
   } = useQuery({
@@ -297,6 +314,41 @@ export function EmpresaDetailsDrawer({
                       {empresa.contato_principal_telefone}
                     </span>
                   </div>}
+              </div>
+            </>}
+
+          {/* Usuários Vinculados */}
+          {linkedUsers && linkedUsers.length > 0 && <>
+              <Separator />
+              <div className="space-y-4">
+                <h3 className="font-semibold text-lg text-[#00141D] flex items-center gap-2">
+                  <UserCircle className="h-5 w-5" />
+                  Usuários Vinculados ({linkedUsers.length})
+                </h3>
+                <div className="space-y-2">
+                  {linkedUsers.map(user => (
+                    <Card key={user.id} className="p-3 border-gray-300 shadow-lg">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback className="bg-[#00141D] text-white text-xs">
+                            {user.full_name?.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="font-medium text-[#00141D]">
+                            {user.full_name}
+                          </div>
+                          <div className="text-xs text-[#36404A]">
+                            Vinculado em{" "}
+                            {user.created_at ? format(new Date(user.created_at), "dd/MM/yyyy", {
+                              locale: ptBR
+                            }) : "-"}
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
               </div>
             </>}
 
