@@ -4,7 +4,6 @@ import { Badge } from "@/components/ui/badge";
 import { Building2, MapPin, Phone, Mail } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ClientStage } from "@/lib/clientStages";
-
 interface Empresa {
   id: string;
   nome: string;
@@ -19,43 +18,30 @@ interface Empresa {
   created_at: string;
   data_primeiro_contato: string | null;
 }
-
 interface ClientFunnelCardProps {
   empresa: Empresa;
   stageColor: ClientStage["color"];
   onClick: () => void;
   isDragging?: boolean;
 }
-
 export function ClientFunnelCard({
   empresa,
   stageColor,
   onClick,
-  isDragging,
+  isDragging
 }: ClientFunnelCardProps) {
-  const { attributes, listeners, setNodeRef, transform } = useDraggable({
-    id: empresa.id,
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform
+  } = useDraggable({
+    id: empresa.id
   });
-
-  const style = transform
-    ? {
-        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-      }
-    : undefined;
-
-  return (
-    <Card
-      ref={setNodeRef}
-      style={style}
-      {...listeners}
-      {...attributes}
-      onClick={onClick}
-      className={cn(
-        "p-3 cursor-pointer transition-all duration-200 bg-[#fffdf6] border border-gray-200",
-        "hover:shadow-md hover:border-[#ffcd00]",
-        isDragging && "opacity-50 shadow-lg rotate-2"
-      )}
-    >
+  const style = transform ? {
+    transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`
+  } : undefined;
+  return <Card ref={setNodeRef} style={style} {...listeners} {...attributes} onClick={onClick} className={cn("p-3 cursor-pointer transition-all duration-200 bg-[#fffdf6] border border-gray-200", "hover:shadow-md hover:border-[#ffcd00]", isDragging && "opacity-50 shadow-lg rotate-2")}>
       <div className="space-y-2">
         {/* Header */}
         <div className="flex items-start justify-between gap-2">
@@ -63,58 +49,42 @@ export function ClientFunnelCard({
             <h3 className="font-bold text-sm text-[#00141d] line-clamp-1">
               {empresa.nome}
             </h3>
-            {empresa.cnpj && (
-              <p className="text-xs text-[#36404a] mt-0.5">
+            {empresa.cnpj && <p className="text-xs text-[#36404a] mt-0.5 font-semibold">
                 CNPJ: {empresa.cnpj}
-              </p>
-            )}
+              </p>}
           </div>
           <Building2 className="h-4 w-4 text-[#36404a] flex-shrink-0" />
         </div>
 
         {/* Info */}
         <div className="space-y-1">
-          {empresa.setor && (
-            <Badge
-              variant="secondary"
-              className={cn("text-xs font-medium", stageColor.bg, stageColor.text)}
-            >
+          {empresa.setor && <Badge variant="secondary" className={cn("text-xs font-medium", stageColor.bg, stageColor.text)}>
               {empresa.setor}
-            </Badge>
-          )}
+            </Badge>}
 
-          {empresa.porte && (
-            <p className="text-xs text-[#36404a]">
-              <span className="font-medium">Porte:</span> {empresa.porte}
-            </p>
-          )}
+          {empresa.porte && <p className="text-xs text-[#36404a] font-semibold">
+              <span className="font-semibold">Porte:</span> {empresa.porte}
+            </p>}
 
-          {(empresa.cidade || empresa.estado) && (
-            <div className="flex items-center gap-1 text-xs text-[#36404a]">
+          {(empresa.cidade || empresa.estado) && <div className="flex items-center gap-1 text-xs text-[#36404a]">
               <MapPin className="h-3 w-3" />
               <span className="line-clamp-1">
                 {empresa.cidade}
                 {empresa.cidade && empresa.estado && ", "}
                 {empresa.estado}
               </span>
-            </div>
-          )}
+            </div>}
 
-          {empresa.telefone && (
-            <div className="flex items-center gap-1 text-xs text-[#36404a]">
+          {empresa.telefone && <div className="flex items-center gap-1 text-xs text-[#36404a]">
               <Phone className="h-3 w-3" />
-              <span>{empresa.telefone}</span>
-            </div>
-          )}
+              <span className="font-semibold">{empresa.telefone}</span>
+            </div>}
 
-          {empresa.email && (
-            <div className="flex items-center gap-1 text-xs text-[#36404a]">
+          {empresa.email && <div className="flex items-center gap-1 text-xs text-[#36404a]">
               <Mail className="h-3 w-3" />
               <span className="line-clamp-1">{empresa.email}</span>
-            </div>
-          )}
+            </div>}
         </div>
       </div>
-    </Card>
-  );
+    </Card>;
 }
