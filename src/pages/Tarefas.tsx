@@ -242,6 +242,15 @@ export default function Tarefas() {
           </div>}
 
         <div className="flex flex-col xl:flex-row gap-4">
+          {/* Today's meetings sidebar - left side */}
+          {view !== "calendar" && (
+            <div className="flex xl:flex-col items-start gap-4 flex-shrink-0">
+              <TodayMeetingsSidebar onEventClick={(event) => handleTaskClick(null, event)} />
+              <Separator orientation="horizontal" className="xl:hidden w-full" />
+              <Separator orientation="vertical" className="hidden xl:block h-auto min-h-[200px]" />
+            </div>
+          )}
+
           {/* Main content */}
           <div className="flex-1 min-w-0">
             {isLoading ? <div className="space-y-4">
@@ -264,15 +273,6 @@ export default function Tarefas() {
                 {onlyTasks.map(task => <TaskCard key={task.id} task={task} onEdit={handleEdit} onDelete={handleDelete} onToggleComplete={handleToggleComplete} onCardClick={handleTaskClick} />)}
               </div>}
           </div>
-
-          {/* Today's meetings sidebar - adapts to screen size */}
-          {view !== "calendar" && (
-            <div className="flex xl:flex-col items-start gap-4 flex-shrink-0">
-              <Separator orientation="horizontal" className="xl:hidden w-full" />
-              <Separator orientation="vertical" className="hidden xl:block h-auto min-h-[200px]" />
-              <TodayMeetingsSidebar onEventClick={(event) => handleTaskClick(null, event)} />
-            </div>
-          )}
         </div>
       </div>
 
