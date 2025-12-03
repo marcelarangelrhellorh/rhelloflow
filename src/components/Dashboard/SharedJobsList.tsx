@@ -40,6 +40,7 @@ export function SharedJobsList({
   const loadJobs = async () => {
     try {
       setLoading(true);
+      // Filtrar vagas deletadas usando !inner join
       const {
         data: shareLinks,
         error
@@ -51,10 +52,11 @@ export function SharedJobsList({
           submissions_count,
           active,
           created_at,
-          vagas (
-            titulo
+          vagas!inner (
+            titulo,
+            deleted_at
           )
-        `).eq('deleted', false).eq('active', true).order('created_at', {
+        `).eq('deleted', false).eq('active', true).is('vagas.deleted_at', null).order('created_at', {
         ascending: false
       });
       if (error) throw error;
