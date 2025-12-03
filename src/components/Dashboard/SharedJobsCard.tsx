@@ -14,10 +14,13 @@ export function SharedJobsCard() {
     try {
       setLoading(true);
 
-      // Buscar vagas que foram compartilhadas via link
-      const {
-        data: vagasCompartilhadas
-      } = await supabase.from('share_links').select('vaga_id').eq('deleted', false);
+      // Buscar vagas que foram compartilhadas via link (excluindo vagas deletadas)
+      const { data: vagasCompartilhadas } = await supabase
+        .from('share_links')
+        .select('vaga_id, vagas!inner(id, deleted_at)')
+        .eq('deleted', false)
+        .is('vagas.deleted_at', null);
+      
       const vagasCount = new Set(vagasCompartilhadas?.map(sl => sl.vaga_id) || []).size;
       setCount(vagasCount);
     } catch (error) {
