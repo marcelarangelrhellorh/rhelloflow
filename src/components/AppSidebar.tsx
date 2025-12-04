@@ -82,13 +82,34 @@ export function AppSidebar() {
       collapsible="icon"
       className="border-r border-border bg-sidebar"
     >
-      <SidebarHeader className="p-4">
+      <SidebarHeader className="p-4 space-y-4">
         <div className="flex items-center justify-between">
           {collapsed ? (
             <img src={symbolLight} alt="rhello" className="h-8 w-8" />
           ) : (
             <img src={logoLight} alt="rhello" className="h-8" />
           )}
+        </div>
+        
+        <div className={`flex ${collapsed ? "flex-col items-center gap-2" : "items-center justify-between"}`}>
+          <div className={`flex ${collapsed ? "flex-col" : "flex-row"} items-center gap-2`}>
+            <ConnectionIndicator />
+            <NotificationBell />
+            <UserMenu />
+          </div>
+          
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleSidebar}
+            className="h-8 w-8"
+          >
+            {collapsed ? (
+              <ChevronRight className="h-4 w-4" />
+            ) : (
+              <ChevronLeft className="h-4 w-4" />
+            )}
+          </Button>
         </div>
       </SidebarHeader>
 
@@ -168,28 +189,6 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-2">
-        <div className={`flex ${collapsed ? "flex-col items-center gap-2" : "items-center justify-between"}`}>
-          <div className={`flex ${collapsed ? "flex-col" : "flex-row"} items-center gap-2`}>
-            <ConnectionIndicator />
-            <NotificationBell />
-            <UserMenu />
-          </div>
-          
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={toggleSidebar}
-            className="h-8 w-8"
-          >
-            {collapsed ? (
-              <ChevronRight className="h-4 w-4" />
-            ) : (
-              <ChevronLeft className="h-4 w-4" />
-            )}
-          </Button>
-        </div>
-      </SidebarFooter>
     </Sidebar>
   );
 }
