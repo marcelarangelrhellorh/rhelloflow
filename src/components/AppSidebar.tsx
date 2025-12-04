@@ -101,7 +101,7 @@ export function AppSidebar() {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="space-y-2">
               {filteredMenuItems.map(item => <SidebarMenuItem key={item.title}>
                   {collapsed ? <Tooltip>
                       <TooltipTrigger asChild>
