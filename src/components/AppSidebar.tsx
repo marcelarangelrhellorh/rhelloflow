@@ -114,7 +114,7 @@ export function AppSidebar() {
                       </TooltipContent>
                     </Tooltip> : <SidebarMenuButton onClick={() => navigate(item.url)} isActive={isActive(item.url)}>
                       <item.icon className="h-5 w-5" />
-                      <span>{item.title}</span>
+                      <span className="font-semibold">{item.title}</span>
                     </SidebarMenuButton>}
                 </SidebarMenuItem>)}
 
