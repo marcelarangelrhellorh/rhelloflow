@@ -601,7 +601,7 @@ export default function EstudoMercado() {
     }
   };
   return <div className="min-h-screen" style={{
-    backgroundColor: '#00141d'
+    backgroundColor: '#fffdf6'
   }}>
       <div className="container mx-auto p-6 space-y-8 max-w-6xl">
         {/* Header */}
