@@ -122,19 +122,10 @@ export function AppSidebar() {
               {isInternalUser && <SidebarMenuItem>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      {collapsed ? <Tooltip>
-                          <TooltipTrigger asChild>
-                            <SidebarMenuButton className="justify-center">
-                              <Wrench className="h-7 w-7" />
-                            </SidebarMenuButton>
-                          </TooltipTrigger>
-                          <TooltipContent side="right">
-                            Ferramentas
-                          </TooltipContent>
-                        </Tooltip> : <SidebarMenuButton>
-                          <Wrench className="h-7 w-7" />
-                          <span className="font-semibold text-base">Ferramentas</span>
-                        </SidebarMenuButton>}
+                      <SidebarMenuButton className={collapsed ? "justify-center" : ""}>
+                        <Wrench className="h-7 w-7" />
+                        {!collapsed && <span className="font-semibold text-base">Ferramentas</span>}
+                      </SidebarMenuButton>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent side="right" align="start" className="w-48">
                       {toolsItems.map(tool => <DropdownMenuItem key={tool.title} onClick={() => navigate(tool.url)} className="cursor-pointer">
