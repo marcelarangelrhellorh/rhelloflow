@@ -611,7 +611,7 @@ export default function EstudoMercado() {
         </div>
 
         {/* Formulário */}
-        <Card className="no-print">
+        <Card className="no-print shadow-2xl">
           <CardHeader>
             <CardTitle>Informações da Consulta</CardTitle>
             <CardDescription className="font-semibold">Preencha os dados para gerar o estudo de mercado</CardDescription>
