@@ -101,7 +101,7 @@ export function UserMenu() {
         
         <DropdownMenuSeparator />
         
-        <DropdownMenuItem className="cursor-pointer py-2.5">
+        <DropdownMenuItem className="cursor-pointer py-2.5" onClick={() => navigate("/configuracoes")}>
           <User className="mr-2 h-5 w-5" />
           <span className="text-base">Meu perfil</span>
         </DropdownMenuItem>
@@ -133,7 +133,7 @@ export function UserMenu() {
           </>
         )}
         
-        <DropdownMenuItem className="cursor-pointer py-2.5">
+        <DropdownMenuItem className="cursor-pointer py-2.5" onClick={() => navigate("/configuracoes")}>
           <Settings className="mr-2 h-5 w-5" />
           <span className="text-base">Configurações</span>
         </DropdownMenuItem>
