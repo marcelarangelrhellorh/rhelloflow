@@ -80,7 +80,7 @@ export function AppSidebar() {
   const isInternalUser = roles.some(r => ["admin", "recrutador", "cs"].includes(r));
   if (rolesLoading) return null;
   return <Sidebar collapsible="icon" className="border-r border-border bg-sidebar">
-      <SidebarHeader className="p-4 space-y-4">
+      <SidebarHeader className={`${collapsed ? 'p-2' : 'p-4'} space-y-4`}>
         <div className="flex items-center justify-between">
           {collapsed ? <img src={symbolLight} alt="rhello" className="h-8 w-8" /> : <img alt="rhello" className="h-8" src="/lovable-uploads/6bff9b8e-8a55-40d2-a107-0543e7b70ad7.png" />}
         </div>
