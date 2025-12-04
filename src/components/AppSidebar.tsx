@@ -106,15 +106,15 @@ export function AppSidebar() {
                   {collapsed ? <Tooltip>
                       <TooltipTrigger asChild>
                         <SidebarMenuButton onClick={() => navigate(item.url)} isActive={isActive(item.url)} className="justify-center">
-                          <item.icon className="h-6 w-6" />
+                          <item.icon className="h-7 w-7" />
                         </SidebarMenuButton>
                       </TooltipTrigger>
                       <TooltipContent side="right">
                         {item.title}
                       </TooltipContent>
                     </Tooltip> : <SidebarMenuButton onClick={() => navigate(item.url)} isActive={isActive(item.url)}>
-                      <item.icon className="h-6 w-6" />
-                      <span className="font-semibold">{item.title}</span>
+                      <item.icon className="h-7 w-7" />
+                      <span className="font-semibold text-base">{item.title}</span>
                     </SidebarMenuButton>}
                 </SidebarMenuItem>)}
 
@@ -125,15 +125,15 @@ export function AppSidebar() {
                       {collapsed ? <Tooltip>
                           <TooltipTrigger asChild>
                             <SidebarMenuButton className="justify-center">
-                              <Wrench className="h-6 w-6" />
+                              <Wrench className="h-7 w-7" />
                             </SidebarMenuButton>
                           </TooltipTrigger>
                           <TooltipContent side="right">
                             Ferramentas
                           </TooltipContent>
                         </Tooltip> : <SidebarMenuButton>
-                          <Wrench className="h-6 w-6" />
-                          <span className="font-semibold">Ferramentas</span>
+                          <Wrench className="h-7 w-7" />
+                          <span className="font-semibold text-base">Ferramentas</span>
                         </SidebarMenuButton>}
                     </DropdownMenuTrigger>
                     <DropdownMenuContent side="right" align="start" className="w-48">
