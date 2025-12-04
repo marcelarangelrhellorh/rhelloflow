@@ -106,14 +106,14 @@ export function AppSidebar() {
                   {collapsed ? <Tooltip>
                       <TooltipTrigger asChild>
                         <SidebarMenuButton onClick={() => navigate(item.url)} isActive={isActive(item.url)} className="justify-center">
-                          <item.icon className="h-5 w-5" />
+                          <item.icon className="h-6 w-6" />
                         </SidebarMenuButton>
                       </TooltipTrigger>
                       <TooltipContent side="right">
                         {item.title}
                       </TooltipContent>
                     </Tooltip> : <SidebarMenuButton onClick={() => navigate(item.url)} isActive={isActive(item.url)}>
-                      <item.icon className="h-5 w-5" />
+                      <item.icon className="h-6 w-6" />
                       <span className="font-semibold">{item.title}</span>
                     </SidebarMenuButton>}
                 </SidebarMenuItem>)}
@@ -125,14 +125,14 @@ export function AppSidebar() {
                       {collapsed ? <Tooltip>
                           <TooltipTrigger asChild>
                             <SidebarMenuButton className="justify-center">
-                              <Wrench className="h-5 w-5" />
+                              <Wrench className="h-6 w-6" />
                             </SidebarMenuButton>
                           </TooltipTrigger>
                           <TooltipContent side="right">
                             Ferramentas
                           </TooltipContent>
                         </Tooltip> : <SidebarMenuButton>
-                          <Wrench className="h-5 w-5" />
+                          <Wrench className="h-6 w-6" />
                           <span className="font-semibold">Ferramentas</span>
                         </SidebarMenuButton>}
                     </DropdownMenuTrigger>
