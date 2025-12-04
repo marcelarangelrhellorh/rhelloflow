@@ -30,6 +30,7 @@ import Acompanhamento from "./pages/Acompanhamento";
 import Tarefas from "./pages/Tarefas";
 import GerenciarEmpresas from "./pages/GerenciarEmpresas";
 import GoogleCalendarCallback from "./pages/GoogleCalendarCallback";
+import Configuracoes from "./pages/Configuracoes";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 const App = () => <ErrorBoundary>
@@ -70,6 +71,7 @@ const App = () => <ErrorBoundary>
             <Route path="/acompanhamento" element={<Acompanhamento />} />
             <Route path="/tarefas" element={<Tarefas />} />
             <Route path="/gerenciar-empresas" element={<GerenciarEmpresas />} />
+            <Route path="/configuracoes" element={<Configuracoes />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
