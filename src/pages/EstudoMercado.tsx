@@ -607,7 +607,7 @@ export default function EstudoMercado() {
         {/* Header */}
         <div className="text-center space-y-2">
           <h1 className="text-4xl font-bold text-primary">Estudo de Mercado Comparativo</h1>
-          <p className="text-slate-50">Compare múltiplas regiões do país para uma função</p>
+          <p className="text-[#00141d] font-medium">Compare múltiplas regiões do país para uma função</p>
         </div>
 
         {/* Formulário */}
