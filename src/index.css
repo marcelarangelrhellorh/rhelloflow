@@ -24,9 +24,22 @@
 */
 
 @layer base {
-  /* Base font size: 16px = 1rem */
+  /* Base font size: Respeita configuração do navegador do usuário (WCAG 2.1) */
   html {
-    font-size: 16px;
+    font-size: 100%; /* Padrão 16px, mas respeita preferências do usuário */
+  }
+
+  /* Ajuste responsivo para telas muito grandes */
+  @media (min-width: 1920px) {
+    html {
+      font-size: 112.5%; /* 18px base para monitores grandes */
+    }
+  }
+
+  @media (min-width: 2560px) {
+    html {
+      font-size: 125%; /* 20px base para 4K/ultra-wide */
+    }
   }
 
   * {
@@ -36,7 +49,7 @@
   body {
     @apply bg-background text-foreground;
     font-family: 'Manrope', system-ui, -apple-system, sans-serif;
-    font-size: 1rem; /* 16px */
+    font-size: 1rem;
     line-height: 1.5;
   }
 }
@@ -213,6 +226,36 @@ All colors MUST be HSL.
   
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
+  }
+}
+
+/* Acessibilidade: Respeita preferência de movimento reduzido */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Utilitário para texto responsivo em body */
+@layer utilities {
+  .text-responsive {
+    font-size: clamp(0.875rem, 1.5vw, 1rem);
+    line-height: 1.6;
+  }
+  
+  .text-responsive-sm {
+    font-size: clamp(0.75rem, 1.25vw, 0.875rem);
+    line-height: 1.5;
+  }
+  
+  .text-responsive-lg {
+    font-size: clamp(1rem, 2vw, 1.125rem);
+    line-height: 1.6;
   }
 }
 
