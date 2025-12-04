@@ -1,4 +1,5 @@
-import { AppNavbar } from "./AppNavbar";
+import { AppSidebar } from "./AppSidebar";
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { Outlet, Navigate, useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,15 +15,12 @@ export function Layout() {
   const location = useLocation();
 
   useEffect(() => {
-    console.log('🔐 Layout: Iniciando setup de autenticação');
-    
     // Set up auth state listener FIRST
     const {
       data: {
         subscription
       }
     } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('🔐 Layout: Auth state change detectado:', event, session ? 'com sessão' : 'sem sessão');
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -34,7 +32,6 @@ export function Layout() {
         session
       }
     }) => {
-      console.log('🔐 Layout: Sessão inicial carregada:', session ? 'com sessão' : 'sem sessão');
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -53,17 +50,27 @@ export function Layout() {
   }, [loading, rolesLoading, user, roles, location.pathname, navigate]);
 
   if (loading || rolesLoading) {
-    return <div className="flex min-h-screen items-center justify-center">
+    return (
+      <div className="flex min-h-screen items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-      </div>;
+      </div>
+    );
   }
+  
   if (!user) {
     return <Navigate to="/login" replace />;
   }
-  return <div className="min-h-screen w-full">
-      <AppNavbar />
-      <main className="bg-background-light min-h-screen bg-[z#] bg-[#ffcd00]/[0.03]">
-        <Outlet />
-      </main>
-    </div>;
+
+  return (
+    <SidebarProvider defaultOpen={true}>
+      <div className="min-h-screen flex w-full">
+        <AppSidebar />
+        <SidebarInset className="flex-1">
+          <main className="min-h-screen bg-background">
+            <Outlet />
+          </main>
+        </SidebarInset>
+      </div>
+    </SidebarProvider>
+  );
 }
