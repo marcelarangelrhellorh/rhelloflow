@@ -133,7 +133,7 @@ export function AppSidebar() {
                           </TooltipContent>
                         </Tooltip> : <SidebarMenuButton>
                           <Wrench className="h-5 w-5" />
-                          <span>Ferramentas</span>
+                          <span className="font-semibold">Ferramentas</span>
                         </SidebarMenuButton>}
                     </DropdownMenuTrigger>
                     <DropdownMenuContent side="right" align="start" className="w-48">
