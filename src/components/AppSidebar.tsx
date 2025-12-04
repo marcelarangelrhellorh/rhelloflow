@@ -114,7 +114,7 @@ export function AppSidebar() {
                       </TooltipContent>
                     </Tooltip> : <SidebarMenuButton onClick={() => navigate(item.url)} isActive={isActive(item.url)}>
                       <item.icon className="h-7 w-7" />
-                      <span className="font-semibold text-base">{item.title}</span>
+                      <span className="text-base">{item.title}</span>
                     </SidebarMenuButton>}
                 </SidebarMenuItem>)}
 
@@ -124,7 +124,7 @@ export function AppSidebar() {
                     <DropdownMenuTrigger asChild>
                       <SidebarMenuButton className={collapsed ? "justify-center" : ""}>
                         <Wrench className="h-7 w-7" />
-                        {!collapsed && <span className="font-semibold text-base">Ferramentas</span>}
+                        {!collapsed && <span className="text-base">Ferramentas</span>}
                       </SidebarMenuButton>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent side="right" align="start" className="w-48">
