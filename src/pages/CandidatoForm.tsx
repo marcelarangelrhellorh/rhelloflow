@@ -11,6 +11,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, Save, Upload, FileText, X } from "lucide-react";
 import { toast } from "sonner";
 import { Constants } from "@/integrations/supabase/types";
+import { LoadingButton } from "@/components/ui/loading-button";
+import { handleApiError } from "@/lib/errorHandler";
 
 export default function CandidatoForm() {
   const { id } = useParams();
@@ -647,19 +649,14 @@ export default function CandidatoForm() {
           </Card>
 
           <div className="flex gap-4">
-            <Button type="submit" disabled={loading || uploading}>
-              {uploading ? (
-                <>
-                  <Upload className="mr-2 h-4 w-4 animate-pulse" />
-                  Fazendo upload...
-                </>
-              ) : (
-                <>
-                  <Save className="mr-2 h-4 w-4" />
-                  {loading ? "Salvando..." : "Salvar Candidato"}
-                </>
-              )}
-            </Button>
+            <LoadingButton 
+              type="submit" 
+              loading={loading || uploading} 
+              loadingText={uploading ? "Fazendo upload..." : "Salvando..."}
+            >
+              <Save className="mr-2 h-4 w-4" />
+              Salvar Candidato
+            </LoadingButton>
             <Button type="button" variant="outline" onClick={() => navigate("/candidatos")} disabled={uploading}>
               Cancelar
             </Button>

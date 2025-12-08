@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,6 +9,7 @@ import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { logLoginSuccess, logLoginFailure } from "@/lib/auditLog";
 import { cn } from "@/lib/utils";
+import { LoadingButton } from "@/components/ui/loading-button";
 
 const loginSchema = z.object({
   email: z.string()
@@ -170,12 +170,14 @@ export default function Auth() {
               )}
             </div>
 
-            <Button type="submit" disabled={loading} className="w-full h-12 text-base font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]">
-              {loading ? <div className="flex items-center gap-2">
-                  <div className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                  Processando...
-                </div> : "Entrar"}
-            </Button>
+            <LoadingButton 
+              type="submit" 
+              loading={loading} 
+              loadingText="Entrando..."
+              className="w-full h-12 text-base font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+            >
+              Entrar
+            </LoadingButton>
           </form>
 
             <div className="mt-6 text-center text-sm text-muted-foreground">

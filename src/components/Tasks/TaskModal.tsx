@@ -26,6 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { LoadingButton } from "@/components/ui/loading-button";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Task, useCreateTask, useUpdateTask } from "@/hooks/useTasks";
@@ -353,13 +354,14 @@ export default function TaskModal({ open, onClose, task, defaultVagaId }: TaskMo
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancelar
               </Button>
-              <Button
+              <LoadingButton
                 type="submit"
                 className="bg-[#ffcd00] hover:bg-[#ffcd00]/90 text-black font-semibold"
-                disabled={createTask.isPending || updateTask.isPending}
+                loading={createTask.isPending || updateTask.isPending}
+                loadingText={isEditing ? "Salvando..." : "Criando..."}
               >
                 {isEditing ? "Salvar Alterações" : "Criar Tarefa"}
-              </Button>
+              </LoadingButton>
             </div>
           </form>
         </Form>

@@ -11,6 +11,8 @@ import { usePagination } from "@/hooks/usePagination";
 import { PaginationControls } from "@/components/ui/pagination-controls";
 import { logger } from "@/lib/logger";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PageSkeleton } from "@/components/skeletons/PageSkeleton";
+import { CardSkeletonGrid } from "@/components/skeletons/CardSkeleton";
 
 // Importar componentes do Funil
 import { StatsHeader } from "@/components/FunilVagas/StatsHeader";
@@ -427,11 +429,16 @@ export default function Vagas() {
           <Tabs value={viewType}>
             <TabsContent value="cards" className="mt-0">
               {/* Cards */}
-              {loading ? <div className="text-center py-12">
-                  <p className="text-[#FFFDF6]">Carregando vagas...</p>
-                </div> : paginatedData.length === 0 ? <div className="text-center py-12">
-                  <p className="text-[#FFFDF6]">Nenhuma vaga encontrada</p>
-                </div> : <>
+              {loading ? (
+                <div className="pt-6">
+                  <CardSkeletonGrid count={8} />
+                </div>
+              ) : paginatedData.length === 0 ? (
+                <div className="text-center py-12">
+                  <p className="text-muted-foreground">Nenhuma vaga encontrada</p>
+                </div>
+              ) : (
+                <>
                   <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pt-6" : "space-y-4 pt-6"}>
                     {paginatedData.map(vaga => <VagaCard key={vaga.id} vaga={vaga} onClick={() => handleCardClick(vaga.id)} viewMode={viewMode} />)}
                   </div>
@@ -439,13 +446,20 @@ export default function Vagas() {
                   <div className="mt-6">
                     <PaginationControls currentPage={currentPage} totalPages={totalPages} onPageChange={goToPage} canGoNext={canGoNext} canGoPrevious={canGoPrevious} startIndex={startIndex} endIndex={endIndex} totalItems={totalItems} />
                   </div>
-                 </>}
+                </>
+              )}
             </TabsContent>
 
             <TabsContent value="funnel" className="mt-0">
-              {loading ? <div className="text-center py-12">
-                  <p className="text-[#FFFDF6]">Carregando vagas...</p>
-                </div> : <div className="pt-6"><PipelineBoard stages={JOB_STAGES.filter(s => s.slug !== "cancelada")} jobs={filteredVagas} progresso={(statusSlug: string) => calculateProgress(statusSlug)} onJobMove={handleMoveJob} onJobClick={id => navigate(`/vagas/${id}`)} onJobEdit={id => navigate(`/vagas/${id}/editar`)} onJobMoveStage={id => navigate(`/vagas/${id}/editar`)} onJobDuplicate={() => {}} onJobClose={() => {}} /></div>}
+              {loading ? (
+                <div className="pt-6">
+                  <CardSkeletonGrid count={6} />
+                </div>
+              ) : (
+                <div className="pt-6">
+                  <PipelineBoard stages={JOB_STAGES.filter(s => s.slug !== "cancelada")} jobs={filteredVagas} progresso={(statusSlug: string) => calculateProgress(statusSlug)} onJobMove={handleMoveJob} onJobClick={id => navigate(`/vagas/${id}`)} onJobEdit={id => navigate(`/vagas/${id}/editar`)} onJobMoveStage={id => navigate(`/vagas/${id}/editar`)} onJobDuplicate={() => {}} onJobClose={() => {}} />
+                </div>
+              )}
             </TabsContent>
           </Tabs>
         </div>
