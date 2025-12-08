@@ -1,10 +1,11 @@
 import { AppSidebar } from "./AppSidebar";
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { Outlet, Navigate, useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export function Layout() {
   const [user, setUser] = useState<User | null>(null);
@@ -13,6 +14,7 @@ export function Layout() {
   const { roles, loading: rolesLoading } = useUserRole();
   const navigate = useNavigate();
   const location = useLocation();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -62,10 +64,17 @@ export function Layout() {
   }
 
   return (
-    <SidebarProvider defaultOpen={true}>
+    <SidebarProvider defaultOpen={!isMobile}>
       <div className="min-h-screen flex w-full">
         <AppSidebar />
         <SidebarInset className="flex-1">
+          {/* Mobile header with hamburger menu */}
+          {isMobile && (
+            <header className="sticky top-0 z-40 flex h-14 items-center gap-4 border-b bg-background/95 backdrop-blur px-4 pt-safe">
+              <SidebarTrigger className="touch-target" />
+              <span className="font-semibold text-foreground">rhello flow</span>
+            </header>
+          )}
           <main className="min-h-screen bg-background">
             <Outlet />
           </main>

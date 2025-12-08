@@ -208,19 +208,19 @@ export default function Dashboard() {
   return <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="px-6 md:px-8 py-6 max-w-[1400px] mx-auto">
-          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
+        <div className="px-4 sm:px-6 md:px-8 py-4 sm:py-6 max-w-[1400px] mx-auto">
+          <div className="flex flex-col gap-4 mb-4 sm:mb-6">
             <div>
-              <h1 className="text-[32px] font-bold text-foreground mb-1">Dashboard</h1>
-              <p className="text-[18px] text-muted-foreground">
+              <h1 className="text-2xl sm:text-[32px] font-bold text-foreground mb-1">Dashboard</h1>
+              <p className="text-sm sm:text-[18px] text-muted-foreground">
                 {userName && `Olá, ${userName}! `}Visão geral do sistema de recrutamento
               </p>
             </div>
             
             {/* Filtros - UI apenas por enquanto */}
-            <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 overflow-x-auto pb-1">
               <Select value={periodFilter} disabled>
-                <SelectTrigger className="w-[180px]">
+                <SelectTrigger className="w-full sm:w-[180px] min-w-0">
                   <SelectValue placeholder="Período" />
                 </SelectTrigger>
                 <SelectContent>
@@ -229,7 +229,7 @@ export default function Dashboard() {
               </Select>
               
               <Select value={recrutadorFilter} disabled>
-                <SelectTrigger className="w-[180px]">
+                <SelectTrigger className="w-full sm:w-[180px] min-w-0">
                   <SelectValue placeholder="Recrutador" />
                 </SelectTrigger>
                 <SelectContent>
@@ -238,7 +238,7 @@ export default function Dashboard() {
               </Select>
               
               <Select value={csFilter} disabled>
-                <SelectTrigger className="w-[180px]">
+                <SelectTrigger className="w-full sm:w-[180px] min-w-0">
                   <SelectValue placeholder="CS" />
                 </SelectTrigger>
                 <SelectContent>
@@ -250,10 +250,10 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="px-6 md:px-8 py-8 max-w-[1400px] mx-auto">
+      <div className="px-4 sm:px-6 md:px-8 py-4 sm:py-8 max-w-[1400px] mx-auto">
         {/* Error banner */}
         {error && (
-          <div className="mb-6">
+          <div className="mb-4 sm:mb-6">
             <ErrorState 
               code="SERVER"
               message="Não foi possível carregar os indicadores."
@@ -264,20 +264,19 @@ export default function Dashboard() {
         )}
 
         {/* Ações Rápidas - Movidas para cima */}
-        <div className="mb-6">
-          <h2 className="text-base font-semibold text-foreground mb-3">Ações rápidas</h2>
-          <div className="flex flex-wrap gap-3">
-            
-            
-            <Button onClick={copyPublicFormLink} className="font-bold transition-all duration-150 rounded-xl h-11 px-6">
-              <Share2 className="mr-2 h-5 w-5" />
-              Formulário de vaga
+        <div className="mb-4 sm:mb-6">
+          <h2 className="text-sm sm:text-base font-semibold text-foreground mb-2 sm:mb-3">Ações rápidas</h2>
+          <div className="flex flex-wrap gap-2 sm:gap-3">
+            <Button onClick={copyPublicFormLink} className="font-bold transition-all duration-150 rounded-xl h-11 px-4 sm:px-6 text-sm sm:text-base">
+              <Share2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+              <span className="hidden sm:inline">Formulário de vaga</span>
+              <span className="sm:hidden">Nova vaga</span>
             </Button>
           </div>
         </div>
 
         {/* KPI Cards Grid */}
-        <div className="grid gap-6 mb-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 sm:gap-6 mb-6 sm:mb-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {loading ? <>
               <KPISkeleton />
               <KPISkeleton />

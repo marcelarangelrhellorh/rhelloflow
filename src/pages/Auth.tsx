@@ -95,31 +95,37 @@ export default function Auth() {
       </div>
 
       {/* Centered Content */}
-      <div className="flex flex-col items-center gap-8 relative z-10">
+      <div className="flex flex-col items-center gap-4 sm:gap-8 relative z-10 w-full max-w-md px-4">
         {/* Rhello Flow Logo - Above Card */}
         <div className="flex items-center gap-1">
-          <img alt="Rhello RH" className="h-28 w-auto" src="/lovable-uploads/0e3e8693-dfae-4588-8a04-9a33b7dd1eea.png" />
-          <span className="text-8xl font-black leading-none font-azo text-foreground">
+          <img 
+            alt="Rhello RH" 
+            className="h-16 sm:h-20 md:h-28 w-auto" 
+            src="/lovable-uploads/0e3e8693-dfae-4588-8a04-9a33b7dd1eea.png"
+            width={112}
+            height={112}
+          />
+          <span className="text-4xl sm:text-6xl md:text-8xl font-black leading-none font-azo text-foreground">
             flow
           </span>
         </div>
 
         {/* Login Card */}
-        <Card className="w-full max-w-md border-0 shadow-2xl animate-fade-in">
-          <CardHeader className="space-y-6 text-center pb-8">
+        <Card className="w-full border-0 shadow-2xl animate-fade-in">
+          <CardHeader className="space-y-4 sm:space-y-6 text-center pb-4 sm:pb-8 px-4 sm:px-6">
             <div className="space-y-2">
-              <CardTitle className="text-3xl font-bold" style={{
+              <CardTitle className="text-2xl sm:text-3xl font-bold" style={{
               color: 'hsl(var(--foreground))'
             }}>
                 Bem-vindo
               </CardTitle>
-              <CardDescription className="text-base font-medium">
+              <CardDescription className="text-sm sm:text-base font-medium">
                 Entre com suas credenciais para acessar o sistema
               </CardDescription>
             </div>
           </CardHeader>
 
-        <CardContent className="pb-8">
+        <CardContent className="pb-6 sm:pb-8 px-4 sm:px-6">
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
               <Label htmlFor="email" className="text-sm font-medium">
