@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,9 @@ import { ImportEmpresasModal } from "@/components/Empresas/ImportEmpresasModal";
 import { ClientPipelineBoard } from "@/components/Empresas/ClientPipelineBoard";
 import { toast } from "sonner";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { usePagination } from "@/hooks/usePagination";
+import { PaginationControls } from "@/components/ui/pagination-controls";
+import { CardSkeletonGrid } from "@/components/skeletons/CardSkeleton";
 type Empresa = {
   id: string;
   nome: string;
@@ -57,23 +60,39 @@ export default function GerenciarEmpresas() {
       return data as Empresa[];
     }
   });
-  const handleEdit = (empresa: Empresa) => {
+  // Paginação
+  const {
+    currentPage,
+    totalPages,
+    paginatedData,
+    goToPage,
+    canGoNext,
+    canGoPrevious,
+    startIndex,
+    endIndex
+  } = usePagination(empresas || [], 12);
+
+  const handleEdit = useCallback((empresa: Empresa) => {
     setSelectedEmpresa(empresa);
     setFormModalOpen(true);
-  };
-  const handleViewDetails = (empresa: Empresa) => {
+  }, []);
+
+  const handleViewDetails = useCallback((empresa: Empresa) => {
     setSelectedEmpresa(empresa);
     setDetailsDrawerOpen(true);
-  };
-  const handleCloseModal = () => {
+  }, []);
+
+  const handleCloseModal = useCallback(() => {
     setFormModalOpen(false);
     setSelectedEmpresa(null);
-  };
-  const handleSuccess = () => {
+  }, []);
+
+  const handleSuccess = useCallback(() => {
     refetch();
     toast.success("Empresa salva com sucesso!");
-  };
-  const getStatusColor = (status: string | null) => {
+  }, [refetch]);
+
+  const getStatusColor = useCallback((status: string | null) => {
     switch (status) {
       case "ativo":
         return "bg-green-100 text-green-800 border-green-200";
@@ -84,8 +103,9 @@ export default function GerenciarEmpresas() {
       default:
         return "bg-gray-100 text-gray-800 border-gray-200";
     }
-  };
-  const handleClientMove = async (empresaId: string, fromSlug: string, toSlug: string) => {
+  }, []);
+
+  const handleClientMove = useCallback(async (empresaId: string, fromSlug: string, toSlug: string) => {
     try {
       const {
         error
@@ -98,7 +118,7 @@ export default function GerenciarEmpresas() {
     } catch (error) {
       toast.error("Erro ao mover cliente");
     }
-  };
+  }, [refetch]);
   return <div className="min-h-screen bg-[#FFFBF0] p-4 sm:p-6 lg:p-8">
       <div className="w-full space-y-6">
         {/* Header */}
@@ -163,12 +183,16 @@ export default function GerenciarEmpresas() {
         </div>
 
         {/* Content */}
-        {isLoading ? <div className="flex justify-center items-center h-64">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-          </div> : empresas && empresas.length > 0 ? viewMode === "funnel" ? <div className="overflow-x-auto">
-              <ClientPipelineBoard empresas={empresas} onClientClick={handleViewDetails} onClientMove={handleClientMove} />
-            </div> : viewMode === "cards" ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 bg-[#36404a]/[0.11]">
-              {empresas.map(empresa => <Card key={empresa.id} className="p-4 transition-shadow cursor-pointer border-gray-300 shadow-xl">
+        {isLoading ? (
+          <CardSkeletonGrid count={6} />
+        ) : empresas && empresas.length > 0 ? viewMode === "funnel" ? (
+          <div className="overflow-x-auto">
+            <ClientPipelineBoard empresas={empresas} onClientClick={handleViewDetails} onClientMove={handleClientMove} />
+          </div>
+        ) : viewMode === "cards" ? (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 bg-[#36404a]/[0.11]">
+              {paginatedData.map(empresa => <Card key={empresa.id} className="p-4 transition-shadow cursor-pointer border-gray-300 shadow-xl">
                   <div className="space-y-3">
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
@@ -209,8 +233,21 @@ export default function GerenciarEmpresas() {
                     </div>
                   </div>
                 </Card>)}
-            </div> : <Card className="border-gray-300">
-              <Table>
+            </div>
+            <PaginationControls
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={goToPage}
+              canGoPrevious={canGoPrevious}
+              canGoNext={canGoNext}
+              startIndex={startIndex}
+              endIndex={endIndex}
+              totalItems={empresas?.length || 0}
+            />
+          </>
+        ) : (
+          <Card className="border-gray-300">
+            <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Cliente</TableHead>
@@ -251,12 +288,15 @@ export default function GerenciarEmpresas() {
                     </TableRow>)}
                 </TableBody>
               </Table>
-            </Card> : <Card className="p-8 text-center">
+            </Card>
+        ) : (
+          <Card className="p-8 text-center">
             <Building2 className="h-12 w-12 text-[#36404A] mx-auto mb-4" />
             <p className="text-[#36404A]">
               Nenhum cliente encontrado. Cadastre o primeiro cliente!
             </p>
-          </Card>}
+          </Card>
+        )}
       </div>
 
       <EmpresaFormModal open={formModalOpen} onClose={handleCloseModal} empresa={selectedEmpresa} onSuccess={handleSuccess} />
