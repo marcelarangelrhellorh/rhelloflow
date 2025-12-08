@@ -140,29 +140,55 @@ export default function Dashboard() {
 
   const loadDashboardOverview = async () => {
     try {
+      // Usar função RPC segura que acessa materialized view otimizada
       const { data, error: queryError } = await supabase
-        .from('dashboard_overview')
-        .select('*')
+        .rpc('get_dashboard_overview_secure')
         .single();
       
-      if (queryError) throw queryError;
+      if (queryError) {
+        // Fallback para view normal se RPC falhar
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from('dashboard_overview')
+          .select('*')
+          .single();
+        
+        if (fallbackError) throw fallbackError;
+        
+        const { count: canceladasCount } = await supabase
+          .from('vagas')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'Cancelada')
+          .is('deleted_at', null);
 
-      const { count: canceladasCount } = await supabase
-        .from('vagas')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'Cancelada')
-        .is('deleted_at', null);
+        setStats({
+          vagasAbertas: fallbackData.vagas_abertas ?? 0,
+          candidatosAtivos: fallbackData.candidatos_ativos ?? 0,
+          vagasAtencao: fallbackData.vagas_atencao ?? 0,
+          idsVagasAtencao: fallbackData.ids_vagas_atencao ?? [],
+          mediaFechamento: fallbackData.media_dias_fechamento ?? 0,
+          taxaAprovacao: fallbackData.taxa_aprovacao ?? 0,
+          feedbacksPendentes: fallbackData.feedbacks_pendentes ?? 0,
+          vagasCanceladas: canceladasCount ?? 0
+        });
+      } else {
+        // Usar dados da materialized view otimizada
+        const { count: canceladasCount } = await supabase
+          .from('vagas')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'Cancelada')
+          .is('deleted_at', null);
 
-      setStats({
-        vagasAbertas: data.vagas_abertas ?? 0,
-        candidatosAtivos: data.candidatos_ativos ?? 0,
-        vagasAtencao: data.vagas_atencao ?? 0,
-        idsVagasAtencao: data.ids_vagas_atencao ?? [],
-        mediaFechamento: data.media_dias_fechamento ?? 0,
-        taxaAprovacao: data.taxa_aprovacao ?? 0,
-        feedbacksPendentes: data.feedbacks_pendentes ?? 0,
-        vagasCanceladas: canceladasCount ?? 0
-      });
+        setStats({
+          vagasAbertas: data?.vagas_abertas ?? 0,
+          candidatosAtivos: data?.candidatos_ativos ?? 0,
+          vagasAtencao: data?.vagas_atencao ?? 0,
+          idsVagasAtencao: data?.ids_vagas_atencao ?? [],
+          mediaFechamento: data?.media_dias_fechamento ?? 0,
+          taxaAprovacao: data?.taxa_aprovacao ?? 0,
+          feedbacksPendentes: data?.feedbacks_pendentes ?? 0,
+          vagasCanceladas: canceladasCount ?? 0
+        });
+      }
       setError(false);
     } catch (error) {
       const { code } = handleApiError(error, { 
