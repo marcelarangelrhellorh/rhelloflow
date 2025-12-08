@@ -1,3 +1,4 @@
+import React from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Card } from "@/components/ui/card";
@@ -89,7 +90,7 @@ const formatSalaryRange = (min?: number | null, max?: number | null, modalidade?
   return salaryText;
 };
 
-export function JobCard({
+export const JobCard = React.memo(function JobCard({
   vaga,
   diasEmAberto,
   diasEtapaAtual,
@@ -239,4 +240,4 @@ export function JobCard({
       </Card>
     </div>
   );
-}
+});

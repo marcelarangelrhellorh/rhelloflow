@@ -1,3 +1,4 @@
+import React from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Calendar, CheckCircle2, Clock, User, Briefcase, Building2, UserCircle } from "lucide-react";
@@ -34,7 +35,7 @@ const statusLabels = {
   in_progress: "Em Andamento",
   done: "Concluída"
 };
-export default function TaskCard({
+const TaskCard = React.memo(function TaskCard({
   task,
   onEdit,
   onDelete,
@@ -114,4 +115,6 @@ export default function TaskCard({
         </div>
       </div>
     </Card>;
-}
+});
+
+export default TaskCard;

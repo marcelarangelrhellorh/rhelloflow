@@ -1,9 +1,11 @@
+import React from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { User, Mail, MapPin, Briefcase, Eye, Edit, Trash2, Link as LinkIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+
 interface Candidato {
   id: string;
   nome_completo: string;
@@ -49,7 +51,7 @@ const statusIcons: Record<string, string> = {
   "Aprovado Solicitante": "🟡",
   "Contratado": "✅"
 };
-export function CandidateCard({
+export const CandidateCard = React.memo(function CandidateCard({
   candidato,
   onView,
   onEdit,
@@ -188,4 +190,4 @@ export function CandidateCard({
         </TooltipProvider>
       </CardContent>
     </Card>;
-}
+});

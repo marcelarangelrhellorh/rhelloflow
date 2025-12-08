@@ -1,3 +1,4 @@
+import React, { useState, useEffect, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,7 +12,6 @@ import { getBusinessDaysFromNow } from "@/lib/dateUtils";
 import { formatSalaryRange } from "@/lib/salaryUtils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { useState, useEffect } from "react";
 import { handleDelete as performDeletion } from "@/lib/deletionUtils";
 import { useUserRole } from "@/hooks/useUserRole";
 interface VagaCardProps {
@@ -83,7 +83,7 @@ const getStatusBadgeColor = (status: string): {
     text: "#00141D"
   };
 };
-export function VagaCard({
+export const VagaCard = React.memo(function VagaCard({
   vaga,
   draggable = false,
   onDragStart,
@@ -425,4 +425,4 @@ export function VagaCard({
         </AlertDialogContent>
       </AlertDialog>
     </>;
-}
+});
