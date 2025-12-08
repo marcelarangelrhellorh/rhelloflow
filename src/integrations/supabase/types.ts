@@ -3468,10 +3468,22 @@ export type Database = {
           area: Database["public"]["Enums"]["area_candidato"] | null
           cidade: string | null
           criado_em: string | null
+          curriculo_url: string | null
+          deleted_at: string | null
+          disponibilidade_mudanca: string | null
+          disponibilidade_status: string | null
           estado: string | null
+          hired_at: string | null
           id: string | null
+          is_visible_for_client: boolean | null
+          linkedin: string | null
           nivel: Database["public"]["Enums"]["nivel_candidato"] | null
           nome_completo: string | null
+          origem: string | null
+          parecer_final: string | null
+          pontos_desenvolver: string | null
+          pontos_fortes: string | null
+          portfolio_url: string | null
           status: Database["public"]["Enums"]["status_candidato"] | null
           vaga_relacionada_id: string | null
         }
@@ -3479,10 +3491,22 @@ export type Database = {
           area?: Database["public"]["Enums"]["area_candidato"] | null
           cidade?: string | null
           criado_em?: string | null
+          curriculo_url?: string | null
+          deleted_at?: string | null
+          disponibilidade_mudanca?: string | null
+          disponibilidade_status?: string | null
           estado?: string | null
+          hired_at?: string | null
           id?: string | null
+          is_visible_for_client?: boolean | null
+          linkedin?: string | null
           nivel?: Database["public"]["Enums"]["nivel_candidato"] | null
           nome_completo?: string | null
+          origem?: string | null
+          parecer_final?: string | null
+          pontos_desenvolver?: string | null
+          pontos_fortes?: string | null
+          portfolio_url?: string | null
           status?: Database["public"]["Enums"]["status_candidato"] | null
           vaga_relacionada_id?: string | null
         }
@@ -3490,10 +3514,22 @@ export type Database = {
           area?: Database["public"]["Enums"]["area_candidato"] | null
           cidade?: string | null
           criado_em?: string | null
+          curriculo_url?: string | null
+          deleted_at?: string | null
+          disponibilidade_mudanca?: string | null
+          disponibilidade_status?: string | null
           estado?: string | null
+          hired_at?: string | null
           id?: string | null
+          is_visible_for_client?: boolean | null
+          linkedin?: string | null
           nivel?: Database["public"]["Enums"]["nivel_candidato"] | null
           nome_completo?: string | null
+          origem?: string | null
+          parecer_final?: string | null
+          pontos_desenvolver?: string | null
+          pontos_fortes?: string | null
+          portfolio_url?: string | null
           status?: Database["public"]["Enums"]["status_candidato"] | null
           vaga_relacionada_id?: string | null
         }
@@ -4295,6 +4331,10 @@ export type Database = {
       can_manage_user_roles: { Args: never; Returns: boolean }
       can_submit_feedback: { Args: { p_request_id: string }; Returns: boolean }
       can_view_analytics: { Args: never; Returns: boolean }
+      can_view_whatsapp_send: {
+        Args: { p_vacancy_id: string }
+        Returns: boolean
+      }
       cleanup_expired_pdf_imports: { Args: never; Returns: undefined }
       cleanup_old_submission_logs: { Args: never; Returns: undefined }
       compute_audit_event_hash: {
