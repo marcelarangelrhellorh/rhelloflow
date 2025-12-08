@@ -81,3 +81,5 @@ verify_jwt = true
 [functions.bulk-sync-tasks]
 verify_jwt = true
 
+[functions.jestor-webhook]
+verify_jwt = false
