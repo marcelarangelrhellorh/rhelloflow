@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { handleApiError } from "@/lib/errorHandler";
 
 export type TaskStatus = 'to_do' | 'in_progress' | 'done';
 export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
@@ -125,13 +126,13 @@ export function useCreateTask() {
 
       return data;
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       queryClient.invalidateQueries({ queryKey: ["vaga-tasks"] });
       toast.success("Tarefa criada com sucesso");
     },
     onError: (error) => {
-      toast.error("Erro ao criar tarefa: " + error.message);
+      handleApiError(error, { context: "ao criar tarefa" });
     },
   });
 }
@@ -160,7 +161,7 @@ export function useUpdateTask() {
       toast.success("Tarefa atualizada com sucesso");
     },
     onError: (error) => {
-      toast.error("Erro ao atualizar tarefa: " + error.message);
+      handleApiError(error, { context: "ao atualizar tarefa" });
     },
   });
 }
@@ -179,7 +180,7 @@ export function useDeleteTask() {
       toast.success("Tarefa excluída com sucesso");
     },
     onError: (error) => {
-      toast.error("Erro ao excluir tarefa: " + error.message);
+      handleApiError(error, { context: "ao excluir tarefa" });
     },
   });
 }
