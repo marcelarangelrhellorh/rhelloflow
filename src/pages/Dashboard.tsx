@@ -3,11 +3,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Briefcase, Users, AlertTriangle, MessageSquare, Clock, Target, UserPlus, XCircle, Share2 } from "lucide-react";
+import { Briefcase, Users, AlertTriangle, MessageSquare, Clock, Target, XCircle, Share2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { RejectedCandidatesCard } from "@/components/Dashboard/RejectedCandidatesCard";
 import { SharedJobsCard } from "@/components/Dashboard/SharedJobsCard";
+import { handleApiError, redirectToLogin } from "@/lib/errorHandler";
+import { ErrorState } from "@/components/ui/error-state";
 
 // Utility functions
 const formatInt = (n: number): string => Math.round(n).toString();
@@ -116,38 +118,41 @@ export default function Dashboard() {
   }, []);
   const loadUserProfile = async () => {
     try {
-      const {
-        data: {
-          user
-        }
-      } = await supabase.auth.getUser();
+      const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        const {
-          data: profile
-        } = await supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle();
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("full_name")
+          .eq("id", user.id)
+          .maybeSingle();
         if (profile) {
           setUserName(profile.full_name);
         }
       }
     } catch (error) {
-      console.error("Erro ao carregar perfil:", error);
+      handleApiError(error, { 
+        context: "ao carregar perfil", 
+        showToast: false,
+        onAuthError: redirectToLogin 
+      });
     }
   };
+
   const loadDashboardOverview = async () => {
     try {
-      const {
-        data,
-        error: queryError
-      } = await supabase.from('dashboard_overview').select('*').single();
+      const { data, error: queryError } = await supabase
+        .from('dashboard_overview')
+        .select('*')
+        .single();
+      
       if (queryError) throw queryError;
 
-      // Buscar vagas canceladas separadamente
-      const {
-        count: canceladasCount
-      } = await supabase.from('vagas').select('*', {
-        count: 'exact',
-        head: true
-      }).eq('status', 'Cancelada').is('deleted_at', null);
+      const { count: canceladasCount } = await supabase
+        .from('vagas')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'Cancelada')
+        .is('deleted_at', null);
+
       setStats({
         vagasAbertas: data.vagas_abertas ?? 0,
         candidatosAtivos: data.candidatos_ativos ?? 0,
@@ -160,18 +165,23 @@ export default function Dashboard() {
       });
       setError(false);
     } catch (error) {
-      console.error("Erro ao carregar dashboard:", error);
+      const { code } = handleApiError(error, { 
+        context: "ao carregar dashboard",
+        showToast: false,
+        onAuthError: redirectToLogin
+      });
       setError(true);
-      throw error;
+      if (code !== 'AUTH') throw error;
     }
   };
+
   const loadData = async () => {
     setLoading(true);
     try {
       await loadUserProfile();
       await loadDashboardOverview();
     } catch (error) {
-      console.error("Erro ao carregar dados:", error);
+      // Erro já tratado nas funções individuais
     } finally {
       setLoading(false);
     }
@@ -242,14 +252,16 @@ export default function Dashboard() {
 
       <div className="px-6 md:px-8 py-8 max-w-[1400px] mx-auto">
         {/* Error banner */}
-        {error && <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg flex items-center justify-between">
-            <p className="text-sm text-destructive-foreground">
-              Não foi possível carregar os indicadores. Tente novamente.
-            </p>
-            <Button onClick={handleRetry} variant="outline" size="sm">
-              Recarregar
-            </Button>
-          </div>}
+        {error && (
+          <div className="mb-6">
+            <ErrorState 
+              code="SERVER"
+              message="Não foi possível carregar os indicadores."
+              onRetry={handleRetry}
+              compact
+            />
+          </div>
+        )}
 
         {/* Ações Rápidas - Movidas para cima */}
         <div className="mb-6">

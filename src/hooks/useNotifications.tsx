@@ -1,5 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { handleApiError } from "@/lib/errorHandler";
+import { logger } from "@/lib/logger";
 
 interface CreateNotificationParams {
   userId: string;
@@ -52,18 +54,13 @@ export const useNotifications = () => {
           job_id: jobId,
         },
       }).catch((emailError) => {
-        console.warn('Failed to send notification email:', emailError);
+        logger.warn('Failed to send notification email:', emailError);
         // Não mostra erro ao usuário, pois a notificação foi criada com sucesso
       });
 
       return data;
     } catch (error) {
-      console.error('Error creating notification:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível criar a notificação",
-        variant: "destructive",
-      });
+      handleApiError(error, { context: 'ao criar notificação' });
       return null;
     }
   };
@@ -100,18 +97,13 @@ export const useNotifications = () => {
             job_id: jobId,
           },
         }).catch((emailError) => {
-          console.warn(`Failed to send notification email to user ${userId}:`, emailError);
+          logger.warn(`Failed to send notification email to user ${userId}:`, emailError);
         });
       });
 
       return data || 0;
     } catch (error) {
-      console.error('Error creating notifications:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível criar as notificações",
-        variant: "destructive",
-      });
+      handleApiError(error, { context: 'ao criar notificações' });
       return 0;
     }
   };
@@ -150,7 +142,7 @@ export const useNotifications = () => {
         jobId,
       });
     } catch (error) {
-      console.error('Error notifying job team:', error);
+      logger.error('Error notifying job team:', error);
       return 0;
     }
   };

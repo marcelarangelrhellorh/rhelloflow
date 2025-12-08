@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { handleApiError, getApiErrorCode } from '@/lib/errorHandler';
+import { logger } from '@/lib/logger';
 
 interface GoogleCalendarEvent {
   id: string;
@@ -73,7 +75,7 @@ export function useGoogleCalendar(): UseGoogleCalendarReturn {
       });
 
       if (error) {
-        console.error('Error fetching calendar status:', error);
+        logger.error('Error fetching calendar status:', error);
         setIsConnected(false);
         setLastSync(null);
       } else {
@@ -81,7 +83,7 @@ export function useGoogleCalendar(): UseGoogleCalendarReturn {
         setLastSync(data.lastSync || null);
       }
     } catch (error) {
-      console.error('Error refreshing status:', error);
+      logger.error('Error refreshing status:', error);
       setIsConnected(false);
       setLastSync(null);
     } finally {
@@ -103,8 +105,7 @@ export function useGoogleCalendar(): UseGoogleCalendarReturn {
       });
 
       if (error) {
-        console.error('Error getting auth URL:', error);
-        toast.error('Erro ao iniciar conexão com Google Calendar');
+        handleApiError(error, { context: 'ao iniciar conexão com Google Calendar' });
         return;
       }
 
@@ -117,8 +118,7 @@ export function useGoogleCalendar(): UseGoogleCalendarReturn {
         window.location.href = data.authUrl;
       }
     } catch (error) {
-      console.error('Error connecting calendar:', error);
-      toast.error('Erro ao conectar Google Calendar');
+      handleApiError(error, { context: 'ao conectar Google Calendar' });
     } finally {
       setIsLoading(false);
     }
@@ -133,8 +133,7 @@ export function useGoogleCalendar(): UseGoogleCalendarReturn {
       });
 
       if (error) {
-        console.error('Error disconnecting calendar:', error);
-        toast.error('Erro ao desconectar Google Calendar');
+        handleApiError(error, { context: 'ao desconectar Google Calendar' });
         return;
       }
 
@@ -142,8 +141,7 @@ export function useGoogleCalendar(): UseGoogleCalendarReturn {
       setLastSync(null);
       toast.success('Google Calendar desconectado com sucesso');
     } catch (error) {
-      console.error('Error disconnecting calendar:', error);
-      toast.error('Erro ao desconectar Google Calendar');
+      handleApiError(error, { context: 'ao desconectar Google Calendar' });
     } finally {
       setIsLoading(false);
     }
@@ -156,8 +154,7 @@ export function useGoogleCalendar(): UseGoogleCalendarReturn {
       });
 
       if (error) {
-        console.error('Error fetching events:', error);
-        toast.error('Erro ao buscar eventos do calendário');
+        handleApiError(error, { context: 'ao buscar eventos do calendário' });
         return [];
       }
 
@@ -169,8 +166,7 @@ export function useGoogleCalendar(): UseGoogleCalendarReturn {
 
       return data.items || [];
     } catch (error) {
-      console.error('Error fetching events:', error);
-      toast.error('Erro ao buscar eventos do calendário');
+      handleApiError(error, { context: 'ao buscar eventos do calendário' });
       return [];
     }
   }, []);
@@ -182,8 +178,7 @@ export function useGoogleCalendar(): UseGoogleCalendarReturn {
       });
 
       if (error) {
-        console.error('Error creating event:', error);
-        toast.error('Erro ao criar evento no calendário');
+        handleApiError(error, { context: 'ao criar evento no calendário' });
         return null;
       }
 
@@ -197,8 +192,7 @@ export function useGoogleCalendar(): UseGoogleCalendarReturn {
       toast.success('Evento criado no Google Calendar');
       return data;
     } catch (error) {
-      console.error('Error creating event:', error);
-      toast.error('Erro ao criar evento no calendário');
+      handleApiError(error, { context: 'ao criar evento no calendário' });
       return null;
     }
   }, []);

@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
+import { handleApiError, getApiErrorCode } from '@/lib/errorHandler';
 
 export interface ClientJob {
   id: string;
@@ -50,7 +51,10 @@ export function useClientJobs(userId: string | undefined) {
           .single();
 
         if (profileError) {
-          logger.error('useClientJobs: Profile error', profileError);
+          const code = getApiErrorCode(profileError);
+          if (code !== 'NOT_FOUND') {
+            handleApiError(profileError, { context: 'ao carregar perfil do cliente', showToast: false });
+          }
           throw profileError;
         }
         
@@ -85,7 +89,7 @@ export function useClientJobs(userId: string | undefined) {
           .order('criado_em', { ascending: false });
 
         if (error) {
-          logger.error('useClientJobs: Vagas error', error);
+          handleApiError(error, { context: 'ao carregar vagas do cliente', showToast: false });
           throw error;
         }
         
@@ -118,7 +122,10 @@ export function useJobCandidates(vagaId: string | undefined) {
           .eq('vaga_relacionada_id', vagaId)
           .order('criado_em', { ascending: false });
 
-        if (error) throw error;
+        if (error) {
+          handleApiError(error, { context: 'ao carregar candidatos da vaga', showToast: false });
+          throw error;
+        }
         
         return data || [];
       } catch (error) {
