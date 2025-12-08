@@ -19,6 +19,8 @@ import { PaginationControls } from "@/components/ui/pagination-controls";
 import { logger } from "@/lib/logger";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DualScrollContainer } from "@/components/ui/dual-scroll-container";
+import { PageSkeleton } from "@/components/skeletons/PageSkeleton";
+import { CardSkeletonGrid } from "@/components/skeletons/CardSkeleton";
 
 // Importar componentes do Funil
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors, closestCenter } from "@dnd-kit/core";
@@ -319,9 +321,7 @@ export default function Candidatos() {
     endIndex
   } = usePagination(filteredCandidatos, 50);
   if (loading) {
-    return <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-      </div>;
+    return <PageSkeleton variant="cards" />;
   }
   return <div className="min-h-screen bg-background">
       {/* Header - Fixed */}

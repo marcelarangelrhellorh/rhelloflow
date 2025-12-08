@@ -15,6 +15,8 @@ import { MultiSelect, MultiSelectOption } from "@/components/ui/multi-select";
 import { parseCurrency, applyCurrencyMask } from "@/lib/salaryUtils";
 import { useUsers } from "@/hooks/useUsers";
 import { TagPicker } from "@/components/TagPicker";
+import { LoadingButton } from "@/components/ui/loading-button";
+import { handleApiError } from "@/lib/errorHandler";
 
 const DIAS_SEMANA = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
 
@@ -217,8 +219,7 @@ export default function VagaForm() {
       }
       navigate("/vagas");
     } catch (error) {
-      console.error("Erro ao salvar vaga:", error);
-      toast.error("Erro ao salvar vaga");
+      handleApiError(error, { context: "ao salvar vaga" });
     } finally {
       setLoading(false);
     }
@@ -676,10 +677,10 @@ export default function VagaForm() {
           </Card>
 
           <div className="flex gap-4">
-            <Button type="submit" disabled={loading}>
+            <LoadingButton type="submit" loading={loading} loadingText="Salvando...">
               <Save className="mr-2 h-4 w-4" />
-              {loading ? "Salvando..." : "Salvar Vaga"}
-            </Button>
+              Salvar Vaga
+            </LoadingButton>
             <Button type="button" variant="outline" onClick={() => navigate("/vagas")}>
               Cancelar
             </Button>
