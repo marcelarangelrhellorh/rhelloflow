@@ -1,9 +1,12 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
-import { corsHeaders } from '../_shared/cors.ts';
+import { corsHeaders, getRestrictedCorsHeaders } from '../_shared/cors.ts';
 
 Deno.serve(async (req) => {
+  const origin = req.headers.get('origin');
+  const restrictedCors = getRestrictedCorsHeaders(origin);
+
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers: restrictedCors });
   }
 
   try {
@@ -271,7 +274,7 @@ Deno.serve(async (req) => {
         success: true, 
         message: 'User and all related data deleted successfully' 
       }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { headers: { ...restrictedCors, 'Content-Type': 'application/json' } }
     );
 
   } catch (error) {
@@ -281,7 +284,7 @@ Deno.serve(async (req) => {
       JSON.stringify({ error: errorMessage }),
       { 
         status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        headers: { ...restrictedCors, 'Content-Type': 'application/json' }
       }
     );
   }
