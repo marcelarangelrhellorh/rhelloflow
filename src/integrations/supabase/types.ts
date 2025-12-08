@@ -382,10 +382,13 @@ export type Database = {
           estado: string | null
           experiencia_profissional: string | null
           feedback: string | null
+          hired_at: string | null
           historico_experiencia: string | null
           id: string
           idade: number | null
+          idempotency_key: string | null
           idiomas: string | null
+          is_visible_for_client: boolean | null
           linkedin: string | null
           nivel: Database["public"]["Enums"]["nivel_candidato"] | null
           nome_completo: string
@@ -421,10 +424,13 @@ export type Database = {
           estado?: string | null
           experiencia_profissional?: string | null
           feedback?: string | null
+          hired_at?: string | null
           historico_experiencia?: string | null
           id?: string
           idade?: number | null
+          idempotency_key?: string | null
           idiomas?: string | null
+          is_visible_for_client?: boolean | null
           linkedin?: string | null
           nivel?: Database["public"]["Enums"]["nivel_candidato"] | null
           nome_completo: string
@@ -460,10 +466,13 @@ export type Database = {
           estado?: string | null
           experiencia_profissional?: string | null
           feedback?: string | null
+          hired_at?: string | null
           historico_experiencia?: string | null
           id?: string
           idade?: number | null
+          idempotency_key?: string | null
           idiomas?: string | null
+          is_visible_for_client?: boolean | null
           linkedin?: string | null
           nivel?: Database["public"]["Enums"]["nivel_candidato"] | null
           nome_completo?: string
@@ -932,6 +941,7 @@ export type Database = {
           disposicao: string | null
           etapa: string | null
           id: string
+          idempotency_key: string | null
           ip_address: string | null
           origem: string | null
           quick_tags: string[] | null
@@ -956,6 +966,7 @@ export type Database = {
           disposicao?: string | null
           etapa?: string | null
           id?: string
+          idempotency_key?: string | null
           ip_address?: string | null
           origem?: string | null
           quick_tags?: string[] | null
@@ -980,6 +991,7 @@ export type Database = {
           disposicao?: string | null
           etapa?: string | null
           id?: string
+          idempotency_key?: string | null
           ip_address?: string | null
           origem?: string | null
           quick_tags?: string[] | null
@@ -1352,6 +1364,7 @@ export type Database = {
         Row: {
           changed_at: string
           changed_by: string | null
+          correlation_id: string | null
           from_status: string | null
           id: string
           job_id: string
@@ -1360,6 +1373,7 @@ export type Database = {
         Insert: {
           changed_at?: string
           changed_by?: string | null
+          correlation_id?: string | null
           from_status?: string | null
           id?: string
           job_id: string
@@ -1368,6 +1382,7 @@ export type Database = {
         Update: {
           changed_at?: string
           changed_by?: string | null
+          correlation_id?: string | null
           from_status?: string | null
           id?: string
           job_id?: string
@@ -2252,6 +2267,7 @@ export type Database = {
           google_task_list_id: string | null
           google_task_synced: boolean | null
           id: string
+          idempotency_key: string | null
           priority: string | null
           reminder_minutes: number | null
           start_time: string | null
@@ -2282,6 +2298,7 @@ export type Database = {
           google_task_list_id?: string | null
           google_task_synced?: boolean | null
           id?: string
+          idempotency_key?: string | null
           priority?: string | null
           reminder_minutes?: number | null
           start_time?: string | null
@@ -2312,6 +2329,7 @@ export type Database = {
           google_task_list_id?: string | null
           google_task_synced?: boolean | null
           id?: string
+          idempotency_key?: string | null
           priority?: string | null
           reminder_minutes?: number | null
           start_time?: string | null
@@ -2635,6 +2653,8 @@ export type Database = {
           horario_fim: string | null
           horario_inicio: string | null
           id: string
+          idempotency_key: string | null
+          last_status_change_by: string | null
           modelo_trabalho: Database["public"]["Enums"]["modelo_trabalho"] | null
           motivo_confidencial: string | null
           observacoes: string | null
@@ -2684,6 +2704,8 @@ export type Database = {
           horario_fim?: string | null
           horario_inicio?: string | null
           id?: string
+          idempotency_key?: string | null
+          last_status_change_by?: string | null
           modelo_trabalho?:
             | Database["public"]["Enums"]["modelo_trabalho"]
             | null
@@ -2735,6 +2757,8 @@ export type Database = {
           horario_fim?: string | null
           horario_inicio?: string | null
           id?: string
+          idempotency_key?: string | null
+          last_status_change_by?: string | null
           modelo_trabalho?:
             | Database["public"]["Enums"]["modelo_trabalho"]
             | null
@@ -2790,6 +2814,13 @@ export type Database = {
             columns: ["empresa_id"]
             isOneToOne: false
             referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vagas_last_status_change_by_fkey"
+            columns: ["last_status_change_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
