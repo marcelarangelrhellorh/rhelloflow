@@ -28,14 +28,23 @@ export function ConnectionIndicator() {
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <div className="flex items-center justify-center">
+          <div 
+            className="flex items-center justify-center"
+            role="status"
+            aria-label={isConnected ? "Conectado ao banco de dados" : "Sem conexão com o banco de dados"}
+            aria-live="polite"
+          >
             <div
               className={`h-2 w-2 rounded-full ${
                 isConnected
                   ? "bg-success animate-pulse"
                   : "bg-destructive"
               }`}
+              aria-hidden="true"
             />
+            <span className="sr-only">
+              {isConnected ? "Conectado" : "Desconectado"}
+            </span>
           </div>
         </TooltipTrigger>
         <TooltipContent>

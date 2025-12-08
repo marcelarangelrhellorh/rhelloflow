@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 export function CardSkeleton() {
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden" aria-busy="true" aria-label="Carregando card">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="space-y-2 flex-1">
@@ -39,7 +39,13 @@ export function CardSkeleton() {
 
 export function CardSkeletonGrid({ count = 6 }: { count?: number }) {
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <div 
+      className="grid gap-4 md:grid-cols-2 lg:grid-cols-3" 
+      role="status" 
+      aria-live="polite" 
+      aria-label="Carregando conteúdo"
+    >
+      <span className="sr-only">Carregando {count} itens...</span>
       {Array.from({ length: count }).map((_, i) => (
         <CardSkeleton key={i} />
       ))}

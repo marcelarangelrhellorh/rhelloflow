@@ -79,13 +79,13 @@ export function AppSidebar() {
   const filteredMenuItems = menuItems.filter(item => item.roles.some(role => roles.includes(role as typeof roles[number])));
   const isInternalUser = roles.some(r => ["admin", "recrutador", "cs"].includes(r));
   if (rolesLoading) return null;
-  return <Sidebar collapsible="icon" className="border-r border-border bg-sidebar">
+  return <Sidebar collapsible="icon" className="border-r border-border bg-sidebar" aria-label="Menu de navegação principal">
       <SidebarHeader className={`${collapsed ? 'p-2' : 'p-4'} space-y-4`}>
         <div className="flex items-center justify-between">
           {collapsed ? (
             <img 
               src={symbolLight} 
-              alt="rhello" 
+              alt="rhello flow - Sistema de Recrutamento" 
               className="h-8 w-8" 
               width={32} 
               height={32}
@@ -93,7 +93,7 @@ export function AppSidebar() {
             />
           ) : (
             <img 
-              alt="rhello" 
+              alt="rhello flow - Sistema de Recrutamento" 
               className="h-8" 
               src="/lovable-uploads/6bff9b8e-8a55-40d2-a107-0543e7b70ad7.png" 
               width={120} 
@@ -110,8 +110,15 @@ export function AppSidebar() {
             <UserMenu />
           </div>
           
-          <Button variant="ghost" size="icon" onClick={toggleSidebar} className="h-8 w-8">
-            {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={toggleSidebar} 
+            className="h-8 w-8"
+            aria-label={collapsed ? "Expandir menu" : "Recolher menu"}
+            aria-expanded={!collapsed}
+          >
+            {collapsed ? <ChevronRight className="h-4 w-4" aria-hidden="true" /> : <ChevronLeft className="h-4 w-4" aria-hidden="true" />}
           </Button>
         </div>
       </SidebarHeader>
@@ -140,14 +147,18 @@ export function AppSidebar() {
               {isInternalUser && <SidebarMenuItem>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <SidebarMenuButton className={collapsed ? "justify-center" : ""}>
-                        <Wrench className="h-7 w-7" />
+                      <SidebarMenuButton 
+                        className={collapsed ? "justify-center" : ""}
+                        aria-label="Ferramentas"
+                        aria-haspopup="menu"
+                      >
+                        <Wrench className="h-7 w-7" aria-hidden="true" />
                         {!collapsed && <span className="text-base">Ferramentas</span>}
                       </SidebarMenuButton>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent side="right" align="start" className="w-48">
-                      {toolsItems.map(tool => <DropdownMenuItem key={tool.title} onClick={() => navigate(tool.url)} className="cursor-pointer">
-                          <tool.icon className="mr-2 h-4 w-4" />
+                    <DropdownMenuContent side="right" align="start" className="w-48" role="menu">
+                      {toolsItems.map(tool => <DropdownMenuItem key={tool.title} onClick={() => navigate(tool.url)} className="cursor-pointer" role="menuitem">
+                          <tool.icon className="mr-2 h-4 w-4" aria-hidden="true" />
                           {tool.title}
                         </DropdownMenuItem>)}
                     </DropdownMenuContent>

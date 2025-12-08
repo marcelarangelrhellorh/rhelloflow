@@ -89,7 +89,7 @@ export default function Auth() {
     backgroundColor: 'rgba(255, 205, 0, 0.05)'
   }}>
       {/* Background decorative elements */}
-      <div className="absolute inset-0 overflow-hidden">
+      <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#ffcd00]/5 rounded-full blur-3xl" />
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-[#ffcd00]/5 rounded-full blur-3xl" />
       </div>
@@ -99,13 +99,13 @@ export default function Auth() {
         {/* Rhello Flow Logo - Above Card */}
         <div className="flex items-center gap-1">
           <img 
-            alt="Rhello RH" 
+            alt="Rhello RH - Sistema de Recrutamento e Seleção" 
             className="h-16 sm:h-20 md:h-28 w-auto" 
             src="/lovable-uploads/0e3e8693-dfae-4588-8a04-9a33b7dd1eea.png"
             width={112}
             height={112}
           />
-          <span className="text-4xl sm:text-6xl md:text-8xl font-black leading-none font-azo text-foreground">
+          <span className="text-4xl sm:text-6xl md:text-8xl font-black leading-none font-azo text-foreground" aria-hidden="true">
             flow
           </span>
         </div>
@@ -117,7 +117,7 @@ export default function Auth() {
               <CardTitle className="text-2xl sm:text-3xl font-bold" style={{
               color: 'hsl(var(--foreground))'
             }}>
-                Bem-vindo
+                <h1>Bem-vindo</h1>
               </CardTitle>
               <CardDescription className="text-sm sm:text-base font-medium">
                 Entre com suas credenciais para acessar o sistema
@@ -126,13 +126,13 @@ export default function Auth() {
           </CardHeader>
 
         <CardContent className="pb-6 sm:pb-8 px-4 sm:px-6">
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-5" aria-label="Formulário de login">
             <div className="space-y-2">
               <Label htmlFor="email" className="text-sm font-medium">
-                Email
+                Email <span className="text-destructive" aria-hidden="true">*</span>
               </Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" aria-hidden="true" />
                 <Input 
                   id="email" 
                   type="email" 
@@ -143,19 +143,23 @@ export default function Auth() {
                     if (errors.email) setErrors(prev => ({ ...prev, email: undefined }));
                   }} 
                   className={cn("pl-10 h-12 text-base", errors.email && "border-destructive")} 
+                  aria-required="true"
+                  aria-invalid={!!errors.email}
+                  aria-describedby={errors.email ? "email-error" : undefined}
+                  autoComplete="email"
                 />
               </div>
               {errors.email && (
-                <p className="text-sm text-destructive">{errors.email}</p>
+                <p id="email-error" className="text-sm text-destructive" role="alert">{errors.email}</p>
               )}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="password" className="text-sm font-medium">
-                Senha
+                Senha <span className="text-destructive" aria-hidden="true">*</span>
               </Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" aria-hidden="true" />
                 <Input 
                   id="password" 
                   type={showPassword ? "text" : "password"} 
@@ -166,13 +170,23 @@ export default function Auth() {
                     if (errors.password) setErrors(prev => ({ ...prev, password: undefined }));
                   }} 
                   className={cn("pl-10 pr-10 h-12 text-base", errors.password && "border-destructive")} 
+                  aria-required="true"
+                  aria-invalid={!!errors.password}
+                  aria-describedby={errors.password ? "password-error" : undefined}
+                  autoComplete="current-password"
                 />
-                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                <button 
+                  type="button" 
+                  onClick={() => setShowPassword(!showPassword)} 
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                  aria-pressed={showPassword}
+                >
+                  {showPassword ? <EyeOff className="h-5 w-5" aria-hidden="true" /> : <Eye className="h-5 w-5" aria-hidden="true" />}
                 </button>
               </div>
               {errors.password && (
-                <p className="text-sm text-destructive">{errors.password}</p>
+                <p id="password-error" className="text-sm text-destructive" role="alert">{errors.password}</p>
               )}
             </div>
 
@@ -181,6 +195,7 @@ export default function Auth() {
               loading={loading} 
               loadingText="Entrando..."
               className="w-full h-12 text-base font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+              aria-busy={loading}
             >
               Entrar
             </LoadingButton>
