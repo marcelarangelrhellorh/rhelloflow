@@ -89,54 +89,33 @@ export default function Vagas() {
   };
   const loadVagas = async () => {
     try {
-      const query = viewType === "funnel" ? supabase.from("vagas").select(`
-              *,
-              recrutador_user:users!vagas_recrutador_id_fkey(name),
-              cs_user:users!vagas_cs_id_fkey(name)
-            `).neq("status_slug", "cancelada").is("deleted_at", null).order("status_order", {
-        ascending: true
-      }) : supabase.from("vagas").select(`
-              *,
-              recrutador_user:users!vagas_recrutador_id_fkey(name),
-              cs_user:users!vagas_cs_id_fkey(name)
-            `).is("deleted_at", null).order("criado_em", {
-        ascending: false
-      });
-      const {
-        data: vagasData,
-        error: vagasError
-      } = await query;
+      // Usar view otimizada que já inclui contagem de candidatos e dias na etapa
+      // Elimina N+1 queries (de ~100 queries para 1 query)
+      let query = supabase
+        .from("vw_vagas_com_stats")
+        .select("*");
+
+      if (viewType === "funnel") {
+        query = query
+          .neq("status_slug", "cancelada")
+          .is("deleted_at", null)
+          .order("status_order", { ascending: true });
+      } else {
+        query = query
+          .is("deleted_at", null)
+          .order("criado_em", { ascending: false });
+      }
+
+      const { data: vagasData, error: vagasError } = await query;
       if (vagasError) throw vagasError;
 
-      // Load candidate counts for each vaga
-      const vagasWithCounts = await Promise.all((vagasData || []).map(async vaga => {
-        const {
-          count
-        } = await supabase.from("candidatos").select("*", {
-          count: "exact",
-          head: true
-        }).eq("vaga_relacionada_id", vaga.id);
-
-        // Para o funil, calcular dias na etapa atual
-        let diasEtapaAtual = 0;
-        if (viewType === "funnel") {
-          const {
-            data: lastStageChange
-          } = await supabase.from("job_stage_history").select("changed_at").eq("job_id", vaga.id).order("changed_at", {
-            ascending: false
-          }).limit(1).single();
-          if (lastStageChange) {
-            diasEtapaAtual = getBusinessDaysFromNow(lastStageChange.changed_at);
-          }
-        }
-        return {
-          ...vaga,
-          candidatos_count: count || 0,
-          recrutador: vaga.recrutador_user?.name || vaga.recrutador || null,
-          cs_responsavel: vaga.cs_user?.name || vaga.cs_responsavel || null,
-          dias_etapa_atual: diasEtapaAtual
-        };
+      // View já retorna candidatos_count e dias_etapa_atual - não precisa de loop N+1
+      const vagasWithCounts = (vagasData || []).map(vaga => ({
+        ...vaga,
+        candidatos_count: vaga.candidatos_count || 0,
+        dias_etapa_atual: vaga.dias_etapa_atual || 0
       }));
+      
       setVagas(vagasWithCounts);
 
       // Calcular estatísticas para o funil
