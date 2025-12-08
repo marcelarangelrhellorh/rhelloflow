@@ -209,7 +209,7 @@ export default function TaskModal({ open, onClose, task, defaultVagaId }: TaskMo
               )}
             />
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="status"
@@ -258,7 +258,7 @@ export default function TaskModal({ open, onClose, task, defaultVagaId }: TaskMo
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="due_date"
@@ -350,13 +350,13 @@ export default function TaskModal({ open, onClose, task, defaultVagaId }: TaskMo
               </div>
             )}
 
-            <div className="flex justify-end gap-2 pt-4">
-              <Button type="button" variant="outline" onClick={onClose}>
+            <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-4">
+              <Button type="button" variant="outline" onClick={onClose} className="w-full sm:w-auto">
                 Cancelar
               </Button>
               <LoadingButton
                 type="submit"
-                className="bg-[#ffcd00] hover:bg-[#ffcd00]/90 text-black font-semibold"
+                className="bg-[#ffcd00] hover:bg-[#ffcd00]/90 text-black font-semibold w-full sm:w-auto"
                 loading={createTask.isPending || updateTask.isPending}
                 loadingText={isEditing ? "Salvando..." : "Criando..."}
               >
