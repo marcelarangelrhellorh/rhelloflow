@@ -133,9 +133,15 @@ export function NotificationBell() {
   };
   return <Sheet>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative shrink-0 text-primary hover:text-primary/80 hover:bg-primary/10 h-12 w-12" title="Notificações">
-          <Bell className="h-6 w-6" />
-          {unreadCount > 0 && <Badge variant="destructive" className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs animate-pulse">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="relative shrink-0 text-primary hover:text-primary/80 hover:bg-primary/10 h-12 w-12" 
+          aria-label={unreadCount > 0 ? `Notificações - ${unreadCount} não lidas` : "Notificações"}
+          aria-haspopup="dialog"
+        >
+          <Bell className="h-6 w-6" aria-hidden="true" />
+          {unreadCount > 0 && <Badge variant="destructive" className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs animate-pulse" aria-hidden="true">
               {unreadCount > 9 ? "9+" : unreadCount}
             </Badge>}
         </Button>
@@ -151,15 +157,23 @@ export function NotificationBell() {
           </div>
         </SheetHeader>
 
-        <div className="mt-6 space-y-2">
-          {notifications.length === 0 ? <div className="flex flex-col items-center justify-center py-12 text-center">
-              <Bell className="h-12 w-12 text-muted-foreground mb-4" />
+        <div className="mt-6 space-y-2" role="list" aria-label="Lista de notificações">
+          {notifications.length === 0 ? <div className="flex flex-col items-center justify-center py-12 text-center" role="status">
+              <Bell className="h-12 w-12 text-muted-foreground mb-4" aria-hidden="true" />
               <p className="text-sm text-muted-foreground">
                 Nenhuma notificação
               </p>
-            </div> : notifications.map(notification => <div key={notification.id} onClick={() => handleNotificationClick(notification)} className={`p-4 rounded-lg border cursor-pointer transition-all hover:shadow-md ${notification.read_at ? "bg-card border-border" : "bg-primary/5 border-primary/20"}`}>
+            </div> : notifications.map(notification => <div 
+                key={notification.id} 
+                onClick={() => handleNotificationClick(notification)} 
+                onKeyDown={(e) => e.key === 'Enter' && handleNotificationClick(notification)}
+                className={`p-4 rounded-lg border cursor-pointer transition-all hover:shadow-md ${notification.read_at ? "bg-card border-border" : "bg-primary/5 border-primary/20"}`}
+                role="listitem"
+                tabIndex={0}
+                aria-label={`${notification.title}${notification.read_at ? '' : ' - não lida'}`}
+              >
                 <div className="flex items-start gap-3">
-                  <span className="text-2xl">
+                  <span className="text-2xl" aria-hidden="true">
                     {getNotificationIcon(notification.kind)}
                   </span>
                   <div className="flex-1 min-w-0">

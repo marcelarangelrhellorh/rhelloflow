@@ -1,5 +1,6 @@
 import { AppSidebar } from "./AppSidebar";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
+import { SkipLink } from "@/components/ui/skip-link";
 import { Outlet, Navigate, useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -53,8 +54,14 @@ export function Layout() {
 
   if (loading || rolesLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      <div 
+        className="flex min-h-screen items-center justify-center"
+        role="status"
+        aria-live="polite"
+        aria-label="Carregando aplicação"
+      >
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" aria-hidden="true" />
+        <span className="sr-only">Carregando...</span>
       </div>
     );
   }
@@ -65,17 +72,18 @@ export function Layout() {
 
   return (
     <SidebarProvider defaultOpen={!isMobile}>
+      <SkipLink />
       <div className="min-h-screen flex w-full">
         <AppSidebar />
         <SidebarInset className="flex-1">
           {/* Mobile header with hamburger menu */}
           {isMobile && (
             <header className="sticky top-0 z-40 flex h-14 items-center gap-4 border-b bg-background/95 backdrop-blur px-4 pt-safe">
-              <SidebarTrigger className="touch-target" />
+              <SidebarTrigger className="touch-target" aria-label="Abrir menu de navegação" />
               <span className="font-semibold text-foreground">rhello flow</span>
             </header>
           )}
-          <main className="min-h-screen bg-background">
+          <main id="main-content" className="min-h-screen bg-background" tabIndex={-1}>
             <Outlet />
           </main>
         </SidebarInset>

@@ -6,8 +6,23 @@ interface PageSkeletonProps {
 }
 
 export function PageSkeleton({ variant = 'cards' }: PageSkeletonProps) {
+  const variantLabels = {
+    cards: 'Carregando cards',
+    table: 'Carregando tabela',
+    profile: 'Carregando perfil',
+    form: 'Carregando formulário'
+  };
+
   return (
-    <div className="min-h-screen bg-background">
+    <div 
+      className="min-h-screen bg-background" 
+      role="status" 
+      aria-live="polite" 
+      aria-busy="true"
+      aria-label={variantLabels[variant]}
+    >
+      <span className="sr-only">{variantLabels[variant]}...</span>
+      
       {/* Header skeleton */}
       <div className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="px-6 md:px-8 py-6 max-w-[1400px] mx-auto">
@@ -38,7 +53,7 @@ export function PageSkeleton({ variant = 'cards' }: PageSkeletonProps) {
         {variant === 'cards' && <CardSkeletonGrid count={6} />}
         
         {variant === 'table' && (
-          <div className="space-y-4">
+          <div className="space-y-4" aria-label="Carregando linhas da tabela">
             <div className="rounded-md border">
               {Array.from({ length: 8 }).map((_, i) => (
                 <div key={i} className="flex items-center gap-4 p-4 border-b last:border-b-0">
@@ -55,7 +70,7 @@ export function PageSkeleton({ variant = 'cards' }: PageSkeletonProps) {
         )}
 
         {variant === 'form' && (
-          <div className="max-w-2xl space-y-6">
+          <div className="max-w-2xl space-y-6" aria-label="Carregando campos do formulário">
             {Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="space-y-2">
                 <Skeleton className="h-4 w-24" />

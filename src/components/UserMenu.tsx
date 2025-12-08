@@ -81,9 +81,17 @@ export function UserMenu() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="focus:outline-none">
-        <Avatar className="h-9 w-9 cursor-pointer ring-2 ring-border hover:ring-foreground transition-all">
-          <AvatarFallback className="bg-foreground text-background font-semibold">
+      <DropdownMenuTrigger 
+        className="focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-full"
+        aria-label={`Menu do usuário ${userName || 'Usuário'}`}
+        aria-haspopup="menu"
+      >
+        <Avatar 
+          className="h-9 w-9 cursor-pointer ring-2 ring-border hover:ring-foreground transition-all"
+          role="img"
+          aria-label={`Avatar de ${userName || 'Usuário'}`}
+        >
+          <AvatarFallback className="bg-foreground text-background font-semibold" aria-hidden="true">
             {getInitials(userName)}
           </AvatarFallback>
         </Avatar>

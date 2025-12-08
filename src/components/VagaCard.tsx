@@ -175,7 +175,16 @@ export const VagaCard = React.memo(function VagaCard({
     }
   };
   return <>
-      <Card draggable={draggable} onDragStart={onDragStart} onClick={handleClick} className="relative cursor-pointer bg-[#FFFDF6] border border-gray-200 overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-200 hover:scale-[1.01]">
+      <Card 
+        draggable={draggable} 
+        onDragStart={onDragStart} 
+        onClick={handleClick}
+        onKeyDown={(e) => e.key === 'Enter' && handleClick()}
+        className="relative cursor-pointer bg-[#FFFDF6] border border-gray-200 overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-200 hover:scale-[1.01] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        role="article"
+        tabIndex={0}
+        aria-label={`Vaga: ${vaga.titulo} - ${vaga.empresa} - Status: ${vaga.status}`}
+      >
         <CardContent className={viewMode === "list" ? "p-4" : "p-5 space-y-4"}>
           {viewMode === "list" ? (
             // Layout horizontal compacto para visualização em lista
@@ -188,8 +197,14 @@ export const VagaCard = React.memo(function VagaCard({
                   </h3>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild onClick={e => e.stopPropagation()}>
-                      <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 text-[#36404A] hover:text-[#00141D]">
-                        <MoreVertical className="h-4 w-4" />
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-7 w-7 shrink-0 text-[#36404A] hover:text-[#00141D]"
+                        aria-label={`Menu de ações da vaga ${vaga.titulo}`}
+                        aria-haspopup="menu"
+                      >
+                        <MoreVertical className="h-4 w-4" aria-hidden="true" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-48 bg-white">
