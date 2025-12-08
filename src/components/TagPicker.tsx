@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { X, Plus, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,15 +19,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-
-interface Tag {
-  id: string;
-  label: string;
-  category: string;
-  slug: string;
-}
+import { useTags } from "@/hooks/data/useTags";
 
 interface TagPickerProps {
   selectedTags: string[]; // array de tag IDs
@@ -44,37 +36,14 @@ const categoryLabels = {
 };
 
 export function TagPicker({ selectedTags, onChange, disabled }: TagPickerProps) {
-  const [availableTags, setAvailableTags] = useState<Tag[]>([]);
-  const [loading, setLoading] = useState(true);
+  // Usa hook com cache de 1 hora
+  const { tags: availableTags, loading, createTag, isCreating } = useTags();
+  
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newTagLabel, setNewTagLabel] = useState("");
   const [newTagCategory, setNewTagCategory] = useState<string>("skill");
-  const [creating, setCreating] = useState(false);
-
-  useEffect(() => {
-    loadTags();
-  }, []);
-
-  const loadTags = async () => {
-    try {
-      const { data, error } = await (supabase as any)
-        .from("tags")
-        .select("*")
-        .eq("active", true)
-        .order("category")
-        .order("label");
-
-      if (error) throw error;
-      setAvailableTags(data || []);
-    } catch (error: any) {
-      console.error("Erro ao carregar tags:", error);
-      toast.error("Erro ao carregar tags");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleToggleTag = (tagId: string) => {
     if (disabled) return;
@@ -88,42 +57,23 @@ export function TagPicker({ selectedTags, onChange, disabled }: TagPickerProps) 
 
   const handleCreateTag = async () => {
     if (!newTagLabel.trim()) {
-      toast.error("Digite o nome da tag");
       return;
     }
 
-    setCreating(true);
     try {
-      const { data, error } = await (supabase as any)
-        .from("tags")
-        .insert({
-          label: newTagLabel.trim(),
-          category: newTagCategory,
-        })
-        .select()
-        .single();
-
-      if (error) {
-        if (error.message.includes("duplicate")) {
-          toast.error("Já existe uma tag com este nome nesta categoria");
-        } else {
-          throw error;
-        }
-        return;
-      }
-
-      setAvailableTags([...availableTags, data]);
-      onChange([...selectedTags, data.id]);
-      toast.success("Tag criada com sucesso!");
+      const newTag = await createTag({
+        label: newTagLabel.trim(),
+        category: newTagCategory,
+      });
+      
+      // Adiciona nova tag à seleção
+      onChange([...selectedTags, newTag.id]);
       
       setShowCreateModal(false);
       setNewTagLabel("");
       setNewTagCategory("skill");
-    } catch (error: any) {
-      console.error("Erro ao criar tag:", error);
-      toast.error("Erro ao criar tag");
-    } finally {
-      setCreating(false);
+    } catch {
+      // Erro já tratado pelo hook
     }
   };
 
@@ -143,7 +93,7 @@ export function TagPicker({ selectedTags, onChange, disabled }: TagPickerProps) 
     }
     acc[tag.category].push(tag);
     return acc;
-  }, {} as Record<string, Tag[]>);
+  }, {} as Record<string, typeof availableTags>);
 
   if (loading) {
     return (
@@ -178,10 +128,10 @@ export function TagPicker({ selectedTags, onChange, disabled }: TagPickerProps) 
               <Badge
                 key={tag.id}
                 variant="outline"
-                className={`${categoryInfo.color} cursor-pointer hover:opacity-80`}
+                className={`${categoryInfo?.color || ''} cursor-pointer hover:opacity-80`}
                 onClick={() => !disabled && handleToggleTag(tag.id)}
               >
-                <span className="text-xs font-medium mr-1">{categoryInfo.label}:</span>
+                <span className="text-xs font-medium mr-1">{categoryInfo?.label || tag.category}:</span>
                 {tag.label}
                 <X className="h-3 w-3 ml-1" />
               </Badge>
@@ -220,7 +170,7 @@ export function TagPicker({ selectedTags, onChange, disabled }: TagPickerProps) 
           return (
             <div key={category}>
               <h4 className="text-sm font-semibold mb-2 text-muted-foreground">
-                {categoryInfo.label}
+                {categoryInfo?.label || category}
               </h4>
               <div className="flex flex-wrap gap-2">
                 {tags.map((tag) => {
@@ -232,7 +182,7 @@ export function TagPicker({ selectedTags, onChange, disabled }: TagPickerProps) 
                       className={`cursor-pointer transition-all ${
                         isSelected
                           ? "bg-primary text-primary-foreground"
-                          : `${categoryInfo.color} hover:opacity-80`
+                          : `${categoryInfo?.color || ''} hover:opacity-80`
                       }`}
                       onClick={() => handleToggleTag(tag.id)}
                     >
@@ -295,8 +245,8 @@ export function TagPicker({ selectedTags, onChange, disabled }: TagPickerProps) 
             <Button variant="outline" onClick={() => setShowCreateModal(false)}>
               Cancelar
             </Button>
-            <Button onClick={handleCreateTag} disabled={creating}>
-              {creating ? (
+            <Button onClick={handleCreateTag} disabled={isCreating || !newTagLabel.trim()}>
+              {isCreating ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Criando...
