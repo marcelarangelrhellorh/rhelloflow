@@ -33,6 +33,7 @@ const Relatorios = lazy(() => import("./pages/Relatorios"));
 const Acompanhamento = lazy(() => import("./pages/Acompanhamento"));
 const Tarefas = lazy(() => import("./pages/Tarefas"));
 const GerenciarEmpresas = lazy(() => import("./pages/GerenciarEmpresas"));
+const EmpresaDetalhes = lazy(() => import("./pages/EmpresaDetalhes"));
 const GoogleCalendarCallback = lazy(() => import("./pages/GoogleCalendarCallback"));
 const Configuracoes = lazy(() => import("./pages/Configuracoes"));
 const Auth = lazy(() => import("./pages/Auth"));
@@ -78,6 +79,8 @@ const App = () => (
               <Route path="/acompanhamento" element={<Acompanhamento />} />
               <Route path="/tarefas" element={<Tarefas />} />
               <Route path="/gerenciar-empresas" element={<GerenciarEmpresas />} />
+              <Route path="/empresas/:id" element={<EmpresaDetalhes />} />
+              <Route path="/configuracoes" element={<Configuracoes />} />
               <Route path="/configuracoes" element={<Configuracoes />} />
             </Route>
             <Route path="*" element={<NotFound />} />

@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -7,9 +8,9 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Building2, Plus, Search, Eye, Pencil, LayoutGrid, List, FileSpreadsheet, Kanban } from "lucide-react";
 import { EmpresaFormModal } from "@/components/Empresas/EmpresaFormModal";
-import { EmpresaDetailsDrawer } from "@/components/Empresas/EmpresaDetailsDrawer";
 import { ImportEmpresasModal } from "@/components/Empresas/ImportEmpresasModal";
 import { ClientPipelineBoard } from "@/components/Empresas/ClientPipelineBoard";
+import { useEmpresaPrefetch } from "@/hooks/data/useEmpresaPrefetch";
 import { toast } from "sonner";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { usePagination } from "@/hooks/usePagination";
@@ -31,9 +32,10 @@ type Empresa = {
   pipeline_stage?: string | null;
 };
 export default function GerenciarEmpresas() {
+  const navigate = useNavigate();
+  const { prefetchEmpresa } = useEmpresaPrefetch();
   const [searchTerm, setSearchTerm] = useState("");
   const [formModalOpen, setFormModalOpen] = useState(false);
-  const [detailsDrawerOpen, setDetailsDrawerOpen] = useState(false);
   const [selectedEmpresa, setSelectedEmpresa] = useState<Empresa | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>("todos");
   const [viewMode, setViewMode] = useState<"cards" | "list" | "funnel">("cards");
@@ -78,9 +80,8 @@ export default function GerenciarEmpresas() {
   }, []);
 
   const handleViewDetails = useCallback((empresa: Empresa) => {
-    setSelectedEmpresa(empresa);
-    setDetailsDrawerOpen(true);
-  }, []);
+    navigate(`/empresas/${empresa.id}`);
+  }, [navigate]);
 
   const handleCloseModal = useCallback(() => {
     setFormModalOpen(false);
@@ -300,18 +301,6 @@ export default function GerenciarEmpresas() {
       </div>
 
       <EmpresaFormModal open={formModalOpen} onClose={handleCloseModal} empresa={selectedEmpresa} onSuccess={handleSuccess} />
-
-      <EmpresaDetailsDrawer open={detailsDrawerOpen} onClose={() => {
-      setDetailsDrawerOpen(false);
-      setSelectedEmpresa(null);
-    }} empresaId={selectedEmpresa?.id || ""} onEdit={() => {
-      setDetailsDrawerOpen(false);
-      if (selectedEmpresa) {
-        handleEdit(selectedEmpresa);
-      }
-    }} onDeleted={() => {
-      refetch();
-    }} />
 
       <ImportEmpresasModal open={importModalOpen} onOpenChange={setImportModalOpen} onSuccess={refetch} />
     </div>;
