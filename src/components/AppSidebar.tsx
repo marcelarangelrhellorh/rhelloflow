@@ -92,14 +92,12 @@ export function AppSidebar() {
               loading="lazy"
             />
           ) : (
-            <img 
-              alt="rhello flow - Sistema de Recrutamento" 
-              className="h-8" 
-              src="/lovable-uploads/6bff9b8e-8a55-40d2-a107-0543e7b70ad7.png" 
-              width={120} 
-              height={32}
-              loading="lazy"
-            />
+          <img 
+            alt="rhello flow - Sistema de Recrutamento" 
+            className="h-8 w-auto object-contain flex-shrink-0" 
+            src="/lovable-uploads/6bff9b8e-8a55-40d2-a107-0543e7b70ad7.png" 
+            loading="lazy"
+          />
           )}
         </div>
         
