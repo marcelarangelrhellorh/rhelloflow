@@ -218,7 +218,7 @@ export default function GerenciarEmpresas() {
                         </p>}
 
                         <div className="flex gap-2 pt-2 border-t border-gray-200">
-                          <Button size="sm" variant="outline" onClick={() => handleViewDetails(empresa)} className="flex-1 bg-[#ffcc00] text-[#00141d]">
+                          <Button size="sm" variant="outline" onClick={() => handleViewDetails(empresa)} className="flex-1 bg-[#00141d] text-white">
                             <Eye className="mr-1 h-3 w-3" />
                             Detalhes
                           </Button>
