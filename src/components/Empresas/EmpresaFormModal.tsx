@@ -259,6 +259,14 @@ export function EmpresaFormModal({
       form.setValue("telefone", dados.telefone);
       form.setValue("email", dados.email);
       
+      // Preencher porte e setor automaticamente
+      if (dados.porte) {
+        form.setValue("porte", dados.porte as "Micro" | "Pequena" | "Média" | "Grande");
+      }
+      if (dados.setor) {
+        form.setValue("setor", dados.setor);
+      }
+      
       // Se nome da empresa estiver vazio, preencher com nome fantasia ou razão social
       const nomeAtual = form.getValues("nome");
       if (!nomeAtual) {
