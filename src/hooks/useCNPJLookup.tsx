@@ -3,6 +3,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { cleanCNPJ, validateCNPJ } from '@/lib/cnpjUtils';
 import { toast } from 'sonner';
 
+export interface AtividadeEconomica {
+  code: string;
+  text: string;
+}
+
 export interface CNPJData {
   razao_social: string;
   nome_fantasia: string;
@@ -15,6 +20,14 @@ export interface CNPJData {
   cep: string;
   telefone: string;
   email: string;
+  // Novos campos da Receita Federal
+  situacao_cadastral: string;
+  data_situacao_cadastral: string;
+  data_abertura: string;
+  natureza_juridica: string;
+  capital_social: number;
+  atividade_principal: AtividadeEconomica[];
+  atividades_secundarias: AtividadeEconomica[];
 }
 
 export interface Socio {
@@ -86,6 +99,20 @@ export function useCNPJLookup(): UseCNPJLookupReturn {
         cep: data.cep?.replace(/\D/g, '') || '',
         telefone: data.telefone || '',
         email: data.email || '',
+        // Novos campos da Receita Federal
+        situacao_cadastral: data.situacao || '',
+        data_situacao_cadastral: data.data_situacao || '',
+        data_abertura: data.abertura || '',
+        natureza_juridica: data.natureza_juridica || '',
+        capital_social: parseFloat(data.capital_social) || 0,
+        atividade_principal: (data.atividade_principal || []).map((a: { code?: string; text?: string }) => ({
+          code: a.code || '',
+          text: a.text || ''
+        })),
+        atividades_secundarias: (data.atividades_secundarias || []).map((a: { code?: string; text?: string }) => ({
+          code: a.code || '',
+          text: a.text || ''
+        })),
       };
 
       // Extrair quadro societário
