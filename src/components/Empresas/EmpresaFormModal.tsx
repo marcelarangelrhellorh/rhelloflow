@@ -83,7 +83,17 @@ export function EmpresaFormModal({
 }: EmpresaFormModalProps) {
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [quadroSocietario, setQuadroSocietario] = useState<Socio[]>([]);
-  const { loading: cnpjLoading, consultarCNPJ } = useCNPJLookup();
+  const { loading: cnpjLoading, consultarCNPJ, limparDados } = useCNPJLookup();
+
+  const handleClose = () => {
+    if (!empresa) {
+      form.reset();
+      setSelectedUserIds([]);
+      setQuadroSocietario([]);
+      limparDados();
+    }
+    onClose();
+  };
 
   // Buscar usuários com role 'client'
   const { data: clientUsers = [] } = useQuery({
@@ -317,7 +327,7 @@ export function EmpresaFormModal({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">
