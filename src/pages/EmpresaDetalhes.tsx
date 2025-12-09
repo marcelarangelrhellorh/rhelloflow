@@ -98,9 +98,9 @@ export default function EmpresaDetalhes() {
         />
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
           {/* Left Column - Main Content */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-3 space-y-6">
             {/* Informações da Empresa */}
             <EmpresaInfoCard empresa={empresa} />
 
@@ -109,9 +109,6 @@ export default function EmpresaDetalhes() {
 
             {/* Quadro Societário */}
             <EmpresaSociosCard empresa={empresa} />
-
-            {/* Histórico / Anotações */}
-            <EmpresaNotesSection empresaId={empresa.id} />
 
             {/* Histórico de Vagas */}
             <EmpresaVagasTable vagas={vagas} isLoading={vagasLoading} />
@@ -124,7 +121,7 @@ export default function EmpresaDetalhes() {
           </div>
 
           {/* Right Column - Sidebar */}
-          <div className="space-y-6">
+          <div className="lg:col-span-2 space-y-6">
             {/* CS Responsável */}
             <EmpresaCSSelector
               empresaId={empresa.id}
@@ -134,6 +131,9 @@ export default function EmpresaDetalhes() {
 
             {/* Usuários Vinculados */}
             <EmpresaLinkedUsersCard users={linkedUsers} />
+
+            {/* Histórico / Anotações */}
+            <EmpresaNotesSection empresaId={empresa.id} />
           </div>
         </div>
       </div>
