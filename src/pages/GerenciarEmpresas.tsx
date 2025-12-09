@@ -18,7 +18,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { usePagination } from "@/hooks/usePagination";
 import { PaginationControls } from "@/components/ui/pagination-controls";
 import { CardSkeletonGrid } from "@/components/skeletons/CardSkeleton";
-
 type Empresa = {
   id: string;
   nome: string;
@@ -34,17 +33,17 @@ type Empresa = {
   data_primeiro_contato: string | null;
   pipeline_stage?: string | null;
 };
-
 export default function GerenciarEmpresas() {
   const navigate = useNavigate();
-  const { prefetchEmpresa } = useEmpresaPrefetch();
+  const {
+    prefetchEmpresa
+  } = useEmpresaPrefetch();
   const [searchTerm, setSearchTerm] = useState("");
   const [formModalOpen, setFormModalOpen] = useState(false);
   const [selectedEmpresa, setSelectedEmpresa] = useState<Empresa | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>("todos");
   const [viewMode, setViewMode] = useState<"cards" | "list" | "funnel">("cards");
   const [importModalOpen, setImportModalOpen] = useState(false);
-
   const {
     data: empresas,
     isLoading,
@@ -59,12 +58,14 @@ export default function GerenciarEmpresas() {
       if (filterStatus !== "todos") {
         query = query.eq("status", filterStatus);
       }
-      const { data, error } = await query;
+      const {
+        data,
+        error
+      } = await query;
       if (error) throw error;
       return data as Empresa[];
     }
   });
-
   const {
     currentPage,
     totalPages,
@@ -75,26 +76,21 @@ export default function GerenciarEmpresas() {
     startIndex,
     endIndex
   } = usePagination(empresas || [], 12);
-
   const handleEdit = useCallback((empresa: Empresa) => {
     setSelectedEmpresa(empresa);
     setFormModalOpen(true);
   }, []);
-
   const handleViewDetails = useCallback((empresa: Empresa) => {
     navigate(`/empresas/${empresa.id}`);
   }, [navigate]);
-
   const handleCloseModal = useCallback(() => {
     setFormModalOpen(false);
     setSelectedEmpresa(null);
   }, []);
-
   const handleSuccess = useCallback(() => {
     refetch();
     toast.success("Empresa salva com sucesso!");
   }, [refetch]);
-
   const getStatusColor = useCallback((status: string | null) => {
     switch (status) {
       case "ativo":
@@ -107,10 +103,11 @@ export default function GerenciarEmpresas() {
         return "bg-gray-100 text-gray-800 border-gray-200";
     }
   }, []);
-
   const handleClientMove = useCallback(async (empresaId: string, fromSlug: string, toSlug: string) => {
     try {
-      const { error } = await supabase.from("empresas").update({
+      const {
+        error
+      } = await supabase.from("empresas").update({
         pipeline_stage: toSlug
       }).eq("id", empresaId);
       if (error) throw error;
@@ -120,9 +117,7 @@ export default function GerenciarEmpresas() {
       toast.error("Erro ao mover cliente");
     }
   }, [refetch]);
-
-  return (
-    <div className="min-h-screen bg-[#FFFBF0] p-4 sm:p-6 lg:p-8">
+  return <div className="min-h-screen bg-[#FFFBF0] p-4 sm:p-6 lg:p-8">
       <div className="w-full space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -140,9 +135,9 @@ export default function GerenciarEmpresas() {
               Importar Excel
             </Button>
             <Button onClick={() => {
-              setSelectedEmpresa(null);
-              setFormModalOpen(true);
-            }} className="bg-[#00141D] hover:bg-[#00141D]/90 text-white font-semibold">
+            setSelectedEmpresa(null);
+            setFormModalOpen(true);
+          }} className="bg-[#00141D] hover:bg-[#00141D]/90 text-white font-semibold">
               <Plus className="mr-2 h-4 w-4" />
               Novo Cliente
             </Button>
@@ -189,21 +184,15 @@ export default function GerenciarEmpresas() {
             </div>
 
             {/* Content */}
-            {isLoading ? (
-              <CardSkeletonGrid count={6} />
-            ) : empresas && empresas.length > 0 ? viewMode === "funnel" ? (
-              <div className="overflow-x-auto">
+            {isLoading ? <CardSkeletonGrid count={6} /> : empresas && empresas.length > 0 ? viewMode === "funnel" ? <div className="overflow-x-auto">
                 <ClientPipelineBoard empresas={empresas} onClientClick={handleViewDetails} onClientMove={handleClientMove} />
-              </div>
-            ) : viewMode === "cards" ? (
-              <>
+              </div> : viewMode === "cards" ? <>
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                  {paginatedData.map(empresa => (
-                    <Card key={empresa.id} className="p-4 transition-shadow cursor-pointer border-gray-300 shadow-md hover:shadow-lg">
+                  {paginatedData.map(empresa => <Card key={empresa.id} className="p-4 transition-shadow cursor-pointer border-gray-300 shadow-md hover:shadow-lg">
                       <div className="space-y-3">
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
-                            <h3 className="font-bold text-lg text-[#00141D] line-clamp-1">
+                            <h3 className="font-bold text-lg line-clamp-1 text-[#00141d]">
                               {empresa.nome}
                             </h3>
                             {empresa.cnpj && <p className="text-sm text-[#36404A]">CNPJ: {empresa.cnpj}</p>}
@@ -239,22 +228,10 @@ export default function GerenciarEmpresas() {
                           </Button>
                         </div>
                       </div>
-                    </Card>
-                  ))}
+                    </Card>)}
                 </div>
-                <PaginationControls
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  onPageChange={goToPage}
-                  canGoPrevious={canGoPrevious}
-                  canGoNext={canGoNext}
-                  startIndex={startIndex}
-                  endIndex={endIndex}
-                  totalItems={empresas?.length || 0}
-                />
-              </>
-            ) : (
-              <Card className="border-gray-300 shadow-md">
+                <PaginationControls currentPage={currentPage} totalPages={totalPages} onPageChange={goToPage} canGoPrevious={canGoPrevious} canGoNext={canGoNext} startIndex={startIndex} endIndex={endIndex} totalItems={empresas?.length || 0} />
+              </> : <Card className="border-gray-300 shadow-md">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -268,8 +245,7 @@ export default function GerenciarEmpresas() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {empresas.map(empresa => (
-                      <TableRow key={empresa.id}>
+                    {empresas.map(empresa => <TableRow key={empresa.id}>
                         <TableCell className="font-semibold text-[#00141D]">
                           {empresa.nome}
                         </TableCell>
@@ -294,19 +270,15 @@ export default function GerenciarEmpresas() {
                             </Button>
                           </div>
                         </TableCell>
-                      </TableRow>
-                    ))}
+                      </TableRow>)}
                   </TableBody>
                 </Table>
-              </Card>
-            ) : (
-              <Card className="p-8 text-center border-gray-300 shadow-md">
+              </Card> : <Card className="p-8 text-center border-gray-300 shadow-md">
                 <Building2 className="h-12 w-12 text-[#36404A] mx-auto mb-4" />
                 <p className="text-[#36404A]">
                   Nenhum cliente encontrado. Cadastre o primeiro cliente!
                 </p>
-              </Card>
-            )}
+              </Card>}
           </div>
 
           {/* Sidebar Direita (1/4) */}
@@ -319,6 +291,5 @@ export default function GerenciarEmpresas() {
 
       <EmpresaFormModal open={formModalOpen} onClose={handleCloseModal} empresa={selectedEmpresa} onSuccess={handleSuccess} />
       <ImportEmpresasModal open={importModalOpen} onOpenChange={setImportModalOpen} onSuccess={refetch} />
-    </div>
-  );
+    </div>;
 }
