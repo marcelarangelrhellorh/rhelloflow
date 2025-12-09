@@ -217,13 +217,13 @@ export default function GerenciarEmpresas() {
                           {empresa.estado}
                         </p>}
 
-                        <div className="flex gap-2 pt-2 border-t border-gray-200">
-                          <Button size="sm" variant="outline" onClick={() => handleViewDetails(empresa)} className="flex-1 bg-[#00141d] text-white">
-                            <Eye className="mr-1 h-3 w-3" />
+                        <div className="flex gap-1.5 pt-2 border-t border-gray-200">
+                          <Button size="sm" variant="outline" onClick={() => handleViewDetails(empresa)} className="px-2 py-1 h-7 text-xs bg-[#00141d] text-white">
+                            <Eye className="mr-1 h-2.5 w-2.5" />
                             Detalhes
                           </Button>
-                          <Button size="sm" variant="outline" onClick={() => handleEdit(empresa)} className="flex-1">
-                            <Pencil className="mr-1 h-3 w-3" />
+                          <Button size="sm" variant="outline" onClick={() => handleEdit(empresa)} className="px-2 py-1 h-7 text-xs">
+                            <Pencil className="mr-1 h-2.5 w-2.5" />
                             Editar
                           </Button>
                         </div>
