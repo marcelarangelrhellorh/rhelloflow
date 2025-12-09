@@ -29,11 +29,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { X, Search, Loader2 } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { X, Search, Loader2, Building, CheckCircle2, XCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { formatCNPJ } from "@/lib/cnpjUtils";
-import { useCNPJLookup, Socio } from "@/hooks/useCNPJLookup";
+import { useCNPJLookup, Socio, AtividadeEconomica, CNPJData } from "@/hooks/useCNPJLookup";
 
 interface ClientUser {
   id: string;
@@ -75,6 +76,14 @@ interface EmpresaFormModalProps {
   onSuccess: () => void;
 }
 
+// Utility to format currency
+const formatCurrency = (value: number) => {
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  }).format(value);
+};
+
 export function EmpresaFormModal({
   open,
   onClose,
@@ -83,6 +92,7 @@ export function EmpresaFormModal({
 }: EmpresaFormModalProps) {
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [quadroSocietario, setQuadroSocietario] = useState<Socio[]>([]);
+  const [dadosReceita, setDadosReceita] = useState<CNPJData | null>(null);
   const { loading: cnpjLoading, consultarCNPJ, limparDados } = useCNPJLookup();
 
   const handleClose = () => {
@@ -90,6 +100,7 @@ export function EmpresaFormModal({
       form.reset();
       setSelectedUserIds([]);
       setQuadroSocietario([]);
+      setDadosReceita(null);
       limparDados();
     }
     onClose();
@@ -182,6 +193,11 @@ export function EmpresaFormModal({
         observacoes: empresa.observacoes || "",
       });
       setSelectedUserIds(linkedUsers.map((u) => u.id));
+      
+      // Load saved quadro societario if editing
+      if (empresa.quadro_societario && Array.isArray(empresa.quadro_societario)) {
+        setQuadroSocietario(empresa.quadro_societario);
+      }
     } else {
       form.reset({
         nome: "",
@@ -208,6 +224,7 @@ export function EmpresaFormModal({
       });
       setSelectedUserIds([]);
       setQuadroSocietario([]);
+      setDadosReceita(null);
     }
   }, [empresa, form, linkedUsers.length]);
 
@@ -248,10 +265,9 @@ export function EmpresaFormModal({
         form.setValue("nome", dados.nome_fantasia || dados.razao_social);
       }
 
-      // Atualizar quadro societário do hook
-      const { quadroSocietario: socios } = await consultarCNPJ(cnpjValue) ? 
-        { quadroSocietario: [] } : { quadroSocietario: [] };
-      
+      // Salvar dados da Receita para exibição
+      setDadosReceita(dados);
+
       // Buscar novamente para pegar quadro societário
       const response = await supabase.functions.invoke('consultar-cnpj', {
         body: { cnpj: cnpjValue.replace(/\D/g, '') }
@@ -268,10 +284,20 @@ export function EmpresaFormModal({
 
   const onSubmit = async (data: EmpresaFormData) => {
     try {
-      const empresaData = {
+      const empresaPayload = {
         ...data,
         email: data.email || null,
         contato_principal_email: data.contato_principal_email || null,
+        // Dados da Receita Federal
+        situacao_cadastral: dadosReceita?.situacao_cadastral || empresa?.situacao_cadastral || null,
+        data_situacao_cadastral: dadosReceita?.data_situacao_cadastral || empresa?.data_situacao_cadastral || null,
+        data_abertura: dadosReceita?.data_abertura || empresa?.data_abertura || null,
+        natureza_juridica: dadosReceita?.natureza_juridica || empresa?.natureza_juridica || null,
+        capital_social: dadosReceita?.capital_social || empresa?.capital_social || null,
+        atividade_principal: dadosReceita?.atividade_principal || empresa?.atividade_principal || [],
+        atividades_secundarias: dadosReceita?.atividades_secundarias || empresa?.atividades_secundarias || [],
+        quadro_societario: quadroSocietario.length > 0 ? quadroSocietario : (empresa?.quadro_societario || []),
+        cnpj_consultado_em: dadosReceita ? new Date().toISOString() : empresa?.cnpj_consultado_em || null,
       };
 
       let empresaId = empresa?.id;
@@ -279,14 +305,14 @@ export function EmpresaFormModal({
       if (empresa?.id) {
         const { error } = await supabase
           .from("empresas")
-          .update(empresaData)
+          .update(empresaPayload)
           .eq("id", empresa.id);
 
         if (error) throw error;
       } else {
         const { data: newEmpresa, error } = await supabase
           .from("empresas")
-          .insert(empresaData)
+          .insert(empresaPayload)
           .select("id")
           .single();
 
@@ -319,7 +345,7 @@ export function EmpresaFormModal({
       }
 
       onSuccess();
-      onClose();
+      handleClose();
     } catch (error) {
       console.error("Erro ao salvar empresa:", error);
       toast.error("Erro ao salvar empresa");
@@ -491,6 +517,106 @@ export function EmpresaFormModal({
                 />
               </div>
             </div>
+
+            {/* Dados da Receita Federal */}
+            {(dadosReceita || empresa?.situacao_cadastral) && (
+              <Card className="p-4 space-y-4 bg-blue-50/50 border-blue-200">
+                <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                  <Building className="h-5 w-5" />
+                  Dados da Receita Federal
+                </h3>
+                
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  {/* Situação Cadastral */}
+                  <div className="flex items-center gap-2">
+                    <span className="text-muted-foreground">Situação:</span>
+                    <Badge 
+                      variant={(dadosReceita?.situacao_cadastral || empresa?.situacao_cadastral) === 'ATIVA' ? 'default' : 'destructive'}
+                      className="flex items-center gap-1"
+                    >
+                      {(dadosReceita?.situacao_cadastral || empresa?.situacao_cadastral) === 'ATIVA' ? (
+                        <CheckCircle2 className="h-3 w-3" />
+                      ) : (
+                        <XCircle className="h-3 w-3" />
+                      )}
+                      {dadosReceita?.situacao_cadastral || empresa?.situacao_cadastral}
+                    </Badge>
+                    {(dadosReceita?.data_situacao_cadastral || empresa?.data_situacao_cadastral) && (
+                      <span className="text-xs text-muted-foreground">
+                        desde {dadosReceita?.data_situacao_cadastral || empresa?.data_situacao_cadastral}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Data de Abertura */}
+                  {(dadosReceita?.data_abertura || empresa?.data_abertura) && (
+                    <div>
+                      <span className="text-muted-foreground">Abertura:</span>
+                      <span className="font-medium ml-2">
+                        {dadosReceita?.data_abertura || empresa?.data_abertura}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Natureza Jurídica */}
+                  {(dadosReceita?.natureza_juridica || empresa?.natureza_juridica) && (
+                    <div className="col-span-2">
+                      <span className="text-muted-foreground">Natureza Jurídica:</span>
+                      <span className="font-medium ml-2">
+                        {dadosReceita?.natureza_juridica || empresa?.natureza_juridica}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Capital Social */}
+                  {((dadosReceita?.capital_social && dadosReceita.capital_social > 0) || 
+                    (empresa?.capital_social && empresa.capital_social > 0)) && (
+                    <div className="col-span-2">
+                      <span className="text-muted-foreground">Capital Social:</span>
+                      <span className="font-medium ml-2">
+                        {formatCurrency(dadosReceita?.capital_social || empresa?.capital_social || 0)}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Atividade Principal */}
+                {((dadosReceita?.atividade_principal && dadosReceita.atividade_principal.length > 0) ||
+                  (empresa?.atividade_principal && empresa.atividade_principal.length > 0)) && (
+                  <div>
+                    <h4 className="font-medium mb-2 text-sm">Atividade Principal</h4>
+                    <div className="bg-background rounded-lg p-3 border">
+                      {((dadosReceita?.atividade_principal || empresa?.atividade_principal) as AtividadeEconomica[])?.map((atividade, index) => (
+                        <div key={index}>
+                          <span className="text-xs text-muted-foreground font-mono">
+                            {atividade.code}
+                          </span>
+                          <p className="text-sm">{atividade.text}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Atividades Secundárias */}
+                {((dadosReceita?.atividades_secundarias && dadosReceita.atividades_secundarias.length > 0) ||
+                  (empresa?.atividades_secundarias && empresa.atividades_secundarias.length > 0)) && (
+                  <div>
+                    <h4 className="font-medium mb-2 text-sm">
+                      Atividades Secundárias ({((dadosReceita?.atividades_secundarias || empresa?.atividades_secundarias) as AtividadeEconomica[])?.length})
+                    </h4>
+                    <div className="space-y-1 max-h-32 overflow-y-auto bg-background rounded-lg border p-2">
+                      {((dadosReceita?.atividades_secundarias || empresa?.atividades_secundarias) as AtividadeEconomica[])?.map((atividade, index) => (
+                        <div key={index} className="text-sm p-2 hover:bg-muted/50 rounded">
+                          <span className="text-xs text-muted-foreground font-mono">{atividade.code}</span>
+                          <p className="text-xs">{atividade.text}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </Card>
+            )}
 
             {/* Quadro Societário */}
             {quadroSocietario.length > 0 && (
@@ -817,7 +943,7 @@ export function EmpresaFormModal({
             />
 
             <div className="flex justify-end gap-2 pt-4">
-              <Button type="button" variant="outline" onClick={onClose}>
+              <Button type="button" variant="outline" onClick={handleClose}>
                 Cancelar
               </Button>
               <Button

@@ -699,88 +699,115 @@ export type Database = {
       }
       empresas: {
         Row: {
+          atividade_principal: Json | null
+          atividades_secundarias: Json | null
           bairro: string | null
+          capital_social: number | null
           cep: string | null
           cidade: string | null
           cnpj: string | null
+          cnpj_consultado_em: string | null
           complemento: string | null
           contato_principal_cargo: string | null
           contato_principal_email: string | null
           contato_principal_nome: string | null
           contato_principal_telefone: string | null
           created_at: string | null
+          data_abertura: string | null
           data_primeiro_contato: string | null
+          data_situacao_cadastral: string | null
           email: string | null
           endereco: string | null
           estado: string | null
           id: string
+          natureza_juridica: string | null
           nome: string
           nome_fantasia: string | null
           numero: string | null
           observacoes: string | null
           pipeline_stage: string | null
           porte: string | null
+          quadro_societario: Json | null
           razao_social: string | null
           setor: string | null
           site: string | null
+          situacao_cadastral: string | null
           status: string | null
           telefone: string | null
           updated_at: string | null
         }
         Insert: {
+          atividade_principal?: Json | null
+          atividades_secundarias?: Json | null
           bairro?: string | null
+          capital_social?: number | null
           cep?: string | null
           cidade?: string | null
           cnpj?: string | null
+          cnpj_consultado_em?: string | null
           complemento?: string | null
           contato_principal_cargo?: string | null
           contato_principal_email?: string | null
           contato_principal_nome?: string | null
           contato_principal_telefone?: string | null
           created_at?: string | null
+          data_abertura?: string | null
           data_primeiro_contato?: string | null
+          data_situacao_cadastral?: string | null
           email?: string | null
           endereco?: string | null
           estado?: string | null
           id?: string
+          natureza_juridica?: string | null
           nome: string
           nome_fantasia?: string | null
           numero?: string | null
           observacoes?: string | null
           pipeline_stage?: string | null
           porte?: string | null
+          quadro_societario?: Json | null
           razao_social?: string | null
           setor?: string | null
           site?: string | null
+          situacao_cadastral?: string | null
           status?: string | null
           telefone?: string | null
           updated_at?: string | null
         }
         Update: {
+          atividade_principal?: Json | null
+          atividades_secundarias?: Json | null
           bairro?: string | null
+          capital_social?: number | null
           cep?: string | null
           cidade?: string | null
           cnpj?: string | null
+          cnpj_consultado_em?: string | null
           complemento?: string | null
           contato_principal_cargo?: string | null
           contato_principal_email?: string | null
           contato_principal_nome?: string | null
           contato_principal_telefone?: string | null
           created_at?: string | null
+          data_abertura?: string | null
           data_primeiro_contato?: string | null
+          data_situacao_cadastral?: string | null
           email?: string | null
           endereco?: string | null
           estado?: string | null
           id?: string
+          natureza_juridica?: string | null
           nome?: string
           nome_fantasia?: string | null
           numero?: string | null
           observacoes?: string | null
           pipeline_stage?: string | null
           porte?: string | null
+          quadro_societario?: Json | null
           razao_social?: string | null
           setor?: string | null
           site?: string | null
+          situacao_cadastral?: string | null
           status?: string | null
           telefone?: string | null
           updated_at?: string | null
