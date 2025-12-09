@@ -18,7 +18,7 @@ export function EmpresaSociosCard({ empresa }: EmpresaSociosCardProps) {
   if (quadroSocietario.length === 0) return null;
 
   return (
-    <Card className="border-border/50">
+    <Card className="border border-gray-300 shadow-md">
       <CardHeader className="pb-3">
         <CardTitle className="text-lg font-semibold flex items-center gap-2">
           <Users className="h-5 w-5" />
@@ -30,10 +30,10 @@ export function EmpresaSociosCard({ empresa }: EmpresaSociosCardProps) {
           {quadroSocietario.map((socio, index) => (
             <div
               key={index}
-              className="flex justify-between items-center p-3 bg-muted/30 rounded-lg border border-border/30"
+              className="flex justify-between items-center p-3 bg-muted/30 rounded-lg border border-gray-200"
             >
-              <span className="font-medium text-foreground">{socio.nome}</span>
-              <Badge variant="secondary" className="text-xs">
+              <span className="text-base font-medium text-foreground">{socio.nome}</span>
+              <Badge variant="secondary" className="text-sm">
                 {socio.qual}
               </Badge>
             </div>

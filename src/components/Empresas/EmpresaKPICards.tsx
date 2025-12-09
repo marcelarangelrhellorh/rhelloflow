@@ -55,7 +55,7 @@ export function EmpresaKPICards({
       {kpis.map((kpi) => (
         <Card
           key={kpi.label}
-          className="p-4 border-border/50 shadow-sm hover:shadow-md transition-shadow"
+          className="p-4 border border-gray-300 shadow-md hover:shadow-lg transition-shadow"
         >
           <div className="flex items-center gap-3">
             <div className={`p-2 rounded-lg ${kpi.bgColor}`}>
@@ -69,7 +69,7 @@ export function EmpresaKPICards({
               >
                 {kpi.value}
               </div>
-              <div className="text-xs text-muted-foreground">{kpi.label}</div>
+              <div className="text-sm font-medium text-muted-foreground">{kpi.label}</div>
             </div>
           </div>
         </Card>

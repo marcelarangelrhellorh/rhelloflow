@@ -34,7 +34,7 @@ export function EmpresaContratacoesTable({
 
   if (isLoading) {
     return (
-      <Card className="border-border/50">
+      <Card className="border border-gray-300 shadow-md">
         <CardHeader>
           <CardTitle className="text-lg font-semibold flex items-center gap-2">
             <Users className="h-5 w-5" />
@@ -53,7 +53,7 @@ export function EmpresaContratacoesTable({
   }
 
   return (
-    <Card className="border-border/50">
+    <Card className="border border-gray-300 shadow-md">
       <CardHeader className="pb-3">
         <CardTitle className="text-lg font-semibold flex items-center gap-2">
           <Users className="h-5 w-5" />
@@ -62,25 +62,25 @@ export function EmpresaContratacoesTable({
       </CardHeader>
       <CardContent>
         {!contratacoes || contratacoes.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-4">
+          <p className="text-base text-muted-foreground text-center py-4">
             Nenhuma contratação registrada para esta empresa.
           </p>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Candidato</TableHead>
-                <TableHead>Data Contratação</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
+                <TableHead className="font-semibold">Candidato</TableHead>
+                <TableHead className="font-semibold">Data Contratação</TableHead>
+                <TableHead className="text-right font-semibold">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {contratacoes.map((contratacao) => (
                 <TableRow key={contratacao.id}>
-                  <TableCell className="font-medium">
+                  <TableCell className="text-base font-medium">
                     {contratacao.nome_completo}
                   </TableCell>
-                  <TableCell className="text-muted-foreground">
+                  <TableCell className="text-base text-muted-foreground">
                     {contratacao.hired_at
                       ? format(new Date(contratacao.hired_at), "dd/MM/yyyy", {
                           locale: ptBR,
@@ -94,6 +94,7 @@ export function EmpresaContratacoesTable({
                       variant="ghost"
                       size="sm"
                       onClick={() => navigate(`/candidatos/${contratacao.id}`)}
+                      className="hover:bg-muted"
                     >
                       <ExternalLink className="h-4 w-4" />
                     </Button>

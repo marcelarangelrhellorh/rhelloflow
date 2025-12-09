@@ -33,18 +33,18 @@ export function EmpresaInfoCard({ empresa }: EmpresaInfoCardProps) {
       <div className="flex items-start gap-3 py-2">
         <Icon className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
         <div className="flex-1 min-w-0">
-          <span className="text-sm text-muted-foreground">{label}:</span>
+          <span className="text-sm font-medium text-muted-foreground">{label}:</span>
           {isLink ? (
             <a
               href={value.startsWith("http") ? value : `https://${value}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="ml-2 text-sm font-medium text-primary hover:underline break-all"
+              className="ml-2 text-base font-medium text-primary hover:underline break-all"
             >
               {value}
             </a>
           ) : (
-            <span className="ml-2 text-sm font-medium text-foreground break-all">
+            <span className="ml-2 text-base font-medium text-foreground break-all">
               {value}
             </span>
           )}
@@ -68,7 +68,7 @@ export function EmpresaInfoCard({ empresa }: EmpresaInfoCardProps) {
     .join(" | ");
 
   return (
-    <Card className="border-border/50">
+    <Card className="border border-gray-300 shadow-md">
       <CardHeader className="pb-3">
         <CardTitle className="text-lg font-semibold flex items-center gap-2">
           <Building2 className="h-5 w-5" />
@@ -92,13 +92,13 @@ export function EmpresaInfoCard({ empresa }: EmpresaInfoCardProps) {
 
         {/* Contato Principal */}
         {empresa.contato_principal_nome && (
-          <div className="pt-4 border-t border-border/50 mt-4">
-            <h4 className="font-medium text-sm text-foreground mb-2 flex items-center gap-2">
+          <div className="pt-4 border-t border-gray-200 mt-4">
+            <h4 className="font-semibold text-base text-foreground mb-2 flex items-center gap-2">
               <User className="h-4 w-4" />
               Contato Principal
             </h4>
             <div className="pl-6 space-y-1">
-              <p className="text-sm">
+              <p className="text-base">
                 <span className="font-medium">{empresa.contato_principal_nome}</span>
                 {empresa.contato_principal_cargo && (
                   <span className="text-muted-foreground">
@@ -108,12 +108,12 @@ export function EmpresaInfoCard({ empresa }: EmpresaInfoCardProps) {
                 )}
               </p>
               {empresa.contato_principal_email && (
-                <p className="text-sm text-muted-foreground">
+                <p className="text-base text-muted-foreground">
                   {empresa.contato_principal_email}
                 </p>
               )}
               {empresa.contato_principal_telefone && (
-                <p className="text-sm text-muted-foreground">
+                <p className="text-base text-muted-foreground">
                   {empresa.contato_principal_telefone}
                 </p>
               )}
@@ -123,9 +123,9 @@ export function EmpresaInfoCard({ empresa }: EmpresaInfoCardProps) {
 
         {/* Observações */}
         {empresa.observacoes && (
-          <div className="pt-4 border-t border-border/50 mt-4">
-            <h4 className="font-medium text-sm text-foreground mb-2">Observações</h4>
-            <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+          <div className="pt-4 border-t border-gray-200 mt-4">
+            <h4 className="font-semibold text-base text-foreground mb-2">Observações</h4>
+            <p className="text-base text-muted-foreground whitespace-pre-wrap">
               {empresa.observacoes}
             </p>
           </div>

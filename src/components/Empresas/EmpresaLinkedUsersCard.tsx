@@ -19,7 +19,7 @@ export function EmpresaLinkedUsersCard({ users }: EmpresaLinkedUsersCardProps) {
   if (!users || users.length === 0) return null;
 
   return (
-    <Card className="border-border/50">
+    <Card className="border border-gray-300 shadow-md">
       <CardHeader className="pb-3">
         <CardTitle className="text-lg font-semibold flex items-center gap-2">
           <UserCircle className="h-5 w-5" />
@@ -31,11 +31,11 @@ export function EmpresaLinkedUsersCard({ users }: EmpresaLinkedUsersCardProps) {
           {users.map((user) => (
             <div
               key={user.id}
-              className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/30 transition-colors"
+              className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 border border-gray-200 hover:bg-muted/50 transition-colors"
             >
-              <Avatar className="h-8 w-8">
+              <Avatar className="h-10 w-10">
                 {user.avatar_url && <AvatarImage src={user.avatar_url} />}
-                <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                <AvatarFallback className="bg-primary/10 text-primary text-sm font-medium">
                   {user.full_name
                     .split(" ")
                     .map((n) => n[0])
@@ -45,10 +45,10 @@ export function EmpresaLinkedUsersCard({ users }: EmpresaLinkedUsersCardProps) {
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">
+                <p className="text-base font-medium text-foreground truncate">
                   {user.full_name}
                 </p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-sm text-muted-foreground">
                   Desde{" "}
                   {format(new Date(user.created_at), "MMM yyyy", { locale: ptBR })}
                 </p>

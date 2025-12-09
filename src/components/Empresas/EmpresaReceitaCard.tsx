@@ -36,7 +36,7 @@ export function EmpresaReceitaCard({ empresa }: EmpresaReceitaCardProps) {
     (empresa.atividades_secundarias as AtividadeEconomica[]) || [];
 
   return (
-    <Card className="border-border/50 bg-blue-50/30">
+    <Card className="border border-gray-300 shadow-md">
       <CardHeader className="pb-3">
         <CardTitle className="text-lg font-semibold flex items-center gap-2">
           <Factory className="h-5 w-5" />
@@ -47,7 +47,7 @@ export function EmpresaReceitaCard({ empresa }: EmpresaReceitaCardProps) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Situação Cadastral */}
           <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Situação:</span>
+            <span className="text-sm font-medium text-muted-foreground">Situação:</span>
             <Badge
               variant={empresa.situacao_cadastral === "ATIVA" ? "default" : "destructive"}
               className="flex items-center gap-1"
@@ -60,7 +60,7 @@ export function EmpresaReceitaCard({ empresa }: EmpresaReceitaCardProps) {
               {empresa.situacao_cadastral}
             </Badge>
             {empresa.data_situacao_cadastral && (
-              <span className="text-xs text-muted-foreground">
+              <span className="text-sm text-muted-foreground">
                 desde {empresa.data_situacao_cadastral}
               </span>
             )}
@@ -70,8 +70,8 @@ export function EmpresaReceitaCard({ empresa }: EmpresaReceitaCardProps) {
           {empresa.data_abertura && (
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">Abertura:</span>
-              <span className="text-sm font-medium text-foreground">
+              <span className="text-sm font-medium text-muted-foreground">Abertura:</span>
+              <span className="text-base font-medium text-foreground">
                 {empresa.data_abertura}
               </span>
             </div>
@@ -82,8 +82,8 @@ export function EmpresaReceitaCard({ empresa }: EmpresaReceitaCardProps) {
             <div className="col-span-full flex items-start gap-2">
               <FileText className="h-4 w-4 text-muted-foreground mt-0.5" />
               <div className="flex-1">
-                <span className="text-sm text-muted-foreground">Natureza Jurídica:</span>
-                <span className="text-sm font-medium text-foreground ml-2">
+                <span className="text-sm font-medium text-muted-foreground">Natureza Jurídica:</span>
+                <span className="text-base font-medium text-foreground ml-2">
                   {empresa.natureza_juridica}
                 </span>
               </div>
@@ -94,8 +94,8 @@ export function EmpresaReceitaCard({ empresa }: EmpresaReceitaCardProps) {
           {empresa.capital_social && empresa.capital_social > 0 && (
             <div className="col-span-full flex items-center gap-2">
               <Banknote className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">Capital Social:</span>
-              <span className="text-sm font-medium text-foreground">
+              <span className="text-sm font-medium text-muted-foreground">Capital Social:</span>
+              <span className="text-base font-medium text-foreground">
                 {formatCurrency(empresa.capital_social)}
               </span>
             </div>
@@ -105,16 +105,16 @@ export function EmpresaReceitaCard({ empresa }: EmpresaReceitaCardProps) {
         {/* Atividade Principal */}
         {atividadePrincipal.length > 0 && (
           <div>
-            <h4 className="font-medium text-sm text-foreground mb-2">
+            <h4 className="font-semibold text-base text-foreground mb-2">
               Atividade Principal
             </h4>
-            <div className="bg-background rounded-lg p-3 border border-border/50">
+            <div className="bg-muted/30 rounded-lg p-3 border border-gray-200">
               {atividadePrincipal.map((atividade, index) => (
                 <div key={index}>
                   <span className="text-xs text-muted-foreground font-mono">
                     {atividade.code}
                   </span>
-                  <p className="text-sm text-foreground">{atividade.text}</p>
+                  <p className="text-base text-foreground">{atividade.text}</p>
                 </div>
               ))}
             </div>
@@ -124,16 +124,16 @@ export function EmpresaReceitaCard({ empresa }: EmpresaReceitaCardProps) {
         {/* Atividades Secundárias */}
         {atividadesSecundarias.length > 0 && (
           <div>
-            <h4 className="font-medium text-sm text-foreground mb-2">
+            <h4 className="font-semibold text-base text-foreground mb-2">
               Atividades Secundárias ({atividadesSecundarias.length})
             </h4>
-            <div className="space-y-1 max-h-40 overflow-y-auto bg-background rounded-lg border border-border/50 p-2">
+            <div className="space-y-1 max-h-40 overflow-y-auto bg-muted/30 rounded-lg border border-gray-200 p-2">
               {atividadesSecundarias.map((atividade, index) => (
                 <div key={index} className="text-sm p-2 hover:bg-muted/50 rounded">
                   <span className="text-xs text-muted-foreground font-mono">
                     {atividade.code}
                   </span>
-                  <p className="text-xs text-muted-foreground">{atividade.text}</p>
+                  <p className="text-sm text-muted-foreground">{atividade.text}</p>
                 </div>
               ))}
             </div>
@@ -142,7 +142,7 @@ export function EmpresaReceitaCard({ empresa }: EmpresaReceitaCardProps) {
 
         {/* Última consulta */}
         {empresa.cnpj_consultado_em && (
-          <p className="text-xs text-muted-foreground text-right">
+          <p className="text-sm text-muted-foreground text-right">
             Última consulta:{" "}
             {format(new Date(empresa.cnpj_consultado_em), "dd/MM/yyyy 'às' HH:mm", {
               locale: ptBR,
