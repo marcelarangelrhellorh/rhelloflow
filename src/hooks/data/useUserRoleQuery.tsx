@@ -41,13 +41,13 @@ export function useUserRoleQuery() {
 
   const userId = user?.id;
 
-  // Query de roles com cache de 10 minutos
+  // Query de roles com cache de 30 minutos (roles mudam muito raramente)
   const { data, isLoading, refetch } = useQuery({
     queryKey: queryKeys.userRoles(userId || ''),
     queryFn: () => fetchUserRoles(userId!),
     enabled: !!userId,
-    staleTime: CACHE_TIMES.USER_PROFILE.staleTime,
-    gcTime: CACHE_TIMES.USER_PROFILE.gcTime,
+    staleTime: 30 * 60 * 1000, // 30 minutos - roles mudam muito raramente
+    gcTime: 60 * 60 * 1000,    // 1 hora em cache
   });
 
   // Invalida cache quando auth muda

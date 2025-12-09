@@ -1,15 +1,14 @@
-import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { LayoutDashboard, Briefcase, Users, Building2, CheckSquare, BarChart3, ClipboardList, Wrench, FileText, MessageSquare, ChevronLeft, ChevronRight } from "lucide-react";
-import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
+import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useSidebarPrefetch } from "@/hooks/useSidebarPrefetch";
 import { UserMenu } from "./UserMenu";
 import { NotificationBell } from "./NotificationBell";
 import { ConnectionIndicator } from "./ConnectionIndicator";
-import logoLight from "@/assets/logo-rhello-light.png";
 import symbolLight from "@/assets/symbol-rhello-light.png";
 const menuItems = [{
   title: "Dashboard",
@@ -70,6 +69,7 @@ export function AppSidebar() {
     roles,
     loading: rolesLoading
   } = useUserRole();
+  const { prefetchRoute } = useSidebarPrefetch();
   const location = useLocation();
   const navigate = useNavigate();
   const isActive = (path: string) => {
@@ -128,14 +128,23 @@ export function AppSidebar() {
               {filteredMenuItems.map(item => <SidebarMenuItem key={item.title}>
                   {collapsed ? <Tooltip>
                       <TooltipTrigger asChild>
-                        <SidebarMenuButton onClick={() => navigate(item.url)} isActive={isActive(item.url)} className="justify-center">
+                        <SidebarMenuButton 
+                          onClick={() => navigate(item.url)} 
+                          onMouseEnter={() => prefetchRoute(item.url)}
+                          isActive={isActive(item.url)} 
+                          className="justify-center"
+                        >
                           <item.icon className="h-7 w-7" />
                         </SidebarMenuButton>
                       </TooltipTrigger>
                       <TooltipContent side="right">
                         {item.title}
                       </TooltipContent>
-                    </Tooltip> : <SidebarMenuButton onClick={() => navigate(item.url)} isActive={isActive(item.url)}>
+                    </Tooltip> : <SidebarMenuButton 
+                      onClick={() => navigate(item.url)} 
+                      onMouseEnter={() => prefetchRoute(item.url)}
+                      isActive={isActive(item.url)}
+                    >
                       <item.icon className="h-7 w-7" />
                       <span className="text-base">{item.title}</span>
                     </SidebarMenuButton>}
