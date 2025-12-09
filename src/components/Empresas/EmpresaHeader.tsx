@@ -40,7 +40,7 @@ export function EmpresaHeader({
   const clienteSince = dataPrimeiroContato || createdAt;
 
   return (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 p-4 bg-card border border-gray-300 rounded-lg shadow-md">
       <div className="flex items-center gap-4">
         <Button
           variant="ghost"
@@ -61,7 +61,7 @@ export function EmpresaHeader({
                 {(status || "ativo").charAt(0).toUpperCase() + (status || "ativo").slice(1)}
               </Badge>
               {clienteSince && (
-                <span className="text-sm text-muted-foreground">
+                <span className="text-base text-muted-foreground">
                   Cliente desde{" "}
                   {format(new Date(clienteSince), "dd/MM/yyyy", { locale: ptBR })}
                 </span>
@@ -71,11 +71,18 @@ export function EmpresaHeader({
         </div>
       </div>
       <div className="flex gap-2">
-        <Button variant="outline" onClick={onEdit}>
+        <Button 
+          variant="outline" 
+          onClick={onEdit}
+          className="border-gray-300 font-semibold"
+        >
           <Pencil className="h-4 w-4 mr-2" />
           Editar
         </Button>
-        <Button variant="destructive" onClick={onDelete}>
+        <Button 
+          onClick={onDelete}
+          className="bg-[#00141d] hover:bg-[#00141d]/90 text-white font-semibold"
+        >
           <Trash2 className="h-4 w-4 mr-2" />
           Excluir
         </Button>

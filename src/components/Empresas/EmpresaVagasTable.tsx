@@ -45,7 +45,7 @@ export function EmpresaVagasTable({ vagas, isLoading }: EmpresaVagasTableProps) 
 
   if (isLoading) {
     return (
-      <Card className="border-border/50">
+      <Card className="border border-gray-300 shadow-md">
         <CardHeader>
           <CardTitle className="text-lg font-semibold flex items-center gap-2">
             <Briefcase className="h-5 w-5" />
@@ -64,7 +64,7 @@ export function EmpresaVagasTable({ vagas, isLoading }: EmpresaVagasTableProps) 
   }
 
   return (
-    <Card className="border-border/50">
+    <Card className="border border-gray-300 shadow-md">
       <CardHeader className="pb-3">
         <CardTitle className="text-lg font-semibold flex items-center gap-2">
           <Briefcase className="h-5 w-5" />
@@ -73,29 +73,29 @@ export function EmpresaVagasTable({ vagas, isLoading }: EmpresaVagasTableProps) 
       </CardHeader>
       <CardContent>
         {!vagas || vagas.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-4">
+          <p className="text-base text-muted-foreground text-center py-4">
             Nenhuma vaga registrada para esta empresa.
           </p>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Título</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Data</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
+                <TableHead className="font-semibold">Título</TableHead>
+                <TableHead className="font-semibold">Status</TableHead>
+                <TableHead className="font-semibold">Data</TableHead>
+                <TableHead className="text-right font-semibold">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {vagas.map((vaga) => (
                 <TableRow key={vaga.id}>
-                  <TableCell className="font-medium">{vaga.titulo}</TableCell>
+                  <TableCell className="text-base font-medium">{vaga.titulo}</TableCell>
                   <TableCell>
                     <Badge className={getStatusColor(vaga.status_slug)}>
                       {getStatusLabel(vaga.status_slug)}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-muted-foreground">
+                  <TableCell className="text-base text-muted-foreground">
                     {format(new Date(vaga.criado_em), "dd/MM/yyyy", { locale: ptBR })}
                   </TableCell>
                   <TableCell className="text-right">
@@ -103,6 +103,7 @@ export function EmpresaVagasTable({ vagas, isLoading }: EmpresaVagasTableProps) 
                       variant="ghost"
                       size="sm"
                       onClick={() => navigate(`/vagas/${vaga.id}`)}
+                      className="hover:bg-muted"
                     >
                       <ExternalLink className="h-4 w-4" />
                     </Button>
