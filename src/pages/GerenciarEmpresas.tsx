@@ -218,8 +218,8 @@ export default function GerenciarEmpresas() {
                         </p>}
 
                         <div className="flex gap-1.5 pt-2 border-t border-gray-200">
-                          <Button size="sm" variant="outline" onClick={() => handleViewDetails(empresa)} className="px-2 py-1 h-7 text-xs bg-[#00141d] text-white">
-                            <Eye className="mr-1 h-2.5 w-2.5" />
+                          <Button size="sm" variant="outline" onClick={() => handleViewDetails(empresa)} className="px-1.5 py-0.5 h-6 text-xs bg-[#00141d] text-white">
+                            <Eye className="mr-0.5 h-2 w-2" />
                             Detalhes
                           </Button>
                           <Button size="sm" variant="outline" onClick={() => handleEdit(empresa)} className="px-2 py-1 h-7 text-xs">
