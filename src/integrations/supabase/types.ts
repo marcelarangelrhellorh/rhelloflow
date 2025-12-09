@@ -697,6 +697,47 @@ export type Database = {
         }
         Relationships: []
       }
+      empresa_notes: {
+        Row: {
+          content: string
+          created_at: string
+          documento_nome: string | null
+          documento_url: string | null
+          empresa_id: string
+          id: string
+          title: string | null
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          documento_nome?: string | null
+          documento_url?: string | null
+          empresa_id: string
+          id?: string
+          title?: string | null
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          documento_nome?: string | null
+          documento_url?: string | null
+          empresa_id?: string
+          id?: string
+          title?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "empresa_notes_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       empresas: {
         Row: {
           atividade_principal: Json | null
@@ -713,6 +754,7 @@ export type Database = {
           contato_principal_nome: string | null
           contato_principal_telefone: string | null
           created_at: string | null
+          cs_responsavel_id: string | null
           data_abertura: string | null
           data_primeiro_contato: string | null
           data_situacao_cadastral: string | null
@@ -751,6 +793,7 @@ export type Database = {
           contato_principal_nome?: string | null
           contato_principal_telefone?: string | null
           created_at?: string | null
+          cs_responsavel_id?: string | null
           data_abertura?: string | null
           data_primeiro_contato?: string | null
           data_situacao_cadastral?: string | null
@@ -789,6 +832,7 @@ export type Database = {
           contato_principal_nome?: string | null
           contato_principal_telefone?: string | null
           created_at?: string | null
+          cs_responsavel_id?: string | null
           data_abertura?: string | null
           data_primeiro_contato?: string | null
           data_situacao_cadastral?: string | null

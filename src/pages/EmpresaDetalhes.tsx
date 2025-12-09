@@ -21,6 +21,8 @@ import { EmpresaVagasTable } from "@/components/Empresas/EmpresaVagasTable";
 import { EmpresaContratacoesTable } from "@/components/Empresas/EmpresaContratacoesTable";
 import { EmpresaLinkedUsersCard } from "@/components/Empresas/EmpresaLinkedUsersCard";
 import { EmpresaFormModal } from "@/components/Empresas/EmpresaFormModal";
+import { EmpresaCSSelector } from "@/components/Empresas/EmpresaCSSelector";
+import { EmpresaNotesSection } from "@/components/Empresas/EmpresaNotesSection";
 import { PageSkeleton } from "@/components/skeletons/PageSkeleton";
 
 export default function EmpresaDetalhes() {
@@ -38,6 +40,7 @@ export default function EmpresaDetalhes() {
     vagasLoading,
     contratacoesLoading,
     deleteEmpresa,
+    refetch,
     vagasAbertas,
     vagasConcluidas,
     totalContratacoes,
@@ -107,6 +110,9 @@ export default function EmpresaDetalhes() {
             {/* Quadro Societário */}
             <EmpresaSociosCard empresa={empresa} />
 
+            {/* Histórico / Anotações */}
+            <EmpresaNotesSection empresaId={empresa.id} />
+
             {/* Histórico de Vagas */}
             <EmpresaVagasTable vagas={vagas} isLoading={vagasLoading} />
 
@@ -119,6 +125,13 @@ export default function EmpresaDetalhes() {
 
           {/* Right Column - Sidebar */}
           <div className="space-y-6">
+            {/* CS Responsável */}
+            <EmpresaCSSelector
+              empresaId={empresa.id}
+              currentCSId={empresa.cs_responsavel_id}
+              onUpdate={() => refetch()}
+            />
+
             {/* Usuários Vinculados */}
             <EmpresaLinkedUsersCard users={linkedUsers} />
           </div>

@@ -38,6 +38,8 @@ export interface Empresa {
   updated_at: string | null;
   data_primeiro_contato: string | null;
   pipeline_stage: string | null;
+  // CS responsável
+  cs_responsavel_id: string | null;
   // Dados Receita Federal
   situacao_cadastral: string | null;
   data_situacao_cadastral: string | null;
