@@ -699,9 +699,11 @@ export type Database = {
       }
       empresas: {
         Row: {
+          bairro: string | null
           cep: string | null
           cidade: string | null
           cnpj: string | null
+          complemento: string | null
           contato_principal_cargo: string | null
           contato_principal_email: string | null
           contato_principal_nome: string | null
@@ -713,9 +715,12 @@ export type Database = {
           estado: string | null
           id: string
           nome: string
+          nome_fantasia: string | null
+          numero: string | null
           observacoes: string | null
           pipeline_stage: string | null
           porte: string | null
+          razao_social: string | null
           setor: string | null
           site: string | null
           status: string | null
@@ -723,9 +728,11 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          bairro?: string | null
           cep?: string | null
           cidade?: string | null
           cnpj?: string | null
+          complemento?: string | null
           contato_principal_cargo?: string | null
           contato_principal_email?: string | null
           contato_principal_nome?: string | null
@@ -737,9 +744,12 @@ export type Database = {
           estado?: string | null
           id?: string
           nome: string
+          nome_fantasia?: string | null
+          numero?: string | null
           observacoes?: string | null
           pipeline_stage?: string | null
           porte?: string | null
+          razao_social?: string | null
           setor?: string | null
           site?: string | null
           status?: string | null
@@ -747,9 +757,11 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          bairro?: string | null
           cep?: string | null
           cidade?: string | null
           cnpj?: string | null
+          complemento?: string | null
           contato_principal_cargo?: string | null
           contato_principal_email?: string | null
           contato_principal_nome?: string | null
@@ -761,9 +773,12 @@ export type Database = {
           estado?: string | null
           id?: string
           nome?: string
+          nome_fantasia?: string | null
+          numero?: string | null
           observacoes?: string | null
           pipeline_stage?: string | null
           porte?: string | null
+          razao_social?: string | null
           setor?: string | null
           site?: string | null
           status?: string | null

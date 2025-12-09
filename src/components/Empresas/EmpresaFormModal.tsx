@@ -29,9 +29,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { X } from "lucide-react";
+import { X, Search, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { formatCNPJ } from "@/lib/cnpjUtils";
+import { useCNPJLookup, Socio } from "@/hooks/useCNPJLookup";
 
 interface ClientUser {
   id: string;
@@ -41,6 +43,8 @@ interface ClientUser {
 
 const empresaSchema = z.object({
   nome: z.string().min(1, "Nome é obrigatório"),
+  razao_social: z.string().optional(),
+  nome_fantasia: z.string().optional(),
   cnpj: z.string().optional(),
   setor: z.string().optional(),
   porte: z.enum(["Micro", "Pequena", "Média", "Grande"]).optional(),
@@ -49,6 +53,9 @@ const empresaSchema = z.object({
   email: z.string().email("Email inválido").optional().or(z.literal("")),
   site: z.string().optional(),
   endereco: z.string().optional(),
+  numero: z.string().optional(),
+  complemento: z.string().optional(),
+  bairro: z.string().optional(),
   cidade: z.string().optional(),
   estado: z.string().optional(),
   cep: z.string().optional(),
@@ -75,12 +82,13 @@ export function EmpresaFormModal({
   onSuccess,
 }: EmpresaFormModalProps) {
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
+  const [quadroSocietario, setQuadroSocietario] = useState<Socio[]>([]);
+  const { loading: cnpjLoading, consultarCNPJ } = useCNPJLookup();
 
   // Buscar usuários com role 'client'
   const { data: clientUsers = [] } = useQuery({
     queryKey: ["client-users-for-linking"],
     queryFn: async () => {
-      // Buscar IDs de usuários com role 'client'
       const { data: roleData, error: roleError } = await supabase
         .from("user_roles")
         .select("user_id")
@@ -91,7 +99,6 @@ export function EmpresaFormModal({
 
       const userIds = roleData.map((r) => r.user_id);
 
-      // Buscar profiles desses usuários
       const { data: profiles, error: profileError } = await supabase
         .from("profiles")
         .select("id, full_name, empresa_id")
@@ -103,12 +110,10 @@ export function EmpresaFormModal({
     enabled: open,
   });
 
-  // Usuários disponíveis (não vinculados ou vinculados a esta empresa)
   const availableUsers = clientUsers.filter(
     (user) => !user.empresa_id || user.empresa_id === empresa?.id
   );
 
-  // Usuários já vinculados a esta empresa (para edição)
   const linkedUsers = clientUsers.filter(
     (user) => user.empresa_id === empresa?.id
   );
@@ -117,6 +122,8 @@ export function EmpresaFormModal({
     resolver: zodResolver(empresaSchema),
     defaultValues: {
       nome: "",
+      razao_social: "",
+      nome_fantasia: "",
       cnpj: "",
       setor: "",
       status: "prospect",
@@ -124,6 +131,9 @@ export function EmpresaFormModal({
       email: "",
       site: "",
       endereco: "",
+      numero: "",
+      complemento: "",
+      bairro: "",
       cidade: "",
       estado: "",
       cep: "",
@@ -139,6 +149,8 @@ export function EmpresaFormModal({
     if (empresa) {
       form.reset({
         nome: empresa.nome || "",
+        razao_social: empresa.razao_social || "",
+        nome_fantasia: empresa.nome_fantasia || "",
         cnpj: empresa.cnpj || "",
         setor: empresa.setor || "",
         porte: empresa.porte || undefined,
@@ -147,6 +159,9 @@ export function EmpresaFormModal({
         email: empresa.email || "",
         site: empresa.site || "",
         endereco: empresa.endereco || "",
+        numero: empresa.numero || "",
+        complemento: empresa.complemento || "",
+        bairro: empresa.bairro || "",
         cidade: empresa.cidade || "",
         estado: empresa.estado || "",
         cep: empresa.cep || "",
@@ -156,11 +171,12 @@ export function EmpresaFormModal({
         contato_principal_telefone: empresa.contato_principal_telefone || "",
         observacoes: empresa.observacoes || "",
       });
-      // Setar usuários já vinculados
       setSelectedUserIds(linkedUsers.map((u) => u.id));
     } else {
       form.reset({
         nome: "",
+        razao_social: "",
+        nome_fantasia: "",
         cnpj: "",
         setor: "",
         status: "prospect",
@@ -168,6 +184,9 @@ export function EmpresaFormModal({
         email: "",
         site: "",
         endereco: "",
+        numero: "",
+        complemento: "",
+        bairro: "",
         cidade: "",
         estado: "",
         cep: "",
@@ -178,6 +197,7 @@ export function EmpresaFormModal({
         observacoes: "",
       });
       setSelectedUserIds([]);
+      setQuadroSocietario([]);
     }
   }, [empresa, form, linkedUsers.length]);
 
@@ -187,6 +207,53 @@ export function EmpresaFormModal({
         ? prev.filter((id) => id !== userId)
         : [...prev, userId]
     );
+  };
+
+  const handleConsultarCNPJ = async () => {
+    const cnpjValue = form.getValues("cnpj");
+    if (!cnpjValue || cnpjValue.length < 18) {
+      toast.error("Digite um CNPJ válido para consultar");
+      return;
+    }
+
+    const dados = await consultarCNPJ(cnpjValue);
+    
+    if (dados) {
+      // Preencher campos automaticamente
+      form.setValue("razao_social", dados.razao_social);
+      form.setValue("nome_fantasia", dados.nome_fantasia);
+      form.setValue("endereco", dados.endereco);
+      form.setValue("numero", dados.numero);
+      form.setValue("complemento", dados.complemento);
+      form.setValue("bairro", dados.bairro);
+      form.setValue("cidade", dados.cidade);
+      form.setValue("estado", dados.estado);
+      form.setValue("cep", dados.cep);
+      form.setValue("telefone", dados.telefone);
+      form.setValue("email", dados.email);
+      
+      // Se nome da empresa estiver vazio, preencher com nome fantasia ou razão social
+      const nomeAtual = form.getValues("nome");
+      if (!nomeAtual) {
+        form.setValue("nome", dados.nome_fantasia || dados.razao_social);
+      }
+
+      // Atualizar quadro societário do hook
+      const { quadroSocietario: socios } = await consultarCNPJ(cnpjValue) ? 
+        { quadroSocietario: [] } : { quadroSocietario: [] };
+      
+      // Buscar novamente para pegar quadro societário
+      const response = await supabase.functions.invoke('consultar-cnpj', {
+        body: { cnpj: cnpjValue.replace(/\D/g, '') }
+      });
+      
+      if (response.data?.qsa) {
+        setQuadroSocietario(response.data.qsa.map((s: any) => ({
+          nome: s.nome || '',
+          qual: s.qual || 'Sócio'
+        })));
+      }
+    }
   };
 
   const onSubmit = async (data: EmpresaFormData) => {
@@ -217,9 +284,7 @@ export function EmpresaFormModal({
         empresaId = newEmpresa.id;
       }
 
-      // Atualizar vinculações de usuários
       if (empresaId) {
-        // Desvincular usuários que foram removidos
         const previousUserIds = linkedUsers.map((u) => u.id);
         const usersToUnlink = previousUserIds.filter(
           (id) => !selectedUserIds.includes(id)
@@ -228,7 +293,6 @@ export function EmpresaFormModal({
           (id) => !previousUserIds.includes(id)
         );
 
-        // Desvincular
         if (usersToUnlink.length > 0) {
           await supabase
             .from("profiles")
@@ -236,7 +300,6 @@ export function EmpresaFormModal({
             .in("id", usersToUnlink);
         }
 
-        // Vincular novos
         if (usersToLink.length > 0) {
           await supabase
             .from("profiles")
@@ -266,9 +329,78 @@ export function EmpresaFormModal({
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {/* Informações Básicas */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-[#00141D]">
+              <h3 className="text-lg font-semibold text-foreground">
                 Informações Básicas
               </h3>
+
+              {/* CNPJ com botão de consulta */}
+              <div className="flex gap-2">
+                <FormField
+                  control={form.control}
+                  name="cnpj"
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel>CNPJ</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="00.000.000/0000-00"
+                          value={field.value}
+                          onChange={(e) => {
+                            const formatted = formatCNPJ(e.target.value);
+                            field.onChange(formatted);
+                          }}
+                          maxLength={18}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleConsultarCNPJ}
+                  disabled={cnpjLoading || !form.watch("cnpj") || form.watch("cnpj")?.length < 18}
+                  className="mt-8 gap-2"
+                >
+                  {cnpjLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Search className="h-4 w-4" />
+                  )}
+                  Consultar
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="razao_social"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Razão Social</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Razão social" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="nome_fantasia"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nome Fantasia</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Nome fantasia" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <FormField
@@ -287,22 +419,6 @@ export function EmpresaFormModal({
 
                 <FormField
                   control={form.control}
-                  name="cnpj"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>CNPJ</FormLabel>
-                      <FormControl>
-                        <Input placeholder="00.000.000/0000-00" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="grid grid-cols-3 gap-4">
-                <FormField
-                  control={form.control}
                   name="setor"
                   render={({ field }) => (
                     <FormItem>
@@ -314,7 +430,9 @@ export function EmpresaFormModal({
                     </FormItem>
                   )}
                 />
+              </div>
 
+              <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="porte"
@@ -364,9 +482,31 @@ export function EmpresaFormModal({
               </div>
             </div>
 
+            {/* Quadro Societário */}
+            {quadroSocietario.length > 0 && (
+              <div className="space-y-4 rounded-lg border p-4 bg-muted/50">
+                <h3 className="text-lg font-semibold text-foreground">
+                  Quadro Societário
+                </h3>
+                <div className="grid gap-2">
+                  {quadroSocietario.map((socio, index) => (
+                    <div
+                      key={index}
+                      className="flex justify-between items-center p-3 bg-background rounded-lg border"
+                    >
+                      <span className="font-medium text-sm">{socio.nome}</span>
+                      <Badge variant="secondary" className="text-xs">
+                        {socio.qual}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Contato da Empresa */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-[#00141D]">
+              <h3 className="text-lg font-semibold text-foreground">
                 Contato da Empresa
               </h3>
 
@@ -417,21 +557,67 @@ export function EmpresaFormModal({
 
             {/* Endereço */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-[#00141D]">Endereço</h3>
+              <h3 className="text-lg font-semibold text-foreground">Endereço</h3>
 
-              <FormField
-                control={form.control}
-                name="endereco"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Endereço</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Rua, número, complemento" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="grid grid-cols-3 gap-4">
+                <FormField
+                  control={form.control}
+                  name="endereco"
+                  render={({ field }) => (
+                    <FormItem className="col-span-2">
+                      <FormLabel>Logradouro</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Rua, Avenida..." {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="numero"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Número</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Nº" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="complemento"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Complemento</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Sala, Andar..." {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="bairro"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Bairro</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Bairro" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
               <div className="grid grid-cols-3 gap-4">
                 <FormField
@@ -480,7 +666,7 @@ export function EmpresaFormModal({
 
             {/* Contato Principal */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-[#00141D]">
+              <h3 className="text-lg font-semibold text-foreground">
                 Contato Principal
               </h3>
 
@@ -547,7 +733,7 @@ export function EmpresaFormModal({
 
             {/* Usuários Externos Vinculados */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-[#00141D]">
+              <h3 className="text-lg font-semibold text-foreground">
                 Usuários Externos Vinculados
               </h3>
               
@@ -626,7 +812,7 @@ export function EmpresaFormModal({
               </Button>
               <Button
                 type="submit"
-                className="bg-[#ffcd00] hover:bg-[#ffcd00]/90 text-black font-semibold"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
               >
                 {empresa ? "Salvar Alterações" : "Criar Cliente"}
               </Button>
