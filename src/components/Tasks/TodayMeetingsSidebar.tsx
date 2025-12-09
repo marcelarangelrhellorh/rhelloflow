@@ -46,8 +46,8 @@ export default function TodayMeetingsSidebar({ onEventClick }: TodayMeetingsSide
 
   if (connectionLoading) {
     return (
-      <Card className="h-fit">
-        <CardHeader className="p-3">
+      <Card className="w-full shadow-sm">
+        <CardHeader className="p-3 pb-2">
           <Skeleton className="h-5 w-32" />
         </CardHeader>
         <CardContent className="p-3 pt-0">
@@ -89,97 +89,95 @@ export default function TodayMeetingsSidebar({ onEventClick }: TodayMeetingsSide
   };
 
   return (
-    <div className="w-full xl:w-56 flex-shrink-0">
-      <Card className="h-fit shadow-sm">
-        <CardHeader className="p-3 pb-2">
-          <CardTitle className="text-sm font-semibold flex items-center gap-2 text-[#00141d]">
-            <Calendar className="h-4 w-4 text-[#ffcd00]" />
-            Reuniões de Hoje
-            {todayMeetings.length > 0 && (
-              <Badge variant="secondary" className="ml-auto text-xs px-1.5 py-0">
-                {todayMeetings.length}
-              </Badge>
-            )}
-          </CardTitle>
-        </CardHeader>
-        
-        <Separator />
-        
-        <CardContent className="p-2">
-          {eventsLoading ? (
-            <div className="space-y-2">
-              {[1, 2].map(i => (
-                <Skeleton key={i} className="h-14 w-full" />
-              ))}
-            </div>
-          ) : todayMeetings.length === 0 ? (
-            <div className="text-center py-4">
-              <Video className="h-8 w-8 mx-auto text-muted-foreground/40 mb-2" />
-              <p className="text-xs text-muted-foreground">
-                Nenhuma reunião hoje
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-2 max-h-[400px] overflow-y-auto">
-              {todayMeetings.map((event: any) => {
-                const isNow = isEventNow(event);
-                const isPast = isEventPast(event);
-                
-                return (
-                  <div
-                    key={event.id}
-                    onClick={() => onEventClick?.(event)}
-                    className={`p-2 rounded-md border cursor-pointer transition-colors ${
-                      isNow 
-                        ? "bg-[#ffcd00]/20 border-[#ffcd00]" 
-                        : isPast 
-                          ? "bg-muted/50 opacity-60" 
-                          : "bg-white hover:bg-muted/50 border-border"
-                    }`}
-                  >
-                    <div className="flex items-start gap-2">
-                      <div className={`p-1 rounded ${isNow ? "bg-[#ffcd00]" : "bg-[#00141d]"}`}>
-                        <Video className={`h-3 w-3 ${isNow ? "text-[#00141d]" : "text-white"}`} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className={`text-xs font-medium truncate ${isPast ? "line-through" : ""}`}>
-                          {event.summary || "Sem título"}
-                        </p>
-                        <div className="flex items-center gap-1 mt-0.5">
-                          <Clock className="h-3 w-3 text-muted-foreground" />
-                          <span className="text-[10px] text-muted-foreground">
-                            {formatEventTime(event)}
-                          </span>
-                          {isNow && (
-                            <Badge className="text-[9px] px-1 py-0 h-4 bg-green-500">
-                              Agora
-                            </Badge>
-                          )}
-                        </div>
+    <Card className="w-full shadow-sm">
+      <CardHeader className="p-3 pb-2">
+        <CardTitle className="text-sm font-semibold flex items-center gap-2 text-[#00141d]">
+          <Calendar className="h-4 w-4 text-[#ffcd00]" />
+          Reuniões de Hoje
+          {todayMeetings.length > 0 && (
+            <Badge variant="secondary" className="ml-auto text-xs px-1.5 py-0">
+              {todayMeetings.length}
+            </Badge>
+          )}
+        </CardTitle>
+      </CardHeader>
+      
+      <Separator />
+      
+      <CardContent className="p-2">
+        {eventsLoading ? (
+          <div className="space-y-2">
+            {[1, 2].map(i => (
+              <Skeleton key={i} className="h-14 w-full" />
+            ))}
+          </div>
+        ) : todayMeetings.length === 0 ? (
+          <div className="text-center py-4">
+            <Video className="h-8 w-8 mx-auto text-muted-foreground/40 mb-2" />
+            <p className="text-xs text-muted-foreground">
+              Nenhuma reunião hoje
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-2 max-h-[300px] overflow-y-auto">
+            {todayMeetings.map((event: any) => {
+              const isNow = isEventNow(event);
+              const isPast = isEventPast(event);
+              
+              return (
+                <div
+                  key={event.id}
+                  onClick={() => onEventClick?.(event)}
+                  className={`p-2 rounded-md border cursor-pointer transition-colors ${
+                    isNow 
+                      ? "bg-[#ffcd00]/20 border-[#ffcd00]" 
+                      : isPast 
+                        ? "bg-muted/50 opacity-60" 
+                        : "bg-white hover:bg-muted/50 border-border"
+                  }`}
+                >
+                  <div className="flex items-start gap-2">
+                    <div className={`p-1 rounded ${isNow ? "bg-[#ffcd00]" : "bg-[#00141d]"}`}>
+                      <Video className={`h-3 w-3 ${isNow ? "text-[#00141d]" : "text-white"}`} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-xs font-medium truncate ${isPast ? "line-through" : ""}`}>
+                        {event.summary || "Sem título"}
+                      </p>
+                      <div className="flex items-center gap-1 mt-0.5">
+                        <Clock className="h-3 w-3 text-muted-foreground" />
+                        <span className="text-[10px] text-muted-foreground">
+                          {formatEventTime(event)}
+                        </span>
+                        {isNow && (
+                          <Badge className="text-[9px] px-1 py-0 h-4 bg-green-500">
+                            Agora
+                          </Badge>
+                        )}
                       </div>
                     </div>
-                    
-                    {event.hangoutLink && !isPast && (
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="w-full mt-1.5 h-6 text-[10px] gap-1"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          window.open(event.hangoutLink, '_blank');
-                        }}
-                      >
-                        <ExternalLink className="h-3 w-3" />
-                        Entrar na reunião
-                      </Button>
-                    )}
                   </div>
-                );
-              })}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+                  
+                  {event.hangoutLink && !isPast && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="w-full mt-1.5 h-6 text-[10px] gap-1"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        window.open(event.hangoutLink, '_blank');
+                      }}
+                    >
+                      <ExternalLink className="h-3 w-3" />
+                      Entrar na reunião
+                    </Button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
