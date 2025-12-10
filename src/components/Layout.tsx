@@ -2,11 +2,12 @@ import { AppSidebar } from "./AppSidebar";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { SkipLink } from "@/components/ui/skip-link";
 import { Outlet, Navigate, useNavigate, useLocation } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { LayoutSkeleton } from "@/components/skeletons/LayoutSkeleton";
 
 export function Layout() {
   const [user, setUser] = useState<User | null>(null);
@@ -52,18 +53,11 @@ export function Layout() {
     }
   }, [loading, rolesLoading, user, roles, location.pathname, navigate]);
 
-  if (loading || rolesLoading) {
-    return (
-      <div 
-        className="flex min-h-screen items-center justify-center"
-        role="status"
-        aria-live="polite"
-        aria-label="Carregando aplicação"
-      >
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" aria-hidden="true" />
-        <span className="sr-only">Carregando...</span>
-      </div>
-    );
+  // Memoize the loading state check
+  const isFullyLoading = useMemo(() => loading || rolesLoading, [loading, rolesLoading]);
+
+  if (isFullyLoading) {
+    return <LayoutSkeleton />;
   }
   
   if (!user) {

@@ -1,45 +1,43 @@
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { memo, useCallback, Suspense, lazy } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Briefcase, Users, AlertTriangle, MessageSquare, Clock, Target, XCircle, Share2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { RejectedCandidatesCard } from "@/components/Dashboard/RejectedCandidatesCard";
-import { SharedJobsCard } from "@/components/Dashboard/SharedJobsCard";
-import { handleApiError, redirectToLogin } from "@/lib/errorHandler";
 import { ErrorState } from "@/components/ui/error-state";
+import { useDashboardData } from "@/hooks/data/useDashboardQuery";
+import { DashboardSkeleton } from "@/components/skeletons/DashboardSkeleton";
+import { Skeleton } from "@/components/ui/skeleton";
+
+// Lazy load secondary cards
+const RejectedCandidatesCard = lazy(() => 
+  import("@/components/Dashboard/RejectedCandidatesCard").then(m => ({ default: m.RejectedCandidatesCard }))
+);
+const SharedJobsCard = lazy(() => 
+  import("@/components/Dashboard/SharedJobsCard").then(m => ({ default: m.SharedJobsCard }))
+);
 
 // Utility functions
 const formatInt = (n: number): string => Math.round(n).toString();
 const formatPercent = (n: number): string => `${Math.round(n)}%`;
 
-// Skeleton component
-const KPISkeleton = () => <Card className="overflow-hidden">
+// Card skeleton for lazy loaded cards
+const CardSkeleton = () => (
+  <Card className="overflow-hidden border-l-4 border-l-muted">
     <CardContent className="p-6">
       <div className="flex items-start justify-between">
         <div className="space-y-3 flex-1">
-          <div className="h-4 w-24 bg-muted-foreground/20 rounded animate-shimmer" style={{
-          backgroundImage: "linear-gradient(90deg, transparent, rgba(255,205,0,0.1), transparent)",
-          backgroundSize: "1000px 100%"
-        }} />
-          <div className="h-12 w-20 bg-muted-foreground/20 rounded animate-shimmer" style={{
-          backgroundImage: "linear-gradient(90deg, transparent, rgba(255,205,0,0.1), transparent)",
-          backgroundSize: "1000px 100%"
-        }} />
-          <div className="h-3 w-32 bg-muted-foreground/20 rounded animate-shimmer" style={{
-          backgroundImage: "linear-gradient(90deg, transparent, rgba(255,205,0,0.1), transparent)",
-          backgroundSize: "1000px 100%"
-        }} />
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-12 w-20" />
+          <Skeleton className="h-3 w-32" />
         </div>
-        <div className="h-14 w-14 bg-muted-foreground/20 rounded-full animate-shimmer" style={{
-        backgroundImage: "linear-gradient(90deg, transparent, rgba(255,205,0,0.1), transparent)",
-        backgroundSize: "1000px 100%"
-      }} />
+        <Skeleton className="h-14 w-14 rounded-full" />
       </div>
     </CardContent>
-  </Card>;
+  </Card>
+);
+
 interface KPICardProps {
   title: string;
   value: string;
@@ -54,7 +52,8 @@ interface KPICardProps {
   pulse?: boolean;
   disabled?: boolean;
 }
-const KPICard = ({
+
+const KPICard = memo(function KPICard({
   title,
   value,
   subtitle,
@@ -67,14 +66,23 @@ const KPICard = ({
   tooltip,
   pulse = false,
   disabled = false
-}: KPICardProps) => {
+}: KPICardProps) {
   const isClickable = onClick && !disabled;
-  return <Card className={`
+  return (
+    <Card 
+      className={`
         overflow-hidden border-l-4 ${borderColor}
         ${isClickable ? 'cursor-pointer hover:shadow-lg hover:-translate-y-1' : 'cursor-default'}
         transition-all duration-150
         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
-      `} onClick={isClickable ? onClick : undefined} onKeyDown={e => isClickable && e.key === 'Enter' && onClick()} tabIndex={isClickable ? 0 : -1} role={isClickable ? "button" : undefined} aria-label={ariaLabel} title={tooltip}>
+      `} 
+      onClick={isClickable ? onClick : undefined} 
+      onKeyDown={e => isClickable && e.key === 'Enter' && onClick()} 
+      tabIndex={isClickable ? 0 : -1} 
+      role={isClickable ? "button" : undefined} 
+      aria-label={ariaLabel} 
+      title={tooltip}
+    >
       <CardContent className="p-6">
         <div className="flex items-start justify-between">
           <div className="space-y-2 flex-1">
@@ -83,155 +91,48 @@ const KPICard = ({
             <p className="text-muted-foreground font-medium text-base">{subtitle}</p>
           </div>
           <div className={`
-              rounded-full p-4 ${iconBgColor} ${iconColor}
-              ${pulse ? 'animate-pulse-glow' : ''}
-              ${isClickable ? 'group-hover:scale-110' : ''}
-              transition-transform duration-150
-            `}>
+            rounded-full p-4 ${iconBgColor} ${iconColor}
+            ${pulse ? 'animate-pulse-glow' : ''}
+            ${isClickable ? 'group-hover:scale-110' : ''}
+            transition-transform duration-150
+          `}>
             {icon}
           </div>
         </div>
       </CardContent>
-    </Card>;
-};
+    </Card>
+  );
+});
+
 export default function Dashboard() {
   const navigate = useNavigate();
-  const [stats, setStats] = useState({
-    vagasAbertas: 0,
-    candidatosAtivos: 0,
-    vagasAtencao: 0,
-    idsVagasAtencao: [] as string[],
-    mediaFechamento: 0,
-    taxaAprovacao: 0,
-    feedbacksPendentes: 0,
-    vagasCanceladas: 0
-  });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-  const [userName, setUserName] = useState<string>("");
-  const [periodFilter] = useState("30dias"); // Fixo por enquanto
-  const [recrutadorFilter] = useState("todos"); // UI apenas
-  const [csFilter] = useState("todos"); // UI apenas
+  const { stats, userName, isLoading, error, refetch } = useDashboardData();
 
-  useEffect(() => {
-    loadData();
-  }, []);
-  const loadUserProfile = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("full_name")
-          .eq("id", user.id)
-          .maybeSingle();
-        if (profile) {
-          setUserName(profile.full_name);
-        }
-      }
-    } catch (error) {
-      handleApiError(error, { 
-        context: "ao carregar perfil", 
-        showToast: false,
-        onAuthError: redirectToLogin 
-      });
-    }
-  };
-
-  const loadDashboardOverview = async () => {
-    try {
-      // Usar função RPC segura que acessa materialized view otimizada
-      const { data, error: queryError } = await supabase
-        .rpc('get_dashboard_overview_secure')
-        .single();
-      
-      if (queryError) {
-        // Fallback para view normal se RPC falhar
-        const { data: fallbackData, error: fallbackError } = await supabase
-          .from('dashboard_overview')
-          .select('*')
-          .single();
-        
-        if (fallbackError) throw fallbackError;
-        
-        const { count: canceladasCount } = await supabase
-          .from('vagas')
-          .select('*', { count: 'exact', head: true })
-          .eq('status', 'Cancelada')
-          .is('deleted_at', null);
-
-        setStats({
-          vagasAbertas: fallbackData.vagas_abertas ?? 0,
-          candidatosAtivos: fallbackData.candidatos_ativos ?? 0,
-          vagasAtencao: fallbackData.vagas_atencao ?? 0,
-          idsVagasAtencao: fallbackData.ids_vagas_atencao ?? [],
-          mediaFechamento: fallbackData.media_dias_fechamento ?? 0,
-          taxaAprovacao: fallbackData.taxa_aprovacao ?? 0,
-          feedbacksPendentes: fallbackData.feedbacks_pendentes ?? 0,
-          vagasCanceladas: canceladasCount ?? 0
-        });
-      } else {
-        // Usar dados da materialized view otimizada
-        const { count: canceladasCount } = await supabase
-          .from('vagas')
-          .select('*', { count: 'exact', head: true })
-          .eq('status', 'Cancelada')
-          .is('deleted_at', null);
-
-        setStats({
-          vagasAbertas: data?.vagas_abertas ?? 0,
-          candidatosAtivos: data?.candidatos_ativos ?? 0,
-          vagasAtencao: data?.vagas_atencao ?? 0,
-          idsVagasAtencao: data?.ids_vagas_atencao ?? [],
-          mediaFechamento: data?.media_dias_fechamento ?? 0,
-          taxaAprovacao: data?.taxa_aprovacao ?? 0,
-          feedbacksPendentes: data?.feedbacks_pendentes ?? 0,
-          vagasCanceladas: canceladasCount ?? 0
-        });
-      }
-      setError(false);
-    } catch (error) {
-      const { code } = handleApiError(error, { 
-        context: "ao carregar dashboard",
-        showToast: false,
-        onAuthError: redirectToLogin
-      });
-      setError(true);
-      if (code !== 'AUTH') throw error;
-    }
-  };
-
-  const loadData = async () => {
-    setLoading(true);
-    try {
-      await loadUserProfile();
-      await loadDashboardOverview();
-    } catch (error) {
-      // Erro já tratado nas funções individuais
-    } finally {
-      setLoading(false);
-    }
-  };
-  const handleRetry = () => {
-    setError(false);
-    loadData();
-  };
-  const handleVagasAbertasClick = () => navigate('/vagas?status=ativas');
-  const handleCandidatosAtivosClick = () => navigate('/candidatos?status=ativos');
-  const handleAtencaoClick = () => {
+  // Memoized handlers
+  const handleVagasAbertasClick = useCallback(() => navigate('/vagas?status=ativas'), [navigate]);
+  const handleCandidatosAtivosClick = useCallback(() => navigate('/candidatos?status=ativos'), [navigate]);
+  const handleAtencaoClick = useCallback(() => {
     const ids = stats.idsVagasAtencao.join(',');
     navigate(`/vagas?attention=out_of_sla&ids=${encodeURIComponent(ids)}`);
-  };
-  const handleFeedbacksClick = () => navigate('/feedbacks-pendentes');
-  const handleTempoMedioClick = () => navigate('/vagas?metric=avg_time_to_close');
-  const handleTaxaAprovacaoClick = () => navigate('/relatorios?focus=conversion');
-  const handleVagasCanceladasClick = () => navigate('/vagas?status=Cancelada');
-  const copyPublicFormLink = () => {
+  }, [navigate, stats.idsVagasAtencao]);
+  const handleFeedbacksClick = useCallback(() => navigate('/feedbacks-pendentes'), [navigate]);
+  const handleTempoMedioClick = useCallback(() => navigate('/vagas?metric=avg_time_to_close'), [navigate]);
+  const handleTaxaAprovacaoClick = useCallback(() => navigate('/relatorios?focus=conversion'), [navigate]);
+  const handleVagasCanceladasClick = useCallback(() => navigate('/vagas?status=Cancelada'), [navigate]);
+  
+  const copyPublicFormLink = useCallback(() => {
     const link = `${window.location.origin}/solicitar-vaga`;
     navigator.clipboard.writeText(link);
     toast.success("Link copiado para a área de transferência!");
-  };
-  return <div className="min-h-screen bg-background">
+  }, []);
+
+  // Show skeleton on initial load
+  if (isLoading) {
+    return <DashboardSkeleton />;
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="px-4 sm:px-6 md:px-8 py-4 sm:py-6 max-w-[1400px] mx-auto">
@@ -245,7 +146,7 @@ export default function Dashboard() {
             
             {/* Filtros - UI apenas por enquanto */}
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 overflow-x-auto pb-1">
-              <Select value={periodFilter} disabled>
+              <Select value="30dias" disabled>
                 <SelectTrigger className="w-full sm:w-[180px] min-w-0">
                   <SelectValue placeholder="Período" />
                 </SelectTrigger>
@@ -254,7 +155,7 @@ export default function Dashboard() {
                 </SelectContent>
               </Select>
               
-              <Select value={recrutadorFilter} disabled>
+              <Select value="todos" disabled>
                 <SelectTrigger className="w-full sm:w-[180px] min-w-0">
                   <SelectValue placeholder="Recrutador" />
                 </SelectTrigger>
@@ -263,7 +164,7 @@ export default function Dashboard() {
                 </SelectContent>
               </Select>
               
-              <Select value={csFilter} disabled>
+              <Select value="todos" disabled>
                 <SelectTrigger className="w-full sm:w-[180px] min-w-0">
                   <SelectValue placeholder="CS" />
                 </SelectTrigger>
@@ -283,13 +184,13 @@ export default function Dashboard() {
             <ErrorState 
               code="SERVER"
               message="Não foi possível carregar os indicadores."
-              onRetry={handleRetry}
+              onRetry={refetch}
               compact
             />
           </div>
         )}
 
-        {/* Ações Rápidas - Movidas para cima */}
+        {/* Ações Rápidas */}
         <div className="mb-4 sm:mb-6">
           <h2 className="text-sm sm:text-base font-semibold text-foreground mb-2 sm:mb-3">Ações rápidas</h2>
           <div className="flex flex-wrap gap-2 sm:gap-3">
@@ -303,43 +204,111 @@ export default function Dashboard() {
 
         {/* KPI Cards Grid */}
         <div className="grid gap-3 sm:gap-6 mb-6 sm:mb-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          {loading ? <>
-              <KPISkeleton />
-              <KPISkeleton />
-              <KPISkeleton />
-              <KPISkeleton />
-              <KPISkeleton />
-              <KPISkeleton />
-              <KPISkeleton />
-            </> : <>
-              {/* 1. Vagas Abertas */}
-              <KPICard title="Vagas Abertas" value={formatInt(stats.vagasAbertas)} subtitle="Vagas ativas no momento" icon={<Briefcase className="h-7 w-7" />} borderColor="border-l-primary" iconBgColor="bg-primary/10" iconColor="text-primary" onClick={handleVagasAbertasClick} ariaLabel={`Abrir vagas ativas (${stats.vagasAbertas} vagas)`} />
+          {/* 1. Vagas Abertas */}
+          <KPICard 
+            title="Vagas Abertas" 
+            value={formatInt(stats.vagasAbertas)} 
+            subtitle="Vagas ativas no momento" 
+            icon={<Briefcase className="h-7 w-7" />} 
+            borderColor="border-l-primary" 
+            iconBgColor="bg-primary/10" 
+            iconColor="text-primary" 
+            onClick={handleVagasAbertasClick} 
+            ariaLabel={`Abrir vagas ativas (${stats.vagasAbertas} vagas)`} 
+          />
 
-              {/* 2. Vagas Compartilhadas via Link */}
-              <SharedJobsCard />
+          {/* 2. Vagas Compartilhadas via Link - Lazy loaded */}
+          <Suspense fallback={<CardSkeleton />}>
+            <SharedJobsCard />
+          </Suspense>
 
-              {/* 3. Vagas Fora do Prazo */}
-              <KPICard title="Vagas Fora do Prazo" value={formatInt(stats.vagasAtencao)} subtitle="Vagas com mais de 30 dias úteis" icon={<AlertTriangle className="h-7 w-7" />} borderColor="border-l-warning" iconBgColor="bg-warning/10" iconColor={stats.vagasAtencao > 0 ? "text-warning" : "text-muted-foreground"} onClick={handleAtencaoClick} ariaLabel={`Abrir vagas fora do SLA (${stats.vagasAtencao} vagas)`} tooltip="Tempo acima do SLA de 30 dias úteis" disabled={stats.vagasAtencao === 0} />
+          {/* 3. Vagas Fora do Prazo */}
+          <KPICard 
+            title="Vagas Fora do Prazo" 
+            value={formatInt(stats.vagasAtencao)} 
+            subtitle="Vagas com mais de 30 dias úteis" 
+            icon={<AlertTriangle className="h-7 w-7" />} 
+            borderColor="border-l-warning" 
+            iconBgColor="bg-warning/10" 
+            iconColor={stats.vagasAtencao > 0 ? "text-warning" : "text-muted-foreground"} 
+            onClick={handleAtencaoClick} 
+            ariaLabel={`Abrir vagas fora do SLA (${stats.vagasAtencao} vagas)`} 
+            tooltip="Tempo acima do SLA de 30 dias úteis" 
+            disabled={stats.vagasAtencao === 0} 
+          />
 
-              {/* 4. Vagas Canceladas */}
-              <KPICard title="Vagas Canceladas" value={formatInt(stats.vagasCanceladas)} subtitle="Total de vagas canceladas" icon={<XCircle className="h-7 w-7" />} borderColor="border-l-destructive" iconBgColor="bg-destructive/10" iconColor="text-destructive" onClick={handleVagasCanceladasClick} ariaLabel={`Ver vagas canceladas (${stats.vagasCanceladas} vagas)`} />
+          {/* 4. Vagas Canceladas */}
+          <KPICard 
+            title="Vagas Canceladas" 
+            value={formatInt(stats.vagasCanceladas)} 
+            subtitle="Total de vagas canceladas" 
+            icon={<XCircle className="h-7 w-7" />} 
+            borderColor="border-l-destructive" 
+            iconBgColor="bg-destructive/10" 
+            iconColor="text-destructive" 
+            onClick={handleVagasCanceladasClick} 
+            ariaLabel={`Ver vagas canceladas (${stats.vagasCanceladas} vagas)`} 
+          />
 
-              {/* 5. Tempo médio de fechamento */}
-              <KPICard title="Tempo médio de fechamento" value={`${formatInt(stats.mediaFechamento)}d`} subtitle="Média dos últimos 30 dias" icon={<Clock className="h-7 w-7" />} borderColor="border-l-success" iconBgColor="bg-success/10" iconColor="text-success" onClick={handleTempoMedioClick} ariaLabel={`Ver métrica de tempo médio (${stats.mediaFechamento} dias)`} />
+          {/* 5. Tempo médio de fechamento */}
+          <KPICard 
+            title="Tempo médio de fechamento" 
+            value={`${formatInt(stats.mediaFechamento)}d`} 
+            subtitle="Média dos últimos 30 dias" 
+            icon={<Clock className="h-7 w-7" />} 
+            borderColor="border-l-success" 
+            iconBgColor="bg-success/10" 
+            iconColor="text-success" 
+            onClick={handleTempoMedioClick} 
+            ariaLabel={`Ver métrica de tempo médio (${stats.mediaFechamento} dias)`} 
+          />
 
-              {/* 6. Taxa de aprovação */}
-              <KPICard title="Taxa de aprovação" value={formatPercent(stats.taxaAprovacao)} subtitle="Contratações / conclusões" icon={<Target className="h-7 w-7" />} borderColor="border-l-success" iconBgColor="bg-success/10" iconColor="text-success" onClick={handleTaxaAprovacaoClick} ariaLabel={`Ver taxa de conversão (${formatPercent(stats.taxaAprovacao)})`} />
+          {/* 6. Taxa de aprovação */}
+          <KPICard 
+            title="Taxa de aprovação" 
+            value={formatPercent(stats.taxaAprovacao)} 
+            subtitle="Contratações / conclusões" 
+            icon={<Target className="h-7 w-7" />} 
+            borderColor="border-l-success" 
+            iconBgColor="bg-success/10" 
+            iconColor="text-success" 
+            onClick={handleTaxaAprovacaoClick} 
+            ariaLabel={`Ver taxa de conversão (${formatPercent(stats.taxaAprovacao)})`} 
+          />
 
-              {/* 7. Candidatos Ativos */}
-              <KPICard title="Candidatos Ativos" value={formatInt(stats.candidatosAtivos)} subtitle="Em processo de seleção" icon={<Users className="h-7 w-7" />} borderColor="border-l-info" iconBgColor="bg-info/10" iconColor="text-info" onClick={handleCandidatosAtivosClick} ariaLabel={`Abrir candidatos ativos (${stats.candidatosAtivos} candidatos)`} />
+          {/* 7. Candidatos Ativos */}
+          <KPICard 
+            title="Candidatos Ativos" 
+            value={formatInt(stats.candidatosAtivos)} 
+            subtitle="Em processo de seleção" 
+            icon={<Users className="h-7 w-7" />} 
+            borderColor="border-l-info" 
+            iconBgColor="bg-info/10" 
+            iconColor="text-info" 
+            onClick={handleCandidatosAtivosClick} 
+            ariaLabel={`Abrir candidatos ativos (${stats.candidatosAtivos} candidatos)`} 
+          />
 
-              {/* 8. Candidatos Reprovados sem WhatsApp */}
-              <RejectedCandidatesCard />
+          {/* 8. Candidatos Reprovados sem WhatsApp - Lazy loaded */}
+          <Suspense fallback={<CardSkeleton />}>
+            <RejectedCandidatesCard />
+          </Suspense>
 
-              {/* 9. Feedbacks Pendentes */}
-              <KPICard title="Feedbacks Pendentes" value={formatInt(stats.feedbacksPendentes)} subtitle="Aguardando retorno do cliente" icon={<MessageSquare className="h-7 w-7" />} borderColor="border-l-purple" iconBgColor="bg-purple/10" iconColor="text-purple" onClick={handleFeedbacksClick} ariaLabel={`Abrir feedbacks pendentes (${stats.feedbacksPendentes} pendentes)`} pulse={stats.feedbacksPendentes > 0} />
-            </>}
+          {/* 9. Feedbacks Pendentes */}
+          <KPICard 
+            title="Feedbacks Pendentes" 
+            value={formatInt(stats.feedbacksPendentes)} 
+            subtitle="Aguardando retorno do cliente" 
+            icon={<MessageSquare className="h-7 w-7" />} 
+            borderColor="border-l-purple" 
+            iconBgColor="bg-purple/10" 
+            iconColor="text-purple" 
+            onClick={handleFeedbacksClick} 
+            ariaLabel={`Abrir feedbacks pendentes (${stats.feedbacksPendentes} pendentes)`} 
+            pulse={stats.feedbacksPendentes > 0} 
+          />
         </div>
       </div>
-    </div>;
+    </div>
+  );
 }
