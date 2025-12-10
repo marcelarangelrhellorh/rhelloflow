@@ -79,7 +79,11 @@ export const queryKeys = {
   },
   
   // Dashboard
-  dashboard: ['dashboard'] as const,
+  dashboard: {
+    all: ['dashboard'] as const,
+    overview: () => ['dashboard', 'overview'] as const,
+    userProfile: () => ['dashboard', 'userProfile'] as const,
+  },
   
   // KPIs
   kpis: ['kpis'] as const,

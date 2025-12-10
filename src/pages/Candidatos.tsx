@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback, Suspense, lazy } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,6 @@ import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { FilterBar } from "@/components/Candidatos/FilterBar";
 import { CandidateCard } from "@/components/Candidatos/CandidateCard";
-import { CandidatosDashboard } from "@/components/Candidatos/CandidatosDashboard";
 import { LinkToJobModal } from "@/components/BancoTalentos/LinkToJobModal";
 import { ImportXlsModal } from "@/components/ImportXlsModal";
 import { handleDelete as performDeletion } from "@/lib/deletionUtils";
@@ -19,12 +18,16 @@ import { PaginationControls } from "@/components/ui/pagination-controls";
 import { logger } from "@/lib/logger";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DualScrollContainer } from "@/components/ui/dual-scroll-container";
-import { PageSkeleton } from "@/components/skeletons/PageSkeleton";
+import { CandidatosSkeleton } from "@/components/skeletons/CandidatosSkeleton";
+import { FunnelSkeleton } from "@/components/skeletons/FunnelSkeleton";
+
+// Lazy load heavy components
+const CandidatosDashboard = lazy(() => import("@/components/Candidatos/CandidatosDashboard").then(m => ({ default: m.CandidatosDashboard })));
+const FunnelColumn = lazy(() => import("@/components/FunilCandidatos/FunnelColumn").then(m => ({ default: m.FunnelColumn })));
+const CandidateFunnelCard = lazy(() => import("@/components/FunilCandidatos/CandidateFunnelCard").then(m => ({ default: m.CandidateFunnelCard })));
 
 // Importar componentes do Funil
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors, closestCenter } from "@dnd-kit/core";
-import { FunnelColumn } from "@/components/FunilCandidatos/FunnelColumn";
-import { CandidateFunnelCard } from "@/components/FunilCandidatos/CandidateFunnelCard";
 import { FilterBar as FunnelFilterBar } from "@/components/FunilCandidatos/FilterBar";
 
 type Candidato = {
@@ -290,7 +293,7 @@ export default function Candidatos() {
   } = usePagination(filteredCandidatos, 50);
 
   if (loading) {
-    return <PageSkeleton variant="cards" />;
+    return <CandidatosSkeleton />;
   }
 
   return (

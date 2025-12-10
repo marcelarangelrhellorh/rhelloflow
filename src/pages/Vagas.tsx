@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback, Suspense, lazy } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,11 +11,13 @@ import { usePagination } from "@/hooks/usePagination";
 import { PaginationControls } from "@/components/ui/pagination-controls";
 import { logger } from "@/lib/logger";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CardSkeletonGrid } from "@/components/skeletons/CardSkeleton";
+import { CardSkeletonGrid, FunnelSkeleton } from "@/components/skeletons";
+import { VagasSkeleton } from "@/components/skeletons/VagasSkeleton";
 
-// Importar componentes do Funil
-import { VagasDashboard } from "@/components/FunilVagas/VagasDashboard";
-import { PipelineBoard } from "@/components/FunilVagas/PipelineBoard";
+// Lazy load heavy components
+const VagasDashboard = lazy(() => import("@/components/FunilVagas/VagasDashboard").then(m => ({ default: m.VagasDashboard })));
+const PipelineBoard = lazy(() => import("@/components/FunilVagas/PipelineBoard").then(m => ({ default: m.PipelineBoard })));
+
 import { JOB_STAGES, calculateProgress } from "@/lib/jobStages";
 import { logVagaEvento } from "@/lib/vagaEventos";
 import { getBusinessDaysFromNow } from "@/lib/dateUtils";
