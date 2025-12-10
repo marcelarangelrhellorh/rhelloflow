@@ -280,14 +280,14 @@ export default function CandidatoDetalhes() {
         </div>
       </div>;
   }
-  return <div className="relative flex min-h-screen w-full font-display" style={{
+  return <div className="min-h-screen w-full font-display" style={{
     backgroundColor: '#FFFBF0'
   }}>
       {/* Breadcrumb / Back Button */}
       <div className="sticky top-0 z-10 backdrop-blur-sm border-b border-gray-200 dark:border-secondary-text-light/20" style={{
       backgroundColor: 'rgba(255, 251, 240, 0.95)'
     }}>
-        <div className="px-4 sm:px-6 lg:px-10 py-2">
+        <div className="px-6 py-2">
           <Button variant="ghost" size="sm" onClick={() => navigate("/candidatos")} className="text-secondary-text-light dark:text-secondary-text-dark text-sm">
             <ArrowLeft className="mr-1 h-3 w-3" />
             <span className="hidden sm:inline">Candidatos</span>
@@ -300,8 +300,8 @@ export default function CandidatoDetalhes() {
       {/* Content with Sidebar Layout */}
       <div className="flex flex-1">
       {/* Main Content */}
-      <main className="flex-1 pl-2 pr-4 sm:pl-3 sm:pr-6 lg:pl-4 lg:pr-10 py-8 bg-[6404a0f] bg-[#faec3e]/[0.01]">
-        <div className="max-w-full space-y-6 py-[100px] mx-0 px-0">
+      <main className="flex-1 px-6 py-6">
+        <div className="space-y-6">
           {/* Simplified Header with Stats */}
           <CandidateHeader nome={candidato.nome_completo} status={candidato.status} nivel={candidato.nivel} area={candidato.area} cidade={candidato.cidade} estado={candidato.estado} onEdit={() => navigate(`/candidatos/${id}/editar`)} onDelete={() => setDeleteDialogOpen(true)} onRelocate={() => setRelocateModalOpen(true)} onStatusChange={handleStatusChange} onSendWhatsApp={() => setWhatsappModalOpen(true)} />
 
