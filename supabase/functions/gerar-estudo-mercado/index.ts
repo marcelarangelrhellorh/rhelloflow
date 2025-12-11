@@ -1,100 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.78.0';
 import { corsHeaders } from '../_shared/cors.ts';
 
-const SYSTEM_PROMPT = `SISTEMA:
-Você é o agente de IA da Rhello RH. Sua tarefa é gerar **Estudos de Mercado Objetivo e Comparativos** para uma função em múltiplas regiões, a partir dos inputs do recrutador.
-
-**CONTEXTO TEMPORAL IMPORTANTE:**
-- Data atual: Novembro de 2025
-- SEMPRE busque os dados MAIS RECENTES disponíveis (preferencialmente de 2025 - qualquer semestre)
-- Se os dados mais recentes forem de períodos anteriores (2024 ou antes), INFORME CLARAMENTE isso nas "observacoes" de cada região
-- Especifique SEMPRE o período/mês de referência dos dados nas "observacoes"
-
-**FONTES QUE VOCÊ DEVE CONSULTAR (busque o máximo possível):**
-- Sites de emprego: Catho, InfoJobs, Vagas.com, LinkedIn, Glassdoor Brasil, Indeed
-- Pesquisas salariais: Guia Salarial Robert Half 2025/2026, Michael Page, Salario.com.br
-- Dados governamentais: CAGED (mais recentes), RAIS, PNAD do IBGE
-- Estudos de mercado e relatórios setoriais mais recentes disponíveis publicamente
-- Outras fontes relevantes e atualizadas do mercado brasileiro
-
-**IMPORTANTE SOBRE REGIÕES E CIDADES:**
-- Você receberá um array de regiões para analisar
-- Se cidades específicas forem informadas, priorize dados dessas cidades sobre dados regionais genéricos
-- Para múltiplas cidades: gere análises INDEPENDENTES para cada cidade (não por região)
-- Se apenas regiões (sem cidades): gere análises por região
-- Mantenha as fontes ÚNICAS no nível geral (não duplicar por região/cidade)
-- A tendência geral é única, mas observe variações regionais/locais
-- Compare os dados entre regiões/cidades quando relevante nas observações
-- **CRÍTICO**: Para cada cidade/região em estudos_regionais, você DEVE incluir campos "observacoes" e "tendencia" específicos daquela localidade
-
-REGRAS GERAIS:
-- RETORNE APENAS UM JSON VÁLIDO (NADA FORA DO JSON).
-- Linguagem: Português (PT-BR), tom conciso e consultivo.
-- Respostas curtas: bullet points, chips ou campos curtos. Evite parágrafos longos.
-- Se não houver dado confiável para campos numéricos, retorne null e explique em "observacoes".
-- Sempre preencha arrays (mesmo que vazios).
-- Incluir as fontes usadas no campo "fontes" e a data/período em "observacoes" de cada região.
-
-SCHEMA DE SAÍDA OBRIGATÓRIO (RETORNE APENAS ESTE JSON):
-{
-  "funcao": string,
-  "regioes": string[],
-  "senioridade": string|null,
-  "tipos_contratacao": string[],
-  "jornada": string|null,
-  "salario_ofertado": number|null,
-  "tipo_contratacao_ofertado": string|null,
-  "estudos_regionais": Array<{
-    regiao: string,
-    faixas_salariais: Array<{
-      tipo_contratacao: string,
-      salario_media: number|null,
-      salario_min: number|null,
-      salario_max: number|null
-    }>,
-    comparacao_oferta: "Abaixo" | "Dentro" | "Acima" | "Sem dado",
-    beneficios: string[],
-    demanda: "Alta" | "Média" | "Baixa",
-    observacoes: string,
-    tendencia: string
-  }>,
-  "tendencia_short": string|null,
-  "fontes": Array<{nome: string, url: string}>,
-  "raw": object
-}
-
-REGRAS DE CÁLCULO / DECISÕES:
-
-Para CADA região no array estudos_regionais:
-
-- faixas_salariais: 
-  - Se tipos_contratacao tiver mais de 1 item, retorne uma faixa salarial para CADA tipo
-  - Se tipos_contratacao estiver vazio ou tiver 1 item, retorne pelo menos uma faixa (pode usar "Geral" como tipo)
-  - Busque dados ESPECÍFICOS da região em questão
-
-- comparacao_oferta: 
-  - Se salario_ofertado == null → "Sem dado".
-  - Caso contrário, busque a faixa salarial correspondente ao tipo_contratacao_ofertado PARA AQUELA REGIÃO
-  - Se não houver faixa ou salario_media == null → "Sem dado" (e explique em observacoes).
-  - Use tolerância de ±7% em relação à salario_media da faixa correspondente para considerar "Dentro".
-  - Se salario_ofertado < salario_media * 0.93 → "Abaixo".
-  - Se salario_ofertado > salario_media * 1.07 → "Acima".
-  - Caso contrário → "Dentro".
-
-- Demanda (Alta/Média/Baixa): baseie-se em evidências REGIONAIS (vagas abertas, histórico). Se não houver dados, retorne "Média" e explique em observacoes.
-
-- Benefícios: liste até 6 itens mais frequentes NAQUELA REGIÃO; se nenhum dado, retorne array vazio.
-
-- Observacoes (string): insights relevantes ESPECÍFICOS da região/cidade (ex: "Dados de 2º semestre de 2025, demanda em crescimento nesta cidade"). Mencione sempre o período dos dados e particularidades locais.
-
-- Tendencia (string): análise de tendência ESPECÍFICA para aquela região/cidade (ex: "Mercado aquecido em [cidade] com alta procura por profissionais PJ"). Seja conciso (máximo 2-3 linhas).
-
-TENDÊNCIA GERAL (tendencia_short):
-
-- fontes: Lista ÚNICA de todas as fontes consultadas (não duplicar por região).
-
-ATENÇÃO: O retorno DEVE ser JSON puro. Não adicione nada antes ou depois. Se necessário incluir explicações adicionais, coloque em "raw".
-`;
+const SYSTEM_PROMPT = `Você é um assistente especialista em remuneração que analisa guias salariais padronizados (Hays 2026 e Michael Page 2026). Receberá como entrada um conjunto de registros (trechos extraídos) e as informações do usuário (cargo, senioridade, localidade). Sua resposta deve ser sempre um JSON válido estritamente no formato especificado abaixo — sem texto adicional fora do JSON. Normatize todos os valores monetários para R$ / mês. Se a fonte trouxer somente valores anuais, converta para mensal dividindo por 12 e marque a conversão.`;
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -103,6 +10,8 @@ Deno.serve(async (req) => {
 
   try {
     const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
     if (!lovableApiKey) {
       console.error('LOVABLE_API_KEY não configurada');
@@ -112,37 +21,153 @@ Deno.serve(async (req) => {
       );
     }
 
-    const body = await req.json();
-    const {
-      funcao,
-      regioes,
-      cidades,
-      senioridade,
-      tipos_contratacao,
-      jornada,
-      salario_ofertado,
-      tipo_contratacao_ofertado
-    } = body;
-
-    if (!funcao || !regioes || regioes.length === 0) {
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error('Supabase credentials não configuradas');
       return new Response(
-        JSON.stringify({ erro: true, mensagem: 'Função e ao menos uma região são obrigatórios.' }),
+        JSON.stringify({ erro: true, mensagem: 'Configuração do banco de dados incompleta.' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
+
+    const body = await req.json();
+    const { cargo, senioridade, localidade } = body;
+
+    if (!cargo) {
+      return new Response(
+        JSON.stringify({ erro: true, mensagem: 'Cargo é obrigatório.' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const inputPayload = {
-      funcao,
-      regioes,
-      cidades: cidades && cidades.length > 0 ? cidades : ['Não especificado'],
-      senioridade: senioridade || 'Não especificado',
-      tipos_contratacao: tipos_contratacao && tipos_contratacao.length > 0 ? tipos_contratacao : ['Geral'],
-      jornada: jornada || 'Não especificado',
-      salario_ofertado: salario_ofertado || null,
-      tipo_contratacao_ofertado: tipo_contratacao_ofertado || null
-    };
+    console.log('Buscando benchmarks para:', { cargo, senioridade, localidade });
 
-    const prompt = `Gere um estudo de mercado comparativo para:\n\n${JSON.stringify(inputPayload, null, 2)}`;
+    // Buscar registros relevantes do banco de dados
+    const searchTerms = cargo.toLowerCase().split(' ').filter((t: string) => t.length > 2);
+    let query = supabaseClient
+      .from('salary_benchmarks')
+      .select('*')
+      .order('source', { ascending: true });
+
+    // Busca por cargo_canonico ou cargo_original
+    if (searchTerms.length > 0) {
+      const orConditions = searchTerms.map((term: string) => 
+        `cargo_canonico.ilike.%${term}%,cargo_original.ilike.%${term}%`
+      ).join(',');
+      query = query.or(orConditions);
+    }
+
+    // Filtrar por senioridade se fornecida
+    if (senioridade) {
+      query = query.or(`senioridade.ilike.%${senioridade}%,senioridade.is.null`);
+    }
+
+    const { data: benchmarks, error: dbError } = await query.limit(50);
+
+    if (dbError) {
+      console.error('Erro ao buscar benchmarks:', dbError);
+    }
+
+    console.log(`Encontrados ${benchmarks?.length || 0} registros de benchmark`);
+
+    // Formatar registros para o prompt
+    const registrosOrdenados = (benchmarks || []).map((b: any) => ({
+      guia: b.source === 'hays' ? 'Hays 2026' : 'Michael Page 2026',
+      pagina: b.page_number,
+      cargo_original: b.cargo_original,
+      cargo_canonico: b.cargo_canonico,
+      setor: b.setor,
+      senioridade: b.senioridade,
+      porte_empresa: b.porte_empresa,
+      fixo_min: b.fixo_min,
+      fixo_max: b.fixo_max,
+      trecho_origem: b.trecho_origem,
+      ano: b.year || 2026
+    }));
+
+    const userPrompt = `Usuário requisitou:
+
+cargo: ${cargo}
+
+senioridade: ${senioridade || 'Não especificado'}
+
+localidade: ${localidade || 'Brasil'}
+
+Registros recuperados (ordenados por relevância). Cada registro é um objeto com campos como guia, pagina, cargo_original, cargo_canonico, peq_fixo_min, peq_fixo_max, grande_fixo_min, grande_fixo_max, fixo_min, fixo_max, trecho_origem, ano (quando disponível).
+
+${JSON.stringify(registrosOrdenados, null, 2)}
+
+
+TAREFA:
+
+Agrupe e normalize os registros para o cargo pedido (use cargo_canonico e fuzzy match se necessário).
+
+Para cada fonte (Hays e Michael Page) produza:
+
+valor mínimo (R$/mês),
+
+valor médio (R$/mês) — calcule como (min+max)/2 quando disponível,
+
+valor máximo (R$/mês).
+Se a fonte listar faixas por porte da empresa (peq_med e grande), forneça os números para cada porte. Se somente um porte estiver disponível, informe e deixe o outro nulo.
+
+Produza um bloco consultivo com até 4 itens (strings curtas) sobre o cargo, baseado nos trechos consultados: oferta x procura (ex.: "alta demanda", "baixa oferta"), responsabilidades-chave do cargo (resumo), e recomendação se o título parece correto para o cliente (ex.: "sugestão: usar 'Gerente de Produto Sênior' em vez de 'Head de Produto'").
+
+Liste as fontes consultadas (nome do guia + ano = 2026) e inclua o trecho_consultado que justificou cada faixa.
+
+Retorne o JSON estrito neste formato:
+
+{
+  "consulta": {
+    "cargo_pedido": "<texto>",
+    "senioridade": "<texto>",
+    "localidade": "<texto>"
+  },
+  "resultado": {
+    "hays": {
+      "encontrado": true,
+      "setor_encontrado": "<texto|null>",
+      "por_porte": {
+        "peq_med": { "min": "R$ <valor>", "media": "R$ <valor>", "max": "R$ <valor>" },
+        "grande": { "min": "R$ <valor>|null", "media": "R$ <valor>|null", "max": "R$ <valor>|null" }
+      },
+      "trecho_consultado": "<texto do PDF que justificou>",
+      "observacao": "<se houver, ex: valores anuais convertidos>",
+      "fonte": "Hays 2026"
+    },
+    "michael_page": {
+      "encontrado": true,
+      "setor_encontrado": "<texto|null>",
+      "por_porte": {
+        "peq_med": { "min": "R$ <valor>", "media": "R$ <valor>", "max": "R$ <valor>" },
+        "grande": { "min": "R$ <valor>|null", "media": "R$ <valor>|null", "max": "R$ <valor>|null" }
+      },
+      "trecho_consultado": "<texto do PDF que justificou>",
+      "observacao": "<se houver>",
+      "fonte": "Michael Page 2026"
+    }
+  },
+  "consultoria": [
+    "Insight curto 1 — oferta/ procura / recomendação",
+    "Insight curto 2 — responsabilidades / ajuste de título",
+    "Insight curto 3 — observação sobre faixa (ex.: variável total alta)",
+    "Insight curto 4 — sugestão para negociação ou ajuste"
+  ]
+}
+
+
+Regras adicionais (muito importantes):
+
+Sempre indicar a unidade final (R$/mês). Se os dados originais foram anuais, inclua "observacao": "valores convertidos de anual para mensal (dividido por 12)".
+
+Se cargo_encontrado for falso em alguma fonte, informe "encontrado": false e coloque por_porte com null nos valores.
+
+Sempre trazer o trecho_consultado literal (até 300 caracteres) para auditoria.
+
+Se houver valores fixo/variável/total na fonte, priorize fixo para comparativo e explique no observacao que a fonte traz componentes variáveis.
+
+Responda apenas com o JSON (sem texto adicional).`;
 
     console.log('Chamando Lovable AI Gateway...');
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
@@ -155,9 +180,9 @@ Deno.serve(async (req) => {
         model: 'google/gemini-2.5-flash',
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
-          { role: 'user', content: prompt }
+          { role: 'user', content: userPrompt }
         ],
-        temperature: 0.7,
+        temperature: 0.3,
         max_tokens: 4000
       })
     });
@@ -209,7 +234,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    if (!parsedEstudo.funcao || !parsedEstudo.estudos_regionais) {
+    if (!parsedEstudo.consulta || !parsedEstudo.resultado) {
       throw new Error('Estrutura mínima inválida no JSON retornado');
     }
 
