@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, FileDown, CheckCircle, XCircle, Lightbulb, Info, Database, RefreshCw, Zap } from "lucide-react";
+import { Loader2, FileDown, CheckCircle, XCircle, Lightbulb, Info, Database, RefreshCw, Zap, ExternalLink, Globe } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import logoRhelloDark from "@/assets/logo-rhello-dark.png";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -39,6 +39,18 @@ interface ResultadoFonte {
   fonte: string;
 }
 
+interface InfoJobsResultado {
+  encontrado: boolean;
+  salario_medio: string | null;
+  faixa: {
+    min: string | null;
+    max: string | null;
+  };
+  registros_base: number | null;
+  fonte: string;
+  url: string | null;
+}
+
 interface EstudoMercadoNovo {
   consulta: {
     cargo_pedido: string;
@@ -48,6 +60,7 @@ interface EstudoMercadoNovo {
   resultado: {
     hays: ResultadoFonte;
     michael_page: ResultadoFonte;
+    infojobs?: InfoJobsResultado;
   };
   consultoria: string[];
 }
@@ -516,6 +529,8 @@ export default function EstudoMercado() {
         {/* Header */}
         <div className="text-center space-y-2">
           <h1 className="text-4xl font-bold text-foreground">Estudo de Mercado Salarial</h1>
+          <p className="text-muted-foreground">Compare salários com dados de Hays, Michael Page 2026 e InfoJobs (tempo real)</p>
+        </div>
           <p className="text-muted-foreground">Compare salários com dados reais de Hays e Michael Page 2026</p>
         </div>
 
@@ -664,6 +679,80 @@ export default function EstudoMercado() {
               {renderResultadoFonte(estudo.resultado.michael_page, "Michael Page 2026", "border-l-purple-500")}
             </div>
 
+            {/* InfoJobs Card */}
+            {estudo.resultado.infojobs && (
+              <Card className="border-l-4 border-l-green-500">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Globe className="h-5 w-5 text-green-600" />
+                      InfoJobs Brasil
+                    </CardTitle>
+                    {estudo.resultado.infojobs.encontrado ? (
+                      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        Dados em tempo real
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="bg-gray-50 text-gray-600 border-gray-200">
+                        <XCircle className="h-3 w-3 mr-1" />
+                        Não encontrado
+                      </Badge>
+                    )}
+                  </div>
+                </CardHeader>
+                {estudo.resultado.infojobs.encontrado && (
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {/* Salário Médio */}
+                      <div className="bg-green-50 rounded-lg p-4 text-center">
+                        <p className="text-sm text-green-700 font-medium">Salário Médio</p>
+                        <p className="text-2xl font-bold text-green-800">
+                          {estudo.resultado.infojobs.salario_medio || '—'}
+                        </p>
+                      </div>
+                      
+                      {/* Faixa Salarial */}
+                      <div className="bg-muted/50 rounded-lg p-4 text-center">
+                        <p className="text-sm text-muted-foreground font-medium">Faixa Salarial</p>
+                        <p className="text-lg font-semibold">
+                          {estudo.resultado.infojobs.faixa.min || '—'} - {estudo.resultado.infojobs.faixa.max || '—'}
+                        </p>
+                      </div>
+                      
+                      {/* Registros Base */}
+                      <div className="bg-muted/50 rounded-lg p-4 text-center">
+                        <p className="text-sm text-muted-foreground font-medium">Base de Dados</p>
+                        <p className="text-lg font-semibold">
+                          {estudo.resultado.infojobs.registros_base 
+                            ? `${estudo.resultado.infojobs.registros_base.toLocaleString('pt-BR')} salários`
+                            : 'N/A'}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between pt-2 border-t">
+                      <p className="text-xs text-muted-foreground">
+                        <Info className="h-3 w-3 inline mr-1" />
+                        Dados baseados em salários reportados por profissionais brasileiros
+                      </p>
+                      {estudo.resultado.infojobs.url && (
+                        <a 
+                          href={estudo.resultado.infojobs.url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-xs text-green-600 hover:text-green-700 flex items-center gap-1"
+                        >
+                          Ver no InfoJobs
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      )}
+                    </div>
+                  </CardContent>
+                )}
+              </Card>
+            )}
+
             {/* Insights Consultivos */}
             {estudo.consultoria && estudo.consultoria.length > 0 && (
               <Card className="border-l-4 border-l-amber-500">
@@ -694,16 +783,21 @@ export default function EstudoMercado() {
                 <CardTitle className="text-base">Fontes Consultadas</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex gap-4 text-sm text-muted-foreground">
+                <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
                   {estudo.resultado.hays.encontrado && (
                     <Badge variant="secondary">{estudo.resultado.hays.fonte}</Badge>
                   )}
                   {estudo.resultado.michael_page.encontrado && (
                     <Badge variant="secondary">{estudo.resultado.michael_page.fonte}</Badge>
                   )}
+                  {estudo.resultado.infojobs?.encontrado && (
+                    <Badge variant="secondary" className="bg-green-100 text-green-700">
+                      {estudo.resultado.infojobs.fonte}
+                    </Badge>
+                  )}
                 </div>
                 <p className="text-xs text-muted-foreground mt-2">
-                  Todos os valores em R$/mês. Dados extraídos dos guias salariais oficiais.
+                  Todos os valores em R$/mês. Hays e Michael Page: guias salariais 2026. InfoJobs: dados em tempo real.
                 </p>
               </CardContent>
             </Card>
