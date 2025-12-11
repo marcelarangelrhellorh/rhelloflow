@@ -103,7 +103,7 @@ export default function Auth() {
             className="h-9 sm:h-[60px] md:h-24 w-auto" 
             src="/lovable-uploads/0e3e8693-dfae-4588-8a04-9a33b7dd1eea.png"
           />
-          <span className="text-4xl sm:text-6xl md:text-8xl font-black leading-none font-azo text-foreground" aria-hidden="true">
+          <span className="h-9 sm:h-[60px] md:h-24 text-4xl sm:text-6xl md:text-8xl font-black leading-none font-azo text-foreground flex items-center" aria-hidden="true">
             flow
           </span>
         </div>
