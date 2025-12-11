@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, FileDown, CheckCircle, XCircle, Lightbulb, Info, Database, RefreshCw, Zap, ExternalLink, Globe } from "lucide-react";
+import { Loader2, FileDown, CheckCircle, XCircle, Lightbulb, Info, Database, RefreshCw, Zap, ExternalLink, Globe, DollarSign, TrendingUp } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import logoRhelloDark from "@/assets/logo-rhello-dark.png";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -51,6 +51,24 @@ interface InfoJobsResultado {
   url: string | null;
 }
 
+interface GlassdoorResultado {
+  encontrado: boolean;
+  salario_medio: string | null;
+  faixa: {
+    min: string | null;
+    max: string | null;
+  };
+  remuneracao_variavel: {
+    media: string | null;
+    min: string | null;
+    max: string | null;
+  } | null;
+  registros_base: number | null;
+  ultima_atualizacao: string | null;
+  fonte: string;
+  url: string | null;
+}
+
 interface EstudoMercadoNovo {
   consulta: {
     cargo_pedido: string;
@@ -61,6 +79,7 @@ interface EstudoMercadoNovo {
     hays: ResultadoFonte;
     michael_page: ResultadoFonte;
     infojobs?: InfoJobsResultado;
+    glassdoor?: GlassdoorResultado;
   };
   consultoria: string[];
 }
@@ -529,7 +548,7 @@ export default function EstudoMercado() {
         {/* Header */}
         <div className="text-center space-y-2">
           <h1 className="text-4xl font-bold text-foreground">Estudo de Mercado Salarial</h1>
-          <p className="text-muted-foreground">Compare salários com dados de Hays, Michael Page 2026 e InfoJobs (tempo real)</p>
+          <p className="text-muted-foreground">Compare salários com dados de Hays, Michael Page 2026, InfoJobs e Glassdoor (tempo real)</p>
         </div>
 
         {/* Aviso de dados não importados */}
@@ -751,6 +770,112 @@ export default function EstudoMercado() {
               </Card>
             )}
 
+            {/* Glassdoor Card */}
+            {estudo.resultado.glassdoor && (
+              <Card className="border-l-4 border-l-teal-500">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <TrendingUp className="h-5 w-5 text-teal-600" />
+                      Glassdoor Brasil
+                    </CardTitle>
+                    {estudo.resultado.glassdoor.encontrado ? (
+                      <Badge variant="outline" className="bg-teal-50 text-teal-700 border-teal-200">
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        Dados em tempo real
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="bg-gray-50 text-gray-600 border-gray-200">
+                        <XCircle className="h-3 w-3 mr-1" />
+                        Não encontrado
+                      </Badge>
+                    )}
+                  </div>
+                </CardHeader>
+                {estudo.resultado.glassdoor.encontrado && (
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {/* Salário Médio */}
+                      <div className="bg-teal-50 rounded-lg p-4 text-center">
+                        <p className="text-sm text-teal-700 font-medium">Salário Médio</p>
+                        <p className="text-2xl font-bold text-teal-800">
+                          {estudo.resultado.glassdoor.salario_medio || '—'}
+                        </p>
+                      </div>
+                      
+                      {/* Faixa Salarial */}
+                      <div className="bg-muted/50 rounded-lg p-4 text-center">
+                        <p className="text-sm text-muted-foreground font-medium">Faixa Salarial</p>
+                        <p className="text-lg font-semibold">
+                          {estudo.resultado.glassdoor.faixa.min || '—'} - {estudo.resultado.glassdoor.faixa.max || '—'}
+                        </p>
+                      </div>
+                      
+                      {/* Registros Base */}
+                      <div className="bg-muted/50 rounded-lg p-4 text-center">
+                        <p className="text-sm text-muted-foreground font-medium">Base de Dados</p>
+                        <p className="text-lg font-semibold">
+                          {estudo.resultado.glassdoor.registros_base 
+                            ? `${estudo.resultado.glassdoor.registros_base.toLocaleString('pt-BR')} salários`
+                            : 'N/A'}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Remuneração Variável (diferencial do Glassdoor) */}
+                    {estudo.resultado.glassdoor.remuneracao_variavel && (
+                      <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <DollarSign className="h-4 w-4 text-amber-600" />
+                          <p className="text-sm font-medium text-amber-800">Remuneração Variável (Bônus)</p>
+                        </div>
+                        <div className="grid grid-cols-3 gap-4 text-center">
+                          <div>
+                            <p className="text-xs text-amber-600">Mínimo</p>
+                            <p className="font-semibold text-amber-800">
+                              {estudo.resultado.glassdoor.remuneracao_variavel.min || '—'}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-amber-600">Média</p>
+                            <p className="font-bold text-amber-900">
+                              {estudo.resultado.glassdoor.remuneracao_variavel.media || '—'}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-amber-600">Máximo</p>
+                            <p className="font-semibold text-amber-800">
+                              {estudo.resultado.glassdoor.remuneracao_variavel.max || '—'}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    <div className="flex items-center justify-between pt-2 border-t">
+                      <p className="text-xs text-muted-foreground">
+                        <Info className="h-3 w-3 inline mr-1" />
+                        {estudo.resultado.glassdoor.ultima_atualizacao 
+                          ? `Atualizado em ${estudo.resultado.glassdoor.ultima_atualizacao}`
+                          : 'Dados reportados por funcionários'}
+                      </p>
+                      {estudo.resultado.glassdoor.url && (
+                        <a 
+                          href={estudo.resultado.glassdoor.url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-xs text-teal-600 hover:text-teal-700 flex items-center gap-1"
+                        >
+                          Ver no Glassdoor
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      )}
+                    </div>
+                  </CardContent>
+                )}
+              </Card>
+            )}
+
             {/* Insights Consultivos */}
             {estudo.consultoria && estudo.consultoria.length > 0 && (
               <Card className="border-l-4 border-l-amber-500">
@@ -793,9 +918,14 @@ export default function EstudoMercado() {
                       {estudo.resultado.infojobs.fonte}
                     </Badge>
                   )}
+                  {estudo.resultado.glassdoor?.encontrado && (
+                    <Badge variant="secondary" className="bg-teal-100 text-teal-700">
+                      {estudo.resultado.glassdoor.fonte}
+                    </Badge>
+                  )}
                 </div>
                 <p className="text-xs text-muted-foreground mt-2">
-                  Todos os valores em R$/mês. Hays e Michael Page: guias salariais 2026. InfoJobs: dados em tempo real.
+                  Todos os valores em R$/mês. Hays e Michael Page: guias salariais 2026. InfoJobs e Glassdoor: dados em tempo real.
                 </p>
               </CardContent>
             </Card>

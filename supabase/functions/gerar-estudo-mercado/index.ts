@@ -1,15 +1,16 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.78.0';
 import { corsHeaders } from '../_shared/cors.ts';
 
-const SYSTEM_PROMPT = `Você é um assistente especialista em remuneração que analisa dados salariais de Hays 2026, Michael Page 2026 e InfoJobs (dados de mercado em tempo real).
+const SYSTEM_PROMPT = `Você é um assistente especialista em remuneração que analisa dados salariais de Hays 2026, Michael Page 2026, InfoJobs e Glassdoor (dados de mercado em tempo real).
 
 VOCÊ RECEBERÁ DADOS PRÉ-AGREGADOS pelo servidor - não precisa fazer cálculos matemáticos, apenas formatar e validar.
 
 Sua tarefa é:
 1. Formatar os valores monetários corretamente (R$ X.XXX,XX / mês)
 2. Validar a estrutura dos dados
-3. Gerar 4 insights consultivos curtos e úteis, considerando todas as fontes disponíveis
-4. InfoJobs é especialmente útil para cargos operacionais e dados em tempo real
+3. Gerar 4 insights consultivos curtos e úteis, considerando TODAS as fontes disponíveis
+4. InfoJobs e Glassdoor são especialmente úteis para dados em tempo real
+5. Glassdoor traz informações únicas de remuneração variável (bônus)
 
 Responda APENAS com JSON válido no formato especificado.`;
 
@@ -20,6 +21,23 @@ interface InfoJobsData {
   faixa: { min: string | null; max: string | null };
   registros_base: number | null;
   localidade: string;
+  fonte: string;
+  url: string;
+  erro?: string;
+}
+
+interface GlassdoorData {
+  encontrado: boolean;
+  cargo: string;
+  salario_medio: string | null;
+  faixa: { min: string | null; max: string | null };
+  remuneracao_variavel: {
+    media: string | null;
+    min: string | null;
+    max: string | null;
+  } | null;
+  registros_base: number | null;
+  ultima_atualizacao: string | null;
   fonte: string;
   url: string;
   erro?: string;
@@ -174,29 +192,53 @@ Deno.serve(async (req) => {
     }
 
     // ============================================
-    // NOVA FASE: Buscar dados do InfoJobs em paralelo
+    // NOVA FASE: Buscar dados do InfoJobs E Glassdoor em paralelo
     // ============================================
-    console.log('Buscando dados do InfoJobs em paralelo...');
+    console.log('Buscando dados do InfoJobs e Glassdoor em paralelo...');
     
     let infojobsData: InfoJobsData | null = null;
-    try {
-      const infojobsResponse = await fetch(`${supabaseUrl}/functions/v1/infojobs-salary-lookup`, {
+    let glassdoorData: GlassdoorData | null = null;
+
+    // Executar ambas as requisições em paralelo
+    const [infojobsResult, glassdoorResult] = await Promise.allSettled([
+      // InfoJobs
+      fetch(`${supabaseUrl}/functions/v1/infojobs-salary-lookup`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${supabaseServiceKey}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ cargo, localidade })
-      });
+      }).then(async (res) => {
+        if (res.ok) return res.json();
+        throw new Error(`InfoJobs: ${res.status}`);
+      }),
+      // Glassdoor
+      fetch(`${supabaseUrl}/functions/v1/glassdoor-salary-lookup`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${supabaseServiceKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ cargo, localidade })
+      }).then(async (res) => {
+        if (res.ok) return res.json();
+        throw new Error(`Glassdoor: ${res.status}`);
+      })
+    ]);
 
-      if (infojobsResponse.ok) {
-        infojobsData = await infojobsResponse.json();
-        console.log('InfoJobs data:', JSON.stringify(infojobsData));
-      } else {
-        console.warn('InfoJobs lookup failed:', infojobsResponse.status);
-      }
-    } catch (ijError) {
-      console.warn('Erro ao buscar InfoJobs (não crítico):', ijError);
+    if (infojobsResult.status === 'fulfilled') {
+      infojobsData = infojobsResult.value;
+      console.log('InfoJobs data:', JSON.stringify(infojobsData));
+    } else {
+      console.warn('InfoJobs lookup failed:', infojobsResult.reason);
+    }
+
+    if (glassdoorResult.status === 'fulfilled') {
+      glassdoorData = glassdoorResult.value;
+      console.log('Glassdoor data:', JSON.stringify(glassdoorData));
+    } else {
+      console.warn('Glassdoor lookup failed:', glassdoorResult.reason);
     }
 
     // ============================================
@@ -217,15 +259,20 @@ Deno.serve(async (req) => {
     const preProcessedData = {
       hays: organizeBySetor(haysBenchmarks, formatCurrency),
       michael_page: organizeBySetor(mpBenchmarks, formatCurrency),
-      infojobs: infojobsData
+      infojobs: infojobsData,
+      glassdoor: glassdoorData
     };
 
     // ============================================
-    // FASE 3: Prompt otimizado com 3 fontes
+    // FASE 3: Prompt otimizado com 4 fontes
     // ============================================
     const infojobsSection = infojobsData?.encontrado 
       ? `InfoJobs (tempo real): Salário médio ${infojobsData.salario_medio}, faixa ${infojobsData.faixa.min} - ${infojobsData.faixa.max}, baseado em ${infojobsData.registros_base || 'N/A'} registros.`
       : 'InfoJobs: Dados não disponíveis para este cargo.';
+
+    const glassdoorSection = glassdoorData?.encontrado
+      ? `Glassdoor (tempo real): Salário médio ${glassdoorData.salario_medio}, faixa ${glassdoorData.faixa.min} - ${glassdoorData.faixa.max}${glassdoorData.remuneracao_variavel?.media ? `, remuneração variável ${glassdoorData.remuneracao_variavel.media}` : ''}, baseado em ${glassdoorData.registros_base || 'N/A'} salários.`
+      : 'Glassdoor: Dados não disponíveis para este cargo.';
 
     const userPrompt = `Cargo: ${cargo}
 Senioridade: ${senioridade || 'Não especificado'}
@@ -235,8 +282,9 @@ DADOS PRÉ-AGREGADOS:
 Hays: ${haysBenchmarks.length} registros
 Michael Page: ${mpBenchmarks.length} registros
 ${infojobsSection}
+${glassdoorSection}
 
-Gere 4 insights consultivos curtos sobre este cargo.`;
+Gere 4 insights consultivos curtos sobre este cargo, considerando todas as fontes disponíveis.`;
 
     console.log('Chamando Lovable AI Gateway com tool calling...');
     
@@ -369,6 +417,25 @@ Gere 4 insights consultivos curtos sobre este cargo.`;
           faixa: { min: null, max: null },
           registros_base: null,
           fonte: 'InfoJobs Brasil',
+          url: null
+        },
+        glassdoor: glassdoorData ? {
+          encontrado: glassdoorData.encontrado,
+          salario_medio: glassdoorData.salario_medio,
+          faixa: glassdoorData.faixa,
+          remuneracao_variavel: glassdoorData.remuneracao_variavel,
+          registros_base: glassdoorData.registros_base,
+          ultima_atualizacao: glassdoorData.ultima_atualizacao,
+          fonte: glassdoorData.fonte,
+          url: glassdoorData.url
+        } : {
+          encontrado: false,
+          salario_medio: null,
+          faixa: { min: null, max: null },
+          remuneracao_variavel: null,
+          registros_base: null,
+          ultima_atualizacao: null,
+          fonte: 'Glassdoor Brasil',
           url: null
         }
       },

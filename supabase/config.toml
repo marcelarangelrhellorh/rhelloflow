@@ -95,3 +95,6 @@ verify_jwt = true
 
 [functions.infojobs-salary-lookup]
 verify_jwt = true
+
+[functions.glassdoor-salary-lookup]
+verify_jwt = true
