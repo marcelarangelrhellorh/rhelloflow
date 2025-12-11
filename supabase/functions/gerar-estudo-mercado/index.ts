@@ -43,27 +43,56 @@ Deno.serve(async (req) => {
 
     console.log('Buscando benchmarks para:', { cargo, senioridade, localidade });
 
-    // Buscar registros relevantes do banco de dados
-    const searchTerms = cargo.toLowerCase().split(' ').filter((t: string) => t.length > 2);
-    let query = supabaseClient
-      .from('salary_benchmarks')
-      .select('*')
-      .order('source', { ascending: true });
+    // Buscar registros relevantes do banco de dados - busca mais flexível
+    const cargoNormalized = cargo.toLowerCase()
+      .replace(/[áàãâä]/g, 'a')
+      .replace(/[éèêë]/g, 'e')
+      .replace(/[íìîï]/g, 'i')
+      .replace(/[óòõôö]/g, 'o')
+      .replace(/[úùûü]/g, 'u');
+    
+    // Extrair termos significativos (ignorar palavras muito comuns)
+    const stopWords = ['de', 'da', 'do', 'em', 'para', 'com', 'por', 'e', 'ou', 'a', 'o'];
+    const searchTerms = cargoNormalized
+      .split(/\s+/)
+      .filter((t: string) => t.length > 2 && !stopWords.includes(t));
 
-    // Busca por cargo_canonico ou cargo_original
-    if (searchTerms.length > 0) {
-      const orConditions = searchTerms.map((term: string) => 
-        `cargo_canonico.ilike.%${term}%,cargo_original.ilike.%${term}%`
-      ).join(',');
-      query = query.or(orConditions);
+    console.log('Termos de busca:', searchTerms);
+
+    // Construir busca OR para cada termo
+    const orConditions: string[] = [];
+    for (const term of searchTerms) {
+      orConditions.push(`cargo_canonico.ilike.%${term}%`);
+      orConditions.push(`cargo_original.ilike.%${term}%`);
     }
 
-    // Filtrar por senioridade se fornecida
-    if (senioridade) {
-      query = query.or(`senioridade.ilike.%${senioridade}%,senioridade.is.null`);
+    let benchmarks: any[] = [];
+    let dbError = null;
+
+    if (orConditions.length > 0) {
+      const { data, error } = await supabaseClient
+        .from('salary_benchmarks')
+        .select('*')
+        .or(orConditions.join(','))
+        .order('source', { ascending: true })
+        .limit(100);
+      
+      benchmarks = data || [];
+      dbError = error;
     }
 
-    const { data: benchmarks, error: dbError } = await query.limit(50);
+    // Se não encontrou nada, buscar todos os registros para a IA processar
+    if (benchmarks.length === 0) {
+      console.log('Nenhum registro encontrado com busca específica, buscando amostra geral...');
+      const { data, error } = await supabaseClient
+        .from('salary_benchmarks')
+        .select('*')
+        .order('source', { ascending: true })
+        .limit(100);
+      
+      benchmarks = data || [];
+      dbError = error;
+    }
 
     if (dbError) {
       console.error('Erro ao buscar benchmarks:', dbError);

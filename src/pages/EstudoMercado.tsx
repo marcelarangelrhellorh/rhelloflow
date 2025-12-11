@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,11 +7,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, FileDown, CheckCircle, XCircle, Lightbulb, Info } from "lucide-react";
+import { Loader2, FileDown, CheckCircle, XCircle, Lightbulb, Info, Database, RefreshCw } from "lucide-react";
 import jsPDF from "jspdf";
 import logoRhelloDark from "@/assets/logo-rhello-dark.png";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import haysData from "@/data/salary-guides/hays_standardized.json";
+import michaelPageData from "@/data/salary-guides/michael_page_standardized.json";
 
 // Interfaces para o novo schema
 interface FaixaPorPorte {
@@ -48,11 +50,73 @@ interface EstudoMercadoNovo {
 export default function EstudoMercado() {
   const [loading, setLoading] = useState(false);
   const [estudo, setEstudo] = useState<EstudoMercadoNovo | null>(null);
+  const [importing, setImporting] = useState(false);
+  const [benchmarkCount, setBenchmarkCount] = useState<number | null>(null);
+  const [checkingData, setCheckingData] = useState(true);
 
   // Form state simplificado
   const [cargo, setCargo] = useState("");
   const [senioridade, setSenioridade] = useState("");
   const [localidade, setLocalidade] = useState("");
+
+  // Verificar se já existem dados importados
+  useEffect(() => {
+    const checkBenchmarks = async () => {
+      try {
+        const { count, error } = await supabase
+          .from('salary_benchmarks')
+          .select('*', { count: 'exact', head: true });
+        
+        if (!error) {
+          setBenchmarkCount(count || 0);
+        }
+      } catch (e) {
+        console.error('Erro ao verificar benchmarks:', e);
+      } finally {
+        setCheckingData(false);
+      }
+    };
+    checkBenchmarks();
+  }, []);
+
+  // Importar dados de salário
+  const handleImportData = async () => {
+    setImporting(true);
+    try {
+      // Importar Hays
+      const { data: haysResult, error: haysError } = await supabase.functions.invoke('import-salary-data', {
+        body: {
+          source: 'hays',
+          data: haysData,
+          clear_existing: true
+        }
+      });
+      
+      if (haysError) throw haysError;
+      console.log('Hays importado:', haysResult);
+
+      // Importar Michael Page
+      const { data: mpResult, error: mpError } = await supabase.functions.invoke('import-salary-data', {
+        body: {
+          source: 'michael_page',
+          data: michaelPageData,
+          clear_existing: true
+        }
+      });
+      
+      if (mpError) throw mpError;
+      console.log('Michael Page importado:', mpResult);
+
+      const totalImported = (haysResult?.inserted || 0) + (mpResult?.inserted || 0);
+      setBenchmarkCount(totalImported);
+      toast.success(`Dados importados com sucesso! ${totalImported} registros.`);
+    } catch (error: any) {
+      console.error('Erro ao importar dados:', error);
+      toast.error('Erro ao importar dados de salário');
+    } finally {
+      setImporting(false);
+    }
+  };
 
   const handleGerarEstudo = async () => {
     if (!cargo) {
@@ -423,6 +487,63 @@ export default function EstudoMercado() {
           <h1 className="text-4xl font-bold text-foreground">Estudo de Mercado Salarial</h1>
           <p className="text-muted-foreground">Compare salários com dados reais de Hays e Michael Page 2026</p>
         </div>
+
+        {/* Aviso de dados não importados */}
+        {!checkingData && benchmarkCount === 0 && (
+          <Card className="border-amber-200 bg-amber-50">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <Database className="h-6 w-6 text-amber-600" />
+                  <div>
+                    <p className="font-medium text-amber-900">Base de dados vazia</p>
+                    <p className="text-sm text-amber-700">
+                      É necessário importar os dados salariais antes de realizar consultas.
+                    </p>
+                  </div>
+                </div>
+                <Button 
+                  onClick={handleImportData} 
+                  disabled={importing}
+                  variant="outline"
+                  className="border-amber-400 text-amber-900 hover:bg-amber-100"
+                >
+                  {importing ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Importando...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Importar Dados
+                    </>
+                  )}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Info de dados importados */}
+        {!checkingData && benchmarkCount !== null && benchmarkCount > 0 && (
+          <div className="flex items-center justify-between bg-muted/50 rounded-lg p-3">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Database className="h-4 w-4" />
+              <span>{benchmarkCount.toLocaleString()} registros de benchmark disponíveis</span>
+            </div>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleImportData}
+              disabled={importing}
+              className="text-xs"
+            >
+              {importing ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
+              <span className="ml-1">Reimportar</span>
+            </Button>
+          </div>
+        )}
 
         {/* Formulário Simplificado */}
         <Card className="shadow-lg">
