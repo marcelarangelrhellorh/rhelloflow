@@ -15,21 +15,26 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import haysData from "@/data/salary-guides/hays_standardized.json";
 import michaelPageData from "@/data/salary-guides/michael_page_standardized.json";
 
-// Interfaces para o novo schema
+// Interfaces para o schema com segmentação por setor
 interface FaixaPorPorte {
   min: string | null;
   media: string | null;
   max: string | null;
 }
 
-interface ResultadoFonte {
-  encontrado: boolean;
-  setor_encontrado: string | null;
+interface ResultadoSetor {
+  setor: string;
   por_porte: {
     peq_med: FaixaPorPorte | null;
     grande: FaixaPorPorte | null;
   };
-  trecho_consultado: string;
+  registros_base: number;
+  trecho_consultado?: string;
+}
+
+interface ResultadoFonte {
+  encontrado: boolean;
+  setores: ResultadoSetor[];
   observacao: string;
   fonte: string;
 }
@@ -219,8 +224,40 @@ export default function EstudoMercado() {
         yPos += 10;
       };
 
+      // Função para renderizar setor no PDF
+      const renderSetorPDF = (setor: ResultadoSetor, xOffset: number, width: number, startY: number): number => {
+        let currentY = startY;
+        
+        // Nome do setor
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(...colors.darkBlue);
+        doc.text(`${setor.setor} (${setor.registros_base} reg.)`, xOffset + 5, currentY);
+        currentY += 6;
+        
+        // Faixas por porte
+        if (setor.por_porte.peq_med) {
+          doc.setFontSize(8);
+          doc.setFont("helvetica", "normal");
+          doc.setTextColor(...colors.grayText);
+          doc.text("Peq/Méd:", xOffset + 5, currentY);
+          doc.text(`${setor.por_porte.peq_med.min || '—'} - ${setor.por_porte.peq_med.max || '—'}`, xOffset + 25, currentY);
+          currentY += 5;
+        }
+        
+        if (setor.por_porte.grande) {
+          doc.setFontSize(8);
+          doc.setFont("helvetica", "normal");
+          doc.text("Grande:", xOffset + 5, currentY);
+          doc.text(`${setor.por_porte.grande.min || '—'} - ${setor.por_porte.grande.max || '—'}`, xOffset + 25, currentY);
+          currentY += 5;
+        }
+        
+        return currentY + 3;
+      };
+
       // Função para renderizar resultado de uma fonte
-      const renderFonteResult = (fonte: ResultadoFonte, nomeFonte: string, xOffset: number, width: number) => {
+      const renderFonteResult = (fonte: ResultadoFonte, nomeFonte: string, xOffset: number, width: number): number => {
         const startY = yPos;
         
         // Título da fonte
@@ -231,13 +268,19 @@ export default function EstudoMercado() {
         
         // Status encontrado
         let currentY = startY + 8;
-        if (fonte.encontrado) {
+        if (fonte.encontrado && fonte.setores && fonte.setores.length > 0) {
           doc.setFillColor(...colors.green);
           doc.circle(xOffset + 8, currentY - 2, 2, "F");
           doc.setFont("helvetica", "normal");
           doc.setFontSize(9);
           doc.setTextColor(...colors.grayText);
-          doc.text("Dados encontrados", xOffset + 13, currentY);
+          doc.text(`${fonte.setores.length} setor(es)`, xOffset + 13, currentY);
+          currentY += 8;
+          
+          // Renderizar cada setor
+          for (const setor of fonte.setores) {
+            currentY = renderSetorPDF(setor, xOffset, width, currentY);
+          }
         } else {
           doc.setFillColor(...colors.red);
           doc.circle(xOffset + 8, currentY - 2, 2, "F");
@@ -246,46 +289,6 @@ export default function EstudoMercado() {
           doc.setTextColor(...colors.grayText);
           doc.text("Não encontrado", xOffset + 13, currentY);
           return currentY + 10;
-        }
-        
-        currentY += 8;
-        
-        // Setor encontrado
-        if (fonte.setor_encontrado) {
-          doc.setFontSize(9);
-          doc.setFont("helvetica", "bold");
-          doc.text("Setor:", xOffset + 5, currentY);
-          doc.setFont("helvetica", "normal");
-          const setorLines = doc.splitTextToSize(fonte.setor_encontrado, width - 30);
-          doc.text(setorLines, xOffset + 20, currentY);
-          currentY += setorLines.length * 4 + 4;
-        }
-        
-        // Faixas por porte
-        if (fonte.por_porte.peq_med) {
-          doc.setFontSize(10);
-          doc.setFont("helvetica", "bold");
-          doc.text("Pequena/Média empresa:", xOffset + 5, currentY);
-          currentY += 6;
-          doc.setFontSize(9);
-          doc.setFont("helvetica", "normal");
-          doc.text(`Mín: ${fonte.por_porte.peq_med.min || '—'}`, xOffset + 10, currentY);
-          doc.text(`Méd: ${fonte.por_porte.peq_med.media || '—'}`, xOffset + 45, currentY);
-          doc.text(`Máx: ${fonte.por_porte.peq_med.max || '—'}`, xOffset + 80, currentY);
-          currentY += 8;
-        }
-        
-        if (fonte.por_porte.grande) {
-          doc.setFontSize(10);
-          doc.setFont("helvetica", "bold");
-          doc.text("Grande empresa:", xOffset + 5, currentY);
-          currentY += 6;
-          doc.setFontSize(9);
-          doc.setFont("helvetica", "normal");
-          doc.text(`Mín: ${fonte.por_porte.grande.min || '—'}`, xOffset + 10, currentY);
-          doc.text(`Méd: ${fonte.por_porte.grande.media || '—'}`, xOffset + 45, currentY);
-          doc.text(`Máx: ${fonte.por_porte.grande.max || '—'}`, xOffset + 80, currentY);
-          currentY += 8;
         }
         
         // Observação
@@ -359,22 +362,34 @@ export default function EstudoMercado() {
       doc.setFont("helvetica", "normal");
       doc.setTextColor(...colors.grayText);
       
-      if (estudo.resultado.hays.encontrado && estudo.resultado.hays.trecho_consultado) {
-        doc.setFont("helvetica", "bold");
-        doc.text("Hays:", margin + 5, yPos);
-        doc.setFont("helvetica", "normal");
-        const haysLines = doc.splitTextToSize(estudo.resultado.hays.trecho_consultado, maxTextWidth - 10);
-        doc.text(haysLines, margin + 5, yPos + 5);
-        yPos += haysLines.length * 4 + 10;
+      // Hays setores
+      if (estudo.resultado.hays.encontrado && estudo.resultado.hays.setores) {
+        for (const setor of estudo.resultado.hays.setores) {
+          if (setor.trecho_consultado) {
+            doc.setFont("helvetica", "bold");
+            doc.text(`Hays - ${setor.setor}:`, margin + 5, yPos);
+            doc.setFont("helvetica", "normal");
+            const lines = doc.splitTextToSize(setor.trecho_consultado, maxTextWidth - 10);
+            doc.text(lines, margin + 5, yPos + 5);
+            yPos += lines.length * 4 + 8;
+            checkSpace(20);
+          }
+        }
       }
       
-      if (estudo.resultado.michael_page.encontrado && estudo.resultado.michael_page.trecho_consultado) {
-        doc.setFont("helvetica", "bold");
-        doc.text("Michael Page:", margin + 5, yPos);
-        doc.setFont("helvetica", "normal");
-        const mpLines = doc.splitTextToSize(estudo.resultado.michael_page.trecho_consultado, maxTextWidth - 10);
-        doc.text(mpLines, margin + 5, yPos + 5);
-        yPos += mpLines.length * 4 + 10;
+      // Michael Page setores
+      if (estudo.resultado.michael_page.encontrado && estudo.resultado.michael_page.setores) {
+        for (const setor of estudo.resultado.michael_page.setores) {
+          if (setor.trecho_consultado) {
+            doc.setFont("helvetica", "bold");
+            doc.text(`Michael Page - ${setor.setor}:`, margin + 5, yPos);
+            doc.setFont("helvetica", "normal");
+            const lines = doc.splitTextToSize(setor.trecho_consultado, maxTextWidth - 10);
+            doc.text(lines, margin + 5, yPos + 5);
+            yPos += lines.length * 4 + 8;
+            checkSpace(20);
+          }
+        }
       }
 
       // ===== RODAPÉ EM TODAS AS PÁGINAS =====
@@ -424,6 +439,38 @@ export default function EstudoMercado() {
     );
   };
 
+  const renderSetorCard = (setor: ResultadoSetor) => {
+    return (
+      <div key={setor.setor} className="border border-border rounded-lg p-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <Badge variant="secondary" className="font-medium">
+            {setor.setor}
+          </Badge>
+          <span className="text-xs text-muted-foreground">
+            {setor.registros_base} registro{setor.registros_base !== 1 ? 's' : ''}
+          </span>
+        </div>
+        
+        {renderFaixaPorte(setor.por_porte.peq_med, "Pequena/Média Empresa")}
+        {renderFaixaPorte(setor.por_porte.grande, "Grande Empresa")}
+        
+        {setor.trecho_consultado && (
+          <Collapsible>
+            <CollapsibleTrigger className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1">
+              <Info className="h-3 w-3" />
+              Ver trecho consultado
+            </CollapsibleTrigger>
+            <CollapsibleContent className="mt-2">
+              <div className="bg-muted/50 rounded p-2 text-xs text-muted-foreground italic">
+                "{setor.trecho_consultado}"
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+        )}
+      </div>
+    );
+  };
+
   const renderResultadoFonte = (fonte: ResultadoFonte, nomeFonte: string, corBorda: string) => {
     return (
       <Card className={`border-l-4 ${corBorda}`}>
@@ -433,7 +480,7 @@ export default function EstudoMercado() {
             {fonte.encontrado ? (
               <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
                 <CheckCircle className="h-3 w-3 mr-1" />
-                Encontrado
+                {fonte.setores?.length || 0} setor{(fonte.setores?.length || 0) !== 1 ? 'es' : ''}
               </Badge>
             ) : (
               <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
@@ -442,14 +489,10 @@ export default function EstudoMercado() {
               </Badge>
             )}
           </div>
-          {fonte.setor_encontrado && (
-            <p className="text-sm text-muted-foreground">Setor: {fonte.setor_encontrado}</p>
-          )}
         </CardHeader>
-        {fonte.encontrado && (
+        {fonte.encontrado && fonte.setores && fonte.setores.length > 0 && (
           <CardContent className="space-y-4">
-            {renderFaixaPorte(fonte.por_porte.peq_med, "Pequena/Média Empresa")}
-            {renderFaixaPorte(fonte.por_porte.grande, "Grande Empresa")}
+            {fonte.setores.map((setor) => renderSetorCard(setor))}
             
             {fonte.observacao && (
               <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
@@ -458,20 +501,6 @@ export default function EstudoMercado() {
                   {fonte.observacao}
                 </p>
               </div>
-            )}
-            
-            {fonte.trecho_consultado && (
-              <Collapsible>
-                <CollapsibleTrigger className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1">
-                  <Info className="h-3 w-3" />
-                  Ver trecho consultado (auditoria)
-                </CollapsibleTrigger>
-                <CollapsibleContent className="mt-2">
-                  <div className="bg-muted/50 rounded p-2 text-xs text-muted-foreground italic">
-                    "{fonte.trecho_consultado}"
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
             )}
           </CardContent>
         )}
