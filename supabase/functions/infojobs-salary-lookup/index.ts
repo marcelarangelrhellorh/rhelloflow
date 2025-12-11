@@ -178,6 +178,31 @@ Deno.serve(async (req) => {
 
     const markdown = await jinaResponse.text();
     console.log(`Markdown recebido: ${markdown.length} caracteres`);
+    console.log(`Markdown preview: ${markdown.substring(0, 800)}`);
+
+    // Verificar se InfoJobs retornou erro 500 ou página de erro
+    if (markdown.includes('500 Internal Server Error') || 
+        markdown.includes('Erro interno') ||
+        markdown.includes('temporarily unavailable')) {
+      console.log('InfoJobs retornou erro interno 500');
+      
+      const result: InfoJobsSalaryData = {
+        encontrado: false,
+        cargo,
+        salario_medio: null,
+        faixa: { min: null, max: null },
+        registros_base: null,
+        localidade: localidade || 'Brasil',
+        fonte: 'InfoJobs',
+        url: infojobsUrl,
+        erro: 'Serviço InfoJobs temporariamente indisponível'
+      };
+
+      return new Response(
+        JSON.stringify(result),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     // Verificar se a página existe (não é 404 ou erro)
     if (markdown.includes('não encontrada') || markdown.includes('404') || markdown.length < 200) {
