@@ -97,7 +97,7 @@ export default function Auth() {
       {/* Centered Content */}
       <div className="flex flex-col items-center gap-4 sm:gap-8 relative z-10 w-full max-w-md px-4">
         {/* Rhello Flow Logo - Above Card */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center justify-center gap-1 w-full">
           <img 
             alt="Rhello RH - Sistema de Recrutamento e Seleção" 
             className="h-16 sm:h-20 md:h-28 w-auto" 
