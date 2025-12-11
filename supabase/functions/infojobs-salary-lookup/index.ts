@@ -19,10 +19,10 @@ function cargoToSlug(cargo: string): string {
   return cargo
     .toLowerCase()
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '') // Remove acentos
-    .replace(/[^a-z0-9\s-]/g, '') // Remove caracteres especiais
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s-]/g, '')
     .trim()
-    .replace(/\s+/g, '-'); // Espaços para hífens
+    .replace(/\s+/g, '-');
 }
 
 function formatCurrency(value: number): string {
@@ -40,7 +40,6 @@ function extractSalaryFromMarkdown(markdown: string): {
   let salarioMax: number | null = null;
   let totalRegistros: number | null = null;
 
-  // Padrão: "R$ X.XXX" ou "R$X.XXX" ou "R$ X,XXX"
   const currencyPattern = /R\$\s*([0-9.,]+)/gi;
 
   // Tentar extrair salário médio
@@ -95,6 +94,41 @@ function extractSalaryFromMarkdown(markdown: string): {
   return { salarioMedio, salarioMin, salarioMax, totalRegistros };
 }
 
+async function scrapeWithFirecrawl(url: string): Promise<{ success: boolean; content: string; error?: string }> {
+  const apiKey = Deno.env.get('FIRECRAWL_API_KEY');
+  if (!apiKey) {
+    return { success: false, content: '', error: 'FIRECRAWL_API_KEY não configurada' };
+  }
+
+  try {
+    const response = await fetch('https://api.firecrawl.dev/v1/scrape', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        url,
+        formats: ['markdown'],
+        onlyMainContent: true,
+        waitFor: 2000,
+      }),
+      signal: AbortSignal.timeout(20000),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      return { success: false, content: '', error: data.error || `Status ${response.status}` };
+    }
+
+    const markdown = data.data?.markdown || data.markdown || '';
+    return { success: true, content: markdown };
+  } catch (error) {
+    return { success: false, content: '', error: error instanceof Error ? error.message : 'Erro desconhecido' };
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -113,27 +147,15 @@ Deno.serve(async (req) => {
 
     const slug = cargoToSlug(cargo);
     const infojobsUrl = `https://www.infojobs.com.br/salario/${slug}`;
-    const jinaUrl = `https://r.jina.ai/${infojobsUrl}`;
 
     console.log(`Buscando InfoJobs para: ${cargo} (slug: ${slug})`);
-    console.log(`URL Jina: ${jinaUrl}`);
+    console.log(`URL: ${infojobsUrl}`);
 
-    // Chamar Jina AI Reader com timeout de 10s
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    // Usar Firecrawl para scraping
+    const scrapeResult = await scrapeWithFirecrawl(infojobsUrl);
 
-    let jinaResponse;
-    try {
-      jinaResponse = await fetch(jinaUrl, {
-        headers: {
-          'Accept': 'text/plain',
-          'User-Agent': 'Mozilla/5.0 (compatible; RhelloFlow/1.0)'
-        },
-        signal: controller.signal
-      });
-    } catch (fetchError) {
-      clearTimeout(timeoutId);
-      console.error('Erro ao chamar Jina:', fetchError);
+    if (!scrapeResult.success) {
+      console.warn(`Firecrawl falhou: ${scrapeResult.error}`);
       
       const result: InfoJobsSalaryData = {
         encontrado: false,
@@ -142,9 +164,9 @@ Deno.serve(async (req) => {
         faixa: { min: null, max: null },
         registros_base: null,
         localidade: localidade || 'Brasil',
-        fonte: 'InfoJobs',
+        fonte: 'InfoJobs Brasil',
         url: infojobsUrl,
-        erro: 'Timeout ou erro de conexão ao buscar dados do InfoJobs'
+        erro: scrapeResult.error || 'Falha ao acessar página'
       };
 
       return new Response(
@@ -153,30 +175,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    clearTimeout(timeoutId);
-
-    if (!jinaResponse.ok) {
-      console.error('Jina retornou erro:', jinaResponse.status);
-      
-      const result: InfoJobsSalaryData = {
-        encontrado: false,
-        cargo,
-        salario_medio: null,
-        faixa: { min: null, max: null },
-        registros_base: null,
-        localidade: localidade || 'Brasil',
-        fonte: 'InfoJobs',
-        url: infojobsUrl,
-        erro: `Página não encontrada (status ${jinaResponse.status})`
-      };
-
-      return new Response(
-        JSON.stringify(result),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    const markdown = await jinaResponse.text();
+    const markdown = scrapeResult.content;
     console.log(`Markdown recebido: ${markdown.length} caracteres`);
     console.log(`Markdown preview: ${markdown.substring(0, 800)}`);
 
@@ -193,7 +192,7 @@ Deno.serve(async (req) => {
         faixa: { min: null, max: null },
         registros_base: null,
         localidade: localidade || 'Brasil',
-        fonte: 'InfoJobs',
+        fonte: 'InfoJobs Brasil',
         url: infojobsUrl,
         erro: 'Serviço InfoJobs temporariamente indisponível'
       };
@@ -215,7 +214,7 @@ Deno.serve(async (req) => {
         faixa: { min: null, max: null },
         registros_base: null,
         localidade: localidade || 'Brasil',
-        fonte: 'InfoJobs',
+        fonte: 'InfoJobs Brasil',
         url: infojobsUrl,
         erro: 'Cargo não encontrado na base do InfoJobs'
       };
@@ -267,7 +266,7 @@ Deno.serve(async (req) => {
         faixa: { min: null, max: null },
         registros_base: null,
         localidade: 'Brasil',
-        fonte: 'InfoJobs',
+        fonte: 'InfoJobs Brasil',
         url: '',
         erro: error instanceof Error ? error.message : 'Erro desconhecido'
       }),

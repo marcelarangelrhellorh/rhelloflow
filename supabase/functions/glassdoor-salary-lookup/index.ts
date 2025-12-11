@@ -20,6 +20,41 @@ interface GlassdoorData {
   erro?: string;
 }
 
+async function scrapeWithFirecrawl(url: string): Promise<{ success: boolean; content: string; error?: string }> {
+  const apiKey = Deno.env.get('FIRECRAWL_API_KEY');
+  if (!apiKey) {
+    return { success: false, content: '', error: 'FIRECRAWL_API_KEY não configurada' };
+  }
+
+  try {
+    const response = await fetch('https://api.firecrawl.dev/v1/scrape', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        url,
+        formats: ['markdown'],
+        onlyMainContent: true,
+        waitFor: 2000,
+      }),
+      signal: AbortSignal.timeout(20000),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      return { success: false, content: '', error: data.error || `Status ${response.status}` };
+    }
+
+    const markdown = data.data?.markdown || data.markdown || '';
+    return { success: true, content: markdown };
+  } catch (error) {
+    return { success: false, content: '', error: error instanceof Error ? error.message : 'Erro desconhecido' };
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -40,31 +75,22 @@ Deno.serve(async (req) => {
     const cargoSlug = cargoTrimmed
       .toLowerCase()
       .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '') // Remove acentos
+      .replace(/[\u0300-\u036f]/g, '')
       .replace(/\s+/g, '-')
       .replace(/[^a-z0-9-]/g, '');
 
-    // URL do Glassdoor Brasil - usar tamanho do cargo original (com espaços)
+    // URL do Glassdoor Brasil - usar tamanho do cargo original
     const cargoLength = cargoTrimmed.length;
     const glassdoorUrl = `https://www.glassdoor.com.br/Sal%C3%A1rios/${cargoSlug}-sal%C3%A1rio-SRCH_KO0,${cargoLength}.htm`;
     
     console.log(`Buscando Glassdoor para: ${cargo}`);
     console.log(`URL: ${glassdoorUrl}`);
 
-    // Usar Jina AI Reader para scraping
-    const jinaUrl = `https://r.jina.ai/${glassdoorUrl}`;
+    // Usar Firecrawl para scraping
+    const scrapeResult = await scrapeWithFirecrawl(glassdoorUrl);
     
-    const response = await fetch(jinaUrl, {
-      method: 'GET',
-      headers: {
-        'Accept': 'text/plain',
-        'X-Return-Format': 'text'
-      },
-      signal: AbortSignal.timeout(15000) // 15s timeout
-    });
-
-    if (!response.ok) {
-      console.warn(`Glassdoor request failed: ${response.status}`);
+    if (!scrapeResult.success) {
+      console.warn(`Firecrawl falhou: ${scrapeResult.error}`);
       return new Response(
         JSON.stringify({
           encontrado: false,
@@ -76,15 +102,35 @@ Deno.serve(async (req) => {
           ultima_atualizacao: null,
           fonte: 'Glassdoor Brasil',
           url: glassdoorUrl,
-          erro: 'Página não encontrada'
+          erro: scrapeResult.error || 'Falha ao acessar página'
         } as GlassdoorData),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const textContent = await response.text();
+    const textContent = scrapeResult.content;
     console.log(`Glassdoor content length: ${textContent.length}`);
     console.log(`Glassdoor content preview: ${textContent.substring(0, 800)}`);
+
+    // Verificar se é página de bloqueio/captcha
+    if (textContent.includes('Ajude-nos a proteger') || textContent.includes('CF-103') || textContent.length < 300) {
+      console.warn('Glassdoor bloqueou a requisição (captcha)');
+      return new Response(
+        JSON.stringify({
+          encontrado: false,
+          cargo,
+          salario_medio: null,
+          faixa: { min: null, max: null },
+          remuneracao_variavel: null,
+          registros_base: null,
+          ultima_atualizacao: null,
+          fonte: 'Glassdoor Brasil',
+          url: glassdoorUrl,
+          erro: 'Glassdoor bloqueou a requisição'
+        } as GlassdoorData),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     // Extrair informações com regex
     let salarioMedio: string | null = null;
