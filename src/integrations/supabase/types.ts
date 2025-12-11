@@ -2033,6 +2033,7 @@ export type Database = {
           id: string
           page_number: number | null
           porte_empresa: string | null
+          search_vector: unknown
           senioridade: string | null
           setor: string | null
           source: string
@@ -2048,6 +2049,7 @@ export type Database = {
           id?: string
           page_number?: number | null
           porte_empresa?: string | null
+          search_vector?: unknown
           senioridade?: string | null
           setor?: string | null
           source: string
@@ -2063,11 +2065,45 @@ export type Database = {
           id?: string
           page_number?: number | null
           porte_empresa?: string | null
+          search_vector?: unknown
           senioridade?: string | null
           setor?: string | null
           source?: string
           trecho_origem?: string | null
           year?: number
+        }
+        Relationships: []
+      }
+      salary_study_cache: {
+        Row: {
+          cache_key: string
+          cargo: string
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          localidade: string | null
+          resultado: Json
+          senioridade: string | null
+        }
+        Insert: {
+          cache_key: string
+          cargo: string
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          localidade?: string | null
+          resultado: Json
+          senioridade?: string | null
+        }
+        Update: {
+          cache_key?: string
+          cargo?: string
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          localidade?: string | null
+          resultado?: Json
+          senioridade?: string | null
         }
         Relationships: []
       }
@@ -4471,6 +4507,7 @@ export type Database = {
       }
       cleanup_expired_pdf_imports: { Args: never; Returns: undefined }
       cleanup_old_submission_logs: { Args: never; Returns: undefined }
+      cleanup_salary_study_cache: { Args: never; Returns: undefined }
       compute_audit_event_hash: {
         Args: {
           p_action: string
@@ -4514,6 +4551,10 @@ export type Database = {
         }
         Returns: string
       }
+      generate_salary_study_cache_key: {
+        Args: { p_cargo: string; p_localidade?: string; p_senioridade?: string }
+        Returns: string
+      }
       get_dashboard_overview_secure: {
         Args: never
         Returns: {
@@ -4540,6 +4581,19 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      get_salary_benchmarks_aggregated: {
+        Args: { p_cargo: string; p_limit?: number; p_senioridade?: string }
+        Returns: {
+          avg_salary: number
+          max_salary: number
+          min_salary: number
+          porte_empresa: string
+          record_count: number
+          sample_trecho: string
+          setor: string
+          source: string
+        }[]
       }
       get_share_link_by_token: {
         Args: { p_token: string }
