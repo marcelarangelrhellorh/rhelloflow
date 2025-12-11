@@ -231,74 +231,16 @@ Deno.serve(async (req) => {
 Senioridade: ${senioridade || 'Não especificado'}
 Localidade: ${localidade || 'Brasil'}
 
-DADOS PRÉ-AGREGADOS (já calculados pelo servidor):
-
-HAYS e MICHAEL PAGE:
-${JSON.stringify({ hays: preProcessedData.hays, michael_page: preProcessedData.michael_page }, null, 2)}
-
-INFOJOBS (dados de mercado em tempo real):
+DADOS PRÉ-AGREGADOS:
+Hays: ${haysBenchmarks.length} registros
+Michael Page: ${mpBenchmarks.length} registros
 ${infojobsSection}
 
-TAREFA:
-1. Valide e formate os dados acima no schema JSON especificado
-2. Gere 4 insights consultivos curtos sobre o cargo (oferta/demanda, responsabilidades, faixa, negociação)
-3. Se InfoJobs tiver dados, use-os para complementar a análise (especialmente útil para cargos operacionais)
+Gere 4 insights consultivos curtos sobre este cargo.`;
 
-RESPONDA APENAS com este JSON:
-{
-  "consulta": {
-    "cargo_pedido": "${cargo}",
-    "senioridade": "${senioridade || 'Não especificado'}",
-    "localidade": "${localidade || 'Brasil'}"
-  },
-  "resultado": {
-    "hays": {
-      "encontrado": ${haysBenchmarks.length > 0},
-      "setores": ${JSON.stringify(preProcessedData.hays.map(s => ({
-        setor: s.setor,
-        por_porte: s.por_porte,
-        registros_base: s.registros_base,
-        trecho_consultado: s.trecho ? s.trecho.substring(0, 200) : null
-      })))},
-      "observacao": "${haysBenchmarks.length > 0 ? 'Valores mensais em R$' : 'Cargo não encontrado na base Hays'}",
-      "fonte": "Hays 2026"
-    },
-    "michael_page": {
-      "encontrado": ${mpBenchmarks.length > 0},
-      "setores": ${JSON.stringify(preProcessedData.michael_page.map(s => ({
-        setor: s.setor,
-        por_porte: s.por_porte,
-        registros_base: s.registros_base,
-        trecho_consultado: s.trecho ? s.trecho.substring(0, 200) : null
-      })))},
-      "observacao": "${mpBenchmarks.length > 0 ? 'Valores mensais em R$' : 'Cargo não encontrado na base Michael Page'}",
-      "fonte": "Michael Page 2026"
-    },
-    "infojobs": ${JSON.stringify(infojobsData ? {
-      encontrado: infojobsData.encontrado,
-      salario_medio: infojobsData.salario_medio,
-      faixa: infojobsData.faixa,
-      registros_base: infojobsData.registros_base,
-      fonte: infojobsData.fonte,
-      url: infojobsData.url
-    } : {
-      encontrado: false,
-      salario_medio: null,
-      faixa: { min: null, max: null },
-      registros_base: null,
-      fonte: "InfoJobs Brasil",
-      url: null
-    })}
-  },
-  "consultoria": [
-    "<insight 1 sobre oferta/demanda>",
-    "<insight 2 sobre responsabilidades típicas>",
-    "<insight 3 sobre posicionamento da faixa>",
-    "<insight 4 sobre negociação>"
-  ]
-}`;
-
-    console.log('Chamando Lovable AI Gateway (prompt otimizado)...');
+    console.log('Chamando Lovable AI Gateway com tool calling...');
+    
+    // Usar tool calling para garantir JSON estruturado
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -312,7 +254,28 @@ RESPONDA APENAS com este JSON:
           { role: 'user', content: userPrompt }
         ],
         temperature: 0.2,
-        max_tokens: 2000 // Reduzido de 4000 para 2000
+        tools: [
+          {
+            type: 'function',
+            function: {
+              name: 'gerar_estudo_mercado',
+              description: 'Gera o estudo de mercado com insights consultivos',
+              parameters: {
+                type: 'object',
+                properties: {
+                  consultoria: {
+                    type: 'array',
+                    items: { type: 'string' },
+                    description: '4 insights consultivos curtos sobre oferta/demanda, responsabilidades, posicionamento e negociação'
+                  }
+                },
+                required: ['consultoria'],
+                additionalProperties: false
+              }
+            }
+          }
+        ],
+        tool_choice: { type: 'function', function: { name: 'gerar_estudo_mercado' } }
       })
     });
 
@@ -338,61 +301,79 @@ RESPONDA APENAS com este JSON:
     }
 
     const aiData = await aiResponse.json();
-    const rawContent = aiData.choices?.[0]?.message?.content;
+    console.log('Resposta da IA recebida');
 
-    if (!rawContent) {
-      throw new Error('Resposta vazia da IA');
-    }
-
-    console.log('Resposta da IA recebida, processando JSON...');
-
-    // Função auxiliar para limpar e corrigir JSON malformado
-    const cleanJsonString = (str: string): string => {
-      let cleaned = str;
-      // Remove trailing commas antes de } ou ]
-      cleaned = cleaned.replace(/,(\s*[}\]])/g, '$1');
-      return cleaned;
-    };
-
-    let parsedEstudo;
-    try {
-      parsedEstudo = JSON.parse(rawContent);
-    } catch (parseError) {
-      console.log('Primeira tentativa de parse falhou, tentando extrair JSON...');
-      
-      let jsonString = rawContent;
-      
-      // Remove code block markers (greedy match para capturar todo o conteúdo)
-      if (jsonString.includes('```')) {
-        // Remove ```json ou ``` do início
-        jsonString = jsonString.replace(/^[\s\S]*?```(?:json)?\s*/, '');
-        // Remove ``` do final
-        jsonString = jsonString.replace(/\s*```[\s\S]*$/, '');
-      }
-      
-      // Encontra o primeiro { e o último } para garantir um objeto válido
-      const firstBrace = jsonString.indexOf('{');
-      const lastBrace = jsonString.lastIndexOf('}');
-      
-      if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
-        jsonString = jsonString.substring(firstBrace, lastBrace + 1);
-      }
-      
-      // Limpa o JSON
-      jsonString = cleanJsonString(jsonString);
-      
+    // Extrair insights do tool call
+    let consultoriaInsights: string[] = [];
+    
+    const toolCall = aiData.choices?.[0]?.message?.tool_calls?.[0];
+    if (toolCall?.function?.arguments) {
       try {
-        parsedEstudo = JSON.parse(jsonString);
-      } catch (secondError) {
-        // Log mais detalhado para debug
-        console.error('JSON extraído length:', jsonString.length);
-        console.error('Posição do erro:', (secondError as Error).message);
-        console.error('Contexto do erro (chars 4300-4400):', jsonString.substring(4300, 4400));
-        console.error('Final do JSON (últimos 200 chars):', jsonString.substring(jsonString.length - 200));
-        
-        throw new Error('Não foi possível extrair JSON válido da resposta da IA: ' + (secondError as Error).message);
+        const args = JSON.parse(toolCall.function.arguments);
+        consultoriaInsights = args.consultoria || [];
+      } catch (e) {
+        console.warn('Erro ao parsear tool call arguments:', e);
       }
     }
+    
+    // Fallback se tool calling não retornar insights
+    if (consultoriaInsights.length === 0) {
+      consultoriaInsights = [
+        `O cargo de ${cargo} apresenta demanda ${haysBenchmarks.length > 0 || mpBenchmarks.length > 0 ? 'ativa' : 'variável'} no mercado.`,
+        'Responsabilidades típicas incluem gestão de processos e entregas técnicas.',
+        'A faixa salarial varia conforme porte da empresa e setor de atuação.',
+        'Negociação deve considerar benefícios além do salário fixo.'
+      ];
+    }
+
+    // Construir resposta estruturada no servidor (não depende da IA para estrutura)
+    const parsedEstudo = {
+      consulta: {
+        cargo_pedido: cargo,
+        senioridade: senioridade || 'Não especificado',
+        localidade: localidade || 'Brasil'
+      },
+      resultado: {
+        hays: {
+          encontrado: haysBenchmarks.length > 0,
+          setores: preProcessedData.hays.map(s => ({
+            setor: s.setor,
+            por_porte: s.por_porte,
+            registros_base: s.registros_base,
+            trecho_consultado: s.trecho ? s.trecho.substring(0, 200) : null
+          })),
+          observacao: haysBenchmarks.length > 0 ? 'Valores mensais em R$' : 'Cargo não encontrado na base Hays',
+          fonte: 'Hays 2026'
+        },
+        michael_page: {
+          encontrado: mpBenchmarks.length > 0,
+          setores: preProcessedData.michael_page.map(s => ({
+            setor: s.setor,
+            por_porte: s.por_porte,
+            registros_base: s.registros_base,
+            trecho_consultado: s.trecho ? s.trecho.substring(0, 200) : null
+          })),
+          observacao: mpBenchmarks.length > 0 ? 'Valores mensais em R$' : 'Cargo não encontrado na base Michael Page',
+          fonte: 'Michael Page 2026'
+        },
+        infojobs: infojobsData ? {
+          encontrado: infojobsData.encontrado,
+          salario_medio: infojobsData.salario_medio,
+          faixa: infojobsData.faixa,
+          registros_base: infojobsData.registros_base,
+          fonte: infojobsData.fonte,
+          url: infojobsData.url
+        } : {
+          encontrado: false,
+          salario_medio: null,
+          faixa: { min: null, max: null },
+          registros_base: null,
+          fonte: 'InfoJobs Brasil',
+          url: null
+        }
+      },
+      consultoria: consultoriaInsights
+    };
 
     if (!parsedEstudo.consulta || !parsedEstudo.resultado) {
       throw new Error('Estrutura mínima inválida no JSON retornado');
