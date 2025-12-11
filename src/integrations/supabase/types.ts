@@ -2023,6 +2023,30 @@ export type Database = {
         }
         Relationships: []
       }
+      role_comparison_cache: {
+        Row: {
+          cache_key: string
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          result: Json
+        }
+        Insert: {
+          cache_key: string
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          result: Json
+        }
+        Update: {
+          cache_key?: string
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          result?: Json
+        }
+        Relationships: []
+      }
       salary_benchmarks: {
         Row: {
           cargo_canonico: string
@@ -2104,6 +2128,36 @@ export type Database = {
           localidade?: string | null
           resultado?: Json
           senioridade?: string | null
+        }
+        Relationships: []
+      }
+      saved_role_comparisons: {
+        Row: {
+          client_context: string | null
+          created_at: string | null
+          id: string
+          prompt_version: string | null
+          requirements: Json
+          role_ids: string[]
+          user_id: string
+        }
+        Insert: {
+          client_context?: string | null
+          created_at?: string | null
+          id?: string
+          prompt_version?: string | null
+          requirements: Json
+          role_ids: string[]
+          user_id: string
+        }
+        Update: {
+          client_context?: string | null
+          created_at?: string | null
+          id?: string
+          prompt_version?: string | null
+          requirements?: Json
+          role_ids?: string[]
+          user_id?: string
         }
         Relationships: []
       }
@@ -4507,6 +4561,7 @@ export type Database = {
       }
       cleanup_expired_pdf_imports: { Args: never; Returns: undefined }
       cleanup_old_submission_logs: { Args: never; Returns: undefined }
+      cleanup_role_comparison_cache: { Args: never; Returns: undefined }
       cleanup_salary_study_cache: { Args: never; Returns: undefined }
       compute_audit_event_hash: {
         Args: {
