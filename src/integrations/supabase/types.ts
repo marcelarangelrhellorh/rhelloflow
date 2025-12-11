@@ -2023,6 +2023,54 @@ export type Database = {
         }
         Relationships: []
       }
+      salary_benchmarks: {
+        Row: {
+          cargo_canonico: string
+          cargo_original: string | null
+          created_at: string | null
+          fixo_max: number | null
+          fixo_min: number | null
+          id: string
+          page_number: number | null
+          porte_empresa: string | null
+          senioridade: string | null
+          setor: string | null
+          source: string
+          trecho_origem: string | null
+          year: number
+        }
+        Insert: {
+          cargo_canonico: string
+          cargo_original?: string | null
+          created_at?: string | null
+          fixo_max?: number | null
+          fixo_min?: number | null
+          id?: string
+          page_number?: number | null
+          porte_empresa?: string | null
+          senioridade?: string | null
+          setor?: string | null
+          source: string
+          trecho_origem?: string | null
+          year?: number
+        }
+        Update: {
+          cargo_canonico?: string
+          cargo_original?: string | null
+          created_at?: string | null
+          fixo_max?: number | null
+          fixo_min?: number | null
+          id?: string
+          page_number?: number | null
+          porte_empresa?: string | null
+          senioridade?: string | null
+          setor?: string | null
+          source?: string
+          trecho_origem?: string | null
+          year?: number
+        }
+        Relationships: []
+      }
       scorecard_analysis_logs: {
         Row: {
           ai_model: string
