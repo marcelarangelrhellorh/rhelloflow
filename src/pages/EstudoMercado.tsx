@@ -531,8 +531,6 @@ export default function EstudoMercado() {
           <h1 className="text-4xl font-bold text-foreground">Estudo de Mercado Salarial</h1>
           <p className="text-muted-foreground">Compare salários com dados de Hays, Michael Page 2026 e InfoJobs (tempo real)</p>
         </div>
-          <p className="text-muted-foreground">Compare salários com dados reais de Hays e Michael Page 2026</p>
-        </div>
 
         {/* Aviso de dados não importados */}
         {!checkingData && benchmarkCount === 0 && (
