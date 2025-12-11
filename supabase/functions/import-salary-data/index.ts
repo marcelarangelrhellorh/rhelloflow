@@ -45,33 +45,21 @@ interface SalaryBenchmark {
   trecho_origem: string | null;
 }
 
-// Parse Hays salary from cargo_original or trecho_origem
-function parseHaysSalary(text: string, porteLabel: string): { min: number | null; max: number | null } {
-  // Pattern: R$ XX.XXX - R$ YY.YYY
-  const regex = new RegExp(`${porteLabel}[^R]*R\\$\\s*([\\d.,]+)\\s*-\\s*R\\$\\s*([\\d.,]+)`, 'i');
-  const match = text.match(regex);
+// Parse all salary values from Hays text (returns array of {min, max} pairs)
+function parseAllHaysSalaries(text: string): { min: number; max: number }[] {
+  const results: { min: number; max: number }[] = [];
+  const regex = /R\$\s*([\d.,]+)\s*-\s*R\$\s*([\d.,]+)/g;
+  let match;
   
-  if (match) {
+  while ((match = regex.exec(text)) !== null) {
     const min = parseFloat(match[1].replace(/\./g, '').replace(',', '.'));
     const max = parseFloat(match[2].replace(/\./g, '').replace(',', '.'));
-    return { min: isNaN(min) ? null : min, max: isNaN(max) ? null : max };
-  }
-  
-  // Fallback: try simple pattern
-  const simpleRegex = /R\$\s*([\d.,]+)\s*-\s*R\$\s*([\d.,]+)/g;
-  const matches = [...text.matchAll(simpleRegex)];
-  
-  if (matches.length > 0) {
-    // For pequeno porte, use first match; for médio, second; for grande, third
-    const idx = porteLabel === 'pequeno' ? 0 : (porteLabel === 'médio' ? 1 : 2);
-    if (matches[idx]) {
-      const min = parseFloat(matches[idx][1].replace(/\./g, '').replace(',', '.'));
-      const max = parseFloat(matches[idx][2].replace(/\./g, '').replace(',', '.'));
-      return { min: isNaN(min) ? null : min, max: isNaN(max) ? null : max };
+    if (!isNaN(min) && !isNaN(max) && min > 1000 && max > 1000) {
+      results.push({ min, max });
     }
   }
   
-  return { min: null, max: null };
+  return results;
 }
 
 // Extract clean cargo name from Hays data
@@ -169,42 +157,96 @@ function transformHaysData(records: HaysRecord[]): SalaryBenchmark[] {
     // Skip header rows and non-salary data
     if (
       record.cargo_original.toLowerCase().includes('cargos empresa') ||
-      record.cargo_original.length < 5 ||
-      (!record.trecho_origem.includes('R$') && !record.cargo_original.includes('R$'))
+      record.cargo_original.length < 5
     ) {
       continue;
     }
     
+    const fullText = `${record.cargo_original} ${record.trecho_origem}`;
+    const salaries = parseAllHaysSalaries(fullText);
+    
+    if (salaries.length === 0) continue;
+    
     const cleanCargo = extractCleanCargo(record.cargo_original);
     if (cleanCargo.length < 3) continue;
     
-    const fullText = `${record.cargo_original} ${record.trecho_origem}`;
+    // Map salaries to portes: [pequeno, médio, grande]
+    const porteMap = ['pequeno_medio', 'medio', 'grande'];
     
-    // Create entries for each porte
-    const portes = [
-      { label: 'pequeno', db: 'pequeno' },
-      { label: 'médio', db: 'medio' },
-      { label: 'grande', db: 'grande' },
-    ];
-    
-    for (const porte of portes) {
-      const salary = parseHaysSalary(fullText, porte.label);
-      
-      if (salary.min !== null || salary.max !== null) {
-        benchmarks.push({
-          source: 'hays',
-          year: 2025,
-          page_number: record.pagina,
-          cargo_original: record.cargo_original,
-          cargo_canonico: cleanCargo,
-          setor: detectSetor(cleanCargo, record.trecho_origem),
-          senioridade: detectSenioridade(cleanCargo),
-          porte_empresa: porte.db,
-          fixo_min: salary.min,
-          fixo_max: salary.max,
-          trecho_origem: record.trecho_origem,
-        });
-      }
+    // If we have 3 salary ranges, map to pequeno, médio, grande
+    // If we have 2, map to pequeno_medio and grande
+    // If we have 1, use it as general
+    if (salaries.length >= 3) {
+      // Pequeno/Médio (use first two ranges combined as min/max)
+      benchmarks.push({
+        source: 'hays',
+        year: 2026,
+        page_number: record.pagina,
+        cargo_original: record.cargo_original,
+        cargo_canonico: cleanCargo,
+        setor: detectSetor(cleanCargo, record.trecho_origem),
+        senioridade: detectSenioridade(cleanCargo),
+        porte_empresa: 'pequeno_medio',
+        fixo_min: salaries[0].min,
+        fixo_max: salaries[1].max,
+        trecho_origem: record.trecho_origem.substring(0, 500),
+      });
+      // Grande
+      benchmarks.push({
+        source: 'hays',
+        year: 2026,
+        page_number: record.pagina,
+        cargo_original: record.cargo_original,
+        cargo_canonico: cleanCargo,
+        setor: detectSetor(cleanCargo, record.trecho_origem),
+        senioridade: detectSenioridade(cleanCargo),
+        porte_empresa: 'grande',
+        fixo_min: salaries[2].min,
+        fixo_max: salaries[2].max,
+        trecho_origem: record.trecho_origem.substring(0, 500),
+      });
+    } else if (salaries.length === 2) {
+      benchmarks.push({
+        source: 'hays',
+        year: 2026,
+        page_number: record.pagina,
+        cargo_original: record.cargo_original,
+        cargo_canonico: cleanCargo,
+        setor: detectSetor(cleanCargo, record.trecho_origem),
+        senioridade: detectSenioridade(cleanCargo),
+        porte_empresa: 'pequeno_medio',
+        fixo_min: salaries[0].min,
+        fixo_max: salaries[0].max,
+        trecho_origem: record.trecho_origem.substring(0, 500),
+      });
+      benchmarks.push({
+        source: 'hays',
+        year: 2026,
+        page_number: record.pagina,
+        cargo_original: record.cargo_original,
+        cargo_canonico: cleanCargo,
+        setor: detectSetor(cleanCargo, record.trecho_origem),
+        senioridade: detectSenioridade(cleanCargo),
+        porte_empresa: 'grande',
+        fixo_min: salaries[1].min,
+        fixo_max: salaries[1].max,
+        trecho_origem: record.trecho_origem.substring(0, 500),
+      });
+    } else {
+      // Single salary range - use as general
+      benchmarks.push({
+        source: 'hays',
+        year: 2026,
+        page_number: record.pagina,
+        cargo_original: record.cargo_original,
+        cargo_canonico: cleanCargo,
+        setor: detectSetor(cleanCargo, record.trecho_origem),
+        senioridade: detectSenioridade(cleanCargo),
+        porte_empresa: null,
+        fixo_min: salaries[0].min,
+        fixo_max: salaries[0].max,
+        trecho_origem: record.trecho_origem.substring(0, 500),
+      });
     }
   }
   
@@ -216,12 +258,12 @@ function transformMichaelPageData(records: MichaelPageRecord[]): SalaryBenchmark
   const benchmarks: SalaryBenchmark[] = [];
   
   for (const record of records) {
-    // Skip header rows
-    if (record.cargo_original.toLowerCase().includes('mínimo máximo') && !record.peq_fixo_min) {
+    // Skip header rows or invalid entries
+    if (!record.cargo_original || record.cargo_original.length < 3) {
       continue;
     }
     
-    // Clean cargo name
+    // Clean cargo name - remove salary pattern suffixes
     const cleanCargo = record.cargo_original
       .replace(/Fix:.*$/i, '')
       .replace(/Mínimo Máximo Var\.?$/i, '')
@@ -230,38 +272,53 @@ function transformMichaelPageData(records: MichaelPageRecord[]): SalaryBenchmark
     
     if (cleanCargo.length < 3) continue;
     
-    // Create entry for pequeno/médio porte
-    if (record.peq_fixo_min !== null || record.peq_fixo_max !== null) {
-      benchmarks.push({
-        source: 'michael_page',
-        year: 2026,
-        page_number: record.pagina,
-        cargo_original: record.cargo_original,
-        cargo_canonico: cleanCargo,
-        setor: detectSetor(cleanCargo, record.trecho_origem || ''),
-        senioridade: detectSenioridade(cleanCargo),
-        porte_empresa: 'pequeno_medio',
-        fixo_min: record.peq_fixo_min,
-        fixo_max: record.peq_fixo_max,
-        trecho_origem: record.trecho_origem,
-      });
+    // Validate and normalize salary values (some entries have swapped min/max)
+    const peqMin = record.peq_fixo_min;
+    const peqMax = record.peq_fixo_max;
+    const grandeMin = record.grande_fixo_min;
+    const grandeMax = record.grande_fixo_max;
+    
+    // Create entry for pequeno/médio porte - validate values are reasonable monthly salaries
+    if (peqMin !== null && peqMax !== null && peqMin >= 1000 && peqMin <= 200000) {
+      const validMin = Math.min(peqMin, peqMax);
+      const validMax = Math.max(peqMin, peqMax);
+      // Skip if max is unreasonably high (annual values mistakenly in monthly field)
+      if (validMax <= 150000) {
+        benchmarks.push({
+          source: 'michael_page',
+          year: 2026,
+          page_number: record.pagina,
+          cargo_original: record.cargo_original,
+          cargo_canonico: cleanCargo,
+          setor: detectSetor(cleanCargo, record.trecho_origem || ''),
+          senioridade: detectSenioridade(cleanCargo),
+          porte_empresa: 'pequeno_medio',
+          fixo_min: validMin,
+          fixo_max: validMax,
+          trecho_origem: (record.trecho_origem || '').substring(0, 500),
+        });
+      }
     }
     
     // Create entry for grande porte
-    if (record.grande_fixo_min !== null || record.grande_fixo_max !== null) {
-      benchmarks.push({
-        source: 'michael_page',
-        year: 2026,
-        page_number: record.pagina,
-        cargo_original: record.cargo_original,
-        cargo_canonico: cleanCargo,
-        setor: detectSetor(cleanCargo, record.trecho_origem || ''),
-        senioridade: detectSenioridade(cleanCargo),
-        porte_empresa: 'grande',
-        fixo_min: record.grande_fixo_min,
-        fixo_max: record.grande_fixo_max,
-        trecho_origem: record.trecho_origem,
-      });
+    if (grandeMin !== null && grandeMax !== null && grandeMin >= 1000 && grandeMin <= 200000) {
+      const validMin = Math.min(grandeMin, grandeMax);
+      const validMax = Math.max(grandeMin, grandeMax);
+      if (validMax <= 150000) {
+        benchmarks.push({
+          source: 'michael_page',
+          year: 2026,
+          page_number: record.pagina,
+          cargo_original: record.cargo_original,
+          cargo_canonico: cleanCargo,
+          setor: detectSetor(cleanCargo, record.trecho_origem || ''),
+          senioridade: detectSenioridade(cleanCargo),
+          porte_empresa: 'grande',
+          fixo_min: validMin,
+          fixo_max: validMax,
+          trecho_origem: (record.trecho_origem || '').substring(0, 500),
+        });
+      }
     }
   }
   
