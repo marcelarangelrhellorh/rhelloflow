@@ -98,12 +98,10 @@ export default function Auth() {
       <div className="flex flex-col items-center gap-4 sm:gap-8 relative z-10 w-full max-w-md px-4">
         {/* Rhello Flow Logo - Above Card */}
         <div className="flex items-center justify-center gap-1 w-full">
-          <img 
+        <img 
             alt="Rhello RH - Sistema de Recrutamento e Seleção" 
-            className="h-16 sm:h-20 md:h-28 w-auto" 
+            className="h-9 sm:h-[60px] md:h-24 w-auto" 
             src="/lovable-uploads/0e3e8693-dfae-4588-8a04-9a33b7dd1eea.png"
-            width={112}
-            height={112}
           />
           <span className="text-4xl sm:text-6xl md:text-8xl font-black leading-none font-azo text-foreground" aria-hidden="true">
             flow
