@@ -1,16 +1,29 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.78.0';
 import { corsHeaders } from '../_shared/cors.ts';
 
-const SYSTEM_PROMPT = `Você é um assistente especialista em remuneração que analisa dados salariais agregados de Hays 2026 e Michael Page 2026.
+const SYSTEM_PROMPT = `Você é um assistente especialista em remuneração que analisa dados salariais de Hays 2026, Michael Page 2026 e InfoJobs (dados de mercado em tempo real).
 
 VOCÊ RECEBERÁ DADOS PRÉ-AGREGADOS pelo servidor - não precisa fazer cálculos matemáticos, apenas formatar e validar.
 
 Sua tarefa é:
 1. Formatar os valores monetários corretamente (R$ X.XXX,XX / mês)
 2. Validar a estrutura dos dados
-3. Gerar 4 insights consultivos curtos e úteis
+3. Gerar 4 insights consultivos curtos e úteis, considerando todas as fontes disponíveis
+4. InfoJobs é especialmente útil para cargos operacionais e dados em tempo real
 
 Responda APENAS com JSON válido no formato especificado.`;
+
+interface InfoJobsData {
+  encontrado: boolean;
+  cargo: string;
+  salario_medio: string | null;
+  faixa: { min: string | null; max: string | null };
+  registros_base: number | null;
+  localidade: string;
+  fonte: string;
+  url: string;
+  erro?: string;
+}
 
 interface AggregatedBenchmark {
   source: string;
@@ -161,6 +174,32 @@ Deno.serve(async (req) => {
     }
 
     // ============================================
+    // NOVA FASE: Buscar dados do InfoJobs em paralelo
+    // ============================================
+    console.log('Buscando dados do InfoJobs em paralelo...');
+    
+    let infojobsData: InfoJobsData | null = null;
+    try {
+      const infojobsResponse = await fetch(`${supabaseUrl}/functions/v1/infojobs-salary-lookup`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${supabaseServiceKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ cargo, localidade })
+      });
+
+      if (infojobsResponse.ok) {
+        infojobsData = await infojobsResponse.json();
+        console.log('InfoJobs data:', JSON.stringify(infojobsData));
+      } else {
+        console.warn('InfoJobs lookup failed:', infojobsResponse.status);
+      }
+    } catch (ijError) {
+      console.warn('Erro ao buscar InfoJobs (não crítico):', ijError);
+    }
+
+    // ============================================
     // FASE 2: Pré-processar dados no servidor
     // ============================================
     const formatCurrency = (value: number): string => {
@@ -177,23 +216,33 @@ Deno.serve(async (req) => {
     // Construir estrutura pré-formatada para IA
     const preProcessedData = {
       hays: organizeBySetor(haysBenchmarks, formatCurrency),
-      michael_page: organizeBySetor(mpBenchmarks, formatCurrency)
+      michael_page: organizeBySetor(mpBenchmarks, formatCurrency),
+      infojobs: infojobsData
     };
 
     // ============================================
-    // FASE 3: Prompt otimizado (reduzido de ~4000 para ~800 tokens)
+    // FASE 3: Prompt otimizado com 3 fontes
     // ============================================
+    const infojobsSection = infojobsData?.encontrado 
+      ? `InfoJobs (tempo real): Salário médio ${infojobsData.salario_medio}, faixa ${infojobsData.faixa.min} - ${infojobsData.faixa.max}, baseado em ${infojobsData.registros_base || 'N/A'} registros.`
+      : 'InfoJobs: Dados não disponíveis para este cargo.';
+
     const userPrompt = `Cargo: ${cargo}
 Senioridade: ${senioridade || 'Não especificado'}
 Localidade: ${localidade || 'Brasil'}
 
 DADOS PRÉ-AGREGADOS (já calculados pelo servidor):
 
-${JSON.stringify(preProcessedData, null, 2)}
+HAYS e MICHAEL PAGE:
+${JSON.stringify({ hays: preProcessedData.hays, michael_page: preProcessedData.michael_page }, null, 2)}
+
+INFOJOBS (dados de mercado em tempo real):
+${infojobsSection}
 
 TAREFA:
 1. Valide e formate os dados acima no schema JSON especificado
 2. Gere 4 insights consultivos curtos sobre o cargo (oferta/demanda, responsabilidades, faixa, negociação)
+3. Se InfoJobs tiver dados, use-os para complementar a análise (especialmente útil para cargos operacionais)
 
 RESPONDA APENAS com este JSON:
 {
@@ -224,7 +273,22 @@ RESPONDA APENAS com este JSON:
       })))},
       "observacao": "${mpBenchmarks.length > 0 ? 'Valores mensais em R$' : 'Cargo não encontrado na base Michael Page'}",
       "fonte": "Michael Page 2026"
-    }
+    },
+    "infojobs": ${JSON.stringify(infojobsData ? {
+      encontrado: infojobsData.encontrado,
+      salario_medio: infojobsData.salario_medio,
+      faixa: infojobsData.faixa,
+      registros_base: infojobsData.registros_base,
+      fonte: infojobsData.fonte,
+      url: infojobsData.url
+    } : {
+      encontrado: false,
+      salario_medio: null,
+      faixa: { min: null, max: null },
+      registros_base: null,
+      fonte: "InfoJobs Brasil",
+      url: null
+    })}
   },
   "consultoria": [
     "<insight 1 sobre oferta/demanda>",
