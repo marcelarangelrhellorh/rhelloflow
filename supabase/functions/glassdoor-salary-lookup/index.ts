@@ -36,15 +36,17 @@ Deno.serve(async (req) => {
     }
 
     // Normalizar cargo para URL do Glassdoor
-    const cargoSlug = cargo
+    const cargoTrimmed = cargo.trim();
+    const cargoSlug = cargoTrimmed
       .toLowerCase()
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '') // Remove acentos
       .replace(/\s+/g, '-')
       .replace(/[^a-z0-9-]/g, '');
 
-    // URL do Glassdoor Brasil
-    const glassdoorUrl = `https://www.glassdoor.com.br/Sal%C3%A1rios/${cargoSlug}-sal%C3%A1rio-SRCH_KO0,${cargoSlug.length}.htm`;
+    // URL do Glassdoor Brasil - usar tamanho do cargo original (com espaços)
+    const cargoLength = cargoTrimmed.length;
+    const glassdoorUrl = `https://www.glassdoor.com.br/Sal%C3%A1rios/${cargoSlug}-sal%C3%A1rio-SRCH_KO0,${cargoLength}.htm`;
     
     console.log(`Buscando Glassdoor para: ${cargo}`);
     console.log(`URL: ${glassdoorUrl}`);
@@ -82,6 +84,7 @@ Deno.serve(async (req) => {
 
     const textContent = await response.text();
     console.log(`Glassdoor content length: ${textContent.length}`);
+    console.log(`Glassdoor content preview: ${textContent.substring(0, 800)}`);
 
     // Extrair informações com regex
     let salarioMedio: string | null = null;
@@ -93,50 +96,82 @@ Deno.serve(async (req) => {
     let registrosBase: number | null = null;
     let ultimaAtualizacao: string | null = null;
 
-    // Padrões de extração (Glassdoor BR)
-    
-    // Salário médio: "R$ 14.000" ou "R$ 14 mil" ou "14.000/mês"
-    const salarioMedioMatch = textContent.match(/(?:sal[aá]rio\s*(?:m[eé]dio|base)[:\s]*)?R?\$?\s*([\d.,]+)\s*(?:mil|k)?(?:\/m[eê]s)?/i);
-    if (salarioMedioMatch) {
-      const valor = salarioMedioMatch[1].replace(/\./g, '').replace(',', '.');
-      const num = parseFloat(valor);
-      if (!isNaN(num)) {
-        // Se for "mil", multiplicar por 1000
-        const multiplier = salarioMedioMatch[0].toLowerCase().includes('mil') ? 1000 : 1;
-        salarioMedio = `R$ ${Math.round(num * multiplier).toLocaleString('pt-BR')}`;
+    // Helper para converter valores com "mil"
+    const parseValorBR = (str: string, hasMil: boolean): number => {
+      const cleaned = str.replace(/\./g, '').replace(',', '.');
+      const num = parseFloat(cleaned);
+      return isNaN(num) ? 0 : (hasMil ? num * 1000 : num);
+    };
+
+    // Padrão 1: Salário médio no formato "R$ X mil/mês" ou "R$ X.XXX/mês"
+    const salarioMedioMatch1 = textContent.match(/R\$\s*([\d.,]+)\s*(mil)?\/m[eê]s/i);
+    if (salarioMedioMatch1) {
+      const hasMil = !!salarioMedioMatch1[2];
+      const valor = parseValorBR(salarioMedioMatch1[1], hasMil);
+      if (valor > 0) {
+        salarioMedio = `R$ ${Math.round(valor).toLocaleString('pt-BR')}`;
       }
     }
 
-    // Faixa salarial: "R$ 11.000 - R$ 17.000" ou "de R$ X a R$ Y"
-    const faixaMatch = textContent.match(/(?:faixa|varia[çc][aã]o|range)[:\s]*(?:de\s*)?R?\$?\s*([\d.,]+)\s*(?:mil|k)?\s*[-–aà]\s*R?\$?\s*([\d.,]+)\s*(?:mil|k)?/i);
+    // Padrão 2: "Salário médio: R$ X.XXX" ou "média de R$ X mil"
+    if (!salarioMedio) {
+      const salarioMedioMatch2 = textContent.match(/(?:sal[aá]rio\s*(?:m[eé]dio|base)|m[eé]dia)[:\s]*R\$\s*([\d.,]+)\s*(mil)?/i);
+      if (salarioMedioMatch2) {
+        const hasMil = !!salarioMedioMatch2[2];
+        const valor = parseValorBR(salarioMedioMatch2[1], hasMil);
+        if (valor > 0) {
+          salarioMedio = `R$ ${Math.round(valor).toLocaleString('pt-BR')}`;
+        }
+      }
+    }
+
+    // Faixa salarial: "R$ X mil - R$ Y mil/mês" ou "R$ X.XXX - R$ Y.XXX"
+    const faixaMatch = textContent.match(/R\$\s*([\d.,]+)\s*(mil)?\s*[-–]\s*R\$\s*([\d.,]+)\s*(mil)?(?:\/m[eê]s)?/i);
     if (faixaMatch) {
-      const min = parseFloat(faixaMatch[1].replace(/\./g, '').replace(',', '.'));
-      const max = parseFloat(faixaMatch[2].replace(/\./g, '').replace(',', '.'));
-      if (!isNaN(min) && !isNaN(max)) {
-        const minMult = faixaMatch[0].toLowerCase().includes('mil') ? 1000 : 1;
-        faixaMin = `R$ ${Math.round(min * minMult).toLocaleString('pt-BR')}`;
-        faixaMax = `R$ ${Math.round(max * minMult).toLocaleString('pt-BR')}`;
+      const minHasMil = !!faixaMatch[2];
+      const maxHasMil = !!faixaMatch[4];
+      const minVal = parseValorBR(faixaMatch[1], minHasMil);
+      const maxVal = parseValorBR(faixaMatch[3], maxHasMil);
+      if (minVal > 0 && maxVal > 0) {
+        faixaMin = `R$ ${Math.round(minVal).toLocaleString('pt-BR')}`;
+        faixaMax = `R$ ${Math.round(maxVal).toLocaleString('pt-BR')}`;
+        
+        // Se não temos média, calcular da faixa
+        if (!salarioMedio) {
+          salarioMedio = `R$ ${Math.round((minVal + maxVal) / 2).toLocaleString('pt-BR')}`;
+        }
       }
     }
 
-    // Remuneração variável/bônus
-    const variavelMatch = textContent.match(/(?:remunera[çc][aã]o\s*vari[aá]vel|b[oô]nus|adicional)[:\s]*R?\$?\s*([\d.,]+)\s*(?:mil|k)?/i);
+    // Remuneração variável/bônus/adicional
+    const variavelMatch = textContent.match(/(?:remunera[çc][aã]o\s*(?:vari[aá]vel|adicional)|b[oô]nus|adicional)[:\s]*R\$\s*([\d.,]+)\s*(mil)?/i);
     if (variavelMatch) {
-      const valor = parseFloat(variavelMatch[1].replace(/\./g, '').replace(',', '.'));
-      if (!isNaN(valor)) {
-        const mult = variavelMatch[0].toLowerCase().includes('mil') ? 1000 : 1;
-        variavelMedia = `R$ ${Math.round(valor * mult).toLocaleString('pt-BR')}`;
+      const hasMil = !!variavelMatch[2];
+      const valor = parseValorBR(variavelMatch[1], hasMil);
+      if (valor > 0) {
+        variavelMedia = `R$ ${Math.round(valor).toLocaleString('pt-BR')}`;
       }
     }
 
-    // Número de salários
-    const registrosMatch = textContent.match(/(?:baseado\s*em|com\s*base\s*em|total\s*de)?\s*(\d+)\s*(?:sal[aá]rios?|dados|relatos|submiss[oõ]es)/i);
-    if (registrosMatch) {
-      registrosBase = parseInt(registrosMatch[1], 10);
+    // Número de salários: "X,X mil salários" ou "X salários" ou "baseado em X"
+    const registrosMatch1 = textContent.match(/([\d.,]+)\s*(?:mil\s+)?sal[aá]rios/i);
+    if (registrosMatch1) {
+      const hasMil = registrosMatch1[0].toLowerCase().includes('mil');
+      const num = parseValorBR(registrosMatch1[1], hasMil);
+      if (num > 0) {
+        registrosBase = Math.round(num);
+      }
+    }
+    
+    if (!registrosBase) {
+      const registrosMatch2 = textContent.match(/(?:baseado\s*em|com\s*base\s*em)\s*(\d+)/i);
+      if (registrosMatch2) {
+        registrosBase = parseInt(registrosMatch2[1], 10);
+      }
     }
 
     // Última atualização
-    const atualizacaoMatch = textContent.match(/(?:atualizado|última\s*atualiza[çc][aã]o)[:\s]*(\d{1,2}\s*(?:de\s*)?\w+\.?\s*(?:de\s*)?\d{2,4})/i);
+    const atualizacaoMatch = textContent.match(/(?:atualizado\s*(?:em)?|[uú]ltima\s*atualiza[çc][aã]o)[:\s]*(\d{1,2}\s*(?:de\s*)?\w+\.?\s*(?:de\s*)?\d{2,4})/i);
     if (atualizacaoMatch) {
       ultimaAtualizacao = atualizacaoMatch[1];
     }
