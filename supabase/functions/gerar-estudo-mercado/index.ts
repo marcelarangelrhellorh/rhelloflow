@@ -83,7 +83,7 @@ Deno.serve(async (req) => {
     const supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
 
     const body = await req.json();
-    const { cargo, senioridade, localidade } = body;
+    const { cargo, senioridade, localidade, forceRefresh } = body;
 
     if (!cargo) {
       return new Response(
@@ -92,10 +92,10 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log('Buscando benchmarks para:', { cargo, senioridade, localidade });
+    console.log('Buscando benchmarks para:', { cargo, senioridade, localidade, forceRefresh });
 
     // ============================================
-    // FASE 4: Verificar cache primeiro
+    // FASE 4: Verificar cache primeiro (skip se forceRefresh)
     // ============================================
     const { data: cacheKeyData } = await supabaseClient
       .rpc('generate_salary_study_cache_key', {
@@ -107,20 +107,24 @@ Deno.serve(async (req) => {
     const cacheKey = cacheKeyData;
     console.log('Cache key:', cacheKey);
 
-    // Verificar se existe cache válido
-    const { data: cachedResult } = await supabaseClient
-      .from('salary_study_cache')
-      .select('resultado')
-      .eq('cache_key', cacheKey)
-      .gt('expires_at', new Date().toISOString())
-      .single();
+    // Verificar se existe cache válido (skip se forceRefresh = true)
+    if (!forceRefresh) {
+      const { data: cachedResult } = await supabaseClient
+        .from('salary_study_cache')
+        .select('resultado')
+        .eq('cache_key', cacheKey)
+        .gt('expires_at', new Date().toISOString())
+        .single();
 
-    if (cachedResult?.resultado) {
-      console.log('Cache hit! Retornando resultado em cache.');
-      return new Response(
-        JSON.stringify(cachedResult.resultado),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json', 'X-Cache': 'HIT' } }
-      );
+      if (cachedResult?.resultado) {
+        console.log('Cache hit! Retornando resultado em cache.');
+        return new Response(
+          JSON.stringify(cachedResult.resultado),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json', 'X-Cache': 'HIT' } }
+        );
+      }
+    } else {
+      console.log('Force refresh solicitado, ignorando cache.');
     }
 
     console.log('Cache miss. Buscando dados agregados...');

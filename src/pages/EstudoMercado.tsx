@@ -95,6 +95,7 @@ export default function EstudoMercado() {
   const [cargo, setCargo] = useState("");
   const [senioridade, setSenioridade] = useState("");
   const [localidade, setLocalidade] = useState("");
+  const [forceRefresh, setForceRefresh] = useState(false);
 
   // Verificar se já existem dados importados
   useEffect(() => {
@@ -166,7 +167,8 @@ export default function EstudoMercado() {
         body: {
           cargo,
           senioridade: senioridade || null,
-          localidade: localidade || null
+          localidade: localidade || null,
+          forceRefresh
         }
       });
       if (error) throw error;
@@ -657,7 +659,19 @@ export default function EstudoMercado() {
               </div>
             </div>
 
-            <div className="flex justify-end">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="forceRefresh"
+                  checked={forceRefresh}
+                  onChange={(e) => setForceRefresh(e.target.checked)}
+                  className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                />
+                <Label htmlFor="forceRefresh" className="text-sm text-muted-foreground cursor-pointer">
+                  Ignorar cache (forçar nova busca)
+                </Label>
+              </div>
               <Button onClick={handleGerarEstudo} disabled={loading} className="h-11 px-6">
                 {loading ? (
                   <>
