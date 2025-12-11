@@ -43,62 +43,102 @@ Deno.serve(async (req) => {
 
     console.log('Buscando benchmarks para:', { cargo, senioridade, localidade });
 
-    // Buscar registros relevantes do banco de dados - busca mais flexível
+    // Normalizar cargo para busca
     const cargoNormalized = cargo.toLowerCase()
       .replace(/[áàãâä]/g, 'a')
       .replace(/[éèêë]/g, 'e')
       .replace(/[íìîï]/g, 'i')
       .replace(/[óòõôö]/g, 'o')
-      .replace(/[úùûü]/g, 'u');
-    
-    // Extrair termos significativos (ignorar palavras muito comuns)
-    const stopWords = ['de', 'da', 'do', 'em', 'para', 'com', 'por', 'e', 'ou', 'a', 'o'];
-    const searchTerms = cargoNormalized
-      .split(/\s+/)
-      .filter((t: string) => t.length > 2 && !stopWords.includes(t));
-
-    console.log('Termos de busca:', searchTerms);
-
-    // Construir busca OR para cada termo
-    const orConditions: string[] = [];
-    for (const term of searchTerms) {
-      orConditions.push(`cargo_canonico.ilike.%${term}%`);
-      orConditions.push(`cargo_original.ilike.%${term}%`);
-    }
+      .replace(/[úùûü]/g, 'u')
+      .trim();
 
     let benchmarks: any[] = [];
     let dbError = null;
 
-    if (orConditions.length > 0) {
-      const { data, error } = await supabaseClient
-        .from('salary_benchmarks')
-        .select('*')
-        .or(orConditions.join(','))
-        .order('source', { ascending: true })
-        .limit(100);
+    // PASSO 1: Busca exata/próxima no cargo_canonico
+    console.log('Passo 1: Busca exata para:', cargoNormalized);
+    
+    const { data: exactData, error: exactError } = await supabaseClient
+      .from('salary_benchmarks')
+      .select('*')
+      .or(`cargo_canonico.ilike.%${cargoNormalized}%,cargo_canonico.ilike.%${cargoNormalized}s%,cargo_original.ilike.%${cargoNormalized}%`)
+      .limit(50);
+    
+    if (exactError) {
+      console.error('Erro na busca exata:', exactError);
+      dbError = exactError;
+    }
+    
+    benchmarks = exactData || [];
+    
+    const haysExact = benchmarks.filter(b => b.source === 'hays').length;
+    const mpExact = benchmarks.filter(b => b.source === 'michael_page').length;
+    console.log(`Passo 1 resultados: ${benchmarks.length} total (Hays: ${haysExact}, Michael Page: ${mpExact})`);
+
+    // PASSO 2: Se poucos resultados, expandir com termos parciais
+    if (benchmarks.length < 15) {
+      console.log('Passo 2: Expandindo busca com termos parciais...');
       
-      benchmarks = data || [];
-      dbError = error;
+      const stopWords = ['de', 'da', 'do', 'em', 'para', 'com', 'por', 'e', 'ou', 'a', 'o'];
+      const searchTerms = cargoNormalized
+        .split(/\s+/)
+        .filter((t: string) => t.length > 2 && !stopWords.includes(t));
+      
+      console.log('Termos de busca expandida:', searchTerms);
+      
+      if (searchTerms.length > 0) {
+        // Construir condições OR para cada termo
+        const orConditions: string[] = [];
+        for (const term of searchTerms) {
+          orConditions.push(`cargo_canonico.ilike.%${term}%`);
+          orConditions.push(`cargo_original.ilike.%${term}%`);
+        }
+        
+        const { data: expandedData, error: expandedError } = await supabaseClient
+          .from('salary_benchmarks')
+          .select('*')
+          .or(orConditions.join(','))
+          .limit(80);
+        
+        if (expandedError) {
+          console.error('Erro na busca expandida:', expandedError);
+        } else if (expandedData) {
+          // Mesclar resultados, evitando duplicatas
+          const existingIds = new Set(benchmarks.map(b => b.id));
+          const newRecords = expandedData.filter(b => !existingIds.has(b.id));
+          benchmarks = [...benchmarks, ...newRecords];
+          
+          const haysTotal = benchmarks.filter(b => b.source === 'hays').length;
+          const mpTotal = benchmarks.filter(b => b.source === 'michael_page').length;
+          console.log(`Passo 2 resultados: +${newRecords.length} novos (Total: ${benchmarks.length}, Hays: ${haysTotal}, Michael Page: ${mpTotal})`);
+        }
+      }
     }
 
-    // Se não encontrou nada, buscar todos os registros para a IA processar
+    // PASSO 3: Se ainda sem resultados, buscar amostra geral
     if (benchmarks.length === 0) {
-      console.log('Nenhum registro encontrado com busca específica, buscando amostra geral...');
+      console.log('Passo 3: Nenhum resultado, buscando amostra geral...');
       const { data, error } = await supabaseClient
         .from('salary_benchmarks')
         .select('*')
-        .order('source', { ascending: true })
         .limit(100);
       
       benchmarks = data || [];
       dbError = error;
     }
 
-    if (dbError) {
-      console.error('Erro ao buscar benchmarks:', dbError);
+    // Log detalhado dos cargos encontrados
+    const cargosEncontrados = [...new Set(benchmarks.map(b => b.cargo_canonico))];
+    console.log(`Total: ${benchmarks.length} registros`);
+    console.log('Cargos encontrados:', cargosEncontrados.slice(0, 10));
+    
+    const haysFinal = benchmarks.filter(b => b.source === 'hays');
+    const mpFinal = benchmarks.filter(b => b.source === 'michael_page');
+    console.log(`Distribuição final - Hays: ${haysFinal.length}, Michael Page: ${mpFinal.length}`);
+    
+    if (mpFinal.length > 0) {
+      console.log('Cargos Michael Page:', [...new Set(mpFinal.map(b => b.cargo_canonico))]);
     }
-
-    console.log(`Encontrados ${benchmarks?.length || 0} registros de benchmark`);
 
     // Formatar registros para o prompt
     const registrosOrdenados = (benchmarks || []).map((b: any) => ({
