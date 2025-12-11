@@ -98,3 +98,6 @@ verify_jwt = true
 
 [functions.glassdoor-salary-lookup]
 verify_jwt = true
+
+[functions.compare-roles]
+verify_jwt = true

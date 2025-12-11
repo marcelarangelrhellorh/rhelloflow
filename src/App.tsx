@@ -36,6 +36,7 @@ const GerenciarEmpresas = lazy(() => import("./pages/GerenciarEmpresas"));
 const EmpresaDetalhes = lazy(() => import("./pages/EmpresaDetalhes"));
 const GoogleCalendarCallback = lazy(() => import("./pages/GoogleCalendarCallback"));
 const Configuracoes = lazy(() => import("./pages/Configuracoes"));
+const ComparadorCargos = lazy(() => import("./pages/ComparadorCargos"));
 const Auth = lazy(() => import("./pages/Auth"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -80,7 +81,7 @@ const App = () => (
               <Route path="/tarefas" element={<Tarefas />} />
               <Route path="/gerenciar-empresas" element={<GerenciarEmpresas />} />
               <Route path="/empresas/:id" element={<EmpresaDetalhes />} />
-              <Route path="/configuracoes" element={<Configuracoes />} />
+              <Route path="/comparador-cargos" element={<ComparadorCargos />} />
               <Route path="/configuracoes" element={<Configuracoes />} />
             </Route>
             <Route path="*" element={<NotFound />} />

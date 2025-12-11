@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { Menu, X, FileText, TrendingUp, MessageSquare } from "lucide-react";
+import { Menu, X, FileText, TrendingUp, MessageSquare, GitCompare } from "lucide-react";
 import { Button } from "./ui/button";
 import { NotificationBell } from "./NotificationBell";
 import { UserMenu } from "./UserMenu";
@@ -71,6 +71,10 @@ export function AppNavbar() {
               <DropdownMenuItem onClick={() => navigate("/estudo-mercado")} className="cursor-pointer">
                 <TrendingUp className="mr-2 h-5 w-5 text-[#ffcd00]" />
                 <span className="font-bold text-sm sm:text-base">Estudo de Mercado</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/comparador-cargos")} className="cursor-pointer">
+                <GitCompare className="mr-2 h-5 w-5 text-[#ffcd00]" />
+                <span className="font-bold text-sm sm:text-base">Comparador de Cargos</span>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => navigate("/whatsapp-templates")} className="cursor-pointer">
                 <MessageSquare className="mr-2 h-5 w-5 text-[#ffcd00]" />
