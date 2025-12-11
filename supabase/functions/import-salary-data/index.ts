@@ -45,6 +45,111 @@ interface SalaryBenchmark {
   trecho_origem: string | null;
 }
 
+// Michael Page 2026 - Page to Sector mapping based on PDF structure
+const MICHAEL_PAGE_SECTOR_MAP: Record<number, string> = {
+  // Agronegócio - página 12
+  12: 'Agronegócio',
+  // Bancos e Serviços Financeiros - páginas 13-24
+  13: 'Bancos e Serviços Financeiros',
+  14: 'Bancos e Serviços Financeiros',
+  15: 'Bancos e Serviços Financeiros',
+  16: 'Bancos e Serviços Financeiros',
+  17: 'Bancos e Serviços Financeiros',
+  18: 'Bancos e Serviços Financeiros',
+  19: 'Bancos e Serviços Financeiros',
+  20: 'Bancos e Serviços Financeiros',
+  21: 'Bancos e Serviços Financeiros',
+  22: 'Bancos e Serviços Financeiros',
+  23: 'Bancos e Serviços Financeiros',
+  24: 'Bancos e Serviços Financeiros',
+  // Construção Civil - páginas 25-28
+  25: 'Construção Civil',
+  26: 'Construção Civil',
+  27: 'Construção Civil',
+  28: 'Construção Civil',
+  // Energia - páginas 29-31
+  29: 'Energia',
+  30: 'Energia',
+  31: 'Energia',
+  // Engenharia e Manufatura - páginas 32-36
+  32: 'Engenharia e Manufatura',
+  33: 'Engenharia e Manufatura',
+  34: 'Engenharia e Manufatura',
+  35: 'Engenharia e Manufatura',
+  36: 'Engenharia e Manufatura',
+  // Finanças e Impostos - páginas 37-41
+  37: 'Finanças e Impostos',
+  38: 'Finanças e Impostos',
+  39: 'Finanças e Impostos',
+  40: 'Finanças e Impostos',
+  41: 'Finanças e Impostos',
+  // Jurídico - páginas 42-46
+  42: 'Jurídico',
+  43: 'Jurídico',
+  44: 'Jurídico',
+  45: 'Jurídico',
+  46: 'Jurídico',
+  // Marketing - páginas 47-50
+  47: 'Marketing',
+  48: 'Marketing',
+  49: 'Marketing',
+  50: 'Marketing',
+  // Recursos Humanos - páginas 51-55
+  51: 'Recursos Humanos',
+  52: 'Recursos Humanos',
+  53: 'Recursos Humanos',
+  54: 'Recursos Humanos',
+  55: 'Recursos Humanos',
+  // Saúde - páginas 56-65
+  56: 'Saúde',
+  57: 'Saúde',
+  58: 'Saúde',
+  59: 'Saúde',
+  60: 'Saúde',
+  61: 'Saúde',
+  62: 'Saúde',
+  63: 'Saúde',
+  64: 'Saúde',
+  65: 'Saúde',
+  // Seguros - páginas 66-68
+  66: 'Seguros',
+  67: 'Seguros',
+  68: 'Seguros',
+  // Supply Chain - páginas 69-78
+  69: 'Supply Chain',
+  70: 'Supply Chain',
+  71: 'Supply Chain',
+  72: 'Supply Chain',
+  73: 'Supply Chain',
+  74: 'Supply Chain',
+  75: 'Supply Chain',
+  76: 'Supply Chain',
+  77: 'Supply Chain',
+  78: 'Supply Chain',
+  // Tecnologia - páginas 79-86
+  79: 'Tecnologia',
+  80: 'Tecnologia',
+  81: 'Tecnologia',
+  82: 'Tecnologia',
+  83: 'Tecnologia',
+  84: 'Tecnologia',
+  85: 'Tecnologia',
+  86: 'Tecnologia',
+  // Varejo - páginas 87-88
+  87: 'Varejo',
+  88: 'Varejo',
+  // Vendas - páginas 89-92
+  89: 'Vendas',
+  90: 'Vendas',
+  91: 'Vendas',
+  92: 'Vendas',
+};
+
+// Get sector from Michael Page page number
+function getMichaelPageSetor(pageNumber: number): string | null {
+  return MICHAEL_PAGE_SECTOR_MAP[pageNumber] || null;
+}
+
 // Parse all salary values from Hays text (returns array of {min, max} pairs)
 function parseAllHaysSalaries(text: string): { min: number; max: number }[] {
   const results: { min: number; max: number }[] = [];
@@ -108,7 +213,7 @@ function detectSenioridade(cargo: string): string | null {
   return null;
 }
 
-// Detect setor from cargo or context
+// Detect setor from cargo or context (fallback for Hays and unknown pages)
 function detectSetor(cargo: string, trecho: string): string | null {
   const text = `${cargo} ${trecho}`.toLowerCase();
   
@@ -137,13 +242,13 @@ function detectSetor(cargo: string, trecho: string): string | null {
     return 'Supply Chain';
   }
   if (text.includes('saúde') || text.includes('farma') || text.includes('médico')) {
-    return 'Saúde/Farma';
+    return 'Saúde';
   }
   if (text.includes('seguros') || text.includes('atuário') || text.includes('sinistro')) {
     return 'Seguros';
   }
   if (text.includes('banco') || text.includes('banking') || text.includes('crédito')) {
-    return 'Banking';
+    return 'Bancos e Serviços Financeiros';
   }
   
   return null;
@@ -272,6 +377,10 @@ function transformMichaelPageData(records: MichaelPageRecord[]): SalaryBenchmark
     
     if (cleanCargo.length < 3) continue;
     
+    // Get setor from page number mapping FIRST, fallback to detectSetor
+    const pageNumber = record.pagina || 0;
+    const setor = getMichaelPageSetor(pageNumber) || detectSetor(cleanCargo, record.trecho_origem || '');
+    
     // Validate and normalize salary values (some entries have swapped min/max)
     const peqMin = record.peq_fixo_min;
     const peqMax = record.peq_fixo_max;
@@ -287,10 +396,10 @@ function transformMichaelPageData(records: MichaelPageRecord[]): SalaryBenchmark
         benchmarks.push({
           source: 'michael_page',
           year: 2026,
-          page_number: record.pagina,
+          page_number: pageNumber,
           cargo_original: record.cargo_original,
           cargo_canonico: cleanCargo,
-          setor: detectSetor(cleanCargo, record.trecho_origem || ''),
+          setor: setor,
           senioridade: detectSenioridade(cleanCargo),
           porte_empresa: 'pequeno_medio',
           fixo_min: validMin,
@@ -308,10 +417,10 @@ function transformMichaelPageData(records: MichaelPageRecord[]): SalaryBenchmark
         benchmarks.push({
           source: 'michael_page',
           year: 2026,
-          page_number: record.pagina,
+          page_number: pageNumber,
           cargo_original: record.cargo_original,
           cargo_canonico: cleanCargo,
-          setor: detectSetor(cleanCargo, record.trecho_origem || ''),
+          setor: setor,
           senioridade: detectSenioridade(cleanCargo),
           porte_empresa: 'grande',
           fixo_min: validMin,
