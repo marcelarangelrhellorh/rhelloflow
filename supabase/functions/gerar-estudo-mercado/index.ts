@@ -1,7 +1,27 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.78.0';
 import { corsHeaders } from '../_shared/cors.ts';
 
-const SYSTEM_PROMPT = `Você é um assistente especialista em remuneração que analisa guias salariais padronizados (Hays 2026 e Michael Page 2026). Receberá como entrada um conjunto de registros (trechos extraídos) e as informações do usuário (cargo, senioridade, localidade). Sua resposta deve ser sempre um JSON válido estritamente no formato especificado abaixo — sem texto adicional fora do JSON. Normatize todos os valores monetários para R$ / mês. Se a fonte trouxer somente valores anuais, converta para mensal dividindo por 12 e marque a conversão.`;
+const SYSTEM_PROMPT = `Você é um assistente especialista em remuneração que analisa dados salariais agregados de Hays 2026 e Michael Page 2026.
+
+VOCÊ RECEBERÁ DADOS PRÉ-AGREGADOS pelo servidor - não precisa fazer cálculos matemáticos, apenas formatar e validar.
+
+Sua tarefa é:
+1. Formatar os valores monetários corretamente (R$ X.XXX,XX / mês)
+2. Validar a estrutura dos dados
+3. Gerar 4 insights consultivos curtos e úteis
+
+Responda APENAS com JSON válido no formato especificado.`;
+
+interface AggregatedBenchmark {
+  source: string;
+  setor: string;
+  porte_empresa: string | null;
+  min_salary: number;
+  max_salary: number;
+  avg_salary: number;
+  record_count: number;
+  sample_trecho: string | null;
+}
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -43,212 +63,178 @@ Deno.serve(async (req) => {
 
     console.log('Buscando benchmarks para:', { cargo, senioridade, localidade });
 
-    // Normalizar cargo para busca
-    const cargoNormalized = cargo.toLowerCase()
-      .replace(/[áàãâä]/g, 'a')
-      .replace(/[éèêë]/g, 'e')
-      .replace(/[íìîï]/g, 'i')
-      .replace(/[óòõôö]/g, 'o')
-      .replace(/[úùûü]/g, 'u')
-      .trim();
+    // ============================================
+    // FASE 4: Verificar cache primeiro
+    // ============================================
+    const { data: cacheKeyData } = await supabaseClient
+      .rpc('generate_salary_study_cache_key', {
+        p_cargo: cargo,
+        p_senioridade: senioridade || null,
+        p_localidade: localidade || null
+      });
 
-    let benchmarks: any[] = [];
-    let dbError = null;
+    const cacheKey = cacheKeyData;
+    console.log('Cache key:', cacheKey);
 
-    // PASSO 1: Busca exata/próxima no cargo_canonico
-    console.log('Passo 1: Busca exata para:', cargoNormalized);
-    
-    const { data: exactData, error: exactError } = await supabaseClient
-      .from('salary_benchmarks')
-      .select('*')
-      .or(`cargo_canonico.ilike.%${cargoNormalized}%,cargo_canonico.ilike.%${cargoNormalized}s%,cargo_original.ilike.%${cargoNormalized}%`)
-      .limit(50);
-    
-    if (exactError) {
-      console.error('Erro na busca exata:', exactError);
-      dbError = exactError;
+    // Verificar se existe cache válido
+    const { data: cachedResult } = await supabaseClient
+      .from('salary_study_cache')
+      .select('resultado')
+      .eq('cache_key', cacheKey)
+      .gt('expires_at', new Date().toISOString())
+      .single();
+
+    if (cachedResult?.resultado) {
+      console.log('Cache hit! Retornando resultado em cache.');
+      return new Response(
+        JSON.stringify(cachedResult.resultado),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json', 'X-Cache': 'HIT' } }
+      );
     }
-    
-    benchmarks = exactData || [];
-    
-    const haysExact = benchmarks.filter(b => b.source === 'hays').length;
-    const mpExact = benchmarks.filter(b => b.source === 'michael_page').length;
-    console.log(`Passo 1 resultados: ${benchmarks.length} total (Hays: ${haysExact}, Michael Page: ${mpExact})`);
 
-    // PASSO 2: Se poucos resultados, expandir com termos parciais
-    if (benchmarks.length < 15) {
-      console.log('Passo 2: Expandindo busca com termos parciais...');
-      
-      const stopWords = ['de', 'da', 'do', 'em', 'para', 'com', 'por', 'e', 'ou', 'a', 'o'];
-      const searchTerms = cargoNormalized
-        .split(/\s+/)
-        .filter((t: string) => t.length > 2 && !stopWords.includes(t));
-      
-      console.log('Termos de busca expandida:', searchTerms);
-      
-      if (searchTerms.length > 0) {
-        // Construir condições OR para cada termo
-        const orConditions: string[] = [];
-        for (const term of searchTerms) {
-          orConditions.push(`cargo_canonico.ilike.%${term}%`);
-          orConditions.push(`cargo_original.ilike.%${term}%`);
-        }
+    console.log('Cache miss. Buscando dados agregados...');
+
+    // ============================================
+    // FASE 2: Usar função de agregação SQL otimizada
+    // ============================================
+    const { data: aggregatedData, error: aggError } = await supabaseClient
+      .rpc('get_salary_benchmarks_aggregated', {
+        p_cargo: cargo,
+        p_senioridade: senioridade || null,
+        p_limit: 100
+      });
+
+    if (aggError) {
+      console.error('Erro na agregação:', aggError);
+      throw new Error('Erro ao buscar dados salariais');
+    }
+
+    const benchmarks: AggregatedBenchmark[] = aggregatedData || [];
+    console.log(`Dados agregados: ${benchmarks.length} grupos`);
+
+    if (benchmarks.length === 0) {
+      // Fallback: busca simples sem FTS
+      console.log('Nenhum resultado via FTS, tentando busca ILIKE...');
+      const cargoNormalized = cargo.toLowerCase()
+        .replace(/[áàãâä]/g, 'a')
+        .replace(/[éèêë]/g, 'e')
+        .replace(/[íìîï]/g, 'i')
+        .replace(/[óòõôö]/g, 'o')
+        .replace(/[úùûü]/g, 'u')
+        .trim();
+
+      const { data: fallbackData } = await supabaseClient
+        .from('salary_benchmarks')
+        .select('source, setor, porte_empresa, fixo_min, fixo_max, trecho_origem')
+        .or(`cargo_canonico.ilike.%${cargoNormalized}%,cargo_original.ilike.%${cargoNormalized}%`)
+        .limit(50);
+
+      if (fallbackData && fallbackData.length > 0) {
+        // Agregar manualmente
+        const grouped = new Map<string, AggregatedBenchmark>();
         
-        const { data: expandedData, error: expandedError } = await supabaseClient
-          .from('salary_benchmarks')
-          .select('*')
-          .or(orConditions.join(','))
-          .limit(80);
-        
-        if (expandedError) {
-          console.error('Erro na busca expandida:', expandedError);
-        } else if (expandedData) {
-          // Mesclar resultados, evitando duplicatas
-          const existingIds = new Set(benchmarks.map(b => b.id));
-          const newRecords = expandedData.filter(b => !existingIds.has(b.id));
-          benchmarks = [...benchmarks, ...newRecords];
+        for (const row of fallbackData) {
+          const key = `${row.source}|${row.setor || 'Geral'}|${row.porte_empresa || 'geral'}`;
+          const existing = grouped.get(key);
           
-          const haysTotal = benchmarks.filter(b => b.source === 'hays').length;
-          const mpTotal = benchmarks.filter(b => b.source === 'michael_page').length;
-          console.log(`Passo 2 resultados: +${newRecords.length} novos (Total: ${benchmarks.length}, Hays: ${haysTotal}, Michael Page: ${mpTotal})`);
+          if (existing) {
+            existing.min_salary = Math.min(existing.min_salary, row.fixo_min || 0);
+            existing.max_salary = Math.max(existing.max_salary, row.fixo_max || 0);
+            existing.avg_salary = (existing.avg_salary * existing.record_count + ((row.fixo_min || 0) + (row.fixo_max || 0)) / 2) / (existing.record_count + 1);
+            existing.record_count++;
+          } else {
+            grouped.set(key, {
+              source: row.source,
+              setor: row.setor || 'Geral',
+              porte_empresa: row.porte_empresa,
+              min_salary: row.fixo_min || 0,
+              max_salary: row.fixo_max || 0,
+              avg_salary: ((row.fixo_min || 0) + (row.fixo_max || 0)) / 2,
+              record_count: 1,
+              sample_trecho: row.trecho_origem
+            });
+          }
         }
+        
+        benchmarks.push(...grouped.values());
       }
     }
 
-    // PASSO 3: Se ainda sem resultados, buscar amostra geral
-    if (benchmarks.length === 0) {
-      console.log('Passo 3: Nenhum resultado, buscando amostra geral...');
-      const { data, error } = await supabaseClient
-        .from('salary_benchmarks')
-        .select('*')
-        .limit(100);
-      
-      benchmarks = data || [];
-      dbError = error;
-    }
+    // ============================================
+    // FASE 2: Pré-processar dados no servidor
+    // ============================================
+    const formatCurrency = (value: number): string => {
+      if (!value || value === 0) return 'R$ 0';
+      return `R$ ${Math.round(value).toLocaleString('pt-BR')}`;
+    };
 
-    // Log detalhado dos cargos encontrados
-    const cargosEncontrados = [...new Set(benchmarks.map(b => b.cargo_canonico))];
-    console.log(`Total: ${benchmarks.length} registros`);
-    console.log('Cargos encontrados:', cargosEncontrados.slice(0, 10));
-    
-    const haysFinal = benchmarks.filter(b => b.source === 'hays');
-    const mpFinal = benchmarks.filter(b => b.source === 'michael_page');
-    console.log(`Distribuição final - Hays: ${haysFinal.length}, Michael Page: ${mpFinal.length}`);
-    
-    if (mpFinal.length > 0) {
-      console.log('Cargos Michael Page:', [...new Set(mpFinal.map(b => b.cargo_canonico))]);
-    }
+    // Organizar dados por fonte e setor
+    const haysBenchmarks = benchmarks.filter(b => b.source === 'hays');
+    const mpBenchmarks = benchmarks.filter(b => b.source === 'michael_page');
 
-    // Formatar registros para o prompt
-    const registrosOrdenados = (benchmarks || []).map((b: any) => ({
-      guia: b.source === 'hays' ? 'Hays 2026' : 'Michael Page 2026',
-      pagina: b.page_number,
-      cargo_original: b.cargo_original,
-      cargo_canonico: b.cargo_canonico,
-      setor: b.setor,
-      senioridade: b.senioridade,
-      porte_empresa: b.porte_empresa,
-      fixo_min: b.fixo_min,
-      fixo_max: b.fixo_max,
-      trecho_origem: b.trecho_origem,
-      ano: b.year || 2026
-    }));
+    console.log(`Hays: ${haysBenchmarks.length} grupos, MP: ${mpBenchmarks.length} grupos`);
 
-    const userPrompt = `Usuário requisitou:
+    // Construir estrutura pré-formatada para IA
+    const preProcessedData = {
+      hays: organizeBySetor(haysBenchmarks, formatCurrency),
+      michael_page: organizeBySetor(mpBenchmarks, formatCurrency)
+    };
 
-cargo: ${cargo}
+    // ============================================
+    // FASE 3: Prompt otimizado (reduzido de ~4000 para ~800 tokens)
+    // ============================================
+    const userPrompt = `Cargo: ${cargo}
+Senioridade: ${senioridade || 'Não especificado'}
+Localidade: ${localidade || 'Brasil'}
 
-senioridade: ${senioridade || 'Não especificado'}
+DADOS PRÉ-AGREGADOS (já calculados pelo servidor):
 
-localidade: ${localidade || 'Brasil'}
-
-Registros recuperados (ordenados por relevância). Cada registro é um objeto com campos como guia, pagina, cargo_original, cargo_canonico, setor, porte_empresa, fixo_min, fixo_max, trecho_origem, ano.
-
-${JSON.stringify(registrosOrdenados, null, 2)}
-
+${JSON.stringify(preProcessedData, null, 2)}
 
 TAREFA:
+1. Valide e formate os dados acima no schema JSON especificado
+2. Gere 4 insights consultivos curtos sobre o cargo (oferta/demanda, responsabilidades, faixa, negociação)
 
-Para cada fonte (Hays e Michael Page), agrupe os registros POR SETOR. NÃO faça média entre setores diferentes — apresente cada setor separadamente.
-
-Para cada setor dentro de cada fonte, produza:
-- valor mínimo (R$/mês)
-- valor médio (R$/mês) — calcule como (min+max)/2
-- valor máximo (R$/mês)
-
-Se a fonte listar faixas por porte da empresa (peq_med e grande), forneça os números para cada porte. Se somente um porte, deixe o outro nulo.
-
-Inclua o campo "registros_base" indicando quantos registros foram usados para calcular cada faixa do setor.
-
-Produza um bloco consultivo com até 4 insights curtos sobre o cargo.
-
-Retorne o JSON estrito neste formato:
-
+RESPONDA APENAS com este JSON:
 {
   "consulta": {
-    "cargo_pedido": "<texto>",
-    "senioridade": "<texto>",
-    "localidade": "<texto>"
+    "cargo_pedido": "${cargo}",
+    "senioridade": "${senioridade || 'Não especificado'}",
+    "localidade": "${localidade || 'Brasil'}"
   },
   "resultado": {
     "hays": {
-      "encontrado": true/false,
-      "setores": [
-        {
-          "setor": "<nome do setor>",
-          "por_porte": {
-            "peq_med": { "min": "R$ <valor>", "media": "R$ <valor>", "max": "R$ <valor>" },
-            "grande": { "min": "R$ <valor>|null", "media": "R$ <valor>|null", "max": "R$ <valor>|null" }
-          },
-          "registros_base": <número de registros usados>,
-          "trecho_consultado": "<texto do PDF que justificou, até 200 chars>"
-        }
-      ],
-      "observacao": "<se houver, ex: valores anuais convertidos>",
+      "encontrado": ${haysBenchmarks.length > 0},
+      "setores": ${JSON.stringify(preProcessedData.hays.map(s => ({
+        setor: s.setor,
+        por_porte: s.por_porte,
+        registros_base: s.registros_base,
+        trecho_consultado: s.trecho ? s.trecho.substring(0, 200) : null
+      })))},
+      "observacao": "${haysBenchmarks.length > 0 ? 'Valores mensais em R$' : 'Cargo não encontrado na base Hays'}",
       "fonte": "Hays 2026"
     },
     "michael_page": {
-      "encontrado": true/false,
-      "setores": [
-        {
-          "setor": "<nome do setor>",
-          "por_porte": {
-            "peq_med": { "min": "R$ <valor>", "media": "R$ <valor>", "max": "R$ <valor>" },
-            "grande": { "min": "R$ <valor>|null", "media": "R$ <valor>|null", "max": "R$ <valor>|null" }
-          },
-          "registros_base": <número de registros usados>,
-          "trecho_consultado": "<texto do PDF que justificou, até 200 chars>"
-        }
-      ],
-      "observacao": "<se houver>",
+      "encontrado": ${mpBenchmarks.length > 0},
+      "setores": ${JSON.stringify(preProcessedData.michael_page.map(s => ({
+        setor: s.setor,
+        por_porte: s.por_porte,
+        registros_base: s.registros_base,
+        trecho_consultado: s.trecho ? s.trecho.substring(0, 200) : null
+      })))},
+      "observacao": "${mpBenchmarks.length > 0 ? 'Valores mensais em R$' : 'Cargo não encontrado na base Michael Page'}",
       "fonte": "Michael Page 2026"
     }
   },
   "consultoria": [
-    "Insight curto 1 — oferta/procura",
-    "Insight curto 2 — responsabilidades/ajuste de título",
-    "Insight curto 3 — observação sobre faixa",
-    "Insight curto 4 — sugestão para negociação"
+    "<insight 1 sobre oferta/demanda>",
+    "<insight 2 sobre responsabilidades típicas>",
+    "<insight 3 sobre posicionamento da faixa>",
+    "<insight 4 sobre negociação>"
   ]
-}
+}`;
 
-
-Regras adicionais:
-
-1. SEGMENTAÇÃO POR SETOR: Cada setor deve aparecer separadamente no array "setores". Não agrupe setores diferentes.
-
-2. Se não houver setor definido nos registros, use "setor": "Geral" ou "setor": "Não especificado".
-
-3. Sempre indicar a unidade final (R$/mês). Se dados originais anuais, mencione na "observacao".
-
-4. Se encontrado=false, retorne "setores": [].
-
-5. O campo "registros_base" ajuda o usuário entender a confiabilidade da faixa.
-
-6. Responda apenas com o JSON (sem texto adicional).`;
-
-    console.log('Chamando Lovable AI Gateway...');
+    console.log('Chamando Lovable AI Gateway (prompt otimizado)...');
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -261,8 +247,8 @@ Regras adicionais:
           { role: 'system', content: SYSTEM_PROMPT },
           { role: 'user', content: userPrompt }
         ],
-        temperature: 0.3,
-        max_tokens: 4000
+        temperature: 0.2,
+        max_tokens: 2000 // Reduzido de 4000 para 2000
       })
     });
 
@@ -317,10 +303,27 @@ Regras adicionais:
       throw new Error('Estrutura mínima inválida no JSON retornado');
     }
 
+    // ============================================
+    // FASE 4: Salvar resultado em cache
+    // ============================================
+    console.log('Salvando resultado em cache...');
+    await supabaseClient
+      .from('salary_study_cache')
+      .upsert({
+        cache_key: cacheKey,
+        cargo: cargo,
+        senioridade: senioridade || null,
+        localidade: localidade || null,
+        resultado: parsedEstudo,
+        expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24h
+      }, {
+        onConflict: 'cache_key'
+      });
+
     console.log('Estudo gerado com sucesso');
     return new Response(
       JSON.stringify(parsedEstudo),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json', 'X-Cache': 'MISS' } }
     );
 
   } catch (error) {
@@ -334,3 +337,71 @@ Regras adicionais:
     );
   }
 });
+
+// Helper: organizar benchmarks por setor
+interface SetorOrganizado {
+  setor: string;
+  por_porte: {
+    peq_med: { min: string; media: string; max: string } | null;
+    grande: { min: string; media: string; max: string } | null;
+  };
+  registros_base: number;
+  trecho: string | null;
+}
+
+function organizeBySetor(
+  benchmarks: AggregatedBenchmark[], 
+  formatCurrency: (v: number) => string
+): SetorOrganizado[] {
+  const setorMap = new Map<string, SetorOrganizado>();
+
+  for (const b of benchmarks) {
+    const setor = b.setor || 'Geral';
+    
+    if (!setorMap.has(setor)) {
+      setorMap.set(setor, {
+        setor,
+        por_porte: { peq_med: null, grande: null },
+        registros_base: 0,
+        trecho: null
+      });
+    }
+
+    const setorData = setorMap.get(setor)!;
+    setorData.registros_base += b.record_count;
+    
+    if (!setorData.trecho && b.sample_trecho) {
+      setorData.trecho = b.sample_trecho;
+    }
+
+    const faixa = {
+      min: formatCurrency(b.min_salary),
+      media: formatCurrency(b.avg_salary),
+      max: formatCurrency(b.max_salary)
+    };
+
+    // Mapear porte_empresa para peq_med ou grande
+    const porte = b.porte_empresa?.toLowerCase() || '';
+    if (porte.includes('grande')) {
+      setorData.por_porte.grande = faixa;
+    } else {
+      // pequeno, medio, pequeno_medio, null -> peq_med
+      if (!setorData.por_porte.peq_med) {
+        setorData.por_porte.peq_med = faixa;
+      } else {
+        // Combinar faixas se já existe
+        const existing = setorData.por_porte.peq_med;
+        const existingMin = parseFloat(existing.min.replace(/[^\d]/g, '')) || 0;
+        const existingMax = parseFloat(existing.max.replace(/[^\d]/g, '')) || 0;
+        
+        setorData.por_porte.peq_med = {
+          min: formatCurrency(Math.min(existingMin, b.min_salary)),
+          media: formatCurrency((existingMin + existingMax + b.min_salary + b.max_salary) / 4),
+          max: formatCurrency(Math.max(existingMax, b.max_salary))
+        };
+      }
+    }
+  }
+
+  return Array.from(setorMap.values());
+}

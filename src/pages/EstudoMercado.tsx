@@ -7,8 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, FileDown, CheckCircle, XCircle, Lightbulb, Info, Database, RefreshCw } from "lucide-react";
-import jsPDF from "jspdf";
+import { Loader2, FileDown, CheckCircle, XCircle, Lightbulb, Info, Database, RefreshCw, Zap } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import logoRhelloDark from "@/assets/logo-rhello-dark.png";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -155,6 +155,8 @@ export default function EstudoMercado() {
   const handleExportarPDF = async () => {
     if (!estudo) return;
     try {
+      // Lazy load jsPDF para reduzir bundle inicial
+      const { default: jsPDF } = await import('jspdf');
       const doc = new jsPDF();
       const colors = {
         yellowPrimary: [255, 205, 0] as [number, number, number],
