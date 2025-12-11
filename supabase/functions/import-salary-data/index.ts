@@ -145,9 +145,28 @@ const MICHAEL_PAGE_SECTOR_MAP: Record<number, string> = {
   92: 'Vendas',
 };
 
+// Hays 2026 - Page to Sector mapping based on PDF structure
+const HAYS_SECTOR_MAP: Record<number, string> = {
+  // Engenharia - páginas 17-20
+  17: 'Engenharia', 18: 'Engenharia', 19: 'Engenharia', 20: 'Engenharia',
+  // Ciências da Vida - páginas 21-23
+  21: 'Ciências da Vida', 22: 'Ciências da Vida', 23: 'Ciências da Vida',
+  // Tecnologia - páginas 24-28
+  24: 'Tecnologia', 25: 'Tecnologia', 26: 'Tecnologia', 27: 'Tecnologia', 28: 'Tecnologia',
+  // Solução Flex (Temporário/Terceiro) - páginas 29-36
+  // Subseções por área dentro do Flex:
+  29: 'Tecnologia', 30: 'Tecnologia', 31: 'Tecnologia', 32: 'Tecnologia', 33: 'Tecnologia',
+  34: 'Finanças e Contabilidade', 35: 'Recursos Humanos', 36: 'Supply Chain',
+};
+
 // Get sector from Michael Page page number
 function getMichaelPageSetor(pageNumber: number): string | null {
   return MICHAEL_PAGE_SECTOR_MAP[pageNumber] || null;
+}
+
+// Get sector from Hays page number
+function getHaysSetor(pageNumber: number): string | null {
+  return HAYS_SECTOR_MAP[pageNumber] || null;
 }
 
 // Parse all salary values from Hays text (returns array of {min, max} pairs)
@@ -275,9 +294,11 @@ function transformHaysData(records: HaysRecord[]): SalaryBenchmark[] {
     const cleanCargo = extractCleanCargo(record.cargo_original);
     if (cleanCargo.length < 3) continue;
     
-    // Map salaries to portes: [pequeno, médio, grande]
-    const porteMap = ['pequeno_medio', 'medio', 'grande'];
+    // Get setor from page number mapping FIRST, fallback to detectSetor
+    const pageNumber = record.pagina || 0;
+    const setor = getHaysSetor(pageNumber) || detectSetor(cleanCargo, record.trecho_origem);
     
+    // Map salaries to portes: [pequeno, médio, grande]
     // If we have 3 salary ranges, map to pequeno, médio, grande
     // If we have 2, map to pequeno_medio and grande
     // If we have 1, use it as general
@@ -286,10 +307,10 @@ function transformHaysData(records: HaysRecord[]): SalaryBenchmark[] {
       benchmarks.push({
         source: 'hays',
         year: 2026,
-        page_number: record.pagina,
+        page_number: pageNumber,
         cargo_original: record.cargo_original,
         cargo_canonico: cleanCargo,
-        setor: detectSetor(cleanCargo, record.trecho_origem),
+        setor: setor,
         senioridade: detectSenioridade(cleanCargo),
         porte_empresa: 'pequeno_medio',
         fixo_min: salaries[0].min,
@@ -300,10 +321,10 @@ function transformHaysData(records: HaysRecord[]): SalaryBenchmark[] {
       benchmarks.push({
         source: 'hays',
         year: 2026,
-        page_number: record.pagina,
+        page_number: pageNumber,
         cargo_original: record.cargo_original,
         cargo_canonico: cleanCargo,
-        setor: detectSetor(cleanCargo, record.trecho_origem),
+        setor: setor,
         senioridade: detectSenioridade(cleanCargo),
         porte_empresa: 'grande',
         fixo_min: salaries[2].min,
@@ -314,10 +335,10 @@ function transformHaysData(records: HaysRecord[]): SalaryBenchmark[] {
       benchmarks.push({
         source: 'hays',
         year: 2026,
-        page_number: record.pagina,
+        page_number: pageNumber,
         cargo_original: record.cargo_original,
         cargo_canonico: cleanCargo,
-        setor: detectSetor(cleanCargo, record.trecho_origem),
+        setor: setor,
         senioridade: detectSenioridade(cleanCargo),
         porte_empresa: 'pequeno_medio',
         fixo_min: salaries[0].min,
@@ -327,10 +348,10 @@ function transformHaysData(records: HaysRecord[]): SalaryBenchmark[] {
       benchmarks.push({
         source: 'hays',
         year: 2026,
-        page_number: record.pagina,
+        page_number: pageNumber,
         cargo_original: record.cargo_original,
         cargo_canonico: cleanCargo,
-        setor: detectSetor(cleanCargo, record.trecho_origem),
+        setor: setor,
         senioridade: detectSenioridade(cleanCargo),
         porte_empresa: 'grande',
         fixo_min: salaries[1].min,
@@ -342,10 +363,10 @@ function transformHaysData(records: HaysRecord[]): SalaryBenchmark[] {
       benchmarks.push({
         source: 'hays',
         year: 2026,
-        page_number: record.pagina,
+        page_number: pageNumber,
         cargo_original: record.cargo_original,
         cargo_canonico: cleanCargo,
-        setor: detectSetor(cleanCargo, record.trecho_origem),
+        setor: setor,
         senioridade: detectSenioridade(cleanCargo),
         porte_empresa: null,
         fixo_min: salaries[0].min,
