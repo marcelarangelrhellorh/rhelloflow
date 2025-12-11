@@ -163,27 +163,25 @@ senioridade: ${senioridade || 'Não especificado'}
 
 localidade: ${localidade || 'Brasil'}
 
-Registros recuperados (ordenados por relevância). Cada registro é um objeto com campos como guia, pagina, cargo_original, cargo_canonico, peq_fixo_min, peq_fixo_max, grande_fixo_min, grande_fixo_max, fixo_min, fixo_max, trecho_origem, ano (quando disponível).
+Registros recuperados (ordenados por relevância). Cada registro é um objeto com campos como guia, pagina, cargo_original, cargo_canonico, setor, porte_empresa, fixo_min, fixo_max, trecho_origem, ano.
 
 ${JSON.stringify(registrosOrdenados, null, 2)}
 
 
 TAREFA:
 
-Agrupe e normalize os registros para o cargo pedido (use cargo_canonico e fuzzy match se necessário).
+Para cada fonte (Hays e Michael Page), agrupe os registros POR SETOR. NÃO faça média entre setores diferentes — apresente cada setor separadamente.
 
-Para cada fonte (Hays e Michael Page) produza:
+Para cada setor dentro de cada fonte, produza:
+- valor mínimo (R$/mês)
+- valor médio (R$/mês) — calcule como (min+max)/2
+- valor máximo (R$/mês)
 
-valor mínimo (R$/mês),
+Se a fonte listar faixas por porte da empresa (peq_med e grande), forneça os números para cada porte. Se somente um porte, deixe o outro nulo.
 
-valor médio (R$/mês) — calcule como (min+max)/2 quando disponível,
+Inclua o campo "registros_base" indicando quantos registros foram usados para calcular cada faixa do setor.
 
-valor máximo (R$/mês).
-Se a fonte listar faixas por porte da empresa (peq_med e grande), forneça os números para cada porte. Se somente um porte estiver disponível, informe e deixe o outro nulo.
-
-Produza um bloco consultivo com até 4 itens (strings curtas) sobre o cargo, baseado nos trechos consultados: oferta x procura (ex.: "alta demanda", "baixa oferta"), responsabilidades-chave do cargo (resumo), e recomendação se o título parece correto para o cliente (ex.: "sugestão: usar 'Gerente de Produto Sênior' em vez de 'Head de Produto'").
-
-Liste as fontes consultadas (nome do guia + ano = 2026) e inclua o trecho_consultado que justificou cada faixa.
+Produza um bloco consultivo com até 4 insights curtos sobre o cargo.
 
 Retorne o JSON estrito neste formato:
 
@@ -195,48 +193,60 @@ Retorne o JSON estrito neste formato:
   },
   "resultado": {
     "hays": {
-      "encontrado": true,
-      "setor_encontrado": "<texto|null>",
-      "por_porte": {
-        "peq_med": { "min": "R$ <valor>", "media": "R$ <valor>", "max": "R$ <valor>" },
-        "grande": { "min": "R$ <valor>|null", "media": "R$ <valor>|null", "max": "R$ <valor>|null" }
-      },
-      "trecho_consultado": "<texto do PDF que justificou>",
+      "encontrado": true/false,
+      "setores": [
+        {
+          "setor": "<nome do setor>",
+          "por_porte": {
+            "peq_med": { "min": "R$ <valor>", "media": "R$ <valor>", "max": "R$ <valor>" },
+            "grande": { "min": "R$ <valor>|null", "media": "R$ <valor>|null", "max": "R$ <valor>|null" }
+          },
+          "registros_base": <número de registros usados>,
+          "trecho_consultado": "<texto do PDF que justificou, até 200 chars>"
+        }
+      ],
       "observacao": "<se houver, ex: valores anuais convertidos>",
       "fonte": "Hays 2026"
     },
     "michael_page": {
-      "encontrado": true,
-      "setor_encontrado": "<texto|null>",
-      "por_porte": {
-        "peq_med": { "min": "R$ <valor>", "media": "R$ <valor>", "max": "R$ <valor>" },
-        "grande": { "min": "R$ <valor>|null", "media": "R$ <valor>|null", "max": "R$ <valor>|null" }
-      },
-      "trecho_consultado": "<texto do PDF que justificou>",
+      "encontrado": true/false,
+      "setores": [
+        {
+          "setor": "<nome do setor>",
+          "por_porte": {
+            "peq_med": { "min": "R$ <valor>", "media": "R$ <valor>", "max": "R$ <valor>" },
+            "grande": { "min": "R$ <valor>|null", "media": "R$ <valor>|null", "max": "R$ <valor>|null" }
+          },
+          "registros_base": <número de registros usados>,
+          "trecho_consultado": "<texto do PDF que justificou, até 200 chars>"
+        }
+      ],
       "observacao": "<se houver>",
       "fonte": "Michael Page 2026"
     }
   },
   "consultoria": [
-    "Insight curto 1 — oferta/ procura / recomendação",
-    "Insight curto 2 — responsabilidades / ajuste de título",
-    "Insight curto 3 — observação sobre faixa (ex.: variável total alta)",
-    "Insight curto 4 — sugestão para negociação ou ajuste"
+    "Insight curto 1 — oferta/procura",
+    "Insight curto 2 — responsabilidades/ajuste de título",
+    "Insight curto 3 — observação sobre faixa",
+    "Insight curto 4 — sugestão para negociação"
   ]
 }
 
 
-Regras adicionais (muito importantes):
+Regras adicionais:
 
-Sempre indicar a unidade final (R$/mês). Se os dados originais foram anuais, inclua "observacao": "valores convertidos de anual para mensal (dividido por 12)".
+1. SEGMENTAÇÃO POR SETOR: Cada setor deve aparecer separadamente no array "setores". Não agrupe setores diferentes.
 
-Se cargo_encontrado for falso em alguma fonte, informe "encontrado": false e coloque por_porte com null nos valores.
+2. Se não houver setor definido nos registros, use "setor": "Geral" ou "setor": "Não especificado".
 
-Sempre trazer o trecho_consultado literal (até 300 caracteres) para auditoria.
+3. Sempre indicar a unidade final (R$/mês). Se dados originais anuais, mencione na "observacao".
 
-Se houver valores fixo/variável/total na fonte, priorize fixo para comparativo e explique no observacao que a fonte traz componentes variáveis.
+4. Se encontrado=false, retorne "setores": [].
 
-Responda apenas com o JSON (sem texto adicional).`;
+5. O campo "registros_base" ajuda o usuário entender a confiabilidade da faixa.
+
+6. Responda apenas com o JSON (sem texto adicional).`;
 
     console.log('Chamando Lovable AI Gateway...');
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
