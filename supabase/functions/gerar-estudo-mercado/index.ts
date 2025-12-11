@@ -348,13 +348,9 @@ RESPONDA APENAS com este JSON:
 
     // Função auxiliar para limpar e corrigir JSON malformado
     const cleanJsonString = (str: string): string => {
-      // Remove caracteres de controle invisíveis
-      let cleaned = str.replace(/[\x00-\x1F\x7F]/g, ' ');
+      let cleaned = str;
       // Remove trailing commas antes de } ou ]
       cleaned = cleaned.replace(/,(\s*[}\]])/g, '$1');
-      // Remove aspas não escapadas dentro de strings (problema comum)
-      // Tenta corrigir quebras de linha dentro de strings
-      cleaned = cleaned.replace(/:\s*"([^"]*)\n([^"]*)"(?=\s*[,}\]])/g, ': "$1 $2"');
       return cleaned;
     };
 
@@ -364,17 +360,22 @@ RESPONDA APENAS com este JSON:
     } catch (parseError) {
       console.log('Primeira tentativa de parse falhou, tentando extrair JSON...');
       
-      // Tenta extrair JSON de code block
       let jsonString = rawContent;
-      const codeBlockMatch = rawContent.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-      if (codeBlockMatch) {
-        jsonString = codeBlockMatch[1];
+      
+      // Remove code block markers (greedy match para capturar todo o conteúdo)
+      if (jsonString.includes('```')) {
+        // Remove ```json ou ``` do início
+        jsonString = jsonString.replace(/^[\s\S]*?```(?:json)?\s*/, '');
+        // Remove ``` do final
+        jsonString = jsonString.replace(/\s*```[\s\S]*$/, '');
       }
       
-      // Tenta encontrar o objeto JSON principal
-      const jsonMatch = jsonString.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        jsonString = jsonMatch[0];
+      // Encontra o primeiro { e o último } para garantir um objeto válido
+      const firstBrace = jsonString.indexOf('{');
+      const lastBrace = jsonString.lastIndexOf('}');
+      
+      if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+        jsonString = jsonString.substring(firstBrace, lastBrace + 1);
       }
       
       // Limpa o JSON
@@ -383,21 +384,13 @@ RESPONDA APENAS com este JSON:
       try {
         parsedEstudo = JSON.parse(jsonString);
       } catch (secondError) {
-        console.error('JSON original (primeiros 500 chars):', rawContent.substring(0, 500));
-        console.error('JSON limpo (primeiros 500 chars):', jsonString.substring(0, 500));
-        console.error('Erro de parse:', secondError);
+        // Log mais detalhado para debug
+        console.error('JSON extraído length:', jsonString.length);
+        console.error('Posição do erro:', (secondError as Error).message);
+        console.error('Contexto do erro (chars 4300-4400):', jsonString.substring(4300, 4400));
+        console.error('Final do JSON (últimos 200 chars):', jsonString.substring(jsonString.length - 200));
         
-        // Última tentativa: usar eval com cuidado (só para JSON)
-        try {
-          // Substitui caracteres problemáticos comuns
-          const sanitized = jsonString
-            .replace(/\n/g, '\\n')
-            .replace(/\r/g, '\\r')
-            .replace(/\t/g, '\\t');
-          parsedEstudo = JSON.parse(sanitized);
-        } catch (thirdError) {
-          throw new Error('Não foi possível extrair JSON válido da resposta da IA: ' + (secondError as Error).message);
-        }
+        throw new Error('Não foi possível extrair JSON válido da resposta da IA: ' + (secondError as Error).message);
       }
     }
 
