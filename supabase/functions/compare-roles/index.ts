@@ -600,7 +600,17 @@ Você recebe:
 
 Você deve produzir EXATAMENTE estas seções em JSON:
 - summary: Resumo executivo (2-3 frases) com a recomendação clara do cargo ideal
-- table_markdown: Tabela comparativa em Markdown com colunas: Cargo, Foco Principal, Senioridade, Quando Escolher, Fit com Requisitos (1-5)
+- table_markdown: Tabela comparativa em Markdown. FORMATO OBRIGATÓRIO:
+  * Use EXATAMENTE estas 5 colunas: Cargo | Foco | Nível | Indicado Para | Fit
+  * Cada célula deve ter NO MÁXIMO 25 caracteres
+  * Use abreviações quando necessário (ex: "Estratégia" em vez de "Estratégia operacional")
+  * CADA LINHA DEVE ESTAR EM UMA NOVA LINHA SEPARADA
+  * A coluna "Fit" deve conter apenas um número de 1 a 5
+  * Exemplo de formato:
+| Cargo | Foco | Nível | Indicado Para | Fit |
+|-------|------|-------|---------------|-----|
+| PM | Visão produto | Sênior | Definir roadmap | 4 |
+| PO | Backlog tático | Pleno | Priorizar sprints | 3 |
 - detailed_justification: 3-5 parágrafos explicando vantagens, riscos e trade-offs de cada cargo
 - recommended_role: ID do cargo mais adequado (ex: "product_manager")
 - suggested_job_title: Título sugerido para a vaga em português

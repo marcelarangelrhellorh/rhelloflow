@@ -103,24 +103,29 @@ export function ComparisonResult({ result }: ComparisonResultProps) {
             </div>
           </AccordionTrigger>
           <AccordionContent>
-            <div className="prose prose-sm max-w-none overflow-x-auto">
+            <div className="overflow-x-auto -mx-4 px-4">
               <ReactMarkdown
                 components={{
                   table: ({ children }) => (
-                    <table className="w-full border-collapse border border-gray-300 text-sm">
+                    <table className="min-w-full border-collapse text-xs">
                       {children}
                     </table>
                   ),
                   thead: ({ children }) => (
                     <thead className="bg-muted">{children}</thead>
                   ),
+                  tr: ({ children }) => (
+                    <tr className="border-b border-gray-200">{children}</tr>
+                  ),
                   th: ({ children }) => (
-                    <th className="border border-gray-300 px-3 py-2 text-left font-medium">
+                    <th className="border border-gray-200 px-3 py-2.5 text-left font-semibold text-foreground whitespace-nowrap">
                       {children}
                     </th>
                   ),
                   td: ({ children }) => (
-                    <td className="border border-gray-300 px-3 py-2">{children}</td>
+                    <td className="border border-gray-200 px-3 py-2.5 text-muted-foreground">
+                      {children}
+                    </td>
                   ),
                 }}
               >
