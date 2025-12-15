@@ -44,14 +44,23 @@ export default function Tarefas() {
   const { getSyncedEvents } = useGoogleCalendar();
 
   // Fetch external calendar events
-  const { data: externalEvents } = useQuery({
+  const { data: externalEvents = [], isLoading: isLoadingExternalEvents } = useQuery({
     queryKey: ['calendar-events'],
     queryFn: async () => {
       const timeMin = moment().subtract(3, 'months').toISOString();
       const timeMax = moment().add(3, 'months').toISOString();
-      return await getSyncedEvents(timeMin, timeMax);
+      const events = await getSyncedEvents(timeMin, timeMax);
+      return events || [];
     },
     refetchInterval: 5 * 60 * 1000
+  });
+
+  // Debug: Log external events for calendar view
+  console.log('[Tarefas] External events for CalendarView:', {
+    total: externalEvents?.length || 0,
+    externalOnly: externalEvents?.filter(e => !e.isFromSystem).length || 0,
+    isLoading: isLoadingExternalEvents,
+    events: externalEvents
   });
 
   // Load users for filter
