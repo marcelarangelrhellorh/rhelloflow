@@ -207,55 +207,77 @@ serve(async (req) => {
     const timeMin = body.timeMin || new Date().toISOString();
     const timeMax = body.timeMax || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(); // 30 days ahead
 
-    // Fetch events from Google Calendar
-    const calendarUrl = new URL("https://www.googleapis.com/calendar/v3/calendars/primary/events");
-    calendarUrl.searchParams.set("timeMin", timeMin);
-    calendarUrl.searchParams.set("timeMax", timeMax);
-    calendarUrl.searchParams.set("singleEvents", "true");
-    calendarUrl.searchParams.set("orderBy", "startTime");
-    calendarUrl.searchParams.set("maxResults", "100");
+    console.log("[get-calendar-events] Fetching events from", timeMin, "to", timeMax);
 
-    const calendarResponse = await fetch(calendarUrl.toString(), {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
+    // Fetch events from Google Calendar with pagination
+    const MAX_RESULTS_PER_PAGE = 2500; // Maximum allowed by Google API
+    const MAX_PAGES = 4; // Safety limit: 4 pages × 2500 = 10,000 events max
+    let allEvents: any[] = [];
+    let pageToken: string | null = null;
+    let pageCount = 0;
 
-    if (!calendarResponse.ok) {
-      const errorText = await calendarResponse.text();
-      console.error("[get-calendar-events] Google Calendar API error:", errorText);
+    do {
+      const calendarUrl = new URL("https://www.googleapis.com/calendar/v3/calendars/primary/events");
+      calendarUrl.searchParams.set("timeMin", timeMin);
+      calendarUrl.searchParams.set("timeMax", timeMax);
+      calendarUrl.searchParams.set("singleEvents", "true");
+      calendarUrl.searchParams.set("orderBy", "startTime");
+      calendarUrl.searchParams.set("maxResults", MAX_RESULTS_PER_PAGE.toString());
       
-      // Check if it's an auth error (401) - needs reconnection
-      if (calendarResponse.status === 401) {
-        console.error("[get-calendar-events] 401 Unauthorized - forcing reconnect");
-        // Force disconnect to allow clean reconnection
-        await supabase
-          .from("profiles")
-          .update({
-            google_calendar_connected: false,
-            google_access_token: null,
-            google_refresh_token: null,
-            google_token_expires_at: null,
-          })
-          .eq("id", user.id);
-          
-        return new Response(JSON.stringify({ 
-          error: "Authentication failed. Please reconnect Google Calendar.", 
-          events: [], 
-          needsReconnect: true 
-        }), {
+      if (pageToken) {
+        calendarUrl.searchParams.set("pageToken", pageToken);
+      }
+
+      const calendarResponse = await fetch(calendarUrl.toString(), {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (!calendarResponse.ok) {
+        const errorText = await calendarResponse.text();
+        console.error("[get-calendar-events] Google Calendar API error:", errorText);
+        
+        // Check if it's an auth error (401) - needs reconnection
+        if (calendarResponse.status === 401) {
+          console.error("[get-calendar-events] 401 Unauthorized - forcing reconnect");
+          // Force disconnect to allow clean reconnection
+          await supabase
+            .from("profiles")
+            .update({
+              google_calendar_connected: false,
+              google_access_token: null,
+              google_refresh_token: null,
+              google_token_expires_at: null,
+            })
+            .eq("id", user.id);
+            
+          return new Response(JSON.stringify({ 
+            error: "Authentication failed. Please reconnect Google Calendar.", 
+            events: [], 
+            needsReconnect: true 
+          }), {
+            status: 200,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        
+        return new Response(JSON.stringify({ error: "Failed to fetch calendar events", events: [], needsReconnect: false }), {
           status: 200,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      
-      return new Response(JSON.stringify({ error: "Failed to fetch calendar events", events: [], needsReconnect: false }), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
 
-    const calendarData = await calendarResponse.json();
+      const calendarData = await calendarResponse.json();
+      const pageEvents = calendarData.items || [];
+      allEvents = [...allEvents, ...pageEvents];
+      pageToken = calendarData.nextPageToken || null;
+      pageCount++;
+      
+      console.log(`[get-calendar-events] Page ${pageCount}: ${pageEvents.length} events fetched`);
+    } while (pageToken && pageCount < MAX_PAGES);
+
+    console.log(`[get-calendar-events] Total events fetched: ${allEvents.length} (${pageCount} page(s))`);
     
     // Get synced task google_event_ids to identify which events came from our system
     const { data: syncedTasks } = await supabase
@@ -267,7 +289,7 @@ serve(async (req) => {
     const syncedEventIds = new Set(syncedTasks?.map(t => t.google_event_id) || []);
 
     // Transform events to a standard format - include ALL events now
-    const events = (calendarData.items || [])
+    const events = allEvents
       .map((event: any) => ({
         id: event.id,
         title: event.summary || "Sem título",
