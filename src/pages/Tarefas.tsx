@@ -252,7 +252,7 @@ export default function Tarefas() {
                   {[1, 2, 3].map(i => <Skeleton key={i} className="h-40 w-full" />)}
                 </div>
               ) : view === "calendar" ? (
-                syncedMeetings.length === 0 ? (
+                syncedMeetings.length === 0 && (!externalEvents || externalEvents.length === 0) ? (
                   <div className="text-center py-16 bg-white rounded-lg border">
                     <p className="text-muted-foreground text-lg mb-4">
                       {allMeetings.length === 0 ? "Nenhuma reunião agendada" : "Nenhuma reunião sincronizada"}
