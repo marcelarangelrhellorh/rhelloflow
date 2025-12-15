@@ -104,6 +104,12 @@ serve(async (req) => {
 
     const { access_token, refresh_token, expires_in } = tokenData;
 
+    console.log('[google-calendar-callback] Tokens received:', {
+      has_access_token: !!access_token,
+      has_refresh_token: !!refresh_token,
+      expires_in
+    });
+
     // Calculate expiration time
     const expiresAt = new Date(Date.now() + (expires_in * 1000)).toISOString();
 
@@ -113,16 +119,42 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
+    // If Google didn't return a new refresh_token, preserve the existing one
+    let finalRefreshToken = refresh_token;
+    if (!refresh_token) {
+      console.log('[google-calendar-callback] No refresh_token received, checking for existing one...');
+      const { data: existingProfile } = await supabaseAdmin
+        .from('profiles')
+        .select('google_refresh_token')
+        .eq('id', user.id)
+        .single();
+      
+      if (existingProfile?.google_refresh_token) {
+        console.log('[google-calendar-callback] Preserving existing refresh_token');
+        // Keep existing encrypted token as-is (don't re-encrypt)
+        finalRefreshToken = null; // Will be handled below
+      } else {
+        console.warn('[google-calendar-callback] No existing refresh_token found - user may need to disconnect and reconnect');
+      }
+    }
+
     // Update user profile with encrypted tokens
+    const updateData: Record<string, unknown> = {
+      google_calendar_connected: true,
+      google_access_token: encryptToken(access_token),
+      google_token_expires_at: expiresAt,
+      google_calendar_last_sync: new Date().toISOString(),
+    };
+
+    // Only update refresh_token if we received a new one from Google
+    if (refresh_token) {
+      updateData.google_refresh_token = encryptToken(refresh_token);
+      console.log('[google-calendar-callback] Saving new refresh_token');
+    }
+
     const { error: updateError } = await supabaseAdmin
       .from('profiles')
-      .update({
-        google_calendar_connected: true,
-        google_access_token: encryptToken(access_token),
-        google_refresh_token: refresh_token ? encryptToken(refresh_token) : null,
-        google_token_expires_at: expiresAt,
-        google_calendar_last_sync: new Date().toISOString(),
-      })
+      .update(updateData)
       .eq('id', user.id);
 
     if (updateError) {
