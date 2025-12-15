@@ -6,18 +6,57 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Decrypt token (reverse of encryption in callback)
-function decryptToken(encryptedToken: string): string {
-  try {
-    return atob(encryptedToken).split('').reverse().join('');
-  } catch {
-    return encryptedToken;
-  }
+const ENCRYPTION_KEY = Deno.env.get("GOOGLE_TOKEN_ENCRYPTION_KEY") || "default-key-for-dev";
+
+// AES-GCM encryption
+async function encryptToken(token: string): Promise<string> {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const key = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(ENCRYPTION_KEY.padEnd(32, "0").slice(0, 32)),
+    { name: "AES-GCM" },
+    false,
+    ["encrypt"]
+  );
+  const encrypted = await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv },
+    key,
+    new TextEncoder().encode(token)
+  );
+  return btoa(JSON.stringify({
+    iv: Array.from(iv),
+    data: Array.from(new Uint8Array(encrypted))
+  }));
 }
 
-// Encrypt token for storage
-function encryptToken(token: string): string {
-  return btoa(token.split('').reverse().join(''));
+// AES-GCM decryption with legacy fallback
+async function decryptToken(encryptedToken: string): Promise<string> {
+  try {
+    const data = JSON.parse(atob(encryptedToken));
+    if (data.iv && data.data) {
+      const key = await crypto.subtle.importKey(
+        "raw",
+        new TextEncoder().encode(ENCRYPTION_KEY.padEnd(32, "0").slice(0, 32)),
+        { name: "AES-GCM" },
+        false,
+        ["decrypt"]
+      );
+      const decrypted = await crypto.subtle.decrypt(
+        { name: "AES-GCM", iv: new Uint8Array(data.iv) },
+        key,
+        new Uint8Array(data.data)
+      );
+      return new TextDecoder().decode(decrypted);
+    }
+    throw new Error("Not AES-GCM format");
+  } catch {
+    // Legacy fallback
+    try {
+      return atob(encryptedToken).split('').reverse().join('');
+    } catch {
+      return encryptedToken;
+    }
+  }
 }
 
 async function refreshAccessToken(refreshToken: string): Promise<{ access_token: string; expires_in: number } | null> {
@@ -61,8 +100,8 @@ async function getValidAccessToken(supabaseAdmin: any, userId: string): Promise<
     return null;
   }
 
-  const accessToken = decryptToken(profile.google_access_token);
-  const refreshToken = profile.google_refresh_token ? decryptToken(profile.google_refresh_token) : null;
+  const accessToken = await decryptToken(profile.google_access_token);
+  const refreshToken = profile.google_refresh_token ? await decryptToken(profile.google_refresh_token) : null;
   const expiresAt = new Date(profile.google_token_expires_at);
 
   // Check if token is expired (with 5 minute buffer)
@@ -74,7 +113,7 @@ async function getValidAccessToken(supabaseAdmin: any, userId: string): Promise<
       await supabaseAdmin
         .from('profiles')
         .update({
-          google_access_token: encryptToken(newTokens.access_token),
+          google_access_token: await encryptToken(newTokens.access_token),
           google_token_expires_at: newExpiresAt,
         })
         .eq('id', userId);
@@ -100,13 +139,12 @@ function taskToCalendarEvent(task: any) {
   const endDateTime = `${dateStr}T${endTime}`;
 
   const priorityColors: Record<string, string> = {
-    'urgent': '11', // Red
-    'high': '6', // Orange  
-    'medium': '5', // Yellow
-    'low': '2', // Green
+    'urgent': '11',
+    'high': '6',
+    'medium': '5',
+    'low': '2',
   };
 
-  // Prepare attendees list
   const attendees = (task.attendee_emails || [])
     .filter((email: string) => email && email.includes('@'))
     .map((email: string) => ({ email }));
@@ -139,15 +177,13 @@ function taskToCalendarEvent(task: any) {
     },
   };
 
-  // Add attendees if any
   if (attendees.length > 0) {
     event.attendees = attendees;
     event.guestsCanModify = false;
     event.guestsCanInviteOthers = false;
-    event.sendUpdates = 'all'; // Send email invitations to all attendees
+    event.sendUpdates = 'all';
   }
 
-  // Add Google Meet conference
   event.conferenceData = {
     createRequest: {
       requestId: `rhello-${task.id}-${Date.now()}`,
@@ -161,7 +197,6 @@ function taskToCalendarEvent(task: any) {
 }
 
 async function createCalendarEvent(accessToken: string, event: any, calendarId: string = 'primary'): Promise<any> {
-  // Add conferenceDataVersion=1 to enable Meet link creation
   const response = await fetch(
     `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events?conferenceDataVersion=1&sendUpdates=all`,
     {
@@ -183,7 +218,6 @@ async function createCalendarEvent(accessToken: string, event: any, calendarId: 
 }
 
 async function updateCalendarEvent(accessToken: string, eventId: string, event: any, calendarId: string = 'primary'): Promise<any> {
-  // Add conferenceDataVersion=1 and sendUpdates for attendee notifications
   const response = await fetch(
     `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events/${encodeURIComponent(eventId)}?conferenceDataVersion=1&sendUpdates=all`,
     {
@@ -215,7 +249,6 @@ async function deleteCalendarEvent(accessToken: string, eventId: string, calenda
     }
   );
 
-  // 404 or 410 means event already deleted - not an error
   if (!response.ok && response.status !== 404 && response.status !== 410) {
     const error = await response.json();
     throw new Error(error.error?.message || 'Failed to delete event');
@@ -256,10 +289,8 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Get access token
     const accessToken = await getValidAccessToken(supabaseAdmin, user.id);
     if (!accessToken) {
-      // Log the error
       await supabaseAdmin.from('sync_logs').insert({
         user_id: user.id,
         task_id,
@@ -274,7 +305,6 @@ serve(async (req) => {
       );
     }
 
-    // Get task data
     const { data: task, error: taskError } = await supabaseAdmin
       .from('tasks')
       .select('*')
@@ -288,7 +318,6 @@ serve(async (req) => {
       );
     }
 
-    // Check if sync is enabled for this task
     if (!task.sync_enabled && action !== 'delete') {
       return new Response(
         JSON.stringify({ success: true, message: 'Sync disabled for this task' }),
@@ -306,12 +335,10 @@ serve(async (req) => {
         result = await createCalendarEvent(accessToken, event, calendarId);
         googleEventId = result.id;
 
-        // Extract Meet link if created
         const meetLink = result.conferenceData?.entryPoints?.find(
           (ep: any) => ep.entryPointType === 'video'
         )?.uri || result.hangoutLink || null;
 
-        // Update task with event ID and Meet link
         await supabaseAdmin
           .from('tasks')
           .update({
@@ -324,23 +351,19 @@ serve(async (req) => {
 
       } else if (action === 'update') {
         if (!task.google_calendar_event_id) {
-          // Create new event if doesn't exist
           const event = taskToCalendarEvent(task);
           result = await createCalendarEvent(accessToken, event, calendarId);
           googleEventId = result.id;
         } else {
-          // Update existing event
           const event = taskToCalendarEvent(task);
           result = await updateCalendarEvent(accessToken, task.google_calendar_event_id, event, calendarId);
           googleEventId = task.google_calendar_event_id;
         }
 
-        // Extract Meet link if created/exists
         const meetLink = result.conferenceData?.entryPoints?.find(
           (ep: any) => ep.entryPointType === 'video'
         )?.uri || result.hangoutLink || null;
 
-        // Update task sync status
         await supabaseAdmin
           .from('tasks')
           .update({
@@ -356,7 +379,6 @@ serve(async (req) => {
           await deleteCalendarEvent(accessToken, task.google_calendar_event_id, calendarId);
         }
 
-        // Clear sync fields
         await supabaseAdmin
           .from('tasks')
           .update({
@@ -366,7 +388,6 @@ serve(async (req) => {
           .eq('id', task_id);
       }
 
-      // Log success
       await supabaseAdmin.from('sync_logs').insert({
         user_id: user.id,
         task_id,
@@ -391,7 +412,6 @@ serve(async (req) => {
     } catch (syncError: any) {
       console.error('Sync error:', syncError);
 
-      // Log error
       await supabaseAdmin.from('sync_logs').insert({
         user_id: user.id,
         task_id,
@@ -401,7 +421,6 @@ serve(async (req) => {
         google_event_id: googleEventId,
       });
 
-      // Mark task as not synced
       await supabaseAdmin
         .from('tasks')
         .update({ google_calendar_synced: false })

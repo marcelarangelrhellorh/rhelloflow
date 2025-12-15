@@ -6,14 +6,60 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Simple encryption for tokens (in production, use a proper encryption library)
-function encryptToken(token: string): string {
-  // Base64 encode with a simple transformation
-  return btoa(token.split('').reverse().join(''));
+const ENCRYPTION_KEY = Deno.env.get("GOOGLE_TOKEN_ENCRYPTION_KEY") || "default-key-for-dev";
+
+// AES-GCM encryption for tokens
+async function encryptToken(token: string): Promise<string> {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const key = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(ENCRYPTION_KEY.padEnd(32, "0").slice(0, 32)),
+    { name: "AES-GCM" },
+    false,
+    ["encrypt"]
+  );
+  const encrypted = await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv },
+    key,
+    new TextEncoder().encode(token)
+  );
+  return btoa(JSON.stringify({
+    iv: Array.from(iv),
+    data: Array.from(new Uint8Array(encrypted))
+  }));
+}
+
+// AES-GCM decryption with legacy fallback
+async function decryptToken(encryptedToken: string): Promise<string> {
+  try {
+    const data = JSON.parse(atob(encryptedToken));
+    if (data.iv && data.data) {
+      const key = await crypto.subtle.importKey(
+        "raw",
+        new TextEncoder().encode(ENCRYPTION_KEY.padEnd(32, "0").slice(0, 32)),
+        { name: "AES-GCM" },
+        false,
+        ["decrypt"]
+      );
+      const decrypted = await crypto.subtle.decrypt(
+        { name: "AES-GCM", iv: new Uint8Array(data.iv) },
+        key,
+        new Uint8Array(data.data)
+      );
+      return new TextDecoder().decode(decrypted);
+    }
+    throw new Error("Not AES-GCM format");
+  } catch {
+    // Legacy fallback
+    try {
+      return atob(encryptedToken).split('').reverse().join('');
+    } catch {
+      return encryptedToken;
+    }
+  }
 }
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -29,7 +75,6 @@ serve(async (req) => {
       }
     );
 
-    // Verify user is authenticated
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
     if (userError || !user) {
       console.error('Authentication error:', userError);
@@ -110,19 +155,27 @@ serve(async (req) => {
       expires_in
     });
 
-    // Calculate expiration time
     const expiresAt = new Date(Date.now() + (expires_in * 1000)).toISOString();
 
-    // Use service role to update profile (bypassing RLS for this specific update)
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // If Google didn't return a new refresh_token, preserve the existing one
-    let finalRefreshToken = refresh_token;
-    if (!refresh_token) {
-      console.log('[google-calendar-callback] No refresh_token received, checking for existing one...');
+    // Build update data with encrypted tokens
+    const updateData: Record<string, unknown> = {
+      google_calendar_connected: true,
+      google_access_token: await encryptToken(access_token),
+      google_token_expires_at: expiresAt,
+      google_calendar_last_sync: new Date().toISOString(),
+    };
+
+    // Handle refresh token
+    if (refresh_token) {
+      updateData.google_refresh_token = await encryptToken(refresh_token);
+      console.log('[google-calendar-callback] Saving new refresh_token with AES-GCM encryption');
+    } else {
+      // Check if existing token needs migration from legacy format
       const { data: existingProfile } = await supabaseAdmin
         .from('profiles')
         .select('google_refresh_token')
@@ -130,26 +183,17 @@ serve(async (req) => {
         .single();
       
       if (existingProfile?.google_refresh_token) {
-        console.log('[google-calendar-callback] Preserving existing refresh_token');
-        // Keep existing encrypted token as-is (don't re-encrypt)
-        finalRefreshToken = null; // Will be handled below
+        // Migrate existing token to new encryption format
+        try {
+          const decrypted = await decryptToken(existingProfile.google_refresh_token);
+          updateData.google_refresh_token = await encryptToken(decrypted);
+          console.log('[google-calendar-callback] Migrated existing refresh_token to AES-GCM');
+        } catch {
+          console.log('[google-calendar-callback] Keeping existing refresh_token as-is');
+        }
       } else {
-        console.warn('[google-calendar-callback] No existing refresh_token found - user may need to disconnect and reconnect');
+        console.warn('[google-calendar-callback] No refresh_token available');
       }
-    }
-
-    // Update user profile with encrypted tokens
-    const updateData: Record<string, unknown> = {
-      google_calendar_connected: true,
-      google_access_token: encryptToken(access_token),
-      google_token_expires_at: expiresAt,
-      google_calendar_last_sync: new Date().toISOString(),
-    };
-
-    // Only update refresh_token if we received a new one from Google
-    if (refresh_token) {
-      updateData.google_refresh_token = encryptToken(refresh_token);
-      console.log('[google-calendar-callback] Saving new refresh_token');
     }
 
     const { error: updateError } = await supabaseAdmin
@@ -165,7 +209,7 @@ serve(async (req) => {
       );
     }
 
-    console.log(`Google Calendar connected for user ${user.id}`);
+    console.log(`Google Calendar connected for user ${user.id} with AES-GCM encryption`);
 
     return new Response(
       JSON.stringify({ success: true, message: 'Google Calendar connected successfully' }),

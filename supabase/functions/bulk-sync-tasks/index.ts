@@ -6,16 +6,57 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-function decryptToken(encryptedToken: string): string {
-  try {
-    return atob(encryptedToken).split('').reverse().join('');
-  } catch {
-    return encryptedToken;
-  }
+const ENCRYPTION_KEY = Deno.env.get("GOOGLE_TOKEN_ENCRYPTION_KEY") || "default-key-for-dev";
+
+// AES-GCM encryption
+async function encryptToken(token: string): Promise<string> {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const key = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(ENCRYPTION_KEY.padEnd(32, "0").slice(0, 32)),
+    { name: "AES-GCM" },
+    false,
+    ["encrypt"]
+  );
+  const encrypted = await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv },
+    key,
+    new TextEncoder().encode(token)
+  );
+  return btoa(JSON.stringify({
+    iv: Array.from(iv),
+    data: Array.from(new Uint8Array(encrypted))
+  }));
 }
 
-function encryptToken(token: string): string {
-  return btoa(token.split('').reverse().join(''));
+// AES-GCM decryption with legacy fallback
+async function decryptToken(encryptedToken: string): Promise<string> {
+  try {
+    const data = JSON.parse(atob(encryptedToken));
+    if (data.iv && data.data) {
+      const key = await crypto.subtle.importKey(
+        "raw",
+        new TextEncoder().encode(ENCRYPTION_KEY.padEnd(32, "0").slice(0, 32)),
+        { name: "AES-GCM" },
+        false,
+        ["decrypt"]
+      );
+      const decrypted = await crypto.subtle.decrypt(
+        { name: "AES-GCM", iv: new Uint8Array(data.iv) },
+        key,
+        new Uint8Array(data.data)
+      );
+      return new TextDecoder().decode(decrypted);
+    }
+    throw new Error("Not AES-GCM format");
+  } catch {
+    // Legacy fallback
+    try {
+      return atob(encryptedToken).split('').reverse().join('');
+    } catch {
+      return encryptedToken;
+    }
+  }
 }
 
 async function refreshAccessToken(refreshToken: string): Promise<{ access_token: string; expires_in: number } | null> {
@@ -47,8 +88,8 @@ async function getValidAccessToken(supabaseAdmin: any, userId: string): Promise<
 
   if (!profile?.google_calendar_connected) return null;
 
-  const accessToken = decryptToken(profile.google_access_token);
-  const refreshToken = profile.google_refresh_token ? decryptToken(profile.google_refresh_token) : null;
+  const accessToken = await decryptToken(profile.google_access_token);
+  const refreshToken = profile.google_refresh_token ? await decryptToken(profile.google_refresh_token) : null;
   const expiresAt = new Date(profile.google_token_expires_at);
 
   if (expiresAt.getTime() - Date.now() < 5 * 60 * 1000 && refreshToken) {
@@ -57,7 +98,7 @@ async function getValidAccessToken(supabaseAdmin: any, userId: string): Promise<
       await supabaseAdmin
         .from('profiles')
         .update({
-          google_access_token: encryptToken(newTokens.access_token),
+          google_access_token: await encryptToken(newTokens.access_token),
           google_token_expires_at: new Date(Date.now() + (newTokens.expires_in * 1000)).toISOString(),
         })
         .eq('id', userId);
@@ -123,7 +164,6 @@ serve(async (req) => {
       );
     }
 
-    // Get tasks that need syncing
     const { data: tasks, error: tasksError } = await supabaseAdmin
       .from('tasks')
       .select('*')
@@ -147,7 +187,6 @@ serve(async (req) => {
 
         let response;
         if (task.google_calendar_event_id) {
-          // Update existing
           response = await fetch(
             `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events/${task.google_calendar_event_id}`,
             {
@@ -157,7 +196,6 @@ serve(async (req) => {
             }
           );
         } else {
-          // Create new
           response = await fetch(
             `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events`,
             {
@@ -187,7 +225,6 @@ serve(async (req) => {
       }
     }
 
-    // Log bulk sync
     await supabaseAdmin.from('sync_logs').insert({
       user_id: user.id,
       action: 'bulk_sync',
