@@ -1,12 +1,14 @@
 import { useState } from 'react';
-import { Calendar, Link2, Unlink, CheckCircle2, RefreshCw, ListTodo } from 'lucide-react';
+import { Calendar, Link2, Unlink, CheckCircle2, RefreshCw, ListTodo, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useGoogleCalendar } from '@/hooks/useGoogleCalendar';
 import { useTaskSync } from '@/hooks/useTaskSync';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+
 export default function GoogleCalendarButton() {
   const {
     isConnected,
@@ -108,8 +110,23 @@ export default function GoogleCalendarButton() {
         </AlertDialog>
       </>;
   }
-  return <Button variant="outline" onClick={handleConnect} className="gap-2">
-      <Link2 className="h-4 w-4" />
-      <span className="hidden sm:inline">Google Calendar</span>
-    </Button>;
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button 
+            variant="outline" 
+            onClick={handleConnect} 
+            className="gap-2 border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-700"
+          >
+            <AlertTriangle className="h-4 w-4" />
+            <span className="hidden sm:inline">Conectar Google</span>
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Conecte para sincronizar reuniões e tarefas com Google Calendar e Tasks</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
 }

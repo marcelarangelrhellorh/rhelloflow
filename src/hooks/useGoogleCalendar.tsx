@@ -260,16 +260,30 @@ export function useGoogleCalendar(): UseGoogleCalendarReturn {
       });
 
       if (error) {
-        console.error('Error fetching synced events:', error);
+        logger.error('Error fetching synced events:', error);
+        return [];
+      }
+
+      // Check if reconnection is needed
+      if (data.needsReconnect) {
+        logger.warn('Google Calendar needs reconnection');
+        setIsConnected(false);
+        setLastSync(null);
+        toast.error('Conexão com Google Calendar expirada. Por favor, reconecte.', {
+          action: {
+            label: 'Reconectar',
+            onClick: () => connectCalendar(),
+          },
+        });
         return [];
       }
 
       return data.events || [];
     } catch (error) {
-      console.error('Error fetching synced events:', error);
+      logger.error('Error fetching synced events:', error);
       return [];
     }
-  }, []);
+  }, [connectCalendar]);
 
   return {
     isConnected,
