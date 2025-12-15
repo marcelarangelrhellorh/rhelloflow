@@ -29,6 +29,7 @@ interface CalendarEvent {
   end: Date;
   resource?: Task;
   isExternal?: boolean;
+  allDay?: boolean;
   description?: string;
   meetLink?: string;
 }
@@ -40,6 +41,7 @@ interface CalendarViewProps {
     title: string;
     start: string;
     end: string;
+    allDay?: boolean;
     description?: string;
     meetLink?: string;
     isFromSystem: boolean;
@@ -151,6 +153,7 @@ export default function CalendarView({
           end,
           resource: meeting,
           isExternal: false,
+          allDay: false,
         };
       });
 
@@ -158,18 +161,45 @@ export default function CalendarView({
     const calendarEvents = externalEvents
       .filter(event => !event.isFromSystem) // Only non-system events
       .map(event => {
-        const start = parseISO(event.start);
-        const end = parseISO(event.end);
+        // Detect all-day events: either explicit flag or date string without time component
+        const isAllDay = event.allDay || (!event.start.includes('T'));
+        
+        let start: Date;
+        let end: Date;
+        
+        if (isAllDay) {
+          // For all-day events, parse as local date (not UTC)
+          start = parseISO(event.start);
+          end = parseISO(event.end);
+        } else {
+          start = parseISO(event.start);
+          end = parseISO(event.end);
+        }
+        
         return {
           id: event.id,
           title: event.title,
           start,
           end,
           isExternal: true,
+          allDay: isAllDay,
           description: event.description,
           meetLink: event.meetLink,
         };
       });
+
+    // Debug logs
+    console.log('[CalendarView] Processed events:', {
+      systemCount: systemEvents.length,
+      externalCount: calendarEvents.length,
+      totalEvents: systemEvents.length + calendarEvents.length,
+      externalSample: calendarEvents.slice(0, 3).map(e => ({
+        title: e.title,
+        start: e.start.toISOString(),
+        end: e.end.toISOString(),
+        allDay: e.allDay
+      }))
+    });
 
     return [...systemEvents, ...calendarEvents];
   }, [meetings, externalEvents]);
