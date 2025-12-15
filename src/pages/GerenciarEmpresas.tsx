@@ -283,7 +283,9 @@ export default function GerenciarEmpresas() {
 
           {/* Sidebar Direita (1/4) */}
           <div className="lg:col-span-1 space-y-4">
-            <EmpresasDashboard empresas={empresas || []} />
+            <div className="sticky top-24">
+              <EmpresasDashboard empresas={empresas || []} />
+            </div>
             <EmpresasRecentList empresas={empresas || []} onViewDetails={handleViewDetails} />
           </div>
         </div>
