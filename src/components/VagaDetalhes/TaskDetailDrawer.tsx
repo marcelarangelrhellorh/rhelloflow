@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -6,10 +7,11 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { CheckCircle2, Clock, Circle, AlertTriangle, Calendar, User, Briefcase, Edit, ExternalLink, Video, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Task, TaskStatus, TaskPriority, useUpdateTask } from "@/hooks/useTasks";
+import { Task, TaskStatus, TaskPriority, useUpdateTask, MeetingOutcome } from "@/hooks/useTasks";
 import { isPast, isToday } from "date-fns";
 import SyncTaskToCalendar from "@/components/Tasks/SyncTaskToCalendar";
 import { TaskSyncIndicator } from "@/components/Tasks/TaskSyncIndicator";
+import MeetingOutcomeModal, { MeetingOutcomeBadge } from "@/components/Tasks/MeetingOutcomeModal";
 
 interface TaskDetailDrawerProps {
   task: Task | null;
@@ -51,7 +53,9 @@ export function TaskDetailDrawer({
   onToggleComplete
 }: TaskDetailDrawerProps) {
   const updateTask = useUpdateTask();
+  const [showOutcomeModal, setShowOutcomeModal] = useState(false);
   const isExternal = !!externalEvent;
+  const isMeeting = task?.task_type === 'meeting';
   
   if (!task && !externalEvent) return null;
 
@@ -60,10 +64,30 @@ export function TaskDetailDrawer({
 
   const handleComplete = async () => {
     if (!task) return;
+    
+    // Se for uma REUNIÃO sendo concluída, abrir modal de desfecho
+    if (isMeeting && task.status !== 'done') {
+      setShowOutcomeModal(true);
+      return;
+    }
+    
+    // Para TAREFAS normais ou reabrir reunião/tarefa concluída
     await updateTask.mutateAsync({
       id: task.id,
-      status: task.status === "done" ? "to_do" : "done"
+      status: task.status === "done" ? "to_do" : "done",
+      meeting_outcome: task.status === "done" ? null : undefined
     });
+    onToggleComplete();
+  };
+
+  const handleOutcomeSelect = async (outcome: MeetingOutcome) => {
+    if (!task) return;
+    await updateTask.mutateAsync({
+      id: task.id,
+      status: 'done',
+      meeting_outcome: outcome
+    });
+    setShowOutcomeModal(false);
     onToggleComplete();
   };
 
@@ -178,7 +202,12 @@ export function TaskDetailDrawer({
                 <StatusIcon className={cn("h-5 w-5", statusConfig[task.status].class)} />
                 <div>
                   <p className="text-muted-foreground text-base font-semibold">Status</p>
-                  <p className="font-medium">{statusConfig[task.status].label}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-medium">{statusConfig[task.status].label}</p>
+                    {isMeeting && task.status === 'done' && (
+                      <MeetingOutcomeBadge outcome={task.meeting_outcome as MeetingOutcome | null} />
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -282,7 +311,9 @@ export function TaskDetailDrawer({
                   )}
                 >
                   <CheckCircle2 className="h-4 w-4" />
-                  {task.status === "done" ? "Reabrir Tarefa" : "Marcar como Concluída"}
+                  {task.status === "done" 
+                    ? (isMeeting ? "Reabrir Reunião" : "Reabrir Tarefa") 
+                    : (isMeeting ? "Concluir Reunião" : "Marcar como Concluída")}
                 </Button>
 
                 <SyncTaskToCalendar task={task} variant="button" />
@@ -293,7 +324,7 @@ export function TaskDetailDrawer({
                   className="w-full gap-2 text-base font-medium"
                 >
                   <Edit className="h-4 w-4" />
-                  Editar Tarefa
+                  {isMeeting ? "Editar Reunião" : "Editar Tarefa"}
                 </Button>
               </div>
 
@@ -308,6 +339,14 @@ export function TaskDetailDrawer({
             </>
           )}
         </div>
+
+        {/* Modal de desfecho para reuniões */}
+        <MeetingOutcomeModal
+          open={showOutcomeModal}
+          onOpenChange={setShowOutcomeModal}
+          onSelect={handleOutcomeSelect}
+          isLoading={updateTask.isPending}
+        />
       </SheetContent>
     </Sheet>
   );
