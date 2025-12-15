@@ -315,24 +315,42 @@ export default function Tarefas() {
             <div className="lg:col-span-1 space-y-4 lg:sticky lg:top-24 lg:self-start">
               <TasksDashboard onTaskClick={handleEdit} />
               <TodayMeetingsSidebar 
-                onEventClick={event => {
-                  // Convert MergedMeeting to format expected by TaskDetailDrawer
-                  const today = new Date();
-                  const todayStr = moment(today).format('YYYY-MM-DD');
-                  
-                  const externalEvent = {
-                    id: event.id,
-                    title: event.title,
-                    description: '',
-                    start: event.start_time 
-                      ? new Date(`${todayStr}T${event.start_time}`) 
-                      : today,
-                    end: event.end_time 
-                      ? new Date(`${todayStr}T${event.end_time}`) 
-                      : today,
-                    meetLink: event.google_meet_link
-                  };
-                  handleTaskClick(null, externalEvent);
+                onEventClick={async event => {
+                  // Check if this is an external Google Calendar event or a local meeting
+                  if (event.isExternal) {
+                    // External event: convert to externalEvent format
+                    const today = new Date();
+                    const todayStr = moment(today).format('YYYY-MM-DD');
+                    
+                    const externalEvent = {
+                      id: event.id,
+                      title: event.title,
+                      description: '',
+                      start: event.start_time 
+                        ? new Date(`${todayStr}T${event.start_time}`) 
+                        : today,
+                      end: event.end_time 
+                        ? new Date(`${todayStr}T${event.end_time}`) 
+                        : today,
+                      meetLink: event.google_meet_link
+                    };
+                    handleTaskClick(null, externalEvent);
+                  } else {
+                    // Local meeting: fetch full task data and open with edit options
+                    const { data: taskData } = await supabase
+                      .from('tasks')
+                      .select(`
+                        *,
+                        assignee:profiles!tasks_assignee_id_fkey(id, full_name, avatar_url),
+                        vaga:vagas!tasks_vaga_id_fkey(id, titulo)
+                      `)
+                      .eq('id', event.id)
+                      .single();
+                    
+                    if (taskData) {
+                      handleTaskClick(taskData as Task, null);
+                    }
+                  }
                 }} 
               />
             </div>
