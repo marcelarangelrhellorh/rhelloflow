@@ -2639,6 +2639,7 @@ export type Database = {
           google_task_synced: boolean | null
           id: string
           idempotency_key: string | null
+          meeting_outcome: string | null
           priority: string | null
           reminder_minutes: number | null
           start_time: string | null
@@ -2670,6 +2671,7 @@ export type Database = {
           google_task_synced?: boolean | null
           id?: string
           idempotency_key?: string | null
+          meeting_outcome?: string | null
           priority?: string | null
           reminder_minutes?: number | null
           start_time?: string | null
@@ -2701,6 +2703,7 @@ export type Database = {
           google_task_synced?: boolean | null
           id?: string
           idempotency_key?: string | null
+          meeting_outcome?: string | null
           priority?: string | null
           reminder_minutes?: number | null
           start_time?: string | null

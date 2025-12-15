@@ -5,6 +5,7 @@ import { handleApiError } from "@/lib/errorHandler";
 
 export type TaskStatus = 'to_do' | 'in_progress' | 'done';
 export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
+export type MeetingOutcome = 'completed' | 'cancelled' | 'no_show' | null;
 
 export type TaskType = 'task' | 'meeting';
 
@@ -40,6 +41,8 @@ export interface Task {
   google_task_synced: boolean;
   google_task_last_sync: string | null;
   google_task_list_id: string | null;
+  // Meeting outcome field
+  meeting_outcome: MeetingOutcome;
   // Relations
   assignee?: {
     id: string;
