@@ -36,7 +36,7 @@ export function EmpresasDashboard({
     ...stage,
     count: empresas.filter(e => e.pipeline_stage === stage.slug).length
   }));
-  return <div className="space-y-4 sticky top-24">
+  return <div className="space-y-4">
       {/* Status Summary */}
       <Card className="p-4 border-gray-300 shadow-md">
         <h3 className="font-bold text-base text-foreground mb-3 flex items-center gap-2">
