@@ -138,7 +138,9 @@ export function TaskDetailDrawer({
                   <div>
                     <p className="text-muted-foreground text-base font-semibold">Início</p>
                     <p className="font-medium text-base">
-                      {format(externalEvent.start, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                      {externalEvent.start instanceof Date && !isNaN(externalEvent.start.getTime())
+                        ? format(externalEvent.start, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })
+                        : "Data não disponível"}
                     </p>
                   </div>
                 </div>
@@ -147,7 +149,9 @@ export function TaskDetailDrawer({
                   <div>
                     <p className="text-muted-foreground text-base font-semibold">Fim</p>
                     <p className="font-medium text-base">
-                      {format(externalEvent.end, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                      {externalEvent.end instanceof Date && !isNaN(externalEvent.end.getTime())
+                        ? format(externalEvent.end, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })
+                        : "Data não disponível"}
                     </p>
                   </div>
                 </div>
@@ -296,7 +300,9 @@ export function TaskDetailDrawer({
               {/* Metadata */}
               <div className="text-xs text-muted-foreground pt-4 border-t">
                 <p className="text-base">
-                  Criada em {format(new Date(task.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                  {task.created_at 
+                    ? `Criada em ${format(new Date(task.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}`
+                    : "Data de criação não disponível"}
                 </p>
               </div>
             </>

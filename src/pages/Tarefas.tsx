@@ -314,7 +314,27 @@ export default function Tarefas() {
           {view !== "calendar" && (
             <div className="lg:col-span-1 space-y-4 lg:sticky lg:top-24 lg:self-start">
               <TasksDashboard onTaskClick={handleEdit} />
-              <TodayMeetingsSidebar onEventClick={event => handleTaskClick(null, event)} />
+              <TodayMeetingsSidebar 
+                onEventClick={event => {
+                  // Convert MergedMeeting to format expected by TaskDetailDrawer
+                  const today = new Date();
+                  const todayStr = moment(today).format('YYYY-MM-DD');
+                  
+                  const externalEvent = {
+                    id: event.id,
+                    title: event.title,
+                    description: '',
+                    start: event.start_time 
+                      ? new Date(`${todayStr}T${event.start_time}`) 
+                      : today,
+                    end: event.end_time 
+                      ? new Date(`${todayStr}T${event.end_time}`) 
+                      : today,
+                    meetLink: event.google_meet_link
+                  };
+                  handleTaskClick(null, externalEvent);
+                }} 
+              />
             </div>
           )}
         </div>
