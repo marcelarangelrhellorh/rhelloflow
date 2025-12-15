@@ -43,12 +43,12 @@ export default function Tarefas() {
   const updateTask = useUpdateTask();
   const { getSyncedEvents } = useGoogleCalendar();
 
-  // Fetch external calendar events
+  // Fetch external calendar events - optimized: 1 month past + 2 months future
   const { data: externalEvents = [], isLoading: isLoadingExternalEvents } = useQuery({
     queryKey: ['calendar-events'],
     queryFn: async () => {
-      const timeMin = moment().subtract(3, 'months').toISOString();
-      const timeMax = moment().add(3, 'months').toISOString();
+      const timeMin = moment().subtract(1, 'month').toISOString();
+      const timeMax = moment().add(2, 'months').toISOString();
       const events = await getSyncedEvents(timeMin, timeMax);
       return events || [];
     },
