@@ -83,6 +83,16 @@ export default function MeetingModal({ open, onClose, task, defaultVagaId, defau
     },
   });
 
+  // Get current user email
+  const { data: currentUser } = useQuery({
+    queryKey: ["current-user-email"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      return user;
+    },
+    staleTime: 1000 * 60 * 30, // 30 minutes
+  });
+
   // Load users for assignee select
   const { data: users } = useQuery({
     queryKey: ["users-for-tasks"],
@@ -126,6 +136,7 @@ export default function MeetingModal({ open, onClose, task, defaultVagaId, defau
         reminder_minutes: task.reminder_minutes || 30,
       });
     } else {
+      // Pre-fill with creator's email for new meetings
       form.reset({
         title: "",
         description: "",
@@ -135,11 +146,11 @@ export default function MeetingModal({ open, onClose, task, defaultVagaId, defau
         assignee_id: "",
         vaga_id: defaultVagaId || "",
         candidato_id: defaultCandidateId || "",
-        attendee_emails: "",
+        attendee_emails: currentUser?.email || "",
         reminder_minutes: 30,
       });
     }
-  }, [task, defaultVagaId, defaultCandidateId, form]);
+  }, [task, defaultVagaId, defaultCandidateId, form, currentUser?.email]);
 
   const isEditing = task && task.id && task.task_type === 'meeting';
 
@@ -148,6 +159,11 @@ export default function MeetingModal({ open, onClose, task, defaultVagaId, defau
     const attendeeEmails = data.attendee_emails
       ? data.attendee_emails.split(',').map(e => e.trim()).filter(e => e.includes('@'))
       : [];
+
+    // Ensure creator's email is always included
+    if (currentUser?.email && !attendeeEmails.includes(currentUser.email)) {
+      attendeeEmails.unshift(currentUser.email);
+    }
 
     // Combine date and time for due_date
     const dueDateTime = new Date(`${data.due_date}T${data.start_time}:00`);
