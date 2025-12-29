@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Briefcase, Users, Building2, CheckSquare, BarChart3, ClipboardList, Wrench, FileText, MessageSquare, ChevronLeft, ChevronRight, GitCompare, FolderHeart } from "lucide-react";
+import { LayoutDashboard, Briefcase, Users, Building2, CheckSquare, BarChart3, ClipboardList, Wrench, FileText, MessageSquare, ChevronLeft, ChevronRight, ChevronDown, GitCompare, FolderHeart } from "lucide-react";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -68,6 +70,7 @@ const toolsItems = [{
   icon: MessageSquare
 }];
 export function AppSidebar() {
+  const [candidatosOpen, setCandidatosOpen] = useState(false);
   const {
     state,
     toggleSidebar
@@ -158,33 +161,61 @@ export function AppSidebar() {
                     </SidebarMenuButton>}
                 </SidebarMenuItem>)}
 
-              {/* Candidatos dropdown for internal users */}
-              {isInternalUser && <SidebarMenuItem>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <SidebarMenuButton 
-                        className={collapsed ? "justify-center" : ""}
-                        isActive={location.pathname.startsWith('/candidatos') || location.pathname.startsWith('/banco-talentos')}
-                        aria-label="Candidatos"
-                        aria-haspopup="menu"
-                      >
-                        <Users className="h-7 w-7" aria-hidden="true" />
-                        {!collapsed && <span className="text-base">Candidatos</span>}
-                      </SidebarMenuButton>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent 
-                      side="right" 
-                      align="start" 
-                      className="w-48 bg-white dark:bg-gray-800 z-[100] shadow-lg border border-gray-200 dark:border-gray-700" 
-                      role="menu"
-                    >
-                      {candidatosItems.map(item => <DropdownMenuItem key={item.title} onClick={() => navigate(item.url)} className="cursor-pointer" role="menuitem">
-                          <item.icon className="mr-2 h-4 w-4" aria-hidden="true" />
-                          {item.title}
-                        </DropdownMenuItem>)}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </SidebarMenuItem>}
+              {/* Candidatos collapsible for internal users */}
+              {isInternalUser && (
+                <Collapsible open={candidatosOpen} onOpenChange={setCandidatosOpen}>
+                  <SidebarMenuItem>
+                    {collapsed ? (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <SidebarMenuButton 
+                            className="justify-center"
+                            isActive={location.pathname.startsWith('/candidatos') || location.pathname.startsWith('/banco-talentos')}
+                          >
+                            <Users className="h-7 w-7" aria-hidden="true" />
+                          </SidebarMenuButton>
+                        </TooltipTrigger>
+                        <TooltipContent side="right">
+                          Candidatos
+                        </TooltipContent>
+                      </Tooltip>
+                    ) : (
+                      <CollapsibleTrigger asChild>
+                        <SidebarMenuButton 
+                          isActive={location.pathname.startsWith('/candidatos') || location.pathname.startsWith('/banco-talentos')}
+                          aria-label="Candidatos"
+                          aria-expanded={candidatosOpen}
+                        >
+                          <Users className="h-7 w-7" aria-hidden="true" />
+                          <span className="text-base flex-1">Candidatos</span>
+                          <ChevronDown 
+                            className={`h-4 w-4 transition-transform duration-200 ${candidatosOpen ? 'rotate-180' : ''}`} 
+                            aria-hidden="true" 
+                          />
+                        </SidebarMenuButton>
+                      </CollapsibleTrigger>
+                    )}
+                  </SidebarMenuItem>
+                  
+                  {!collapsed && (
+                    <CollapsibleContent className="pl-4 space-y-1">
+                      {candidatosItems.map(item => (
+                        <SidebarMenuItem key={item.title}>
+                          <SidebarMenuButton 
+                            onClick={() => navigate(item.url)}
+                            onMouseEnter={() => prefetchRoute(item.url)}
+                            isActive={location.pathname === item.url}
+                            className="pl-4"
+                          >
+                            <item.icon className="h-5 w-5" aria-hidden="true" />
+                            <span className="text-sm">{item.title}</span>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      ))}
+                    </CollapsibleContent>
+                  )}
+                </Collapsible>
+              )}
 
               {filteredMenuItems.slice(2).map(item => <SidebarMenuItem key={item.title}>
                   {collapsed ? <Tooltip>
