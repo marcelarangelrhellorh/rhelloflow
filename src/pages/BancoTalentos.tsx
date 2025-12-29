@@ -10,6 +10,9 @@ import { CandidateCard } from "@/components/BancoTalentos/CandidateCard";
 import { CandidateProfileDrawer } from "@/components/BancoTalentos/CandidateProfileDrawer";
 import { LinkToJobModal } from "@/components/BancoTalentos/LinkToJobModal";
 import { ImportXlsModal } from "@/components/ImportXlsModal";
+import { TalentPoolLinkManager } from "@/components/TalentPoolLinkManager";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Link2 } from "lucide-react";
 import { differenceInDays } from "date-fns";
 interface Candidato {
   id: string;
@@ -163,6 +166,22 @@ export default function BancoTalentos() {
           </div>
         </div>
         <div className="flex gap-2">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="outline" className="border-[#00141D] text-[#00141D] hover:bg-[#00141D]/10">
+                <Link2 className="mr-2 h-5 w-5" />
+                Gerenciar Links
+              </Button>
+            </SheetTrigger>
+            <SheetContent className="w-[500px] sm:w-[600px] overflow-y-auto">
+              <SheetHeader>
+                <SheetTitle>Gerenciar Links do Banco de Talentos</SheetTitle>
+              </SheetHeader>
+              <div className="mt-6">
+                <TalentPoolLinkManager />
+              </div>
+            </SheetContent>
+          </Sheet>
           <Button onClick={() => navigate('/candidatos/novo')} className="bg-[#00141D] hover:bg-[#00141D]/90 text-white font-bold">
             <Plus className="mr-2 h-5 w-5" />
             Adicionar Candidato

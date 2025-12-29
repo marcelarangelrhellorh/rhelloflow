@@ -21,6 +21,8 @@ import { SendWhatsAppModal } from "@/components/CandidatoDetalhes/SendWhatsAppMo
 import { WhatsAppHistory } from "@/components/CandidatoDetalhes/WhatsAppHistory";
 import { CandidateNotesSection } from "@/components/CandidatoDetalhes/CandidateNotesSection";
 import { CandidateMeetingsCard } from "@/components/CandidatoDetalhes/CandidateMeetingsCard";
+import { FitCulturalCard } from "@/components/CandidatoDetalhes/FitCulturalCard";
+import type { FitCulturalData } from "@/constants/fitCultural";
 type Candidato = {
   id: string;
   nome_completo: string;
@@ -46,6 +48,9 @@ type Candidato = {
   criado_em: string;
   origem: string | null;
   source_link_id: string | null;
+  modelo_contratacao: string | null;
+  formato_trabalho: string | null;
+  fit_cultural: FitCulturalData | null;
 };
 type Vaga = {
   id: string;
@@ -141,7 +146,12 @@ export default function CandidatoDetalhes() {
         error
       } = await supabase.from("candidatos").select("*").eq("id", id).single();
       if (error) throw error;
-      setCandidato(data);
+      // Cast fit_cultural from Json to FitCulturalData
+      const candidatoData: Candidato = {
+        ...data,
+        fit_cultural: data.fit_cultural as unknown as FitCulturalData | null
+      };
+      setCandidato(candidatoData);
       if (data.vaga_relacionada_id) {
         const {
           data: vagaData
@@ -320,9 +330,14 @@ export default function CandidatoDetalhes() {
 
             {/* Main Content - Professional Info */}
             <div className="lg:col-span-8">
-              <ProfessionalInfoCard pretensaoSalarial={candidato.pretensao_salarial} vagaTitulo={vaga?.titulo || null} vagaId={candidato.vaga_relacionada_id} dataCadastro={candidato.criado_em} nivel={candidato.nivel} area={candidato.area} curriculoUrl={candidato.curriculo_url} portfolioUrl={candidato.portfolio_url} disponibilidadeMudanca={candidato.disponibilidade_mudanca} disponibilidadeStatus={candidato.disponibilidade_status} pontosFortes={candidato.pontos_fortes} pontosDesenvolver={candidato.pontos_desenvolver} parecerFinal={candidato.parecer_final} origem={candidato.origem} candidatoId={id!} experienciaProfissional={(candidato as any).experiencia_profissional || null} idiomas={(candidato as any).idiomas || null} onUpdate={loadCandidato} onVagaClick={() => vaga && navigate(`/vagas/${vaga.id}`)} />
+              <ProfessionalInfoCard pretensaoSalarial={candidato.pretensao_salarial} vagaTitulo={vaga?.titulo || null} vagaId={candidato.vaga_relacionada_id} dataCadastro={candidato.criado_em} nivel={candidato.nivel} area={candidato.area} curriculoUrl={candidato.curriculo_url} portfolioUrl={candidato.portfolio_url} disponibilidadeMudanca={candidato.disponibilidade_mudanca} disponibilidadeStatus={candidato.disponibilidade_status} pontosFortes={candidato.pontos_fortes} pontosDesenvolver={candidato.pontos_desenvolver} parecerFinal={candidato.parecer_final} origem={candidato.origem} candidatoId={id!} experienciaProfissional={(candidato as any).experiencia_profissional || null} idiomas={(candidato as any).idiomas || null} modeloContratacao={candidato.modelo_contratacao} formatoTrabalho={candidato.formato_trabalho} onUpdate={loadCandidato} onVagaClick={() => vaga && navigate(`/vagas/${vaga.id}`)} />
             </div>
           </div>
+
+          {/* Fit Cultural Card - only show if data exists */}
+          {candidato.fit_cultural && (
+            <FitCulturalCard fitCultural={candidato.fit_cultural} />
+          )}
 
           {/* Candidate Notes Section */}
           <CandidateNotesSection candidateId={id!} />

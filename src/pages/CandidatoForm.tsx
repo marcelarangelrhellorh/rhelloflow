@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { Constants } from "@/integrations/supabase/types";
 import { LoadingButton } from "@/components/ui/loading-button";
 import { handleApiError } from "@/lib/errorHandler";
+import { MODELO_CONTRATACAO_OPTIONS, FORMATO_TRABALHO_OPTIONS } from "@/constants/fitCultural";
 
 export default function CandidatoForm() {
   const { id } = useParams();
@@ -46,6 +47,8 @@ export default function CandidatoForm() {
     idade: "",
     historico_experiencia: "",
     idiomas: "",
+    modelo_contratacao: "",
+    formato_trabalho: "",
   });
 
   useEffect(() => {
@@ -105,6 +108,8 @@ export default function CandidatoForm() {
           idade: data.idade ? data.idade.toString() : "",
           historico_experiencia: data.historico_experiencia || "",
           idiomas: data.idiomas || "",
+          modelo_contratacao: (data as any).modelo_contratacao || "",
+          formato_trabalho: (data as any).formato_trabalho || "",
         });
       }
     } catch (error) {
@@ -212,6 +217,8 @@ export default function CandidatoForm() {
         idade: formData.idade ? parseInt(formData.idade) : null,
         historico_experiencia: formData.historico_experiencia || null,
         idiomas: formData.idiomas || null,
+        modelo_contratacao: formData.modelo_contratacao || null,
+        formato_trabalho: formData.formato_trabalho || null,
       };
 
       const { error } = await supabase
@@ -496,6 +503,42 @@ export default function CandidatoForm() {
                     <SelectItem value="A combinar">A combinar</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="modelo_contratacao">Modelo de Contratação</Label>
+                  <Select 
+                    value={formData.modelo_contratacao} 
+                    onValueChange={(value) => setFormData({ ...formData, modelo_contratacao: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white z-50">
+                      {MODELO_CONTRATACAO_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="formato_trabalho">Formato de Trabalho</Label>
+                  <Select 
+                    value={formData.formato_trabalho} 
+                    onValueChange={(value) => setFormData({ ...formData, formato_trabalho: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white z-50">
+                      {FORMATO_TRABALHO_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </CardContent>
           </Card>

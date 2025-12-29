@@ -4,6 +4,7 @@
  */
 
 import type { CandidatoStatus } from '@/constants/candidatoStatus';
+import type { FitCulturalData } from '@/constants/fitCultural';
 
 export interface Candidato {
   id: string;
@@ -46,6 +47,10 @@ export interface Candidato {
   is_visible_for_client: boolean | null;
   idempotency_key: string | null;
   utm: Record<string, unknown> | null;
+  modelo_contratacao: string | null;
+  formato_trabalho: string | null;
+  fit_cultural: FitCulturalData | null;
+  talent_pool_link_id: string | null;
 }
 
 export interface CandidatoHistorico {

@@ -70,6 +70,8 @@ interface ProfessionalInfoCardProps {
   candidatoId: string;
   experienciaProfissional: string | null;
   idiomas: string | null;
+  modeloContratacao?: string | null;
+  formatoTrabalho?: string | null;
   onUpdate?: () => void;
   onVagaClick?: () => void;
 }
@@ -91,6 +93,8 @@ export function ProfessionalInfoCard({
   candidatoId,
   experienciaProfissional,
   idiomas,
+  modeloContratacao,
+  formatoTrabalho,
   onUpdate,
   onVagaClick
 }: ProfessionalInfoCardProps) {

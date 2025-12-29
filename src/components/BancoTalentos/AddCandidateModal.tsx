@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { logger } from "@/lib/logger";
+import { MODELO_CONTRATACAO_OPTIONS, FORMATO_TRABALHO_OPTIONS } from "@/constants/fitCultural";
 
 interface AddCandidateModalProps {
   open: boolean;
@@ -36,7 +37,9 @@ export function AddCandidateModal({ open, onOpenChange, onSuccess }: AddCandidat
     linkedin: "",
     recruiter_id: "",
     curriculo_link: "",
-    feedback: ""
+    feedback: "",
+    modelo_contratacao: "",
+    formato_trabalho: ""
   });
 
   useEffect(() => {
@@ -78,7 +81,9 @@ export function AddCandidateModal({ open, onOpenChange, onSuccess }: AddCandidat
         recrutador: null,
         status: "Banco de Talentos",
         curriculo_link: formData.curriculo_link || null,
-        feedback: formData.feedback || null
+        feedback: formData.feedback || null,
+        modelo_contratacao: formData.modelo_contratacao || null,
+        formato_trabalho: formData.formato_trabalho || null
       });
 
       if (error) throw error;
@@ -107,7 +112,9 @@ export function AddCandidateModal({ open, onOpenChange, onSuccess }: AddCandidat
       linkedin: "",
       recruiter_id: "",
       curriculo_link: "",
-      feedback: ""
+      feedback: "",
+      modelo_contratacao: "",
+      formato_trabalho: ""
     });
   };
 
@@ -260,6 +267,40 @@ export function AddCandidateModal({ open, onOpenChange, onSuccess }: AddCandidat
                 onChange={(e) => setFormData({ ...formData, curriculo_link: e.target.value })}
                 placeholder="https://..."
               />
+            </div>
+
+            <div>
+              <Label htmlFor="modelo_contratacao">Modelo de Contratação</Label>
+              <Select 
+                value={formData.modelo_contratacao} 
+                onValueChange={(value) => setFormData({ ...formData, modelo_contratacao: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent>
+                  {MODELO_CONTRATACAO_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="formato_trabalho">Formato de Trabalho</Label>
+              <Select 
+                value={formData.formato_trabalho} 
+                onValueChange={(value) => setFormData({ ...formData, formato_trabalho: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent>
+                  {FORMATO_TRABALHO_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="col-span-2">
