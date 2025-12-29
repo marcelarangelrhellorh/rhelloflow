@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Briefcase, Users, Building2, CheckSquare, BarChart3, ClipboardList, Wrench, FileText, MessageSquare, ChevronLeft, ChevronRight, GitCompare } from "lucide-react";
+import { LayoutDashboard, Briefcase, Users, Building2, CheckSquare, BarChart3, ClipboardList, Wrench, FileText, MessageSquare, ChevronLeft, ChevronRight, GitCompare, FolderHeart } from "lucide-react";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
@@ -21,11 +21,6 @@ const menuItems = [{
   icon: Briefcase,
   roles: ["admin", "recrutador", "cs"]
 }, {
-  title: "Candidatos",
-  url: "/candidatos",
-  icon: Users,
-  roles: ["admin", "recrutador", "cs"]
-}, {
   title: "Clientes",
   url: "/gerenciar-empresas",
   icon: Building2,
@@ -45,6 +40,15 @@ const menuItems = [{
   url: "/acompanhamento",
   icon: ClipboardList,
   roles: ["client"]
+}];
+const candidatosItems = [{
+  title: "Em processo",
+  url: "/candidatos",
+  icon: Users
+}, {
+  title: "Banco de Talentos",
+  url: "/banco-talentos",
+  icon: FolderHeart
 }];
 const toolsItems = [{
   title: "Scorecards",
@@ -129,7 +133,55 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-2">
-              {filteredMenuItems.map(item => <SidebarMenuItem key={item.title}>
+              {filteredMenuItems.slice(0, 2).map(item => <SidebarMenuItem key={item.title}>
+                  {collapsed ? <Tooltip>
+                      <TooltipTrigger asChild>
+                        <SidebarMenuButton 
+                          onClick={() => navigate(item.url)} 
+                          onMouseEnter={() => prefetchRoute(item.url)}
+                          isActive={isActive(item.url)} 
+                          className="justify-center"
+                        >
+                          <item.icon className="h-7 w-7" />
+                        </SidebarMenuButton>
+                      </TooltipTrigger>
+                      <TooltipContent side="right">
+                        {item.title}
+                      </TooltipContent>
+                    </Tooltip> : <SidebarMenuButton 
+                      onClick={() => navigate(item.url)} 
+                      onMouseEnter={() => prefetchRoute(item.url)}
+                      isActive={isActive(item.url)}
+                    >
+                      <item.icon className="h-7 w-7" />
+                      <span className="text-base">{item.title}</span>
+                    </SidebarMenuButton>}
+                </SidebarMenuItem>)}
+
+              {/* Candidatos dropdown for internal users */}
+              {isInternalUser && <SidebarMenuItem>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <SidebarMenuButton 
+                        className={collapsed ? "justify-center" : ""}
+                        isActive={location.pathname.startsWith('/candidatos') || location.pathname.startsWith('/banco-talentos')}
+                        aria-label="Candidatos"
+                        aria-haspopup="menu"
+                      >
+                        <Users className="h-7 w-7" aria-hidden="true" />
+                        {!collapsed && <span className="text-base">Candidatos</span>}
+                      </SidebarMenuButton>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent side="right" align="start" className="w-48" role="menu">
+                      {candidatosItems.map(item => <DropdownMenuItem key={item.title} onClick={() => navigate(item.url)} className="cursor-pointer" role="menuitem">
+                          <item.icon className="mr-2 h-4 w-4" aria-hidden="true" />
+                          {item.title}
+                        </DropdownMenuItem>)}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </SidebarMenuItem>}
+
+              {filteredMenuItems.slice(2).map(item => <SidebarMenuItem key={item.title}>
                   {collapsed ? <Tooltip>
                       <TooltipTrigger asChild>
                         <SidebarMenuButton 
