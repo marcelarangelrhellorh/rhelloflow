@@ -255,7 +255,7 @@ export function ApplicationModal({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm">
-      <div className="fixed inset-y-0 right-0 w-full max-w-2xl bg-[#FFFDF6] shadow-2xl overflow-hidden">
+      <div className="fixed inset-y-0 right-0 w-full max-w-2xl bg-white shadow-2xl overflow-hidden">
         <div className="h-full flex flex-col">
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-[#36404A]/10">

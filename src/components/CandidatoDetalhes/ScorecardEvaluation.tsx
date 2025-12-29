@@ -324,7 +324,7 @@ export function ScorecardEvaluation({
             </div>
 
             {/* Score Summary */}
-            {allScoresSet && <Card className="border-2 border-[#FFCD00] bg-[#FFFDF6]">
+            {allScoresSet && <Card className="border-2 border-[#FFCD00] bg-white">
                 <CardContent className="pt-6">
                   <div className="space-y-4">
                     <div>

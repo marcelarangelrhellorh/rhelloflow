@@ -117,7 +117,7 @@ export default function GerenciarEmpresas() {
       toast.error("Erro ao mover cliente");
     }
   }, [refetch]);
-  return <div className="min-h-screen bg-[#FFFBF0] p-4 sm:p-6 lg:p-8">
+  return <div className="min-h-screen bg-white p-4 sm:p-6 lg:p-8">
       <div className="w-full space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">

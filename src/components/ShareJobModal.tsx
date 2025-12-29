@@ -154,7 +154,7 @@ export function ShareJobModal({ open, onOpenChange, vagaId, vagaTitulo }: ShareJ
         margin: 2,
         color: {
           dark: '#00141D',
-          light: '#FFFDF6',
+          light: '#FFFFFF',
         },
       });
       setQrCodeUrl(qrUrl);

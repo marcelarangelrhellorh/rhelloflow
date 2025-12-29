@@ -125,7 +125,7 @@ export default function PublicVagaForm() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-[#FFFDF6] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-white flex items-center justify-center p-4">
         <Card className="max-w-2xl w-full border-2 border-primary/20">
           <CardContent className="pt-12 pb-12 text-center">
             <div className="flex justify-center mb-6">
@@ -162,7 +162,7 @@ export default function PublicVagaForm() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FFFDF6] py-12 px-4">
+    <div className="min-h-screen bg-white py-12 px-4">
       <div className="mx-auto max-w-4xl">
         {/* Header */}
         <div className="text-center mb-8">

@@ -180,7 +180,7 @@ export const VagaCard = React.memo(function VagaCard({
         onDragStart={onDragStart} 
         onClick={handleClick}
         onKeyDown={(e) => e.key === 'Enter' && handleClick()}
-        className="relative cursor-pointer bg-[#FFFDF6] border border-gray-200 overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-200 hover:scale-[1.01] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        className="relative cursor-pointer bg-white border border-gray-200 overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-200 hover:scale-[1.01] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         role="article"
         tabIndex={0}
         aria-label={`Vaga: ${vaga.titulo} - ${vaga.empresa} - Status: ${vaga.status}`}
@@ -283,7 +283,7 @@ export const VagaCard = React.memo(function VagaCard({
               {recrutadorName && (
                 <div className="flex items-center justify-center w-9 h-9 rounded-full font-bold text-sm shrink-0" style={{
                   backgroundColor: "#00141D",
-                  color: "#FFFDF6"
+                  color: "#FFFFFF"
                 }} title={recrutadorName}>
                   {getInitials(recrutadorName)}
                 </div>
@@ -383,7 +383,7 @@ export const VagaCard = React.memo(function VagaCard({
 
                 {recrutadorName && <div className="flex items-center justify-center w-10 h-10 rounded-full font-bold text-sm" style={{
                   backgroundColor: "#00141D",
-                  color: "#FFFDF6"
+                  color: "#FFFFFF"
                 }} title={recrutadorName}>
                     {getInitials(recrutadorName)}
                   </div>}

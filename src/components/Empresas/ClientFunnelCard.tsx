@@ -41,7 +41,7 @@ export function ClientFunnelCard({
   const style = transform ? {
     transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`
   } : undefined;
-  return <Card ref={setNodeRef} style={style} {...listeners} {...attributes} onClick={onClick} className={cn("p-3 cursor-pointer transition-all duration-200 bg-[#fffdf6] border border-gray-200", "hover:shadow-md hover:border-[#ffcd00]", isDragging && "opacity-50 shadow-lg rotate-2")}>
+  return <Card ref={setNodeRef} style={style} {...listeners} {...attributes} onClick={onClick} className={cn("p-3 cursor-pointer transition-all duration-200 bg-white border border-gray-200", "hover:shadow-md hover:border-[#ffcd00]", isDragging && "opacity-50 shadow-lg rotate-2")}>
       <div className="space-y-2">
         {/* Header */}
         <div className="flex items-start justify-between gap-2">

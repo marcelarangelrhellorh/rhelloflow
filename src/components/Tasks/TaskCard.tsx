@@ -125,7 +125,7 @@ const TaskCard = React.memo(function TaskCard({
             {task.assignee && (
               <div className="flex items-center gap-2">
                 <Avatar className="h-6 w-6 bg-[#00141d]">
-                  <AvatarFallback className="text-[#fffdf6] text-xs">
+                  <AvatarFallback className="text-white text-xs">
                     {getInitials(task.assignee.full_name)}
                   </AvatarFallback>
                 </Avatar>

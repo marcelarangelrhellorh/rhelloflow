@@ -56,7 +56,7 @@ const App = () => <ErrorBoundary>
             <Route path="/banco-talentos/:token" element={<TalentPoolForm />} />
             <Route element={<Layout />}>
               <Route path="/" element={<Dashboard />} />
-              <Route path="/vagas" element={<Vagas />} className="" />
+              <Route path="/vagas" element={<Vagas />} />
               <Route path="/vagas/nova" element={<VagaForm />} />
               <Route path="/vagas/:id" element={<VagaDetalhes />} />
               <Route path="/vagas/:id/editar" element={<VagaForm />} />

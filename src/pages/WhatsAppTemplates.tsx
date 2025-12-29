@@ -205,9 +205,7 @@ const WhatsAppTemplates = () => {
     id: t.created_by, 
     name: t.creator_name || 'Desconhecido' 
   })).map(c => JSON.stringify(c)))).map(c => JSON.parse(c));
-  return <div className="min-h-screen" style={{
-    backgroundColor: '#FFFBF0'
-  }}>
+  return <div className="min-h-screen bg-white">
       {/* Header - Fixed */}
       <div className="sticky top-0 z-20 bg-white border-b border-gray-200 shadow-sm">
         <div className="px-6 py-4 space-y-4">
