@@ -71,11 +71,11 @@ const KPICard = memo(function KPICard({
   return (
     <Card 
       className={`
-        overflow-hidden border-l-4 ${borderColor}
+        overflow-hidden border-l-4 ${borderColor} bg-white dark:bg-card
         ${isClickable ? 'cursor-pointer hover:shadow-lg hover:-translate-y-1' : 'cursor-default'}
         transition-all duration-150
         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
-      `} 
+      `}
       onClick={isClickable ? onClick : undefined} 
       onKeyDown={e => isClickable && e.key === 'Enter' && onClick()} 
       tabIndex={isClickable ? 0 : -1} 
@@ -132,7 +132,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-white dark:bg-background-dark">
       {/* Header */}
       <div className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="px-4 sm:px-6 md:px-8 py-4 sm:py-6 max-w-[1400px] mx-auto">
