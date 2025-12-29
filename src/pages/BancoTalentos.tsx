@@ -142,9 +142,7 @@ export default function BancoTalentos() {
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
       </div>;
   }
-  return <div className="min-h-screen p-8" style={{
-    backgroundColor: '#FFFBF0'
-  }}>
+  return <div className="min-h-screen p-8 bg-background">
       {/* Cabeçalho */}
       <div className="mb-8 flex items-start justify-between">
         <div>
