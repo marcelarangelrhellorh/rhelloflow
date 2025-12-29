@@ -54,7 +54,7 @@ type Candidato = {
 
 type StatusCandidato = "Banco de Talentos" | "Selecionado" | "Entrevista rhello" | "Reprovado Rhello" | "Aprovado Rhello" | "Shortlist" | "Entrevistas Solicitante" | "Reprovado Solicitante" | "Aprovado Solicitante" | "Contratado";
 
-const statusColumns: StatusCandidato[] = ["Banco de Talentos", "Selecionado", "Entrevista rhello", "Reprovado Rhello", "Aprovado Rhello", "Shortlist", "Entrevistas Solicitante", "Reprovado Solicitante", "Aprovado Solicitante", "Contratado"];
+const statusColumns: StatusCandidato[] = ["Selecionado", "Entrevista rhello", "Reprovado Rhello", "Aprovado Rhello", "Shortlist", "Entrevistas Solicitante", "Reprovado Solicitante", "Aprovado Solicitante", "Contratado"];
 
 const statusColors: Record<StatusCandidato, string> = {
   "Banco de Talentos": "bg-info/10 text-info border-info/20",
@@ -248,8 +248,11 @@ export default function Candidatos() {
     }
   };
 
-  // Filtragem para o funil
+  // Filtragem para o funil (exclui Banco de Talentos)
   const filteredFunnelCandidates = candidatos.filter(candidato => {
+    // Excluir candidatos no Banco de Talentos (gerenciados em /banco-talentos)
+    if (candidato.status === "Banco de Talentos") return false;
+    
     const matchesSearch = searchTerm === "" || candidato.nome_completo.toLowerCase().includes(searchTerm.toLowerCase()) || candidato.email.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesVaga = vagaFilter === "all" || candidato.vaga_relacionada_id === vagaFilter;
     const matchesCliente = clienteFilter === "all" || candidato.vaga_relacionada_id && vagas.find(v => v.id === candidato.vaga_relacionada_id)?.empresa === clienteFilter;
@@ -258,7 +261,11 @@ export default function Candidatos() {
     return matchesSearch && matchesVaga && matchesCliente && matchesRecrutadorVaga && matchesRecrutador;
   });
 
+  // Filtragem para Cards (exclui Banco de Talentos)
   const filteredCandidatos = candidatos.filter(candidato => {
+    // Excluir candidatos no Banco de Talentos (gerenciados em /banco-talentos)
+    if (candidato.status === "Banco de Talentos") return false;
+    
     const matchesSearch = candidato.nome_completo.toLowerCase().includes(searchTerm.toLowerCase()) || candidato.email.toLowerCase().includes(searchTerm.toLowerCase()) || candidato.cidade && candidato.cidade.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || candidato.status === statusFilter;
     const matchesDisponibilidade = disponibilidadeFilter === "all" || candidato.disponibilidade_status === disponibilidadeFilter;
