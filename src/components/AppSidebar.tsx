@@ -172,7 +172,12 @@ export function AppSidebar() {
                         {!collapsed && <span className="text-base">Candidatos</span>}
                       </SidebarMenuButton>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent side="right" align="start" className="w-48" role="menu">
+                    <DropdownMenuContent 
+                      side="right" 
+                      align="start" 
+                      className="w-48 bg-white dark:bg-gray-800 z-[100] shadow-lg border border-gray-200 dark:border-gray-700" 
+                      role="menu"
+                    >
                       {candidatosItems.map(item => <DropdownMenuItem key={item.title} onClick={() => navigate(item.url)} className="cursor-pointer" role="menuitem">
                           <item.icon className="mr-2 h-4 w-4" aria-hidden="true" />
                           {item.title}
