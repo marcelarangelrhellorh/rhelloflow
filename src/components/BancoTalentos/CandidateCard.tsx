@@ -169,10 +169,7 @@ export function CandidateCard({
         </div>
 
         {/* Tags (exemplo - pode ser dinâmico) */}
-        <div className="flex flex-wrap gap-2 mb-4">
-          <Badge variant="secondary" className="text-xs">#Comunicação</Badge>
-          <Badge variant="secondary" className="text-xs">#Liderança</Badge>
-        </div>
+        
 
         {/* Ações */}
         <div className="flex gap-2" role="group" aria-label="Ações do candidato">
