@@ -40,9 +40,7 @@ const Configuracoes = lazy(() => import("./pages/Configuracoes"));
 const ComparadorCargos = lazy(() => import("./pages/ComparadorCargos"));
 const Auth = lazy(() => import("./pages/Auth"));
 const NotFound = lazy(() => import("./pages/NotFound"));
-
-const App = () => (
-  <ErrorBoundary>
+const App = () => <ErrorBoundary>
     <TooltipProvider>
       <Toaster />
       <Sonner />
@@ -58,7 +56,7 @@ const App = () => (
             <Route path="/banco-talentos/:token" element={<TalentPoolForm />} />
             <Route element={<Layout />}>
               <Route path="/" element={<Dashboard />} />
-              <Route path="/vagas" element={<Vagas />} />
+              <Route path="/vagas" element={<Vagas />} className="" />
               <Route path="/vagas/nova" element={<VagaForm />} />
               <Route path="/vagas/:id" element={<VagaDetalhes />} />
               <Route path="/vagas/:id/editar" element={<VagaForm />} />
@@ -91,7 +89,5 @@ const App = () => (
         </Suspense>
       </BrowserRouter>
     </TooltipProvider>
-  </ErrorBoundary>
-);
-
+  </ErrorBoundary>;
 export default App;
