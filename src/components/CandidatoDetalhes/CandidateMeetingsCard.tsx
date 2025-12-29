@@ -107,7 +107,7 @@ export function CandidateMeetingsCard({
             {meetings.length}
           </span>
           <span className="text-muted-foreground font-semibold text-xs">
-            reuniã{meetings.length !== 1 ? "ões" : "o"}
+            {meetings.length === 1 ? "reunião" : "reuniões"}
           </span>
           {overdueMeetings.length > 0 && <Badge variant="destructive" className="text-base gap-1 whitespace-nowrap px-[10px]">
               <AlertTriangle className="h-4 w-4" />
