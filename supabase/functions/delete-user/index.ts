@@ -84,6 +84,114 @@ Deno.serve(async (req) => {
       console.log('✓ Deleted user_roles');
     }
 
+    // Delete candidate_notes
+    const { error: candidateNotesError } = await supabaseAdmin
+      .from('candidate_notes')
+      .delete()
+      .eq('user_id', userId);
+    
+    if (candidateNotesError) {
+      console.error('Error deleting candidate_notes:', candidateNotesError);
+    } else {
+      console.log('✓ Deleted candidate_notes');
+    }
+
+    // Delete job_history
+    const { error: jobHistoryError } = await supabaseAdmin
+      .from('job_history')
+      .delete()
+      .eq('user_id', userId);
+    
+    if (jobHistoryError) {
+      console.error('Error deleting job_history:', jobHistoryError);
+    } else {
+      console.log('✓ Deleted job_history');
+    }
+
+    // Delete empresa_notes
+    const { error: empresaNotesError } = await supabaseAdmin
+      .from('empresa_notes')
+      .delete()
+      .eq('user_id', userId);
+    
+    if (empresaNotesError) {
+      console.error('Error deleting empresa_notes:', empresaNotesError);
+    } else {
+      console.log('✓ Deleted empresa_notes');
+    }
+
+    // Delete tasks created by user or assigned to user
+    const { error: tasksError } = await supabaseAdmin
+      .from('tasks')
+      .delete()
+      .or(`created_by.eq.${userId},assignee_id.eq.${userId}`);
+    
+    if (tasksError) {
+      console.error('Error deleting tasks:', tasksError);
+    } else {
+      console.log('✓ Deleted tasks');
+    }
+
+    // Nullify job_stage_history changed_by
+    const { error: jobStageHistoryError } = await supabaseAdmin
+      .from('job_stage_history')
+      .update({ changed_by: null })
+      .eq('changed_by', userId);
+    
+    if (jobStageHistoryError) {
+      console.error('Error updating job_stage_history:', jobStageHistoryError);
+    } else {
+      console.log('✓ Nullified job_stage_history');
+    }
+
+    // Delete whatsapp_sends
+    const { error: whatsappSendsError } = await supabaseAdmin
+      .from('whatsapp_sends')
+      .delete()
+      .eq('sent_by', userId);
+    
+    if (whatsappSendsError) {
+      console.error('Error deleting whatsapp_sends:', whatsappSendsError);
+    } else {
+      console.log('✓ Deleted whatsapp_sends');
+    }
+
+    // Nullify candidate_tags added_by
+    const { error: candidateTagsError } = await supabaseAdmin
+      .from('candidate_tags')
+      .update({ added_by: null })
+      .eq('added_by', userId);
+    
+    if (candidateTagsError) {
+      console.error('Error updating candidate_tags:', candidateTagsError);
+    } else {
+      console.log('✓ Nullified candidate_tags');
+    }
+
+    // Delete deletion_approvals
+    const { error: deletionApprovalsError } = await supabaseAdmin
+      .from('deletion_approvals')
+      .delete()
+      .or(`requested_by.eq.${userId},approved_by.eq.${userId}`);
+    
+    if (deletionApprovalsError) {
+      console.error('Error deleting deletion_approvals:', deletionApprovalsError);
+    } else {
+      console.log('✓ Deleted deletion_approvals');
+    }
+
+    // Nullify pre_delete_snapshots deleted_by (keep audit trail)
+    const { error: preDeleteSnapshotsError } = await supabaseAdmin
+      .from('pre_delete_snapshots')
+      .update({ deleted_by: null })
+      .eq('deleted_by', userId);
+    
+    if (preDeleteSnapshotsError) {
+      console.error('Error updating pre_delete_snapshots:', preDeleteSnapshotsError);
+    } else {
+      console.log('✓ Nullified pre_delete_snapshots');
+    }
+
     // Delete feedback_requests
     const { error: feedbackReqError } = await supabaseAdmin
       .from('feedback_requests')
@@ -212,9 +320,11 @@ Deno.serve(async (req) => {
         cs_id: null,
         created_by: null,
         updated_by: null,
-        deleted_by: null
+        deleted_by: null,
+        last_status_change_by: null,
+        cliente_id: null
       })
-      .or(`recrutador_id.eq.${userId},cs_id.eq.${userId},created_by.eq.${userId},updated_by.eq.${userId},deleted_by.eq.${userId}`);
+      .or(`recrutador_id.eq.${userId},cs_id.eq.${userId},created_by.eq.${userId},updated_by.eq.${userId},deleted_by.eq.${userId},last_status_change_by.eq.${userId},cliente_id.eq.${userId}`);
     
     if (vagasUpdateError) {
       console.error('Error updating vagas:', vagasUpdateError);
@@ -232,6 +342,30 @@ Deno.serve(async (req) => {
       console.error('Error updating candidatos:', candidatosUpdateError);
     } else {
       console.log('✓ Nullified references in candidatos');
+    }
+
+    // Nullify references in feedbacks deleted_by
+    const { error: feedbacksDeletedByError } = await supabaseAdmin
+      .from('feedbacks')
+      .update({ deleted_by: null })
+      .eq('deleted_by', userId);
+    
+    if (feedbacksDeletedByError) {
+      console.error('Error updating feedbacks deleted_by:', feedbacksDeletedByError);
+    } else {
+      console.log('✓ Nullified feedbacks deleted_by');
+    }
+
+    // Nullify cs_responsavel_id in empresas
+    const { error: empresasUpdateError } = await supabaseAdmin
+      .from('empresas')
+      .update({ cs_responsavel_id: null })
+      .eq('cs_responsavel_id', userId);
+    
+    if (empresasUpdateError) {
+      console.error('Error updating empresas:', empresasUpdateError);
+    } else {
+      console.log('✓ Nullified empresas cs_responsavel_id');
     }
 
     // Delete profiles (this should cascade if properly configured)
