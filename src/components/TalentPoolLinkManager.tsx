@@ -160,10 +160,7 @@ export function TalentPoolLinkManager() {
   return <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
-          <CardTitle className="flex items-center gap-2 text-sm">
-            <Link2 className="h-5 w-5" />
-            Links do Banco de Talentos
-          </CardTitle>
+          
           <CardDescription>
             Gerencie links públicos para cadastro no banco de talentos
           </CardDescription>
