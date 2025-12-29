@@ -17,8 +17,11 @@ const isAllowedOrigin = (origin: string | null): boolean => {
   // Check exact matches
   if (allowedOrigins.includes(origin)) return true;
   
-  // Allow Lovable preview URLs
+  // Allow Lovable preview URLs (*.lovable.app)
   if (origin.match(/^https:\/\/[a-z0-9]+-preview--[a-z0-9-]+\.lovable\.app$/)) return true;
+  
+  // Allow Lovable project URLs (*.lovableproject.com)
+  if (origin.match(/^https:\/\/[a-z0-9-]+\.lovableproject\.com$/)) return true;
   
   // Allow localhost for development
   if (origin.startsWith('http://localhost:')) return true;
