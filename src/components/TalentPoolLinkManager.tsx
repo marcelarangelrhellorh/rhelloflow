@@ -170,8 +170,8 @@ export function TalentPoolLinkManager() {
         </div>
         <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-[#00141D] hover:bg-[#00141D]/90 text-white">
-              <Plus className="mr-2 h-4 w-4" />
+            <Button size="sm" className="bg-[#00141D] hover:bg-[#00141D]/90 text-white">
+              <Plus className="mr-1 h-3 w-3" />
               Novo Link
             </Button>
           </DialogTrigger>
