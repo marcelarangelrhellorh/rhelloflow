@@ -410,6 +410,8 @@ export type Database = {
           estado: string | null
           experiencia_profissional: string | null
           feedback: string | null
+          fit_cultural: Json | null
+          formato_trabalho: string | null
           hired_at: string | null
           historico_experiencia: string | null
           id: string
@@ -418,6 +420,7 @@ export type Database = {
           idiomas: string | null
           is_visible_for_client: boolean | null
           linkedin: string | null
+          modelo_contratacao: string | null
           nivel: Database["public"]["Enums"]["nivel_candidato"] | null
           nome_completo: string
           origem: string | null
@@ -430,6 +433,7 @@ export type Database = {
           sexo: string | null
           source_link_id: string | null
           status: Database["public"]["Enums"]["status_candidato"] | null
+          talent_pool_link_id: string | null
           telefone: string | null
           total_feedbacks: number
           ultimo_feedback: string | null
@@ -452,6 +456,8 @@ export type Database = {
           estado?: string | null
           experiencia_profissional?: string | null
           feedback?: string | null
+          fit_cultural?: Json | null
+          formato_trabalho?: string | null
           hired_at?: string | null
           historico_experiencia?: string | null
           id?: string
@@ -460,6 +466,7 @@ export type Database = {
           idiomas?: string | null
           is_visible_for_client?: boolean | null
           linkedin?: string | null
+          modelo_contratacao?: string | null
           nivel?: Database["public"]["Enums"]["nivel_candidato"] | null
           nome_completo: string
           origem?: string | null
@@ -472,6 +479,7 @@ export type Database = {
           sexo?: string | null
           source_link_id?: string | null
           status?: Database["public"]["Enums"]["status_candidato"] | null
+          talent_pool_link_id?: string | null
           telefone?: string | null
           total_feedbacks?: number
           ultimo_feedback?: string | null
@@ -494,6 +502,8 @@ export type Database = {
           estado?: string | null
           experiencia_profissional?: string | null
           feedback?: string | null
+          fit_cultural?: Json | null
+          formato_trabalho?: string | null
           hired_at?: string | null
           historico_experiencia?: string | null
           id?: string
@@ -502,6 +512,7 @@ export type Database = {
           idiomas?: string | null
           is_visible_for_client?: boolean | null
           linkedin?: string | null
+          modelo_contratacao?: string | null
           nivel?: Database["public"]["Enums"]["nivel_candidato"] | null
           nome_completo?: string
           origem?: string | null
@@ -514,6 +525,7 @@ export type Database = {
           sexo?: string | null
           source_link_id?: string | null
           status?: Database["public"]["Enums"]["status_candidato"] | null
+          talent_pool_link_id?: string | null
           telefone?: string | null
           total_feedbacks?: number
           ultimo_feedback?: string | null
@@ -526,6 +538,13 @@ export type Database = {
             columns: ["source_link_id"]
             isOneToOne: false
             referencedRelation: "share_links"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidatos_talent_pool_link_id_fkey"
+            columns: ["talent_pool_link_id"]
+            isOneToOne: false
+            referencedRelation: "talent_pool_links"
             referencedColumns: ["id"]
           },
           {
@@ -2617,6 +2636,107 @@ export type Database = {
         }
         Relationships: []
       }
+      talent_pool_link_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          ip_address: string | null
+          link_id: string
+          metadata: Json | null
+          user_agent: string | null
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          ip_address?: string | null
+          link_id: string
+          metadata?: Json | null
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          ip_address?: string | null
+          link_id?: string
+          metadata?: Json | null
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "talent_pool_link_events_link_id_fkey"
+            columns: ["link_id"]
+            isOneToOne: false
+            referencedRelation: "talent_pool_links"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      talent_pool_links: {
+        Row: {
+          active: boolean
+          created_at: string
+          created_by: string | null
+          expires_at: string | null
+          id: string
+          last_used_at: string | null
+          max_submissions: number | null
+          note: string | null
+          password_hash: string | null
+          revoked: boolean | null
+          revoked_at: string | null
+          revoked_by: string | null
+          submissions_count: number
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          last_used_at?: string | null
+          max_submissions?: number | null
+          note?: string | null
+          password_hash?: string | null
+          revoked?: boolean | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          submissions_count?: number
+          token: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          last_used_at?: string | null
+          max_submissions?: number | null
+          note?: string | null
+          password_hash?: string | null
+          revoked?: boolean | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          submissions_count?: number
+          token?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       tasks: {
         Row: {
           assignee_id: string | null
@@ -4667,12 +4787,26 @@ export type Database = {
           vaga_id: string
         }[]
       }
+      get_talent_pool_link_by_token: {
+        Args: { p_token: string }
+        Returns: {
+          active: boolean
+          created_at: string
+          expires_at: string
+          id: string
+          max_submissions: number
+          requires_password: boolean
+          submissions_count: number
+          token: string
+        }[]
+      }
       get_user_role: { Args: { user_id: string }; Returns: string }
       get_user_roles: {
         Args: { user_id: string }
         Returns: Database["public"]["Enums"]["app_role"][]
       }
       has_active_share_link: { Args: { p_vaga_id: string }; Returns: boolean }
+      has_active_talent_pool_link: { Args: never; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
