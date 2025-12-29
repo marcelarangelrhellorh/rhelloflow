@@ -31,6 +31,8 @@ import {
   MODELO_CONTRATACAO_OPTIONS,
   FORMATO_TRABALHO_OPTIONS,
   ORIGEM_OPTIONS,
+  CARGO_OPTIONS,
+  ESTADOS_BRASILEIROS,
   type FitCulturalData,
 } from "@/constants/fitCultural";
 
@@ -75,6 +77,7 @@ export default function TalentPoolForm() {
     linkedin: "",
     idade: "",
     nivel: "",
+    cargo: "",
     area: "",
     pretensao_salarial: "",
     modelo_contratacao: "",
@@ -83,6 +86,9 @@ export default function TalentPoolForm() {
     password: "",
     company: "", // Honeypot
   });
+
+  // File states
+  const [portfolioFile, setPortfolioFile] = useState<File | null>(null);
 
   // Fit Cultural data
   const [fitCultural, setFitCultural] = useState<FitCulturalData>({
@@ -150,6 +156,30 @@ export default function TalentPoolForm() {
       }
 
       setFile(selectedFile);
+    }
+  };
+
+  const handlePortfolioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (selectedFile) {
+      if (selectedFile.size > 20 * 1024 * 1024) {
+        toast.error("O arquivo deve ter no máximo 20MB");
+        return;
+      }
+
+      const validTypes = [
+        'application/pdf',
+        'image/png',
+        'image/jpeg',
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+      ];
+
+      if (!validTypes.includes(selectedFile.type)) {
+        toast.error("Apenas arquivos PDF, PNG, JPG ou PPTX são aceitos para portfólio");
+        return;
+      }
+
+      setPortfolioFile(selectedFile);
     }
   };
 
@@ -253,15 +283,22 @@ export default function TalentPoolForm() {
       const fileBase64 = await fileToBase64(file);
       setUploadProgress(50);
 
+      // Prepare portfolio file if present
+      let portfolioBase64 = null;
+      if (portfolioFile) {
+        portfolioBase64 = await fileToBase64(portfolioFile);
+      }
+
       const candidateData = {
         nome_completo: formData.nome_completo.trim(),
         email: formData.email.trim(),
         telefone: formData.telefone.trim(),
         cidade: formData.cidade.trim() || null,
-        estado: formData.estado.trim() || null,
+        estado: formData.estado || null,
         linkedin: formData.linkedin.trim() || null,
         idade: formData.idade ? parseInt(formData.idade) : null,
         nivel: formData.nivel || null,
+        cargo: formData.cargo || null,
         area: formData.area || null,
         pretensao_salarial: formData.pretensao_salarial || null,
         modelo_contratacao: formData.modelo_contratacao,
@@ -283,6 +320,10 @@ export default function TalentPoolForm() {
               data: fileBase64,
               name: file.name,
             },
+            portfolio: portfolioBase64 && portfolioFile ? {
+              data: portfolioBase64,
+              name: portfolioFile.name,
+            } : undefined,
           },
         },
       });
@@ -459,14 +500,16 @@ export default function TalentPoolForm() {
 
                 <div>
                   <Label htmlFor="estado" className="text-[#00141D]">Estado</Label>
-                  <Input
-                    id="estado"
-                    maxLength={2}
-                    placeholder="SP"
-                    className="mt-1 border-[#36404A]/20"
-                    value={formData.estado}
-                    onChange={(e) => setFormData({ ...formData, estado: e.target.value.toUpperCase() })}
-                  />
+                  <Select value={formData.estado} onValueChange={(value) => setFormData({ ...formData, estado: value })}>
+                    <SelectTrigger className="mt-1 border-[#36404A]/20">
+                      <SelectValue placeholder="Selecione o estado" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white max-h-60">
+                      {ESTADOS_BRASILEIROS.map((estado) => (
+                        <SelectItem key={estado.value} value={estado.value}>{estado.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div>
@@ -511,7 +554,21 @@ export default function TalentPoolForm() {
                 </div>
 
                 <div>
-                  <Label htmlFor="nivel" className="text-[#00141D]">Nível de experiência</Label>
+                  <Label htmlFor="cargo" className="text-[#00141D]">Cargo</Label>
+                  <Select value={formData.cargo} onValueChange={(value) => setFormData({ ...formData, cargo: value })}>
+                    <SelectTrigger className="mt-1 border-[#36404A]/20">
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white">
+                      {CARGO_OPTIONS.map((cargo) => (
+                        <SelectItem key={cargo.value} value={cargo.value}>{cargo.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="nivel" className="text-[#00141D]">Senioridade</Label>
                   <Select value={formData.nivel} onValueChange={(value) => setFormData({ ...formData, nivel: value })}>
                     <SelectTrigger className="mt-1 border-[#36404A]/20">
                       <SelectValue placeholder="Selecione" />
@@ -569,7 +626,7 @@ export default function TalentPoolForm() {
                 </div>
               </div>
 
-              {/* File upload */}
+              {/* File upload - Currículo */}
               <div>
                 <Label htmlFor="curriculo" className="text-[#00141D]">
                   Currículo (PDF ou DOCX) <span className="text-red-600">*</span>
@@ -587,6 +644,24 @@ export default function TalentPoolForm() {
                 {uploadProgress > 0 && uploadProgress < 100 && (
                   <Progress value={uploadProgress} className="h-2 mt-2" />
                 )}
+                <p className="text-xs text-[#36404A] mt-1">Tamanho máximo: 20MB</p>
+              </div>
+
+              {/* File upload - Portfólio */}
+              <div>
+                <Label htmlFor="portfolio" className="text-[#00141D]">
+                  Portfólio (PDF, PNG, JPG ou PPTX) - opcional
+                </Label>
+                <div className="flex items-center gap-3 mt-1">
+                  <Input
+                    id="portfolio"
+                    type="file"
+                    accept=".pdf,.png,.jpg,.jpeg,.pptx"
+                    onChange={handlePortfolioChange}
+                    className="border-[#36404A]/20"
+                  />
+                  {portfolioFile && <CheckCircle className="h-5 w-5 text-green-600" />}
+                </div>
                 <p className="text-xs text-[#36404A] mt-1">Tamanho máximo: 20MB</p>
               </div>
             </CardContent>

@@ -18,6 +18,7 @@ export interface Candidato {
   curriculo_url: string | null;
   portfolio_url: string | null;
   nivel: string | null;
+  cargo: string | null;
   area: string | null;
   status: CandidatoStatus | string;
   vaga_relacionada_id: string | null;
