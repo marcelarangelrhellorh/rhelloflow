@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
+import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,6 +11,7 @@ import { toast } from "sonner";
 import { logLoginSuccess, logLoginFailure } from "@/lib/auditLog";
 import { cn } from "@/lib/utils";
 import { LoadingButton } from "@/components/ui/loading-button";
+import { AUTH_USER_ROLES_KEY } from "@/hooks/data/useUserRoleQuery";
 
 const loginSchema = z.object({
   email: z.string()
@@ -26,11 +28,13 @@ type LoginErrors = { email?: string; password?: string };
 
 export default function Auth() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<LoginErrors>({});
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
@@ -52,27 +56,51 @@ export default function Auth() {
         email: result.data.email,
         password: result.data.password
       });
+      
       if (error) {
-        // Log failed login attempt
         await logLoginFailure(email, error.message);
         throw error;
       }
+      
       if (data.user) {
-        // Log successful login
         await logLoginSuccess(data.user.id, email);
 
-        // Verificar se o usuário tem role client
-        const {
-          data: rolesData
-        } = await supabase.from("user_roles").select("role").eq("user_id", data.user.id).eq("role", "client").maybeSingle();
-        toast.success("Login realizado com sucesso!");
+        // Buscar todos os roles do usuário
+        const { data: rolesData } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", data.user.id);
+        
+        const rolesList = (rolesData || []).map(r => r.role);
+        const isClient = rolesList.includes("client");
+        const isAdmin = rolesList.includes("admin");
 
-        // Redirecionar baseado no role
-        if (rolesData) {
-          navigate("/acompanhamento");
+        // PRE-POPULAR CACHE - evita nova requisição no Layout
+        queryClient.setQueryData(AUTH_USER_ROLES_KEY, {
+          user: data.user,
+          roles: rolesList,
+          isAdmin,
+        });
+
+        // Prefetch da página de destino
+        const destinationRoute = isClient ? "/acompanhamento" : "/";
+        if (destinationRoute === "/") {
+          // Prefetch Dashboard
+          import("@/pages/Dashboard");
+          queryClient.prefetchQuery({
+            queryKey: ['dashboard', 'overview'],
+            queryFn: async () => {
+              const { data } = await supabase.rpc('get_dashboard_overview_secure');
+              return data;
+            },
+          });
         } else {
-          navigate("/");
+          // Prefetch Acompanhamento
+          import("@/pages/Acompanhamento");
         }
+
+        toast.success("Login realizado com sucesso!");
+        navigate(destinationRoute);
       }
     } catch (error: any) {
       console.error("Erro na autenticação:", error);
