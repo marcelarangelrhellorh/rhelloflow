@@ -8,7 +8,6 @@ import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { CandidateHeader } from "@/components/CandidatoDetalhes/CandidateHeader";
 import { StatsBar } from "@/components/CandidatoDetalhes/StatsBar";
-import { ContactCard } from "@/components/CandidatoDetalhes/ContactCard";
 import { ProfessionalInfoCard } from "@/components/CandidatoDetalhes/ProfessionalInfoCard";
 import { FeedbackList } from "@/components/CandidatoDetalhes/FeedbackList";
 import { SolicitarFeedbackModal } from "@/components/CandidatoDetalhes/SolicitarFeedbackModal";
@@ -319,18 +318,45 @@ export default function CandidatoDetalhes() {
           {/* Compact Stats Row */}
           <StatsBar criadoEm={candidato.criado_em} ultimoFeedback={stats.ultimoFeedback} processosParticipados={stats.totalProcessos} mediaAvaliacao={stats.mediaRating} qtdAvaliacoes={stats.qtdAvaliacoes} totalFeedbacks={stats.totalFeedbacks} />
 
-          {/* Two Column Layout - Top */}
+          {/* Main Info Card + Tags */}
           <div className="grid gap-6 lg:grid-cols-12">
-            {/* Left Sidebar - Contact & Tags */}
-            <div className="lg:col-span-4 space-y-6 mx-0 py-0 my-0 shadow-none">
-              <ContactCard email={candidato.email} telefone={candidato.telefone} cidade={candidato.cidade} estado={candidato.estado} linkedin={candidato.linkedin} curriculoLink={candidato.curriculo_link} isFromPublicLink={!!candidato.source_link_id} />
-
-              <CandidateTagsCard candidateId={id!} />
+            {/* Main Content - Unified Info Card */}
+            <div className="lg:col-span-8">
+              <ProfessionalInfoCard 
+                email={candidato.email} 
+                telefone={candidato.telefone} 
+                cidade={candidato.cidade} 
+                estado={candidato.estado} 
+                linkedin={candidato.linkedin} 
+                curriculoLink={candidato.curriculo_link} 
+                isFromPublicLink={!!candidato.source_link_id}
+                pretensaoSalarial={candidato.pretensao_salarial} 
+                vagaTitulo={vaga?.titulo || null} 
+                vagaId={candidato.vaga_relacionada_id} 
+                dataCadastro={candidato.criado_em} 
+                nivel={candidato.nivel} 
+                area={candidato.area} 
+                curriculoUrl={candidato.curriculo_url} 
+                portfolioUrl={candidato.portfolio_url} 
+                disponibilidadeMudanca={candidato.disponibilidade_mudanca} 
+                disponibilidadeStatus={candidato.disponibilidade_status} 
+                pontosFortes={candidato.pontos_fortes} 
+                pontosDesenvolver={candidato.pontos_desenvolver} 
+                parecerFinal={candidato.parecer_final} 
+                origem={candidato.origem} 
+                candidatoId={id!} 
+                experienciaProfissional={(candidato as any).experiencia_profissional || null} 
+                idiomas={(candidato as any).idiomas || null} 
+                modeloContratacao={candidato.modelo_contratacao} 
+                formatoTrabalho={candidato.formato_trabalho} 
+                onUpdate={loadCandidato} 
+                onVagaClick={() => vaga && navigate(`/vagas/${vaga.id}`)} 
+              />
             </div>
 
-            {/* Main Content - Professional Info */}
-            <div className="lg:col-span-8">
-              <ProfessionalInfoCard pretensaoSalarial={candidato.pretensao_salarial} vagaTitulo={vaga?.titulo || null} vagaId={candidato.vaga_relacionada_id} dataCadastro={candidato.criado_em} nivel={candidato.nivel} area={candidato.area} curriculoUrl={candidato.curriculo_url} portfolioUrl={candidato.portfolio_url} disponibilidadeMudanca={candidato.disponibilidade_mudanca} disponibilidadeStatus={candidato.disponibilidade_status} pontosFortes={candidato.pontos_fortes} pontosDesenvolver={candidato.pontos_desenvolver} parecerFinal={candidato.parecer_final} origem={candidato.origem} candidatoId={id!} experienciaProfissional={(candidato as any).experiencia_profissional || null} idiomas={(candidato as any).idiomas || null} modeloContratacao={candidato.modelo_contratacao} formatoTrabalho={candidato.formato_trabalho} onUpdate={loadCandidato} onVagaClick={() => vaga && navigate(`/vagas/${vaga.id}`)} />
+            {/* Right Sidebar - Tags */}
+            <div className="lg:col-span-4">
+              <CandidateTagsCard candidateId={id!} />
             </div>
           </div>
 
