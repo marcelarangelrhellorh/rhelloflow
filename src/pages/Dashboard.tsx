@@ -11,20 +11,19 @@ import { DashboardSkeleton } from "@/components/skeletons/DashboardSkeleton";
 import { Skeleton } from "@/components/ui/skeleton";
 
 // Lazy load secondary cards
-const RejectedCandidatesCard = lazy(() => 
-  import("@/components/Dashboard/RejectedCandidatesCard").then(m => ({ default: m.RejectedCandidatesCard }))
-);
-const SharedJobsCard = lazy(() => 
-  import("@/components/Dashboard/SharedJobsCard").then(m => ({ default: m.SharedJobsCard }))
-);
+const RejectedCandidatesCard = lazy(() => import("@/components/Dashboard/RejectedCandidatesCard").then(m => ({
+  default: m.RejectedCandidatesCard
+})));
+const SharedJobsCard = lazy(() => import("@/components/Dashboard/SharedJobsCard").then(m => ({
+  default: m.SharedJobsCard
+})));
 
 // Utility functions
 const formatInt = (n: number): string => Math.round(n).toString();
 const formatPercent = (n: number): string => `${Math.round(n)}%`;
 
 // Card skeleton for lazy loaded cards
-const CardSkeleton = () => (
-  <Card className="overflow-hidden border-l-4 border-l-muted">
+const CardSkeleton = () => <Card className="overflow-hidden border-l-4 border-l-muted">
     <CardContent className="p-6">
       <div className="flex items-start justify-between">
         <div className="space-y-3 flex-1">
@@ -35,9 +34,7 @@ const CardSkeleton = () => (
         <Skeleton className="h-14 w-14 rounded-full" />
       </div>
     </CardContent>
-  </Card>
-);
-
+  </Card>;
 interface KPICardProps {
   title: string;
   value: string;
@@ -52,7 +49,6 @@ interface KPICardProps {
   pulse?: boolean;
   disabled?: boolean;
 }
-
 const KPICard = memo(function KPICard({
   title,
   value,
@@ -68,21 +64,12 @@ const KPICard = memo(function KPICard({
   disabled = false
 }: KPICardProps) {
   const isClickable = onClick && !disabled;
-  return (
-    <Card 
-      className={`
+  return <Card className={`
         overflow-hidden border-l-4 ${borderColor} bg-white dark:bg-card
         ${isClickable ? 'cursor-pointer hover:shadow-lg hover:-translate-y-1' : 'cursor-default'}
         transition-all duration-150
         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
-      `}
-      onClick={isClickable ? onClick : undefined} 
-      onKeyDown={e => isClickable && e.key === 'Enter' && onClick()} 
-      tabIndex={isClickable ? 0 : -1} 
-      role={isClickable ? "button" : undefined} 
-      aria-label={ariaLabel} 
-      title={tooltip}
-    >
+      `} onClick={isClickable ? onClick : undefined} onKeyDown={e => isClickable && e.key === 'Enter' && onClick()} tabIndex={isClickable ? 0 : -1} role={isClickable ? "button" : undefined} aria-label={ariaLabel} title={tooltip}>
       <CardContent className="p-6">
         <div className="flex items-start justify-between">
           <div className="space-y-2 flex-1">
@@ -100,13 +87,17 @@ const KPICard = memo(function KPICard({
           </div>
         </div>
       </CardContent>
-    </Card>
-  );
+    </Card>;
 });
-
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { stats, userName, isLoading, error, refetch } = useDashboardData();
+  const {
+    stats,
+    userName,
+    isLoading,
+    error,
+    refetch
+  } = useDashboardData();
 
   // Memoized handlers
   const handleVagasAbertasClick = useCallback(() => navigate('/vagas?status=ativas'), [navigate]);
@@ -119,7 +110,6 @@ export default function Dashboard() {
   const handleTempoMedioClick = useCallback(() => navigate('/vagas?metric=avg_time_to_close'), [navigate]);
   const handleTaxaAprovacaoClick = useCallback(() => navigate('/relatorios?focus=conversion'), [navigate]);
   const handleVagasCanceladasClick = useCallback(() => navigate('/vagas?status=Cancelada'), [navigate]);
-  
   const copyPublicFormLink = useCallback(() => {
     const link = `${window.location.origin}/solicitar-vaga`;
     navigator.clipboard.writeText(link);
@@ -130,12 +120,10 @@ export default function Dashboard() {
   if (isLoading) {
     return <DashboardSkeleton />;
   }
-
-  return (
-    <div className="min-h-screen bg-white dark:bg-background-dark">
+  return <div className="min-h-screen bg-white dark:bg-background-dark">
       {/* Header */}
       <div className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="px-4 sm:px-6 md:px-8 py-4 sm:py-6 max-w-[1400px] mx-auto">
+        <div className="px-4 sm:px-6 md:px-8 py-4 sm:py-6 max-w-[1400px] mx-auto bg-white">
           <div className="flex flex-col gap-4 mb-4 sm:mb-6">
             <div>
               <h1 className="text-2xl sm:text-[32px] font-bold text-foreground mb-1">Dashboard</h1>
@@ -179,16 +167,9 @@ export default function Dashboard() {
 
       <div className="px-4 sm:px-6 md:px-8 py-4 sm:py-8 max-w-[1400px] mx-auto">
         {/* Error banner */}
-        {error && (
-          <div className="mb-4 sm:mb-6">
-            <ErrorState 
-              code="SERVER"
-              message="Não foi possível carregar os indicadores."
-              onRetry={refetch}
-              compact
-            />
-          </div>
-        )}
+        {error && <div className="mb-4 sm:mb-6">
+            <ErrorState code="SERVER" message="Não foi possível carregar os indicadores." onRetry={refetch} compact />
+          </div>}
 
         {/* Ações Rápidas */}
         <div className="mb-4 sm:mb-6">
@@ -205,17 +186,7 @@ export default function Dashboard() {
         {/* KPI Cards Grid */}
         <div className="grid gap-3 sm:gap-6 mb-6 sm:mb-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {/* 1. Vagas Abertas */}
-          <KPICard 
-            title="Vagas Abertas" 
-            value={formatInt(stats.vagasAbertas)} 
-            subtitle="Vagas ativas no momento" 
-            icon={<Briefcase className="h-7 w-7" />} 
-            borderColor="border-l-primary" 
-            iconBgColor="bg-primary/10" 
-            iconColor="text-primary" 
-            onClick={handleVagasAbertasClick} 
-            ariaLabel={`Abrir vagas ativas (${stats.vagasAbertas} vagas)`} 
-          />
+          <KPICard title="Vagas Abertas" value={formatInt(stats.vagasAbertas)} subtitle="Vagas ativas no momento" icon={<Briefcase className="h-7 w-7" />} borderColor="border-l-primary" iconBgColor="bg-primary/10" iconColor="text-primary" onClick={handleVagasAbertasClick} ariaLabel={`Abrir vagas ativas (${stats.vagasAbertas} vagas)`} />
 
           {/* 2. Vagas Compartilhadas via Link - Lazy loaded */}
           <Suspense fallback={<CardSkeleton />}>
@@ -223,71 +194,19 @@ export default function Dashboard() {
           </Suspense>
 
           {/* 3. Vagas Fora do Prazo */}
-          <KPICard 
-            title="Vagas Fora do Prazo" 
-            value={formatInt(stats.vagasAtencao)} 
-            subtitle="Vagas com mais de 30 dias úteis" 
-            icon={<AlertTriangle className="h-7 w-7" />} 
-            borderColor="border-l-warning" 
-            iconBgColor="bg-warning/10" 
-            iconColor={stats.vagasAtencao > 0 ? "text-warning" : "text-muted-foreground"} 
-            onClick={handleAtencaoClick} 
-            ariaLabel={`Abrir vagas fora do SLA (${stats.vagasAtencao} vagas)`} 
-            tooltip="Tempo acima do SLA de 30 dias úteis" 
-            disabled={stats.vagasAtencao === 0} 
-          />
+          <KPICard title="Vagas Fora do Prazo" value={formatInt(stats.vagasAtencao)} subtitle="Vagas com mais de 30 dias úteis" icon={<AlertTriangle className="h-7 w-7" />} borderColor="border-l-warning" iconBgColor="bg-warning/10" iconColor={stats.vagasAtencao > 0 ? "text-warning" : "text-muted-foreground"} onClick={handleAtencaoClick} ariaLabel={`Abrir vagas fora do SLA (${stats.vagasAtencao} vagas)`} tooltip="Tempo acima do SLA de 30 dias úteis" disabled={stats.vagasAtencao === 0} />
 
           {/* 4. Vagas Canceladas */}
-          <KPICard 
-            title="Vagas Canceladas" 
-            value={formatInt(stats.vagasCanceladas)} 
-            subtitle="Total de vagas canceladas" 
-            icon={<XCircle className="h-7 w-7" />} 
-            borderColor="border-l-destructive" 
-            iconBgColor="bg-destructive/10" 
-            iconColor="text-destructive" 
-            onClick={handleVagasCanceladasClick} 
-            ariaLabel={`Ver vagas canceladas (${stats.vagasCanceladas} vagas)`} 
-          />
+          <KPICard title="Vagas Canceladas" value={formatInt(stats.vagasCanceladas)} subtitle="Total de vagas canceladas" icon={<XCircle className="h-7 w-7" />} borderColor="border-l-destructive" iconBgColor="bg-destructive/10" iconColor="text-destructive" onClick={handleVagasCanceladasClick} ariaLabel={`Ver vagas canceladas (${stats.vagasCanceladas} vagas)`} />
 
           {/* 5. Tempo médio de fechamento */}
-          <KPICard 
-            title="Tempo médio de fechamento" 
-            value={`${formatInt(stats.mediaFechamento)}d`} 
-            subtitle="Média dos últimos 30 dias" 
-            icon={<Clock className="h-7 w-7" />} 
-            borderColor="border-l-success" 
-            iconBgColor="bg-success/10" 
-            iconColor="text-success" 
-            onClick={handleTempoMedioClick} 
-            ariaLabel={`Ver métrica de tempo médio (${stats.mediaFechamento} dias)`} 
-          />
+          <KPICard title="Tempo médio de fechamento" value={`${formatInt(stats.mediaFechamento)}d`} subtitle="Média dos últimos 30 dias" icon={<Clock className="h-7 w-7" />} borderColor="border-l-success" iconBgColor="bg-success/10" iconColor="text-success" onClick={handleTempoMedioClick} ariaLabel={`Ver métrica de tempo médio (${stats.mediaFechamento} dias)`} />
 
           {/* 6. Taxa de aprovação */}
-          <KPICard 
-            title="Taxa de aprovação" 
-            value={formatPercent(stats.taxaAprovacao)} 
-            subtitle="Contratações / conclusões" 
-            icon={<Target className="h-7 w-7" />} 
-            borderColor="border-l-success" 
-            iconBgColor="bg-success/10" 
-            iconColor="text-success" 
-            onClick={handleTaxaAprovacaoClick} 
-            ariaLabel={`Ver taxa de conversão (${formatPercent(stats.taxaAprovacao)})`} 
-          />
+          <KPICard title="Taxa de aprovação" value={formatPercent(stats.taxaAprovacao)} subtitle="Contratações / conclusões" icon={<Target className="h-7 w-7" />} borderColor="border-l-success" iconBgColor="bg-success/10" iconColor="text-success" onClick={handleTaxaAprovacaoClick} ariaLabel={`Ver taxa de conversão (${formatPercent(stats.taxaAprovacao)})`} />
 
           {/* 7. Candidatos Ativos */}
-          <KPICard 
-            title="Candidatos Ativos" 
-            value={formatInt(stats.candidatosAtivos)} 
-            subtitle="Em processo de seleção" 
-            icon={<Users className="h-7 w-7" />} 
-            borderColor="border-l-info" 
-            iconBgColor="bg-info/10" 
-            iconColor="text-info" 
-            onClick={handleCandidatosAtivosClick} 
-            ariaLabel={`Abrir candidatos ativos (${stats.candidatosAtivos} candidatos)`} 
-          />
+          <KPICard title="Candidatos Ativos" value={formatInt(stats.candidatosAtivos)} subtitle="Em processo de seleção" icon={<Users className="h-7 w-7" />} borderColor="border-l-info" iconBgColor="bg-info/10" iconColor="text-info" onClick={handleCandidatosAtivosClick} ariaLabel={`Abrir candidatos ativos (${stats.candidatosAtivos} candidatos)`} />
 
           {/* 8. Candidatos Reprovados sem WhatsApp - Lazy loaded */}
           <Suspense fallback={<CardSkeleton />}>
@@ -295,20 +214,8 @@ export default function Dashboard() {
           </Suspense>
 
           {/* 9. Feedbacks Pendentes */}
-          <KPICard 
-            title="Feedbacks Pendentes" 
-            value={formatInt(stats.feedbacksPendentes)} 
-            subtitle="Aguardando retorno do cliente" 
-            icon={<MessageSquare className="h-7 w-7" />} 
-            borderColor="border-l-purple" 
-            iconBgColor="bg-purple/10" 
-            iconColor="text-purple" 
-            onClick={handleFeedbacksClick} 
-            ariaLabel={`Abrir feedbacks pendentes (${stats.feedbacksPendentes} pendentes)`} 
-            pulse={stats.feedbacksPendentes > 0} 
-          />
+          <KPICard title="Feedbacks Pendentes" value={formatInt(stats.feedbacksPendentes)} subtitle="Aguardando retorno do cliente" icon={<MessageSquare className="h-7 w-7" />} borderColor="border-l-purple" iconBgColor="bg-purple/10" iconColor="text-purple" onClick={handleFeedbacksClick} ariaLabel={`Abrir feedbacks pendentes (${stats.feedbacksPendentes} pendentes)`} pulse={stats.feedbacksPendentes > 0} />
         </div>
       </div>
-    </div>
-  );
+    </div>;
 }

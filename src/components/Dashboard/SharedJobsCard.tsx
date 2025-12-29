@@ -15,12 +15,9 @@ export function SharedJobsCard() {
       setLoading(true);
 
       // Buscar vagas que foram compartilhadas via link (excluindo vagas deletadas)
-      const { data: vagasCompartilhadas } = await supabase
-        .from('share_links')
-        .select('vaga_id, vagas!inner(id, deleted_at)')
-        .eq('deleted', false)
-        .is('vagas.deleted_at', null);
-      
+      const {
+        data: vagasCompartilhadas
+      } = await supabase.from('share_links').select('vaga_id, vagas!inner(id, deleted_at)').eq('deleted', false).is('vagas.deleted_at', null);
       const vagasCount = new Set(vagasCompartilhadas?.map(sl => sl.vaga_id) || []).size;
       setCount(vagasCount);
     } catch (error) {
@@ -40,7 +37,7 @@ export function SharedJobsCard() {
           transition-all duration-150
           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
         `} onClick={isClickable ? () => setShowList(true) : undefined} tabIndex={isClickable ? 0 : -1} role={isClickable ? "button" : undefined} aria-label={`Vagas compartilhadas (${count} vagas)`} title="Vagas com links de divulgação ativos">
-        <CardContent className="p-6">
+        <CardContent className="p-6 bg-white">
           <div className="flex items-start justify-between">
             <div className="space-y-2 flex-1">
               <p className="text-muted-foreground font-semibold text-base">Vagas Compartilhadas</p>
