@@ -225,7 +225,7 @@ export function ScorecardEvaluation({
   const allScoresSet = evaluations.length > 0 && evaluations.every(ev => ev.score > 0);
   return <Card className="border border-gray-300 shadow-md">
       <CardHeader className="border-gray-300">
-        <CardTitle className="text-xl font-bold"> Scorecards</CardTitle>
+        <CardTitle className="font-bold text-base"> Scorecards</CardTitle>
         <CardDescription className="text-base">
           Avalie <span className="font-semibold">{candidateName}</span> de forma estruturada
         </CardDescription>

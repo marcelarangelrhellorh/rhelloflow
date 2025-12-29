@@ -191,7 +191,7 @@ export function ProfessionalInfoCard({
   };
   return <Card className="border border-gray-300 shadow-md">
       <CardHeader>
-        <CardTitle className="text-lg">Informações Profissionais</CardTitle>
+        <CardTitle className="text-base">Informações Profissionais</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6 shadow-md border-[#ffcd00]">
         {/* Grid Layout */}
@@ -199,7 +199,7 @@ export function ProfessionalInfoCard({
           {/* Pretensão Salarial */}
           <div>
             <p className="text-muted-foreground mb-1 flex items-center gap-1 font-semibold text-base">
-              <DollarSign className="h-3.5 w-3.5" />
+              <DollarSign className="h-3.5 w-3.5 text-gray-800" />
               Pretensão Salarial
             </p>
             <p className="text-base font-semibold text-card-foreground">
@@ -215,8 +215,8 @@ export function ProfessionalInfoCard({
 
           {/* Nível */}
           {nivel && <div>
-              <p className="text-sm text-muted-foreground mb-1">Nível</p>
-              <p className="text-base font-medium text-card-foreground capitalize">{nivel}</p>
+              
+              
             </div>}
 
           {/* Área */}

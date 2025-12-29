@@ -171,7 +171,7 @@ export function ScorecardHistory({
   if (scorecards.length === 0) {
     return <Card className="border border-gray-300 shadow-md">
         <CardHeader>
-          <CardTitle>Histórico de Avaliações</CardTitle>
+          <CardTitle className="text-base">Histórico de Avaliações</CardTitle>
           <CardDescription className="text-base font-medium">Scorecards preenchidos para este candidato</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col items-center justify-center py-12">

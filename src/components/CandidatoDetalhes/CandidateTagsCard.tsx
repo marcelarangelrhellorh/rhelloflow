@@ -151,8 +151,8 @@ export function CandidateTagsCard({
       <CardHeader>
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <TagIcon className="h-5 w-5 shrink-0" />
-            <CardTitle className="text-sm">Tags</CardTitle>
+            <TagIcon className="h-5 w-5 shrink-0 text-[#ffcc00]" />
+            <CardTitle className="text-base">Tags</CardTitle>
           </div>
           <Button size="sm" onClick={() => setAddModalOpen(true)} className="font-semibold text-xs shrink-0">
             <Plus className="h-3 w-3 mr-1" />
@@ -162,7 +162,7 @@ export function CandidateTagsCard({
       </CardHeader>
       <CardContent className="py-0 my-[32px]">
         {loading ? <p className="text-muted-foreground">Carregando tags...</p> : tags.length === 0 ? <div className="text-center py-8">
-            <TagIcon className="h-12 w-12 mx-auto text-muted-foreground mb-2" />
+            
             <p className="text-muted-foreground">Nenhuma tag adicionada</p>
             <p className="text-sm text-muted-foreground">
               Tags serão adicionadas automaticamente quando o candidato se candidatar a vagas

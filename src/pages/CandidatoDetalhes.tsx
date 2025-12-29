@@ -298,7 +298,7 @@ export default function CandidatoDetalhes() {
       <div className="sticky top-0 z-10 backdrop-blur-sm border-b border-gray-200 dark:border-secondary-text-light/20" style={{
       backgroundColor: 'rgba(255, 251, 240, 0.95)'
     }}>
-        <div className="px-6 py-2">
+        <div className="px-6 py-2 bg-white">
           <Button variant="ghost" size="sm" onClick={() => navigate("/candidatos")} className="text-secondary-text-light dark:text-secondary-text-dark text-sm">
             <ArrowLeft className="mr-1 h-3 w-3" />
             <span className="hidden sm:inline">Candidatos</span>
@@ -311,7 +311,7 @@ export default function CandidatoDetalhes() {
       {/* Content with Sidebar Layout */}
       <div className="flex flex-1">
       {/* Main Content */}
-      <main className="flex-1 px-6 py-6">
+      <main className="flex-1 px-6 py-6 bg-white">
         <div className="space-y-6">
           {/* Simplified Header with Stats */}
           <CandidateHeader nome={candidato.nome_completo} status={candidato.status} nivel={candidato.nivel} area={candidato.area} cidade={candidato.cidade} estado={candidato.estado} onEdit={() => navigate(`/candidatos/${id}/editar`)} onDelete={() => setDeleteDialogOpen(true)} onRelocate={() => setRelocateModalOpen(true)} onStatusChange={handleStatusChange} onSendWhatsApp={() => setWhatsappModalOpen(true)} />
@@ -335,9 +335,7 @@ export default function CandidatoDetalhes() {
           </div>
 
           {/* Fit Cultural Card - only show if data exists */}
-          {candidato.fit_cultural && (
-            <FitCulturalCard fitCultural={candidato.fit_cultural} />
-          )}
+          {candidato.fit_cultural && <FitCulturalCard fitCultural={candidato.fit_cultural} />}
 
           {/* Candidate Notes Section */}
           <CandidateNotesSection candidateId={id!} />
