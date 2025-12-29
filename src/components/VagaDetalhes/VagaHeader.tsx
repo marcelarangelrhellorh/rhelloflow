@@ -44,17 +44,17 @@ export function VagaHeader({
         </div>
       </div>
       <div className="flex gap-2">
-        <Button onClick={onGenerateClientLink} variant="outline" className="rounded-full font-bold text-base min-w-[140px]">
+        <Button onClick={onGenerateClientLink} variant="outline" className="rounded-full font-bold min-w-[140px] text-sm">
           <span className="material-symbols-outlined text-lg">link</span>
           Link Cliente
         </Button>
-        <Button onClick={onViewDetails} variant="outline" className="rounded-full font-bold text-base min-w-[140px]">
+        <Button onClick={onViewDetails} variant="outline" className="rounded-full font-bold min-w-[140px] text-sm">
           <span className="material-symbols-outlined text-lg">visibility</span>
-          Ver Detalhes
+          Detalhes da Vaga  
         </Button>
-        <Button onClick={onShare} className="rounded-full font-bold text-base min-w-[140px]">
+        <Button onClick={onShare} className="rounded-full font-bold min-w-[140px] text-sm">
           <span className="material-symbols-outlined text-lg">share</span>
-          Compartilhar
+          Link da Vaga  
         </Button>
       </div>
     </div>;
