@@ -158,20 +158,21 @@ export function TalentPoolLinkManager() {
       </Card>;
   }
   return <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <div>
-          
-          <CardDescription>
-            Gerencie links públicos para cadastro no banco de talentos
-          </CardDescription>
-        </div>
-        <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-          <DialogTrigger asChild>
-            <Button size="sm" className="bg-[#00141D] hover:bg-[#00141D]/90 text-white">
-              <Plus className="mr-1 h-3 w-3" />
-              Novo Link
-            </Button>
-          </DialogTrigger>
+      <CardHeader className="pb-4">
+        <div className="flex items-center justify-between gap-4">
+          <div className="space-y-1">
+            <CardTitle className="text-lg">Links do Banco de Talentos</CardTitle>
+            <CardDescription className="text-sm">
+              Gerencie links públicos para cadastro no banco de talentos
+            </CardDescription>
+          </div>
+          <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+            <DialogTrigger asChild>
+              <Button size="sm" className="shrink-0 bg-[#00141D] hover:bg-[#00141D]/90 text-white">
+                <Plus className="mr-1 h-3 w-3" />
+                Novo Link
+              </Button>
+            </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Criar Novo Link</DialogTitle>
@@ -232,6 +233,7 @@ export function TalentPoolLinkManager() {
             </div>
           </DialogContent>
         </Dialog>
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         {links.length === 0 ? <div className="text-center py-8 text-muted-foreground">
