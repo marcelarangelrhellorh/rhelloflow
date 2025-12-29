@@ -318,47 +318,40 @@ export default function CandidatoDetalhes() {
           {/* Compact Stats Row */}
           <StatsBar criadoEm={candidato.criado_em} ultimoFeedback={stats.ultimoFeedback} processosParticipados={stats.totalProcessos} mediaAvaliacao={stats.mediaRating} qtdAvaliacoes={stats.qtdAvaliacoes} totalFeedbacks={stats.totalFeedbacks} />
 
-          {/* Main Info Card + Tags */}
-          <div className="grid gap-6 lg:grid-cols-12">
-            {/* Main Content - Unified Info Card */}
-            <div className="lg:col-span-8">
-              <ProfessionalInfoCard 
-                email={candidato.email} 
-                telefone={candidato.telefone} 
-                cidade={candidato.cidade} 
-                estado={candidato.estado} 
-                linkedin={candidato.linkedin} 
-                curriculoLink={candidato.curriculo_link} 
-                isFromPublicLink={!!candidato.source_link_id}
-                pretensaoSalarial={candidato.pretensao_salarial} 
-                vagaTitulo={vaga?.titulo || null} 
-                vagaId={candidato.vaga_relacionada_id} 
-                dataCadastro={candidato.criado_em} 
-                nivel={candidato.nivel} 
-                area={candidato.area} 
-                curriculoUrl={candidato.curriculo_url} 
-                portfolioUrl={candidato.portfolio_url} 
-                disponibilidadeMudanca={candidato.disponibilidade_mudanca} 
-                disponibilidadeStatus={candidato.disponibilidade_status} 
-                pontosFortes={candidato.pontos_fortes} 
-                pontosDesenvolver={candidato.pontos_desenvolver} 
-                parecerFinal={candidato.parecer_final} 
-                origem={candidato.origem} 
-                candidatoId={id!} 
-                experienciaProfissional={(candidato as any).experiencia_profissional || null} 
-                idiomas={(candidato as any).idiomas || null} 
-                modeloContratacao={candidato.modelo_contratacao} 
-                formatoTrabalho={candidato.formato_trabalho} 
-                onUpdate={loadCandidato} 
-                onVagaClick={() => vaga && navigate(`/vagas/${vaga.id}`)} 
-              />
-            </div>
+          {/* Tags - Horizontal Full Width */}
+          <CandidateTagsCard candidateId={id!} />
 
-            {/* Right Sidebar - Tags */}
-            <div className="lg:col-span-4">
-              <CandidateTagsCard candidateId={id!} />
-            </div>
-          </div>
+          {/* Main Info Card - Full Width */}
+          <ProfessionalInfoCard 
+            email={candidato.email} 
+            telefone={candidato.telefone} 
+            cidade={candidato.cidade} 
+            estado={candidato.estado} 
+            linkedin={candidato.linkedin} 
+            curriculoLink={candidato.curriculo_link} 
+            isFromPublicLink={!!candidato.source_link_id}
+            pretensaoSalarial={candidato.pretensao_salarial} 
+            vagaTitulo={vaga?.titulo || null} 
+            vagaId={candidato.vaga_relacionada_id} 
+            dataCadastro={candidato.criado_em} 
+            nivel={candidato.nivel} 
+            area={candidato.area} 
+            curriculoUrl={candidato.curriculo_url} 
+            portfolioUrl={candidato.portfolio_url} 
+            disponibilidadeMudanca={candidato.disponibilidade_mudanca} 
+            disponibilidadeStatus={candidato.disponibilidade_status} 
+            pontosFortes={candidato.pontos_fortes} 
+            pontosDesenvolver={candidato.pontos_desenvolver} 
+            parecerFinal={candidato.parecer_final} 
+            origem={candidato.origem} 
+            candidatoId={id!} 
+            experienciaProfissional={(candidato as any).experiencia_profissional || null} 
+            idiomas={(candidato as any).idiomas || null} 
+            modeloContratacao={candidato.modelo_contratacao} 
+            formatoTrabalho={candidato.formato_trabalho} 
+            onUpdate={loadCandidato} 
+            onVagaClick={() => vaga && navigate(`/vagas/${vaga.id}`)} 
+          />
 
           {/* Fit Cultural Card - only show if data exists */}
           {candidato.fit_cultural && <FitCulturalCard fitCultural={candidato.fit_cultural} />}
