@@ -139,7 +139,7 @@ export default function VagaDetalhes() {
   }
   const daysOpen = getBusinessDaysFromNow(vaga.criado_em);
   const progress = calculateProgress(vaga.status_slug || "a_iniciar");
-  return <div className="relative flex min-h-screen w-full font-display bg-background-light dark:bg-background-dark">
+  return <div className="relative flex min-h-screen w-full font-display bg-white dark:bg-background-dark">
       {/* Main Content */}
       <main className="flex-1 px-6 sm:px-10 lg:px-16 py-8">
         <div className="w-full mx-0 py-0 px-0">
