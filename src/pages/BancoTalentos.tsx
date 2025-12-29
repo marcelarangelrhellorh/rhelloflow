@@ -13,6 +13,11 @@ import { TalentPoolLinkManager } from "@/components/TalentPoolLinkManager";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Link2 } from "lucide-react";
 import { differenceInDays } from "date-fns";
+import { CARGO_OPTIONS } from "@/constants/fitCultural";
+
+const NIVEL_OPTIONS = ["Estagiário", "Júnior", "Pleno", "Sênior", "Liderança"];
+const AREA_OPTIONS = ["RH", "Vendas", "Financeiro", "Marketing", "Operações", "TI", "Administrativo", "Comercial", "Logística", "Outros"];
+
 interface Candidato {
   id: string;
   nome_completo: string;
@@ -22,6 +27,7 @@ interface Candidato {
   estado: string | null;
   area: string | null;
   nivel: string | null;
+  cargo: string | null;
   pretensao_salarial: number | null;
   linkedin: string | null;
   status: string;
@@ -44,6 +50,9 @@ export default function BancoTalentos() {
   const [estadoFilter, setEstadoFilter] = useState<string>("all");
   const [avaliacaoFilter, setAvaliacaoFilter] = useState<string>("all");
   const [tagFilter, setTagFilter] = useState<string>("all");
+  const [senioridadeFilter, setSenioridadeFilter] = useState<string>("all");
+  const [areaFilter, setAreaFilter] = useState<string>("all");
+  const [cargoFilter, setCargoFilter] = useState<string>("all");
   const [availableTags, setAvailableTags] = useState<Array<{
     label: string;
     value: string;
@@ -124,12 +133,18 @@ export default function BancoTalentos() {
       const candidateTags = (candidato as any).tags || [];
       matchesTags = candidateTags.some((ct: any) => ct.tag_id === tagFilter);
     }
-    return matchesSearch && matchesEstado && matchesAvaliacao && matchesTags;
+
+    // Novos filtros
+    const matchesSenioridade = senioridadeFilter === "all" || candidato.nivel === senioridadeFilter;
+    const matchesArea = areaFilter === "all" || candidato.area === areaFilter;
+    const matchesCargo = cargoFilter === "all" || candidato.cargo === cargoFilter;
+
+    return matchesSearch && matchesEstado && matchesAvaliacao && matchesTags && matchesSenioridade && matchesArea && matchesCargo;
   });
   const getDaysInBank = (dateString: string) => {
     return differenceInDays(new Date(), new Date(dateString));
   };
-  const hasActiveFilters = searchTerm !== "" || estadoFilter !== "all" || avaliacaoFilter !== "all" || tagFilter !== "all";
+  const hasActiveFilters = searchTerm !== "" || estadoFilter !== "all" || avaliacaoFilter !== "all" || tagFilter !== "all" || senioridadeFilter !== "all" || areaFilter !== "all" || cargoFilter !== "all";
   const handleViewProfile = (candidato: Candidato) => {
     navigate(`/candidatos/${candidato.id}`);
   };
@@ -244,7 +259,7 @@ export default function BancoTalentos() {
           </Select>
 
           <Select value={tagFilter} onValueChange={setTagFilter}>
-            <SelectTrigger className={`w-[250px] ${tagFilter !== 'all' ? 'border-2 border-primary' : ''}`}>
+            <SelectTrigger className={`w-[200px] ${tagFilter !== 'all' ? 'border-2 border-primary' : ''}`}>
               <SelectValue placeholder="Filtrar por tags" />
             </SelectTrigger>
             <SelectContent>
@@ -252,6 +267,42 @@ export default function BancoTalentos() {
               {availableTags.map(tag => <SelectItem key={tag.value} value={tag.value}>
                   {tag.label}
                 </SelectItem>)}
+            </SelectContent>
+          </Select>
+
+          <Select value={senioridadeFilter} onValueChange={setSenioridadeFilter}>
+            <SelectTrigger className={`w-[180px] ${senioridadeFilter !== 'all' ? 'border-2 border-primary' : ''}`}>
+              <SelectValue placeholder="Senioridade" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas as senioridades</SelectItem>
+              {NIVEL_OPTIONS.map(nivel => (
+                <SelectItem key={nivel} value={nivel}>{nivel}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={areaFilter} onValueChange={setAreaFilter}>
+            <SelectTrigger className={`w-[180px] ${areaFilter !== 'all' ? 'border-2 border-primary' : ''}`}>
+              <SelectValue placeholder="Área" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas as áreas</SelectItem>
+              {AREA_OPTIONS.map(area => (
+                <SelectItem key={area} value={area}>{area}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={cargoFilter} onValueChange={setCargoFilter}>
+            <SelectTrigger className={`w-[180px] ${cargoFilter !== 'all' ? 'border-2 border-primary' : ''}`}>
+              <SelectValue placeholder="Cargo" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os cargos</SelectItem>
+              {CARGO_OPTIONS.map(cargo => (
+                <SelectItem key={cargo.value} value={cargo.value}>{cargo.label}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
 
@@ -274,6 +325,9 @@ export default function BancoTalentos() {
           setEstadoFilter("all");
           setAvaliacaoFilter("all");
           setTagFilter("all");
+          setSenioridadeFilter("all");
+          setAreaFilter("all");
+          setCargoFilter("all");
         }} className="text-muted-foreground hover:text-foreground">
               Limpar filtros
             </Button>
