@@ -69,19 +69,22 @@ export interface TaskFilters {
   search?: string;
 }
 
+// Shared select fields for all task queries to ensure consistency
+const TASK_SELECT_FIELDS = `
+  *,
+  assignee:profiles!tasks_assignee_id_fkey(id, full_name),
+  vaga:vagas(id, titulo),
+  empresa:empresas(id, nome),
+  candidato:candidatos(id, nome_completo)
+` as const;
+
 export function useTasks(filters?: TaskFilters) {
   return useQuery({
     queryKey: ["tasks", filters],
     queryFn: async () => {
       let query = supabase
         .from("tasks")
-        .select(`
-          *,
-          assignee:profiles!tasks_assignee_id_fkey(id, full_name),
-          vaga:vagas(id, titulo),
-          empresa:empresas(id, nome),
-          candidato:candidatos(id, nome_completo)
-        `)
+        .select(TASK_SELECT_FIELDS)
         .order("due_date", { ascending: true, nullsFirst: false })
         .order("created_at", { ascending: false });
 
@@ -199,13 +202,7 @@ export function useOverdueTasks(isAdmin: boolean = false) {
 
       let query = supabase
         .from("tasks")
-        .select(`
-          *,
-          assignee:profiles!tasks_assignee_id_fkey(id, full_name),
-          vaga:vagas(id, titulo),
-          empresa:empresas(id, nome),
-          candidato:candidatos(id, nome_completo)
-        `)
+        .select(TASK_SELECT_FIELDS)
         .neq("status", "done")
         .lt("due_date", now)
         .not("due_date", "is", null);
@@ -232,13 +229,7 @@ export function usePriorityTasks(priority: TaskPriority, isAdmin: boolean = fals
 
       let query = supabase
         .from("tasks")
-        .select(`
-          *,
-          assignee:profiles!tasks_assignee_id_fkey(id, full_name),
-          vaga:vagas(id, titulo),
-          empresa:empresas(id, nome),
-          candidato:candidatos(id, nome_completo)
-        `)
+        .select(TASK_SELECT_FIELDS)
         .eq("priority", priority)
         .neq("status", "done");
 

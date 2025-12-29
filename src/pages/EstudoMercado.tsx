@@ -14,6 +14,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import haysData from "@/data/salary-guides/hays_standardized.json";
 import michaelPageData from "@/data/salary-guides/michael_page_standardized.json";
+import { logger } from "@/lib/logger";
 
 // Interfaces para o schema com segmentação por setor
 interface FaixaPorPorte {
@@ -109,7 +110,7 @@ export default function EstudoMercado() {
           setBenchmarkCount(count || 0);
         }
       } catch (e) {
-        console.error('Erro ao verificar benchmarks:', e);
+        logger.error('Erro ao verificar benchmarks:', e);
       } finally {
         setCheckingData(false);
       }
@@ -131,7 +132,7 @@ export default function EstudoMercado() {
       });
       
       if (haysError) throw haysError;
-      console.log('Hays importado:', haysResult);
+      logger.log('Hays importado:', haysResult);
 
       // Importar Michael Page
       const { data: mpResult, error: mpError } = await supabase.functions.invoke('import-salary-data', {
@@ -143,13 +144,13 @@ export default function EstudoMercado() {
       });
       
       if (mpError) throw mpError;
-      console.log('Michael Page importado:', mpResult);
+      logger.log('Michael Page importado:', mpResult);
 
       const totalImported = (haysResult?.inserted || 0) + (mpResult?.inserted || 0);
       setBenchmarkCount(totalImported);
       toast.success(`Dados importados com sucesso! ${totalImported} registros.`);
     } catch (error: any) {
-      console.error('Erro ao importar dados:', error);
+      logger.error('Erro ao importar dados:', error);
       toast.error('Erro ao importar dados de salário');
     } finally {
       setImporting(false);
@@ -179,7 +180,7 @@ export default function EstudoMercado() {
       setEstudo(data);
       toast.success("Estudo gerado com sucesso!");
     } catch (error: any) {
-      console.error("Erro ao gerar estudo:", error);
+      logger.error("Erro ao gerar estudo:", error);
       toast.error(error.message || "Erro ao gerar estudo de mercado");
     } finally {
       setLoading(false);

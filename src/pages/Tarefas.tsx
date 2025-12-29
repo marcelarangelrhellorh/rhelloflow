@@ -20,6 +20,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
 import moment from "moment";
+import { logger } from "@/lib/logger";
 
 export default function Tarefas() {
   const [view, setView] = useState<"list" | "kanban" | "calendar">("kanban");
@@ -56,7 +57,7 @@ export default function Tarefas() {
   });
 
   // Debug: Log external events for calendar view
-  console.log('[Tarefas] External events for CalendarView:', {
+  logger.log('[Tarefas] External events for CalendarView:', {
     total: externalEvents?.length || 0,
     externalOnly: externalEvents?.filter(e => !e.isFromSystem).length || 0,
     isLoading: isLoadingExternalEvents,

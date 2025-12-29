@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { logger } from "@/lib/logger";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -97,7 +98,7 @@ export default function CandidatoDetalhes() {
         table: 'candidatos',
         filter: `id=eq.${id}`
       }, payload => {
-        console.log('Candidato atualizado:', payload);
+        logger.log('Candidato atualizado:', payload);
         if (payload.eventType === 'UPDATE') {
           loadCandidato();
         }
@@ -148,7 +149,7 @@ export default function CandidatoDetalhes() {
         setVaga(vagaData);
       }
     } catch (error) {
-      console.error("Erro ao carregar candidato:", error);
+      logger.error("Erro ao carregar candidato:", error);
       toast.error("Erro ao carregar candidato");
     } finally {
       setLoading(false);
@@ -189,7 +190,7 @@ export default function CandidatoDetalhes() {
         totalFeedbacks: ratingData?.length || 0
       };
     } catch (error) {
-      console.error("Erro ao carregar estatísticas:", error);
+      logger.error("Erro ao carregar estatísticas:", error);
       return {
         ultimoFeedback: null,
         totalProcessos: 0,
@@ -210,7 +211,7 @@ export default function CandidatoDetalhes() {
       if (error) throw error;
       setHistorico(data || []);
     } catch (error) {
-      console.error("Erro ao carregar histórico:", error);
+      logger.error("Erro ao carregar histórico:", error);
     }
   };
   const handleStatusChange = async (newStatus: string) => {
@@ -243,7 +244,7 @@ export default function CandidatoDetalhes() {
       await loadCandidato();
       await loadHistorico();
     } catch (error) {
-      console.error("Erro ao atualizar etapa:", error);
+      logger.error("Erro ao atualizar etapa:", error);
       toast.error("Erro ao atualizar etapa do candidato");
     }
   };
@@ -256,7 +257,7 @@ export default function CandidatoDetalhes() {
       toast.success("Candidato excluído com sucesso!");
       navigate("/candidatos");
     } catch (error) {
-      console.error("Erro ao excluir candidato:", error);
+      logger.error("Erro ao excluir candidato:", error);
       toast.error("Erro ao excluir candidato");
     }
   };
