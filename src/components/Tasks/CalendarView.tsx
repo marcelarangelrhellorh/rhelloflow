@@ -5,6 +5,7 @@ import { ptBR } from 'date-fns/locale';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { Task } from '@/hooks/useTasks';
 import { Video, Clock } from 'lucide-react';
+import { logger } from '@/lib/logger';
 
 // Configure date-fns localizer (replaces moment - saves ~232KB)
 const locales = { 'pt-BR': ptBR };
@@ -189,7 +190,7 @@ export default function CalendarView({
       });
 
     // Debug logs
-    console.log('[CalendarView] Processed events:', {
+    logger.log('[CalendarView] Processed events:', {
       systemCount: systemEvents.length,
       externalCount: calendarEvents.length,
       totalEvents: systemEvents.length + calendarEvents.length,

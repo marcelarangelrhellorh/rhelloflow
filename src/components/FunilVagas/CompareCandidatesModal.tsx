@@ -11,6 +11,7 @@ import { BarChart3, Sparkles, Download, User, Calendar, Star } from "lucide-reac
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+import { logger } from "@/lib/logger";
 
 interface CompareCandidatesModalProps {
   open: boolean;
@@ -76,16 +77,16 @@ export function CompareCandidatesModal({
   const loadData = async () => {
     try {
       setLoading(true);
-      console.log("Loading comparison data for vaga:", vagaId);
+      logger.log("Loading comparison data for vaga:", vagaId);
       
       const { data, error } = await supabase.functions.invoke("compare-candidates", {
         body: { vagaId, anonymize },
       });
 
-      console.log("Response from compare-candidates:", { data, error });
+      logger.log("Response from compare-candidates:", { data, error });
 
       if (error) {
-        console.error("Edge function error:", error);
+        logger.error("Edge function error:", error);
         throw error;
       }
 
@@ -96,7 +97,7 @@ export function CompareCandidatesModal({
       setCandidates(data.candidates || []);
       setStats(data.stats || null);
       
-      console.log(`Found ${data.candidates?.length || 0} candidates with scorecards`);
+      logger.log(`Found ${data.candidates?.length || 0} candidates with scorecards`);
       
       if (!data.candidates || data.candidates.length === 0) {
         toast({
@@ -105,7 +106,7 @@ export function CompareCandidatesModal({
         });
       }
     } catch (error: any) {
-      console.error("Error loading comparison data:", error);
+      logger.error("Error loading comparison data:", error);
       toast({
         title: "Erro ao carregar dados",
         description: error.message || "Erro desconhecido ao carregar dados",
@@ -146,7 +147,7 @@ export function CompareCandidatesModal({
         description: "Resumo executivo gerado com sucesso pela IA.",
       });
     } catch (error: any) {
-      console.error("Error generating AI summary:", error);
+      logger.error("Error generating AI summary:", error);
       toast({
         title: "Erro ao gerar resumo",
         description: error.message,

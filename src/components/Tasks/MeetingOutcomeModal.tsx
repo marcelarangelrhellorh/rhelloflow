@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { CheckCircle2, XCircle, UserX } from "lucide-react";
 import {
   Dialog,
@@ -53,7 +53,7 @@ const outcomeOptions: {
   },
 ];
 
-export default function MeetingOutcomeModal({
+const MeetingOutcomeModal = memo(function MeetingOutcomeModal({
   open,
   onOpenChange,
   onSelect,
@@ -99,10 +99,16 @@ export default function MeetingOutcomeModal({
       </DialogContent>
     </Dialog>
   );
-}
+});
+
+export default MeetingOutcomeModal;
 
 // Badge component for displaying meeting outcome
-export function MeetingOutcomeBadge({ outcome }: { outcome: MeetingOutcome | null }) {
+export const MeetingOutcomeBadge = memo(function MeetingOutcomeBadge({ 
+  outcome 
+}: { 
+  outcome: MeetingOutcome | null 
+}) {
   if (!outcome) return null;
 
   const config = {
@@ -127,4 +133,4 @@ export function MeetingOutcomeBadge({ outcome }: { outcome: MeetingOutcome | nul
       {label}
     </span>
   );
-}
+});
