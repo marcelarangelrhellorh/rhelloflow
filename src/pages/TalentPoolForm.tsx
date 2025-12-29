@@ -317,7 +317,7 @@ export default function TalentPoolForm() {
   if (error) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center p-4">
-        <Card className="max-w-md w-full border-[#FFCD00]">
+        <Card className="max-w-md w-full border-[#FFCD00] bg-white">
           <CardContent className="pt-6">
             <div className="flex items-center gap-2 text-red-600 mb-4">
               <AlertCircle className="h-5 w-5" />
@@ -336,7 +336,7 @@ export default function TalentPoolForm() {
   if (submitted) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center p-4">
-        <Card className="max-w-md w-full border-[#FFCD00]">
+        <Card className="max-w-md w-full border-[#FFCD00] bg-white">
           <CardContent className="pt-6">
             <div className="flex items-center gap-2 text-green-600 mb-4">
               <CheckCircle className="h-5 w-5" />
@@ -385,7 +385,7 @@ export default function TalentPoolForm() {
       <main className="max-w-4xl mx-auto px-4 py-8">
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Dados Pessoais */}
-          <Card className="border-[#FFCD00]">
+          <Card className="border-[#FFCD00] bg-white">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-[#00141D]">
                 <User className="h-5 w-5 text-[#FFCD00]" />
@@ -487,7 +487,7 @@ export default function TalentPoolForm() {
           </Card>
 
           {/* Perfil Profissional */}
-          <Card className="border-[#FFCD00]">
+          <Card className="border-[#FFCD00] bg-white">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-[#00141D]">
                 <Briefcase className="h-5 w-5 text-[#FFCD00]" />
@@ -593,7 +593,7 @@ export default function TalentPoolForm() {
           </Card>
 
           {/* Origem */}
-          <Card className="border-[#FFCD00]">
+          <Card className="border-[#FFCD00] bg-white">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-[#00141D]">
                 <FileText className="h-5 w-5 text-[#FFCD00]" />
@@ -615,7 +615,7 @@ export default function TalentPoolForm() {
           </Card>
 
           {/* Fit Cultural */}
-          <Card className="border-[#FFCD00]">
+          <Card className="border-[#FFCD00] bg-white">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-[#00141D]">
                 <Heart className="h-5 w-5 text-[#FFCD00]" />
@@ -747,7 +747,7 @@ export default function TalentPoolForm() {
 
           {/* Password if required */}
           {linkData?.requires_password && (
-            <Card className="border-[#FFCD00]">
+            <Card className="border-[#FFCD00] bg-white">
               <CardContent className="pt-6">
                 <Label htmlFor="password" className="text-[#00141D]">
                   Senha de acesso <span className="text-red-600">*</span>
