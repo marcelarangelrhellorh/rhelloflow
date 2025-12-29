@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { LayoutDashboard, Briefcase, Users, Building2, CheckSquare, BarChart3, ClipboardList, Wrench, FileText, MessageSquare, ChevronLeft, ChevronRight, ChevronDown, GitCompare, FolderHeart } from "lucide-react";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
-
+import { Skeleton } from "@/components/ui/skeleton";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -12,6 +12,7 @@ import { UserMenu } from "./UserMenu";
 import { NotificationBell } from "./NotificationBell";
 import { ConnectionIndicator } from "./ConnectionIndicator";
 import symbolLight from "@/assets/symbol-rhello-light.png";
+
 const menuItems = [{
   title: "Dashboard",
   url: "/",
@@ -43,6 +44,7 @@ const menuItems = [{
   icon: ClipboardList,
   roles: ["client"]
 }];
+
 const candidatosItems = [{
   title: "Em processo",
   url: "/candidatos",
@@ -52,6 +54,7 @@ const candidatosItems = [{
   url: "/banco-talentos",
   icon: FolderHeart
 }];
+
 const toolsItems = [{
   title: "Scorecards",
   url: "/scorecards",
@@ -69,6 +72,35 @@ const toolsItems = [{
   url: "/whatsapp-templates",
   icon: MessageSquare
 }];
+
+function SidebarSkeleton() {
+  return (
+    <Sidebar collapsible="icon" className="border-r border-border bg-sidebar">
+      <SidebarHeader className="p-4 space-y-4">
+        <Skeleton className="h-8 w-32" />
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-6 w-6 rounded-full" />
+          <Skeleton className="h-6 w-6 rounded-full" />
+          <Skeleton className="h-6 w-6 rounded-full" />
+        </div>
+      </SidebarHeader>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu className="space-y-2 px-2">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <SidebarMenuItem key={i}>
+                  <Skeleton className="h-10 w-full rounded-md" />
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+    </Sidebar>
+  );
+}
+
 export function AppSidebar() {
   const [candidatosOpen, setCandidatosOpen] = useState(false);
   const [ferramentasOpen, setFerramentasOpen] = useState(false);
@@ -90,7 +122,9 @@ export function AppSidebar() {
   };
   const filteredMenuItems = menuItems.filter(item => item.roles.some(role => roles.includes(role as typeof roles[number])));
   const isInternalUser = roles.some(r => ["admin", "recrutador", "cs"].includes(r));
-  if (rolesLoading) return null;
+  
+  // Mostrar skeleton durante loading em vez de null
+  if (rolesLoading) return <SidebarSkeleton />;
   return <Sidebar collapsible="icon" className="border-r border-border bg-sidebar" aria-label="Menu de navegação principal">
       <SidebarHeader className={`${collapsed ? 'p-2' : 'p-4'} space-y-4`}>
         <div className="flex items-center justify-between">
