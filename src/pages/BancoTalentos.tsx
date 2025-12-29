@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { CandidateCard } from "@/components/BancoTalentos/CandidateCard";
-import { CandidateProfileDrawer } from "@/components/BancoTalentos/CandidateProfileDrawer";
+
 import { LinkToJobModal } from "@/components/BancoTalentos/LinkToJobModal";
 import { ImportXlsModal } from "@/components/ImportXlsModal";
 import { TalentPoolLinkManager } from "@/components/TalentPoolLinkManager";
@@ -50,8 +50,6 @@ export default function BancoTalentos() {
     value: string;
   }>>([]);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [selectedCandidate, setSelectedCandidate] = useState<Candidato | null>(null);
-  const [showProfileDrawer, setShowProfileDrawer] = useState(false);
   const [showLinkJobModal, setShowLinkJobModal] = useState(false);
   const [linkJobCandidateId, setLinkJobCandidateId] = useState<string | null>(null);
   const [importModalOpen, setImportModalOpen] = useState(false);
@@ -136,8 +134,7 @@ export default function BancoTalentos() {
   };
   const hasActiveFilters = searchTerm !== "" || estadoFilter !== "all" || avaliacaoFilter !== "all" || tagFilter !== "all";
   const handleViewProfile = (candidato: Candidato) => {
-    setSelectedCandidate(candidato);
-    setShowProfileDrawer(true);
+    navigate(`/candidatos/${candidato.id}`);
   };
   const handleLinkToJob = (candidatoId: string) => {
     setLinkJobCandidateId(candidatoId);
@@ -316,12 +313,6 @@ export default function BancoTalentos() {
         </div>}
 
       {/* Modals */}
-      {selectedCandidate && <CandidateProfileDrawer open={showProfileDrawer} onOpenChange={setShowProfileDrawer} candidate={{
-      ...selectedCandidate,
-      recruiter_name: selectedCandidate.profiles?.full_name || selectedCandidate.recrutador || "Não atribuído",
-      days_in_bank: getDaysInBank(selectedCandidate.criado_em)
-    }} />}
-
       {linkJobCandidateId && <LinkToJobModal open={showLinkJobModal} onOpenChange={setShowLinkJobModal} candidateId={linkJobCandidateId} onSuccess={() => {
       loadCandidatos();
       setShowLinkJobModal(false);
