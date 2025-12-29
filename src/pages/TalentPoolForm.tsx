@@ -308,7 +308,7 @@ export default function TalentPoolForm() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FFFDF6] flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-[#FFCD00]" />
       </div>
     );
@@ -316,8 +316,8 @@ export default function TalentPoolForm() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#FFFDF6] flex items-center justify-center p-4">
-        <Card className="max-w-md w-full border-[#36404A]/20">
+      <div className="min-h-screen bg-white flex items-center justify-center p-4">
+        <Card className="max-w-md w-full border-[#FFCD00]">
           <CardContent className="pt-6">
             <div className="flex items-center gap-2 text-red-600 mb-4">
               <AlertCircle className="h-5 w-5" />
@@ -335,7 +335,7 @@ export default function TalentPoolForm() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-[#FFFDF6] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-white flex items-center justify-center p-4">
         <Card className="max-w-md w-full border-[#FFCD00]">
           <CardContent className="pt-6">
             <div className="flex items-center gap-2 text-green-600 mb-4">
@@ -359,7 +359,7 @@ export default function TalentPoolForm() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FFFDF6] font-['Manrope',system-ui,sans-serif]">
+    <div className="min-h-screen bg-white font-['Manrope',system-ui,sans-serif]">
       {/* Header */}
       <header className="bg-white border-b border-[#36404A]/10 sticky top-0 z-40">
         <div className="max-w-4xl mx-auto px-4 py-4">
@@ -385,10 +385,10 @@ export default function TalentPoolForm() {
       <main className="max-w-4xl mx-auto px-4 py-8">
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Dados Pessoais */}
-          <Card className="border-[#36404A]/20">
+          <Card className="border-[#FFCD00]">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-[#00141D]">
-                <User className="h-5 w-5" />
+                <User className="h-5 w-5 text-[#FFCD00]" />
                 Dados Pessoais
               </CardTitle>
             </CardHeader>
@@ -487,10 +487,10 @@ export default function TalentPoolForm() {
           </Card>
 
           {/* Perfil Profissional */}
-          <Card className="border-[#36404A]/20">
+          <Card className="border-[#FFCD00]">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-[#00141D]">
-                <Briefcase className="h-5 w-5" />
+                <Briefcase className="h-5 w-5 text-[#FFCD00]" />
                 Perfil Profissional
               </CardTitle>
             </CardHeader>
@@ -593,10 +593,10 @@ export default function TalentPoolForm() {
           </Card>
 
           {/* Origem */}
-          <Card className="border-[#FFCD00]/40">
+          <Card className="border-[#FFCD00]">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-[#00141D]">
-                <FileText className="h-5 w-5" />
+                <FileText className="h-5 w-5 text-[#FFCD00]" />
                 Por onde teve acesso ao formulário? <span className="text-red-600">*</span>
               </CardTitle>
             </CardHeader>
@@ -615,7 +615,7 @@ export default function TalentPoolForm() {
           </Card>
 
           {/* Fit Cultural */}
-          <Card className="border-[#FFCD00]/40">
+          <Card className="border-[#FFCD00]">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-[#00141D]">
                 <Heart className="h-5 w-5 text-[#FFCD00]" />
@@ -747,7 +747,7 @@ export default function TalentPoolForm() {
 
           {/* Password if required */}
           {linkData?.requires_password && (
-            <Card className="border-[#36404A]/20">
+            <Card className="border-[#FFCD00]">
               <CardContent className="pt-6">
                 <Label htmlFor="password" className="text-[#00141D]">
                   Senha de acesso <span className="text-red-600">*</span>
