@@ -396,6 +396,7 @@ export type Database = {
       candidatos: {
         Row: {
           area: Database["public"]["Enums"]["area_candidato"] | null
+          cargo: string | null
           cidade: string | null
           criado_em: string | null
           curriculo_link: string | null
@@ -442,6 +443,7 @@ export type Database = {
         }
         Insert: {
           area?: Database["public"]["Enums"]["area_candidato"] | null
+          cargo?: string | null
           cidade?: string | null
           criado_em?: string | null
           curriculo_link?: string | null
@@ -488,6 +490,7 @@ export type Database = {
         }
         Update: {
           area?: Database["public"]["Enums"]["area_candidato"] | null
+          cargo?: string | null
           cidade?: string | null
           criado_em?: string | null
           curriculo_link?: string | null

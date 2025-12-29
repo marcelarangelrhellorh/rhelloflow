@@ -151,6 +151,7 @@ Deno.serve(async (req) => {
       estado: candidate.estado?.trim() || null,
       linkedin: candidate.linkedin?.trim() || null,
       nivel: candidate.nivel || null,
+      cargo: candidate.cargo || null,
       area: candidate.area || null,
       pretensao_salarial: candidate.pretensao_salarial ? parseFloat(candidate.pretensao_salarial) : null,
       idade: candidate.idade ? parseInt(candidate.idade) : null,
@@ -213,6 +214,41 @@ Deno.serve(async (req) => {
         }
       } catch (uploadErr) {
         console.error('Error processing file upload:', uploadErr);
+      }
+    }
+
+    // Handle portfolio upload if provided
+    if (files?.portfolio?.data) {
+      try {
+        const base64Data = files.portfolio.data.split(',')[1];
+        const binaryData = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
+        
+        const fileExt = files.portfolio.name.split('.').pop() || 'pdf';
+        const filePath = `${newCandidate.id}_portfolio_${Date.now()}.${fileExt}`;
+        
+        // Determine content type based on file extension
+        let contentType = 'application/pdf';
+        if (fileExt === 'png') contentType = 'image/png';
+        else if (fileExt === 'jpg' || fileExt === 'jpeg') contentType = 'image/jpeg';
+        else if (fileExt === 'pptx') contentType = 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+        
+        const { error: uploadError } = await supabase.storage
+          .from('portfolios')
+          .upload(filePath, binaryData, {
+            contentType,
+            upsert: false,
+          });
+
+        if (!uploadError) {
+          await supabase
+            .from('candidatos')
+            .update({ portfolio_url: filePath })
+            .eq('id', newCandidate.id);
+        } else {
+          console.error('Error uploading portfolio:', uploadError);
+        }
+      } catch (uploadErr) {
+        console.error('Error processing portfolio upload:', uploadErr);
       }
     }
 

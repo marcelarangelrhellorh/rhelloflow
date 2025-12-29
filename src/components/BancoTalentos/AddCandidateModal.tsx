@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { logger } from "@/lib/logger";
-import { MODELO_CONTRATACAO_OPTIONS, FORMATO_TRABALHO_OPTIONS } from "@/constants/fitCultural";
+import { MODELO_CONTRATACAO_OPTIONS, FORMATO_TRABALHO_OPTIONS, CARGO_OPTIONS, ESTADOS_BRASILEIROS } from "@/constants/fitCultural";
 
 interface AddCandidateModalProps {
   open: boolean;
@@ -33,10 +33,12 @@ export function AddCandidateModal({ open, onOpenChange, onSuccess }: AddCandidat
     estado: "",
     area: "",
     nivel: "",
+    cargo: "",
     pretensao_salarial: "",
     linkedin: "",
     recruiter_id: "",
     curriculo_link: "",
+    portfolio_link: "",
     feedback: "",
     modelo_contratacao: "",
     formato_trabalho: ""
@@ -75,12 +77,14 @@ export function AddCandidateModal({ open, onOpenChange, onSuccess }: AddCandidat
         estado: formData.estado || null,
         area: formData.area as any,
         nivel: formData.nivel as any,
+        cargo: formData.cargo || null,
         pretensao_salarial: formData.pretensao_salarial ? parseFloat(formData.pretensao_salarial) : null,
         linkedin: formData.linkedin || null,
         recruiter_id: formData.recruiter_id || null,
         recrutador: null,
         status: "Banco de Talentos",
         curriculo_link: formData.curriculo_link || null,
+        portfolio_url: formData.portfolio_link || null,
         feedback: formData.feedback || null,
         modelo_contratacao: formData.modelo_contratacao || null,
         formato_trabalho: formData.formato_trabalho || null
@@ -108,10 +112,12 @@ export function AddCandidateModal({ open, onOpenChange, onSuccess }: AddCandidat
       estado: "",
       area: "",
       nivel: "",
+      cargo: "",
       pretensao_salarial: "",
       linkedin: "",
       recruiter_id: "",
       curriculo_link: "",
+      portfolio_link: "",
       feedback: "",
       modelo_contratacao: "",
       formato_trabalho: ""
@@ -172,13 +178,16 @@ export function AddCandidateModal({ open, onOpenChange, onSuccess }: AddCandidat
 
             <div>
               <Label htmlFor="estado">Estado</Label>
-              <Input
-                id="estado"
-                value={formData.estado}
-                onChange={(e) => setFormData({ ...formData, estado: e.target.value })}
-                maxLength={2}
-                placeholder="SP"
-              />
+              <Select value={formData.estado} onValueChange={(value) => setFormData({ ...formData, estado: value })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent className="max-h-60">
+                  {ESTADOS_BRASILEIROS.map((estado) => (
+                    <SelectItem key={estado.value} value={estado.value}>{estado.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
@@ -200,7 +209,21 @@ export function AddCandidateModal({ open, onOpenChange, onSuccess }: AddCandidat
             </div>
 
             <div>
-              <Label htmlFor="nivel">Nível Profissional</Label>
+              <Label htmlFor="cargo">Cargo</Label>
+              <Select value={formData.cargo} onValueChange={(value) => setFormData({ ...formData, cargo: value })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent>
+                  {CARGO_OPTIONS.map((cargo) => (
+                    <SelectItem key={cargo.value} value={cargo.value}>{cargo.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="nivel">Senioridade</Label>
               <Select value={formData.nivel} onValueChange={(value) => setFormData({ ...formData, nivel: value })}>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione" />
@@ -258,13 +281,24 @@ export function AddCandidateModal({ open, onOpenChange, onSuccess }: AddCandidat
               </Select>
             </div>
 
-            <div className="col-span-2">
+            <div>
               <Label htmlFor="curriculo_link">Link do Currículo</Label>
               <Input
                 id="curriculo_link"
                 type="url"
                 value={formData.curriculo_link}
                 onChange={(e) => setFormData({ ...formData, curriculo_link: e.target.value })}
+                placeholder="https://..."
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="portfolio_link">Link do Portfólio</Label>
+              <Input
+                id="portfolio_link"
+                type="url"
+                value={formData.portfolio_link}
+                onChange={(e) => setFormData({ ...formData, portfolio_link: e.target.value })}
                 placeholder="https://..."
               />
             </div>
