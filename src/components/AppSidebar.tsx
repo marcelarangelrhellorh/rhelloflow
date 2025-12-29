@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { LayoutDashboard, Briefcase, Users, Building2, CheckSquare, BarChart3, ClipboardList, Wrench, FileText, MessageSquare, ChevronLeft, ChevronRight, ChevronDown, GitCompare, FolderHeart } from "lucide-react";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -71,6 +71,7 @@ const toolsItems = [{
 }];
 export function AppSidebar() {
   const [candidatosOpen, setCandidatosOpen] = useState(false);
+  const [ferramentasOpen, setFerramentasOpen] = useState(false);
   const {
     state,
     toggleSidebar
@@ -242,27 +243,61 @@ export function AppSidebar() {
                     </SidebarMenuButton>}
                 </SidebarMenuItem>)}
 
-              {/* Tools dropdown for internal users */}
-              {isInternalUser && <SidebarMenuItem>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <SidebarMenuButton 
-                        className={collapsed ? "justify-center" : ""}
-                        aria-label="Ferramentas"
-                        aria-haspopup="menu"
-                      >
-                        <Wrench className="h-7 w-7" aria-hidden="true" />
-                        {!collapsed && <span className="text-base">Ferramentas</span>}
-                      </SidebarMenuButton>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent side="right" align="start" className="w-48" role="menu">
-                      {toolsItems.map(tool => <DropdownMenuItem key={tool.title} onClick={() => navigate(tool.url)} className="cursor-pointer" role="menuitem">
-                          <tool.icon className="mr-2 h-4 w-4" aria-hidden="true" />
-                          {tool.title}
-                        </DropdownMenuItem>)}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </SidebarMenuItem>}
+              {/* Tools collapsible for internal users */}
+              {isInternalUser && (
+                <Collapsible open={ferramentasOpen} onOpenChange={setFerramentasOpen}>
+                  <SidebarMenuItem>
+                    {collapsed ? (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <SidebarMenuButton 
+                            className="justify-center"
+                            isActive={toolsItems.some(t => location.pathname.startsWith(t.url))}
+                          >
+                            <Wrench className="h-7 w-7" aria-hidden="true" />
+                          </SidebarMenuButton>
+                        </TooltipTrigger>
+                        <TooltipContent side="right">
+                          Ferramentas
+                        </TooltipContent>
+                      </Tooltip>
+                    ) : (
+                      <CollapsibleTrigger asChild>
+                        <SidebarMenuButton 
+                          isActive={toolsItems.some(t => location.pathname.startsWith(t.url))}
+                          aria-label="Ferramentas"
+                          aria-expanded={ferramentasOpen}
+                        >
+                          <Wrench className="h-7 w-7" aria-hidden="true" />
+                          <span className="text-base flex-1">Ferramentas</span>
+                          <ChevronDown 
+                            className={`h-4 w-4 transition-transform duration-200 ${ferramentasOpen ? 'rotate-180' : ''}`} 
+                            aria-hidden="true" 
+                          />
+                        </SidebarMenuButton>
+                      </CollapsibleTrigger>
+                    )}
+                  </SidebarMenuItem>
+                  
+                  {!collapsed && (
+                    <CollapsibleContent className="pl-4 space-y-1">
+                      {toolsItems.map(item => (
+                        <SidebarMenuItem key={item.title}>
+                          <SidebarMenuButton 
+                            onClick={() => navigate(item.url)}
+                            onMouseEnter={() => prefetchRoute(item.url)}
+                            isActive={location.pathname === item.url}
+                            className="pl-4"
+                          >
+                            <item.icon className="h-5 w-5" aria-hidden="true" />
+                            <span className="text-sm">{item.title}</span>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      ))}
+                    </CollapsibleContent>
+                  )}
+                </Collapsible>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
