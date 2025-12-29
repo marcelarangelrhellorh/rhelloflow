@@ -101,3 +101,12 @@ verify_jwt = true
 
 [functions.compare-roles]
 verify_jwt = true
+
+[functions.generate-talent-pool-link]
+verify_jwt = true
+
+[functions.get-talent-pool-link]
+verify_jwt = false
+
+[functions.submit-talent-pool-application]
+verify_jwt = false
