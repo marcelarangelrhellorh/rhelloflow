@@ -141,7 +141,7 @@ export default function Tarefas() {
   }, [tasks]);
 
   return (
-    <div className="min-h-screen bg-[#FFFBF0]">
+    <div className="min-h-screen bg-white">
       {/* Header - Simplified */}
       <div className="bg-white border-b shadow-sm sticky top-0 z-10">
         <div className="w-full py-4 px-4 sm:px-6 lg:px-8">

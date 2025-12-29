@@ -148,7 +148,7 @@ export default function ShareJob() {
 
   if (loading || !shareConfig) {
     return (
-      <div className="min-h-screen bg-[#FFFDF6] flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-[#FFCD00]" />
       </div>
     );
@@ -156,7 +156,7 @@ export default function ShareJob() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#FFFDF6] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-white flex items-center justify-center p-4">
         <Card className="max-w-md w-full border-[#36404A]/20">
           <CardContent className="pt-6">
             <div className="flex items-center gap-2 text-red-600 mb-4">
@@ -175,7 +175,7 @@ export default function ShareJob() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-[#FFFDF6] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-white flex items-center justify-center p-4">
         <Card className="max-w-md w-full border-[#FFCD00]">
           <CardContent className="pt-6">
             <div className="flex items-center gap-2 text-green-600 mb-4">
@@ -205,7 +205,7 @@ export default function ShareJob() {
   const daysOpen = getDaysOpen(vaga.criado_em);
 
   return (
-    <div className="min-h-screen bg-[#FFFDF6] font-['Manrope',system-ui,sans-serif]">
+    <div className="min-h-screen bg-white font-['Manrope',system-ui,sans-serif]">
       {/* Header */}
       <header className="bg-white border-b border-[#36404A]/10 sticky top-0 z-40">
         <div className="max-w-6xl mx-auto px-4 py-4">
@@ -256,11 +256,11 @@ export default function ShareJob() {
 
               {/* Quick Stats */}
               <div className="flex flex-wrap gap-4 text-sm text-[#36404A]">
-                <span className="flex items-center gap-1.5 px-3 py-1.5 bg-[#FFFDF6] rounded-md border border-[#36404A]/10">
+                <span className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 rounded-md border border-[#36404A]/10">
                   <Clock className="h-4 w-4" />
                   {daysOpen} dias no ar
                 </span>
-                <span className="flex items-center gap-1.5 px-3 py-1.5 bg-[#FFFDF6] rounded-md border border-[#36404A]/10">
+                <span className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 rounded-md border border-[#36404A]/10">
                   <Users className="h-4 w-4" />
                   {linkData.submissions_count} candidatos
                 </span>
@@ -397,13 +397,13 @@ export default function ShareJob() {
                 <h2 className="text-2xl font-bold text-[#00141D] mb-4">Horário de Trabalho</h2>
                 <div className="flex flex-wrap gap-4 text-[#36404A]">
                   {vaga.horario_inicio && vaga.horario_fim && (
-                    <div className="flex items-center gap-2 px-4 py-2 bg-[#FFFDF6] rounded-lg border border-[#36404A]/10">
+                    <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-lg border border-[#36404A]/10">
                       <Clock className="h-5 w-5" />
                       <span className="font-medium">{vaga.horario_inicio} - {vaga.horario_fim}</span>
                     </div>
                   )}
                   {vaga.dias_semana && vaga.dias_semana.length > 0 && (
-                    <div className="flex items-center gap-2 px-4 py-2 bg-[#FFFDF6] rounded-lg border border-[#36404A]/10">
+                    <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-lg border border-[#36404A]/10">
                       <Calendar className="h-5 w-5" />
                       <span className="font-medium">{vaga.dias_semana.join(", ")}</span>
                     </div>
@@ -428,10 +428,10 @@ export default function ShareJob() {
       {/* Footer */}
       <footer className="bg-[#00141D] text-white py-8 mt-16">
         <div className="max-w-6xl mx-auto px-4 text-center text-sm">
-          <p className="text-[#FFFDF6]/70">
+          <p className="text-white/70">
             © {new Date().getFullYear()} Rhello Recrutamento & Seleção. Todos os direitos reservados.
           </p>
-          <p className="text-[#FFFDF6]/50 mt-2 text-xs">
+          <p className="text-white/50 mt-2 text-xs">
             Ao enviar sua candidatura, seus dados serão tratados conforme a LGPD.
           </p>
         </div>
