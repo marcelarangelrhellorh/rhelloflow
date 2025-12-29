@@ -150,7 +150,7 @@ export function FeedbackList({
             <div className="mb-4 rounded-full bg-muted/20 p-4">
               <MessageSquare className="h-8 w-8 text-muted-foreground" />
             </div>
-            <p className="text-muted-foreground text-base font-medium">
+            <p className="text-muted-foreground font-medium text-sm">
               Nenhum feedback registrado ainda
             </p>
           </div> : <div className="space-y-4">

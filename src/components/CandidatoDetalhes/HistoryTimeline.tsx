@@ -55,7 +55,7 @@ export function HistoryTimeline({
             <div className="mb-4 rounded-full bg-muted/20 p-4">
               <Briefcase className="h-8 w-8 text-muted-foreground" />
             </div>
-            <p className="text-muted-foreground text-base font-medium">
+            <p className="text-muted-foreground font-medium text-sm">
               Nenhum histórico de processos registrado
             </p>
           </div> : <div className="relative">

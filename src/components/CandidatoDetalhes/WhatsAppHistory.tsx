@@ -102,7 +102,7 @@ export function WhatsAppHistory({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground font-medium text-base">
+          <p className="text-muted-foreground font-medium text-sm">
             Nenhuma mensagem WhatsApp enviada para este candidato.
           </p>
         </CardContent>

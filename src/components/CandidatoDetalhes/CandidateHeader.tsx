@@ -95,7 +95,7 @@ export function CandidateHeader({
               <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-sm text-secondary-text-light dark:text-secondary-text-dark mb-3">
                 {(nivel || area) && <div className="flex items-center gap-1.5">
                     <Briefcase className="h-4 w-4" />
-                    <span>{[nivel, area].filter(Boolean).join(" – ")}</span>
+                    <span className="font-semibold">{[nivel, area].filter(Boolean).join(" – ")}</span>
                   </div>}
                 
                 {(cidade || estado) && <div className="flex items-center gap-1.5">
@@ -123,22 +123,22 @@ export function CandidateHeader({
 
           {/* Right Side - Action Buttons */}
           <div className="flex flex-wrap gap-2">
-            <Button onClick={onSendWhatsApp} variant="outline" className="font-semibold text-base border-gray-200 dark:border-secondary-text-light/20 text-success hover:bg-success/10">
+            <Button onClick={onSendWhatsApp} variant="outline" className="font-semibold border-gray-200 dark:border-secondary-text-light/20 text-success hover:bg-success/10 text-sm">
               <MessageCircle className="mr-2 h-4 w-4" />
               WhatsApp
             </Button>
 
-            <Button onClick={onEdit} className="font-semibold text-base">
+            <Button onClick={onEdit} className="font-semibold text-sm">
               <Edit className="mr-2 h-4 w-4" />
               Editar
             </Button>
 
-            <Button onClick={onRelocate} variant="outline" className="font-semibold text-base border-gray-200 dark:border-secondary-text-light/20">
+            <Button onClick={onRelocate} variant="outline" className="font-semibold border-gray-200 dark:border-secondary-text-light/20 text-sm">
               <RefreshCw className="mr-2 h-4 w-4" />
               Realocar
             </Button>
 
-            <Button onClick={onDelete} variant="destructive" className="font-semibold text-base">
+            <Button onClick={onDelete} variant="destructive" className="font-semibold text-sm">
               <Trash2 className="mr-2 h-4 w-4" />
               Excluir
             </Button>

@@ -172,7 +172,7 @@ export function ScorecardHistory({
     return <Card className="border border-gray-300 shadow-md">
         <CardHeader>
           <CardTitle className="text-base">Histórico de Avaliações</CardTitle>
-          <CardDescription className="text-base font-medium">Scorecards preenchidos para este candidato</CardDescription>
+          <CardDescription className="font-medium text-sm">Scorecards preenchidos para este candidato</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col items-center justify-center py-12">
           <Target className="h-12 w-12 text-muted-foreground mb-4" />
