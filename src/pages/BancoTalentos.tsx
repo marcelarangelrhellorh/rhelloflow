@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { CandidateCard } from "@/components/BancoTalentos/CandidateCard";
-
 import { LinkToJobModal } from "@/components/BancoTalentos/LinkToJobModal";
 import { ImportXlsModal } from "@/components/ImportXlsModal";
 import { TalentPoolLinkManager } from "@/components/TalentPoolLinkManager";
@@ -109,9 +108,7 @@ export default function BancoTalentos() {
   };
   const filteredCandidatos = candidatos.filter(candidato => {
     // Filtro de busca por nome
-    const matchesSearch = searchTerm === "" || 
-      candidato.nome_completo.toLowerCase().includes(searchTerm.toLowerCase());
-
+    const matchesSearch = searchTerm === "" || candidato.nome_completo.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesEstado = estadoFilter === "all" || candidato.estado === estadoFilter;
 
     // Filtro de avaliação
@@ -167,7 +164,7 @@ export default function BancoTalentos() {
             <SheetTrigger asChild>
               <Button variant="outline" className="border-[#00141D] text-[#00141D] hover:bg-[#00141D]/10">
                 <Link2 className="mr-2 h-5 w-5" />
-                Gerenciar Links
+                Link Banco de Talentos   
               </Button>
             </SheetTrigger>
             <SheetContent className="w-[500px] sm:w-[600px] overflow-y-auto">
@@ -179,7 +176,7 @@ export default function BancoTalentos() {
               </div>
             </SheetContent>
           </Sheet>
-          <Button onClick={() => navigate('/candidatos/novo')} className="bg-[#00141D] hover:bg-[#00141D]/90 text-white font-bold">
+          <Button onClick={() => navigate('/candidatos/novo')} className="bg-[#00141D] hover:bg-[#00141D]/90 text-white font-bold text-sm">
             <Plus className="mr-2 h-5 w-5" />
             Adicionar Candidato
           </Button>
@@ -195,13 +192,7 @@ export default function BancoTalentos() {
         <div className="flex flex-wrap gap-4 mb-4">
           <div className="relative flex-1 min-w-[250px]">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder="Buscar por nome..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
+            <Input type="text" placeholder="Buscar por nome..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10" />
           </div>
 
           <Select value={avaliacaoFilter} onValueChange={setAvaliacaoFilter}>

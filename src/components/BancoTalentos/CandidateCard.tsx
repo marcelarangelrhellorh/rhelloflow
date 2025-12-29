@@ -117,12 +117,8 @@ export function CandidateCard({
         </CardContent>
       </Card>;
   }
-  return <Card 
-    className="hover:shadow-lg transition-all duration-200 hover:scale-[1.01] bg-white my-0 ml-0 mr-auto px-0 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-    role="article"
-    aria-label={`Candidato: ${candidate.nome_completo} - ${candidate.nivel} - ${candidate.area} - ${candidate.status}`}
-  >
-      <CardContent className="p-6 mx-0">
+  return <Card className="hover:shadow-lg transition-all duration-200 hover:scale-[1.01] bg-white my-0 ml-0 mr-auto px-0 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" role="article" aria-label={`Candidato: ${candidate.nome_completo} - ${candidate.nivel} - ${candidate.area} - ${candidate.status}`}>
+      <CardContent className="p-6 mx-0 shadow-lg">
         {/* Header do card */}
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-3">
@@ -180,23 +176,11 @@ export function CandidateCard({
 
         {/* Ações */}
         <div className="flex gap-2" role="group" aria-label="Ações do candidato">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="flex-1 hover:bg-[#F9EC3F] hover:text-[#00141D] hover:border-[#F9EC3F]" 
-            onClick={onViewProfile}
-            aria-label={`Ver perfil de ${candidate.nome_completo}`}
-          >
+          <Button variant="outline" size="sm" className="flex-1 hover:bg-[#F9EC3F] hover:text-[#00141D] hover:border-[#F9EC3F]" onClick={onViewProfile} aria-label={`Ver perfil de ${candidate.nome_completo}`}>
             <ExternalLink className="mr-2 h-4 w-4" aria-hidden="true" />
             Ver perfil
           </Button>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="flex-1 hover:bg-[#F9EC3F] hover:text-[#00141D] hover:border-[#F9EC3F]" 
-            onClick={onLinkToJob}
-            aria-label={`Vincular ${candidate.nome_completo} a uma vaga`}
-          >
+          <Button variant="outline" size="sm" className="flex-1 hover:bg-[#F9EC3F] hover:text-[#00141D] hover:border-[#F9EC3F]" onClick={onLinkToJob} aria-label={`Vincular ${candidate.nome_completo} a uma vaga`}>
             <LinkIcon className="mr-2 h-4 w-4" aria-hidden="true" />
             Vincular
           </Button>
