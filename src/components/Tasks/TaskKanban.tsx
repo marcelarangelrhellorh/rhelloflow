@@ -12,15 +12,34 @@ interface TaskKanbanProps {
   entityType?: "tasks" | "meetings";
 }
 
-const columns: {
-  status: TaskStatus;
+// Colunas para tarefas
+const taskColumns: {
+  id: string;
   label: string;
   color: string;
 }[] = [
-  { status: "to_do", label: "A Fazer", color: "border-t-blue-500" },
-  { status: "in_progress", label: "Em Andamento", color: "border-t-yellow-500" },
-  { status: "done", label: "Concluída", color: "border-t-green-500" },
+  { id: "to_do", label: "A Fazer", color: "border-t-blue-500" },
+  { id: "in_progress", label: "Em Andamento", color: "border-t-yellow-500" },
+  { id: "done", label: "Concluída", color: "border-t-green-500" },
 ];
+
+// Colunas para reuniões
+const meetingColumns: {
+  id: string;
+  label: string;
+  color: string;
+}[] = [
+  { id: "scheduled", label: "Agendadas", color: "border-t-blue-500" },
+  { id: "completed", label: "Concluídas", color: "border-t-green-500" },
+  { id: "cancelled", label: "Canceladas", color: "border-t-slate-500" },
+  { id: "no_show", label: "No Show", color: "border-t-red-500" },
+];
+
+// Determina em qual coluna uma reunião deve aparecer
+const getMeetingColumn = (task: Task): string => {
+  if (task.status !== 'done') return 'scheduled';
+  return task.meeting_outcome || 'completed';
+};
 
 export default function TaskKanban({
   tasks,
@@ -32,6 +51,8 @@ export default function TaskKanban({
   const updateTask = useUpdateTask();
   const [outcomeModalOpen, setOutcomeModalOpen] = useState(false);
   const [pendingDropTask, setPendingDropTask] = useState<Task | null>(null);
+
+  const columns = entityType === "meetings" ? meetingColumns : taskColumns;
 
   const handleToggleComplete = async (task: Task, meetingOutcome?: MeetingOutcome) => {
     const newStatus: TaskStatus = task.status === 'done' ? 'to_do' : 'done';
@@ -50,18 +71,57 @@ export default function TaskKanban({
     e.preventDefault();
   };
 
-  const handleDrop = async (e: React.DragEvent, status: TaskStatus) => {
+  const handleDrop = async (e: React.DragEvent, columnId: string) => {
     e.preventDefault();
     const taskId = e.dataTransfer.getData("taskId");
     const task = tasks.find(t => t.id === taskId);
     
-    if (task && task.status !== status) {
+    if (!task) return;
+
+    if (entityType === "meetings") {
+      // Lógica para reuniões
+      const currentColumn = getMeetingColumn(task);
+      if (currentColumn === columnId) return;
+
+      let newStatus: TaskStatus;
+      let newOutcome: MeetingOutcome | null;
+
+      switch (columnId) {
+        case 'scheduled':
+          newStatus = 'to_do';
+          newOutcome = null;
+          break;
+        case 'completed':
+          newStatus = 'done';
+          newOutcome = 'completed';
+          break;
+        case 'cancelled':
+          newStatus = 'done';
+          newOutcome = 'cancelled';
+          break;
+        case 'no_show':
+          newStatus = 'done';
+          newOutcome = 'no_show';
+          break;
+        default:
+          return;
+      }
+
+      await updateTask.mutateAsync({
+        id: taskId,
+        status: newStatus,
+        meeting_outcome: newOutcome,
+      });
+    } else {
+      // Lógica para tarefas (existente)
+      const status = columnId as TaskStatus;
+      if (task.status === status) return;
+
       // If dropping a meeting into "done" column, show outcome modal
       if (status === 'done' && task.task_type === 'meeting') {
         setPendingDropTask(task);
         setOutcomeModalOpen(true);
       } else {
-        // For regular tasks or other status changes, update directly
         await updateTask.mutateAsync({
           id: taskId,
           status,
@@ -83,17 +143,24 @@ export default function TaskKanban({
     setOutcomeModalOpen(false);
   };
 
+  const getColumnTasks = (columnId: string) => {
+    if (entityType === "meetings") {
+      return tasks.filter(task => getMeetingColumn(task) === columnId);
+    }
+    return tasks.filter(task => task.status === columnId);
+  };
+
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl">
+      <div className={`grid grid-cols-1 gap-6 ${entityType === "meetings" ? "md:grid-cols-4" : "md:grid-cols-3"} max-w-6xl`}>
         {columns.map(column => {
-          const columnTasks = tasks.filter(task => task.status === column.status);
+          const columnTasks = getColumnTasks(column.id);
           return (
             <div 
-              key={column.status} 
+              key={column.id} 
               className="flex flex-col gap-3" 
               onDragOver={handleDragOver} 
-              onDrop={e => handleDrop(e, column.status)}
+              onDrop={e => handleDrop(e, column.id)}
             >
               <Card className={`p-4 border-t-4 ${column.color}`}>
                 <div className="flex items-center justify-between">
@@ -133,7 +200,7 @@ export default function TaskKanban({
         })}
       </div>
 
-      {/* Meeting Outcome Modal for drag & drop */}
+      {/* Meeting Outcome Modal for drag & drop (only for tasks mode) */}
       <MeetingOutcomeModal
         open={outcomeModalOpen}
         onOpenChange={(open) => {
