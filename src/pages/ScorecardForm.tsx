@@ -99,7 +99,7 @@ export default function ScorecardForm() {
     } catch (error: any) {
       console.error("Erro ao carregar template:", error);
       toast.error("Erro ao carregar template");
-      navigate("/scorecards");
+      navigate("/avaliacoes");
     } finally {
       setLoading(false);
     }
@@ -258,7 +258,7 @@ export default function ScorecardForm() {
         toast.success("Template criado com sucesso!");
       }
 
-      navigate("/scorecards");
+      navigate("/avaliacoes");
     } catch (error: any) {
       console.error("Erro ao salvar template:", error);
       toast.error("Erro ao salvar template");
@@ -287,7 +287,7 @@ export default function ScorecardForm() {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => navigate("/scorecards")}
+                onClick={() => navigate("/avaliacoes")}
               >
                 <ArrowLeft className="h-5 w-5" />
               </Button>

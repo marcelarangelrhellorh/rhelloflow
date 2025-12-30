@@ -64,9 +64,9 @@ export function AppNavbar() {
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-56 bg-background z-[100]">
-              <DropdownMenuItem onClick={() => navigate("/scorecards")} className="cursor-pointer">
+              <DropdownMenuItem onClick={() => navigate("/avaliacoes")} className="cursor-pointer">
                 <FileText className="mr-2 h-5 w-5 text-[#ffcd00]" />
-                <span className="font-bold text-sm sm:text-base">Scorecards</span>
+                <span className="font-bold text-sm sm:text-base">Avaliações</span>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => navigate("/estudo-mercado")} className="cursor-pointer">
                 <TrendingUp className="mr-2 h-5 w-5 text-[#ffcd00]" />

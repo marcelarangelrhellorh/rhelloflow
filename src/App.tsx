@@ -67,9 +67,9 @@ const App = () => <ErrorBoundary>
               
               <Route path="/banco-talentos" element={<BancoTalentos />} />
               <Route path="/feedbacks-pendentes" element={<FeedbacksPendentes />} />
-              <Route path="/scorecards" element={<Scorecards />} />
-              <Route path="/scorecards/novo" element={<ScorecardForm />} />
-              <Route path="/scorecards/:id/editar" element={<ScorecardForm />} />
+              <Route path="/avaliacoes" element={<Scorecards />} />
+              <Route path="/avaliacoes/novo" element={<ScorecardForm />} />
+              <Route path="/avaliacoes/:id/editar" element={<ScorecardForm />} />
               <Route path="/analises" element={<Analises />} />
               <Route path="/gerenciar-usuarios" element={<GerenciarUsuarios />} />
               <Route path="/gerenciar-exclusoes" element={<GerenciarExclusoes />} />

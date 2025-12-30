@@ -56,8 +56,8 @@ const candidatosItems = [{
 }];
 
 const toolsItems = [{
-  title: "Scorecards",
-  url: "/scorecards",
+  title: "Avaliações",
+  url: "/avaliacoes",
   icon: FileText
 }, {
   title: "Estudo de Mercado",
