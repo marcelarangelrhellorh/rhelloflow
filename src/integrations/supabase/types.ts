@@ -4911,6 +4911,10 @@ export type Database = {
         | "Contratado"
         | "Reprovado Rhello"
         | "Aprovado Rhello"
+        | "Assessment | Teste Técnico"
+        | "Entrevista"
+        | "Reprovado"
+        | "Triagem"
       status_vaga:
         | "A iniciar"
         | "Discovery"
@@ -5109,6 +5113,10 @@ export const Constants = {
         "Contratado",
         "Reprovado Rhello",
         "Aprovado Rhello",
+        "Assessment | Teste Técnico",
+        "Entrevista",
+        "Reprovado",
+        "Triagem",
       ],
       status_vaga: [
         "A iniciar",
