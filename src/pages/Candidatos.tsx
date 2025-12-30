@@ -52,21 +52,24 @@ type Candidato = {
   };
 };
 
-type StatusCandidato = "Banco de Talentos" | "Selecionado" | "Entrevista rhello" | "Reprovado Rhello" | "Aprovado Rhello" | "Shortlist" | "Entrevistas Solicitante" | "Reprovado Solicitante" | "Aprovado Solicitante" | "Contratado";
+type StatusCandidato = "Triagem" | "Assessment | Teste Técnico" | "Entrevista" | "Shortlist" | "Reprovado" | "Contratado";
 
-const statusColumns: StatusCandidato[] = ["Selecionado", "Entrevista rhello", "Reprovado Rhello", "Aprovado Rhello", "Shortlist", "Entrevistas Solicitante", "Reprovado Solicitante", "Aprovado Solicitante", "Contratado"];
+const statusColumns: StatusCandidato[] = [
+  "Triagem",
+  "Assessment | Teste Técnico",
+  "Entrevista",
+  "Shortlist",
+  "Reprovado",
+  "Contratado"
+];
 
 const statusColors: Record<StatusCandidato, string> = {
-  "Banco de Talentos": "bg-info/10 text-info border-info/20",
-  "Selecionado": "bg-[#BBF7D0] text-green-800 border-green-200",
-  "Entrevista rhello": "bg-[#BFDBFE] text-blue-800 border-blue-200",
-  "Reprovado Rhello": "bg-[#FECACA] text-red-800 border-red-200",
-  "Aprovado Rhello": "bg-[#FDE68A] text-yellow-800 border-yellow-200",
-  "Shortlist": "bg-[#C7D2FE] text-indigo-800 border-indigo-200",
-  "Entrevistas Solicitante": "bg-[#E9D5FF] text-purple-800 border-purple-200",
-  "Reprovado Solicitante": "bg-[#FECACA] text-red-800 border-red-200",
-  "Aprovado Solicitante": "bg-[#FDE68A] text-yellow-800 border-yellow-200",
-  "Contratado": "bg-[#D9F99D] text-lime-800 border-lime-200"
+  "Triagem": "bg-slate-100 text-slate-800 border-slate-200",
+  "Assessment | Teste Técnico": "bg-purple-100 text-purple-800 border-purple-200",
+  "Entrevista": "bg-blue-100 text-blue-800 border-blue-200",
+  "Shortlist": "bg-amber-100 text-amber-800 border-amber-200",
+  "Reprovado": "bg-red-100 text-red-800 border-red-200",
+  "Contratado": "bg-green-100 text-green-800 border-green-200"
 };
 
 export default function Candidatos() {
@@ -271,7 +274,7 @@ export default function Candidatos() {
     const matchesDisponibilidade = disponibilidadeFilter === "all" || candidato.disponibilidade_status === disponibilidadeFilter;
     const matchesVaga = vagaFilter === "all" || candidato.vaga_relacionada_id === vagaFilter;
     const matchesCliente = clienteFilter === "all" || candidato.vaga_relacionada_id && vagas.find(v => v.id === candidato.vaga_relacionada_id)?.empresa === clienteFilter;
-    const matchesAttention = attentionFilter !== 'awaiting_client_feedback' || candidato.status === 'Entrevistas Solicitante';
+    const matchesAttention = attentionFilter !== 'awaiting_client_feedback' || candidato.status === 'Shortlist';
     return matchesSearch && matchesStatus && matchesDisponibilidade && matchesVaga && matchesCliente && matchesAttention;
   });
 

@@ -16,25 +16,24 @@ interface CandidateHeaderProps {
   onStatusChange: (newStatus: string) => void;
   onSendWhatsApp: () => void;
 }
-const ETAPAS_DISPONIVEIS = ["Banco de Talentos", "Selecionado", "Entrevista rhello", "Aprovado rhello", "Reprovado rhello", "Shortlist", "Entrevistas Solicitante", "Aprovado Solicitante", "Reprovado Solicitante", "Contratado"] as const;
+const ETAPAS_DISPONIVEIS = [
+  "Banco de Talentos",
+  "Triagem",
+  "Assessment | Teste Técnico",
+  "Entrevista",
+  "Shortlist",
+  "Reprovado",
+  "Contratado"
+] as const;
+
 const statusColors: Record<string, string> = {
   "Banco de Talentos": "bg-muted/10 text-muted-foreground border-muted",
-  "Selecionado": "bg-primary/10 text-primary border-primary/20",
-  "Entrevista rhello": "bg-warning/10 text-warning border-warning/20",
-  "Enviado ao Cliente": "bg-info/10 text-info border-info/20",
-  "Entrevista com Cliente": "bg-warning/10 text-warning border-warning/20",
-  "Shortlist": "bg-indigo-100/50 text-indigo-700 border-indigo-200",
-  "Entrevistas Solicitante": "bg-info/10 text-info border-info/20",
-  "Feedback Cliente": "bg-warning/10 text-warning border-warning/20",
-  "Aguardando Retorno": "bg-muted/10 text-muted-foreground border-muted",
-  "Aprovado": "bg-success/10 text-success border-success/20",
-  "Aprovado rhello": "bg-success/10 text-success border-success/20",
-  "Aprovado Solicitante": "bg-success/10 text-success border-success/20",
+  "Triagem": "bg-slate-100 text-slate-800 border-slate-200",
+  "Assessment | Teste Técnico": "bg-purple-100 text-purple-800 border-purple-200",
+  "Entrevista": "bg-blue-100 text-blue-800 border-blue-200",
+  "Shortlist": "bg-amber-100 text-amber-800 border-amber-200",
+  "Reprovado": "bg-red-100 text-red-800 border-red-200",
   "Contratado": "bg-success text-success-foreground border-success",
-  "Declinou": "bg-destructive/10 text-destructive border-destructive/20",
-  "Reprovado Cliente": "bg-destructive/10 text-destructive border-destructive/20",
-  "Reprovado rhello": "bg-destructive/10 text-destructive border-destructive/20",
-  "Reprovado Solicitante": "bg-destructive/10 text-destructive border-destructive/20"
 };
 export function CandidateHeader({
   nome,
