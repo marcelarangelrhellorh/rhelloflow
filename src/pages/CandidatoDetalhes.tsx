@@ -11,7 +11,7 @@ import { StatsBar } from "@/components/CandidatoDetalhes/StatsBar";
 import { ProfessionalInfoCard } from "@/components/CandidatoDetalhes/ProfessionalInfoCard";
 import { FeedbackList } from "@/components/CandidatoDetalhes/FeedbackList";
 import { SolicitarFeedbackModal } from "@/components/CandidatoDetalhes/SolicitarFeedbackModal";
-import { ScorecardEvaluation } from "@/components/CandidatoDetalhes/ScorecardEvaluation";
+import { CandidateScorecardSection } from "@/components/CandidatoDetalhes/CandidateScorecardSection";
 import { ScorecardHistory } from "@/components/CandidatoDetalhes/ScorecardHistory";
 import { HistoryTimeline } from "@/components/CandidatoDetalhes/HistoryTimeline";
 import { LinkToJobModal } from "@/components/BancoTalentos/LinkToJobModal";
@@ -368,7 +368,7 @@ export default function CandidatoDetalhes() {
           {/* Scorecards and Timeline - Horizontal */}
           <div className="grid gap-6 lg:grid-cols-2">
             <div className="space-y-6">
-              <ScorecardEvaluation candidateId={id!} candidateName={candidato.nome_completo} vagaId={candidato.vaga_relacionada_id} />
+              <CandidateScorecardSection candidateId={id!} candidateName={candidato.nome_completo} vagaId={candidato.vaga_relacionada_id} />
 
               <ScorecardHistory candidateId={id!} />
             </div>
