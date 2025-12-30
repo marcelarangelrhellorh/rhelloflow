@@ -76,7 +76,7 @@ const TaskCard = React.memo(function TaskCard({
     <>
       <Card 
         className={cn(
-          "p-4 shadow-md hover:shadow-lg transition-shadow cursor-pointer max-w-2xl", 
+          "p-4 shadow-md hover:shadow-lg transition-shadow cursor-pointer max-w-2xl overflow-hidden", 
           task.status === 'done' && "opacity-60"
         )} 
         draggable={draggable} 
@@ -156,24 +156,24 @@ const TaskCard = React.memo(function TaskCard({
           </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-2 pt-3 border-t" onClick={e => e.stopPropagation()}>
+          <div className="flex items-center flex-wrap gap-1.5 pt-3 border-t" onClick={e => e.stopPropagation()}>
             <Button 
               size="sm" 
               variant={task.status === 'done' ? "outline" : "default"} 
               className={cn(
-                "h-8 text-sm", 
+                "h-7 text-xs px-2 whitespace-nowrap", 
                 task.status !== 'done' ? "bg-[#00141d] hover:bg-[#00141d]/90 text-white font-semibold" : ""
               )} 
               onClick={handleCompleteClick}
             >
-              <CheckCircle2 className="h-4 w-4 mr-1" />
+              <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
               {task.status === 'done' ? 'Reabrir' : 'Concluir'}
             </Button>
-            <Button size="sm" variant="ghost" onClick={() => onEdit(task)} className="h-8 text-sm font-medium">
+            <Button size="sm" variant="ghost" onClick={() => onEdit(task)} className="h-7 text-xs px-2 font-medium whitespace-nowrap">
               Editar
             </Button>
             <SyncTaskToCalendar task={task} />
-            <Button size="sm" variant="ghost" onClick={() => onDelete(task.id)} className="h-8 text-sm text-red-600 font-medium">
+            <Button size="sm" variant="ghost" onClick={() => onDelete(task.id)} className="h-7 text-xs px-2 text-red-600 font-medium whitespace-nowrap">
               Excluir
             </Button>
           </div>
