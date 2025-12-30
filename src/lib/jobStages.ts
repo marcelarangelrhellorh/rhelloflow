@@ -1,24 +1,12 @@
 // Definição centralizada das etapas do funil de vagas
-// Agora padronizado e sincronizado com a tabela vaga_status_ref
+// Sincronizado com a tabela vaga_status_ref
 
 export const JOB_STAGES = [
-  {
-    id: "a-iniciar",
-    slug: "a_iniciar",
-    name: "A iniciar",
-    order: 1,
-    kind: "normal" as const,
-    color: {
-      bg: "#16A34A",
-      text: "#FFFFFF",
-      columnBg: "#F0FDF4",
-    },
-  },
   {
     id: "discovery",
     slug: "discovery",
     name: "Discovery",
-    order: 2,
+    order: 1,
     kind: "normal" as const,
     color: {
       bg: "#2563EB",
@@ -30,7 +18,7 @@ export const JOB_STAGES = [
     id: "divulgacao",
     slug: "divulgacao",
     name: "Divulgação",
-    order: 3,
+    order: 2,
     kind: "normal" as const,
     color: {
       bg: "#0EA5E9",
@@ -42,7 +30,7 @@ export const JOB_STAGES = [
     id: "triagem",
     slug: "triagem",
     name: "Triagem",
-    order: 4,
+    order: 3,
     kind: "normal" as const,
     color: {
       bg: "#7C3AED",
@@ -51,10 +39,10 @@ export const JOB_STAGES = [
     },
   },
   {
-    id: "entrevistas-rhello",
-    slug: "entrevistas_rhello",
-    name: "Entrevistas rhello",
-    order: 5,
+    id: "entrevistas",
+    slug: "entrevistas",
+    name: "Entrevistas",
+    order: 4,
     kind: "normal" as const,
     color: {
       bg: "#FB923C",
@@ -63,22 +51,10 @@ export const JOB_STAGES = [
     },
   },
   {
-    id: "aguardando-retorno-cliente",
-    slug: "aguardando_retorno_cliente",
-    name: "Aguardando retorno do cliente",
-    order: 6,
-    kind: "normal" as const,
-    color: {
-      bg: "#F59E0B",
-      text: "#FFFFFF",
-      columnBg: "#FFFBEB",
-    },
-  },
-  {
-    id: "apresentacao-candidatos",
-    slug: "apresentacao_candidatos",
-    name: "Apresentação de candidatos",
-    order: 7,
+    id: "shortlist-disponivel",
+    slug: "shortlist_disponivel",
+    name: "Shortlist disponível",
+    order: 5,
     kind: "normal" as const,
     color: {
       bg: "#10B981",
@@ -87,34 +63,10 @@ export const JOB_STAGES = [
     },
   },
   {
-    id: "entrevistas-solicitante",
-    slug: "entrevistas_solicitante",
-    name: "Entrevistas solicitante",
-    order: 8,
-    kind: "normal" as const,
-    color: {
-      bg: "#14B8A6",
-      text: "#FFFFFF",
-      columnBg: "#F0FDFA",
-    },
-  },
-  {
-    id: "em-processo-contratacao",
-    slug: "em_processo_contratacao",
-    name: "Em processo de contratação",
-    order: 9,
-    kind: "normal" as const,
-    color: {
-      bg: "#6366F1",
-      text: "#FFFFFF",
-      columnBg: "#EEF2FF",
-    },
-  },
-  {
     id: "concluida",
     slug: "concluida",
     name: "Concluída",
-    order: 10,
+    order: 6,
     kind: "final" as const,
     color: {
       bg: "#22C55E",
@@ -126,7 +78,7 @@ export const JOB_STAGES = [
     id: "congelada",
     slug: "congelada",
     name: "Congelada",
-    order: 11,
+    order: 7,
     kind: "frozen" as const,
     color: {
       bg: "#94A3B8",
@@ -138,7 +90,7 @@ export const JOB_STAGES = [
     id: "cancelada",
     slug: "cancelada",
     name: "Cancelada",
-    order: 12,
+    order: 8,
     kind: "canceled" as const,
     color: {
       bg: "#EF4444",
@@ -174,15 +126,37 @@ export const calculateProgress = (statusOrSlug: string): number => {
   // Para estados finais, retornar 100%
   if (stage.kind === 'final') return 100;
   
-  // Para estados congelados/pausados/cancelados, usar ordem atual
+  // Para estados congelados/cancelados, usar ordem atual
   const totalNormalStages = JOB_STAGES.filter(s => s.kind === 'normal').length;
   return Math.round((stage.order / totalNormalStages) * 100);
 };
 
 // Mapear status legado para slug (para compatibilidade)
 export const mapLegacyStatusToSlug = (oldStatus: string): string => {
+  const legacyMap: Record<string, string> = {
+    // Mapeamentos de etapas removidas
+    'a_iniciar': 'discovery',
+    'A iniciar': 'discovery',
+    'entrevistas_rhello': 'entrevistas',
+    'Entrevistas rhello': 'entrevistas',
+    'Entrevistas Rhello': 'entrevistas',
+    'aguardando_retorno_cliente': 'entrevistas',
+    'Aguardando retorno do cliente': 'entrevistas',
+    'entrevistas_solicitante': 'entrevistas',
+    'Entrevistas solicitante': 'entrevistas',
+    'Entrevista cliente': 'entrevistas',
+    'apresentacao_candidatos': 'shortlist_disponivel',
+    'Apresentação de candidatos': 'shortlist_disponivel',
+    'Apresentação de Candidatos': 'shortlist_disponivel',
+    'em_processo_contratacao': 'shortlist_disponivel',
+    'Em processo de contratação': 'shortlist_disponivel',
+    'Concluído': 'concluida',
+  };
+  
+  if (legacyMap[oldStatus]) return legacyMap[oldStatus];
+  
   const stage = getStageByName(oldStatus);
-  return stage ? stage.slug : 'a_iniciar';
+  return stage ? stage.slug : 'discovery';
 };
 
 // Mapear slug para label (para exibição)
