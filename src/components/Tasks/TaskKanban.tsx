@@ -9,6 +9,7 @@ interface TaskKanbanProps {
   onEdit: (task: Task) => void;
   onDelete: (id: string) => void;
   onTaskClick?: (task: Task) => void;
+  entityType?: "tasks" | "meetings";
 }
 
 const columns: {
@@ -25,7 +26,8 @@ export default function TaskKanban({
   tasks,
   onEdit,
   onDelete,
-  onTaskClick
+  onTaskClick,
+  entityType = "tasks"
 }: TaskKanbanProps) {
   const updateTask = useUpdateTask();
   const [outcomeModalOpen, setOutcomeModalOpen] = useState(false);
@@ -122,7 +124,7 @@ export default function TaskKanban({
                 ))}
                 {columnTasks.length === 0 && (
                   <Card className="p-8 text-center text-muted-foreground border-dashed text-base">
-                    Nenhuma tarefa
+                    {entityType === "meetings" ? "Nenhuma reunião" : "Nenhuma tarefa"}
                   </Card>
                 )}
               </div>

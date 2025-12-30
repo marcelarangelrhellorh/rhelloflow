@@ -24,6 +24,7 @@ import { logger } from "@/lib/logger";
 
 export default function Tarefas() {
   const [view, setView] = useState<"list" | "kanban" | "calendar">("kanban");
+  const [entityMode, setEntityMode] = useState<"tasks" | "meetings">("tasks");
   const [taskModalOpen, setTaskModalOpen] = useState(false);
   const [meetingModalOpen, setMeetingModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
@@ -125,20 +126,25 @@ export default function Tarefas() {
     setDetailDrawerOpen(true);
   };
 
-  // Filter only tasks (not meetings) for Kanban and List views
+  // Filter only tasks (not meetings)
   const onlyTasks = useMemo(() => {
     return tasks?.filter(task => task.task_type !== 'meeting') || [];
   }, [tasks]);
 
-  // Filter only synced meetings for calendar view
-  const syncedMeetings = useMemo(() => {
-    return tasks?.filter(task => task.task_type === 'meeting' && task.google_calendar_event_id) || [];
-  }, [tasks]);
-
-  // All meetings for empty state check
+  // All meetings
   const allMeetings = useMemo(() => {
     return tasks?.filter(task => task.task_type === 'meeting') || [];
   }, [tasks]);
+
+  // Filter only synced meetings for calendar view
+  const syncedMeetings = useMemo(() => {
+    return allMeetings.filter(task => task.google_calendar_event_id) || [];
+  }, [allMeetings]);
+
+  // Items to display based on entity mode
+  const displayedItems = useMemo(() => {
+    return entityMode === "tasks" ? onlyTasks : allMeetings;
+  }, [entityMode, onlyTasks, allMeetings]);
 
   return (
     <div className="min-h-screen bg-white">
@@ -235,6 +241,19 @@ export default function Tarefas() {
                     </SelectContent>
                   </Select>
 
+                  <Tabs value={entityMode} onValueChange={v => setEntityMode(v as "tasks" | "meetings")}>
+                    <TabsList className="h-9">
+                      <TabsTrigger value="tasks" className="text-xs px-3 gap-1.5">
+                        <ListTodo className="h-3.5 w-3.5" />
+                        Tarefas
+                      </TabsTrigger>
+                      <TabsTrigger value="meetings" className="text-xs px-3 gap-1.5">
+                        <Video className="h-3.5 w-3.5" />
+                        Reuniões
+                      </TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+
                   <Tabs value={view} onValueChange={v => setView(v as "list" | "kanban" | "calendar")}>
                     <TabsList className="h-9">
                       <TabsTrigger value="kanban" className="text-xs px-3">
@@ -262,41 +281,67 @@ export default function Tarefas() {
                   {[1, 2, 3].map(i => <Skeleton key={i} className="h-40 w-full" />)}
                 </div>
               ) : view === "calendar" ? (
-                syncedMeetings.length === 0 && (!externalEvents || externalEvents.length === 0) ? (
-                  <div className="text-center py-16 bg-white rounded-lg border">
-                    <p className="text-muted-foreground text-lg mb-4">
-                      {allMeetings.length === 0 ? "Nenhuma reunião agendada" : "Nenhuma reunião sincronizada"}
-                    </p>
-                    <Button onClick={handleNewMeeting} variant="outline" className="gap-2">
-                      <Video className="h-5 w-5" />
-                      {allMeetings.length === 0 ? "Criar primeira reunião" : "Criar e sincronizar"}
-                    </Button>
-                  </div>
+                entityMode === "meetings" ? (
+                  syncedMeetings.length === 0 && (!externalEvents || externalEvents.length === 0) ? (
+                    <div className="text-center py-16 bg-white rounded-lg border">
+                      <p className="text-muted-foreground text-lg mb-4">
+                        {allMeetings.length === 0 ? "Nenhuma reunião agendada" : "Nenhuma reunião sincronizada"}
+                      </p>
+                      <Button onClick={handleNewMeeting} variant="outline" className="gap-2">
+                        <Video className="h-5 w-5" />
+                        {allMeetings.length === 0 ? "Criar primeira reunião" : "Criar e sincronizar"}
+                      </Button>
+                    </div>
+                  ) : (
+                    <CalendarView 
+                      meetings={syncedMeetings} 
+                      externalEvents={externalEvents} 
+                      onEventClick={handleTaskClick} 
+                    />
+                  )
                 ) : (
-                  <CalendarView 
-                    meetings={syncedMeetings} 
-                    externalEvents={externalEvents} 
-                    onEventClick={handleTaskClick} 
-                  />
+                  onlyTasks.filter(t => t.due_date).length === 0 ? (
+                    <div className="text-center py-16 bg-white rounded-lg border">
+                      <p className="text-muted-foreground text-lg mb-4">Nenhuma tarefa com data de vencimento</p>
+                      <Button onClick={handleNewTask} className="bg-[#ffcd00] hover:bg-[#ffcd00]/90 text-black font-semibold">
+                        <Plus className="h-5 w-5 mr-2" />
+                        Criar tarefa com prazo
+                      </Button>
+                    </div>
+                  ) : (
+                    <CalendarView 
+                      meetings={[]} 
+                      externalEvents={[]} 
+                      tasks={onlyTasks.filter(t => t.due_date)}
+                      onEventClick={handleTaskClick} 
+                    />
+                  )
                 )
-              ) : onlyTasks.length === 0 ? (
+              ) : displayedItems.length === 0 ? (
                 <div className="text-center py-16 bg-white rounded-lg border">
-                  <p className="text-muted-foreground text-lg mb-4">Nenhuma tarefa encontrada</p>
-                  <Button onClick={handleNewTask} className="bg-[#ffcd00] hover:bg-[#ffcd00]/90 text-black font-semibold">
-                    <Plus className="h-5 w-5 mr-2" />
-                    Criar sua primeira tarefa
+                  <p className="text-muted-foreground text-lg mb-4">
+                    {entityMode === "tasks" ? "Nenhuma tarefa encontrada" : "Nenhuma reunião encontrada"}
+                  </p>
+                  <Button 
+                    onClick={entityMode === "tasks" ? handleNewTask : handleNewMeeting} 
+                    className={entityMode === "tasks" ? "bg-[#ffcd00] hover:bg-[#ffcd00]/90 text-black font-semibold" : ""}
+                    variant={entityMode === "meetings" ? "outline" : "default"}
+                  >
+                    {entityMode === "tasks" ? <Plus className="h-5 w-5 mr-2" /> : <Video className="h-5 w-5 mr-2" />}
+                    {entityMode === "tasks" ? "Criar sua primeira tarefa" : "Agendar primeira reunião"}
                   </Button>
                 </div>
               ) : view === "kanban" ? (
                 <TaskKanban 
-                  tasks={onlyTasks} 
+                  tasks={displayedItems} 
                   onEdit={handleEdit} 
                   onDelete={handleDelete} 
-                  onTaskClick={handleTaskClick} 
+                  onTaskClick={handleTaskClick}
+                  entityType={entityMode}
                 />
               ) : (
                 <div className="space-y-3">
-                  {onlyTasks.map(task => (
+                  {displayedItems.map(task => (
                     <TaskCard 
                       key={task.id} 
                       task={task} 

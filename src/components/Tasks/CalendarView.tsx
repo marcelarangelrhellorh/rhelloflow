@@ -37,6 +37,7 @@ interface CalendarEvent {
 
 interface CalendarViewProps {
   meetings: Task[];
+  tasks?: Task[];
   externalEvents?: Array<{
     id: string;
     title: string;
@@ -133,6 +134,7 @@ const CustomToolbar = ({
 };
 export default function CalendarView({
   meetings,
+  tasks = [],
   externalEvents = [],
   onEventClick
 }: CalendarViewProps) {
@@ -155,6 +157,22 @@ export default function CalendarView({
           resource: meeting,
           isExternal: false,
           allDay: false,
+        };
+      });
+
+    // Tasks with due_date (shown as all-day events)
+    const taskEvents = tasks
+      .filter(task => task.due_date)
+      .map(task => {
+        const date = parseISO(task.due_date!);
+        return {
+          id: task.id,
+          title: task.title,
+          start: date,
+          end: date,
+          resource: task,
+          isExternal: false,
+          allDay: true,
         };
       });
 
@@ -192,8 +210,9 @@ export default function CalendarView({
     // Debug logs
     logger.log('[CalendarView] Processed events:', {
       systemCount: systemEvents.length,
+      taskCount: taskEvents.length,
       externalCount: calendarEvents.length,
-      totalEvents: systemEvents.length + calendarEvents.length,
+      totalEvents: systemEvents.length + taskEvents.length + calendarEvents.length,
       externalSample: calendarEvents.slice(0, 3).map(e => ({
         title: e.title,
         start: e.start.toISOString(),
@@ -202,8 +221,8 @@ export default function CalendarView({
       }))
     });
 
-    return [...systemEvents, ...calendarEvents];
-  }, [meetings, externalEvents]);
+    return [...systemEvents, ...taskEvents, ...calendarEvents];
+  }, [meetings, tasks, externalEvents]);
   const handleSelectEvent = (event: CalendarEvent) => {
     if (event.isExternal) {
       onEventClick(null, {
