@@ -1,6 +1,8 @@
 import { Briefcase, Clock, AlertTriangle, Users, Flame, TrendingUp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { JOB_STAGES } from "@/lib/jobStages";
+import { PaceCard } from "./PaceCard";
+import { usePaceMetrics } from "@/hooks/usePaceMetrics";
 
 interface Vaga {
   id: string;
@@ -42,8 +44,13 @@ export function VagasDashboard({
     count: vagas.filter(v => v.status_slug === stage.slug).length
   })).filter(s => s.count > 0);
 
+  const paceMetrics = usePaceMetrics();
+
   return (
     <div className="space-y-4">
+      {/* Pace de Fechamento */}
+      <PaceCard metrics={paceMetrics} />
+
       {/* Resumo do Pipeline */}
       <Card className="border-gray-300 shadow-md">
         <CardHeader className="pb-2">
