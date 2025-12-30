@@ -14,44 +14,53 @@ interface DashboardStats {
   vagasCanceladas: number;
 }
 
+// Helper para garantir número válido (nunca NaN)
+const toNumber = (val: unknown, fallback = 0): number => {
+  if (val === null || val === undefined) return fallback;
+  const num = Number(val);
+  return isNaN(num) ? fallback : num;
+};
+
 async function fetchDashboardOverview(): Promise<DashboardStats> {
-  // Try optimized RPC first
-  const { data, error: rpcError } = await supabase
-    .rpc('get_dashboard_overview_secure')
-    .single();
+  // Try optimized RPC first (retorna array, não usar .single())
+  const { data: rpcData, error: rpcError } = await supabase
+    .rpc('get_dashboard_overview_secure');
+
+  // Extrair primeiro item do array de forma segura
+  const data = Array.isArray(rpcData) && rpcData.length > 0 ? rpcData[0] : null;
 
   let baseStats: Partial<DashboardStats>;
 
-  if (rpcError) {
+  if (rpcError || !data) {
     // Fallback to regular view
     const { data: fallbackData, error: fallbackError } = await supabase
       .from('dashboard_overview')
       .select('*')
-      .single();
+      .maybeSingle();
 
     if (fallbackError) throw fallbackError;
     baseStats = {
-      vagasAbertas: fallbackData.vagas_abertas ?? 0,
-      candidatosAtivos: fallbackData.candidatos_ativos ?? 0,
-      vagasAtencao: fallbackData.vagas_atencao ?? 0,
-      idsVagasAtencao: fallbackData.ids_vagas_atencao ?? [],
-      mediaFechamento: fallbackData.media_dias_fechamento ?? 0,
-      taxaAprovacao: fallbackData.taxa_aprovacao ?? 0,
-      feedbacksPendentes: fallbackData.feedbacks_pendentes ?? 0,
+      vagasAbertas: toNumber(fallbackData?.vagas_abertas),
+      candidatosAtivos: toNumber(fallbackData?.candidatos_ativos),
+      vagasAtencao: toNumber(fallbackData?.vagas_atencao),
+      idsVagasAtencao: fallbackData?.ids_vagas_atencao ?? [],
+      mediaFechamento: toNumber(fallbackData?.media_dias_fechamento),
+      taxaAprovacao: toNumber(fallbackData?.taxa_aprovacao),
+      feedbacksPendentes: toNumber(fallbackData?.feedbacks_pendentes),
     };
   } else {
     baseStats = {
-      vagasAbertas: data?.vagas_abertas ?? 0,
-      candidatosAtivos: data?.candidatos_ativos ?? 0,
-      vagasAtencao: data?.vagas_atencao ?? 0,
-      idsVagasAtencao: data?.ids_vagas_atencao ?? [],
-      mediaFechamento: data?.media_dias_fechamento ?? 0,
-      taxaAprovacao: data?.taxa_aprovacao ?? 0,
-      feedbacksPendentes: data?.feedbacks_pendentes ?? 0,
+      vagasAbertas: toNumber(data.vagas_abertas),
+      candidatosAtivos: toNumber(data.candidatos_ativos),
+      vagasAtencao: toNumber(data.vagas_atencao),
+      idsVagasAtencao: data.ids_vagas_atencao ?? [],
+      mediaFechamento: toNumber(data.media_dias_fechamento),
+      taxaAprovacao: toNumber(data.taxa_aprovacao),
+      feedbacksPendentes: toNumber(data.feedbacks_pendentes),
     };
   }
 
-  // Fetch cancelled jobs count in parallel with base stats
+  // Fetch cancelled jobs count
   const { count: canceladasCount } = await supabase
     .from('vagas')
     .select('*', { count: 'exact', head: true })
@@ -60,7 +69,7 @@ async function fetchDashboardOverview(): Promise<DashboardStats> {
 
   return {
     ...baseStats,
-    vagasCanceladas: canceladasCount ?? 0,
+    vagasCanceladas: toNumber(canceladasCount),
   } as DashboardStats;
 }
 
