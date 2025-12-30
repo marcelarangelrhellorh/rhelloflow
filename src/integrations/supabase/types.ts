@@ -167,12 +167,17 @@ export type Database = {
           candidate_id: string
           comments: string | null
           created_at: string | null
+          created_by: string | null
           evaluator_id: string
+          expires_at: string | null
+          external_token: string | null
           id: string
           match_percentage: number | null
           recommendation:
             | Database["public"]["Enums"]["scorecard_recommendation"]
             | null
+          source: string | null
+          submitted_at: string | null
           template_id: string
           total_score: number | null
           updated_at: string | null
@@ -182,12 +187,17 @@ export type Database = {
           candidate_id: string
           comments?: string | null
           created_at?: string | null
+          created_by?: string | null
           evaluator_id: string
+          expires_at?: string | null
+          external_token?: string | null
           id?: string
           match_percentage?: number | null
           recommendation?:
             | Database["public"]["Enums"]["scorecard_recommendation"]
             | null
+          source?: string | null
+          submitted_at?: string | null
           template_id: string
           total_score?: number | null
           updated_at?: string | null
@@ -197,12 +207,17 @@ export type Database = {
           candidate_id?: string
           comments?: string | null
           created_at?: string | null
+          created_by?: string | null
           evaluator_id?: string
+          expires_at?: string | null
+          external_token?: string | null
           id?: string
           match_percentage?: number | null
           recommendation?:
             | Database["public"]["Enums"]["scorecard_recommendation"]
             | null
+          source?: string | null
+          submitted_at?: string | null
           template_id?: string
           total_score?: number | null
           updated_at?: string | null
@@ -256,6 +271,13 @@ export type Database = {
             columns: ["candidate_id"]
             isOneToOne: false
             referencedRelation: "vw_candidatos_reprovados_sem_whatsapp"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidate_scorecards_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
@@ -2260,6 +2282,8 @@ export type Database = {
           display_order: number | null
           id: string
           name: string
+          options: Json | null
+          question_type: string | null
           scale_type: Database["public"]["Enums"]["scale_type"] | null
           template_id: string
           weight: number | null
@@ -2271,6 +2295,8 @@ export type Database = {
           display_order?: number | null
           id?: string
           name: string
+          options?: Json | null
+          question_type?: string | null
           scale_type?: Database["public"]["Enums"]["scale_type"] | null
           template_id: string
           weight?: number | null
@@ -2282,6 +2308,8 @@ export type Database = {
           display_order?: number | null
           id?: string
           name?: string
+          options?: Json | null
+          question_type?: string | null
           scale_type?: Database["public"]["Enums"]["scale_type"] | null
           template_id?: string
           weight?: number | null
@@ -2300,26 +2328,41 @@ export type Database = {
         Row: {
           created_at: string | null
           criteria_id: string
+          graded_at: string | null
+          graded_by: string | null
           id: string
+          is_correct: boolean | null
           notes: string | null
           score: number | null
           scorecard_id: string
+          selected_option_index: number | null
+          text_answer: string | null
         }
         Insert: {
           created_at?: string | null
           criteria_id: string
+          graded_at?: string | null
+          graded_by?: string | null
           id?: string
+          is_correct?: boolean | null
           notes?: string | null
           score?: number | null
           scorecard_id: string
+          selected_option_index?: number | null
+          text_answer?: string | null
         }
         Update: {
           created_at?: string | null
           criteria_id?: string
+          graded_at?: string | null
+          graded_by?: string | null
           id?: string
+          is_correct?: boolean | null
           notes?: string | null
           score?: number | null
           scorecard_id?: string
+          selected_option_index?: number | null
+          text_answer?: string | null
         }
         Relationships: [
           {
@@ -2327,6 +2370,13 @@ export type Database = {
             columns: ["criteria_id"]
             isOneToOne: false
             referencedRelation: "scorecard_criteria"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scorecard_evaluations_graded_by_fkey"
+            columns: ["graded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
@@ -2346,6 +2396,7 @@ export type Database = {
           description: string | null
           id: string
           name: string
+          type: string | null
           updated_at: string | null
         }
         Insert: {
@@ -2355,6 +2406,7 @@ export type Database = {
           description?: string | null
           id?: string
           name: string
+          type?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -2364,6 +2416,7 @@ export type Database = {
           description?: string | null
           id?: string
           name?: string
+          type?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -4809,6 +4862,19 @@ export type Database = {
           requires_password: boolean
           submissions_count: number
           token: string
+        }[]
+      }
+      get_technical_test_by_token: {
+        Args: { p_token: string }
+        Returns: {
+          candidate_id: string
+          candidate_name: string
+          expires_at: string
+          scorecard_id: string
+          submitted_at: string
+          template_id: string
+          vaga_id: string
+          vaga_titulo: string
         }[]
       }
       get_user_role: { Args: { user_id: string }; Returns: string }
