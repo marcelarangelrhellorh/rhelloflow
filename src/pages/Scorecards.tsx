@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Copy, Edit, Trash, TrendingUp, Users, Target } from "lucide-react";
+import { Plus, Copy, Edit, Trash, TrendingUp, Users, Target, User } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 interface ScorecardTemplate {
   id: string;
@@ -13,6 +13,8 @@ interface ScorecardTemplate {
   description: string | null;
   active: boolean;
   created_at: string;
+  created_by: string | null;
+  creator_name?: string;
   criteria_count?: number;
   usage_count?: number;
 }
@@ -38,11 +40,14 @@ export default function Scorecards() {
     try {
       setLoading(true);
 
-      // Load templates with criteria count
+      // Load templates with criteria count and creator info
       const {
         data: templatesData,
         error: templatesError
-      } = await supabase.from("scorecard_templates").select("*").order("created_at", {
+      } = await supabase.from("scorecard_templates").select(`
+        *,
+        profiles:created_by(full_name)
+      `).order("created_at", {
         ascending: false
       });
       if (templatesError) throw templatesError;
@@ -61,8 +66,13 @@ export default function Scorecards() {
           count: "exact",
           head: true
         }).eq("template_id", template.id);
+        
+        // Extract creator name from join
+        const creatorName = (template.profiles as any)?.full_name || "Usuário desconhecido";
+        
         return {
           ...template,
+          creator_name: creatorName,
           criteria_count: criteriaCount || 0,
           usage_count: usageCount || 0
         };
@@ -167,12 +177,12 @@ export default function Scorecards() {
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-[#00141D]">Scorecards</h1>
+              <h1 className="text-3xl font-bold text-[#00141D]">Avaliações</h1>
               <p className="text-base text-[#36404A] mt-1">
                 Gerencie templates de avaliação de candidatos
               </p>
             </div>
-            <Button onClick={() => navigate("/scorecards/novo")} className="font-semibold">
+            <Button onClick={() => navigate("/avaliacoes/novo")} className="font-semibold">
               <Plus className="mr-2 h-4 w-4" />
               Novo Template
             </Button>
@@ -236,7 +246,7 @@ export default function Scorecards() {
                 <p className="text-base text-[hsl(var(--muted-foreground))] mb-6">
                   Crie seu primeiro template de scorecard para começar
                 </p>
-                <Button onClick={() => navigate("/scorecards/novo")} className="bg-[hsl(var(--primary))] hover:bg-[hsl(var(--accent))] text-[hsl(var(--primary-foreground))] font-semibold">
+                <Button onClick={() => navigate("/avaliacoes/novo")} className="bg-[hsl(var(--primary))] hover:bg-[hsl(var(--accent))] text-[hsl(var(--primary-foreground))] font-semibold">
                   <Plus className="mr-2 h-5 w-5" />
                   Criar Template
                 </Button>
@@ -257,6 +267,10 @@ export default function Scorecards() {
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-4">
+                    <div className="flex items-center gap-2 text-sm text-[hsl(var(--muted-foreground))]">
+                      <User className="h-4 w-4" />
+                      <span>Criado por: <strong className="text-[hsl(var(--foreground))]">{template.creator_name}</strong></span>
+                    </div>
                     <div className="flex items-center justify-between text-base">
                       <span className="text-[hsl(var(--muted-foreground))] font-semibold">Critérios:</span>
                       <span className="font-bold text-[hsl(var(--foreground))]">{template.criteria_count}</span>
@@ -267,7 +281,7 @@ export default function Scorecards() {
                     </div>
                     
                     <div className="flex gap-2 pt-3 border-t border-[hsl(var(--border))]">
-                      <Button variant="outline" size="sm" onClick={() => navigate(`/scorecards/${template.id}/editar`)} className="flex-1 hover:bg-[hsl(var(--primary))]/10 hover:border-[hsl(var(--primary))]/30 font-semibold">
+                      <Button variant="outline" size="sm" onClick={() => navigate(`/avaliacoes/${template.id}/editar`)} className="flex-1 hover:bg-[hsl(var(--primary))]/10 hover:border-[hsl(var(--primary))]/30 font-semibold">
                         <Edit className="mr-2 h-4 w-4" />
                         Editar
                       </Button>
