@@ -167,14 +167,14 @@ export default function ScorecardForm() {
     }
 
     if (criteria.length === 0) {
-      toast.error("Adicione pelo menos um critério");
+      toast.error("Adicione pelo menos uma pergunta");
       return;
     }
 
     // Validate criteria
     const invalidCriteria = criteria.find((c) => !c.name.trim());
     if (invalidCriteria) {
-      toast.error("Todos os critérios devem ter um nome");
+      toast.error("Todas as perguntas devem ter um texto");
       return;
     }
 
@@ -350,9 +350,9 @@ export default function ScorecardForm() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-xl">Critérios de Avaliação</CardTitle>
+                <CardTitle className="text-xl">Perguntas da Avaliação</CardTitle>
                 <CardDescription className="text-base">
-                  Defina os critérios que serão avaliados (peso total deve somar 100%)
+                  Defina as perguntas que serão avaliadas (peso total deve somar 100%)
                 </CardDescription>
               </div>
               <Badge
@@ -438,13 +438,13 @@ export default function ScorecardForm() {
 
                       {/* Name */}
                       <div className="space-y-2">
-                        <Label className="text-base">Nome do Critério *</Label>
+                        <Label className="text-base">Pergunta *</Label>
                         <Input
                           value={criterion.name}
                           onChange={(e) =>
                             updateCriterion(index, "name", e.target.value)
                           }
-                          placeholder="Ex: Conhecimento Técnico"
+                          placeholder="Ex: O candidato demonstrou conhecimento técnico adequado?"
                           className="text-base"
                         />
                       </div>
@@ -485,14 +485,14 @@ export default function ScorecardForm() {
               className="w-full text-base"
             >
               <Plus className="mr-2 h-5 w-5" />
-              Adicionar Critério
+              Adicionar Pergunta
             </Button>
 
             {/* Scale Info */}
             <div className="bg-muted p-4 rounded-lg">
               <h4 className="text-base font-semibold mb-2">Escala de Avaliação</h4>
               <p className="text-base text-muted-foreground">
-                Todos os critérios utilizam escala de 1 a 5:
+                Todas as perguntas utilizam escala de 1 a 5:
               </p>
               <ul className="text-base text-muted-foreground mt-2 space-y-1">
                 <li>• 1 = Não atende às expectativas</li>
