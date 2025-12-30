@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Save, X } from "lucide-react";
 import { toast } from "sonner";
 import { Constants } from "@/integrations/supabase/types";
+import { ORIGEM_OPTIONS } from "@/constants/fitCultural";
 
 interface CandidateModalProps {
   open: boolean;
@@ -358,19 +359,9 @@ export function CandidateModal({ open, onClose, candidatoId, onSave }: Candidate
                     <SelectValue placeholder={hasSourceLink ? "Link de Divulgação" : "Selecione a origem"} />
                   </SelectTrigger>
                   <SelectContent className="bg-popover z-50">
-                    <SelectItem value="Link de Divulgação">🔗 Link de Divulgação</SelectItem>
-                    <SelectItem value="Pandapé">🐼 Pandapé</SelectItem>
-                    <SelectItem value="LinkedIn">💼 LinkedIn</SelectItem>
-                    <SelectItem value="Gupy">🎯 Gupy</SelectItem>
-                    <SelectItem value="Indeed">📋 Indeed</SelectItem>
-                    <SelectItem value="Catho">📊 Catho</SelectItem>
-                    <SelectItem value="Indicação">👥 Indicação</SelectItem>
-                    <SelectItem value="Site da Empresa">🌐 Site da Empresa</SelectItem>
-                    <SelectItem value="Instagram">📸 Instagram</SelectItem>
-                    <SelectItem value="WhatsApp">💬 WhatsApp</SelectItem>
-                    <SelectItem value="E-mail Direto">✉️ E-mail Direto</SelectItem>
-                    <SelectItem value="Hunting">🎯 Hunting</SelectItem>
-                    <SelectItem value="Outra">➕ Outra</SelectItem>
+                    {ORIGEM_OPTIONS.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 {hasSourceLink && (
