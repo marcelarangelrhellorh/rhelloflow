@@ -9,6 +9,7 @@ import MeetingModal from "@/components/Tasks/MeetingModal";
 import TaskCard from "@/components/Tasks/TaskCard";
 import TaskKanban from "@/components/Tasks/TaskKanban";
 import TasksDashboard from "@/components/Tasks/TasksDashboard";
+import MeetingsWeeklySummary from "@/components/Tasks/MeetingsWeeklySummary";
 import GoogleCalendarButton from "@/components/Tasks/GoogleCalendarButton";
 import CalendarView from "@/components/Tasks/CalendarView";
 import TodayMeetingsSidebar from "@/components/Tasks/TodayMeetingsSidebar";
@@ -360,7 +361,8 @@ export default function Tarefas() {
           {view !== "calendar" && (
             <div className="lg:col-span-1 space-y-4 lg:sticky lg:top-24 lg:self-start">
               <TasksDashboard onTaskClick={handleEdit} />
-              <TodayMeetingsSidebar 
+              <MeetingsWeeklySummary />
+              <TodayMeetingsSidebar
                 onEventClick={async event => {
                   // Check if this is an external Google Calendar event or a local meeting
                   if (event.isExternal) {
