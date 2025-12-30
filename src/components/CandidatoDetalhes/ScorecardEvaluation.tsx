@@ -33,6 +33,7 @@ interface ScorecardEvaluationProps {
   candidateId: string;
   candidateName: string;
   vagaId?: string | null;
+  templateType?: 'entrevista' | 'teste_tecnico';
 }
 const categoryLabels: Record<string, string> = {
   hard_skills: "Hard Skills",
@@ -68,7 +69,8 @@ const recommendations = [{
 export function ScorecardEvaluation({
   candidateId,
   candidateName,
-  vagaId
+  vagaId,
+  templateType = 'entrevista'
 }: ScorecardEvaluationProps) {
   const [templates, setTemplates] = useState<ScorecardTemplate[]>([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
@@ -88,10 +90,14 @@ export function ScorecardEvaluation({
   }, [selectedTemplateId]);
   async function loadTemplates() {
     try {
-      const {
-        data,
-        error
-      } = await supabase.from("scorecard_templates").select("id, name, description").eq("active", true).order("name");
+      let query = supabase.from("scorecard_templates").select("id, name, description").eq("active", true);
+      
+      // Filter by template type
+      if (templateType) {
+        query = query.eq("type", templateType);
+      }
+      
+      const { data, error } = await query.order("name");
       if (error) throw error;
       setTemplates(data || []);
     } catch (error: any) {
