@@ -4922,6 +4922,11 @@ export type Database = {
         | "Em processo de contratação"
         | "Concluído"
         | "Cancelada"
+        | "Divulgação"
+        | "Entrevistas"
+        | "Shortlist disponível"
+        | "Concluída"
+        | "Congelada"
       user_type: "rhello" | "external"
     }
     CompositeTypes: {
@@ -5116,6 +5121,11 @@ export const Constants = {
         "Em processo de contratação",
         "Concluído",
         "Cancelada",
+        "Divulgação",
+        "Entrevistas",
+        "Shortlist disponível",
+        "Concluída",
+        "Congelada",
       ],
       user_type: ["rhello", "external"],
     },
