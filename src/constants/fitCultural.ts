@@ -88,14 +88,21 @@ export const FORMATO_TRABALHO_OPTIONS = [
 ] as const;
 
 export const ORIGEM_OPTIONS = [
+  { value: "Link de Divulgação", label: "🔗 Link de Divulgação" },
+  { value: "Pandapé", label: "🐼 Pandapé" },
   { value: "LinkedIn", label: "💼 LinkedIn" },
+  { value: "Gupy", label: "🎯 Gupy" },
+  { value: "Indeed", label: "📋 Indeed" },
+  { value: "Catho", label: "📊 Catho" },
   { value: "Indicação", label: "👥 Indicação" },
-  { value: "Site", label: "🌐 Site" },
-  { value: "Evento", label: "🎪 Evento" },
-  { value: "Google", label: "🔍 Google" },
+  { value: "Site da Empresa", label: "🌐 Site da Empresa" },
   { value: "Instagram", label: "📸 Instagram" },
   { value: "WhatsApp", label: "💬 WhatsApp" },
-  { value: "Outros", label: "➕ Outros" },
+  { value: "Google", label: "🔍 Google" },
+  { value: "E-mail Direto", label: "✉️ E-mail Direto" },
+  { value: "Hunting", label: "🎯 Hunting" },
+  { value: "Evento", label: "🎪 Evento" },
+  { value: "Outra", label: "➕ Outra" },
 ] as const;
 
 // Opções de cargo

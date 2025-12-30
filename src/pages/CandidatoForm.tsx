@@ -13,7 +13,7 @@ import { toast } from "sonner";
 import { Constants } from "@/integrations/supabase/types";
 import { LoadingButton } from "@/components/ui/loading-button";
 import { handleApiError } from "@/lib/errorHandler";
-import { MODELO_CONTRATACAO_OPTIONS, FORMATO_TRABALHO_OPTIONS } from "@/constants/fitCultural";
+import { MODELO_CONTRATACAO_OPTIONS, FORMATO_TRABALHO_OPTIONS, ORIGEM_OPTIONS } from "@/constants/fitCultural";
 
 export default function CandidatoForm() {
   const { id } = useParams();
@@ -677,16 +677,19 @@ export default function CandidatoForm() {
             <CardContent>
               <div>
                 <Label htmlFor="origem">Como este candidato chegou até nós?</Label>
-                <Input
-                  id="origem"
-                  placeholder="Ex: LinkedIn, Indicação, Gupy, etc."
-                  value={formData.origem}
-                  onChange={(e) => setFormData({ ...formData, origem: e.target.value })}
-                  className="mt-2"
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  Digite a origem da candidatura. Novas origens serão adicionadas automaticamente.
-                </p>
+                <Select 
+                  value={formData.origem} 
+                  onValueChange={(value) => setFormData({ ...formData, origem: value })}
+                >
+                  <SelectTrigger className="mt-2">
+                    <SelectValue placeholder="Selecione a origem" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover z-50">
+                    {ORIGEM_OPTIONS.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </CardContent>
           </Card>
