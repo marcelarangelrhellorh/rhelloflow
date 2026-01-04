@@ -1,8 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Trash2, RefreshCw, Briefcase, MapPin, User, PartyPopper, CheckCircle2, MessageCircle } from "lucide-react";
+import { Edit, Trash2, RefreshCw, Briefcase, MapPin, PartyPopper, CheckCircle2, MessageCircle, Link2, Link2Off } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useNavigate } from "react-router-dom";
+
 interface CandidateHeaderProps {
   nome: string;
   status: string;
@@ -10,6 +12,8 @@ interface CandidateHeaderProps {
   area: string | null;
   cidade: string | null;
   estado: string | null;
+  vagaTitulo: string | null;
+  vagaId: string | null;
   onEdit: () => void;
   onDelete: () => void;
   onRelocate: () => void;
@@ -33,12 +37,15 @@ export function CandidateHeader({
   area,
   cidade,
   estado,
+  vagaTitulo,
+  vagaId,
   onEdit,
   onDelete,
   onRelocate,
   onStatusChange,
   onSendWhatsApp
 }: CandidateHeaderProps) {
+  const navigate = useNavigate();
   const getInitials = (name: string) => {
     const parts = name.split(" ");
     return parts.length >= 2 ? `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase() : name.substring(0, 2).toUpperCase();
@@ -92,6 +99,22 @@ export function CandidateHeader({
                     <MapPin className="h-4 w-4" />
                     <span className="font-semibold">{[cidade, estado].filter(Boolean).join(", ")}</span>
                   </div>}
+
+                {/* Vaga vinculada */}
+                {vagaId && vagaTitulo ? (
+                  <button 
+                    onClick={() => navigate(`/vagas/${vagaId}`)}
+                    className="flex items-center gap-1.5 text-primary hover:text-primary/80 hover:underline transition-colors"
+                  >
+                    <Link2 className="h-4 w-4" />
+                    <span className="font-semibold">{vagaTitulo}</span>
+                  </button>
+                ) : (
+                  <div className="flex items-center gap-1.5 text-muted-foreground">
+                    <Link2Off className="h-4 w-4" />
+                    <span className="font-medium italic">Sem vaga vinculada</span>
+                  </div>
+                )}
               </div>
 
               {/* Seletor de Etapa */}
