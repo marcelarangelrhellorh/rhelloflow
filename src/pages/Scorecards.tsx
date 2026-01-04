@@ -313,7 +313,7 @@ export default function Scorecards() {
               </CardContent>
             </Card> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 text-sm">
               {filteredTemplates.map(template => <Card key={template.id} className="hover:shadow-lg transition-all duration-200 bg-gradient-to-br from-white to-[hsl(var(--background))] border-[hsl(var(--border))] text-sm flex flex-col h-full">
-                  <CardHeader className="min-h-[120px]">
+                  <CardHeader className="min-h-[140px]">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0 text-sm">
                         <CardTitle className="font-bold text-[hsl(var(--foreground))] truncate text-sm">{template.name}</CardTitle>
