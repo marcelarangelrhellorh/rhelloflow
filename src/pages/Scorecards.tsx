@@ -209,7 +209,7 @@ export default function Scorecards() {
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="font-bold text-[#00141D] text-2xl">Avaliações</h1>
+              <h1 className="text-3xl font-bold text-[#00141D]">Avaliações</h1>
               <p className="text-base text-[#36404A] mt-1">
                 Gerencie templates de avaliação de candidatos
               </p>
@@ -311,13 +311,13 @@ export default function Scorecards() {
                   Criar Template
                 </Button>
               </CardContent>
-            </Card> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {filteredTemplates.map(template => <Card key={template.id} className="hover:shadow-lg transition-all duration-200 bg-gradient-to-br from-white to-[hsl(var(--background))] border-[hsl(var(--border))]">
+            </Card> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 text-sm">
+              {filteredTemplates.map(template => <Card key={template.id} className="hover:shadow-lg transition-all duration-200 bg-gradient-to-br from-white to-[hsl(var(--background))] border-[hsl(var(--border))] text-sm">
                   <CardHeader>
                     <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1 min-w-0">
-                        <CardTitle className="text-lg font-bold text-[hsl(var(--foreground))] truncate">{template.name}</CardTitle>
-                        <CardDescription className="mt-1.5 text-sm font-medium line-clamp-2">
+                      <div className="flex-1 min-w-0 text-sm">
+                        <CardTitle className="font-bold text-[hsl(var(--foreground))] truncate text-sm">{template.name}</CardTitle>
+                        <CardDescription className="mt-1.5 text-base font-medium line-clamp-2">
                           {template.description || "Sem descrição"}
                         </CardDescription>
                       </div>
