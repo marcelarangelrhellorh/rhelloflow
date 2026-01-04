@@ -8,7 +8,6 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Copy, Edit, Trash, TrendingUp, Users, Target, User, ClipboardList, FileText } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-
 interface ScorecardTemplate {
   id: string;
   name: string;
@@ -21,13 +20,11 @@ interface ScorecardTemplate {
   criteria_count?: number;
   usage_count?: number;
 }
-
 interface DashboardStats {
   totalTemplates: number;
   totalEvaluations: number;
   averageScore: number;
 }
-
 export default function Scorecards() {
   const navigate = useNavigate();
   const [templates, setTemplates] = useState<ScorecardTemplate[]>([]);
@@ -40,15 +37,12 @@ export default function Scorecards() {
   });
   const [loading, setLoading] = useState(true);
   const [deleteTemplateId, setDeleteTemplateId] = useState<string | null>(null);
-
   useEffect(() => {
     loadData();
   }, []);
-
   useEffect(() => {
     filterTemplates();
   }, [templates, activeTab]);
-
   function filterTemplates() {
     if (activeTab === "todos") {
       setFilteredTemplates(templates);
@@ -56,7 +50,6 @@ export default function Scorecards() {
       setFilteredTemplates(templates.filter(t => t.type === activeTab));
     }
   }
-
   async function loadData() {
     try {
       setLoading(true);
@@ -87,10 +80,9 @@ export default function Scorecards() {
           count: "exact",
           head: true
         }).eq("template_id", template.id);
-        
+
         // Extract creator name from join
         const creatorName = (template.profiles as any)?.full_name || "Usuário desconhecido";
-        
         return {
           ...template,
           type: (template.type || "entrevista") as "entrevista" | "teste_tecnico",
@@ -124,7 +116,6 @@ export default function Scorecards() {
       setLoading(false);
     }
   }
-
   async function handleDuplicate(templateId: string) {
     try {
       // Get original template
@@ -178,7 +169,6 @@ export default function Scorecards() {
       toast.error("Erro ao duplicar template");
     }
   }
-
   async function handleDelete(templateId: string) {
     try {
       const {
@@ -193,41 +183,33 @@ export default function Scorecards() {
       toast.error("Erro ao excluir template");
     }
   }
-
   const getTypeIcon = (type: string) => {
     return type === "teste_tecnico" ? <FileText className="h-4 w-4" /> : <ClipboardList className="h-4 w-4" />;
   };
-
   const getTypeBadge = (type: string) => {
     if (type === "teste_tecnico") {
-      return (
-        <Badge variant="outline" className="bg-purple-100 text-purple-800 border-purple-200 font-medium">
+      return <Badge variant="outline" className="bg-purple-100 text-purple-800 border-purple-200 font-medium">
           <FileText className="h-3 w-3 mr-1" />
           Teste Técnico
-        </Badge>
-      );
+        </Badge>;
     }
-    return (
-      <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-200 font-medium">
+    return <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-200 font-medium">
         <ClipboardList className="h-3 w-3 mr-1" />
         Entrevista
-      </Badge>
-    );
+      </Badge>;
   };
-
   if (loading) {
     return <div className="flex items-center justify-center min-h-screen bg-white">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
       </div>;
   }
-
   return <div className="min-h-screen bg-white">
       {/* Header */}
       <div className="sticky top-0 z-20 bg-white border-b border-gray-200 shadow-sm">
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-[#00141D]">Avaliações</h1>
+              <h1 className="font-bold text-[#00141D] text-2xl">Avaliações</h1>
               <p className="text-base text-[#36404A] mt-1">
                 Gerencie templates de avaliação de candidatos
               </p>
@@ -319,16 +301,10 @@ export default function Scorecards() {
                   <Target className="h-10 w-10 text-[hsl(var(--primary-foreground))]" />
                 </div>
                 <h3 className="text-xl font-bold mb-2 text-[hsl(var(--foreground))]">
-                  {activeTab === "todos" 
-                    ? "Nenhum template criado" 
-                    : activeTab === "entrevista"
-                    ? "Nenhum template de entrevista"
-                    : "Nenhum teste técnico"}
+                  {activeTab === "todos" ? "Nenhum template criado" : activeTab === "entrevista" ? "Nenhum template de entrevista" : "Nenhum teste técnico"}
                 </h3>
                 <p className="text-base text-[hsl(var(--muted-foreground))] mb-6">
-                  {activeTab === "todos" 
-                    ? "Crie seu primeiro template de scorecard para começar"
-                    : `Crie um template do tipo ${activeTab === "entrevista" ? "entrevista" : "teste técnico"}`}
+                  {activeTab === "todos" ? "Crie seu primeiro template de scorecard para começar" : `Crie um template do tipo ${activeTab === "entrevista" ? "entrevista" : "teste técnico"}`}
                 </p>
                 <Button onClick={() => navigate("/avaliacoes/novo")} className="bg-[hsl(var(--primary))] hover:bg-[hsl(var(--accent))] text-[hsl(var(--primary-foreground))] font-semibold">
                   <Plus className="mr-2 h-5 w-5" />
