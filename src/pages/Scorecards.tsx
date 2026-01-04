@@ -334,11 +334,11 @@ export default function Scorecards() {
                       <User className="h-4 w-4" />
                       <span>Criado por: <strong className="text-[hsl(var(--foreground))]">{template.creator_name}</strong></span>
                     </div>
-                    <div className="flex items-center justify-between text-base">
+                    <div className="flex items-center justify-between text-sm">
                       <span className="text-[hsl(var(--muted-foreground))] font-semibold">Perguntas:</span>
                       <span className="font-bold text-[hsl(var(--foreground))]">{template.criteria_count}</span>
                     </div>
-                    <div className="flex items-center justify-between text-base">
+                    <div className="flex items-center justify-between text-sm">
                       <span className="text-[hsl(var(--muted-foreground))] font-semibold">Usado em:</span>
                       <span className="font-bold text-[hsl(var(--foreground))]">{template.usage_count} avaliações</span>
                     </div>
