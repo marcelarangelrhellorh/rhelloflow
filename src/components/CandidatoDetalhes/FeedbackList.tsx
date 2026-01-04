@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, MessageSquare, Trash2, Star, Send } from "lucide-react";
+import { Plus, Trash2, Star, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useEffect, useState } from "react";
@@ -147,9 +147,7 @@ export function FeedbackList({
         {isLoading ? <div className="flex justify-center py-8">
             <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
           </div> : feedbacks.length === 0 ? <div className="flex flex-col items-center justify-center py-8 text-center">
-            <div className="mb-4 rounded-full bg-muted/20 p-4">
-              <MessageSquare className="h-8 w-8 text-muted-foreground" />
-            </div>
+            
             <p className="text-muted-foreground font-medium text-sm">
               Nenhum feedback registrado ainda
             </p>

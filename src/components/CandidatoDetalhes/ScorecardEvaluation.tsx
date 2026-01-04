@@ -91,13 +91,15 @@ export function ScorecardEvaluation({
   async function loadTemplates() {
     try {
       let query = supabase.from("scorecard_templates").select("id, name, description").eq("active", true);
-      
+
       // Filter by template type
       if (templateType) {
         query = query.eq("type", templateType);
       }
-      
-      const { data, error } = await query.order("name");
+      const {
+        data,
+        error
+      } = await query.order("name");
       if (error) throw error;
       setTemplates(data || []);
     } catch (error: any) {
@@ -231,7 +233,7 @@ export function ScorecardEvaluation({
   const allScoresSet = evaluations.length > 0 && evaluations.every(ev => ev.score > 0);
   return <Card className="border border-gray-300 shadow-md">
       <CardHeader className="border-gray-300">
-        <CardTitle className="font-bold text-base"> Scorecards</CardTitle>
+        <CardTitle className="font-bold text-base"> Avaliações</CardTitle>
         <CardDescription className="text-base">
           Avalie <span className="font-semibold">{candidateName}</span> de forma estruturada
         </CardDescription>

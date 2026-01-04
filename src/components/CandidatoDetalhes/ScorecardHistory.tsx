@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Star, User, Calendar, Target, ChevronDown } from "lucide-react";
+import { Star, User, Calendar, ChevronDown } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -175,7 +175,7 @@ export function ScorecardHistory({
           <CardDescription className="font-medium text-sm">Scorecards preenchidos para este candidato</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col items-center justify-center py-12">
-          <Target className="h-12 w-12 text-muted-foreground mb-4" />
+          
           <p className="text-sm text-muted-foreground">
             Nenhum scorecard preenchido ainda
           </p>

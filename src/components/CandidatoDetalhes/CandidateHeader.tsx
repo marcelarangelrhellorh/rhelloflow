@@ -16,16 +16,7 @@ interface CandidateHeaderProps {
   onStatusChange: (newStatus: string) => void;
   onSendWhatsApp: () => void;
 }
-const ETAPAS_DISPONIVEIS = [
-  "Banco de Talentos",
-  "Triagem",
-  "Assessment | Teste Técnico",
-  "Entrevista",
-  "Shortlist",
-  "Reprovado",
-  "Contratado"
-] as const;
-
+const ETAPAS_DISPONIVEIS = ["Banco de Talentos", "Triagem", "Assessment | Teste Técnico", "Entrevista", "Shortlist", "Reprovado", "Contratado"] as const;
 const statusColors: Record<string, string> = {
   "Banco de Talentos": "bg-muted/10 text-muted-foreground border-muted",
   "Triagem": "bg-slate-100 text-slate-800 border-slate-200",
@@ -33,7 +24,7 @@ const statusColors: Record<string, string> = {
   "Entrevista": "bg-blue-100 text-blue-800 border-blue-200",
   "Shortlist": "bg-amber-100 text-amber-800 border-amber-200",
   "Reprovado": "bg-red-100 text-red-800 border-red-200",
-  "Contratado": "bg-success text-success-foreground border-success",
+  "Contratado": "bg-success text-success-foreground border-success"
 };
 export function CandidateHeader({
   nome,
@@ -84,7 +75,7 @@ export function CandidateHeader({
             {/* Info */}
             <div className="flex-1 min-w-0">
               <div className="flex flex-wrap items-center gap-2 mb-3">
-                <h1 className="text-primary-text-light dark:text-primary-text-dark text-3xl font-black tracking-tight truncate">{nome}</h1>
+                <h1 className="text-primary-text-light dark:text-primary-text-dark font-black tracking-tight truncate text-2xl">{nome}</h1>
                 <Badge variant={isContratado ? "default" : "outline"} className={cn("text-base font-semibold flex-shrink-0", isContratado && "bg-success text-success-foreground hover:bg-success/90 border-success", !isContratado && (statusColors[status] || statusColors["Banco de Talentos"]))}>
                   {status}
                 </Badge>
