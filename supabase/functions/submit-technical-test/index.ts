@@ -153,24 +153,32 @@ serve(async (req) => {
       throw new Error('Failed to update test status');
     }
 
-    // Create notification for the recruiter who created the test
-    if (scorecard.created_by) {
-      const candidateName = (scorecard.candidatos as any)?.nome_completo || 'Candidato';
-      
-      await supabase
-        .from('notifications')
-        .insert({
-          user_id: scorecard.created_by,
-          kind: 'teste_tecnico',
-          title: 'Teste técnico respondido',
-          body: `${candidateName} completou o teste técnico com score de ${matchPercentage}%`,
-          job_id: scorecard.vaga_id
-        });
-
-      console.log(`Notification sent to user ${scorecard.created_by}`);
-    }
-
     console.log(`Technical test submitted for scorecard ${scorecard.id}: ${matchPercentage}%`);
+
+    // Create notification for the recruiter who created the test (non-blocking)
+    if (scorecard.created_by) {
+      try {
+        const candidateName = (scorecard.candidatos as any)?.nome_completo || 'Candidato';
+        
+        const { error: notifError } = await supabase
+          .from('notifications')
+          .insert({
+            user_id: scorecard.created_by,
+            kind: 'teste_tecnico',
+            title: 'Teste técnico respondido',
+            body: `${candidateName} completou o teste técnico com score de ${matchPercentage}%`,
+            job_id: scorecard.vaga_id
+          });
+
+        if (notifError) {
+          console.error('Failed to create notification:', notifError);
+        } else {
+          console.log(`Notification sent to user ${scorecard.created_by}`);
+        }
+      } catch (notifErr) {
+        console.error('Notification error (non-blocking):', notifErr);
+      }
+    }
 
     return new Response(
       JSON.stringify({
