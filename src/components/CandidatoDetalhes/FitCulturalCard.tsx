@@ -9,7 +9,7 @@ export function FitCulturalCard({
   fitCultural
 }: FitCulturalCardProps) {
   if (!fitCultural) return null;
-  return <Card>
+  return <Card className="shadow-lg">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
           <Heart className="h-5 w-5 text-primary" />

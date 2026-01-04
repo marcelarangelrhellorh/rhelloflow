@@ -322,36 +322,7 @@ export default function CandidatoDetalhes() {
           <CandidateTagsCard candidateId={id!} />
 
           {/* Main Info Card - Full Width */}
-          <ProfessionalInfoCard 
-            email={candidato.email} 
-            telefone={candidato.telefone} 
-            cidade={candidato.cidade} 
-            estado={candidato.estado} 
-            linkedin={candidato.linkedin} 
-            curriculoLink={candidato.curriculo_link} 
-            isFromPublicLink={!!candidato.source_link_id}
-            pretensaoSalarial={candidato.pretensao_salarial} 
-            vagaTitulo={vaga?.titulo || null} 
-            vagaId={candidato.vaga_relacionada_id} 
-            dataCadastro={candidato.criado_em} 
-            nivel={candidato.nivel} 
-            area={candidato.area} 
-            curriculoUrl={candidato.curriculo_url} 
-            portfolioUrl={candidato.portfolio_url} 
-            disponibilidadeMudanca={candidato.disponibilidade_mudanca} 
-            disponibilidadeStatus={candidato.disponibilidade_status} 
-            pontosFortes={candidato.pontos_fortes} 
-            pontosDesenvolver={candidato.pontos_desenvolver} 
-            parecerFinal={candidato.parecer_final} 
-            origem={candidato.origem} 
-            candidatoId={id!} 
-            experienciaProfissional={(candidato as any).experiencia_profissional || null} 
-            idiomas={(candidato as any).idiomas || null} 
-            modeloContratacao={candidato.modelo_contratacao} 
-            formatoTrabalho={candidato.formato_trabalho} 
-            onUpdate={loadCandidato} 
-            onVagaClick={() => vaga && navigate(`/vagas/${vaga.id}`)} 
-          />
+          <ProfessionalInfoCard email={candidato.email} telefone={candidato.telefone} cidade={candidato.cidade} estado={candidato.estado} linkedin={candidato.linkedin} curriculoLink={candidato.curriculo_link} isFromPublicLink={!!candidato.source_link_id} pretensaoSalarial={candidato.pretensao_salarial} vagaTitulo={vaga?.titulo || null} vagaId={candidato.vaga_relacionada_id} dataCadastro={candidato.criado_em} nivel={candidato.nivel} area={candidato.area} curriculoUrl={candidato.curriculo_url} portfolioUrl={candidato.portfolio_url} disponibilidadeMudanca={candidato.disponibilidade_mudanca} disponibilidadeStatus={candidato.disponibilidade_status} pontosFortes={candidato.pontos_fortes} pontosDesenvolver={candidato.pontos_desenvolver} parecerFinal={candidato.parecer_final} origem={candidato.origem} candidatoId={id!} experienciaProfissional={(candidato as any).experiencia_profissional || null} idiomas={(candidato as any).idiomas || null} modeloContratacao={candidato.modelo_contratacao} formatoTrabalho={candidato.formato_trabalho} onUpdate={loadCandidato} onVagaClick={() => vaga && navigate(`/vagas/${vaga.id}`)} />
 
           {/* Fit Cultural Card - only show if data exists */}
           {candidato.fit_cultural && <FitCulturalCard fitCultural={candidato.fit_cultural} />}
@@ -376,7 +347,7 @@ export default function CandidatoDetalhes() {
       </main>
 
         {/* Right Sidebar - Meetings + Notes */}
-        <aside className="hidden xl:block w-96 border-l border-gray-200 dark:border-secondary-text-light/20 bg-white dark:bg-background-dark overflow-y-auto">
+        <aside className="hidden xl:block w-96 border-l border-gray-200 dark:border-secondary-text-light/20 bg-white dark:bg-background-dark overflow-y-auto shadow-lg">
           <div className="sticky top-0 p-4 space-y-4">
             <CandidateMeetingsCard candidateId={id!} candidateName={candidato.nome_completo} className="shadow-lg border-gray-200" />
             
