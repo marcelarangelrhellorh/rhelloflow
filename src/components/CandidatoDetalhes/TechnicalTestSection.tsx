@@ -7,28 +7,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { 
-  Send, 
-  Copy, 
-  Clock, 
-  CheckCircle2, 
-  AlertCircle, 
-  ExternalLink,
-  RefreshCw,
-  Eye,
-  FileText
-} from "lucide-react";
+import { Send, Copy, Clock, CheckCircle2, AlertCircle, ExternalLink, RefreshCw, Eye, FileText } from "lucide-react";
 import { format, formatDistanceToNow, isPast } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { TechnicalTestResultModal } from "./TechnicalTestResultModal";
-
 interface Template {
   id: string;
   name: string;
   description: string | null;
 }
-
 interface TechnicalTest {
   id: string;
   template_id: string;
@@ -40,20 +28,24 @@ interface TechnicalTest {
   match_percentage: number | null;
   total_score: number | null;
 }
-
 interface TechnicalTestSectionProps {
   candidateId: string;
   candidateName: string;
   vagaId?: string | null;
 }
-
-const expirationOptions = [
-  { value: "3", label: "3 dias" },
-  { value: "7", label: "7 dias" },
-  { value: "14", label: "14 dias" },
-  { value: "30", label: "30 dias" },
-];
-
+const expirationOptions = [{
+  value: "3",
+  label: "3 dias"
+}, {
+  value: "7",
+  label: "7 dias"
+}, {
+  value: "14",
+  label: "14 dias"
+}, {
+  value: "30",
+  label: "30 dias"
+}];
 export function TechnicalTestSection({
   candidateId,
   candidateName,
@@ -66,34 +58,29 @@ export function TechnicalTestSection({
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [selectedTestId, setSelectedTestId] = useState<string | null>(null);
-
   useEffect(() => {
     loadTemplates();
     loadTests();
   }, [candidateId]);
-
   async function loadTemplates() {
     try {
-      const { data, error } = await supabase
-        .from("scorecard_templates")
-        .select("id, name, description")
-        .eq("active", true)
-        .eq("type", "teste_tecnico")
-        .order("name");
-      
+      const {
+        data,
+        error
+      } = await supabase.from("scorecard_templates").select("id, name, description").eq("active", true).eq("type", "teste_tecnico").order("name");
       if (error) throw error;
       setTemplates(data || []);
     } catch (error: any) {
       console.error("Erro ao carregar templates:", error);
     }
   }
-
   async function loadTests() {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from("candidate_scorecards")
-        .select(`
+      const {
+        data,
+        error
+      } = await supabase.from("candidate_scorecards").select(`
           id,
           template_id,
           external_token,
@@ -103,13 +90,10 @@ export function TechnicalTestSection({
           match_percentage,
           total_score,
           scorecard_templates!candidate_scorecards_template_id_fkey(name)
-        `)
-        .eq("candidate_id", candidateId)
-        .eq("source", "externo")
-        .order("created_at", { ascending: false });
-      
+        `).eq("candidate_id", candidateId).eq("source", "externo").order("created_at", {
+        ascending: false
+      });
       if (error) throw error;
-      
       setTests((data || []).map((t: any) => ({
         id: t.id,
         template_id: t.template_id,
@@ -127,17 +111,17 @@ export function TechnicalTestSection({
       setLoading(false);
     }
   }
-
   async function handleGenerateLink() {
     if (!selectedTemplateId) {
       toast.error("Selecione um template");
       return;
     }
-
     try {
       setGenerating(true);
-      
-      const { data, error } = await supabase.functions.invoke("generate-technical-test-link", {
+      const {
+        data,
+        error
+      } = await supabase.functions.invoke("generate-technical-test-link", {
         body: {
           candidateId,
           templateId: selectedTemplateId,
@@ -145,10 +129,8 @@ export function TechnicalTestSection({
           expirationDays: parseInt(expirationDays)
         }
       });
-
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-
       toast.success("Link do teste gerado com sucesso!");
       setSelectedTemplateId("");
       loadTests();
@@ -165,8 +147,11 @@ export function TechnicalTestSection({
       setGenerating(false);
     }
   }
-
-  function getTestStatus(test: TechnicalTest): { label: string; color: string; icon: React.ReactNode } {
+  function getTestStatus(test: TechnicalTest): {
+    label: string;
+    color: string;
+    icon: React.ReactNode;
+  } {
     if (test.submitted_at) {
       return {
         label: "Respondido",
@@ -174,7 +159,6 @@ export function TechnicalTestSection({
         icon: <CheckCircle2 className="h-4 w-4" />
       };
     }
-    
     if (test.expires_at && isPast(new Date(test.expires_at))) {
       return {
         label: "Expirado",
@@ -182,18 +166,15 @@ export function TechnicalTestSection({
         icon: <AlertCircle className="h-4 w-4" />
       };
     }
-    
     return {
       label: "Aguardando",
       color: "bg-yellow-100 text-yellow-800 border-yellow-200",
       icon: <Clock className="h-4 w-4" />
     };
   }
-
   function getTestUrl(token: string): string {
     return `${window.location.origin}/teste-tecnico/${token}`;
   }
-
   async function copyLink(token: string) {
     try {
       await navigator.clipboard.writeText(getTestUrl(token));
@@ -202,9 +183,7 @@ export function TechnicalTestSection({
       toast.error("Erro ao copiar link");
     }
   }
-
-  return (
-    <Card className="border border-gray-300 shadow-md">
+  return <Card className="border border-gray-300 shadow-md">
       <CardHeader className="border-gray-300">
         <CardTitle className="font-bold text-base">Teste Técnico</CardTitle>
         <CardDescription className="text-base">
@@ -224,26 +203,18 @@ export function TechnicalTestSection({
                   <SelectValue placeholder="Selecione um teste técnico" />
                 </SelectTrigger>
                 <SelectContent>
-                  {templates.length === 0 ? (
-                    <div className="p-2 text-sm text-muted-foreground">
+                  {templates.length === 0 ? <div className="p-2 text-sm text-muted-foreground">
                       Nenhum template de teste técnico disponível.
                       <br />
                       Crie um em Avaliações → Novo Template.
-                    </div>
-                  ) : (
-                    templates.map(template => (
-                      <SelectItem key={template.id} value={template.id}>
+                    </div> : templates.map(template => <SelectItem key={template.id} value={template.id}>
                         <div>
                           <div className="font-medium">{template.name}</div>
-                          {template.description && (
-                            <div className="text-xs text-muted-foreground">
+                          {template.description && <div className="text-xs text-muted-foreground">
                               {template.description}
-                            </div>
-                          )}
+                            </div>}
                         </div>
-                      </SelectItem>
-                    ))
-                  )}
+                      </SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -255,62 +226,43 @@ export function TechnicalTestSection({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {expirationOptions.map(opt => (
-                    <SelectItem key={opt.value} value={opt.value}>
+                  {expirationOptions.map(opt => <SelectItem key={opt.value} value={opt.value}>
                       {opt.label}
-                    </SelectItem>
-                  ))}
+                    </SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
           </div>
 
-          <Button 
-            onClick={handleGenerateLink} 
-            disabled={generating || !selectedTemplateId}
-            className="w-full md:w-auto"
-          >
-            {generating ? (
-              <>
+          <Button onClick={handleGenerateLink} disabled={generating || !selectedTemplateId} className="w-full md:w-auto">
+            {generating ? <>
                 <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
                 Gerando...
-              </>
-            ) : (
-              <>
+              </> : <>
                 <Send className="mr-2 h-4 w-4" />
                 Gerar Link do Teste
-              </>
-            )}
+              </>}
           </Button>
         </div>
 
         {/* Tests List */}
         <div className="space-y-3">
-          <h4 className="font-semibold text-sm">Testes Enviados</h4>
+          <h4 className="font-semibold text-base">Testes Enviados</h4>
           
-          {loading ? (
-            <div className="flex items-center justify-center py-8">
+          {loading ? <div className="flex items-center justify-center py-8">
               <div className="h-6 w-6 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-            </div>
-          ) : tests.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
+            </div> : tests.length === 0 ? <div className="text-center py-8 text-muted-foreground">
               <FileText className="mx-auto h-12 w-12 mb-2 opacity-50" />
               <p className="text-sm">Nenhum teste enviado ainda</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
+            </div> : <div className="space-y-3">
               {tests.map(test => {
-                const status = getTestStatus(test);
-                return (
-                  <div 
-                    key={test.id} 
-                    className="flex items-center justify-between p-4 border rounded-lg hover:shadow-sm transition-shadow"
-                  >
+            const status = getTestStatus(test);
+            return <div key={test.id} className="flex items-center justify-between p-4 border rounded-lg hover:shadow-sm transition-shadow">
                     <div className="flex-1 space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold">{test.template_name}</span>
+                        <span className="font-semibold text-sm">{test.template_name}</span>
                         <Badge variant="outline" className={cn("text-xs", status.color)}>
-                          <span className="flex items-center gap-1">
+                          <span className="flex items-center gap-1 text-sm">
                             {status.icon}
                             {status.label}
                           </span>
@@ -318,79 +270,55 @@ export function TechnicalTestSection({
                       </div>
                       
                       <div className="text-xs text-muted-foreground space-x-3">
-                        <span>
-                          Enviado: {format(new Date(test.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                        <span className="font-medium text-sm">
+                          Enviado: {format(new Date(test.created_at), "dd/MM/yyyy 'às' HH:mm", {
+                      locale: ptBR
+                    })}
                         </span>
-                        {test.expires_at && !test.submitted_at && (
-                          <span>
-                            • Expira {formatDistanceToNow(new Date(test.expires_at), { addSuffix: true, locale: ptBR })}
-                          </span>
-                        )}
-                        {test.submitted_at && (
-                          <span>
-                            • Respondido em {format(new Date(test.submitted_at), "dd/MM/yyyy", { locale: ptBR })}
-                          </span>
-                        )}
+                        {test.expires_at && !test.submitted_at && <span className="font-medium text-sm">
+                            • Expira {formatDistanceToNow(new Date(test.expires_at), {
+                      addSuffix: true,
+                      locale: ptBR
+                    })}
+                          </span>}
+                        {test.submitted_at && <span>
+                            • Respondido em {format(new Date(test.submitted_at), "dd/MM/yyyy", {
+                      locale: ptBR
+                    })}
+                          </span>}
                       </div>
 
                       {/* Score if submitted */}
-                      {test.submitted_at && test.match_percentage !== null && (
-                        <div className="mt-2">
+                      {test.submitted_at && test.match_percentage !== null && <div className="mt-2">
                           <div className="flex items-center gap-2">
                             <span className="text-sm font-medium">Score:</span>
                             <span className="text-lg font-bold text-primary">{test.match_percentage}%</span>
                           </div>
                           <Progress value={test.match_percentage} className="h-2 w-32 mt-1" />
-                        </div>
-                      )}
+                        </div>}
                     </div>
 
                     <div className="flex items-center gap-2">
-                      {test.submitted_at ? (
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => setSelectedTestId(test.id)}
-                        >
+                      {test.submitted_at ? <Button variant="outline" size="sm" onClick={() => setSelectedTestId(test.id)}>
                           <Eye className="h-4 w-4 mr-1" />
                           Ver Respostas
-                        </Button>
-                      ) : (
-                        <>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => copyLink(test.external_token)}
-                          >
+                        </Button> : <>
+                          <Button variant="outline" size="sm" onClick={() => copyLink(test.external_token)}>
                             <Copy className="h-4 w-4 mr-1" />
                             Copiar
                           </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => window.open(getTestUrl(test.external_token), "_blank")}
-                          >
+                          <Button variant="ghost" size="sm" onClick={() => window.open(getTestUrl(test.external_token), "_blank")}>
                             <ExternalLink className="h-4 w-4" />
                           </Button>
-                        </>
-                      )}
+                        </>}
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+                  </div>;
+          })}
+            </div>}
         </div>
       </CardContent>
 
       {/* Result Modal */}
-      {selectedTestId && (
-        <TechnicalTestResultModal 
-          scorecardId={selectedTestId}
-          open={!!selectedTestId}
-          onOpenChange={(open) => !open && setSelectedTestId(null)}
-        />
-      )}
-    </Card>
-  );
+      {selectedTestId && <TechnicalTestResultModal scorecardId={selectedTestId} open={!!selectedTestId} onOpenChange={open => !open && setSelectedTestId(null)} />}
+    </Card>;
 }
