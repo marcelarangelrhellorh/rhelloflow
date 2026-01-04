@@ -374,7 +374,7 @@ export default function ScorecardForm() {
                   <RadioGroupItem value="entrevista" id="entrevista" />
                   <Label htmlFor="entrevista" className="flex-1 cursor-pointer">
                     <div className="font-medium">Avaliação de Entrevista</div>
-                    <div className="text-sm text-muted-foreground font-normal">
+                    <div className="text-sm text-muted-foreground font-normal mt-1">
                       Preenchido pelo recrutador após entrevistar o candidato
                     </div>
                   </Label>
