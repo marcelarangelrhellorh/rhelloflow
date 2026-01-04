@@ -157,7 +157,7 @@ export function CandidateNotesSection({ candidateId }: CandidateNotesSectionProp
       {/* Header - Always visible */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-between p-3 hover:bg-muted/50 transition-colors"
+        className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
       >
         <div className="flex items-center gap-2">
           {isExpanded ? (
@@ -179,7 +179,7 @@ export function CandidateNotesSection({ candidateId }: CandidateNotesSectionProp
 
       {/* Content - Visible when expanded */}
       {isExpanded && (
-        <div className="px-3 pb-3 border-t border-border">
+        <div className="px-4 pb-4 border-t border-border">
           {/* Actions header */}
           <div className="flex items-center justify-between py-3">
             {!showForm && (
@@ -221,7 +221,7 @@ export function CandidateNotesSection({ candidateId }: CandidateNotesSectionProp
                       modules={quillModules}
                       formats={quillFormats}
                       placeholder="Observações..."
-                      className="[&_.ql-editor]:min-h-[80px] [&_.ql-editor]:text-sm [&_.ql-toolbar]:border-0 [&_.ql-toolbar]:border-b [&_.ql-container]:border-0 [&_.ql-toolbar]:p-1 [&_.ql-toolbar_button]:!w-6 [&_.ql-toolbar_button]:!h-6"
+                      className="[&_.ql-editor]:min-h-[100px] [&_.ql-editor]:text-sm [&_.ql-toolbar]:border-0 [&_.ql-toolbar]:border-b [&_.ql-container]:border-0"
                     />
                   </div>
                 </div>

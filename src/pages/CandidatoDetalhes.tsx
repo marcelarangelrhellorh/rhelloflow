@@ -376,7 +376,7 @@ export default function CandidatoDetalhes() {
       </main>
 
         {/* Right Sidebar - Meetings + Notes */}
-        <aside className="hidden xl:block w-80 border-l border-gray-200 dark:border-secondary-text-light/20 bg-white dark:bg-background-dark overflow-y-auto">
+        <aside className="hidden xl:block w-96 border-l border-gray-200 dark:border-secondary-text-light/20 bg-white dark:bg-background-dark overflow-y-auto">
           <div className="sticky top-0 p-4 space-y-4">
             <CandidateMeetingsCard candidateId={id!} candidateName={candidato.nome_completo} className="shadow-lg border-gray-200" />
             
