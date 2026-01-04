@@ -206,10 +206,10 @@ export function CandidateNotesSection({
           {/* Notes list */}
           {!isLoading && notes.length > 0 && <div className="space-y-2 max-h-[300px] overflow-y-auto">
               {notes.map(note => <div key={note.id} className="p-3 rounded-lg border border-border bg-background hover:bg-muted/30 transition-colors">
-                  <h4 className="font-semibold text-foreground truncate text-sm">
+                  <h4 className="font-semibold text-foreground truncate text-base">
                     {note.title || "Sem título"}
                   </h4>
-                  <div className="flex flex-col gap-0.5 text-xs text-muted-foreground mt-1">
+                  <div className="flex flex-col gap-0.5 text-sm text-muted-foreground mt-1">
                     <span>
                       {format(new Date(note.created_at), "dd/MM/yy 'às' HH:mm", {
                 locale: ptBR
@@ -217,7 +217,7 @@ export function CandidateNotesSection({
                     </span>
                     {note.user_name && <span className="truncate">{note.user_name}</span>}
                   </div>
-                  <div className="mt-2 text-xs text-foreground/80 line-clamp-2 prose prose-sm max-w-none [&_ul]:list-disc [&_ul]:pl-3 [&_ol]:list-decimal [&_ol]:pl-3" dangerouslySetInnerHTML={{
+                  <div className="mt-2 text-sm text-foreground/80 line-clamp-2 prose prose-sm max-w-none [&_ul]:list-disc [&_ul]:pl-3 [&_ol]:list-decimal [&_ol]:pl-3" dangerouslySetInnerHTML={{
             __html: note.content
           }} />
                 </div>)}
