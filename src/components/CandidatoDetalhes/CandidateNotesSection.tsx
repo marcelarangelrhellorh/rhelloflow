@@ -153,25 +153,25 @@ export function CandidateNotesSection({ candidateId }: CandidateNotesSectionProp
   };
 
   return (
-    <div className="mt-8 rounded-lg border border-gray-300 bg-card shadow-md">
+    <div className="rounded-lg border border-gray-200 dark:border-secondary-text-light/20 bg-card shadow-lg overflow-hidden">
       {/* Header - Always visible */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors rounded-lg"
+        className="w-full flex items-center justify-between p-3 hover:bg-muted/50 transition-colors"
       >
         <div className="flex items-center gap-2">
           {isExpanded ? (
-            <ChevronDown className="h-5 w-5 text-muted-foreground" />
+            <ChevronDown className="h-4 w-4 text-muted-foreground" />
           ) : (
-            <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            <ChevronRight className="h-4 w-4 text-muted-foreground" />
           )}
-          <FileText className="h-5 w-5 text-primary" />
-          <span className="font-semibold text-foreground text-base">
+          <FileText className="h-4 w-4 text-primary" />
+          <span className="font-semibold text-foreground text-sm">
             Anotações
           </span>
           {notes.length > 0 && (
-            <span className="ml-2 text-muted-foreground text-base font-semibold">
-              ({notes.length} anotaç{notes.length !== 1 ? "ões" : "ão"})
+            <span className="text-muted-foreground text-sm font-medium">
+              ({notes.length})
             </span>
           )}
         </div>
@@ -179,39 +179,38 @@ export function CandidateNotesSection({ candidateId }: CandidateNotesSectionProp
 
       {/* Content - Visible when expanded */}
       {isExpanded && (
-        <div className="px-4 pb-4 border-t border-border">
+        <div className="px-3 pb-3 border-t border-border">
           {/* Actions header */}
-          <div className="flex items-center justify-between py-4">
-            <h3 className="text-lg font-semibold text-foreground">Anotações</h3>
+          <div className="flex items-center justify-between py-3">
             {!showForm && (
               <Button
                 onClick={() => setShowForm(true)}
                 size="sm"
-                className="bg-[#00141d] text-white font-semibold text-base"
+                className="w-full bg-primary text-primary-foreground font-medium text-xs"
               >
-                <Plus className="h-4 w-4 mr-1" />
-                Adicionar anotação
+                <Plus className="h-3 w-3 mr-1" />
+                Adicionar
               </Button>
             )}
           </div>
 
           {/* Inline Form */}
           {showForm && (
-            <div className="mb-6 p-4 rounded-lg border border-border bg-muted/30">
-              <div className="space-y-4">
+            <div className="mb-4 p-3 rounded-lg border border-border bg-muted/30">
+              <div className="space-y-3">
                 <div>
-                  <label className="font-medium text-foreground mb-1 block text-base">
+                  <label className="font-medium text-foreground mb-1 block text-xs">
                     Título (opcional)
                   </label>
                   <Input
                     value={formTitle}
                     onChange={(e) => setFormTitle(e.target.value)}
-                    placeholder="Ex: Contato inicial, Follow-up..."
-                    className="bg-background text-base"
+                    placeholder="Ex: Follow-up..."
+                    className="bg-background text-sm h-8"
                   />
                 </div>
                 <div>
-                  <label className="font-medium text-foreground mb-1 block text-base">
+                  <label className="font-medium text-foreground mb-1 block text-xs">
                     Conteúdo *
                   </label>
                   <div className="bg-background rounded-md border border-input">
@@ -221,28 +220,30 @@ export function CandidateNotesSection({ candidateId }: CandidateNotesSectionProp
                       onChange={setFormContent}
                       modules={quillModules}
                       formats={quillFormats}
-                      placeholder="Descreva suas observações sobre o candidato..."
-                      className="[&_.ql-editor]:min-h-[120px] [&_.ql-toolbar]:border-0 [&_.ql-toolbar]:border-b [&_.ql-container]:border-0"
+                      placeholder="Observações..."
+                      className="[&_.ql-editor]:min-h-[80px] [&_.ql-editor]:text-sm [&_.ql-toolbar]:border-0 [&_.ql-toolbar]:border-b [&_.ql-container]:border-0 [&_.ql-toolbar]:p-1 [&_.ql-toolbar_button]:!w-6 [&_.ql-toolbar_button]:!h-6"
                     />
                   </div>
                 </div>
                 <div className="flex justify-end gap-2">
                   <Button
                     variant="outline"
+                    size="sm"
                     onClick={handleCancel}
                     disabled={isSaving}
-                    className="text-sm font-semibold"
+                    className="text-xs h-7 px-2"
                   >
-                    <X className="h-4 w-4 mr-1" />
+                    <X className="h-3 w-3 mr-1" />
                     Cancelar
                   </Button>
                   <Button
+                    size="sm"
                     onClick={handleSave}
                     disabled={isSaving || !formContent.trim()}
-                    className="font-semibold bg-[#00141d]"
+                    className="text-xs h-7 px-2 bg-primary"
                   >
-                    <Save className="h-4 w-4 mr-1" />
-                    {isSaving ? "Salvando..." : "Salvar"}
+                    <Save className="h-3 w-3 mr-1" />
+                    {isSaving ? "..." : "Salvar"}
                   </Button>
                 </div>
               </div>
@@ -251,12 +252,12 @@ export function CandidateNotesSection({ candidateId }: CandidateNotesSectionProp
 
           {/* Loading state */}
           {isLoading && (
-            <div className="space-y-3">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="p-4 rounded-lg border border-border">
-                  <Skeleton className="h-5 w-1/3 mb-2" />
-                  <Skeleton className="h-4 w-1/4 mb-2" />
-                  <Skeleton className="h-4 w-full" />
+            <div className="space-y-2">
+              {[1, 2].map((i) => (
+                <div key={i} className="p-3 rounded-lg border border-border">
+                  <Skeleton className="h-4 w-2/3 mb-2" />
+                  <Skeleton className="h-3 w-1/2 mb-2" />
+                  <Skeleton className="h-3 w-full" />
                 </div>
               ))}
             </div>
@@ -264,51 +265,39 @@ export function CandidateNotesSection({ candidateId }: CandidateNotesSectionProp
 
           {/* Empty state */}
           {!isLoading && notes.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
-              <FileText className="h-12 w-12 mx-auto mb-3 opacity-50" />
-              <p className="font-medium">Nenhuma anotação registrada ainda.</p>
-              <p className="text-sm font-medium">
-                Clique em "Adicionar anotação" para criar a primeira.
-              </p>
+            <div className="text-center py-4 text-muted-foreground">
+              <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
+              <p className="text-xs font-medium">Nenhuma anotação ainda.</p>
             </div>
           )}
 
           {/* Notes list */}
           {!isLoading && notes.length > 0 && (
-            <div className="space-y-3">
+            <div className="space-y-2 max-h-[300px] overflow-y-auto">
               {notes.map((note) => (
                 <div
                   key={note.id}
-                  className="p-4 rounded-lg border border-border bg-background hover:bg-muted/30 transition-colors"
+                  className="p-3 rounded-lg border border-border bg-background hover:bg-muted/30 transition-colors"
                 >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold text-foreground truncate text-base">
-                        {note.title || "Sem título"}
-                      </h4>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-                        <span className="text-base font-medium">
-                          {format(
-                            new Date(note.created_at),
-                            "dd 'de' MMMM 'de' yyyy 'às' HH:mm",
-                            { locale: ptBR }
-                          )}
-                        </span>
-                        {note.user_name && (
-                          <>
-                            <span>•</span>
-                            <span className="text-base font-medium">
-                              {note.user_name}
-                            </span>
-                          </>
-                        )}
-                      </div>
-                      <div
-                        className="mt-2 text-base text-foreground/80 line-clamp-3 prose prose-base max-w-none [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4"
-                        dangerouslySetInnerHTML={{ __html: note.content }}
-                      />
-                    </div>
+                  <h4 className="font-semibold text-foreground truncate text-sm">
+                    {note.title || "Sem título"}
+                  </h4>
+                  <div className="flex flex-col gap-0.5 text-xs text-muted-foreground mt-1">
+                    <span>
+                      {format(
+                        new Date(note.created_at),
+                        "dd/MM/yy 'às' HH:mm",
+                        { locale: ptBR }
+                      )}
+                    </span>
+                    {note.user_name && (
+                      <span className="truncate">{note.user_name}</span>
+                    )}
                   </div>
+                  <div
+                    className="mt-2 text-xs text-foreground/80 line-clamp-2 prose prose-sm max-w-none [&_ul]:list-disc [&_ul]:pl-3 [&_ol]:list-decimal [&_ol]:pl-3"
+                    dangerouslySetInnerHTML={{ __html: note.content }}
+                  />
                 </div>
               ))}
             </div>

@@ -356,9 +356,6 @@ export default function CandidatoDetalhes() {
           {/* Fit Cultural Card - only show if data exists */}
           {candidato.fit_cultural && <FitCulturalCard fitCultural={candidato.fit_cultural} />}
 
-          {/* Candidate Notes Section */}
-          <CandidateNotesSection candidateId={id!} />
-
           {/* Feedbacks and WhatsApp History - Side by Side */}
           <div className="grid gap-6 lg:grid-cols-2">
             <FeedbackList candidatoId={id!} onSolicitarFeedback={() => setSolicitarFeedbackModalOpen(true)} />
@@ -378,10 +375,13 @@ export default function CandidatoDetalhes() {
         </div>
       </main>
 
-        {/* Right Sidebar - Meetings */}
+        {/* Right Sidebar - Meetings + Notes */}
         <aside className="hidden xl:block w-80 border-l border-gray-200 dark:border-secondary-text-light/20 bg-white dark:bg-background-dark overflow-y-auto">
-          <div className="sticky top-0 p-6">
+          <div className="sticky top-0 p-4 space-y-4">
             <CandidateMeetingsCard candidateId={id!} candidateName={candidato.nome_completo} className="shadow-lg border-gray-200" />
+            
+            {/* Notes Section */}
+            <CandidateNotesSection candidateId={id!} />
           </div>
         </aside>
       </div>
