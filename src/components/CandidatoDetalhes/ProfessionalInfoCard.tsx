@@ -332,19 +332,16 @@ Localização: ${[cidade, estado].filter(Boolean).join(", ") || "Não informada"
 
           {/* Nível */}
           {nivel && <div>
-              <p className="text-sm text-muted-foreground mb-1">Nível</p>
+              <p className="text-muted-foreground mb-1 text-base font-semibold">Nível</p>
               <p className="text-base font-medium text-card-foreground">{nivel}</p>
             </div>}
 
           {/* Nível */}
-          {nivel && <div>
-              
-              
-            </div>}
+          {nivel}
 
           {/* Área */}
           {area && <div>
-              <p className="text-sm text-muted-foreground mb-1">Área</p>
+              <p className="text-muted-foreground mb-1 text-base font-semibold">Área</p>
               <p className="text-base font-medium text-card-foreground">{area}</p>
             </div>}
 
