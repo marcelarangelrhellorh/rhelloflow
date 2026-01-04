@@ -4,6 +4,7 @@ import { Edit, Trash2, RefreshCw, Briefcase, MapPin, PartyPopper, CheckCircle2, 
 import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 interface CandidateHeaderProps {
   nome: string;
@@ -49,6 +50,18 @@ export function CandidateHeader({
   const getInitials = (name: string) => {
     const parts = name.split(" ");
     return parts.length >= 2 ? `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase() : name.substring(0, 2).toUpperCase();
+  };
+
+  const handleStatusChangeWithValidation = (newStatus: string) => {
+    // Se está no Banco de Talentos e não tem vaga vinculada, bloquear mudança
+    if (status === "Banco de Talentos" && !vagaId && newStatus !== "Banco de Talentos") {
+      toast.warning("Vincule o candidato a uma vaga antes de movê-lo para outra etapa", {
+        description: "Use o botão 'Realocar' para vincular a uma vaga primeiro.",
+        duration: 5000,
+      });
+      return;
+    }
+    onStatusChange(newStatus);
   };
   const isContratado = status === "Contratado";
   return <div className="space-y-4">
@@ -118,7 +131,7 @@ export function CandidateHeader({
               </div>
 
               {/* Seletor de Etapa */}
-              <Select value={status} onValueChange={onStatusChange}>
+              <Select value={status} onValueChange={handleStatusChangeWithValidation}>
                 <SelectTrigger className="w-full sm:w-[280px] h-10 text-base border-gray-200 dark:border-secondary-text-light/20 bg-white dark:bg-background-dark hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors">
                   <SelectValue>
                     <span className="text-secondary-text-light dark:text-secondary-text-dark">Etapa:</span>{" "}
