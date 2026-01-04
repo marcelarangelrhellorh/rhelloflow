@@ -317,7 +317,7 @@ export default function Scorecards() {
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
                         <CardTitle className="text-lg font-bold text-[hsl(var(--foreground))] truncate">{template.name}</CardTitle>
-                        <CardDescription className="mt-1.5 text-base font-medium line-clamp-2">
+                        <CardDescription className="mt-1.5 text-sm font-medium line-clamp-2">
                           {template.description || "Sem descrição"}
                         </CardDescription>
                       </div>
