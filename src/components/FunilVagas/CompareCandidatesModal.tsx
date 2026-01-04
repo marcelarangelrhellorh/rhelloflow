@@ -32,32 +32,17 @@ type CandidateData = {
     average: number;
   }>;
   lastEvaluationDate: string;
-  recommendations: string[];
   evaluators: string[];
   scorecards: Array<{
     id: string;
     templateName: string;
     evaluator: string;
     score: number;
-    recommendation: string;
     comments: string | null;
     date: string;
   }>;
 };
 
-const recommendationLabels: Record<string, string> = {
-  strong_yes: "Fortemente Recomendado",
-  yes: "Recomendado",
-  maybe: "Talvez",
-  no: "Não Recomendado",
-};
-
-const recommendationColors: Record<string, string> = {
-  strong_yes: "bg-green-600 text-white",
-  yes: "bg-green-400 text-white",
-  maybe: "bg-yellow-500 text-white",
-  no: "bg-red-500 text-white",
-};
 
 export function CompareCandidatesModal({
   open,
@@ -336,7 +321,6 @@ export function CompareCandidatesModal({
                         <th className="p-4 text-left font-semibold">Top Critérios</th>
                         <th className="p-4 text-center font-semibold">Avaliações</th>
                         <th className="p-4 text-center font-semibold">Última Avaliação</th>
-                        <th className="p-4 text-left font-semibold">Recomendações</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -402,21 +386,6 @@ export function CompareCandidatesModal({
                               {format(new Date(candidate.lastEvaluationDate), "dd/MM/yyyy", {
                                 locale: ptBR,
                               })}
-                            </div>
-                          </td>
-                          <td className="p-4">
-                            <div className="flex flex-wrap gap-1">
-                              {[...new Set(candidate.recommendations)].map((rec, i) => (
-                                <Badge
-                                  key={i}
-                                  className={cn(
-                                    "text-xs",
-                                    recommendationColors[rec] || "bg-gray-500 text-white"
-                                  )}
-                                >
-                                  {recommendationLabels[rec] || rec}
-                                </Badge>
-                              ))}
                             </div>
                           </td>
                         </tr>

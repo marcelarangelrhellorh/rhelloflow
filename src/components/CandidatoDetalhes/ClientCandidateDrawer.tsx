@@ -49,7 +49,6 @@ interface Scorecard {
   id: string;
   total_score: number;
   match_percentage: number;
-  recommendation: string;
   comments: string | null;
   created_at: string;
   evaluator_name: string | null;
@@ -115,7 +114,6 @@ export function ClientCandidateDrawer({ open, onOpenChange, candidateId }: Clien
           id,
           total_score,
           match_percentage,
-          recommendation,
           comments,
           created_at,
           evaluator_id
@@ -164,14 +162,6 @@ export function ClientCandidateDrawer({ open, onOpenChange, candidateId }: Clien
     return `${window.location.origin}/feedback/${token}`;
   };
 
-  const getRecommendationBadge = (recommendation: string) => {
-    const variants = {
-      'yes': { label: 'Recomendado', variant: 'default' as const },
-      'maybe': { label: 'Talvez', variant: 'secondary' as const },
-      'no': { label: 'Não Recomendado', variant: 'destructive' as const }
-    };
-    return variants[recommendation as keyof typeof variants] || { label: recommendation, variant: 'outline' as const };
-  };
 
   if (loading || !candidate) {
     return (
@@ -270,15 +260,13 @@ export function ClientCandidateDrawer({ open, onOpenChange, candidateId }: Clien
 
                 <div className="space-y-3">
                   {scorecards.map((scorecard) => {
-                    const recommendation = getRecommendationBadge(scorecard.recommendation);
-                    
                     return (
                       <Card key={scorecard.id}>
                         <CardContent className="p-4">
                           <div className="space-y-3">
                             <div className="flex items-center justify-between">
-                              <Badge variant={recommendation.variant} className="text-xs font-semibold">
-                                {recommendation.label}
+                              <Badge variant="secondary" className="text-xs font-semibold">
+                                Avaliação
                               </Badge>
                               <span className="text-xs text-muted-foreground">
                                 {format(new Date(scorecard.created_at), "dd/MM/yyyy", { locale: ptBR })}
