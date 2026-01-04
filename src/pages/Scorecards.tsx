@@ -312,12 +312,12 @@ export default function Scorecards() {
                 </Button>
               </CardContent>
             </Card> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 text-sm">
-              {filteredTemplates.map(template => <Card key={template.id} className="hover:shadow-lg transition-all duration-200 bg-gradient-to-br from-white to-[hsl(var(--background))] border-[hsl(var(--border))] text-sm">
-                  <CardHeader>
+              {filteredTemplates.map(template => <Card key={template.id} className="hover:shadow-lg transition-all duration-200 bg-gradient-to-br from-white to-[hsl(var(--background))] border-[hsl(var(--border))] text-sm flex flex-col h-full">
+                  <CardHeader className="min-h-[120px]">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0 text-sm">
                         <CardTitle className="font-bold text-[hsl(var(--foreground))] truncate text-sm">{template.name}</CardTitle>
-                        <CardDescription className="mt-1.5 text-base font-medium line-clamp-2">
+                        <CardDescription className="mt-1.5 text-sm font-medium line-clamp-2">
                           {template.description || "Sem descrição"}
                         </CardDescription>
                       </div>
@@ -329,7 +329,7 @@ export default function Scorecards() {
                       </div>
                     </div>
                   </CardHeader>
-                  <CardContent className="space-y-4">
+                  <CardContent className="space-y-4 flex-1 flex flex-col justify-end">
                     <div className="flex items-center gap-2 text-sm text-[hsl(var(--muted-foreground))]">
                       <User className="h-4 w-4" />
                       <span>Criado por: <strong className="text-[hsl(var(--foreground))]">{template.creator_name}</strong></span>
