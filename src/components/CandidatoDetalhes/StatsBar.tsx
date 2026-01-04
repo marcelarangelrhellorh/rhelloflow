@@ -19,7 +19,7 @@ export function StatsBar({
   const diasNaEtapa = getBusinessDaysFromNow(criadoEm);
   const ultimoFeedbackFormatado = ultimoFeedback ? new Date(ultimoFeedback).toLocaleDateString("pt-BR") : "—";
   return <div className="grid gap-6 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
-      <div className="flex flex-col gap-2 rounded-lg p-6 bg-white dark:bg-background-dark border dark:border-secondary-text-light/20 shadow-md border-gray-400">
+      <div className="flex flex-col gap-2 rounded-lg p-6 bg-white dark:bg-background-dark border dark:border-secondary-text-light/20 shadow-md border-[#ffcc00]">
         <div className="flex items-center gap-2 mb-1">
           <div className="rounded-full bg-warning/10 p-2">
             <Clock className="h-5 w-5 text-warning" />
@@ -29,7 +29,7 @@ export function StatsBar({
         <p className="text-primary-text-light dark:text-primary-text-dark font-bold text-lg">{diasNaEtapa} dias</p>
       </div>
 
-      <div className="flex flex-col gap-2 rounded-lg p-6 bg-white dark:bg-background-dark border dark:border-secondary-text-light/20 shadow-md border-gray-400">
+      <div className="flex flex-col gap-2 rounded-lg p-6 bg-white dark:bg-background-dark border dark:border-secondary-text-light/20 shadow-md border-[#ffcc00]">
         <div className="flex items-center gap-2 mb-1">
           <div className="rounded-full bg-info/10 p-2">
             <MessageSquare className="h-5 w-5 text-info" />
@@ -39,7 +39,7 @@ export function StatsBar({
         <p className="text-primary-text-light dark:text-primary-text-dark font-bold text-lg">{totalFeedbacks}</p>
       </div>
 
-      <div className="flex flex-col gap-2 rounded-lg p-6 bg-white dark:bg-background-dark border dark:border-secondary-text-light/20 shadow-md border-gray-400">
+      <div className="flex flex-col gap-2 rounded-lg p-6 bg-white dark:bg-background-dark border dark:border-secondary-text-light/20 shadow-md border-[#ffcc00]">
         <div className="flex items-center gap-2 mb-1">
           <div className="rounded-full bg-info/10 p-2">
             <Clock className="h-5 w-5 text-info" />
@@ -49,7 +49,7 @@ export function StatsBar({
         <p className="text-primary-text-light dark:text-primary-text-dark font-bold text-lg">{ultimoFeedbackFormatado}</p>
       </div>
 
-      <div className="flex flex-col gap-2 rounded-lg p-6 bg-white dark:bg-background-dark border dark:border-secondary-text-light/20 shadow-md border-gray-400">
+      <div className="flex flex-col gap-2 rounded-lg p-6 bg-white dark:bg-background-dark border dark:border-secondary-text-light/20 shadow-md border-[#ffcc00]">
         <div className="flex items-center gap-2 mb-1">
           <div className="rounded-full bg-primary/10 p-2">
             <Briefcase className="h-5 w-5 text-primary" />
@@ -59,7 +59,7 @@ export function StatsBar({
         <p className="text-primary-text-light dark:text-primary-text-dark font-bold text-lg">{processosParticipados}</p>
       </div>
 
-      <div className="flex flex-col gap-2 rounded-lg p-6 bg-white dark:bg-background-dark border dark:border-secondary-text-light/20 shadow-md border-gray-400">
+      <div className="flex flex-col gap-2 rounded-lg p-6 bg-white dark:bg-background-dark border dark:border-secondary-text-light/20 shadow-md border-[#ffcc00]">
         <div className="flex items-center gap-2 mb-1">
           <div className="rounded-full bg-success/10 p-2">
             <Star className="h-5 w-5 text-success" />
