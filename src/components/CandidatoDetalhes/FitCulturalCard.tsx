@@ -24,8 +24,8 @@ export function FitCulturalCard({
 
         {fitCultural.valores?.length > 0 && <div>
             <p className="text-sm text-muted-foreground mb-2 font-semibold">Valores importantes</p>
-            <div className="flex flex-wrap gap-1.5">
-              {fitCultural.valores.map(valor => <Badge key={valor} variant="secondary" className="text-xs">
+            <div className="flex flex-wrap gap-2">
+              {fitCultural.valores.map(valor => <Badge key={valor} variant="secondary" className="text-sm">
                   {valor}
                 </Badge>)}
             </div>
