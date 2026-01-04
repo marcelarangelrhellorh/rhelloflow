@@ -44,6 +44,11 @@ const categoryColors: Record<string, string> = {
   fit_cultural: "bg-orange-100 text-orange-800 border-orange-200",
   outros: "bg-gray-100 text-gray-800 border-gray-200"
 };
+const defaultRecommendation = { 
+  label: "Sem Recomendação", 
+  color: "bg-gray-400 text-white" 
+};
+
 const recommendationConfig: Record<string, {
   label: string;
   color: string;
@@ -63,6 +68,10 @@ const recommendationConfig: Record<string, {
   no: {
     label: "Não Recomendado",
     color: "bg-red-500 text-white"
+  },
+  strong_no: {
+    label: "Fortemente Não Recomendado",
+    color: "bg-red-700 text-white"
   }
 };
 function getInitials(name: string | undefined): string {
@@ -210,7 +219,7 @@ export function ScorecardHistory({
           <CardContent className="shadow-lg">
         <div className="grid grid-cols-1 gap-6">
           {scorecards.map(scorecard => {
-              const recConfig = recommendationConfig[scorecard.recommendation];
+              const recConfig = recommendationConfig[scorecard.recommendation] || defaultRecommendation;
               return <div key={scorecard.id} className="border rounded-lg p-8 space-y-6 hover:shadow-md transition-shadow">
                 {/* Header com título e pontuação */}
                 <div className="flex items-start justify-between gap-6 pb-4 border-b">
