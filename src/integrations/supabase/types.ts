@@ -173,9 +173,6 @@ export type Database = {
           external_token: string | null
           id: string
           match_percentage: number | null
-          recommendation:
-            | Database["public"]["Enums"]["scorecard_recommendation"]
-            | null
           source: string | null
           submitted_at: string | null
           template_id: string
@@ -193,9 +190,6 @@ export type Database = {
           external_token?: string | null
           id?: string
           match_percentage?: number | null
-          recommendation?:
-            | Database["public"]["Enums"]["scorecard_recommendation"]
-            | null
           source?: string | null
           submitted_at?: string | null
           template_id: string
@@ -213,9 +207,6 @@ export type Database = {
           external_token?: string | null
           id?: string
           match_percentage?: number | null
-          recommendation?:
-            | Database["public"]["Enums"]["scorecard_recommendation"]
-            | null
           source?: string | null
           submitted_at?: string | null
           template_id?: string
@@ -4971,7 +4962,6 @@ export type Database = {
         | "Contratado"
         | "Em andamento"
       scale_type: "rating_1_5" | "text_options"
-      scorecard_recommendation: "strong_yes" | "yes" | "maybe" | "no"
       status_candidato:
         | "Banco de Talentos"
         | "Selecionado"
@@ -5173,7 +5163,6 @@ export const Constants = {
         "Em andamento",
       ],
       scale_type: ["rating_1_5", "text_options"],
-      scorecard_recommendation: ["strong_yes", "yes", "maybe", "no"],
       status_candidato: [
         "Banco de Talentos",
         "Selecionado",

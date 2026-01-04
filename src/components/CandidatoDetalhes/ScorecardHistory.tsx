@@ -16,7 +16,6 @@ interface Scorecard {
   id: string;
   template_name: string;
   evaluator_name: string;
-  recommendation: string;
   comments: string | null;
   total_score: number;
   match_percentage: number;
@@ -43,36 +42,6 @@ const categoryColors: Record<string, string> = {
   experiencia: "bg-purple-100 text-purple-800 border-purple-200",
   fit_cultural: "bg-orange-100 text-orange-800 border-orange-200",
   outros: "bg-gray-100 text-gray-800 border-gray-200"
-};
-const defaultRecommendation = { 
-  label: "Sem Recomendação", 
-  color: "bg-gray-400 text-white" 
-};
-
-const recommendationConfig: Record<string, {
-  label: string;
-  color: string;
-}> = {
-  strong_yes: {
-    label: "Fortemente Recomendado",
-    color: "bg-green-600 text-white"
-  },
-  yes: {
-    label: "Recomendado",
-    color: "bg-green-400 text-white"
-  },
-  maybe: {
-    label: "Talvez",
-    color: "bg-yellow-500 text-white"
-  },
-  no: {
-    label: "Não Recomendado",
-    color: "bg-red-500 text-white"
-  },
-  strong_no: {
-    label: "Fortemente Não Recomendado",
-    color: "bg-red-700 text-white"
-  }
 };
 function getInitials(name: string | undefined): string {
   if (!name || name.trim().length === 0) {
@@ -148,7 +117,6 @@ export function ScorecardHistory({
           id: scorecard.id,
           template_name: scorecard.scorecard_templates?.name || "Template",
           evaluator_name: usersMap.get(scorecard.evaluator_id) || "Avaliador",
-          recommendation: scorecard.recommendation,
           comments: scorecard.comments,
           total_score: scorecard.total_score,
           match_percentage: scorecard.match_percentage,
@@ -219,7 +187,6 @@ export function ScorecardHistory({
           <CardContent className="shadow-lg">
         <div className="grid grid-cols-1 gap-6">
           {scorecards.map(scorecard => {
-              const recConfig = recommendationConfig[scorecard.recommendation] || defaultRecommendation;
               return <div key={scorecard.id} className="border rounded-lg p-8 space-y-6 hover:shadow-md transition-shadow">
                 {/* Header com título e pontuação */}
                 <div className="flex items-start justify-between gap-6 pb-4 border-b">
@@ -264,13 +231,6 @@ export function ScorecardHistory({
                       })}
                     </span>
                   </div>
-                </div>
-
-                {/* Recommendation Badge */}
-                <div className="pt-2">
-                  <Badge className={cn("text-sm font-semibold px-4 py-1.5", recConfig.color)}>
-                    {recConfig.label}
-                  </Badge>
                 </div>
 
                 {/* Progress Bar */}

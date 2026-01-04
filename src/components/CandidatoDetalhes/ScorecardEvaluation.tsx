@@ -49,23 +49,6 @@ const categoryColors: Record<string, string> = {
   fit_cultural: "bg-orange-100 text-orange-800 border-orange-200",
   outros: "bg-gray-100 text-gray-800 border-gray-200"
 };
-const recommendations = [{
-  value: "strong_yes",
-  label: "Fortemente Recomendado",
-  color: "bg-green-600"
-}, {
-  value: "yes",
-  label: "Recomendado",
-  color: "bg-green-400"
-}, {
-  value: "maybe",
-  label: "Talvez",
-  color: "bg-yellow-500"
-}, {
-  value: "no",
-  label: "Não Recomendado",
-  color: "bg-red-500"
-}];
 export function ScorecardEvaluation({
   candidateId,
   candidateName,
@@ -76,7 +59,7 @@ export function ScorecardEvaluation({
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
   const [criteria, setCriteria] = useState<Criterion[]>([]);
   const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
-  const [recommendation, setRecommendation] = useState<string>("");
+  
   const [comments, setComments] = useState("");
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -162,10 +145,6 @@ export function ScorecardEvaluation({
       toast.error("Selecione um template");
       return;
     }
-    if (!recommendation) {
-      toast.error("Selecione uma recomendação");
-      return;
-    }
     const incompleteEvaluations = evaluations.filter(ev => ev.score === 0);
     if (incompleteEvaluations.length > 0) {
       toast.error("Preencha a pontuação de todos os critérios");
@@ -193,7 +172,6 @@ export function ScorecardEvaluation({
         template_id: selectedTemplateId,
         evaluator_id: user.id,
         vaga_id: vagaId,
-        recommendation: recommendation as any,
         comments: comments,
         total_score: total,
         match_percentage: percentage
@@ -217,7 +195,7 @@ export function ScorecardEvaluation({
       setSelectedTemplateId("");
       setCriteria([]);
       setEvaluations([]);
-      setRecommendation("");
+      
       setComments("");
     } catch (error: any) {
       console.error("Erro ao salvar avaliação:", error);
@@ -350,23 +328,6 @@ export function ScorecardEvaluation({
                 </CardContent>
               </Card>}
 
-            {/* Recommendation */}
-            <div className="space-y-2">
-              <Label className="text-base font-semibold">Recomendação Final *</Label>
-              <Select value={recommendation} onValueChange={setRecommendation}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione sua recomendação" />
-                </SelectTrigger>
-                <SelectContent>
-                  {recommendations.map(rec => <SelectItem key={rec.value} value={rec.value}>
-                      <div className="flex items-center gap-2">
-                        <div className={cn("w-3 h-3 rounded-full", rec.color)} />
-                        <span>{rec.label}</span>
-                      </div>
-                    </SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
 
             {/* Comments */}
             <div className="space-y-2">
@@ -376,7 +337,7 @@ export function ScorecardEvaluation({
 
             {/* Actions */}
             <div className="flex gap-2 pt-4 border-t">
-              <Button onClick={handleSave} disabled={saving || !allScoresSet || !recommendation} className="flex-1 font-semibold">
+              <Button onClick={handleSave} disabled={saving || !allScoresSet} className="flex-1 font-semibold">
                 {saving ? "Salvando..." : "Salvar Avaliação"}
               </Button>
             </div>

@@ -47,7 +47,6 @@ serve(async (req) => {
         created_at,
         evaluator_id,
         comments,
-        recommendation,
         candidatos!inner(nome_completo, email),
         scorecard_evaluations(
           criteria_id,
@@ -99,7 +98,6 @@ serve(async (req) => {
           text: scorecard.comments,
           evaluator_id: scorecard.evaluator_id,
           date: scorecard.created_at,
-          recommendation: scorecard.recommendation,
         });
       }
 
