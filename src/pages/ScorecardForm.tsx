@@ -382,8 +382,8 @@ export default function ScorecardForm() {
                 <div className="flex items-center space-x-3 p-4 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
                   <RadioGroupItem value="teste_tecnico" id="teste_tecnico" />
                   <Label htmlFor="teste_tecnico" className="flex-1 cursor-pointer">
-                    <div className="font-semibold">Teste Técnico</div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="font-medium">Teste Técnico</div>
+                    <div className="text-sm text-muted-foreground font-normal mt-1">
                       Enviado ao candidato para preenchimento online
                     </div>
                   </Label>
