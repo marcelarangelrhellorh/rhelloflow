@@ -508,11 +508,11 @@ export default function Relatorios() {
             </p>}
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={handleRefresh} className="bg-[#00151f] text-white">
+          <Button variant="outline" size="sm" onClick={handleRefresh} className="rounded-full h-8 px-4">
             <RefreshCw className="h-4 w-4 mr-2" />
             Atualizar
           </Button>
-          <Button variant="outline" onClick={exportForBI}>
+          <Button variant="outline" size="sm" onClick={exportForBI} className="rounded-full h-8 px-4">
             <FileDown className="h-4 w-4 mr-2" />
             Exportar para BI
           </Button>
