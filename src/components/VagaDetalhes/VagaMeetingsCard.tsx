@@ -90,7 +90,7 @@ export function VagaMeetingsCard({
       <div className={cn("flex flex-col gap-3 rounded-lg p-6 bg-white dark:bg-background-dark border border-gray-200 dark:border-secondary-text-light/20 shadow-sm", className)}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Calendar className="text-amber-500 w-[30px] h-[30px]" />
+            <Calendar className="text-amber-500 w-5 h-5" />
             <p className="text-secondary-text-light dark:text-secondary-text-dark font-semibold text-base">
               Reuniões
             </p>
