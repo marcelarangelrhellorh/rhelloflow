@@ -97,7 +97,7 @@ export function VagaMeetingsCard({
     <>
       <div
         className={cn(
-          "flex flex-col gap-3 rounded-lg p-6 bg-white dark:bg-background-dark border border-transparent shadow-sm",
+          "flex flex-col gap-3 rounded-lg p-6 bg-white dark:bg-background-dark border border-gray-200 dark:border-secondary-text-light/20 shadow-sm",
           className
         )}
       >
