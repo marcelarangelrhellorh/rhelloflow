@@ -122,6 +122,3 @@ verify_jwt = false
 
 [functions.check-stale-jobs]
 verify_jwt = false
-
-[functions.refresh-kpis]
-verify_jwt = true

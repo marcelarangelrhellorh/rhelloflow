@@ -162,7 +162,6 @@ export default function Relatorios() {
   const { data: kpiData, isLoading: kpiLoading, dataUpdatedAt } = useKPIs();
   
   const [chartsLoading, setChartsLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const [timePerStage, setTimePerStage] = useState<TimePerStage[]>([]);
   const [originData, setOriginData] = useState<OriginPerformance[]>([]);
   const [recruiterData, setRecruiterData] = useState<RecruiterPerformance[]>([]);
@@ -612,41 +611,6 @@ export default function Relatorios() {
     toast.success("Atualizando dados...");
   };
 
-  const handleForceRefresh = async () => {
-    setIsRefreshing(true);
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        toast.error("Você precisa estar logado para atualizar os dados");
-        return;
-      }
-
-      const { data, error } = await supabase.functions.invoke('refresh-kpis', {
-        headers: {
-          Authorization: `Bearer ${session.access_token}`
-        }
-      });
-
-      if (error) throw error;
-
-      // Invalidar cache e recarregar dados
-      await queryClient.invalidateQueries({ queryKey: ['kpis'] });
-      await queryClient.invalidateQueries({ queryKey: ['dashboard'] });
-      await loadChartsData();
-
-      toast.success(`Dados atualizados em tempo real!`, {
-        description: `Última atualização: ${format(new Date(data.refreshed_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}`
-      });
-    } catch (error) {
-      logger.error("Erro ao forçar refresh:", error);
-      toast.error("Erro ao atualizar dados", {
-        description: "Tente novamente em alguns instantes"
-      });
-    } finally {
-      setIsRefreshing(false);
-    }
-  };
-
   const loading = kpiLoading || chartsLoading;
 
   return (
@@ -662,14 +626,9 @@ export default function Relatorios() {
           )}
         </div>
         <div className="flex gap-2">
-          <Button 
-            variant="default" 
-            size="sm" 
-            onClick={handleForceRefresh}
-            disabled={isRefreshing}
-          >
-            <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-            {isRefreshing ? 'Atualizando...' : 'Atualizar Agora'}
+          <Button variant="outline" size="sm" onClick={handleRefresh}>
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Atualizar
           </Button>
           <Button variant="outline" onClick={exportForBI}>
             <FileDown className="h-4 w-4 mr-2" />
