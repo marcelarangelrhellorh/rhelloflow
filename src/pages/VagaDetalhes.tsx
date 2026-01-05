@@ -185,7 +185,7 @@ export default function VagaDetalhes() {
               <VagaCandidatesTable candidatos={candidatos} vagaId={vaga.id} vagaTitulo={vaga.titulo} />
             </div>
 
-            <div className="lg:col-span-1 space-y-6">
+            <div className="lg:col-span-1 space-y-6 shadow-lg border-[#ffcc00] border-solid border-2">
               <VagaActivityLog eventos={eventos} candidatoContratado={candidatoContratado} vagaStatus={vaga.status} />
             </div>
           </div>

@@ -15,7 +15,7 @@ export function VagaKPICards({
   onStatusChange
 }: VagaKPICardsProps) {
   return <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-      <div className="flex flex-col gap-2 rounded-lg p-4 bg-white dark:bg-background-dark border border-gray-200 dark:border-secondary-text-light/20 shadow-sm">
+      <div className="flex flex-col gap-2 rounded-lg p-4 bg-white dark:bg-background-dark border border-gray-200 dark:border-secondary-text-light/20 shadow-lg">
         <p className="text-secondary-text-light dark:text-secondary-text-dark font-semibold text-base">
           Etapa Atual da Contratação
         </p>
@@ -37,7 +37,7 @@ export function VagaKPICards({
           </p>}
       </div>
 
-      <div className="flex flex-col gap-1 rounded-lg p-4 bg-white dark:bg-background-dark border border-gray-200 dark:border-secondary-text-light/20 shadow-sm">
+      <div className="flex flex-col gap-1 rounded-lg p-4 bg-white dark:bg-background-dark border border-gray-200 dark:border-secondary-text-light/20 shadow-lg">
         <p className="text-secondary-text-light dark:text-secondary-text-dark font-semibold text-base">
           Candidatos Ativos
         </p>
@@ -46,7 +46,7 @@ export function VagaKPICards({
         </p>
       </div>
 
-      <div className="flex flex-col gap-1 rounded-lg p-4 bg-white dark:bg-background-dark border border-gray-200 dark:border-secondary-text-light/20 shadow-sm">
+      <div className="flex flex-col gap-1 rounded-lg p-4 bg-white dark:bg-background-dark border border-gray-200 dark:border-secondary-text-light/20 shadow-lg">
         <p className="text-secondary-text-light dark:text-secondary-text-dark font-semibold text-base">
           Duração do Processo
         </p>
@@ -55,7 +55,7 @@ export function VagaKPICards({
         </p>
       </div>
 
-      <div className="flex flex-col gap-1 rounded-lg p-4 bg-white dark:bg-background-dark border border-gray-200 dark:border-secondary-text-light/20 shadow-sm">
+      <div className="flex flex-col gap-1 rounded-lg p-4 bg-white dark:bg-background-dark border border-gray-200 dark:border-secondary-text-light/20 shadow-lg">
         <p className="text-secondary-text-light dark:text-secondary-text-dark font-semibold text-base">
           Modelo de Trabalho
         </p>
@@ -64,7 +64,7 @@ export function VagaKPICards({
         </p>
       </div>
 
-      <div className="flex flex-col gap-1 rounded-lg p-4 bg-white dark:bg-background-dark border border-gray-200 dark:border-secondary-text-light/20 shadow-sm">
+      <div className="flex flex-col gap-1 rounded-lg p-4 bg-white dark:bg-background-dark border border-gray-200 dark:border-secondary-text-light/20 shadow-lg">
         <p className="text-secondary-text-light dark:text-secondary-text-dark text-base font-semibold">
           Formato da Contratação
         </p>
