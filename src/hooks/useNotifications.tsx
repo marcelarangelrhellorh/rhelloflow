@@ -195,6 +195,54 @@ export const useNotifications = () => {
     );
   };
 
+  /**
+   * Notify external clients about a new candidate in Shortlist
+   */
+  const notifyClientsAboutShortlist = async (
+    candidatoName: string,
+    vagaId: string,
+    vagaTitulo: string
+  ): Promise<number> => {
+    try {
+      // Get empresa_id from job
+      const { data: vaga, error: vagaError } = await supabase
+        .from('vagas')
+        .select('empresa_id')
+        .eq('id', vagaId)
+        .single();
+
+      if (vagaError || !vaga?.empresa_id) {
+        logger.warn('No empresa_id found for job:', vagaId);
+        return 0;
+      }
+
+      // Get external clients linked to this empresa
+      const { data: clients, error: clientsError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('empresa_id', vaga.empresa_id)
+        .eq('user_type', 'external');
+
+      if (clientsError) throw clientsError;
+      if (!clients?.length) {
+        logger.info('No external clients found for empresa:', vaga.empresa_id);
+        return 0;
+      }
+
+      const clientIds = clients.map(c => c.id);
+      return await createNotificationsForUsers({
+        userIds: clientIds,
+        kind: 'shortlist',
+        title: 'Novo candidato em Shortlist',
+        body: `${candidatoName} foi adicionado à shortlist da vaga ${vagaTitulo}`,
+        jobId: vagaId,
+      });
+    } catch (error) {
+      logger.error('Error notifying clients about shortlist:', error);
+      return 0;
+    }
+  };
+
   return {
     createNotification,
     createNotificationsForUsers,
@@ -202,6 +250,7 @@ export const useNotifications = () => {
     notifyNewCandidate,
     notifyCandidateStatusChange,
     notifyNewFeedback,
+    notifyClientsAboutShortlist,
   };
 };
 
