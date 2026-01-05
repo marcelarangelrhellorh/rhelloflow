@@ -202,8 +202,14 @@ export default function Acompanhamento() {
   };
   const selectedVagaData = vagas.find(v => v.id === selectedVaga);
   const vagaCandidatos = candidatos.filter(c => c.vaga_relacionada_id === selectedVaga);
-  // Candidatos em Shortlist - única lista que o cliente pode acessar nomes/fichas
-  const shortlistCandidatos = vagaCandidatos.filter(c => c.status === 'Shortlist');
+  
+  // Candidatos aparecem para o cliente apenas quando a VAGA estiver em "Shortlist disponível"
+  const isShortlistAvailable = selectedVagaData?.status === 'shortlist_disponivel' || 
+                                selectedVagaData?.status === 'Shortlist disponível';
+  const shortlistCandidatos = isShortlistAvailable 
+    ? vagaCandidatos.filter(c => c.status === 'Shortlist')
+    : [];
+  
   const vagaHistory = stageHistory.filter(h => h.job_id === selectedVaga);
 
   // Filter vagas based on search and date
@@ -586,12 +592,25 @@ export default function Acompanhamento() {
                 ) : (
                   <div className="text-center py-8">
                     <Users className="h-10 w-10 mx-auto mb-3 text-muted-foreground opacity-50" />
-                    <p className="text-muted-foreground font-medium">
-                      Ainda não há candidatos em Shortlist para esta vaga.
-                    </p>
-                    <p className="text-muted-foreground text-sm mt-1">
-                      Os candidatos aparecerão aqui quando estiverem prontos para sua avaliação.
-                    </p>
+                    {!isShortlistAvailable ? (
+                      <>
+                        <p className="text-muted-foreground font-medium">
+                          A shortlist está sendo preparada pela equipe de recrutamento.
+                        </p>
+                        <p className="text-muted-foreground text-sm mt-1">
+                          Você será notificado quando os candidatos estiverem prontos para avaliação.
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-muted-foreground font-medium">
+                          Ainda não há candidatos em Shortlist para esta vaga.
+                        </p>
+                        <p className="text-muted-foreground text-sm mt-1">
+                          Os candidatos aparecerão aqui quando estiverem prontos para sua avaliação.
+                        </p>
+                      </>
+                    )}
                   </div>
                 )}
               </CardContent>
