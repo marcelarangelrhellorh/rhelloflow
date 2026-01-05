@@ -14,6 +14,7 @@ import { VagaCandidatesTable } from "@/components/VagaDetalhes/VagaCandidatesTab
 import { VagaActivityLog } from "@/components/VagaDetalhes/VagaActivityLog";
 import { VagaDetailsDrawer } from "@/components/VagaDetalhes/VagaDetailsDrawer";
 import { VagaTasksCard } from "@/components/VagaDetalhes/VagaTasksCard";
+import { VagaMeetingsCard } from "@/components/VagaDetalhes/VagaMeetingsCard";
 import { JobHistorySection } from "@/components/VagaDetalhes/JobHistorySection";
 import { toast } from "@/hooks/use-toast";
 
@@ -191,10 +192,10 @@ export default function VagaDetalhes() {
         </div>
       </main>
 
-      {/* Right Sidebar - Tasks */}
-      <aside className="hidden xl:flex w-96 flex-shrink-0 flex-col border-l border-border bg-white dark:bg-background-dark p-4 sticky top-0 h-screen overflow-y-auto">
-        
+      {/* Right Sidebar - Tasks & Meetings */}
+      <aside className="hidden xl:flex w-96 flex-shrink-0 flex-col gap-6 border-l border-border bg-white dark:bg-background-dark p-4 sticky top-0 h-screen overflow-y-auto">
         <VagaTasksCard vagaId={vaga.id} vagaTitulo={vaga.titulo} />
+        <VagaMeetingsCard vagaId={vaga.id} vagaTitulo={vaga.titulo} />
       </aside>
     </div>;
 }
