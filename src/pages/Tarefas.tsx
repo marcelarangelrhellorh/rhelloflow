@@ -22,7 +22,6 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
 import moment from "moment";
 import { logger } from "@/lib/logger";
-
 export default function Tarefas() {
   const [view, setView] = useState<"list" | "kanban" | "calendar">("kanban");
   const [entityMode, setEntityMode] = useState<"tasks" | "meetings">("tasks");
@@ -40,14 +39,21 @@ export default function Tarefas() {
     assignee_id: undefined,
     search: undefined
   });
-
-  const { data: tasks, isLoading } = useTasks(filters);
+  const {
+    data: tasks,
+    isLoading
+  } = useTasks(filters);
   const deleteTask = useDeleteTask();
   const updateTask = useUpdateTask();
-  const { getSyncedEvents } = useGoogleCalendar();
+  const {
+    getSyncedEvents
+  } = useGoogleCalendar();
 
   // Fetch external calendar events - optimized: 1 month past + 2 months future
-  const { data: externalEvents = [], isLoading: isLoadingExternalEvents } = useQuery({
+  const {
+    data: externalEvents = [],
+    isLoading: isLoadingExternalEvents
+  } = useQuery({
     queryKey: ['calendar-events'],
     queryFn: async () => {
       const timeMin = moment().subtract(1, 'month').toISOString();
@@ -67,15 +73,19 @@ export default function Tarefas() {
   });
 
   // Load users for filter
-  const { data: users } = useQuery({
+  const {
+    data: users
+  } = useQuery({
     queryKey: ["users-for-filter"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("profiles").select("id, full_name").order("full_name");
+      const {
+        data,
+        error
+      } = await supabase.from("profiles").select("id, full_name").order("full_name");
       if (error) throw error;
       return data;
     }
   });
-
   const handleEdit = (task: Task) => {
     setSelectedTask(task);
     if (task.task_type === 'meeting') {
@@ -84,12 +94,10 @@ export default function Tarefas() {
       setTaskModalOpen(true);
     }
   };
-
   const handleDelete = (id: string) => {
     setTaskToDelete(id);
     setDeleteDialogOpen(true);
   };
-
   const confirmDelete = async () => {
     if (taskToDelete) {
       await deleteTask.mutateAsync(taskToDelete);
@@ -97,7 +105,6 @@ export default function Tarefas() {
       setTaskToDelete(null);
     }
   };
-
   const handleToggleComplete = async (task: Task) => {
     const newStatus = task.status === 'done' ? 'to_do' : 'done';
     await updateTask.mutateAsync({
@@ -105,17 +112,14 @@ export default function Tarefas() {
       status: newStatus
     });
   };
-
   const handleNewTask = () => {
     setSelectedTask(null);
     setTaskModalOpen(true);
   };
-
   const handleNewMeeting = () => {
     setSelectedTask(null);
     setMeetingModalOpen(true);
   };
-
   const handleTaskClick = (task: Task | null, externalEvent?: any) => {
     if (externalEvent) {
       setExternalEventDetail(externalEvent);
@@ -146,16 +150,14 @@ export default function Tarefas() {
   const displayedItems = useMemo(() => {
     return entityMode === "tasks" ? onlyTasks : allMeetings;
   }, [entityMode, onlyTasks, allMeetings]);
-
-  return (
-    <div className="min-h-screen bg-white">
+  return <div className="min-h-screen bg-white">
       {/* Header - Simplified */}
       <div className="bg-white border-b shadow-sm sticky top-0 z-10">
         <div className="w-full py-4 px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
               <h1 className="text-2xl font-bold text-[#00141d]">Tarefas</h1>
-              <p className="text-sm text-muted-foreground mt-0.5">
+              <p className="text-muted-foreground mt-0.5 text-base">
                 Gerencie suas tarefas e reuniões
               </p>
             </div>
@@ -185,19 +187,17 @@ export default function Tarefas() {
               <div className="flex flex-col lg:flex-row gap-3">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input 
-                    placeholder="Buscar tarefas..." 
-                    className="pl-10 h-9" 
-                    value={filters.search || ""} 
-                    onChange={e => setFilters({ ...filters, search: e.target.value || undefined })} 
-                  />
+                  <Input placeholder="Buscar tarefas..." className="pl-10 h-9" value={filters.search || ""} onChange={e => setFilters({
+                  ...filters,
+                  search: e.target.value || undefined
+                })} />
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  <Select 
-                    value={filters.status || "all"} 
-                    onValueChange={value => setFilters({ ...filters, status: value === "all" ? undefined : value as any })}
-                  >
+                  <Select value={filters.status || "all"} onValueChange={value => setFilters({
+                  ...filters,
+                  status: value === "all" ? undefined : value as any
+                })}>
                     <SelectTrigger className="w-[140px] h-9 text-sm">
                       <SelectValue placeholder="Status" />
                     </SelectTrigger>
@@ -209,10 +209,10 @@ export default function Tarefas() {
                     </SelectContent>
                   </Select>
 
-                  <Select 
-                    value={filters.priority || "all"} 
-                    onValueChange={value => setFilters({ ...filters, priority: value === "all" ? undefined : value as any })}
-                  >
+                  <Select value={filters.priority || "all"} onValueChange={value => setFilters({
+                  ...filters,
+                  priority: value === "all" ? undefined : value as any
+                })}>
                     <SelectTrigger className="w-[140px] h-9 text-sm">
                       <SelectValue placeholder="Prioridade" />
                     </SelectTrigger>
@@ -225,20 +225,18 @@ export default function Tarefas() {
                     </SelectContent>
                   </Select>
 
-                  <Select 
-                    value={filters.assignee_id || "all"} 
-                    onValueChange={value => setFilters({ ...filters, assignee_id: value === "all" ? undefined : value })}
-                  >
+                  <Select value={filters.assignee_id || "all"} onValueChange={value => setFilters({
+                  ...filters,
+                  assignee_id: value === "all" ? undefined : value
+                })}>
                     <SelectTrigger className="w-[160px] h-9 text-sm">
                       <SelectValue placeholder="Responsável" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Todos</SelectItem>
-                      {users?.map(user => (
-                        <SelectItem key={user.id} value={user.id}>
+                      {users?.map(user => <SelectItem key={user.id} value={user.id}>
                           {user.full_name}
-                        </SelectItem>
-                      ))}
+                        </SelectItem>)}
                     </SelectContent>
                   </Select>
 
@@ -277,14 +275,9 @@ export default function Tarefas() {
 
             {/* Task Content */}
             <div className="w-full">
-              {isLoading ? (
-                <div className="space-y-4">
+              {isLoading ? <div className="space-y-4">
                   {[1, 2, 3].map(i => <Skeleton key={i} className="h-40 w-full" />)}
-                </div>
-              ) : view === "calendar" ? (
-                entityMode === "meetings" ? (
-                  syncedMeetings.length === 0 && (!externalEvents || externalEvents.length === 0) ? (
-                    <div className="text-center py-16 bg-white rounded-lg border">
+                </div> : view === "calendar" ? entityMode === "meetings" ? syncedMeetings.length === 0 && (!externalEvents || externalEvents.length === 0) ? <div className="text-center py-16 bg-white rounded-lg border">
                       <p className="text-muted-foreground text-lg mb-4">
                         {allMeetings.length === 0 ? "Nenhuma reunião agendada" : "Nenhuma reunião sincronizada"}
                       </p>
@@ -292,117 +285,60 @@ export default function Tarefas() {
                         <Video className="h-5 w-5" />
                         {allMeetings.length === 0 ? "Criar primeira reunião" : "Criar e sincronizar"}
                       </Button>
-                    </div>
-                  ) : (
-                    <CalendarView 
-                      meetings={syncedMeetings} 
-                      externalEvents={externalEvents} 
-                      onEventClick={handleTaskClick} 
-                    />
-                  )
-                ) : (
-                  onlyTasks.filter(t => t.due_date).length === 0 ? (
-                    <div className="text-center py-16 bg-white rounded-lg border">
+                    </div> : <CalendarView meetings={syncedMeetings} externalEvents={externalEvents} onEventClick={handleTaskClick} /> : onlyTasks.filter(t => t.due_date).length === 0 ? <div className="text-center py-16 bg-white rounded-lg border">
                       <p className="text-muted-foreground text-lg mb-4">Nenhuma tarefa com data de vencimento</p>
                       <Button onClick={handleNewTask} className="bg-[#ffcd00] hover:bg-[#ffcd00]/90 text-black font-semibold">
                         <Plus className="h-5 w-5 mr-2" />
                         Criar tarefa com prazo
                       </Button>
-                    </div>
-                  ) : (
-                    <CalendarView 
-                      meetings={[]} 
-                      externalEvents={[]} 
-                      tasks={onlyTasks.filter(t => t.due_date)}
-                      onEventClick={handleTaskClick} 
-                    />
-                  )
-                )
-              ) : displayedItems.length === 0 ? (
-                <div className="text-center py-16 bg-white rounded-lg border">
+                    </div> : <CalendarView meetings={[]} externalEvents={[]} tasks={onlyTasks.filter(t => t.due_date)} onEventClick={handleTaskClick} /> : displayedItems.length === 0 ? <div className="text-center py-16 bg-white rounded-lg border">
                   <p className="text-muted-foreground text-lg mb-4">
                     {entityMode === "tasks" ? "Nenhuma tarefa encontrada" : "Nenhuma reunião encontrada"}
                   </p>
-                  <Button 
-                    onClick={entityMode === "tasks" ? handleNewTask : handleNewMeeting} 
-                    className={entityMode === "tasks" ? "bg-[#ffcd00] hover:bg-[#ffcd00]/90 text-black font-semibold" : ""}
-                    variant={entityMode === "meetings" ? "outline" : "default"}
-                  >
+                  <Button onClick={entityMode === "tasks" ? handleNewTask : handleNewMeeting} className={entityMode === "tasks" ? "bg-[#ffcd00] hover:bg-[#ffcd00]/90 text-black font-semibold" : ""} variant={entityMode === "meetings" ? "outline" : "default"}>
                     {entityMode === "tasks" ? <Plus className="h-5 w-5 mr-2" /> : <Video className="h-5 w-5 mr-2" />}
                     {entityMode === "tasks" ? "Criar sua primeira tarefa" : "Agendar primeira reunião"}
                   </Button>
-                </div>
-              ) : view === "kanban" ? (
-                <TaskKanban 
-                  tasks={displayedItems} 
-                  onEdit={handleEdit} 
-                  onDelete={handleDelete} 
-                  onTaskClick={handleTaskClick}
-                  entityType={entityMode}
-                />
-              ) : (
-                <div className="space-y-3">
-                  {displayedItems.map(task => (
-                    <TaskCard 
-                      key={task.id} 
-                      task={task} 
-                      onEdit={handleEdit} 
-                      onDelete={handleDelete} 
-                      onToggleComplete={handleToggleComplete} 
-                      onCardClick={handleTaskClick} 
-                    />
-                  ))}
-                </div>
-              )}
+                </div> : view === "kanban" ? <TaskKanban tasks={displayedItems} onEdit={handleEdit} onDelete={handleDelete} onTaskClick={handleTaskClick} entityType={entityMode} /> : <div className="space-y-3">
+                  {displayedItems.map(task => <TaskCard key={task.id} task={task} onEdit={handleEdit} onDelete={handleDelete} onToggleComplete={handleToggleComplete} onCardClick={handleTaskClick} />)}
+                </div>}
             </div>
           </div>
 
           {/* Right Column - Sidebar (1/4) */}
-          {view !== "calendar" && (
-            <div className="lg:col-span-1 space-y-4 lg:sticky lg:top-24 lg:self-start">
+          {view !== "calendar" && <div className="lg:col-span-1 space-y-4 lg:sticky lg:top-24 lg:self-start">
               <TasksDashboard onTaskClick={handleEdit} />
               <MeetingsWeeklySummary />
-              <TodayMeetingsSidebar
-                onEventClick={async event => {
-                  // Check if this is an external Google Calendar event or a local meeting
-                  if (event.isExternal) {
-                    // External event: convert to externalEvent format
-                    const today = new Date();
-                    const todayStr = moment(today).format('YYYY-MM-DD');
-                    
-                    const externalEvent = {
-                      id: event.id,
-                      title: event.title,
-                      description: '',
-                      start: event.start_time 
-                        ? new Date(`${todayStr}T${event.start_time}`) 
-                        : today,
-                      end: event.end_time 
-                        ? new Date(`${todayStr}T${event.end_time}`) 
-                        : today,
-                      meetLink: event.google_meet_link
-                    };
-                    handleTaskClick(null, externalEvent);
-                  } else {
-                    // Local meeting: fetch full task data and open with edit options
-                    const { data: taskData } = await supabase
-                      .from('tasks')
-                      .select(`
+              <TodayMeetingsSidebar onEventClick={async event => {
+            // Check if this is an external Google Calendar event or a local meeting
+            if (event.isExternal) {
+              // External event: convert to externalEvent format
+              const today = new Date();
+              const todayStr = moment(today).format('YYYY-MM-DD');
+              const externalEvent = {
+                id: event.id,
+                title: event.title,
+                description: '',
+                start: event.start_time ? new Date(`${todayStr}T${event.start_time}`) : today,
+                end: event.end_time ? new Date(`${todayStr}T${event.end_time}`) : today,
+                meetLink: event.google_meet_link
+              };
+              handleTaskClick(null, externalEvent);
+            } else {
+              // Local meeting: fetch full task data and open with edit options
+              const {
+                data: taskData
+              } = await supabase.from('tasks').select(`
                         *,
                         assignee:profiles!tasks_assignee_id_fkey(id, full_name, avatar_url),
                         vaga:vagas!tasks_vaga_id_fkey(id, titulo)
-                      `)
-                      .eq('id', event.id)
-                      .single();
-                    
-                    if (taskData) {
-                      handleTaskClick(taskData as Task, null);
-                    }
-                  }
-                }} 
-              />
-            </div>
-          )}
+                      `).eq('id', event.id).single();
+              if (taskData) {
+                handleTaskClick(taskData as Task, null);
+              }
+            }
+          }} />
+            </div>}
         </div>
       </div>
 
@@ -410,40 +346,21 @@ export default function Tarefas() {
       <TaskModal open={taskModalOpen} onClose={() => setTaskModalOpen(false)} task={selectedTask} />
       <MeetingModal open={meetingModalOpen} onClose={() => setMeetingModalOpen(false)} task={selectedTask} />
       
-      {taskForDetail && (
-        <TaskDetailDrawer 
-          task={taskForDetail} 
-          open={detailDrawerOpen} 
-          onOpenChange={open => {
-            setDetailDrawerOpen(open);
-            if (!open) {
-              setTaskForDetail(null);
-              setExternalEventDetail(null);
-            }
-          }} 
-          onEdit={handleEdit} 
-          onDelete={() => taskForDetail && handleDelete(taskForDetail.id)} 
-          onToggleComplete={() => taskForDetail && handleToggleComplete(taskForDetail)} 
-        />
-      )}
+      {taskForDetail && <TaskDetailDrawer task={taskForDetail} open={detailDrawerOpen} onOpenChange={open => {
+      setDetailDrawerOpen(open);
+      if (!open) {
+        setTaskForDetail(null);
+        setExternalEventDetail(null);
+      }
+    }} onEdit={handleEdit} onDelete={() => taskForDetail && handleDelete(taskForDetail.id)} onToggleComplete={() => taskForDetail && handleToggleComplete(taskForDetail)} />}
 
-      {externalEventDetail && (
-        <TaskDetailDrawer 
-          task={null} 
-          externalEvent={externalEventDetail} 
-          open={detailDrawerOpen} 
-          onOpenChange={open => {
-            setDetailDrawerOpen(open);
-            if (!open) {
-              setTaskForDetail(null);
-              setExternalEventDetail(null);
-            }
-          }} 
-          onEdit={() => {}} 
-          onDelete={() => {}} 
-          onToggleComplete={() => {}} 
-        />
-      )}
+      {externalEventDetail && <TaskDetailDrawer task={null} externalEvent={externalEventDetail} open={detailDrawerOpen} onOpenChange={open => {
+      setDetailDrawerOpen(open);
+      if (!open) {
+        setTaskForDetail(null);
+        setExternalEventDetail(null);
+      }
+    }} onEdit={() => {}} onDelete={() => {}} onToggleComplete={() => {}} />}
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
@@ -461,6 +378,5 @@ export default function Tarefas() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
-  );
+    </div>;
 }
