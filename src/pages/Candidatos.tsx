@@ -194,12 +194,63 @@ export default function Candidatos() {
       const { error } = await supabase.from("candidatos").update({ status: newStatus }).eq("id", candidatoId);
       if (error) throw error;
       toast.success(`Candidato movido para ${newStatus}`);
+
+      // Se moveu para Shortlist, notificar clientes externos
+      if (newStatus === "Shortlist" && candidato.vaga_relacionada_id) {
+        const vagaInfo = vagas.find(v => v.id === candidato.vaga_relacionada_id);
+        if (vagaInfo) {
+          notifyClientsAboutShortlist(
+            candidato.nome_completo,
+            candidato.vaga_relacionada_id,
+            vagaInfo.titulo
+          );
+        }
+      }
     } catch (error) {
       logger.error("Erro ao mover candidato:", error);
       toast.error("Erro ao mover candidato");
       setCandidatos(prev => prev.map(c => c.id === candidatoId ? { ...c, status: candidato.status } : c));
     } finally {
       setActiveId(null);
+    }
+  };
+
+  // Função para notificar clientes externos sobre candidato em Shortlist
+  const notifyClientsAboutShortlist = async (
+    candidatoName: string,
+    vagaId: string,
+    vagaTitulo: string
+  ) => {
+    try {
+      // Buscar empresa_id da vaga
+      const { data: vaga, error: vagaError } = await supabase
+        .from('vagas')
+        .select('empresa_id')
+        .eq('id', vagaId)
+        .single();
+
+      if (vagaError || !vaga?.empresa_id) return;
+
+      // Buscar clientes externos vinculados à empresa
+      const { data: clients, error: clientsError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('empresa_id', vaga.empresa_id)
+        .eq('user_type', 'external');
+
+      if (clientsError || !clients?.length) return;
+
+      // Criar notificação para cada cliente
+      const clientIds = clients.map(c => c.id);
+      await supabase.rpc('create_notifications_for_users', {
+        p_user_ids: clientIds,
+        p_kind: 'shortlist',
+        p_title: 'Novo candidato em Shortlist',
+        p_body: `${candidatoName} foi adicionado à shortlist da vaga ${vagaTitulo}`,
+        p_job_id: vagaId,
+      });
+    } catch (error) {
+      logger.warn('Erro ao notificar clientes sobre shortlist:', error);
     }
   };
 
