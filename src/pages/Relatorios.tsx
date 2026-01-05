@@ -508,7 +508,7 @@ export default function Relatorios() {
             </p>}
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={handleRefresh} className="rounded-full h-8 px-4">
+          <Button variant="outline" size="sm" onClick={handleRefresh} className="rounded-full h-8 px-4 text-white bg-[#00151f]">
             <RefreshCw className="h-4 w-4 mr-2" />
             Atualizar
           </Button>
