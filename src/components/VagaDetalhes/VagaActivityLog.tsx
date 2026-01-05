@@ -2,36 +2,47 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { VagaEvento } from "@/hooks/data/useVagaEventos";
 import type { Candidato } from "@/hooks/data/useCandidatos";
-
 type ActivityType = "offer" | "status_change" | "candidate_added" | "process_started";
-
 interface Activity {
   id: string;
   type: ActivityType;
   description: string;
   date: string;
 }
-
 interface VagaActivityLogProps {
   eventos: VagaEvento[];
   candidatoContratado: Candidato | null;
   vagaStatus: string;
 }
-
-export function VagaActivityLog({ eventos, candidatoContratado, vagaStatus }: VagaActivityLogProps) {
+export function VagaActivityLog({
+  eventos,
+  candidatoContratado,
+  vagaStatus
+}: VagaActivityLogProps) {
   const getActivityIcon = (type: ActivityType) => {
     switch (type) {
       case "offer":
-        return { icon: "celebration", color: "green" };
+        return {
+          icon: "celebration",
+          color: "green"
+        };
       case "status_change":
-        return { icon: "add_task", color: "blue" };
+        return {
+          icon: "add_task",
+          color: "blue"
+        };
       case "candidate_added":
-        return { icon: "person_add", color: "blue" };
+        return {
+          icon: "person_add",
+          color: "blue"
+        };
       case "process_started":
-        return { icon: "event", color: "gray" };
+        return {
+          icon: "event",
+          color: "gray"
+        };
     }
   };
-
   const getRecentActivities = (): Activity[] => {
     const activities: Activity[] = [];
 
@@ -41,16 +52,14 @@ export function VagaActivityLog({ eventos, candidatoContratado, vagaStatus }: Va
         id: `contratado-${candidatoContratado.id}`,
         type: "offer",
         description: `Candidato "${candidatoContratado.nome_completo}" foi contratado para esta vaga`,
-        date: format(
-          new Date(candidatoContratado.criado_em),
-          "d 'de' MMMM 'de' yyyy 'às' HH:mm",
-          { locale: ptBR }
-        ),
+        date: format(new Date(candidatoContratado.criado_em), "d 'de' MMMM 'de' yyyy 'às' HH:mm", {
+          locale: ptBR
+        })
       });
     }
 
     // Map events to activities
-    const eventosAtividades = eventos.map((evento) => {
+    const eventosAtividades = eventos.map(evento => {
       let type: ActivityType = "process_started";
       if (evento.tipo === "CANDIDATO_ADICIONADO") {
         type = "candidate_added";
@@ -61,51 +70,33 @@ export function VagaActivityLog({ eventos, candidatoContratado, vagaStatus }: Va
       } else if (evento.tipo === "FEEDBACK_ADICIONADO") {
         type = "status_change";
       }
-
       return {
         id: evento.id,
         type,
         description: evento.descricao,
-        date: format(
-          new Date(evento.created_at),
-          "d 'de' MMMM 'de' yyyy 'às' HH:mm",
-          { locale: ptBR }
-        ),
+        date: format(new Date(evento.created_at), "d 'de' MMMM 'de' yyyy 'às' HH:mm", {
+          locale: ptBR
+        })
       };
     });
-
     return [...activities, ...eventosAtividades];
   };
-
   const activities = getRecentActivities();
-
-  return (
-    <div>
-      <h2 className="text-primary-text-light dark:text-primary-text-dark text-2xl font-bold tracking-tight mb-6">
+  return <div>
+      <h2 className="text-primary-text-light dark:text-primary-text-dark text-2xl font-bold tracking-tight mb-6 mx-[15px]">
         Atividade Recente
       </h2>
 
       <div className="space-y-6">
-        {activities.map((activity) => {
-          const { icon, color } = getActivityIcon(activity.type);
-          const bgColorClass =
-            color === "green"
-              ? "bg-green-500/20"
-              : color === "blue"
-              ? "bg-blue-500/20"
-              : "bg-gray-500/20";
-          const textColorClass =
-            color === "green"
-              ? "text-green-600 dark:text-green-400"
-              : color === "blue"
-              ? "text-blue-600 dark:text-blue-400"
-              : "text-gray-600 dark:text-gray-400";
-
-          return (
-            <div key={activity.id} className="flex items-start gap-4">
-              <div
-                className={`flex-shrink-0 mt-1 size-8 rounded-full ${bgColorClass} flex items-center justify-center`}
-              >
+        {activities.map(activity => {
+        const {
+          icon,
+          color
+        } = getActivityIcon(activity.type);
+        const bgColorClass = color === "green" ? "bg-green-500/20" : color === "blue" ? "bg-blue-500/20" : "bg-gray-500/20";
+        const textColorClass = color === "green" ? "text-green-600 dark:text-green-400" : color === "blue" ? "text-blue-600 dark:text-blue-400" : "text-gray-600 dark:text-gray-400";
+        return <div key={activity.id} className="flex items-start gap-4">
+              <div className={`flex-shrink-0 mt-1 size-8 rounded-full ${bgColorClass} flex items-center justify-center`}>
                 <span className={`material-symbols-outlined ${textColorClass} text-lg`}>
                   {icon}
                 </span>
@@ -118,10 +109,8 @@ export function VagaActivityLog({ eventos, candidatoContratado, vagaStatus }: Va
                   {activity.date}
                 </p>
               </div>
-            </div>
-          );
-        })}
+            </div>;
+      })}
       </div>
-    </div>
-  );
+    </div>;
 }
