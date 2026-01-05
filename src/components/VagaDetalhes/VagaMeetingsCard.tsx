@@ -109,8 +109,8 @@ export function VagaMeetingsCard({
           <span className="text-muted-foreground font-semibold text-xs">
             {meetings.length === 1 ? "reunião" : "reuniões"}
           </span>
-          {overdueMeetings.length > 0 && <Badge variant="destructive" className="text-base gap-1 whitespace-nowrap px-[10px]">
-              <AlertTriangle className="h-4 w-4" />
+          {overdueMeetings.length > 0 && <Badge variant="destructive" className="text-xs gap-1 whitespace-nowrap px-[10px]">
+              <AlertTriangle className="h-3 w-3" />
               {overdueMeetings.length} atrasada
               {overdueMeetings.length !== 1 ? "s" : ""}
             </Badge>}
