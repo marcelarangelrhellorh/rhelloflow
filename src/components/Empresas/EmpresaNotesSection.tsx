@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { ChevronDown, ChevronRight, Plus, X, Save, FileText, Paperclip, Download, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,8 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
+import { MentionEditor } from "@/components/ui/mention-editor";
+import { useMentions } from "@/hooks/useMentions";
 
 interface EmpresaNote {
   id: string;
@@ -24,9 +24,10 @@ interface EmpresaNote {
 
 interface EmpresaNotesSectionProps {
   empresaId: string;
+  empresaName?: string;
 }
 
-export function EmpresaNotesSection({ empresaId }: EmpresaNotesSectionProps) {
+export function EmpresaNotesSection({ empresaId, empresaName = "Empresa" }: EmpresaNotesSectionProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [notes, setNotes] = useState<EmpresaNote[]>([]);
@@ -37,18 +38,7 @@ export function EmpresaNotesSection({ empresaId }: EmpresaNotesSectionProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  const quillModules = useMemo(
-    () => ({
-      toolbar: [
-        ["bold", "italic", "underline"],
-        [{ list: "ordered" }, { list: "bullet" }],
-        ["clean"],
-      ],
-    }),
-    []
-  );
-
-  const quillFormats = ["bold", "italic", "underline", "list", "bullet"];
+  const { mentionUsers, processMentions } = useMentions();
 
   const fetchNotes = async () => {
     if (!empresaId) return;
@@ -176,10 +166,15 @@ export function EmpresaNotesSection({ empresaId }: EmpresaNotesSectionProps) {
 
     setIsSaving(true);
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
+
+      // Buscar nome do usuário atual
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", user.id)
+        .single();
 
       // Upload file if selected
       let fileData: { url: string; name: string } | null = null;
@@ -187,16 +182,31 @@ export function EmpresaNotesSection({ empresaId }: EmpresaNotesSectionProps) {
         fileData = await uploadFile();
       }
 
-      const { error } = await supabase.from("empresa_notes").insert({
-        empresa_id: empresaId,
-        user_id: user.id,
-        title: formTitle.trim() || null,
-        content: formContent,
-        documento_url: fileData?.url || null,
-        documento_nome: fileData?.name || null,
-      });
+      const { data: insertedNote, error } = await supabase
+        .from("empresa_notes")
+        .insert({
+          empresa_id: empresaId,
+          user_id: user.id,
+          title: formTitle.trim() || null,
+          content: formContent,
+          documento_url: fileData?.url || null,
+          documento_nome: fileData?.name || null,
+        })
+        .select()
+        .single();
 
       if (error) throw error;
+
+      // Processar menções e enviar notificações
+      if (insertedNote) {
+        await processMentions(
+          formContent,
+          'empresa_note',
+          insertedNote.id,
+          empresaName,
+          profile?.full_name || "Alguém"
+        );
+      }
 
       toast({
         title: "Sucesso",
@@ -315,19 +325,15 @@ export function EmpresaNotesSection({ empresaId }: EmpresaNotesSectionProps) {
                 </div>
                 <div>
                   <label className="font-medium text-foreground mb-1 block text-base">
-                    Conteúdo *
+                    Conteúdo * <span className="text-muted-foreground text-sm">(use @ para mencionar)</span>
                   </label>
-                  <div className="bg-background rounded-md border border-input">
-                    <ReactQuill
-                      theme="snow"
-                      value={formContent}
-                      onChange={setFormContent}
-                      modules={quillModules}
-                      formats={quillFormats}
-                      placeholder="Descreva a reunião, negociação ou observação sobre o cliente..."
-                      className="[&_.ql-editor]:min-h-[120px] [&_.ql-toolbar]:border-0 [&_.ql-toolbar]:border-b [&_.ql-container]:border-0"
-                    />
-                  </div>
+                  <MentionEditor
+                    value={formContent}
+                    onChange={setFormContent}
+                    users={mentionUsers}
+                    placeholder="Descreva a reunião, negociação ou observação... Use @ para mencionar alguém"
+                    minHeight="120px"
+                  />
                 </div>
                 <div>
                   <label className="font-medium text-foreground mb-1 block text-base">
@@ -439,7 +445,7 @@ export function EmpresaNotesSection({ empresaId }: EmpresaNotesSectionProps) {
                         )}
                       </div>
                       <div
-                        className="mt-2 text-base text-foreground/80 prose prose-base max-w-none [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4"
+                        className="mt-2 text-base text-foreground/80 prose prose-base max-w-none [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_.mention]:bg-primary/15 [&_.mention]:text-primary [&_.mention]:px-1.5 [&_.mention]:py-0.5 [&_.mention]:rounded [&_.mention]:font-medium"
                         dangerouslySetInnerHTML={{ __html: note.content }}
                       />
                       {/* Attachment */}

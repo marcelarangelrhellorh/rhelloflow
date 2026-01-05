@@ -133,7 +133,7 @@ export default function EmpresaDetalhes() {
             <EmpresaLinkedUsersCard users={linkedUsers} />
 
             {/* Histórico / Anotações */}
-            <EmpresaNotesSection empresaId={empresa.id} />
+            <EmpresaNotesSection empresaId={empresa.id} empresaName={empresa.nome} />
           </div>
         </div>
       </div>
