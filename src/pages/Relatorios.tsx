@@ -5,23 +5,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from "recharts";
-import { Download, FileDown, Briefcase, Users, Clock, AlertTriangle, TrendingUp, Target } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { Download, FileDown, Briefcase, Users, Clock, AlertTriangle, TrendingUp, Target, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
-import { format } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { usePagination } from "@/hooks/usePagination";
 import { PaginationControls } from "@/components/ui/pagination-controls";
 import { logger } from "@/lib/logger";
-
-interface KPIData {
-  vagas_abertas: number;
-  candidatos_novos: number;
-  contratacoes: number;
-  time_to_hire_avg: number;
-  sla_violations_count: number;
-  banco_count: number;
-}
+import { useKPIs } from "@/hooks/useKPIs";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface TimePerStage {
   stage: string;
@@ -164,8 +158,10 @@ const RecruiterPerformanceTable = ({ loading, recruiterData, onExport }: {
 };
 
 export default function Relatorios() {
-  const [loading, setLoading] = useState(true);
-  const [kpiData, setKpiData] = useState<KPIData | null>(null);
+  const queryClient = useQueryClient();
+  const { data: kpiData, isLoading: kpiLoading, dataUpdatedAt } = useKPIs();
+  
+  const [chartsLoading, setChartsLoading] = useState(true);
   const [timePerStage, setTimePerStage] = useState<TimePerStage[]>([]);
   const [originData, setOriginData] = useState<OriginPerformance[]>([]);
   const [recruiterData, setRecruiterData] = useState<RecruiterPerformance[]>([]);
@@ -177,120 +173,124 @@ export default function Relatorios() {
   const [selectedRecruiter, setSelectedRecruiter] = useState<string>("all");
   const [selectedCS, setSelectedCS] = useState<string>("all");
   const [recruiters, setRecruiters] = useState<any[]>([]);
+  const [csUsers, setCsUsers] = useState<any[]>([]);
 
   useEffect(() => {
-    loadRecruiters();
+    loadUsers();
   }, []);
 
   useEffect(() => {
-    loadData();
+    loadChartsData();
   }, [dateFrom, dateTo, selectedRecruiter, selectedCS]);
 
-  const loadRecruiters = async () => {
+  const loadUsers = async () => {
     try {
-      // Buscar usuários que têm role de recrutador ou CS
-      const { data: userRoles } = await supabase
+      // Buscar recrutadores
+      const { data: recruiterRoles } = await supabase
         .from("user_roles")
         .select("user_id")
-        .in("role", ["recrutador", "cs"]);
+        .eq("role", "recrutador");
       
-      if (!userRoles || userRoles.length === 0) {
-        setRecruiters([]);
-        return;
+      // Buscar CS
+      const { data: csRoles } = await supabase
+        .from("user_roles")
+        .select("user_id")
+        .eq("role", "cs");
+
+      const recruiterIds = [...new Set(recruiterRoles?.map(ur => ur.user_id) || [])];
+      const csIds = [...new Set(csRoles?.map(ur => ur.user_id) || [])];
+
+      if (recruiterIds.length > 0) {
+        const { data: recruiterProfiles } = await supabase
+          .from("profiles")
+          .select("id, full_name")
+          .in("id", recruiterIds)
+          .order("full_name");
+        if (recruiterProfiles) setRecruiters(recruiterProfiles);
       }
 
-      const userIds = [...new Set(userRoles.map(ur => ur.user_id))];
-
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("id, full_name")
-        .in("id", userIds)
-        .order("full_name");
-      
-      if (profiles) setRecruiters(profiles);
+      if (csIds.length > 0) {
+        const { data: csProfiles } = await supabase
+          .from("profiles")
+          .select("id, full_name")
+          .in("id", csIds)
+          .order("full_name");
+        if (csProfiles) setCsUsers(csProfiles);
+      }
     } catch (error) {
-      logger.error("Error loading recruiters:", error);
+      logger.error("Error loading users:", error);
     }
   };
 
-  const loadData = async () => {
-    setLoading(true);
+  const loadChartsData = async () => {
+    setChartsLoading(true);
     try {
       await Promise.all([
-        loadKPIs(),
         loadTimePerStage(),
         loadOriginPerformance(),
         loadRecruiterPerformance(),
         loadOverdueJobs()
       ]);
     } catch (error) {
-      logger.error("Error loading data:", error);
-      toast.error("Erro ao carregar dados dos relatórios");
+      logger.error("Error loading charts data:", error);
+      toast.error("Erro ao carregar dados dos gráficos");
     } finally {
-      setLoading(false);
+      setChartsLoading(false);
     }
   };
 
-  const loadKPIs = async () => {
-    let query = supabase
-      .from("vagas")
-      .select("id, status, criado_em");
-    
-    const { data: vagas } = await query;
-    
-    let candidatosQuery = supabase
-      .from("candidatos")
-      .select("id, status, criado_em")
-      .gte("criado_em", dateFrom)
-      .lte("criado_em", dateTo);
-    
-    const { data: candidatos } = await candidatosQuery;
-
-    const { data: bancoTalentos } = await supabase
-      .from("candidatos")
-      .select("id")
-      .eq("disponibilidade_status", "disponível");
-
-    const vagasAbertas = vagas?.filter(v => 
-      !['Concluída', 'Cancelada', 'Pausada'].includes(v.status || '')
-    ).length || 0;
-
-    const candidatosNovos = candidatos?.length || 0;
-    const contratacoes = candidatos?.filter(c => c.status === 'Contratado').length || 0;
-
-    // Time to hire simplificado
-    const hiredCandidates = candidatos?.filter(c => c.status === 'Contratado') || [];
-    const avgTimeToHire = hiredCandidates.length > 0 
-      ? hiredCandidates.reduce((acc, c) => {
-          const days = Math.floor((new Date().getTime() - new Date(c.criado_em).getTime()) / (1000 * 60 * 60 * 24));
-          return acc + days;
-        }, 0) / hiredCandidates.length
-      : 0;
-
-    // SLA violations (vagas > 30 dias)
-    const slaViolations = vagas?.filter(v => {
-      if (['Concluída', 'Cancelada'].includes(v.status || '')) return false;
-      const days = Math.floor((new Date().getTime() - new Date(v.criado_em).getTime()) / (1000 * 60 * 60 * 24));
-      return days > 30;
-    }).length || 0;
-
-    setKpiData({
-      vagas_abertas: vagasAbertas,
-      candidatos_novos: candidatosNovos,
-      contratacoes: contratacoes,
-      time_to_hire_avg: Math.round(avgTimeToHire),
-      sla_violations_count: slaViolations,
-      banco_count: bancoTalentos?.length || 0
-    });
-  };
-
   const loadTimePerStage = async () => {
-    // Simplificado - baseado em status atual dos candidatos
-    const { data: candidatos } = await supabase
+    let query = supabase
       .from("candidatos")
-      .select("status, criado_em")
+      .select("status, criado_em, vaga_relacionada_id")
       .gte("criado_em", dateFrom)
-      .lte("criado_em", dateTo);
+      .lte("criado_em", dateTo)
+      .is("deleted_at", null);
+
+    // Aplicar filtro de recrutador via vaga
+    if (selectedRecruiter !== "all") {
+      const { data: vagasDoRecrutador } = await supabase
+        .from("vagas")
+        .select("id")
+        .eq("recrutador_id", selectedRecruiter);
+      
+      const vagaIds = vagasDoRecrutador?.map(v => v.id) || [];
+      if (vagaIds.length > 0) {
+        query = query.in("vaga_relacionada_id", vagaIds);
+      } else {
+        setTimePerStage([]);
+        return;
+      }
+    }
+
+    // Aplicar filtro de CS via empresa
+    if (selectedCS !== "all") {
+      const { data: empresas } = await supabase
+        .from("empresas")
+        .select("nome")
+        .eq("cs_responsavel_id", selectedCS);
+      
+      const empresasNomes = empresas?.map(e => e.nome) || [];
+      if (empresasNomes.length > 0) {
+        const { data: vagasDoCS } = await supabase
+          .from("vagas")
+          .select("id")
+          .in("empresa", empresasNomes);
+        
+        const vagaIds = vagasDoCS?.map(v => v.id) || [];
+        if (vagaIds.length > 0) {
+          query = query.in("vaga_relacionada_id", vagaIds);
+        } else {
+          setTimePerStage([]);
+          return;
+        }
+      } else {
+        setTimePerStage([]);
+        return;
+      }
+    }
+
+    const { data: candidatos } = await query;
 
     if (!candidatos) return;
 
@@ -314,11 +314,57 @@ export default function Relatorios() {
   };
 
   const loadOriginPerformance = async () => {
-    const { data } = await supabase
+    let query = supabase
       .from("candidatos")
-      .select("origem")
+      .select("origem, vaga_relacionada_id")
       .gte("criado_em", dateFrom)
-      .lte("criado_em", dateTo);
+      .lte("criado_em", dateTo)
+      .is("deleted_at", null);
+
+    // Aplicar filtro de recrutador
+    if (selectedRecruiter !== "all") {
+      const { data: vagasDoRecrutador } = await supabase
+        .from("vagas")
+        .select("id")
+        .eq("recrutador_id", selectedRecruiter);
+      
+      const vagaIds = vagasDoRecrutador?.map(v => v.id) || [];
+      if (vagaIds.length > 0) {
+        query = query.in("vaga_relacionada_id", vagaIds);
+      } else {
+        setOriginData([]);
+        return;
+      }
+    }
+
+    // Aplicar filtro de CS via empresa
+    if (selectedCS !== "all") {
+      const { data: empresas } = await supabase
+        .from("empresas")
+        .select("nome")
+        .eq("cs_responsavel_id", selectedCS);
+      
+      const empresasNomes = empresas?.map(e => e.nome) || [];
+      if (empresasNomes.length > 0) {
+        const { data: vagasDoCS } = await supabase
+          .from("vagas")
+          .select("id")
+          .in("empresa", empresasNomes);
+        
+        const vagaIds = vagasDoCS?.map(v => v.id) || [];
+        if (vagaIds.length > 0) {
+          query = query.in("vaga_relacionada_id", vagaIds);
+        } else {
+          setOriginData([]);
+          return;
+        }
+      } else {
+        setOriginData([]);
+        return;
+      }
+    }
+
+    const { data } = await query;
 
     if (!data) return;
 
@@ -338,13 +384,39 @@ export default function Relatorios() {
 
   const loadRecruiterPerformance = async () => {
     try {
-      // Buscar vagas no período
-      const { data: vagas, error: vagasError } = await supabase
+      // Se filtro de CS está ativo, buscar empresas do CS primeiro
+      let empresasDoCS: string[] = [];
+      if (selectedCS !== "all") {
+        const { data: empresas } = await supabase
+          .from("empresas")
+          .select("nome")
+          .eq("cs_responsavel_id", selectedCS);
+        empresasDoCS = empresas?.map(e => e.nome) || [];
+        if (empresasDoCS.length === 0) {
+          setRecruiterData([]);
+          return;
+        }
+      }
+
+      let vagasQuery = supabase
         .from("vagas")
-        .select("id, recrutador_id, criado_em")
+        .select("id, recrutador_id, criado_em, empresa")
         .gte("criado_em", dateFrom)
         .lte("criado_em", dateTo)
-        .not("recrutador_id", "is", null);
+        .not("recrutador_id", "is", null)
+        .is("deleted_at", null);
+
+      // Aplicar filtro de recrutador
+      if (selectedRecruiter !== "all") {
+        vagasQuery = vagasQuery.eq("recrutador_id", selectedRecruiter);
+      }
+
+      // Aplicar filtro de CS via empresa
+      if (selectedCS !== "all" && empresasDoCS.length > 0) {
+        vagasQuery = vagasQuery.in("empresa", empresasDoCS);
+      }
+
+      const { data: vagas, error: vagasError } = await vagasQuery;
 
       if (vagasError) {
         logger.error("Erro ao carregar vagas para performance:", vagasError);
@@ -357,69 +429,60 @@ export default function Relatorios() {
         return;
       }
 
-      // Buscar todos os profiles dos recrutadores únicos
       const recruiterIds = [...new Set(vagas.map(v => v.recrutador_id).filter(Boolean))];
       
-      const { data: profiles, error: profilesError } = await supabase
+      const { data: profiles } = await supabase
         .from("profiles")
         .select("id, full_name")
         .in("id", recruiterIds);
 
-      if (profilesError) {
-        logger.error("Erro ao carregar profiles:", profilesError);
-      }
-
-      // Criar um mapa de id -> nome
       const profilesMap = new Map(profiles?.map(p => [p.id, p.full_name]) || []);
 
-      const { data: candidatos, error: candidatosError } = await supabase
+      const vagaIds = vagas.map(v => v.id);
+      const { data: candidatos } = await supabase
         .from("candidatos")
         .select("id, status, vaga_relacionada_id, criado_em")
-        .gte("criado_em", dateFrom)
-        .lte("criado_em", dateTo);
+        .in("vaga_relacionada_id", vagaIds)
+        .is("deleted_at", null);
 
-      if (candidatosError) {
-        logger.error("Erro ao carregar candidatos para performance:", candidatosError);
-      }
+      const recruiterStats: Record<string, any> = {};
 
-    const recruiterStats: Record<string, any> = {};
-
-    vagas.forEach(v => {
-      const recruiterId = v.recrutador_id;
-      if (!recruiterId) return;
-      
-      const recruiterName = profilesMap.get(recruiterId) || 'Sem nome';
-      
-      if (!recruiterStats[recruiterId]) {
-        recruiterStats[recruiterId] = {
-          recrutador_nome: recruiterName,
-          vagas: 0,
-          candidatos: 0,
-          contratacoes: 0,
-          total_days: 0,
-          hired_count: 0
-        };
-      }
-      
-      recruiterStats[recruiterId].vagas++;
-    });
-
-    candidatos?.forEach(c => {
-      const vaga = vagas.find(v => v.id === c.vaga_relacionada_id);
-      if (!vaga?.recrutador_id) return;
-      
-      const recruiterId = vaga.recrutador_id;
-      if (recruiterStats[recruiterId]) {
-        recruiterStats[recruiterId].candidatos++;
+      vagas.forEach(v => {
+        const recruiterId = v.recrutador_id;
+        if (!recruiterId) return;
         
-        if (c.status === 'Contratado') {
-          recruiterStats[recruiterId].contratacoes++;
-          const days = Math.floor((new Date().getTime() - new Date(c.criado_em).getTime()) / (1000 * 60 * 60 * 24));
-          recruiterStats[recruiterId].total_days += days;
-          recruiterStats[recruiterId].hired_count++;
+        const recruiterName = profilesMap.get(recruiterId) || 'Sem nome';
+        
+        if (!recruiterStats[recruiterId]) {
+          recruiterStats[recruiterId] = {
+            recrutador_nome: recruiterName,
+            vagas: 0,
+            candidatos: 0,
+            contratacoes: 0,
+            total_days: 0,
+            hired_count: 0
+          };
         }
-      }
-    });
+        
+        recruiterStats[recruiterId].vagas++;
+      });
+
+      candidatos?.forEach(c => {
+        const vaga = vagas.find(v => v.id === c.vaga_relacionada_id);
+        if (!vaga?.recrutador_id) return;
+        
+        const recruiterId = vaga.recrutador_id;
+        if (recruiterStats[recruiterId]) {
+          recruiterStats[recruiterId].candidatos++;
+          
+          if (c.status === 'Contratado') {
+            recruiterStats[recruiterId].contratacoes++;
+            const days = Math.floor((new Date().getTime() - new Date(c.criado_em).getTime()) / (1000 * 60 * 60 * 24));
+            recruiterStats[recruiterId].total_days += days;
+            recruiterStats[recruiterId].hired_count++;
+          }
+        }
+      });
 
       const recruiterArray: RecruiterPerformance[] = Object.values(recruiterStats)
         .map((r: any) => ({
@@ -440,12 +503,36 @@ export default function Relatorios() {
   };
 
   const loadOverdueJobs = async () => {
-    const { data } = await supabase
+    let query = supabase
       .from("vagas")
       .select("id, titulo, empresa, criado_em, status")
       .not("status", "in", '("Concluída","Cancelada")')
+      .is("deleted_at", null)
       .order("criado_em", { ascending: true })
       .limit(20);
+
+    // Aplicar filtro de recrutador
+    if (selectedRecruiter !== "all") {
+      query = query.eq("recrutador_id", selectedRecruiter);
+    }
+
+    // Aplicar filtro de CS via empresa
+    if (selectedCS !== "all") {
+      const { data: empresas } = await supabase
+        .from("empresas")
+        .select("nome")
+        .eq("cs_responsavel_id", selectedCS);
+      
+      const empresasNomes = empresas?.map(e => e.nome) || [];
+      if (empresasNomes.length > 0) {
+        query = query.in("empresa", empresasNomes);
+      } else {
+        setOverdueJobs([]);
+        return;
+      }
+    }
+
+    const { data } = await query;
 
     if (!data) return;
 
@@ -480,34 +567,74 @@ export default function Relatorios() {
     toast.success("CSV exportado com sucesso!");
   };
 
+  const exportForBI = () => {
+    const biExport = {
+      export_metadata: {
+        generated_at: new Date().toISOString(),
+        period: { from: dateFrom, to: dateTo },
+        filters: { 
+          recruiter: selectedRecruiter === "all" ? null : selectedRecruiter,
+          cs: selectedCS === "all" ? null : selectedCS
+        },
+        data_freshness: dataUpdatedAt ? new Date(dataUpdatedAt).toISOString() : null
+      },
+      kpis: kpiData ? {
+        vagas_abertas: kpiData.vagas_abertas,
+        vagas_concluidas: kpiData.vagas_concluidas,
+        total_candidatos: kpiData.total_candidatos,
+        total_contratacoes: kpiData.total_contratacoes,
+        novos_candidatos_30d: kpiData.novos_candidatos_30d,
+        avg_time_to_hire_days: kpiData.avg_time_to_hire_days,
+        banco_talentos: kpiData.banco_talentos
+      } : null,
+      charts_data: {
+        time_per_stage: timePerStage,
+        origin_performance: originData
+      },
+      tables_data: {
+        recruiter_performance: recruiterData,
+        overdue_jobs: overdueJobs
+      }
+    };
+
+    const blob = new Blob([JSON.stringify(biExport, null, 2)], { type: 'application/json' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `relatorio_bi_${format(new Date(), 'yyyy-MM-dd')}.json`;
+    link.click();
+    toast.success("Relatório exportado para BI!");
+  };
+
+  const handleRefresh = () => {
+    queryClient.invalidateQueries({ queryKey: ['kpis'] });
+    loadChartsData();
+    toast.success("Atualizando dados...");
+  };
+
+  const loading = kpiLoading || chartsLoading;
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Relatórios</h1>
           <p className="text-muted-foreground">Métricas e análises do processo de recrutamento</p>
+          {dataUpdatedAt && (
+            <p className="text-xs text-muted-foreground mt-1">
+              Dados atualizados {formatDistanceToNow(new Date(dataUpdatedAt), { addSuffix: true, locale: ptBR })}
+            </p>
+          )}
         </div>
-        <Button 
-          variant="outline"
-          onClick={() => {
-            const allData = {
-              kpis: kpiData,
-              time_per_stage: timePerStage,
-              origin_performance: originData,
-              recruiter_performance: recruiterData,
-              overdue_jobs: overdueJobs
-            };
-            const blob = new Blob([JSON.stringify(allData, null, 2)], { type: 'application/json' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `relatorio_completo_${format(new Date(), 'yyyy-MM-dd')}.json`;
-            link.click();
-            toast.success("Relatório completo exportado!");
-          }}
-        >
-          <FileDown className="h-4 w-4 mr-2" />
-          Exportar Relatório Completo
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={handleRefresh}>
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Atualizar
+          </Button>
+          <Button variant="outline" onClick={exportForBI}>
+            <FileDown className="h-4 w-4 mr-2" />
+            Exportar para BI
+          </Button>
+        </div>
       </div>
 
       {/* Filtros */}
@@ -555,7 +682,7 @@ export default function Relatorios() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todos</SelectItem>
-                  {recruiters.map(r => (
+                  {csUsers.map(r => (
                     <SelectItem key={r.id} value={r.id}>{r.full_name}</SelectItem>
                   ))}
                 </SelectContent>
@@ -567,7 +694,7 @@ export default function Relatorios() {
 
       {/* KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {loading ? (
+        {kpiLoading ? (
           <>
             <KPISkeleton />
             <KPISkeleton />
@@ -580,37 +707,37 @@ export default function Relatorios() {
           <>
             <KPICard
               title="Vagas Abertas"
-              value={kpiData?.vagas_abertas.toString() || "0"}
+              value={kpiData?.vagas_abertas?.toString() || "0"}
               icon={<Briefcase className="h-6 w-6 text-white" />}
               iconBgColor="bg-blue-500"
             />
             <KPICard
-              title="Candidatos Novos"
-              value={kpiData?.candidatos_novos.toString() || "0"}
+              title="Candidatos (30 dias)"
+              value={kpiData?.novos_candidatos_30d?.toString() || "0"}
               icon={<Users className="h-6 w-6 text-white" />}
               iconBgColor="bg-green-500"
             />
             <KPICard
-              title="Contratações"
-              value={kpiData?.contratacoes.toString() || "0"}
+              title="Total Contratações"
+              value={kpiData?.total_contratacoes?.toString() || "0"}
               icon={<Target className="h-6 w-6 text-white" />}
               iconBgColor="bg-purple-500"
             />
             <KPICard
               title="Time to Hire (dias)"
-              value={kpiData?.time_to_hire_avg.toString() || "0"}
+              value={kpiData?.avg_time_to_hire_days?.toString() || "0"}
               icon={<Clock className="h-6 w-6 text-white" />}
               iconBgColor="bg-orange-500"
             />
             <KPICard
-              title="Vagas Fora do Prazo"
-              value={kpiData?.sla_violations_count.toString() || "0"}
+              title="Vagas Pausadas"
+              value={kpiData?.vagas_pausadas?.toString() || "0"}
               icon={<AlertTriangle className="h-6 w-6 text-white" />}
-              iconBgColor="bg-red-500"
+              iconBgColor="bg-amber-500"
             />
             <KPICard
               title="Banco de Talentos"
-              value={kpiData?.banco_count.toString() || "0"}
+              value={kpiData?.banco_talentos?.total_no_banco?.toString() || "0"}
               icon={<TrendingUp className="h-6 w-6 text-white" />}
               iconBgColor="bg-teal-500"
             />
@@ -638,8 +765,10 @@ export default function Relatorios() {
             </div>
           </CardHeader>
           <CardContent>
-            {loading ? (
+            {chartsLoading ? (
               <Skeleton className="h-[300px] w-full" />
+            ) : timePerStage.length === 0 ? (
+              <p className="text-muted-foreground text-center py-8">Nenhum dado disponível para o período selecionado</p>
             ) : (
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={timePerStage}>
@@ -672,8 +801,10 @@ export default function Relatorios() {
             </div>
           </CardHeader>
           <CardContent>
-            {loading ? (
+            {chartsLoading ? (
               <Skeleton className="h-[300px] w-full" />
+            ) : originData.length === 0 ? (
+              <p className="text-muted-foreground text-center py-8">Nenhum dado disponível para o período selecionado</p>
             ) : (
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
@@ -700,7 +831,7 @@ export default function Relatorios() {
 
       {/* Performance por Recrutador */}
       <RecruiterPerformanceTable 
-        loading={loading}
+        loading={chartsLoading}
         recruiterData={recruiterData}
         onExport={() => exportCSV(recruiterData, 'performance_recrutador')}
       />
@@ -724,7 +855,7 @@ export default function Relatorios() {
           </div>
         </CardHeader>
         <CardContent>
-          {loading ? (
+          {chartsLoading ? (
             <Skeleton className="h-[200px] w-full" />
           ) : overdueJobs.length === 0 ? (
             <p className="text-muted-foreground text-center py-8">Nenhuma vaga fora do prazo</p>
