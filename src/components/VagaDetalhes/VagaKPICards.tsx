@@ -19,7 +19,7 @@ export function VagaKPICards({
         <p className="text-secondary-text-light dark:text-secondary-text-dark font-semibold text-base">
           Etapa Atual da Contratação
         </p>
-        <Select value={vaga.status_slug || "a_iniciar"} onValueChange={onStatusChange} disabled={vaga.status_slug === "concluida"}>
+        <Select value={vaga.status_slug || "discovery"} onValueChange={onStatusChange} disabled={vaga.status_slug === "concluida"}>
           <SelectTrigger className="w-full bg-white dark:bg-background-dark border-border hover:bg-primary/5 transition-colors text-base font-medium">
             <SelectValue />
           </SelectTrigger>

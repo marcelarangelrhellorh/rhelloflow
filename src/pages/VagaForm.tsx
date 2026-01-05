@@ -18,7 +18,7 @@ import { TagPicker } from "@/components/TagPicker";
 import { LoadingButton } from "@/components/ui/loading-button";
 import { handleApiError } from "@/lib/errorHandler";
 import { useCacheInvalidation } from "@/hooks/data/useCacheInvalidation";
-
+import { VAGA_STATUS } from "@/constants/vagaStatus";
 const DIAS_SEMANA = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
 
 const BENEFICIOS_OPTIONS: MultiSelectOption[] = [
@@ -60,7 +60,7 @@ export default function VagaForm() {
     cliente_id: "",
     complexidade: "",
     prioridade: "",
-    status: "A iniciar",
+    status: VAGA_STATUS.DISCOVERY as string,
     salario_min: "",
     salario_max: "",
     salario_modalidade: "FAIXA" as "FAIXA" | "A_COMBINAR",
@@ -106,7 +106,7 @@ export default function VagaForm() {
           cliente_id: data.cliente_id || "",
           complexidade: data.complexidade || "",
           prioridade: data.prioridade || "",
-          status: data.status || "A iniciar",
+          status: data.status || VAGA_STATUS.DISCOVERY,
           salario_min: data.salario_min?.toString() || "",
           salario_max: data.salario_max?.toString() || "",
           salario_modalidade: (data.salario_modalidade as any) || "FAIXA",
@@ -453,7 +453,7 @@ export default function VagaForm() {
 
               <div>
                 <Label htmlFor="status">Status</Label>
-                <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
+                <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value as string })}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>

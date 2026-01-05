@@ -139,7 +139,7 @@ export default function VagaDetalhes() {
       </div>;
   }
   const daysOpen = getBusinessDaysFromNow(vaga.criado_em);
-  const progress = calculateProgress(vaga.status_slug || "a_iniciar");
+  const progress = calculateProgress(vaga.status_slug || "discovery");
   return <div className="relative flex min-h-screen w-full font-display bg-white dark:bg-background-dark">
       {/* Main Content */}
       <main className="flex-1 px-6 sm:px-10 lg:px-16 py-8">
@@ -161,7 +161,7 @@ export default function VagaDetalhes() {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
-              <VagaTimeline currentStatusSlug={vaga.status_slug || "a_iniciar"} progress={progress} />
+              <VagaTimeline currentStatusSlug={vaga.status_slug || "discovery"} progress={progress} />
 
               <JobHistorySection vagaId={vaga.id} />
 
