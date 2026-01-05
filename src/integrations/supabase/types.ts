@@ -1756,6 +1756,33 @@ export type Database = {
           },
         ]
       }
+      mentions: {
+        Row: {
+          created_at: string | null
+          entity_id: string
+          entity_type: string
+          id: string
+          mentioned_user_id: string
+          mentioner_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          entity_id: string
+          entity_type: string
+          id?: string
+          mentioned_user_id: string
+          mentioner_id: string
+        }
+        Update: {
+          created_at?: string | null
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          mentioned_user_id?: string
+          mentioner_id?: string
+        }
+        Relationships: []
+      }
       notificacoes: {
         Row: {
           created_at: string | null

@@ -352,7 +352,7 @@ export default function CandidatoDetalhes() {
             <CandidateMeetingsCard candidateId={id!} candidateName={candidato.nome_completo} className="shadow-lg border-gray-200" />
             
             {/* Notes Section */}
-            <CandidateNotesSection candidateId={id!} />
+            <CandidateNotesSection candidateId={id!} candidateName={candidato.nome_completo} />
           </div>
         </aside>
       </div>
