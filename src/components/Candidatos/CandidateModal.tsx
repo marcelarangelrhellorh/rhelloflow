@@ -11,6 +11,7 @@ import { Save, X } from "lucide-react";
 import { toast } from "sonner";
 import { Constants } from "@/integrations/supabase/types";
 import { ORIGEM_OPTIONS } from "@/constants/fitCultural";
+import { useCacheInvalidation } from "@/hooks/data/useCacheInvalidation";
 
 interface CandidateModalProps {
   open: boolean;
@@ -24,6 +25,7 @@ const RECRUTADORES = ["Ítalo", "Bianca Marques", "Victor", "Mariana", "Isabella
 export function CandidateModal({ open, onClose, candidatoId, onSave }: CandidateModalProps) {
   const [loading, setLoading] = useState(false);
   const [vagas, setVagas] = useState<{ id: string; titulo: string }[]>([]);
+  const { invalidateCandidatos } = useCacheInvalidation();
   const [formData, setFormData] = useState({
     nome_completo: "",
     email: "",
@@ -187,6 +189,7 @@ export function CandidateModal({ open, onClose, candidatoId, onSave }: Candidate
         toast.success("Candidato criado com sucesso!");
       }
       
+      await invalidateCandidatos(dataToSave.vaga_relacionada_id || undefined);
       onSave();
       onClose();
     } catch (error) {

@@ -40,6 +40,12 @@ export const CACHE_TIMES = {
     staleTime: 60 * 1000,       // 1 minuto
     gcTime: 5 * 60 * 1000,      // 5 minutos
   },
+  
+  // Dados operacionais - 1 minuto (atualizações frequentes)
+  OPERATIONAL: {
+    staleTime: 60 * 1000,       // 1 minuto
+    gcTime: 10 * 60 * 1000,     // 10 minutos
+  },
 } as const;
 
 // Query Keys centralizados para consistência

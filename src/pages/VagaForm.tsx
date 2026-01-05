@@ -17,6 +17,7 @@ import { useUsers } from "@/hooks/useUsers";
 import { TagPicker } from "@/components/TagPicker";
 import { LoadingButton } from "@/components/ui/loading-button";
 import { handleApiError } from "@/lib/errorHandler";
+import { useCacheInvalidation } from "@/hooks/data/useCacheInvalidation";
 
 const DIAS_SEMANA = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
 
@@ -44,6 +45,7 @@ export default function VagaForm() {
   const { users: csUsers } = useUsers('cs');
   const { users: clientUsers } = useUsers('client');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const { invalidateVagas } = useCacheInvalidation();
   
   const [formData, setFormData] = useState({
     titulo: "",
@@ -200,6 +202,7 @@ export default function VagaForm() {
         // Atualizar tags da vaga
         await saveTags(id);
 
+        await invalidateVagas();
         toast.success("Vaga atualizada com sucesso!");
       } else {
         const { data: newVaga, error } = await supabase
@@ -215,6 +218,7 @@ export default function VagaForm() {
           await saveTags(newVaga.id);
         }
 
+        await invalidateVagas();
         toast.success("Vaga criada com sucesso!");
       }
       navigate("/vagas");
