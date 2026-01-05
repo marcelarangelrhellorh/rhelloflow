@@ -103,7 +103,7 @@ export function VagaTasksCard({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <CheckSquare className="text-primary w-[30px] h-[30px]" />
-            <p className="text-secondary-text-light dark:text-secondary-text-dark font-semibold text-xl">
+            <p className="text-secondary-text-light dark:text-secondary-text-dark font-semibold text-base">
               Tarefas
             </p>
           </div>
@@ -148,14 +148,7 @@ export function VagaTasksCard({
           </p>}
       </div>
 
-      <TaskDetailDrawer 
-        task={selectedTask} 
-        open={detailDrawerOpen} 
-        onOpenChange={setDetailDrawerOpen} 
-        onEdit={handleEditTask}
-        onDelete={() => {}}
-        onToggleComplete={() => {}}
-      />
+      <TaskDetailDrawer task={selectedTask} open={detailDrawerOpen} onOpenChange={setDetailDrawerOpen} onEdit={handleEditTask} onDelete={() => {}} onToggleComplete={() => {}} />
 
       <TaskModal open={modalOpen} onClose={handleCloseModal} task={editingTask} defaultVagaId={defaultVagaId} />
     </>;
