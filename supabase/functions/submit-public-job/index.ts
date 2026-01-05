@@ -240,8 +240,8 @@ Deno.serve(async (req) => {
       confidencial: validatedData.confidencial || false,
       motivo_confidencial: validatedData.motivo_confidencial ? sanitizeText(validatedData.motivo_confidencial) : null,
       source: 'externo',
-      status: 'A iniciar',
-      status_slug: 'a_iniciar',
+        status: 'Discovery',
+        status_slug: 'discovery',
     };
 
     // Insert job into database
