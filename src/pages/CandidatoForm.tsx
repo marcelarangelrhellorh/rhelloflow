@@ -14,6 +14,7 @@ import { Constants } from "@/integrations/supabase/types";
 import { LoadingButton } from "@/components/ui/loading-button";
 import { handleApiError } from "@/lib/errorHandler";
 import { MODELO_CONTRATACAO_OPTIONS, FORMATO_TRABALHO_OPTIONS, ORIGEM_OPTIONS } from "@/constants/fitCultural";
+import { useCacheInvalidation } from "@/hooks/data/useCacheInvalidation";
 
 export default function CandidatoForm() {
   const { id } = useParams();
@@ -23,6 +24,7 @@ export default function CandidatoForm() {
   const [vagas, setVagas] = useState<{ id: string; titulo: string }[]>([]);
   const [curriculoFile, setCurriculoFile] = useState<File | null>(null);
   const [portfolioFile, setPortfolioFile] = useState<File | null>(null);
+  const { invalidateCandidatos } = useCacheInvalidation();
   const [formData, setFormData] = useState({
     nome_completo: "",
     email: "",
@@ -228,6 +230,7 @@ export default function CandidatoForm() {
 
       if (error) throw error;
       
+      await invalidateCandidatos(formData.vaga_relacionada_id || undefined);
       toast.success(id ? "Candidato atualizado com sucesso!" : "Candidato criado com sucesso!");
       navigate("/candidatos");
     } catch (error) {

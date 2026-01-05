@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { logger } from "@/lib/logger";
 import { MODELO_CONTRATACAO_OPTIONS, FORMATO_TRABALHO_OPTIONS, CARGO_OPTIONS, ESTADOS_BRASILEIROS } from "@/constants/fitCultural";
+import { useCacheInvalidation } from "@/hooks/data/useCacheInvalidation";
 
 interface AddCandidateModalProps {
   open: boolean;
@@ -25,6 +26,7 @@ interface Profile {
 export function AddCandidateModal({ open, onOpenChange, onSuccess }: AddCandidateModalProps) {
   const [loading, setLoading] = useState(false);
   const [recruiters, setRecruiters] = useState<Profile[]>([]);
+  const { invalidateCandidatos } = useCacheInvalidation();
   const [formData, setFormData] = useState({
     nome_completo: "",
     email: "",
@@ -92,6 +94,7 @@ export function AddCandidateModal({ open, onOpenChange, onSuccess }: AddCandidat
 
       if (error) throw error;
 
+      await invalidateCandidatos();
       toast.success("Candidato adicionado com sucesso!");
       onSuccess();
       resetForm();

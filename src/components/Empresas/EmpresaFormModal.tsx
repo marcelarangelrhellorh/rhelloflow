@@ -35,6 +35,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { formatCNPJ } from "@/lib/cnpjUtils";
 import { useCNPJLookup, Socio, AtividadeEconomica, CNPJData } from "@/hooks/useCNPJLookup";
+import { useCacheInvalidation } from "@/hooks/data/useCacheInvalidation";
 
 interface ClientUser {
   id: string;
@@ -94,6 +95,7 @@ export function EmpresaFormModal({
   const [quadroSocietario, setQuadroSocietario] = useState<Socio[]>([]);
   const [dadosReceita, setDadosReceita] = useState<CNPJData | null>(null);
   const { loading: cnpjLoading, consultarCNPJ, limparDados } = useCNPJLookup();
+  const { invalidateEmpresas } = useCacheInvalidation();
 
   const handleClose = () => {
     if (!empresa) {
@@ -352,6 +354,7 @@ export function EmpresaFormModal({
         }
       }
 
+      await invalidateEmpresas();
       onSuccess();
       handleClose();
     } catch (error) {
