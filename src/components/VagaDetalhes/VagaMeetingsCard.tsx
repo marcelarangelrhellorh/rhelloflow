@@ -112,7 +112,7 @@ export function VagaMeetingsCard({
             size="sm"
             variant="outline"
             onClick={handleNewMeeting}
-            className="h-7 gap-1 text-sm font-semibold bg-[#00141D] text-white hover:bg-[#00141D]/90 border-[#00141D]"
+            className="h-8 gap-1 px-4 text-sm font-semibold bg-[#00141D] text-white hover:bg-[#00141D]/90 border-[#00141D] rounded-full"
           >
             <Plus className="h-3 w-3" />
             Nova
@@ -195,7 +195,7 @@ export function VagaMeetingsCard({
         )}
 
         {meetings.length === 0 && (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-amber-600 dark:text-amber-500">
             Nenhuma reunião agendada
           </p>
         )}
