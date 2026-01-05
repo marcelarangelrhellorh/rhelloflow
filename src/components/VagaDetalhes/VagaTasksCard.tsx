@@ -99,7 +99,7 @@ export function VagaTasksCard({
       </div>;
   }
   return <>
-      <div className={cn("flex flex-col gap-3 rounded-lg p-6 bg-white dark:bg-background-dark border border-transparent shadow-sm", className)}>
+      <div className={cn("flex flex-col gap-3 rounded-lg p-6 bg-white dark:bg-background-dark border border-gray-200 dark:border-secondary-text-light/20 shadow-sm", className)}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <CheckSquare className="text-primary w-[30px] h-[30px]" />
@@ -107,7 +107,7 @@ export function VagaTasksCard({
               Tarefas
             </p>
           </div>
-          <Button size="sm" variant="outline" onClick={handleNewTask} className="h-7 gap-1 text-sm font-semibold bg-[#00141D] text-white hover:bg-[#00141D]/90 border-[#00141D]">
+          <Button size="sm" variant="outline" onClick={handleNewTask} className="h-8 gap-1 px-4 text-sm font-semibold bg-[#00141D] text-white hover:bg-[#00141D]/90 border-[#00141D] rounded-full">
             <Plus className="h-3 w-3" />
             Nova
           </Button>
