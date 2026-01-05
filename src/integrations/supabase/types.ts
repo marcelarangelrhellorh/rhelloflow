@@ -444,6 +444,9 @@ export type Database = {
           portfolio_url: string | null
           pretensao_salarial: number | null
           recrutador: string | null
+          rejection_feedback_at: string | null
+          rejection_feedback_given: boolean | null
+          rejection_feedback_job_id: string | null
           sexo: string | null
           source_link_id: string | null
           status: Database["public"]["Enums"]["status_candidato"] | null
@@ -491,6 +494,9 @@ export type Database = {
           portfolio_url?: string | null
           pretensao_salarial?: number | null
           recrutador?: string | null
+          rejection_feedback_at?: string | null
+          rejection_feedback_given?: boolean | null
+          rejection_feedback_job_id?: string | null
           sexo?: string | null
           source_link_id?: string | null
           status?: Database["public"]["Enums"]["status_candidato"] | null
@@ -538,6 +544,9 @@ export type Database = {
           portfolio_url?: string | null
           pretensao_salarial?: number | null
           recrutador?: string | null
+          rejection_feedback_at?: string | null
+          rejection_feedback_given?: boolean | null
+          rejection_feedback_job_id?: string | null
           sexo?: string | null
           source_link_id?: string | null
           status?: Database["public"]["Enums"]["status_candidato"] | null
@@ -549,6 +558,41 @@ export type Database = {
           vaga_relacionada_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "candidatos_rejection_feedback_job_id_fkey"
+            columns: ["rejection_feedback_job_id"]
+            isOneToOne: false
+            referencedRelation: "vagas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidatos_rejection_feedback_job_id_fkey"
+            columns: ["rejection_feedback_job_id"]
+            isOneToOne: false
+            referencedRelation: "vagas_active"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidatos_rejection_feedback_job_id_fkey"
+            columns: ["rejection_feedback_job_id"]
+            isOneToOne: false
+            referencedRelation: "vagas_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidatos_rejection_feedback_job_id_fkey"
+            columns: ["rejection_feedback_job_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_cliente_detalhadas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidatos_rejection_feedback_job_id_fkey"
+            columns: ["rejection_feedback_job_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_com_stats"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "candidatos_source_link_id_fkey"
             columns: ["source_link_id"]
@@ -1645,6 +1689,66 @@ export type Database = {
           },
           {
             foreignKeyName: "job_stage_history_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_com_stats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_stage_notifications: {
+        Row: {
+          id: string
+          job_id: string
+          notified_at: string
+          stage_slug: string
+          user_id: string | null
+        }
+        Insert: {
+          id?: string
+          job_id: string
+          notified_at?: string
+          stage_slug: string
+          user_id?: string | null
+        }
+        Update: {
+          id?: string
+          job_id?: string
+          notified_at?: string
+          stage_slug?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_stage_notifications_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "vagas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_stage_notifications_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "vagas_active"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_stage_notifications_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "vagas_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_stage_notifications_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_cliente_detalhadas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_stage_notifications_job_id_fkey"
             columns: ["job_id"]
             isOneToOne: false
             referencedRelation: "vw_vagas_com_stats"
@@ -4581,12 +4685,50 @@ export type Database = {
           email: string | null
           id: string | null
           nome_completo: string | null
+          rejection_feedback_at: string | null
+          rejection_feedback_given: boolean | null
+          rejection_feedback_job_id: string | null
           status: Database["public"]["Enums"]["status_candidato"] | null
           telefone: string | null
           vaga_relacionada_id: string | null
           vaga_titulo: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "candidatos_rejection_feedback_job_id_fkey"
+            columns: ["rejection_feedback_job_id"]
+            isOneToOne: false
+            referencedRelation: "vagas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidatos_rejection_feedback_job_id_fkey"
+            columns: ["rejection_feedback_job_id"]
+            isOneToOne: false
+            referencedRelation: "vagas_active"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidatos_rejection_feedback_job_id_fkey"
+            columns: ["rejection_feedback_job_id"]
+            isOneToOne: false
+            referencedRelation: "vagas_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidatos_rejection_feedback_job_id_fkey"
+            columns: ["rejection_feedback_job_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_cliente_detalhadas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidatos_rejection_feedback_job_id_fkey"
+            columns: ["rejection_feedback_job_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_com_stats"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "candidatos_vaga_relacionada_id_fkey"
             columns: ["vaga_relacionada_id"]

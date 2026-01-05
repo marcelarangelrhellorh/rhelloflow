@@ -10,6 +10,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { FilterBar } from "@/components/Candidatos/FilterBar";
 import { CandidateCard } from "@/components/Candidatos/CandidateCard";
 import { LinkToJobModal } from "@/components/BancoTalentos/LinkToJobModal";
+import { RejectionFeedbackModal } from "@/components/Candidatos/RejectionFeedbackModal";
 import { ImportXlsModal } from "@/components/ImportXlsModal";
 import { handleDelete as performDeletion } from "@/lib/deletionUtils";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -105,6 +106,15 @@ export default function Candidatos() {
   const [dragOverColumn, setDragOverColumn] = useState<string | null>(null);
   const [users, setUsers] = useState<Array<{ id: string; name: string }>>([]);
 
+  // Estado para modal de feedback de reprovação
+  const [rejectionModalData, setRejectionModalData] = useState<{
+    candidatoId: string;
+    candidatoName: string;
+    vagaTitle?: string;
+    vagaId?: string;
+    previousStatus: string;
+  } | null>(null);
+
   const sensors = useSensors(useSensor(PointerSensor, {
     activationConstraint: { distance: 8 }
   }));
@@ -162,6 +172,22 @@ export default function Candidatos() {
       return;
     }
 
+    // Se o novo status é "Reprovado", abrir modal de confirmação de feedback
+    if (newStatus === "Reprovado") {
+      const vagaInfo = vagas.find(v => v.id === candidato.vaga_relacionada_id);
+      setRejectionModalData({
+        candidatoId: candidato.id,
+        candidatoName: candidato.nome_completo,
+        vagaTitle: vagaInfo?.titulo,
+        vagaId: candidato.vaga_relacionada_id || undefined,
+        previousStatus: candidato.status,
+      });
+      // Atualização otimista visual
+      setCandidatos(prev => prev.map(c => c.id === candidatoId ? { ...c, status: newStatus } : c));
+      setActiveId(null);
+      return;
+    }
+
     // Atualização otimista
     setCandidatos(prev => prev.map(c => c.id === candidatoId ? { ...c, status: newStatus } : c));
     try {
@@ -174,6 +200,44 @@ export default function Candidatos() {
       setCandidatos(prev => prev.map(c => c.id === candidatoId ? { ...c, status: candidato.status } : c));
     } finally {
       setActiveId(null);
+    }
+  };
+
+  // Handler para confirmação de feedback de reprovação
+  const handleRejectionFeedbackConfirm = async (gaveFeedback: boolean) => {
+    if (!rejectionModalData) return;
+
+    const { candidatoId, vagaId, previousStatus } = rejectionModalData;
+
+    try {
+      const updateData: Record<string, unknown> = {
+        status: "Reprovado",
+        rejection_feedback_given: gaveFeedback,
+        rejection_feedback_at: gaveFeedback ? new Date().toISOString() : null,
+        rejection_feedback_job_id: vagaId || null,
+      };
+
+      const { error } = await supabase
+        .from("candidatos")
+        .update(updateData)
+        .eq("id", candidatoId);
+
+      if (error) throw error;
+      
+      toast.success(
+        gaveFeedback 
+          ? "Candidato movido para Reprovado (retorno já dado)" 
+          : "Candidato movido para Reprovado (pendente de retorno)"
+      );
+    } catch (error) {
+      logger.error("Erro ao mover candidato para reprovado:", error);
+      toast.error("Erro ao mover candidato");
+      // Reverter atualização otimista
+      setCandidatos(prev => 
+        prev.map(c => c.id === candidatoId ? { ...c, status: previousStatus } : c)
+      );
+    } finally {
+      setRejectionModalData(null);
     }
   };
 
@@ -503,6 +567,14 @@ export default function Candidatos() {
       </AlertDialog>
 
       <ImportXlsModal open={importModalOpen} onOpenChange={setImportModalOpen} sourceType="vaga" showVagaSelector={true} onSuccess={() => { loadCandidatos(); }} />
+
+      {/* Modal de confirmação de feedback de reprovação */}
+      <RejectionFeedbackModal
+        open={!!rejectionModalData}
+        onConfirm={handleRejectionFeedbackConfirm}
+        candidateName={rejectionModalData?.candidatoName || ""}
+        jobTitle={rejectionModalData?.vagaTitle}
+      />
     </div>
   );
 }

@@ -119,3 +119,6 @@ verify_jwt = false
 
 [functions.submit-technical-test]
 verify_jwt = false
+
+[functions.check-stale-jobs]
+verify_jwt = false
