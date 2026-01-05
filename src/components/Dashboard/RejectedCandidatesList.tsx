@@ -4,9 +4,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ExternalLink, Send, Phone, AlertCircle } from "lucide-react";
+import { ExternalLink, Send, Phone, AlertCircle, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { BulkWhatsAppModal } from "./BulkWhatsAppModal";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 interface RejectedCandidate {
   id: string;
   nome_completo: string;
@@ -17,6 +19,8 @@ interface RejectedCandidate {
   vacancy_id: string;
   vacancy_title: string;
   dias_desde_status: number;
+  rejection_feedback_given?: boolean | null;
+  rejection_feedback_at?: string | null;
 }
 interface RejectedCandidatesListProps {
   open: boolean;
@@ -62,6 +66,26 @@ export function RejectedCandidatesList({
     setSelectedIds(new Set());
     onRefresh();
   };
+
+  const handleMarkFeedbackGiven = async (candidateId: string) => {
+    try {
+      const { error } = await supabase
+        .from("candidatos")
+        .update({
+          rejection_feedback_given: true,
+          rejection_feedback_at: new Date().toISOString(),
+        })
+        .eq("id", candidateId);
+
+      if (error) throw error;
+      toast.success("Retorno marcado como dado");
+      onRefresh();
+    } catch (error) {
+      console.error("Erro ao marcar retorno:", error);
+      toast.error("Erro ao marcar retorno");
+    }
+  };
+
   return <>
       <Sheet open={open} onOpenChange={onOpenChange}>
         <SheetContent side="right" className="w-full sm:max-w-4xl overflow-y-auto">
@@ -106,12 +130,13 @@ export function RejectedCandidatesList({
                     <TableHead>Status</TableHead>
                     <TableHead>Dias</TableHead>
                     <TableHead>Telefone</TableHead>
+                    <TableHead>Retorno</TableHead>
                     <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {candidates.length === 0 ? <TableRow>
-                      <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                    {candidates.length === 0 ? <TableRow>
+                      <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                         Nenhum candidato encontrado
                       </TableCell>
                     </TableRow> : candidates.map(candidate => <TableRow key={candidate.id}>
@@ -152,13 +177,28 @@ export function RejectedCandidatesList({
                             </span>
                           </div>
                         </TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className="text-xs border-amber-500/30 text-amber-600">
+                            Pendente
+                          </Badge>
+                        </TableCell>
                         <TableCell className="text-right">
-                          <Button variant="ghost" size="sm" disabled={!isValidPhone(candidate.telefone)} onClick={() => {
-                      setSelectedIds(new Set([candidate.id]));
-                      setShowBulkModal(true);
-                    }}>
-                            <Phone className="h-4 w-4" />
-                          </Button>
+                          <div className="flex gap-1 justify-end">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              title="Marcar retorno como dado"
+                              onClick={() => handleMarkFeedbackGiven(candidate.id)}
+                            >
+                              <Check className="h-4 w-4 text-green-600" />
+                            </Button>
+                            <Button variant="ghost" size="sm" disabled={!isValidPhone(candidate.telefone)} onClick={() => {
+                              setSelectedIds(new Set([candidate.id]));
+                              setShowBulkModal(true);
+                            }}>
+                              <Phone className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>)}
                 </TableBody>
