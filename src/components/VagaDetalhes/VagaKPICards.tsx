@@ -41,7 +41,7 @@ export function VagaKPICards({
         <p className="text-secondary-text-light dark:text-secondary-text-dark font-semibold text-base">
           Candidatos Ativos
         </p>
-        <p className="text-primary-text-light dark:text-primary-text-dark text-2xl font-bold">
+        <p className="text-primary-text-light dark:text-primary-text-dark font-bold text-base">
           {candidatos.length}
         </p>
       </div>
@@ -50,7 +50,7 @@ export function VagaKPICards({
         <p className="text-secondary-text-light dark:text-secondary-text-dark font-semibold text-base">
           Duração do Processo
         </p>
-        <p className="text-primary-text-light dark:text-primary-text-dark text-lg font-bold">
+        <p className="text-primary-text-light dark:text-primary-text-dark font-bold text-base">
           {daysOpen} Dias
         </p>
       </div>
@@ -59,7 +59,7 @@ export function VagaKPICards({
         <p className="text-secondary-text-light dark:text-secondary-text-dark font-semibold text-base">
           Modelo de Trabalho
         </p>
-        <p className="text-primary-text-light dark:text-primary-text-dark text-xl font-bold">
+        <p className="text-primary-text-light dark:text-primary-text-dark font-bold text-base">
           {vaga.modelo_trabalho || "Não informado"}
         </p>
       </div>
@@ -68,7 +68,7 @@ export function VagaKPICards({
         <p className="text-secondary-text-light dark:text-secondary-text-dark text-base font-semibold">
           Formato da Contratação
         </p>
-        <p className="text-primary-text-light dark:text-primary-text-dark text-lg font-bold">
+        <p className="text-primary-text-light dark:text-primary-text-dark font-bold text-base">
           {vaga.tipo_contratacao || "Não informado"}
         </p>
       </div>

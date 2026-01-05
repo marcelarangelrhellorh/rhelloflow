@@ -32,7 +32,7 @@ export function VagaTimeline({
   };
   const timelineSteps = getTimelineSteps(currentStatusSlug);
   return <div className="mb-12">
-      <h2 className="text-primary-text-light dark:text-primary-text-dark text-2xl font-bold tracking-tight mb-6">
+      <h2 className="text-primary-text-light dark:text-primary-text-dark font-bold tracking-tight mb-6 text-lg">
         Linha do Tempo do Processo
       </h2>
 
