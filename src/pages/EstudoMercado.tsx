@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, FileDown, CheckCircle, XCircle, Lightbulb, Info, Database, RefreshCw, Zap, ExternalLink, Globe, DollarSign, TrendingUp } from "lucide-react";
+import { Loader2, FileDown, CheckCircle, XCircle, Lightbulb, Info, Database, RefreshCw, Zap, ExternalLink, Globe, DollarSign, TrendingUp, X, Plus, Tags } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import logoRhelloDark from "@/assets/logo-rhello-dark.png";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -16,6 +16,7 @@ import haysData from "@/data/salary-guides/hays_standardized.json";
 import michaelPageData from "@/data/salary-guides/michael_page_standardized.json";
 import { logger } from "@/lib/logger";
 import { generateEstudoMercadoPdf } from "@/components/EstudoMercado/EstudoMercadoPdfExport";
+import { useRolesSynonyms } from "@/hooks/useRolesSynonyms";
 
 // Interfaces para o schema com segmentação por setor
 interface FaixaPorPorte {
@@ -93,11 +94,46 @@ export default function EstudoMercado() {
   const [benchmarkCount, setBenchmarkCount] = useState<number | null>(null);
   const [checkingData, setCheckingData] = useState(true);
 
-  // Form state simplificado
+  // Form state
   const [cargo, setCargo] = useState("");
   const [senioridade, setSenioridade] = useState("");
   const [localidade, setLocalidade] = useState("");
   const [forceRefresh, setForceRefresh] = useState(false);
+  
+  // Synonyms state
+  const [sinonimos, setSinonimos] = useState<string[]>([]);
+  const [novoSinonimo, setNovoSinonimo] = useState("");
+  const [showSynonyms, setShowSynonyms] = useState(false);
+  
+  const { getSynonymsForRole } = useRolesSynonyms();
+
+  // Auto-load synonyms when cargo changes
+  useEffect(() => {
+    if (cargo.trim()) {
+      const catalogSynonyms = getSynonymsForRole(cargo);
+      if (catalogSynonyms.length > 0) {
+        setSinonimos(catalogSynonyms);
+        setShowSynonyms(true);
+      } else {
+        setSinonimos([]);
+      }
+    } else {
+      setSinonimos([]);
+      setShowSynonyms(false);
+    }
+  }, [cargo, getSynonymsForRole]);
+
+  const handleAddSinonimo = () => {
+    const term = novoSinonimo.trim();
+    if (term && !sinonimos.includes(term) && term.toLowerCase() !== cargo.toLowerCase()) {
+      setSinonimos(prev => [...prev, term]);
+      setNovoSinonimo("");
+    }
+  };
+
+  const handleRemoveSinonimo = (index: number) => {
+    setSinonimos(prev => prev.filter((_, i) => i !== index));
+  };
 
   // Verificar se já existem dados importados
   useEffect(() => {
@@ -168,7 +204,12 @@ export default function EstudoMercado() {
       const { data, error } = await supabase.functions.invoke("gerar-estudo-mercado", {
         body: {
           cargo,
+          sinonimos: sinonimos.length > 0 ? sinonimos : undefined,
           senioridade: senioridade || null,
+          localidade: localidade || null,
+          forceRefresh
+        }
+      });
           localidade: localidade || null,
           forceRefresh
         }
@@ -405,6 +446,68 @@ export default function EstudoMercado() {
                 />
               </div>
             </div>
+
+            {/* Synonyms Section */}
+            {cargo.trim() && (
+              <div className="space-y-3 p-4 bg-muted/30 rounded-lg border">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Tags className="h-4 w-4 text-muted-foreground" />
+                    <Label className="text-sm font-medium">Termos alternativos para busca</Label>
+                  </div>
+                  <Badge variant="secondary" className="text-xs">
+                    {sinonimos.length} termo{sinonimos.length !== 1 ? 's' : ''}
+                  </Badge>
+                </div>
+                
+                <p className="text-xs text-muted-foreground">
+                  Estes termos serão usados para buscar em InfoJobs e Glassdoor, aumentando a chance de encontrar dados.
+                </p>
+
+                {/* Display synonyms as chips */}
+                {sinonimos.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {sinonimos.map((syn, idx) => (
+                      <Badge 
+                        key={idx} 
+                        variant="outline" 
+                        className="flex items-center gap-1 pr-1"
+                      >
+                        {syn}
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveSinonimo(idx)}
+                          className="ml-1 hover:bg-muted rounded-full p-0.5"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+
+                {/* Add new synonym */}
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Adicionar termo alternativo..."
+                    value={novoSinonimo}
+                    onChange={e => setNovoSinonimo(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleAddSinonimo())}
+                    className="flex-1 h-8 text-sm"
+                  />
+                  <Button 
+                    type="button" 
+                    size="sm" 
+                    variant="outline"
+                    onClick={handleAddSinonimo}
+                    disabled={!novoSinonimo.trim()}
+                  >
+                    <Plus className="h-3 w-3 mr-1" />
+                    Adicionar
+                  </Button>
+                </div>
+              </div>
+            )}
 
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">

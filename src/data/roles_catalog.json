@@ -2,6 +2,7 @@
   {
     "role_id": "assistente_operacoes",
     "title": "Assistente de Operações",
+    "synonyms": ["Auxiliar de Operações", "Assistente Operacional", "Operations Assistant"],
     "category": "Operações",
     "seniority": "Júnior",
     "core_focus": ["Execução de rotinas", "Suporte operacional"],
@@ -16,6 +17,7 @@
   {
     "role_id": "analista_operacoes",
     "title": "Analista de Operações",
+    "synonyms": ["Operations Analyst", "Analista Operacional", "Analista de Processos Operacionais"],
     "category": "Operações",
     "seniority": "Pleno",
     "core_focus": ["Monitoramento operacional", "Análise de dados"],
@@ -30,6 +32,7 @@
   {
     "role_id": "coordenador_operacoes",
     "title": "Coordenador de Operações",
+    "synonyms": ["Operations Coordinator", "Supervisor de Operações", "Coordenador Operacional"],
     "category": "Operações",
     "seniority": "Pleno/Sênior",
     "core_focus": ["Execução de equipe", "Garantia de processos"],
@@ -44,6 +47,7 @@
   {
     "role_id": "gerente_operacoes",
     "title": "Gerente de Operações",
+    "synonyms": ["Operations Manager", "Gestor de Operações", "Head de Operações"],
     "category": "Operações",
     "seniority": "Sênior",
     "core_focus": ["Eficiência", "Qualidade operacional", "Custos"],
@@ -58,6 +62,7 @@
   {
     "role_id": "head_operacoes",
     "title": "Head / Diretor de Operações (COO)",
+    "synonyms": ["COO", "Chief Operating Officer", "Diretor de Operações", "VP de Operações"],
     "category": "Operações",
     "seniority": "Executivo",
     "core_focus": ["Estratégia operacional", "Alinhamento executivo"],
@@ -72,6 +77,7 @@
   {
     "role_id": "analista_processos",
     "title": "Analista de Processos",
+    "synonyms": ["Process Analyst", "Analista de Melhoria Contínua", "Analista de BPM"],
     "category": "Projetos e Processos",
     "seniority": "Pleno",
     "core_focus": ["Mapeamento de processos", "Melhoria contínua"],
@@ -86,6 +92,7 @@
   {
     "role_id": "gerente_processos",
     "title": "Gerente de Processos",
+    "synonyms": ["Process Manager", "Gerente de Melhoria Contínua", "Gerente de Excelência Operacional"],
     "category": "Projetos e Processos",
     "seniority": "Sênior",
     "core_focus": ["Padronização", "Automação"],
@@ -100,6 +107,7 @@
   {
     "role_id": "product_manager",
     "title": "Product Manager (Gerente de Produto)",
+    "synonyms": ["PM", "Gerente de Produto", "Product Lead", "GPM"],
     "category": "Produto e Tecnologia",
     "seniority": "Pleno/Sênior",
     "core_focus": ["Visão de produto", "Valor ao usuário"],
@@ -114,6 +122,7 @@
   {
     "role_id": "product_owner",
     "title": "Product Owner",
+    "synonyms": ["PO", "Dono do Produto", "Product Owner Ágil"],
     "category": "Produto e Tecnologia",
     "seniority": "Pleno",
     "core_focus": ["Backlog tático", "Alinhamento com o time"],
@@ -128,6 +137,7 @@
   {
     "role_id": "tech_lead",
     "title": "Tech Lead / Líder Técnico",
+    "synonyms": ["Technical Lead", "Líder Técnico", "Lead Developer", "Engineering Lead"],
     "category": "Tecnologia",
     "seniority": "Sênior",
     "core_focus": ["Decisões técnicas", "Qualidade de código"],
@@ -142,6 +152,7 @@
   {
     "role_id": "cto",
     "title": "Chief Technology Officer (CTO)",
+    "synonyms": ["CTO", "Diretor de Tecnologia", "VP de Tecnologia", "Head de Tecnologia"],
     "category": "Tecnologia",
     "seniority": "Executivo",
     "core_focus": ["Estratégia tecnológica", "Escalabilidade"],
@@ -156,6 +167,7 @@
   {
     "role_id": "engenheiro_software_junior",
     "title": "Engenheiro de Software (Júnior)",
+    "synonyms": ["Desenvolvedor Júnior", "Junior Developer", "Programador Júnior", "Software Developer Jr"],
     "category": "Tecnologia",
     "seniority": "Júnior",
     "core_focus": ["Implementação básica", "Aprendizado"],
@@ -170,6 +182,7 @@
   {
     "role_id": "engenheiro_software_pleno",
     "title": "Engenheiro de Software (Pleno)",
+    "synonyms": ["Desenvolvedor Pleno", "Mid-level Developer", "Programador Pleno", "Software Developer"],
     "category": "Tecnologia",
     "seniority": "Pleno",
     "core_focus": ["Entrega de funcionalidades", "Qualidade de código"],
@@ -184,6 +197,7 @@
   {
     "role_id": "engenheiro_software_senior",
     "title": "Engenheiro de Software (Sênior)",
+    "synonyms": ["Desenvolvedor Sênior", "Senior Developer", "Programador Sênior", "Senior Software Engineer"],
     "category": "Tecnologia",
     "seniority": "Sênior",
     "core_focus": ["Arquitetura", "Mentoria"],
@@ -198,6 +212,7 @@
   {
     "role_id": "devops_sre",
     "title": "DevOps / SRE",
+    "synonyms": ["Site Reliability Engineer", "Engenheiro DevOps", "Platform Engineer", "Engenheiro de Infraestrutura"],
     "category": "Tecnologia",
     "seniority": "Pleno/Sênior",
     "core_focus": ["Infraestrutura", "Disponibilidade"],
@@ -212,6 +227,7 @@
   {
     "role_id": "qa_analista",
     "title": "QA / Analista de Testes",
+    "synonyms": ["Quality Assurance", "Analista de Qualidade", "Test Engineer", "QA Engineer"],
     "category": "Tecnologia",
     "seniority": "Pleno",
     "core_focus": ["Qualidade de software", "Testes"],
@@ -226,6 +242,7 @@
   {
     "role_id": "ux_ui_designer",
     "title": "UX/UI Designer",
+    "synonyms": ["Designer de Produto", "Product Designer", "Designer de Interface", "UX Designer", "UI Designer"],
     "category": "Design & Conteúdo",
     "seniority": "Pleno",
     "core_focus": ["Usabilidade", "Interface"],
@@ -240,6 +257,7 @@
   {
     "role_id": "motion_designer",
     "title": "Motion Designer",
+    "synonyms": ["Animador", "Video Designer", "Motion Graphics Designer"],
     "category": "Design & Conteúdo",
     "seniority": "Pleno",
     "core_focus": ["Animação", "Vídeo"],
@@ -254,6 +272,7 @@
   {
     "role_id": "designer_grafico",
     "title": "Designer Gráfico",
+    "synonyms": ["Graphic Designer", "Designer Visual", "Diretor de Arte"],
     "category": "Design & Conteúdo",
     "seniority": "Júnior/Pleno",
     "core_focus": ["Criação visual", "Marca"],
@@ -268,6 +287,7 @@
   {
     "role_id": "redator_copywriter",
     "title": "Redator / Copywriter",
+    "synonyms": ["Copywriter", "Redator Publicitário", "Content Writer", "UX Writer"],
     "category": "Design & Conteúdo",
     "seniority": "Pleno",
     "core_focus": ["Mensagens", "Persuasão"],
@@ -282,6 +302,7 @@
   {
     "role_id": "social_media",
     "title": "Social Media",
+    "synonyms": ["Community Manager", "Gestor de Redes Sociais", "Social Media Manager"],
     "category": "Marketing",
     "seniority": "Júnior/Pleno",
     "core_focus": ["Engajamento", "Comunidade"],
@@ -296,6 +317,7 @@
   {
     "role_id": "analista_marketing",
     "title": "Analista de Marketing",
+    "synonyms": ["Marketing Analyst", "Analista de Marketing Digital", "Growth Analyst"],
     "category": "Marketing",
     "seniority": "Pleno",
     "core_focus": ["Campanhas", "Mensuração"],
@@ -310,6 +332,7 @@
   {
     "role_id": "especialista_performance",
     "title": "Especialista em Performance (Ads)",
+    "synonyms": ["Mídia Performance", "Gestor de Tráfego", "Performance Marketing Specialist", "Paid Media Specialist"],
     "category": "Marketing",
     "seniority": "Pleno/Sênior",
     "core_focus": ["Mídia paga", "Otimização de campanhas"],
@@ -324,6 +347,7 @@
   {
     "role_id": "product_marketing_manager",
     "title": "Product Marketing Manager",
+    "synonyms": ["PMM", "Gerente de Marketing de Produto", "Product Marketer"],
     "category": "Marketing",
     "seniority": "Sênior",
     "core_focus": ["Go-to-market", "Posicionamento"],
@@ -338,6 +362,7 @@
   {
     "role_id": "sdr_bdr",
     "title": "SDR / BDR (Pré-vendas)",
+    "synonyms": ["Sales Development Representative", "Business Development Representative", "Pré-vendas", "Inside Sales"],
     "category": "Comercial",
     "seniority": "Júnior/Pleno",
     "core_focus": ["Qualificação de leads", "AGendamento"],
@@ -352,6 +377,7 @@
   {
     "role_id": "executivo_vendas",
     "title": "Executivo de Vendas",
+    "synonyms": ["Account Executive", "Vendedor", "Sales Executive", "Consultor de Vendas"],
     "category": "Comercial",
     "seniority": "Pleno/Sênior",
     "core_focus": ["Fechamento de negócios", "Negociação"],
@@ -366,6 +392,7 @@
   {
     "role_id": "kam_gerente_contas",
     "title": "Gerente de Contas / KAM",
+    "synonyms": ["Key Account Manager", "Account Manager", "Gerente de Relacionamento", "Client Success Manager"],
     "category": "Comercial",
     "seniority": "Sênior",
     "core_focus": ["Gestão de contas", "Expansão de receita"],
@@ -380,6 +407,7 @@
   {
     "role_id": "coordenador_comercial",
     "title": "Coordenador Comercial",
+    "synonyms": ["Sales Coordinator", "Coordenador de Vendas", "Supervisor Comercial"],
     "category": "Comercial",
     "seniority": "Pleno",
     "core_focus": ["Operação de vendas", "Processos comerciais"],
@@ -394,6 +422,7 @@
   {
     "role_id": "gerente_comercial",
     "title": "Gerente Comercial",
+    "synonyms": ["Sales Manager", "Gerente de Vendas", "Head Comercial", "Diretor Comercial"],
     "category": "Comercial",
     "seniority": "Sênior",
     "core_focus": ["Estratégia de vendas", "Resultados"],
@@ -408,6 +437,7 @@
   {
     "role_id": "analista_financeiro",
     "title": "Analista Financeiro",
+    "synonyms": ["Financial Analyst", "Analista de Finanças", "Analista de FP&A"],
     "category": "Financeiro",
     "seniority": "Pleno",
     "core_focus": ["Controle financeiro", "Relatórios"],
@@ -422,6 +452,7 @@
   {
     "role_id": "controller",
     "title": "Controller",
+    "synonyms": ["Controlador Financeiro", "Financial Controller", "Controller Financeiro"],
     "category": "Financeiro",
     "seniority": "Sênior",
     "core_focus": ["Governança financeira", "Reporting"],
@@ -436,6 +467,7 @@
   {
     "role_id": "gerente_financeiro",
     "title": "Gerente Financeiro",
+    "synonyms": ["Finance Manager", "Gestor Financeiro", "Head de Finanças"],
     "category": "Financeiro",
     "seniority": "Sênior",
     "core_focus": ["Gestão de caixa", "Estratégia financeira"],
@@ -450,6 +482,7 @@
   {
     "role_id": "diretor_financeiro",
     "title": "Diretor Financeiro (CFO)",
+    "synonyms": ["CFO", "Chief Financial Officer", "VP de Finanças", "Diretor de Finanças"],
     "category": "Financeiro",
     "seniority": "Executivo",
     "core_focus": ["Estratégia de capital", "Relação com investidores"],
@@ -464,6 +497,7 @@
   {
     "role_id": "assistente_rh",
     "title": "Assistente de RH",
+    "synonyms": ["Auxiliar de RH", "Assistente de Recursos Humanos", "HR Assistant", "Auxiliar de Recursos Humanos"],
     "category": "Recursos Humanos",
     "seniority": "Júnior",
     "core_focus": ["Suporte administrativo", "Processos de RH"],
@@ -478,6 +512,7 @@
   {
     "role_id": "analista_rh",
     "title": "Analista de RH",
+    "synonyms": ["Analista de Recursos Humanos", "HR Analyst", "People Analyst", "Analista de Gente e Gestão"],
     "category": "Recursos Humanos",
     "seniority": "Pleno",
     "core_focus": ["Gestão de processos de RH", "Análise de indicadores"],
@@ -492,6 +527,7 @@
   {
     "role_id": "analista_recrutamento",
     "title": "Analista de Recrutamento e Seleção",
+    "synonyms": ["Recrutador", "Recruiter", "Talent Acquisition", "Analista de R&S", "Analista de Atração de Talentos"],
     "category": "Recursos Humanos",
     "seniority": "Pleno",
     "core_focus": ["Atração de talentos", "Seleção de candidatos"],
@@ -506,6 +542,7 @@
   {
     "role_id": "business_partner_rh",
     "title": "Business Partner de RH (HRBP)",
+    "synonyms": ["HRBP", "HR Business Partner", "BP de RH", "Business Partner de Pessoas", "People Business Partner"],
     "category": "Recursos Humanos",
     "seniority": "Sênior",
     "core_focus": ["Consultoria interna", "Alinhamento estratégico"],
@@ -520,6 +557,7 @@
   {
     "role_id": "coordenador_rh",
     "title": "Coordenador de RH",
+    "synonyms": ["Coordenador de Recursos Humanos", "HR Coordinator", "Coordenador de Gente e Gestão", "Coordenador de People"],
     "category": "Recursos Humanos",
     "seniority": "Pleno/Sênior",
     "core_focus": ["Gestão de equipe de RH", "Processos integrados"],
@@ -534,6 +572,7 @@
   {
     "role_id": "especialista_dp",
     "title": "Especialista em Departamento Pessoal",
+    "synonyms": ["Analista de DP", "Analista de Departamento Pessoal", "Especialista em Folha", "Payroll Specialist"],
     "category": "Recursos Humanos",
     "seniority": "Pleno/Sênior",
     "core_focus": ["Folha de pagamento", "Compliance trabalhista"],
@@ -548,6 +587,7 @@
   {
     "role_id": "especialista_treinamento",
     "title": "Especialista em Treinamento e Desenvolvimento",
+    "synonyms": ["Analista de T&D", "L&D Specialist", "Especialista em Desenvolvimento Organizacional", "Training Specialist"],
     "category": "Recursos Humanos",
     "seniority": "Pleno/Sênior",
     "core_focus": ["Capacitação", "Desenvolvimento de pessoas"],
@@ -562,6 +602,7 @@
   {
     "role_id": "gerente_rh",
     "title": "Gerente de RH",
+    "synonyms": ["Gerente de Recursos Humanos", "HR Manager", "People Manager", "Gerente de Gente e Gestão", "Head de RH"],
     "category": "Recursos Humanos",
     "seniority": "Sênior",
     "core_focus": ["Estratégia de pessoas", "Gestão de RH"],
@@ -576,6 +617,7 @@
   {
     "role_id": "diretor_rh",
     "title": "Diretor de RH (CHRO)",
+    "synonyms": ["CHRO", "Chief Human Resources Officer", "VP de RH", "Diretor de Pessoas", "Chief People Officer", "CPO"],
     "category": "Recursos Humanos",
     "seniority": "Executivo",
     "core_focus": ["Estratégia de capital humano", "Cultura organizacional"],
