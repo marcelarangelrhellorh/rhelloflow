@@ -138,7 +138,7 @@ export default function VagaDetalhes() {
         </p>
       </div>;
   }
-  const daysOpen = getBusinessDaysFromNow(vaga.criado_em);
+  const daysOpen = getBusinessDaysFromNow(vaga.data_abertura || vaga.criado_em);
   const progress = calculateProgress(vaga.status_slug || "discovery");
   return <div className="relative flex min-h-screen w-full font-display bg-white dark:bg-background-dark">
       {/* Main Content */}

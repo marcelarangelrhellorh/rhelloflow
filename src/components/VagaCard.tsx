@@ -24,6 +24,7 @@ interface VagaCardProps {
     recrutador_id?: string | null;
     status: string;
     criado_em: string | null;
+    data_abertura?: string | null;
     candidatos_count?: number;
     salario_min?: number | null;
     salario_max?: number | null;
@@ -102,7 +103,7 @@ export const VagaCard = React.memo(function VagaCard({
   const [requiresApproval, setRequiresApproval] = useState(false);
   const [recrutadorName, setRecrutadorName] = useState<string | null>(vaga.recrutador);
   const progress = statusProgressMap[vaga.status] || 0;
-  const daysOpen = vaga.criado_em ? getBusinessDaysFromNow(vaga.criado_em) : 0;
+  const daysOpen = getBusinessDaysFromNow(vaga.data_abertura || vaga.criado_em);
   const statusColors = getStatusBadgeColor(vaga.status);
   useEffect(() => {
     if (vaga.recrutador_id && !vaga.recrutador) {
