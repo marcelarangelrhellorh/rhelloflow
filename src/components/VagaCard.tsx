@@ -16,6 +16,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { handleDelete as performDeletion } from "@/lib/deletionUtils";
 import { useUserRole } from "@/hooks/useUserRole";
+interface VagaRecrutador {
+  user_id: string;
+  is_primary: boolean;
+  users: { name: string } | null;
+}
+
 interface VagaCardProps {
   vaga: {
     id: string;
@@ -90,15 +96,53 @@ export const VagaCard = React.memo(function VagaCard({
   const [isDeleting, setIsDeleting] = useState(false);
   const [deletionReason, setDeletionReason] = useState("");
   const [requiresApproval, setRequiresApproval] = useState(false);
+  const [recrutadores, setRecrutadores] = useState<VagaRecrutador[]>([]);
   const [recrutadorName, setRecrutadorName] = useState<string | null>(vaga.recrutador);
   const progress = calculateProgress(vaga.status);
   const daysOpen = getBusinessDaysFromNow(vaga.data_abertura || vaga.criado_em);
   const statusColors = getStatusBadgeColor(vaga.status);
+
+  // Carregar múltiplos recrutadores
   useEffect(() => {
-    if (vaga.recrutador_id && !vaga.recrutador) {
+    loadRecrutadores();
+  }, [vaga.id]);
+
+  const loadRecrutadores = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('vaga_recrutadores')
+        .select('user_id, is_primary, users!vaga_recrutadores_user_id_fkey(name)')
+        .eq('vaga_id', vaga.id)
+        .order('is_primary', { ascending: false });
+      
+      if (error) throw error;
+      
+      if (data && data.length > 0) {
+        const mapped = data.map(r => ({
+          user_id: r.user_id,
+          is_primary: r.is_primary,
+          users: r.users as { name: string } | null
+        }));
+        setRecrutadores(mapped);
+        // Define o nome do recrutador principal para compatibilidade
+        const principal = mapped.find(r => r.is_primary);
+        if (principal?.users?.name) {
+          setRecrutadorName(principal.users.name);
+        }
+      } else if (vaga.recrutador_id && !vaga.recrutador) {
+        // Fallback: carregar do campo legado se não houver na nova tabela
+        loadRecrutadorName();
+      }
+    } catch (error) {
+      console.error('Erro ao carregar recrutadores:', error);
+    }
+  };
+  // Fallback: carregar nome do recrutador do campo legado
+  useEffect(() => {
+    if (vaga.recrutador_id && !vaga.recrutador && recrutadores.length === 0) {
       loadRecrutadorName();
     }
-  }, [vaga.recrutador_id]);
+  }, [vaga.recrutador_id, recrutadores.length]);
   const loadRecrutadorName = async () => {
     try {
       const {
@@ -241,7 +285,15 @@ export const VagaCard = React.memo(function VagaCard({
                 <div className="space-y-0.5">
                   <p className="text-[#36404A] text-xs font-semibold">Recrutador</p>
                   <p className="text-sm font-semibold text-[#00141D] line-clamp-1 max-w-[150px]">
-                    {recrutadorName || "Não atribuído"}
+                    {recrutadores.length > 0 
+                      ? recrutadores.map(r => r.users?.name).filter(Boolean).join(", ")
+                      : recrutadorName || "Não atribuído"
+                    }
+                    {recrutadores.length > 1 && (
+                      <span className="text-xs text-muted-foreground ml-1">
+                        ({recrutadores.length})
+                      </span>
+                    )}
                   </p>
                 </div>
               </div>
@@ -336,9 +388,23 @@ export const VagaCard = React.memo(function VagaCard({
                 </div>
                 <div className="space-y-1">
                   <p className="text-[#36404A] text-base font-semibold">Recrutador</p>
-                  <p className="text-sm font-semibold text-[#00141D] line-clamp-1">
-                    {recrutadorName || "Não atribuído"}
-                  </p>
+                  <div className="space-y-0.5">
+                    {recrutadores.length > 0 ? (
+                      <div className="flex flex-wrap gap-1">
+                        {recrutadores.map((r, idx) => (
+                          <span key={r.user_id} className="text-sm font-semibold text-[#00141D]">
+                            {r.users?.name}
+                            {r.is_primary && <span className="text-xs text-muted-foreground ml-0.5">(P)</span>}
+                            {idx < recrutadores.length - 1 && ","}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm font-semibold text-[#00141D] line-clamp-1">
+                        {recrutadorName || "Não atribuído"}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
 

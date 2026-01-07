@@ -75,7 +75,7 @@ export default function VagaForm() {
     contato_nome: "",
     contato_email: "",
     contato_telefone: "",
-    recrutador_id: "",
+    recrutador_ids: [] as string[], // Suporte para múltiplos recrutadores
     cs_id: "",
     cliente_id: "",
     complexidade: "",
@@ -123,7 +123,7 @@ export default function VagaForm() {
           contato_nome: data.contato_nome || "",
           contato_email: data.contato_email || "",
           contato_telefone: data.contato_telefone || "",
-          recrutador_id: data.recrutador_id || "",
+          recrutador_ids: [], // Será preenchido abaixo
           cs_id: data.cs_id || "",
           cliente_id: data.cliente_id || "",
           complexidade: data.complexidade || "",
@@ -145,6 +145,20 @@ export default function VagaForm() {
           observacoes: data.observacoes || "",
           data_abertura: data.data_abertura || "",
         });
+
+        // Carregar recrutadores da vaga
+        const { data: recrutadoresData } = await supabase
+          .from("vaga_recrutadores")
+          .select("user_id, is_primary")
+          .eq("vaga_id", id)
+          .order("is_primary", { ascending: false }); // Principal primeiro
+
+        if (recrutadoresData && recrutadoresData.length > 0) {
+          setFormData(prev => ({
+            ...prev,
+            recrutador_ids: recrutadoresData.map(r => r.user_id)
+          }));
+        }
 
         // Carregar tags da vaga
         const { data: vacancyTagsData } = await (supabase as any)
@@ -198,7 +212,7 @@ export default function VagaForm() {
         contato_nome: formData.contato_nome || null,
         contato_email: formData.contato_email || null,
         contato_telefone: formData.contato_telefone || null,
-        recrutador_id: formData.recrutador_id || null,
+        recrutador_id: formData.recrutador_ids[0] || null, // Primeiro é o principal (compatibilidade)
         cs_id: formData.cs_id || null,
         cliente_id: formData.cliente_id || null,
         complexidade: (formData.complexidade || null) as any,
@@ -230,6 +244,9 @@ export default function VagaForm() {
           .eq("id", id);
         if (error) throw error;
 
+        // Atualizar recrutadores da vaga
+        await saveRecrutadores(id);
+
         // Atualizar tags da vaga
         await saveTags(id);
 
@@ -244,8 +261,9 @@ export default function VagaForm() {
         
         if (error) throw error;
 
-        // Salvar tags da vaga
+        // Salvar recrutadores e tags da vaga
         if (newVaga) {
+          await saveRecrutadores(newVaga.id);
           await saveTags(newVaga.id);
         }
 
@@ -257,6 +275,34 @@ export default function VagaForm() {
       handleApiError(error, { context: "ao salvar vaga" });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const saveRecrutadores = async (vagaId: string) => {
+    try {
+      // Remover todos os recrutadores existentes
+      await supabase
+        .from("vaga_recrutadores")
+        .delete()
+        .eq("vaga_id", vagaId);
+
+      // Inserir novos recrutadores (primeiro é o principal)
+      if (formData.recrutador_ids.length > 0) {
+        const recrutadoresToInsert = formData.recrutador_ids.map((userId, index) => ({
+          vaga_id: vagaId,
+          user_id: userId,
+          is_primary: index === 0, // Primeiro recrutador é o principal
+        }));
+
+        const { error } = await supabase
+          .from("vaga_recrutadores")
+          .insert(recrutadoresToInsert);
+
+        if (error) throw error;
+      }
+    } catch (error) {
+      console.error("Erro ao salvar recrutadores:", error);
+      throw error;
     }
   };
 
@@ -457,19 +503,19 @@ export default function VagaForm() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label htmlFor="recrutador">Recrutador</Label>
-                <Select value={formData.recrutador_id} onValueChange={(value) => setFormData({ ...formData, recrutador_id: value })}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione um recrutador" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {recrutadores.map((rec) => (
-                      <SelectItem key={rec.id} value={rec.id}>
-                        {rec.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="recrutadores">Recrutadores</Label>
+                <p className="text-xs text-muted-foreground mb-2">
+                  O primeiro recrutador selecionado será o principal
+                </p>
+                <MultiSelect
+                  options={recrutadores.map((rec) => ({
+                    label: rec.name,
+                    value: rec.id,
+                  }))}
+                  value={formData.recrutador_ids}
+                  onChange={(ids) => setFormData({ ...formData, recrutador_ids: ids })}
+                  placeholder="Selecione os recrutadores"
+                />
               </div>
 
               <div>

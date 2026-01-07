@@ -3313,6 +3313,83 @@ export type Database = {
           },
         ]
       }
+      vaga_recrutadores: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          id: string
+          is_primary: boolean | null
+          user_id: string
+          vaga_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_primary?: boolean | null
+          user_id: string
+          vaga_id: string
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_primary?: boolean | null
+          user_id?: string
+          vaga_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vaga_recrutadores_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vaga_recrutadores_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vaga_recrutadores_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vagas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vaga_recrutadores_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vagas_active"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vaga_recrutadores_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vagas_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vaga_recrutadores_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_cliente_detalhadas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vaga_recrutadores_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_com_stats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vaga_status_ref: {
         Row: {
           color: string
@@ -4790,6 +4867,61 @@ export type Database = {
           {
             foreignKeyName: "candidatos_vaga_relacionada_id_fkey"
             columns: ["vaga_relacionada_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_com_stats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vw_vaga_recrutadores: {
+        Row: {
+          created_at: string | null
+          id: string | null
+          is_primary: boolean | null
+          recrutador_email: string | null
+          recrutador_nome: string | null
+          user_id: string | null
+          vaga_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vaga_recrutadores_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vaga_recrutadores_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vagas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vaga_recrutadores_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vagas_active"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vaga_recrutadores_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vagas_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vaga_recrutadores_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_cliente_detalhadas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vaga_recrutadores_vaga_id_fkey"
+            columns: ["vaga_id"]
             isOneToOne: false
             referencedRelation: "vw_vagas_com_stats"
             referencedColumns: ["id"]
