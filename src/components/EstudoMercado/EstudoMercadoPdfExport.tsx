@@ -244,23 +244,14 @@ export async function generateEstudoMercadoPdf(estudo: EstudoMercadoNovo): Promi
       
       // Render each sector
       for (const setor of fonte.setores.slice(0, 2)) { // Max 2 sectors per card
-        // Sector name - truncate to avoid badge collision
+        // Sector name
         doc.setFont("helvetica", "bold");
         doc.setFontSize(9);
         doc.setTextColor(...colors.textPrimary);
-        const maxSectorWidth = width - 60;
-        const sectorName = setor.setor.length > 25 
-          ? setor.setor.substring(0, 25) + '...' 
+        const sectorName = setor.setor.length > 35 
+          ? setor.setor.substring(0, 35) + '...' 
           : setor.setor;
         doc.text(sectorName, x + 10, currentY);
-        
-        // Records badge - positioned after truncated text
-        doc.setFillColor(...colors.accentLight);
-        doc.roundedRect(x + width - 45, currentY - 6, 35, 12, 2, 2, "F");
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(7);
-        doc.setTextColor(...colors.textSecondary);
-        doc.text(`${setor.registros_base} reg.`, x + width - 28, currentY + 2, { align: "center" });
         
         currentY += 10;
         
