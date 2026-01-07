@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { ChevronDown, ChevronRight, Plus, X, Save, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,8 +7,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
+import { MentionEditor } from "@/components/ui/mention-editor";
+import { useMentions } from "@/hooks/useMentions";
+
 interface JobHistoryRecord {
   id: string;
   job_id: string;
@@ -18,11 +19,15 @@ interface JobHistoryRecord {
   created_at: string;
   user_name?: string;
 }
+
 interface JobHistorySectionProps {
   vagaId: string;
+  vagaTitle?: string;
 }
+
 export function JobHistorySection({
-  vagaId
+  vagaId,
+  vagaTitle
 }: JobHistorySectionProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -31,14 +36,8 @@ export function JobHistorySection({
   const [formTitle, setFormTitle] = useState("");
   const [formContent, setFormContent] = useState("");
   const [isSaving, setIsSaving] = useState(false);
-  const quillModules = useMemo(() => ({
-    toolbar: [["bold", "italic", "underline"], [{
-      list: "ordered"
-    }, {
-      list: "bullet"
-    }], ["clean"]]
-  }), []);
-  const quillFormats = ["bold", "italic", "underline", "list", "bullet"];
+
+  const { mentionUsers, processMentions } = useMentions();
   const fetchRecords = async () => {
     if (!vagaId) return;
     setIsLoading(true);
@@ -94,21 +93,40 @@ export function JobHistorySection({
     }
     setIsSaving(true);
     try {
-      const {
-        data: {
-          user
-        }
-      } = await supabase.auth.getUser();
+      const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
-      const {
-        error
-      } = await supabase.from("job_history").insert({
-        job_id: vagaId,
-        user_id: user.id,
-        title: formTitle.trim() || null,
-        content: formContent
-      });
+
+      // Buscar nome do usuário atual
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", user.id)
+        .single();
+
+      const { data: insertedRecord, error } = await supabase
+        .from("job_history")
+        .insert({
+          job_id: vagaId,
+          user_id: user.id,
+          title: formTitle.trim() || null,
+          content: formContent
+        })
+        .select()
+        .single();
+
       if (error) throw error;
+
+      // Processar menções e notificar usuários
+      if (insertedRecord) {
+        await processMentions(
+          formContent,
+          'job_history',
+          insertedRecord.id,
+          vagaTitle || "Vaga",
+          profile?.full_name || "Alguém"
+        );
+      }
+
       toast({
         title: "Sucesso",
         description: "Registro adicionado ao histórico."
@@ -173,11 +191,15 @@ export function JobHistorySection({
                 </div>
                 <div>
                   <label className="font-medium text-foreground mb-1 block text-base">
-                    Conteúdo *
+                    Conteúdo * <span className="text-muted-foreground text-sm">(use @ para mencionar)</span>
                   </label>
-                  <div className="bg-background rounded-md border border-input">
-                    <ReactQuill theme="snow" value={formContent} onChange={setFormContent} modules={quillModules} formats={quillFormats} placeholder="Descreva o que aconteceu..." className="[&_.ql-editor]:min-h-[120px] [&_.ql-toolbar]:border-0 [&_.ql-toolbar]:border-b [&_.ql-container]:border-0" />
-                  </div>
+                  <MentionEditor
+                    value={formContent}
+                    onChange={setFormContent}
+                    users={mentionUsers}
+                    placeholder="Descreva o que aconteceu... Use @ para mencionar alguém"
+                    minHeight="120px"
+                  />
                 </div>
                 <div className="flex justify-end gap-2">
                   <Button variant="outline" onClick={handleCancel} disabled={isSaving} className="text-sm font-semibold">
@@ -229,9 +251,10 @@ export function JobHistorySection({
                             <span className="text-base font-medium">{record.user_name}</span>
                           </>}
                       </div>
-                      <div className="mt-2 text-base text-foreground/80 line-clamp-3 prose prose-base max-w-none [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4" dangerouslySetInnerHTML={{
-                __html: record.content
-              }} />
+                      <div 
+                        className="mt-2 text-base text-foreground/80 line-clamp-3 prose prose-base max-w-none [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_.mention]:bg-primary/15 [&_.mention]:text-primary [&_.mention]:px-1 [&_.mention]:py-0.5 [&_.mention]:rounded [&_.mention]:font-medium" 
+                        dangerouslySetInnerHTML={{ __html: record.content }}
+                      />
                     </div>
                   </div>
                 </div>)}
