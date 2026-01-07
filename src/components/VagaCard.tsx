@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { getBusinessDaysFromNow } from "@/lib/dateUtils";
 import { formatSalaryRange } from "@/lib/salaryUtils";
+import { calculateProgress } from "@/lib/jobStages";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { handleDelete as performDeletion } from "@/lib/deletionUtils";
@@ -36,18 +37,6 @@ interface VagaCardProps {
   onClick?: () => void;
   viewMode?: "grid" | "list";
 }
-const statusProgressMap: Record<string, number> = {
-  "A iniciar": 10,
-  "Discovery": 20,
-  "Triagem": 25,
-  "Entrevistas rhello": 40,
-  "Aguardando retorno do cliente": 50,
-  "Apresentação de Candidatos": 60,
-  "Entrevista cliente": 75,
-  "Em processo de contratação": 85,
-  "Concluído": 100,
-  "Cancelada": 0
-};
 
 // Função para obter iniciais do nome
 const getInitials = (name: string | null): string => {
@@ -102,7 +91,7 @@ export const VagaCard = React.memo(function VagaCard({
   const [deletionReason, setDeletionReason] = useState("");
   const [requiresApproval, setRequiresApproval] = useState(false);
   const [recrutadorName, setRecrutadorName] = useState<string | null>(vaga.recrutador);
-  const progress = statusProgressMap[vaga.status] || 0;
+  const progress = calculateProgress(vaga.status);
   const daysOpen = getBusinessDaysFromNow(vaga.data_abertura || vaga.criado_em);
   const statusColors = getStatusBadgeColor(vaga.status);
   useEffect(() => {
