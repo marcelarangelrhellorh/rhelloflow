@@ -474,7 +474,9 @@ export async function generateEstudoMercadoPdf(estudo: EstudoMercadoNovo): Promi
   doc.setFontSize(9);
   doc.text("FONTES CONSULTADAS", margin + infoCardWidth + 20, infoY + 15);
   
-  const fontes = ["Hays 2026", "Michael Page 2026"];
+  const fontes: string[] = [];
+  if (estudo.resultado.hays?.encontrado) fontes.push("Hays 2026");
+  if (estudo.resultado.michael_page?.encontrado) fontes.push("Michael Page 2026");
   if (estudo.resultado.infojobs?.encontrado) fontes.push("InfoJobs");
   if (estudo.resultado.glassdoor?.encontrado) fontes.push("Glassdoor");
   
@@ -499,20 +501,36 @@ export async function generateEstudoMercadoPdf(estudo: EstudoMercadoNovo): Promi
   // PAGE 2: COMPARATIVE VIEW
   // =====================================
   
-  let yPos = addNewPage();
-  yPos = drawHeader("COMPARATIVO DE FONTES", "Análise detalhada Hays vs Michael Page");
-  
-  yPos = drawSectionTitle("Guias Salariais 2026", yPos);
+  const hasHays = estudo.resultado.hays?.encontrado === true;
+  const hasMichaelPage = estudo.resultado.michael_page?.encontrado === true;
   
   const colWidth = (contentWidth - 10) / 2;
+  let yPos: number;
   
-  // Hays card
-  drawSourceCard(estudo.resultado.hays, "HAYS 2026", margin, yPos, colWidth);
-  
-  // Michael Page card
-  drawSourceCard(estudo.resultado.michael_page, "MICHAEL PAGE 2026", margin + colWidth + 10, yPos, colWidth);
-  
-  yPos += 135;
+  if (hasHays || hasMichaelPage) {
+    yPos = addNewPage();
+    yPos = drawHeader("COMPARATIVO DE FONTES", "Análise detalhada por fonte");
+    
+    yPos = drawSectionTitle("Guias Salariais 2026", yPos);
+    
+    if (hasHays && hasMichaelPage) {
+      // Both sources - side by side
+      drawSourceCard(estudo.resultado.hays, "HAYS 2026", margin, yPos, colWidth);
+      drawSourceCard(estudo.resultado.michael_page, "MICHAEL PAGE 2026", margin + colWidth + 10, yPos, colWidth);
+    } else if (hasHays) {
+      // Only Hays
+      drawSourceCard(estudo.resultado.hays, "HAYS 2026", margin, yPos, colWidth);
+    } else if (hasMichaelPage) {
+      // Only Michael Page
+      drawSourceCard(estudo.resultado.michael_page, "MICHAEL PAGE 2026", margin, yPos, colWidth);
+    }
+    
+    yPos += 135;
+  } else {
+    // No salary guides found - start page for online sources
+    yPos = addNewPage();
+    yPos = drawHeader("FONTES ONLINE", "Dados de mercado em tempo real");
+  }
   
   // Online sources section - only show if at least one source has data
   const hasInfojobs = estudo.resultado.infojobs?.encontrado === true;
