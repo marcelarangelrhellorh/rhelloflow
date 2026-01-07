@@ -244,13 +244,17 @@ export async function generateEstudoMercadoPdf(estudo: EstudoMercadoNovo): Promi
       
       // Render each sector
       for (const setor of fonte.setores.slice(0, 2)) { // Max 2 sectors per card
-        // Sector name
+        // Sector name - truncate to avoid badge collision
         doc.setFont("helvetica", "bold");
         doc.setFontSize(9);
         doc.setTextColor(...colors.textPrimary);
-        doc.text(`${setor.setor}`, x + 10, currentY);
+        const maxSectorWidth = width - 60;
+        const sectorName = setor.setor.length > 25 
+          ? setor.setor.substring(0, 25) + '...' 
+          : setor.setor;
+        doc.text(sectorName, x + 10, currentY);
         
-        // Records badge
+        // Records badge - positioned after truncated text
         doc.setFillColor(...colors.accentLight);
         doc.roundedRect(x + width - 45, currentY - 6, 35, 12, 2, 2, "F");
         doc.setFont("helvetica", "normal");
@@ -519,15 +523,26 @@ export async function generateEstudoMercadoPdf(estudo: EstudoMercadoNovo): Promi
   
   yPos += 135;
   
-  // Online sources section
-  yPos = checkPageBreak(yPos, 120);
-  yPos = drawSectionTitle("Fontes Online", yPos);
+  // Online sources section - only show if at least one source has data
+  const hasInfojobs = estudo.resultado.infojobs?.encontrado === true;
+  const hasGlassdoor = estudo.resultado.glassdoor?.encontrado === true;
   
-  // InfoJobs card
-  drawOnlineSourceCard(estudo.resultado.infojobs, "INFOJOBS", margin, yPos, colWidth);
-  
-  // Glassdoor card
-  drawOnlineSourceCard(estudo.resultado.glassdoor, "GLASSDOOR", margin + colWidth + 10, yPos, colWidth);
+  if (hasInfojobs || hasGlassdoor) {
+    yPos = checkPageBreak(yPos, 120);
+    yPos = drawSectionTitle("Fontes Online", yPos);
+    
+    if (hasInfojobs && hasGlassdoor) {
+      // Both sources - side by side
+      drawOnlineSourceCard(estudo.resultado.infojobs, "INFOJOBS", margin, yPos, colWidth);
+      drawOnlineSourceCard(estudo.resultado.glassdoor, "GLASSDOOR", margin + colWidth + 10, yPos, colWidth);
+    } else if (hasInfojobs) {
+      // Only InfoJobs
+      drawOnlineSourceCard(estudo.resultado.infojobs, "INFOJOBS", margin, yPos, colWidth);
+    } else if (hasGlassdoor) {
+      // Only Glassdoor
+      drawOnlineSourceCard(estudo.resultado.glassdoor, "GLASSDOOR", margin, yPos, colWidth);
+    }
+  }
   
   // =====================================
   // PAGE 3: INSIGHTS
@@ -539,10 +554,17 @@ export async function generateEstudoMercadoPdf(estudo: EstudoMercadoNovo): Promi
     
     yPos = drawSectionTitle("Principais Descobertas", yPos);
     
-    // Insights box
+    // Calculate dynamic height for insights box based on actual text content
+    let insightsTotalHeight = 20; // padding
+    for (const texto of estudo.consultoria) {
+      const lines = doc.splitTextToSize(texto, contentWidth - 30);
+      insightsTotalHeight += lines.length * 5 + 12;
+    }
+    
+    // Insights box with dynamic height
     doc.setFillColor(...colors.cardBg);
     doc.setDrawColor(...colors.border);
-    doc.roundedRect(margin, yPos, contentWidth, estudo.consultoria.length * 22 + 20, 3, 3, "FD");
+    doc.roundedRect(margin, yPos, contentWidth, insightsTotalHeight, 3, 3, "FD");
     
     yPos += 15;
     
