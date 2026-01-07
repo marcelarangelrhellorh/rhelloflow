@@ -163,7 +163,7 @@ export default function VagaDetalhes() {
             <div className="lg:col-span-2">
               <VagaTimeline currentStatusSlug={vaga.status_slug || "discovery"} progress={progress} />
 
-              <JobHistorySection vagaId={vaga.id} />
+              <JobHistorySection vagaId={vaga.id} vagaTitle={vaga.titulo} />
 
               {vaga.status === "Concluído" && candidatoContratado && <div className="mb-8 p-6 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border-2 border-green-500 dark:border-green-400 rounded-lg shadow-sm">
                   <div className="flex items-center gap-3">
