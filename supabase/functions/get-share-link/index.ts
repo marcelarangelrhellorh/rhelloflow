@@ -80,7 +80,8 @@ serve(async (req) => {
         observacoes,
         prioridade,
         complexidade,
-        criado_em
+        criado_em,
+        data_abertura
       `)
       .eq('id', shareLink.vaga_id)
       .single();

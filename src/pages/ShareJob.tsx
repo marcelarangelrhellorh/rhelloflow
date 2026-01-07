@@ -50,6 +50,7 @@ interface ShareLinkData {
     prioridade: string | null;
     complexidade: string | null;
     criado_em: string;
+    data_abertura: string | null;
   };
 }
 
@@ -202,7 +203,7 @@ export default function ShareJob() {
   if (!linkData) return null;
 
   const vaga = linkData.vagas;
-  const daysOpen = getDaysOpen(vaga.criado_em);
+  const daysOpen = getDaysOpen(vaga.data_abertura || vaga.criado_em);
 
   return (
     <div className="min-h-screen bg-white font-['Manrope',system-ui,sans-serif]">

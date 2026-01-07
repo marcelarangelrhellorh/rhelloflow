@@ -36,6 +36,7 @@ type Vaga = {
   complexidade: string | null;
   prioridade: string | null;
   criado_em: string;
+  data_abertura: string | null;
   candidatos_count?: number;
   confidencial?: boolean | null;
   area?: string | null;
@@ -125,7 +126,7 @@ export default function Vagas() {
     }
   };
   const calculateFunnelStats = async (vagasData: Vaga[]) => {
-    const diasAbertos = vagasData.filter(v => v.status_slug !== "concluida" && v.status_slug !== "cancelada").map(v => getBusinessDaysFromNow(v.criado_em || ""));
+    const diasAbertos = vagasData.filter(v => v.status_slug !== "concluida" && v.status_slug !== "cancelada").map(v => getBusinessDaysFromNow(v.data_abertura || v.criado_em || ""));
     const media = diasAbertos.length > 0 ? Math.round(diasAbertos.reduce((a, b) => a + b, 0) / diasAbertos.length) : 0;
     setMediaDiasAbertos(media);
     const foraPrazo = diasAbertos.filter(dias => dias > 30).length;
