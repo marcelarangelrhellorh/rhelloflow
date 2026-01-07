@@ -15,6 +15,7 @@ export function useVagaTasks(vagaId: string | undefined) {
           assignee:profiles!tasks_assignee_id_fkey(id, full_name)
         `)
         .eq("vaga_id", vagaId)
+        .eq("task_type", "task")
         .order("due_date", { ascending: true, nullsFirst: false })
         .order("created_at", { ascending: false });
 
