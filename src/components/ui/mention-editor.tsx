@@ -1,8 +1,11 @@
 import React, { useMemo, useEffect, useRef } from "react";
-import ReactQuill from "react-quill";
+import ReactQuill, { Quill } from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import "quill-mention";
+import { Mention } from "quill-mention";
 import "quill-mention/dist/quill.mention.css";
+
+// Registrar módulo de menção com o Quill
+Quill.register("modules/mention", Mention, true);
 
 export interface MentionUser {
   id: string;
