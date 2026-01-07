@@ -35,6 +35,7 @@ export type Vaga = {
   responsabilidades: string | null;
   observacoes: string | null;
   source: string | null;
+  data_abertura: string | null;
 };
 
 export function useVaga(id: string | undefined) {

@@ -3351,6 +3351,7 @@ export type Database = {
           criado_em: string | null
           cs_id: string | null
           cs_responsavel: string | null
+          data_abertura: string | null
           deleted_at: string | null
           deleted_by: string | null
           deleted_reason: string | null
@@ -3402,6 +3403,7 @@ export type Database = {
           criado_em?: string | null
           cs_id?: string | null
           cs_responsavel?: string | null
+          data_abertura?: string | null
           deleted_at?: string | null
           deleted_by?: string | null
           deleted_reason?: string | null
@@ -3455,6 +3457,7 @@ export type Database = {
           criado_em?: string | null
           cs_id?: string | null
           cs_responsavel?: string | null
+          data_abertura?: string | null
           deleted_at?: string | null
           deleted_by?: string | null
           deleted_reason?: string | null

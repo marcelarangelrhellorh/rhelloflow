@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +10,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeft, Save } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ArrowLeft, Save, CalendarIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Constants } from "@/integrations/supabase/types";
 import { MultiSelect, MultiSelectOption } from "@/components/ui/multi-select";
@@ -76,6 +81,7 @@ export default function VagaForm() {
     requisitos_desejaveis: "",
     responsabilidades: "",
     observacoes: "",
+    data_abertura: "",
   });
 
   useEffect(() => {
@@ -122,6 +128,7 @@ export default function VagaForm() {
           requisitos_desejaveis: data.requisitos_desejaveis || "",
           responsabilidades: data.responsabilidades || "",
           observacoes: data.observacoes || "",
+          data_abertura: data.data_abertura || "",
         });
 
         // Carregar tags da vaga
@@ -197,6 +204,7 @@ export default function VagaForm() {
         requisitos_desejaveis: formData.requisitos_desejaveis || null,
         responsabilidades: formData.responsabilidades || null,
         observacoes: formData.observacoes || null,
+        data_abertura: formData.data_abertura || new Date().toISOString().split('T')[0],
       };
 
       if (id) {
@@ -299,6 +307,42 @@ export default function VagaForm() {
                   value={formData.empresa}
                   onChange={(e) => setFormData({ ...formData, empresa: e.target.value })}
                 />
+              </div>
+
+              <div>
+                <Label htmlFor="data_abertura">Data de Abertura</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !formData.data_abertura && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.data_abertura 
+                        ? format(new Date(formData.data_abertura + 'T12:00:00'), "dd/MM/yyyy", { locale: ptBR })
+                        : "Selecione a data (padrão: hoje)"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={formData.data_abertura ? new Date(formData.data_abertura + 'T12:00:00') : undefined}
+                      onSelect={(date) => setFormData({ 
+                        ...formData, 
+                        data_abertura: date ? format(date, 'yyyy-MM-dd') : "" 
+                      })}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                      locale={ptBR}
+                    />
+                  </PopoverContent>
+                </Popover>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Para vagas retroativas, selecione a data real de abertura
+                </p>
               </div>
 
               <div className="flex items-center space-x-2">
