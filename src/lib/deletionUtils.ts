@@ -168,6 +168,19 @@ export async function performSoftDelete(
       })
       .eq("id", resourceId);
     error = result.error;
+
+    // Desativar links de compartilhamento associados à vaga
+    if (!error) {
+      await supabase
+        .from("share_links")
+        .update({ active: false, deleted: true, deleted_at: new Date().toISOString(), deleted_by: userData.user.id })
+        .eq("vaga_id", resourceId);
+
+      await supabase
+        .from("client_view_links")
+        .update({ active: false, deleted: true, deleted_at: new Date().toISOString(), deleted_by: userData.user.id })
+        .eq("vaga_id", resourceId);
+    }
   } else if (resourceType === "feedback") {
     const result = await supabase
       .from("feedbacks")
@@ -315,6 +328,22 @@ export async function handleDelete(
       "Non-admin user attempted deletion"
     );
     return { success: false, error: "Only admins can delete resources" };
+  }
+
+  // Verificar se já existe solicitação pendente para este recurso
+  const { data: existingApproval } = await supabase
+    .from("deletion_approvals")
+    .select("id, status")
+    .eq("resource_type", resourceType)
+    .eq("resource_id", resourceId)
+    .eq("status", "pending")
+    .maybeSingle();
+
+  if (existingApproval) {
+    return {
+      success: false,
+      error: "Já existe uma solicitação de exclusão pendente para este recurso",
+    };
   }
 
   // Assess deletion risk

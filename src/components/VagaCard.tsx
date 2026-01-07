@@ -8,6 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { MoreVertical, Edit, Trash2, AlertTriangle, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { getBusinessDaysFromNow } from "@/lib/dateUtils";
 import { formatSalaryRange } from "@/lib/salaryUtils";
 import { supabase } from "@/integrations/supabase/client";
@@ -91,6 +92,7 @@ export const VagaCard = React.memo(function VagaCard({
   viewMode = "grid"
 }: VagaCardProps) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const {
     isAdmin
   } = useUserRole();
@@ -162,8 +164,9 @@ export const VagaCard = React.memo(function VagaCard({
         setShowDeleteDialog(false);
         return;
       }
-      toast.success("✅ Vaga marcada para exclusão com sucesso");
-      setTimeout(() => window.location.reload(), 1000);
+      toast.success("✅ Vaga excluída com sucesso");
+      setShowDeleteDialog(false);
+      queryClient.invalidateQueries({ queryKey: ['vagas'] });
     } catch (error) {
       console.error("Erro ao excluir vaga:", error);
       toast.error("❌ Erro ao excluir a vaga. Tente novamente.");
