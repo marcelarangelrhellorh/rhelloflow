@@ -346,29 +346,13 @@ export async function handleDelete(
     };
   }
 
-  // Assess deletion risk
+  // Assess deletion risk (apenas para logging, admins podem excluir diretamente)
   const { riskLevel } = await assessDeletionRisk(resourceType, resourceId);
+  
+  console.log(`Deletion risk for ${resourceType} ${resourceId}: ${riskLevel}`);
 
-  // High-risk or critical deletions require approval workflow
-  if (riskLevel === "high" || riskLevel === "critical") {
-    const approvalResult = await requestDeletionApproval(
-      resourceType,
-      resourceId,
-      reason,
-      riskLevel,
-      { resource_name: resourceName }
-    );
-
-    if (!approvalResult.success) {
-      return { success: false, error: approvalResult.error };
-    }
-
-    return {
-      success: true,
-      requiresApproval: true,
-      approvalId: approvalResult.approvalId,
-    };
-  }
+  // Admins podem executar soft-delete diretamente, independente do risco
+  // Não há mais workflow de aprovação - se é admin, pode excluir
 
   // Low/medium risk: proceed with soft-delete
   const deleteResult = await performSoftDelete(
