@@ -24,7 +24,7 @@ import { LoadingButton } from "@/components/ui/loading-button";
 import { handleApiError } from "@/lib/errorHandler";
 import { useCacheInvalidation } from "@/hooks/data/useCacheInvalidation";
 import { VAGA_STATUS } from "@/constants/vagaStatus";
-import { mapLegacyStatusToSlug, getStageBySlug } from "@/lib/jobStages";
+import { JOB_STAGES, mapLegacyStatusToSlug, getStageBySlug } from "@/lib/jobStages";
 const DIAS_SEMANA = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
 
 const BENEFICIOS_OPTIONS: MultiSelectOption[] = [
@@ -52,10 +52,24 @@ export default function VagaForm() {
   const { users: clientUsers } = useUsers('client');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const { invalidateVagas } = useCacheInvalidation();
+  const [empresas, setEmpresas] = useState<Array<{id: string, nome: string}>>([]);
+
+  // Carregar empresas cadastradas
+  useEffect(() => {
+    const loadEmpresas = async () => {
+      const { data } = await supabase
+        .from("empresas")
+        .select("id, nome")
+        .order("nome");
+      if (data) setEmpresas(data);
+    };
+    loadEmpresas();
+  }, []);
   
   const [formData, setFormData] = useState({
     titulo: "",
     empresa: "",
+    empresa_id: "",
     confidencial: false,
     motivo_confidencial: "",
     contato_nome: "",
@@ -103,6 +117,7 @@ export default function VagaForm() {
         setFormData({
           titulo: data.titulo || "",
           empresa: data.empresa || "",
+          empresa_id: data.empresa_id || "",
           confidencial: data.confidencial || false,
           motivo_confidencial: data.motivo_confidencial || "",
           contato_nome: data.contato_nome || "",
@@ -177,6 +192,7 @@ export default function VagaForm() {
       const dataToSave = {
         titulo: formData.titulo,
         empresa: formData.empresa,
+        empresa_id: formData.empresa_id || null,
         confidencial: formData.confidencial,
         motivo_confidencial: formData.confidencial ? formData.motivo_confidencial : null,
         contato_nome: formData.contato_nome || null,
@@ -300,13 +316,29 @@ export default function VagaForm() {
               </div>
 
               <div>
-                <Label htmlFor="empresa">Empresa *</Label>
-                <Input
-                  id="empresa"
-                  required
-                  value={formData.empresa}
-                  onChange={(e) => setFormData({ ...formData, empresa: e.target.value })}
-                />
+                <Label htmlFor="empresa">Cliente *</Label>
+                <Select 
+                  value={formData.empresa_id || ""} 
+                  onValueChange={(value) => {
+                    const empresa = empresas.find(e => e.id === value);
+                    setFormData({ 
+                      ...formData, 
+                      empresa_id: value,
+                      empresa: empresa?.nome || ""
+                    });
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um cliente" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {empresas.map((emp) => (
+                      <SelectItem key={emp.id} value={emp.id}>
+                        {emp.nome}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div>
@@ -503,14 +535,22 @@ export default function VagaForm() {
               </div>
 
               <div>
-                <Label htmlFor="status">Status</Label>
+                <Label htmlFor="status">Etapa</Label>
                 <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value as string })}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {Constants.public.Enums.status_vaga.map((status) => (
-                      <SelectItem key={status} value={status}>{status}</SelectItem>
+                    {JOB_STAGES.map((stage) => (
+                      <SelectItem key={stage.slug} value={stage.name}>
+                        <div className="flex items-center gap-2">
+                          <div 
+                            className="w-3 h-3 rounded-full" 
+                            style={{ backgroundColor: stage.color.bg }} 
+                          />
+                          {stage.name}
+                        </div>
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
