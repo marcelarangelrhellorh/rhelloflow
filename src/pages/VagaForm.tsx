@@ -19,6 +19,7 @@ import { LoadingButton } from "@/components/ui/loading-button";
 import { handleApiError } from "@/lib/errorHandler";
 import { useCacheInvalidation } from "@/hooks/data/useCacheInvalidation";
 import { VAGA_STATUS } from "@/constants/vagaStatus";
+import { mapLegacyStatusToSlug, getStageBySlug } from "@/lib/jobStages";
 const DIAS_SEMANA = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
 
 const BENEFICIOS_OPTIONS: MultiSelectOption[] = [
@@ -162,6 +163,10 @@ export default function VagaForm() {
         }
       }
 
+      // Calcular status_slug e status_order baseado no status selecionado
+      const statusSlug = mapLegacyStatusToSlug(formData.status);
+      const stage = getStageBySlug(statusSlug);
+
       const dataToSave = {
         titulo: formData.titulo,
         empresa: formData.empresa,
@@ -176,6 +181,8 @@ export default function VagaForm() {
         complexidade: (formData.complexidade || null) as any,
         prioridade: (formData.prioridade || null) as any,
         status: formData.status as any,
+        status_slug: statusSlug,
+        status_order: stage?.order ?? 1,
         salario_min: formData.salario_modalidade === "A_COMBINAR" ? null : parseCurrency(formData.salario_min),
         salario_max: formData.salario_modalidade === "A_COMBINAR" ? null : parseCurrency(formData.salario_max),
         salario_modalidade: formData.salario_modalidade,
