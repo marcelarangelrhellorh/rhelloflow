@@ -1,4 +1,4 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.78.0';
+import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from '../_shared/cors.ts';
 
 const SYSTEM_PROMPT = `Você é um assistente especialista em remuneração que analisa dados salariais de Hays 2026, Michael Page 2026, InfoJobs e Glassdoor (dados de mercado em tempo real).
