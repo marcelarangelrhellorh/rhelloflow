@@ -8,11 +8,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Save, CheckCircle2 } from "lucide-react";
+import { Save, CheckCircle2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Constants } from "@/integrations/supabase/types";
 import { MultiSelect, MultiSelectOption } from "@/components/ui/multi-select";
 import { parseCurrency, applyCurrencyMask } from "@/lib/salaryUtils";
+import { formatCNPJ, validateCNPJ, cleanCNPJ } from "@/lib/cnpjUtils";
 
 const DIAS_SEMANA = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
 
@@ -37,9 +38,12 @@ export default function PublicVagaForm() {
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [formStartTime] = useState(Date.now());
+  const [cnpjLoading, setCnpjLoading] = useState(false);
+  const [cnpjError, setCnpjError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     titulo: "",
     empresa: "",
+    cnpj: "",
     confidencial: false,
     motivo_confidencial: "",
     salario_min: "",
@@ -62,11 +66,64 @@ export default function PublicVagaForm() {
     website: "", // Honeypot field
   });
 
+  const handleCNPJLookup = async () => {
+    const cnpjLimpo = cleanCNPJ(formData.cnpj);
+    
+    if (cnpjLimpo.length === 0) {
+      setCnpjError("CNPJ é obrigatório");
+      return;
+    }
+    
+    if (cnpjLimpo.length !== 14) {
+      setCnpjError("CNPJ deve ter 14 dígitos");
+      return;
+    }
+    
+    if (!validateCNPJ(cnpjLimpo)) {
+      setCnpjError("CNPJ inválido - verifique os dígitos");
+      return;
+    }
+    
+    setCnpjError(null);
+    setCnpjLoading(true);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('consultar-cnpj', {
+        body: { cnpj: cnpjLimpo }
+      });
+      
+      if (!error && data && data.status !== 'ERROR') {
+        const nomeEmpresa = data.fantasia || data.nome || '';
+        if (nomeEmpresa) {
+          setFormData(prev => ({
+            ...prev,
+            empresa: nomeEmpresa
+          }));
+          toast.success('Dados da empresa carregados automaticamente!');
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao consultar CNPJ:', error);
+      // Não bloqueia - usuário ainda pode preencher manualmente
+    } finally {
+      setCnpjLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
+      // Validar CNPJ obrigatório
+      const cnpjLimpo = cleanCNPJ(formData.cnpj);
+      if (cnpjLimpo.length !== 14 || !validateCNPJ(cnpjLimpo)) {
+        setCnpjError("CNPJ inválido");
+        toast.error("Por favor, informe um CNPJ válido");
+        setLoading(false);
+        return;
+      }
+
       // Validations
       if (formData.salario_modalidade === "FAIXA") {
         const salMin = parseCurrency(formData.salario_min);
@@ -82,6 +139,7 @@ export default function PublicVagaForm() {
       const dataToSave = {
         titulo: formData.titulo,
         empresa: formData.empresa,
+        cnpj: cleanCNPJ(formData.cnpj),
         contato_nome: formData.contato_nome,
         contato_email: formData.contato_email,
         contato_telefone: formData.contato_telefone || null,
@@ -255,6 +313,37 @@ export default function PublicVagaForm() {
                   value={formData.titulo}
                   onChange={(e) => setFormData({ ...formData, titulo: e.target.value })}
                 />
+              </div>
+
+              <div>
+                <Label htmlFor="cnpj">CNPJ da Empresa *</Label>
+                <div className="relative">
+                  <Input
+                    id="cnpj"
+                    required
+                    placeholder="00.000.000/0000-00"
+                    value={formData.cnpj}
+                    onChange={(e) => {
+                      setCnpjError(null);
+                      setFormData({ 
+                        ...formData, 
+                        cnpj: formatCNPJ(e.target.value) 
+                      });
+                    }}
+                    onBlur={handleCNPJLookup}
+                    maxLength={18}
+                    className={cnpjError ? "border-destructive pr-10" : "pr-10"}
+                  />
+                  {cnpjLoading && (
+                    <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
+                  )}
+                </div>
+                {cnpjError && (
+                  <p className="text-xs text-destructive mt-1">{cnpjError}</p>
+                )}
+                <p className="text-xs text-muted-foreground mt-1">
+                  Ao informar o CNPJ, preenchemos automaticamente o nome da empresa
+                </p>
               </div>
 
               <div>
