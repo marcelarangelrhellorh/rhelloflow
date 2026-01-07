@@ -210,10 +210,6 @@ export default function EstudoMercado() {
           forceRefresh
         }
       });
-          localidade: localidade || null,
-          forceRefresh
-        }
-      });
       if (error) throw error;
       if (data?.erro) {
         toast.error(data.mensagem || "Erro ao gerar estudo");
