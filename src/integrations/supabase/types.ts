@@ -4852,6 +4852,7 @@ export type Database = {
           criado_em: string | null
           cs_id: string | null
           cs_responsavel: string | null
+          data_abertura: string | null
           deleted_at: string | null
           dias_etapa_atual: number | null
           empresa: string | null
