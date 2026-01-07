@@ -21,7 +21,7 @@ interface GlassdoorData {
 }
 
 async function scrapeWithFirecrawl(url: string): Promise<{ success: boolean; content: string; error?: string }> {
-  const apiKey = Deno.env.get('FIRECRAWL_API_KEY');
+  const apiKey = Deno.env.get('FIRECRAWL_API_KEY_1') || Deno.env.get('FIRECRAWL_API_KEY');
   if (!apiKey) {
     return { success: false, content: '', error: 'FIRECRAWL_API_KEY não configurada' };
   }
