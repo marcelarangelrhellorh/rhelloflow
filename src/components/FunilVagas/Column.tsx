@@ -15,6 +15,7 @@ interface Vaga {
   status_order: number; // Ordem no funil
   prioridade: string | null;
   criado_em: string | null;
+  data_abertura?: string | null;
   candidatos_count?: number;
   confidencial?: boolean | null;
   dias_etapa_atual?: number; // Dias úteis na etapa atual
@@ -80,7 +81,7 @@ export function Column({
         <SortableContext items={jobs.map(j => j.id)} strategy={verticalListSortingStrategy}>
           {jobs.length === 0 ? <div className="flex items-center justify-center h-32 text-sm text-muted-foreground">
               Nenhuma vaga nesta etapa
-            </div> : jobs.map(vaga => <JobCard key={vaga.id} vaga={vaga} stageColor={stage.color} diasEmAberto={getBusinessDaysFromNow(vaga.criado_em || "")} diasEtapaAtual={vaga.dias_etapa_atual || 0} progresso={progresso(vaga.status_slug)} onDragStart={() => {}} onView={() => onJobClick(vaga.id)} onEdit={() => onJobEdit(vaga.id)} onDuplicate={() => onJobDuplicate(vaga.id)} onClose={() => onJobClose(vaga.id)} />)}
+            </div> : jobs.map(vaga => <JobCard key={vaga.id} vaga={vaga} stageColor={stage.color} diasEmAberto={getBusinessDaysFromNow(vaga.data_abertura || vaga.criado_em || "")} diasEtapaAtual={vaga.dias_etapa_atual || 0} progresso={progresso(vaga.status_slug)} onDragStart={() => {}} onView={() => onJobClick(vaga.id)} onEdit={() => onJobEdit(vaga.id)} onDuplicate={() => onJobDuplicate(vaga.id)} onClose={() => onJobClose(vaga.id)} />)}
         </SortableContext>
       </div>
     </div>;
