@@ -63,6 +63,11 @@ Deno.serve(async (req) => {
     const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
+
+    // Capturar headers de autenticação originais para repassar às subfunções
+    const authHeader = req.headers.get('Authorization');
+    const apikeyHeader = req.headers.get('apikey') || supabaseAnonKey;
 
     if (!lovableApiKey) {
       console.error('LOVABLE_API_KEY não configurada');
@@ -204,30 +209,37 @@ Deno.serve(async (req) => {
     let glassdoorData: GlassdoorData | null = null;
 
     // Executar ambas as requisições em paralelo
+    // Headers para chamadas internas - usar JWT do usuário original
+    const internalHeaders: Record<string, string> = {
+      'Content-Type': 'application/json'
+    };
+    if (authHeader) {
+      internalHeaders['Authorization'] = authHeader;
+    }
+    if (apikeyHeader) {
+      internalHeaders['apikey'] = apikeyHeader;
+    }
+
     const [infojobsResult, glassdoorResult] = await Promise.allSettled([
       // InfoJobs
       fetch(`${supabaseUrl}/functions/v1/infojobs-salary-lookup`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${supabaseServiceKey}`,
-          'Content-Type': 'application/json'
-        },
+        headers: internalHeaders,
         body: JSON.stringify({ cargo, localidade })
       }).then(async (res) => {
         if (res.ok) return res.json();
-        throw new Error(`InfoJobs: ${res.status}`);
+        const errText = await res.text().catch(() => '');
+        throw new Error(`InfoJobs: ${res.status} ${res.statusText} ${errText}`);
       }),
       // Glassdoor
       fetch(`${supabaseUrl}/functions/v1/glassdoor-salary-lookup`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${supabaseServiceKey}`,
-          'Content-Type': 'application/json'
-        },
+        headers: internalHeaders,
         body: JSON.stringify({ cargo, localidade })
       }).then(async (res) => {
         if (res.ok) return res.json();
-        throw new Error(`Glassdoor: ${res.status}`);
+        const errText = await res.text().catch(() => '');
+        throw new Error(`Glassdoor: ${res.status} ${res.statusText} ${errText}`);
       })
     ]);
 
@@ -236,6 +248,18 @@ Deno.serve(async (req) => {
       console.log('InfoJobs data:', JSON.stringify(infojobsData));
     } else {
       console.warn('InfoJobs lookup failed:', infojobsResult.reason);
+      // Criar objeto de erro para exibir na UI
+      infojobsData = {
+        encontrado: false,
+        cargo,
+        salario_medio: null,
+        faixa: { min: null, max: null },
+        registros_base: null,
+        localidade: localidade || 'Brasil',
+        fonte: 'InfoJobs Brasil',
+        url: `https://www.infojobs.com.br/salario/${cargo.toLowerCase().replace(/\s+/g, '-')}`,
+        erro: String(infojobsResult.reason)
+      };
     }
 
     if (glassdoorResult.status === 'fulfilled') {
@@ -243,6 +267,19 @@ Deno.serve(async (req) => {
       console.log('Glassdoor data:', JSON.stringify(glassdoorData));
     } else {
       console.warn('Glassdoor lookup failed:', glassdoorResult.reason);
+      // Criar objeto de erro para exibir na UI
+      glassdoorData = {
+        encontrado: false,
+        cargo,
+        salario_medio: null,
+        faixa: { min: null, max: null },
+        remuneracao_variavel: null,
+        registros_base: null,
+        ultima_atualizacao: null,
+        fonte: 'Glassdoor Brasil',
+        url: `https://www.glassdoor.com.br/Sal%C3%A1rios/${encodeURIComponent(cargo)}-sal%C3%A1rio-SRCH_KO0,${cargo.length}.htm`,
+        erro: String(glassdoorResult.reason)
+      };
     }
 
     // ============================================
@@ -408,39 +445,25 @@ Gere 4 insights consultivos curtos sobre este cargo, considerando todas as fonte
           observacao: mpBenchmarks.length > 0 ? 'Valores mensais em R$' : 'Cargo não encontrado na base Michael Page',
           fonte: 'Michael Page 2026'
         },
-        infojobs: infojobsData ? {
-          encontrado: infojobsData.encontrado,
-          salario_medio: infojobsData.salario_medio,
-          faixa: infojobsData.faixa,
-          registros_base: infojobsData.registros_base,
-          fonte: infojobsData.fonte,
-          url: infojobsData.url
-        } : {
-          encontrado: false,
-          salario_medio: null,
-          faixa: { min: null, max: null },
-          registros_base: null,
-          fonte: 'InfoJobs Brasil',
-          url: null
+        infojobs: {
+          encontrado: infojobsData?.encontrado || false,
+          salario_medio: infojobsData?.salario_medio || null,
+          faixa: infojobsData?.faixa || { min: null, max: null },
+          registros_base: infojobsData?.registros_base || null,
+          fonte: infojobsData?.fonte || 'InfoJobs Brasil',
+          url: infojobsData?.url || null,
+          erro: infojobsData?.erro || null
         },
-        glassdoor: glassdoorData ? {
-          encontrado: glassdoorData.encontrado,
-          salario_medio: glassdoorData.salario_medio,
-          faixa: glassdoorData.faixa,
-          remuneracao_variavel: glassdoorData.remuneracao_variavel,
-          registros_base: glassdoorData.registros_base,
-          ultima_atualizacao: glassdoorData.ultima_atualizacao,
-          fonte: glassdoorData.fonte,
-          url: glassdoorData.url
-        } : {
-          encontrado: false,
-          salario_medio: null,
-          faixa: { min: null, max: null },
-          remuneracao_variavel: null,
-          registros_base: null,
-          ultima_atualizacao: null,
-          fonte: 'Glassdoor Brasil',
-          url: null
+        glassdoor: {
+          encontrado: glassdoorData?.encontrado || false,
+          salario_medio: glassdoorData?.salario_medio || null,
+          faixa: glassdoorData?.faixa || { min: null, max: null },
+          remuneracao_variavel: glassdoorData?.remuneracao_variavel || null,
+          registros_base: glassdoorData?.registros_base || null,
+          ultima_atualizacao: glassdoorData?.ultima_atualizacao || null,
+          fonte: glassdoorData?.fonte || 'Glassdoor Brasil',
+          url: glassdoorData?.url || null,
+          erro: glassdoorData?.erro || null
         }
       },
       consultoria: consultoriaInsights
