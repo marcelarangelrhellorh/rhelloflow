@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Edit, Trash2, RefreshCw, Briefcase, MapPin, PartyPopper, CheckCircle2, MessageCircle, Link2, Link2Off } from "lucide-react";
@@ -5,6 +6,13 @@ import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+
+interface Vaga {
+  id: string;
+  titulo: string;
+  empresa: string;
+}
 
 interface CandidateHeaderProps {
   nome: string;
@@ -15,11 +23,13 @@ interface CandidateHeaderProps {
   estado: string | null;
   vagaTitulo: string | null;
   vagaId: string | null;
+  candidatoId: string;
   onEdit: () => void;
   onDelete: () => void;
   onRelocate: () => void;
   onStatusChange: (newStatus: string) => void;
   onSendWhatsApp: () => void;
+  onVagaChange: (vagaId: string | null) => void;
 }
 const ETAPAS_DISPONIVEIS = ["Banco de Talentos", "Triagem", "Assessment | Teste Técnico", "Entrevista", "Shortlist", "Reprovado", "Contratado"] as const;
 const statusColors: Record<string, string> = {
@@ -40,13 +50,44 @@ export function CandidateHeader({
   estado,
   vagaTitulo,
   vagaId,
+  candidatoId,
   onEdit,
   onDelete,
   onRelocate,
   onStatusChange,
-  onSendWhatsApp
+  onSendWhatsApp,
+  onVagaChange
 }: CandidateHeaderProps) {
   const navigate = useNavigate();
+  const [vagas, setVagas] = useState<Vaga[]>([]);
+  const [loadingVagas, setLoadingVagas] = useState(false);
+
+  useEffect(() => {
+    loadVagas();
+  }, []);
+
+  const loadVagas = async () => {
+    setLoadingVagas(true);
+    try {
+      const { data, error } = await supabase
+        .from("vagas")
+        .select("id, titulo, empresa")
+        .neq("status", "Concluído")
+        .neq("status", "Cancelada")
+        .order("titulo");
+      if (error) throw error;
+      setVagas(data || []);
+    } catch (error: any) {
+      console.error("Erro ao carregar vagas:", error);
+    } finally {
+      setLoadingVagas(false);
+    }
+  };
+
+  const handleVagaChange = (newVagaId: string) => {
+    const vagaIdToSet = newVagaId === "none" ? null : newVagaId;
+    onVagaChange(vagaIdToSet);
+  };
   const getInitials = (name: string) => {
     const parts = name.split(" ");
     return parts.length >= 2 ? `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase() : name.substring(0, 2).toUpperCase();
@@ -130,20 +171,45 @@ export function CandidateHeader({
                 )}
               </div>
 
-              {/* Seletor de Etapa */}
-              <Select value={status} onValueChange={handleStatusChangeWithValidation}>
-                <SelectTrigger className="w-full sm:w-[280px] h-10 text-base border-gray-200 dark:border-secondary-text-light/20 bg-white dark:bg-background-dark hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors">
-                  <SelectValue>
-                    <span className="text-secondary-text-light dark:text-secondary-text-dark">Etapa:</span>{" "}
-                    <span className="font-semibold text-primary-text-light dark:text-primary-text-dark">{status}</span>
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent className="bg-white dark:bg-background-dark border-gray-200 dark:border-secondary-text-light/20 z-50">
-                  {ETAPAS_DISPONIVEIS.map(etapa => <SelectItem key={etapa} value={etapa} className={cn("cursor-pointer", etapa === status && "font-bold bg-primary/10")}>
-                      {etapa === status && "✓ "}{etapa}
-                    </SelectItem>)}
-                </SelectContent>
-              </Select>
+              {/* Seletores de Etapa e Vaga */}
+              <div className="flex flex-wrap gap-3">
+                {/* Seletor de Etapa */}
+                <Select value={status} onValueChange={handleStatusChangeWithValidation}>
+                  <SelectTrigger className="w-full sm:w-[280px] h-10 text-base border-gray-200 dark:border-secondary-text-light/20 bg-white dark:bg-background-dark hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors">
+                    <SelectValue>
+                      <span className="text-secondary-text-light dark:text-secondary-text-dark">Etapa:</span>{" "}
+                      <span className="font-semibold text-primary-text-light dark:text-primary-text-dark">{status}</span>
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent className="bg-white dark:bg-background-dark border-gray-200 dark:border-secondary-text-light/20 z-50">
+                    {ETAPAS_DISPONIVEIS.map(etapa => <SelectItem key={etapa} value={etapa} className={cn("cursor-pointer", etapa === status && "font-bold bg-primary/10")}>
+                        {etapa === status && "✓ "}{etapa}
+                      </SelectItem>)}
+                  </SelectContent>
+                </Select>
+
+                {/* Seletor de Vaga */}
+                <Select value={vagaId || "none"} onValueChange={handleVagaChange} disabled={loadingVagas}>
+                  <SelectTrigger className="w-full sm:w-[320px] h-10 text-base border-gray-200 dark:border-secondary-text-light/20 bg-white dark:bg-background-dark hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors">
+                    <SelectValue>
+                      <span className="text-secondary-text-light dark:text-secondary-text-dark">Vaga:</span>{" "}
+                      <span className="font-semibold text-primary-text-light dark:text-primary-text-dark truncate">
+                        {vagaId ? (vagas.find(v => v.id === vagaId)?.titulo || vagaTitulo || "Carregando...") : "Nenhuma"}
+                      </span>
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent className="bg-white dark:bg-background-dark border-gray-200 dark:border-secondary-text-light/20 z-50 max-h-[300px]">
+                    <SelectItem value="none" className="cursor-pointer">
+                      Nenhuma vaga
+                    </SelectItem>
+                    {vagas.map(vaga => (
+                      <SelectItem key={vaga.id} value={vaga.id} className={cn("cursor-pointer", vaga.id === vagaId && "font-bold bg-primary/10")}>
+                        {vaga.id === vagaId && "✓ "}{vaga.titulo} - {vaga.empresa}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
 

@@ -257,6 +257,25 @@ export default function CandidatoDetalhes() {
       toast.error("Erro ao atualizar etapa do candidato");
     }
   };
+
+  const handleVagaChange = async (newVagaId: string | null) => {
+    if (!id || !candidato) return;
+    try {
+      const { error } = await supabase
+        .from("candidatos")
+        .update({
+          vaga_relacionada_id: newVagaId,
+          status: newVagaId ? "Triagem" : "Banco de Talentos"
+        })
+        .eq("id", id);
+      if (error) throw error;
+      toast.success("Vaga relacionada atualizada!");
+      await loadCandidato();
+    } catch (error: any) {
+      logger.error("Erro ao atualizar vaga:", error);
+      toast.error("Erro ao atualizar vaga relacionada");
+    }
+  };
   const handleDelete = async () => {
     try {
       const {
@@ -313,7 +332,7 @@ export default function CandidatoDetalhes() {
       <main className="flex-1 px-6 py-6 bg-white">
         <div className="space-y-6">
           {/* Simplified Header with Stats */}
-          <CandidateHeader nome={candidato.nome_completo} status={candidato.status} nivel={candidato.nivel} area={candidato.area} cidade={candidato.cidade} estado={candidato.estado} vagaTitulo={vaga?.titulo || null} vagaId={candidato.vaga_relacionada_id} onEdit={() => navigate(`/candidatos/${id}/editar`)} onDelete={() => setDeleteDialogOpen(true)} onRelocate={() => setRelocateModalOpen(true)} onStatusChange={handleStatusChange} onSendWhatsApp={() => setWhatsappModalOpen(true)} />
+          <CandidateHeader nome={candidato.nome_completo} status={candidato.status} nivel={candidato.nivel} area={candidato.area} cidade={candidato.cidade} estado={candidato.estado} vagaTitulo={vaga?.titulo || null} vagaId={candidato.vaga_relacionada_id} candidatoId={id!} onEdit={() => navigate(`/candidatos/${id}/editar`)} onDelete={() => setDeleteDialogOpen(true)} onRelocate={() => setRelocateModalOpen(true)} onStatusChange={handleStatusChange} onSendWhatsApp={() => setWhatsappModalOpen(true)} onVagaChange={handleVagaChange} />
 
           {/* Compact Stats Row */}
           <StatsBar criadoEm={candidato.criado_em} ultimoFeedback={stats.ultimoFeedback} processosParticipados={stats.totalProcessos} mediaAvaliacao={stats.mediaRating} qtdAvaliacoes={stats.qtdAvaliacoes} totalFeedbacks={stats.totalFeedbacks} />
