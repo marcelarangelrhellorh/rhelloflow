@@ -92,7 +92,6 @@ export default function CandidateFormPage() {
     pretensao_salarial: "",
     modelo_contratacao: "",
     formato_trabalho: "",
-    origem: "",
     password: "",
     company: "", // Honeypot
   });
@@ -250,8 +249,43 @@ export default function CandidateFormPage() {
       return;
     }
 
-    if (!formData.origem) {
-      toast.error("Selecione por onde teve acesso ao formulário");
+    if (!formData.linkedin.trim()) {
+      toast.error("Preencha seu LinkedIn");
+      return;
+    }
+
+    if (!formData.cidade.trim()) {
+      toast.error("Preencha sua cidade");
+      return;
+    }
+
+    if (!formData.estado) {
+      toast.error("Selecione seu estado");
+      return;
+    }
+
+    if (!formData.idade) {
+      toast.error("Preencha sua idade");
+      return;
+    }
+
+    if (!formData.area) {
+      toast.error("Selecione sua área de atuação");
+      return;
+    }
+
+    if (!formData.cargo) {
+      toast.error("Selecione seu cargo");
+      return;
+    }
+
+    if (!formData.nivel) {
+      toast.error("Selecione sua senioridade");
+      return;
+    }
+
+    if (!formData.pretensao_salarial) {
+      toast.error("Preencha sua pretensão salarial");
       return;
     }
 
@@ -310,17 +344,16 @@ export default function CandidateFormPage() {
         email: formData.email.trim(),
         cpf: cleanCPF(formData.cpf),
         telefone: formData.telefone.trim(),
-        cidade: formData.cidade.trim() || null,
-        estado: formData.estado || null,
-        linkedin: formData.linkedin.trim() || null,
-        idade: formData.idade ? parseInt(formData.idade) : null,
-        nivel: formData.nivel || null,
-        cargo: formData.cargo || null,
-        area: formData.area || null,
-        pretensao_salarial: formData.pretensao_salarial || null,
+        cidade: formData.cidade.trim(),
+        estado: formData.estado,
+        linkedin: formData.linkedin.trim(),
+        idade: parseInt(formData.idade),
+        nivel: formData.nivel,
+        cargo: formData.cargo,
+        area: formData.area,
+        pretensao_salarial: formData.pretensao_salarial,
         modelo_contratacao: formData.modelo_contratacao,
         formato_trabalho: formData.formato_trabalho,
-        origem: formData.origem,
         fit_cultural: fitCultural,
         company: formData.company, // Honeypot
       };
@@ -539,7 +572,9 @@ export default function CandidateFormPage() {
                 </div>
 
                 <div>
-                  <Label htmlFor="linkedin" className="text-[#00141D]">LinkedIn</Label>
+                  <Label htmlFor="linkedin" className="text-[#00141D]">
+                    LinkedIn <span className="text-red-600">*</span>
+                  </Label>
                   <Input
                     id="linkedin"
                     placeholder="https://linkedin.com/in/..."
@@ -550,7 +585,9 @@ export default function CandidateFormPage() {
                 </div>
 
                 <div>
-                  <Label htmlFor="cidade" className="text-[#00141D]">Cidade</Label>
+                  <Label htmlFor="cidade" className="text-[#00141D]">
+                    Cidade <span className="text-red-600">*</span>
+                  </Label>
                   <Input
                     id="cidade"
                     className="mt-1 border-[#36404A]/20"
@@ -560,7 +597,9 @@ export default function CandidateFormPage() {
                 </div>
 
                 <div>
-                  <Label htmlFor="estado" className="text-[#00141D]">Estado</Label>
+                  <Label htmlFor="estado" className="text-[#00141D]">
+                    Estado <span className="text-red-600">*</span>
+                  </Label>
                   <Select value={formData.estado} onValueChange={(value) => setFormData({ ...formData, estado: value })}>
                     <SelectTrigger className="mt-1 border-[#36404A]/20">
                       <SelectValue placeholder="Selecione o estado" />
@@ -574,7 +613,9 @@ export default function CandidateFormPage() {
                 </div>
 
                 <div>
-                  <Label htmlFor="idade" className="text-[#00141D]">Idade</Label>
+                  <Label htmlFor="idade" className="text-[#00141D]">
+                    Idade <span className="text-red-600">*</span>
+                  </Label>
                   <Input
                     id="idade"
                     type="number"
@@ -601,7 +642,9 @@ export default function CandidateFormPage() {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="area" className="text-[#00141D]">Área de atuação</Label>
+                  <Label htmlFor="area" className="text-[#00141D]">
+                    Área de atuação <span className="text-red-600">*</span>
+                  </Label>
                   <Select value={formData.area} onValueChange={(value) => setFormData({ ...formData, area: value })}>
                     <SelectTrigger className="mt-1 border-[#36404A]/20">
                       <SelectValue placeholder="Selecione" />
@@ -615,7 +658,9 @@ export default function CandidateFormPage() {
                 </div>
 
                 <div>
-                  <Label htmlFor="cargo" className="text-[#00141D]">Cargo</Label>
+                  <Label htmlFor="cargo" className="text-[#00141D]">
+                    Cargo <span className="text-red-600">*</span>
+                  </Label>
                   <Select value={formData.cargo} onValueChange={(value) => setFormData({ ...formData, cargo: value })}>
                     <SelectTrigger className="mt-1 border-[#36404A]/20">
                       <SelectValue placeholder="Selecione" />
@@ -629,7 +674,9 @@ export default function CandidateFormPage() {
                 </div>
 
                 <div>
-                  <Label htmlFor="nivel" className="text-[#00141D]">Senioridade</Label>
+                  <Label htmlFor="nivel" className="text-[#00141D]">
+                    Senioridade <span className="text-red-600">*</span>
+                  </Label>
                   <Select value={formData.nivel} onValueChange={(value) => setFormData({ ...formData, nivel: value })}>
                     <SelectTrigger className="mt-1 border-[#36404A]/20">
                       <SelectValue placeholder="Selecione" />
@@ -643,7 +690,9 @@ export default function CandidateFormPage() {
                 </div>
 
                 <div>
-                  <Label htmlFor="pretensao_salarial" className="text-[#00141D]">Pretensão salarial (R$)</Label>
+                  <Label htmlFor="pretensao_salarial" className="text-[#00141D]">
+                    Pretensão salarial (R$) <span className="text-red-600">*</span>
+                  </Label>
                   <Input
                     id="pretensao_salarial"
                     type="number"
@@ -728,27 +777,6 @@ export default function CandidateFormPage() {
             </CardContent>
           </Card>
 
-          {/* Origem */}
-          <Card className="border-[#FFCD00] bg-white">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-[#00141D]">
-                <FileText className="h-5 w-5 text-[#FFCD00]" />
-                Por onde teve acesso ao formulário? <span className="text-red-600">*</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Select value={formData.origem} onValueChange={(value) => setFormData({ ...formData, origem: value })}>
-                <SelectTrigger className="border-[#36404A]/20">
-                  <SelectValue placeholder="Selecione" />
-                </SelectTrigger>
-                <SelectContent className="bg-white">
-                  {ORIGEM_OPTIONS.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </CardContent>
-          </Card>
 
           {/* Fit Cultural */}
           <Card className="border-[#FFCD00] bg-white">
