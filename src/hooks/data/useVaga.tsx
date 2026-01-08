@@ -7,6 +7,7 @@ export type Vaga = {
   id: string;
   titulo: string;
   empresa: string;
+  empresa_id: string | null;
   status: string;
   status_slug: string;
   status_order: number;
