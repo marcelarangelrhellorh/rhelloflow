@@ -17,6 +17,7 @@ import { TaskDetailDrawer } from "@/components/VagaDetalhes/TaskDetailDrawer";
 import { Task, TaskFilters, useTasks, useDeleteTask, useUpdateTask } from "@/hooks/useTasks";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useProfilesByRole } from "@/hooks/data/useProfilesByRole";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
@@ -72,20 +73,9 @@ export default function Tarefas() {
     events: externalEvents
   });
 
-  // Load users for filter
-  const {
-    data: users
-  } = useQuery({
-    queryKey: ["users-for-filter"],
-    queryFn: async () => {
-      const {
-        data,
-        error
-      } = await supabase.from("profiles").select("id, full_name").order("full_name");
-      if (error) throw error;
-      return data;
-    }
-  });
+  // Load users for filter by role
+  const { data: recrutadores } = useProfilesByRole(['recrutador']);
+  const { data: csUsers } = useProfilesByRole(['cs']);
   const handleEdit = (task: Task) => {
     setSelectedTask(task);
     if (task.task_type === 'meeting') {
@@ -229,12 +219,27 @@ export default function Tarefas() {
                   ...filters,
                   assignee_id: value === "all" ? undefined : value
                 })}>
-                    <SelectTrigger className="w-[160px] h-9 text-sm">
-                      <SelectValue placeholder="Responsável" />
+                    <SelectTrigger className="w-[180px] h-9 text-sm">
+                      <SelectValue placeholder="Recrutador" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">Todos</SelectItem>
-                      {users?.map(user => <SelectItem key={user.id} value={user.id}>
+                      <SelectItem value="all">Todos recrutadores</SelectItem>
+                      {recrutadores?.map(user => <SelectItem key={user.id} value={user.id}>
+                          {user.full_name}
+                        </SelectItem>)}
+                    </SelectContent>
+                  </Select>
+
+                  <Select value={filters.assignee_id || "all"} onValueChange={value => setFilters({
+                  ...filters,
+                  assignee_id: value === "all" ? undefined : value
+                })}>
+                    <SelectTrigger className="w-[140px] h-9 text-sm">
+                      <SelectValue placeholder="CS" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos CS</SelectItem>
+                      {csUsers?.map(user => <SelectItem key={user.id} value={user.id}>
                           {user.full_name}
                         </SelectItem>)}
                     </SelectContent>
