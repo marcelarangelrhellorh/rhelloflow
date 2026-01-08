@@ -145,6 +145,12 @@ export default function CandidatoForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Validate CPF
+    if (!formData.cpf || !validateCPF(formData.cpf)) {
+      toast.error("CPF inválido ou não preenchido");
+      return;
+    }
+    
     // Validate required file
     if (!id && !curriculoFile && !formData.curriculo_url) {
       toast.error("É obrigatório anexar um currículo");
@@ -200,6 +206,7 @@ export default function CandidatoForm() {
       const dataToSave = {
         nome_completo: formData.nome_completo,
         email: formData.email,
+        cpf: formData.cpf ? cleanCPF(formData.cpf) : null,
         telefone: formData.telefone || null,
         cidade: formData.cidade || null,
         estado: formData.estado || null,
@@ -344,6 +351,13 @@ export default function CandidatoForm() {
                   />
                 </div>
               </div>
+
+              <CPFInput
+                value={formData.cpf}
+                onChange={(value) => setFormData({ ...formData, cpf: value })}
+                required={true}
+                showValidation={true}
+              />
 
               <div className="grid grid-cols-3 gap-4">
                 <div>
