@@ -26,6 +26,7 @@ type Candidato = {
   id: string;
   nome_completo: string;
   email: string;
+  cpf: string | null;
   telefone: string | null;
   cidade: string | null;
   estado: string | null;
@@ -35,6 +36,8 @@ type Candidato = {
   portfolio_url: string | null;
   nivel: string | null;
   area: string | null;
+  cargo: string | null;
+  idade: number | null;
   status: string;
   vaga_relacionada_id: string | null;
   pretensao_salarial: number | null;
@@ -50,6 +53,8 @@ type Candidato = {
   modelo_contratacao: string | null;
   formato_trabalho: string | null;
   fit_cultural: FitCulturalData | null;
+  experiencia_profissional: string | null;
+  idiomas: string | null;
 };
 type Vaga = {
   id: string;
@@ -341,7 +346,7 @@ export default function CandidatoDetalhes() {
           <CandidateTagsCard candidateId={id!} />
 
           {/* Main Info Card - Full Width */}
-          <ProfessionalInfoCard email={candidato.email} telefone={candidato.telefone} cidade={candidato.cidade} estado={candidato.estado} linkedin={candidato.linkedin} curriculoLink={candidato.curriculo_link} isFromPublicLink={!!candidato.source_link_id} pretensaoSalarial={candidato.pretensao_salarial} vagaTitulo={vaga?.titulo || null} vagaId={candidato.vaga_relacionada_id} dataCadastro={candidato.criado_em} nivel={candidato.nivel} area={candidato.area} curriculoUrl={candidato.curriculo_url} portfolioUrl={candidato.portfolio_url} disponibilidadeMudanca={candidato.disponibilidade_mudanca} disponibilidadeStatus={candidato.disponibilidade_status} pontosFortes={candidato.pontos_fortes} pontosDesenvolver={candidato.pontos_desenvolver} parecerFinal={candidato.parecer_final} origem={candidato.origem} candidatoId={id!} experienciaProfissional={(candidato as any).experiencia_profissional || null} idiomas={(candidato as any).idiomas || null} modeloContratacao={candidato.modelo_contratacao} formatoTrabalho={candidato.formato_trabalho} onUpdate={loadCandidato} onVagaClick={() => vaga && navigate(`/vagas/${vaga.id}`)} />
+          <ProfessionalInfoCard email={candidato.email} telefone={candidato.telefone} cidade={candidato.cidade} estado={candidato.estado} linkedin={candidato.linkedin} curriculoLink={candidato.curriculo_link} isFromPublicLink={!!candidato.source_link_id} pretensaoSalarial={candidato.pretensao_salarial} vagaTitulo={vaga?.titulo || null} vagaId={candidato.vaga_relacionada_id} dataCadastro={candidato.criado_em} nivel={candidato.nivel} area={candidato.area} curriculoUrl={candidato.curriculo_url} portfolioUrl={candidato.portfolio_url} disponibilidadeMudanca={candidato.disponibilidade_mudanca} disponibilidadeStatus={candidato.disponibilidade_status} pontosFortes={candidato.pontos_fortes} pontosDesenvolver={candidato.pontos_desenvolver} parecerFinal={candidato.parecer_final} origem={candidato.origem} candidatoId={id!} experienciaProfissional={candidato.experiencia_profissional} idiomas={candidato.idiomas} modeloContratacao={candidato.modelo_contratacao} formatoTrabalho={candidato.formato_trabalho} cpf={candidato.cpf} cargo={candidato.cargo} idade={candidato.idade} onUpdate={loadCandidato} onVagaClick={() => vaga && navigate(`/vagas/${vaga.id}`)} />
 
           {/* Fit Cultural Card - only show if data exists */}
           {candidato.fit_cultural && <FitCulturalCard fitCultural={candidato.fit_cultural} />}
