@@ -54,7 +54,7 @@ export function VagaHeader({
         </Button>
         <Button onClick={onShare} className="rounded-full font-bold min-w-[140px] text-sm">
           <span className="material-symbols-outlined text-lg">share</span>
-          Link da Vaga  
+          Link de Divulgação   
         </Button>
       </div>
     </div>;
