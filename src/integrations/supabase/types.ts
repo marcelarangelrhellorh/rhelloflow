@@ -3439,6 +3439,7 @@ export type Database = {
           dias_semana: string[] | null
           empresa: string
           empresa_id: string | null
+          habilidades_comportamentais: string | null
           horario_fim: string | null
           horario_inicio: string | null
           id: string
@@ -3448,6 +3449,7 @@ export type Database = {
           motivo_confidencial: string | null
           observacoes: string | null
           prioridade: Database["public"]["Enums"]["prioridade_vaga"] | null
+          quantidade_vagas: number | null
           recruiter_id: string | null
           recrutador: string | null
           recrutador_id: string | null
@@ -3491,6 +3493,7 @@ export type Database = {
           dias_semana?: string[] | null
           empresa: string
           empresa_id?: string | null
+          habilidades_comportamentais?: string | null
           horario_fim?: string | null
           horario_inicio?: string | null
           id?: string
@@ -3502,6 +3505,7 @@ export type Database = {
           motivo_confidencial?: string | null
           observacoes?: string | null
           prioridade?: Database["public"]["Enums"]["prioridade_vaga"] | null
+          quantidade_vagas?: number | null
           recruiter_id?: string | null
           recrutador?: string | null
           recrutador_id?: string | null
@@ -3545,6 +3549,7 @@ export type Database = {
           dias_semana?: string[] | null
           empresa?: string
           empresa_id?: string | null
+          habilidades_comportamentais?: string | null
           horario_fim?: string | null
           horario_inicio?: string | null
           id?: string
@@ -3556,6 +3561,7 @@ export type Database = {
           motivo_confidencial?: string | null
           observacoes?: string | null
           prioridade?: Database["public"]["Enums"]["prioridade_vaga"] | null
+          quantidade_vagas?: number | null
           recruiter_id?: string | null
           recrutador?: string | null
           recrutador_id?: string | null

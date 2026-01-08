@@ -58,6 +58,8 @@ export default function PublicVagaForm() {
     beneficios_outros: "",
     requisitos_obrigatorios: "",
     requisitos_desejaveis: "",
+    habilidades_comportamentais: "",
+    quantidade_vagas: "1",
     responsabilidades: "",
     observacoes: "",
     contato_nome: "",
@@ -158,7 +160,9 @@ export default function PublicVagaForm() {
         beneficios: formData.beneficios.length > 0 ? formData.beneficios : null,
         beneficios_outros: formData.beneficios.includes("Outros") ? formData.beneficios_outros : null,
         requisitos_obrigatorios: formData.requisitos_obrigatorios || null,
-        requisitos_desejaveis: formData.requisitos_desejaveis || null,
+        requisitos_desejaveis: formData.requisitos_desejaveis,
+        habilidades_comportamentais: formData.habilidades_comportamentais,
+        quantidade_vagas: parseInt(formData.quantidade_vagas) || 1,
         responsabilidades: formData.responsabilidades || null,
         observacoes: formData.observacoes || null,
       };
@@ -570,14 +574,47 @@ export default function PublicVagaForm() {
               </div>
 
               <div>
-                <Label htmlFor="requisitos_desejaveis">Requisitos Desejáveis</Label>
+                <Label htmlFor="requisitos_desejaveis">Requisitos Desejáveis *</Label>
                 <Textarea
                   id="requisitos_desejaveis"
+                  required
                   rows={4}
                   placeholder="Liste as qualificações que seriam um diferencial..."
                   value={formData.requisitos_desejaveis}
                   onChange={(e) => setFormData({ ...formData, requisitos_desejaveis: e.target.value })}
                 />
+              </div>
+
+              <div>
+                <Label htmlFor="habilidades_comportamentais">Habilidades Comportamentais *</Label>
+                <Textarea
+                  id="habilidades_comportamentais"
+                  required
+                  rows={4}
+                  placeholder="Descreva as habilidades comportamentais desejadas (ex: liderança, comunicação, trabalho em equipe, resiliência...)"
+                  value={formData.habilidades_comportamentais}
+                  onChange={(e) => setFormData({ ...formData, habilidades_comportamentais: e.target.value })}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Soft skills e competências interpessoais importantes para o cargo
+                </p>
+              </div>
+
+              <div>
+                <Label htmlFor="quantidade_vagas">Quantidade de Vagas para este Cargo *</Label>
+                <Input
+                  id="quantidade_vagas"
+                  type="number"
+                  min="1"
+                  max="100"
+                  required
+                  placeholder="1"
+                  value={formData.quantidade_vagas}
+                  onChange={(e) => setFormData({ ...formData, quantidade_vagas: e.target.value })}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Quantas pessoas serão contratadas para esta posição?
+                </p>
               </div>
 
               <div>
