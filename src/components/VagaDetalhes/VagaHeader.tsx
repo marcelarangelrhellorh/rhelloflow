@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatSalaryRange } from "@/lib/salaryUtils";
@@ -28,7 +29,17 @@ export function VagaHeader({
           {vaga.titulo}
         </h1>
         <p className="text-[#36404a] mt-1 font-medium text-base">
-          {vaga.empresa} • Acompanhe o progresso do processo de contratação
+          {vaga.empresa_id ? (
+            <Link 
+              to={`/empresa/${vaga.empresa_id}`}
+              className="text-primary hover:underline font-semibold"
+            >
+              {vaga.empresa}
+            </Link>
+          ) : (
+            <span>{vaga.empresa}</span>
+          )}
+          {" "}• Acompanhe o progresso do processo de contratação
         </p>
         <div className="flex items-center gap-2 mt-3 flex-wrap">
           {(vaga.salario_min || vaga.salario_max || vaga.salario_modalidade) && <Badge className="bg-[#ffcd00]/20 text-[#00141d] border-[#ffcd00]/30 font-bold text-sm px-3 py-1">
