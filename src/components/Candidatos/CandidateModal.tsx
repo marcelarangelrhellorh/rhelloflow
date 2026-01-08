@@ -12,6 +12,8 @@ import { toast } from "sonner";
 import { Constants } from "@/integrations/supabase/types";
 import { ORIGEM_OPTIONS } from "@/constants/fitCultural";
 import { useCacheInvalidation } from "@/hooks/data/useCacheInvalidation";
+import { CPFInput } from "@/components/ui/cpf-input";
+import { validateCPF, cleanCPF } from "@/lib/cpfUtils";
 
 interface CandidateModalProps {
   open: boolean;
@@ -29,6 +31,7 @@ export function CandidateModal({ open, onClose, candidatoId, onSave }: Candidate
   const [formData, setFormData] = useState({
     nome_completo: "",
     email: "",
+    cpf: "",
     telefone: "",
     cidade: "",
     estado: "",
@@ -60,6 +63,7 @@ export function CandidateModal({ open, onClose, candidatoId, onSave }: Candidate
     setFormData({
       nome_completo: "",
       email: "",
+      cpf: "",
       telefone: "",
       cidade: "",
       estado: "",
@@ -108,6 +112,7 @@ export function CandidateModal({ open, onClose, candidatoId, onSave }: Candidate
         setFormData({
           nome_completo: data.nome_completo || "",
           email: data.email || "",
+          cpf: data.cpf || "",
           telefone: data.telefone || "",
           cidade: data.cidade || "",
           estado: data.estado || "",
@@ -132,12 +137,41 @@ export function CandidateModal({ open, onClose, candidatoId, onSave }: Candidate
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validar CPF
+    if (!formData.cpf || !validateCPF(formData.cpf)) {
+      toast.error("CPF inválido. Por favor, verifique.");
+      return;
+    }
+    
     setLoading(true);
 
     try {
+      const cpfLimpo = cleanCPF(formData.cpf);
+      
+      // Verificar se CPF já existe (excluindo o próprio candidato se estiver editando)
+      const cpfQuery = supabase
+        .from("candidatos")
+        .select("id, nome_completo")
+        .eq("cpf", cpfLimpo)
+        .is("deleted_at", null);
+      
+      if (candidatoId) {
+        cpfQuery.neq("id", candidatoId);
+      }
+      
+      const { data: existingCPF } = await cpfQuery.maybeSingle();
+      
+      if (existingCPF) {
+        toast.error(`Já existe um candidato cadastrado com este CPF: ${existingCPF.nome_completo}`);
+        setLoading(false);
+        return;
+      }
+
       const dataToSave = {
         nome_completo: formData.nome_completo,
         email: formData.email,
+        cpf: cpfLimpo,
         telefone: formData.telefone || null,
         cidade: formData.cidade || null,
         estado: formData.estado || null,
@@ -249,6 +283,12 @@ export function CandidateModal({ open, onClose, candidatoId, onSave }: Candidate
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <CPFInput
+                  value={formData.cpf}
+                  onChange={(value) => setFormData({ ...formData, cpf: value })}
+                  required
+                />
+
                 <div>
                   <Label htmlFor="cidade">Cidade</Label>
                   <Input
@@ -257,7 +297,9 @@ export function CandidateModal({ open, onClose, candidatoId, onSave }: Candidate
                     onChange={(e) => setFormData({ ...formData, cidade: e.target.value })}
                   />
                 </div>
+              </div>
 
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="estado">Estado</Label>
                   <Input
@@ -268,16 +310,16 @@ export function CandidateModal({ open, onClose, candidatoId, onSave }: Candidate
                     onChange={(e) => setFormData({ ...formData, estado: e.target.value.toUpperCase() })}
                   />
                 </div>
-              </div>
 
-              <div>
-                <Label htmlFor="linkedin">LinkedIn</Label>
-                <Input
-                  id="linkedin"
-                  placeholder="https://linkedin.com/in/..."
-                  value={formData.linkedin}
-                  onChange={(e) => setFormData({ ...formData, linkedin: e.target.value })}
-                />
+                <div>
+                  <Label htmlFor="linkedin">LinkedIn</Label>
+                  <Input
+                    id="linkedin"
+                    placeholder="https://linkedin.com/in/..."
+                    value={formData.linkedin}
+                    onChange={(e) => setFormData({ ...formData, linkedin: e.target.value })}
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>

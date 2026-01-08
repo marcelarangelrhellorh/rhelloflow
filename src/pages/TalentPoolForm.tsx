@@ -35,6 +35,7 @@ import {
   ESTADOS_BRASILEIROS,
   type FitCulturalData,
 } from "@/constants/fitCultural";
+import { formatCPF, validateCPF, cleanCPF } from "@/lib/cpfUtils";
 
 interface LinkData {
   id: string;
@@ -71,6 +72,7 @@ export default function TalentPoolForm() {
   const [formData, setFormData] = useState({
     nome_completo: "",
     email: "",
+    cpf: "",
     telefone: "",
     cidade: "",
     estado: "",
@@ -224,6 +226,12 @@ export default function TalentPoolForm() {
       return;
     }
 
+    // Validar CPF
+    if (!formData.cpf || !validateCPF(formData.cpf)) {
+      toast.error("Preencha um CPF válido");
+      return;
+    }
+
     if (!formData.modelo_contratacao) {
       toast.error("Selecione o modelo de contratação");
       return;
@@ -292,6 +300,7 @@ export default function TalentPoolForm() {
       const candidateData = {
         nome_completo: formData.nome_completo.trim(),
         email: formData.email.trim(),
+        cpf: cleanCPF(formData.cpf),
         telefone: formData.telefone.trim(),
         cidade: formData.cidade.trim() || null,
         estado: formData.estado || null,
@@ -474,6 +483,23 @@ export default function TalentPoolForm() {
                     className="mt-1 border-[#36404A]/20"
                     value={formData.telefone}
                     onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="cpf" className="text-[#00141D]">
+                    CPF <span className="text-red-600">*</span>
+                  </Label>
+                  <Input
+                    id="cpf"
+                    type="text"
+                    inputMode="numeric"
+                    required
+                    placeholder="000.000.000-00"
+                    className="mt-1 border-[#36404A]/20"
+                    value={formData.cpf}
+                    onChange={(e) => setFormData({ ...formData, cpf: formatCPF(e.target.value) })}
+                    maxLength={14}
                   />
                 </div>
 

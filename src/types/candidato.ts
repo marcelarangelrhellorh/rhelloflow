@@ -10,6 +10,7 @@ export interface Candidato {
   id: string;
   nome_completo: string;
   email: string;
+  cpf: string | null;
   telefone: string | null;
   cidade: string | null;
   estado: string | null;

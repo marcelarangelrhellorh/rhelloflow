@@ -411,6 +411,7 @@ export type Database = {
           area: Database["public"]["Enums"]["area_candidato"] | null
           cargo: string | null
           cidade: string | null
+          cpf: string | null
           criado_em: string | null
           curriculo_link: string | null
           curriculo_url: string | null
@@ -461,6 +462,7 @@ export type Database = {
           area?: Database["public"]["Enums"]["area_candidato"] | null
           cargo?: string | null
           cidade?: string | null
+          cpf?: string | null
           criado_em?: string | null
           curriculo_link?: string | null
           curriculo_url?: string | null
@@ -511,6 +513,7 @@ export type Database = {
           area?: Database["public"]["Enums"]["area_candidato"] | null
           cargo?: string | null
           cidade?: string | null
+          cpf?: string | null
           criado_em?: string | null
           curriculo_link?: string | null
           curriculo_url?: string | null

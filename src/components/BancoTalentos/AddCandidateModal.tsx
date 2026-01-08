@@ -10,6 +10,8 @@ import { toast } from "sonner";
 import { logger } from "@/lib/logger";
 import { MODELO_CONTRATACAO_OPTIONS, FORMATO_TRABALHO_OPTIONS, CARGO_OPTIONS, ESTADOS_BRASILEIROS } from "@/constants/fitCultural";
 import { useCacheInvalidation } from "@/hooks/data/useCacheInvalidation";
+import { CPFInput } from "@/components/ui/cpf-input";
+import { validateCPF, cleanCPF } from "@/lib/cpfUtils";
 
 interface AddCandidateModalProps {
   open: boolean;
@@ -30,6 +32,7 @@ export function AddCandidateModal({ open, onOpenChange, onSuccess }: AddCandidat
   const [formData, setFormData] = useState({
     nome_completo: "",
     email: "",
+    cpf: "",
     telefone: "",
     cidade: "",
     estado: "",
@@ -68,12 +71,35 @@ export function AddCandidateModal({ open, onOpenChange, onSuccess }: AddCandidat
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validar CPF
+    if (!formData.cpf || !validateCPF(formData.cpf)) {
+      toast.error("CPF inválido. Por favor, verifique.");
+      return;
+    }
+    
     setLoading(true);
 
     try {
+      // Verificar se CPF já existe
+      const cpfLimpo = cleanCPF(formData.cpf);
+      const { data: existingCPF } = await supabase
+        .from("candidatos")
+        .select("id, nome_completo")
+        .eq("cpf", cpfLimpo)
+        .is("deleted_at", null)
+        .maybeSingle();
+      
+      if (existingCPF) {
+        toast.error(`Já existe um candidato cadastrado com este CPF: ${existingCPF.nome_completo}`);
+        setLoading(false);
+        return;
+      }
+
       const { error } = await supabase.from("candidatos").insert({
         nome_completo: formData.nome_completo,
         email: formData.email,
+        cpf: cpfLimpo,
         telefone: formData.telefone || null,
         cidade: formData.cidade || null,
         estado: formData.estado || null,
@@ -110,6 +136,7 @@ export function AddCandidateModal({ open, onOpenChange, onSuccess }: AddCandidat
     setFormData({
       nome_completo: "",
       email: "",
+      cpf: "",
       telefone: "",
       cidade: "",
       estado: "",
@@ -156,6 +183,14 @@ export function AddCandidateModal({ open, onOpenChange, onSuccess }: AddCandidat
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                required
+              />
+            </div>
+
+            <div>
+              <CPFInput
+                value={formData.cpf}
+                onChange={(value) => setFormData({ ...formData, cpf: value })}
                 required
               />
             </div>
