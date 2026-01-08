@@ -149,7 +149,7 @@ export default function VagaDetalhes() {
               <ExternalJobBanner vagaId={vaga.id} recrutador={vaga.recrutador} csResponsavel={vaga.cs_responsavel} complexidade={vaga.complexidade} prioridade={vaga.prioridade} />
             </div>}
 
-          <VagaHeader vaga={vaga} vagaTags={vagaTags} onGenerateClientLink={handleGenerateClientLink} onViewDetails={() => setDetailsDrawerOpen(true)} onShare={() => setShareModalOpen(true)} />
+          <VagaHeader vaga={vaga} vagaTags={vagaTags} onGenerateClientLink={handleGenerateClientLink} onShare={() => setShareModalOpen(true)} />
 
           <ShareJobModal open={shareModalOpen} onOpenChange={setShareModalOpen} vagaId={vaga.id} vagaTitulo={vaga.titulo} />
 
@@ -157,13 +157,13 @@ export default function VagaDetalhes() {
 
           <VagaDetailsDrawer open={detailsDrawerOpen} onOpenChange={setDetailsDrawerOpen} vaga={vaga} selectedTags={selectedTags} onTagsChange={setSelectedTags} onSaveTags={saveTags} savingTags={savingTags} />
 
-          <VagaKPICards vaga={vaga} candidatos={candidatos} daysOpen={daysOpen} onStatusChange={handleStatusChange} />
+          <VagaKPICards vaga={vaga} candidatos={candidatos} daysOpen={daysOpen} onStatusChange={handleStatusChange} onViewDetails={() => setDetailsDrawerOpen(true)} />
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
               <VagaTimeline currentStatusSlug={vaga.status_slug || "discovery"} progress={progress} />
 
-              <JobHistorySection vagaId={vaga.id} vagaTitle={vaga.titulo} className="shadow-lg" />
+              <JobHistorySection vagaId={vaga.id} vagaTitle={vaga.titulo} />
 
               {vaga.status === "Concluído" && candidatoContratado && <div className="mb-8 p-6 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border-2 border-green-500 dark:border-green-400 rounded-lg shadow-sm">
                   <div className="flex items-center gap-3">
