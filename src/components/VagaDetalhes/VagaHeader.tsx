@@ -7,14 +7,12 @@ interface VagaHeaderProps {
   vaga: Vaga;
   vagaTags: VagaTag[];
   onGenerateClientLink: () => void;
-  onViewDetails: () => void;
   onShare: () => void;
 }
 export function VagaHeader({
   vaga,
   vagaTags,
   onGenerateClientLink,
-  onViewDetails,
   onShare
 }: VagaHeaderProps) {
   const categoryColors: Record<string, string> = {
@@ -47,10 +45,6 @@ export function VagaHeader({
         <Button onClick={onGenerateClientLink} variant="outline" className="rounded-full font-bold min-w-[140px] text-sm">
           <span className="material-symbols-outlined text-lg">link</span>
           Link Cliente
-        </Button>
-        <Button onClick={onViewDetails} variant="outline" className="rounded-full font-bold min-w-[140px] text-sm">
-          <span className="material-symbols-outlined text-lg">visibility</span>
-          Detalhes da Vaga  
         </Button>
         <Button onClick={onShare} className="rounded-full font-bold min-w-[140px] text-sm">
           <span className="material-symbols-outlined text-lg">share</span>

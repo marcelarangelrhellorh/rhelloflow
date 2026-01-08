@@ -1,4 +1,5 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import { JOB_STAGES } from "@/lib/jobStages";
 import type { Vaga } from "@/hooks/data/useVaga";
 import type { Candidato } from "@/hooks/data/useCandidatos";
@@ -7,12 +8,14 @@ interface VagaKPICardsProps {
   candidatos: Candidato[];
   daysOpen: number;
   onStatusChange: (newStatusSlug: string) => void;
+  onViewDetails: () => void;
 }
 export function VagaKPICards({
   vaga,
   candidatos,
   daysOpen,
-  onStatusChange
+  onStatusChange,
+  onViewDetails
 }: VagaKPICardsProps) {
   return <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
       <div className="flex flex-col gap-2 rounded-lg p-4 bg-white dark:bg-background-dark border border-gray-200 dark:border-secondary-text-light/20 shadow-lg">
@@ -71,6 +74,13 @@ export function VagaKPICards({
         <p className="text-primary-text-light dark:text-primary-text-dark font-bold text-base">
           {vaga.tipo_contratacao || "Não informado"}
         </p>
+      </div>
+
+      <div className="flex items-center justify-center rounded-lg p-4 bg-white dark:bg-background-dark border border-gray-200 dark:border-secondary-text-light/20 shadow-lg">
+        <Button onClick={onViewDetails} variant="outline" className="rounded-full font-bold min-w-[140px] text-sm">
+          <span className="material-symbols-outlined text-lg">visibility</span>
+          Detalhes da Vaga
+        </Button>
       </div>
     </div>;
 }
