@@ -122,3 +122,12 @@ verify_jwt = false
 
 [functions.check-stale-jobs]
 verify_jwt = false
+
+[functions.generate-candidate-form-link]
+verify_jwt = true
+
+[functions.get-candidate-form-link]
+verify_jwt = false
+
+[functions.submit-candidate-form-application]
+verify_jwt = false

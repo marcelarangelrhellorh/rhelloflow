@@ -23,6 +23,7 @@ const CandidatoDetalhes = lazy(() => import("./pages/CandidatoDetalhes"));
 const BancoTalentos = lazy(() => import("./pages/BancoTalentos"));
 const TalentPoolForm = lazy(() => import("./pages/TalentPoolForm"));
 const TechnicalTestForm = lazy(() => import("./pages/TechnicalTestForm"));
+const CandidateFormPage = lazy(() => import("./pages/CandidateFormPage"));
 const Scorecards = lazy(() => import("./pages/Scorecards"));
 const ScorecardForm = lazy(() => import("./pages/ScorecardForm"));
 const Analises = lazy(() => import("./pages/Analises"));
@@ -56,6 +57,7 @@ const App = () => <ErrorBoundary>
             <Route path="/feedback/:token" element={<FeedbackCliente />} />
             <Route path="/banco-talentos/:token" element={<TalentPoolForm />} />
             <Route path="/teste-tecnico/:token" element={<TechnicalTestForm />} />
+            <Route path="/candidatura/:token" element={<CandidateFormPage />} />
             <Route element={<Layout />}>
               <Route path="/" element={<Dashboard />} />
               <Route path="/vagas" element={<Vagas />} />
