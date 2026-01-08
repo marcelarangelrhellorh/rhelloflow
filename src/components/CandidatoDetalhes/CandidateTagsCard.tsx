@@ -147,40 +147,34 @@ export function CandidateTagsCard({
     acc[tag.category].push(tag);
     return acc;
   }, {} as Record<string, CandidateTag[]>);
-  return <Card className="my-[50px] shadow-md border border-gray-300 overflow-visible">
-      <CardHeader>
+  return <Card className="border border-border shadow-lg">
+      <CardHeader className="py-3">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <TagIcon className="h-5 w-5 shrink-0" />
-            <CardTitle className="text-sm">Tags</CardTitle>
+            <TagIcon className="h-4 w-4 shrink-0 text-[#ffcc00]" />
+            <CardTitle className="text-base font-semibold">Tags</CardTitle>
           </div>
-          <Button size="sm" onClick={() => setAddModalOpen(true)} className="font-semibold text-xs shrink-0">
+          <Button size="sm" variant="outline" onClick={() => setAddModalOpen(true)} className="text-xs h-7 shrink-0 font-semibold">
             <Plus className="h-3 w-3 mr-1" />
             Adicionar
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="py-0 my-[32px]">
-        {loading ? <p className="text-muted-foreground">Carregando tags...</p> : tags.length === 0 ? <div className="text-center py-8">
-            <TagIcon className="h-12 w-12 mx-auto text-muted-foreground mb-2" />
-            <p className="text-muted-foreground">Nenhuma tag adicionada</p>
-            <p className="text-sm text-muted-foreground">
-              Tags serão adicionadas automaticamente quando o candidato se candidatar a vagas
-            </p>
-          </div> : <div className="space-y-4">
+      <CardContent className="pt-0 pb-3">
+        {loading ? <p className="text-muted-foreground text-sm">Carregando tags...</p> : tags.length === 0 ? <p className="text-muted-foreground text-sm">Nenhuma tag adicionada</p> : <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
             {Object.entries(groupedTags).map(([category, categoryTags]) => {
           const categoryInfo = categoryLabels[category as keyof typeof categoryLabels];
-          return <div key={category}>
-                  <h4 className="font-semibold mb-2 text-muted-foreground text-base text-left">
-                    {categoryInfo.label}
-                  </h4>
-                  <div className="flex flex-wrap gap-2">
+          return <div key={category} className="flex items-center gap-2">
+                  <span className="text-xs font-medium text-muted-foreground whitespace-nowrap">
+                    {categoryInfo.label}:
+                  </span>
+                  <div className="flex flex-wrap gap-1">
                     {categoryTags.map(tag => {
                 const origin = getOriginIcon(tag.added_reason);
                 return <TooltipProvider key={tag.id}>
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <Badge variant="outline" className={`${categoryInfo.color} cursor-help group relative`}>
+                              <Badge variant="outline" className={`${categoryInfo.color} cursor-help group relative text-xs py-0.5`}>
                                 <span className="text-xs mr-1">{origin.icon}</span>
                                 {tag.label}
                                 <button onClick={e => {

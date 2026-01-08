@@ -8,6 +8,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { logger } from "@/lib/logger";
+import { MODELO_CONTRATACAO_OPTIONS, FORMATO_TRABALHO_OPTIONS, CARGO_OPTIONS, ESTADOS_BRASILEIROS } from "@/constants/fitCultural";
+import { useCacheInvalidation } from "@/hooks/data/useCacheInvalidation";
+import { CPFInput } from "@/components/ui/cpf-input";
+import { validateCPF, cleanCPF } from "@/lib/cpfUtils";
 
 interface AddCandidateModalProps {
   open: boolean;
@@ -24,19 +28,25 @@ interface Profile {
 export function AddCandidateModal({ open, onOpenChange, onSuccess }: AddCandidateModalProps) {
   const [loading, setLoading] = useState(false);
   const [recruiters, setRecruiters] = useState<Profile[]>([]);
+  const { invalidateCandidatos } = useCacheInvalidation();
   const [formData, setFormData] = useState({
     nome_completo: "",
     email: "",
+    cpf: "",
     telefone: "",
     cidade: "",
     estado: "",
     area: "",
     nivel: "",
+    cargo: "",
     pretensao_salarial: "",
     linkedin: "",
     recruiter_id: "",
     curriculo_link: "",
-    feedback: ""
+    portfolio_link: "",
+    feedback: "",
+    modelo_contratacao: "",
+    formato_trabalho: ""
   });
 
   useEffect(() => {
@@ -61,28 +71,56 @@ export function AddCandidateModal({ open, onOpenChange, onSuccess }: AddCandidat
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validar CPF
+    if (!formData.cpf || !validateCPF(formData.cpf)) {
+      toast.error("CPF inválido. Por favor, verifique.");
+      return;
+    }
+    
     setLoading(true);
 
     try {
+      // Verificar se CPF já existe
+      const cpfLimpo = cleanCPF(formData.cpf);
+      const { data: existingCPF } = await supabase
+        .from("candidatos")
+        .select("id, nome_completo")
+        .eq("cpf", cpfLimpo)
+        .is("deleted_at", null)
+        .maybeSingle();
+      
+      if (existingCPF) {
+        toast.error(`Já existe um candidato cadastrado com este CPF: ${existingCPF.nome_completo}`);
+        setLoading(false);
+        return;
+      }
+
       const { error } = await supabase.from("candidatos").insert({
         nome_completo: formData.nome_completo,
         email: formData.email,
+        cpf: cpfLimpo,
         telefone: formData.telefone || null,
         cidade: formData.cidade || null,
         estado: formData.estado || null,
         area: formData.area as any,
         nivel: formData.nivel as any,
+        cargo: formData.cargo || null,
         pretensao_salarial: formData.pretensao_salarial ? parseFloat(formData.pretensao_salarial) : null,
         linkedin: formData.linkedin || null,
         recruiter_id: formData.recruiter_id || null,
         recrutador: null,
         status: "Banco de Talentos",
         curriculo_link: formData.curriculo_link || null,
-        feedback: formData.feedback || null
+        portfolio_url: formData.portfolio_link || null,
+        feedback: formData.feedback || null,
+        modelo_contratacao: formData.modelo_contratacao || null,
+        formato_trabalho: formData.formato_trabalho || null
       });
 
       if (error) throw error;
 
+      await invalidateCandidatos();
       toast.success("Candidato adicionado com sucesso!");
       onSuccess();
       resetForm();
@@ -98,16 +136,21 @@ export function AddCandidateModal({ open, onOpenChange, onSuccess }: AddCandidat
     setFormData({
       nome_completo: "",
       email: "",
+      cpf: "",
       telefone: "",
       cidade: "",
       estado: "",
       area: "",
       nivel: "",
+      cargo: "",
       pretensao_salarial: "",
       linkedin: "",
       recruiter_id: "",
       curriculo_link: "",
-      feedback: ""
+      portfolio_link: "",
+      feedback: "",
+      modelo_contratacao: "",
+      formato_trabalho: ""
     });
   };
 
@@ -145,6 +188,14 @@ export function AddCandidateModal({ open, onOpenChange, onSuccess }: AddCandidat
             </div>
 
             <div>
+              <CPFInput
+                value={formData.cpf}
+                onChange={(value) => setFormData({ ...formData, cpf: value })}
+                required
+              />
+            </div>
+
+            <div>
               <Label htmlFor="telefone">Telefone</Label>
               <Input
                 id="telefone"
@@ -165,13 +216,16 @@ export function AddCandidateModal({ open, onOpenChange, onSuccess }: AddCandidat
 
             <div>
               <Label htmlFor="estado">Estado</Label>
-              <Input
-                id="estado"
-                value={formData.estado}
-                onChange={(e) => setFormData({ ...formData, estado: e.target.value })}
-                maxLength={2}
-                placeholder="SP"
-              />
+              <Select value={formData.estado} onValueChange={(value) => setFormData({ ...formData, estado: value })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent className="max-h-60">
+                  {ESTADOS_BRASILEIROS.map((estado) => (
+                    <SelectItem key={estado.value} value={estado.value}>{estado.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
@@ -193,7 +247,21 @@ export function AddCandidateModal({ open, onOpenChange, onSuccess }: AddCandidat
             </div>
 
             <div>
-              <Label htmlFor="nivel">Nível Profissional</Label>
+              <Label htmlFor="cargo">Cargo</Label>
+              <Select value={formData.cargo} onValueChange={(value) => setFormData({ ...formData, cargo: value })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent>
+                  {CARGO_OPTIONS.map((cargo) => (
+                    <SelectItem key={cargo.value} value={cargo.value}>{cargo.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="nivel">Senioridade</Label>
               <Select value={formData.nivel} onValueChange={(value) => setFormData({ ...formData, nivel: value })}>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione" />
@@ -251,7 +319,7 @@ export function AddCandidateModal({ open, onOpenChange, onSuccess }: AddCandidat
               </Select>
             </div>
 
-            <div className="col-span-2">
+            <div>
               <Label htmlFor="curriculo_link">Link do Currículo</Label>
               <Input
                 id="curriculo_link"
@@ -260,6 +328,51 @@ export function AddCandidateModal({ open, onOpenChange, onSuccess }: AddCandidat
                 onChange={(e) => setFormData({ ...formData, curriculo_link: e.target.value })}
                 placeholder="https://..."
               />
+            </div>
+
+            <div>
+              <Label htmlFor="portfolio_link">Link do Portfólio</Label>
+              <Input
+                id="portfolio_link"
+                type="url"
+                value={formData.portfolio_link}
+                onChange={(e) => setFormData({ ...formData, portfolio_link: e.target.value })}
+                placeholder="https://..."
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="modelo_contratacao">Modelo de Contratação</Label>
+              <Select 
+                value={formData.modelo_contratacao} 
+                onValueChange={(value) => setFormData({ ...formData, modelo_contratacao: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent>
+                  {MODELO_CONTRATACAO_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="formato_trabalho">Formato de Trabalho</Label>
+              <Select 
+                value={formData.formato_trabalho} 
+                onValueChange={(value) => setFormData({ ...formData, formato_trabalho: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent>
+                  {FORMATO_TRABALHO_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="col-span-2">

@@ -168,6 +168,19 @@ export async function performSoftDelete(
       })
       .eq("id", resourceId);
     error = result.error;
+
+    // Desativar links de compartilhamento associados à vaga
+    if (!error) {
+      await supabase
+        .from("share_links")
+        .update({ active: false, deleted: true, deleted_at: new Date().toISOString(), deleted_by: userData.user.id })
+        .eq("vaga_id", resourceId);
+
+      await supabase
+        .from("client_view_links")
+        .update({ active: false, deleted: true, deleted_at: new Date().toISOString(), deleted_by: userData.user.id })
+        .eq("vaga_id", resourceId);
+    }
   } else if (resourceType === "feedback") {
     const result = await supabase
       .from("feedbacks")
@@ -317,29 +330,29 @@ export async function handleDelete(
     return { success: false, error: "Only admins can delete resources" };
   }
 
-  // Assess deletion risk
-  const { riskLevel } = await assessDeletionRisk(resourceType, resourceId);
+  // Verificar se já existe solicitação pendente para este recurso
+  const { data: existingApproval } = await supabase
+    .from("deletion_approvals")
+    .select("id, status")
+    .eq("resource_type", resourceType)
+    .eq("resource_id", resourceId)
+    .eq("status", "pending")
+    .maybeSingle();
 
-  // High-risk or critical deletions require approval workflow
-  if (riskLevel === "high" || riskLevel === "critical") {
-    const approvalResult = await requestDeletionApproval(
-      resourceType,
-      resourceId,
-      reason,
-      riskLevel,
-      { resource_name: resourceName }
-    );
-
-    if (!approvalResult.success) {
-      return { success: false, error: approvalResult.error };
-    }
-
+  if (existingApproval) {
     return {
-      success: true,
-      requiresApproval: true,
-      approvalId: approvalResult.approvalId,
+      success: false,
+      error: "Já existe uma solicitação de exclusão pendente para este recurso",
     };
   }
+
+  // Assess deletion risk (apenas para logging, admins podem excluir diretamente)
+  const { riskLevel } = await assessDeletionRisk(resourceType, resourceId);
+  
+  console.log(`Deletion risk for ${resourceType} ${resourceId}: ${riskLevel}`);
+
+  // Admins podem executar soft-delete diretamente, independente do risco
+  // Não há mais workflow de aprovação - se é admin, pode excluir
 
   // Low/medium risk: proceed with soft-delete
   const deleteResult = await performSoftDelete(

@@ -88,9 +88,9 @@ export function PipelineBoard({
   const activeStage = activeJob ? stages.find(s => s.slug === activeJob.status_slug) : null;
   return <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <DualScrollContainer>
-        <div className="flex gap-4 bg-[#36404a]/[0.06] pb-4" style={{
+        <div style={{
         minWidth: 'max-content'
-      }}>
+      }} className="flex gap-4 pb-4 bg-transparent">
           {stages.map(stage => <Column key={stage.id} stage={stage} jobs={getJobsByStage(stage.slug)} progresso={progresso} onJobClick={onJobClick} onJobEdit={onJobEdit} onJobMoveStage={onJobMoveStage} onJobDuplicate={onJobDuplicate} onJobClose={onJobClose} />)}
         </div>
       </DualScrollContainer>

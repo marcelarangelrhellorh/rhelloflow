@@ -99,15 +99,15 @@ export function VagaTasksCard({
       </div>;
   }
   return <>
-      <div className={cn("flex flex-col gap-3 rounded-lg p-6 bg-white dark:bg-background-dark border border-transparent shadow-sm", className)}>
+      <div className={cn("flex flex-col gap-3 rounded-lg p-6 bg-white dark:bg-background-dark border border-gray-200 dark:border-secondary-text-light/20 shadow-sm", className)}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <CheckSquare className="text-primary w-[30px] h-[30px]" />
-            <p className="text-secondary-text-light dark:text-secondary-text-dark font-semibold text-xl">
+            <CheckSquare className="text-primary w-5 h-5" />
+            <p className="text-secondary-text-light dark:text-secondary-text-dark font-semibold text-base">
               Tarefas
             </p>
           </div>
-          <Button size="sm" variant="outline" onClick={handleNewTask} className="h-7 gap-1 text-sm font-semibold bg-[#00141D] text-white hover:bg-[#00141D]/90 border-[#00141D]">
+          <Button size="sm" variant="outline" onClick={handleNewTask} className="h-8 gap-1 px-4 text-sm font-semibold bg-[#00141D] text-white hover:bg-[#00141D]/90 border-[#00141D] rounded-full">
             <Plus className="h-3 w-3" />
             Nova
           </Button>
@@ -119,8 +119,8 @@ export function VagaTasksCard({
             {tasks.length}
           </span>
           <span className="text-muted-foreground font-semibold text-xs">tarefa{tasks.length !== 1 ? "s" : ""}</span>
-          {overdueTasks.length > 0 && <Badge variant="destructive" className="text-base gap-1 whitespace-nowrap px-[10px] mx-[100px]">
-              <AlertTriangle className="h-4 w-4" />
+          {overdueTasks.length > 0 && <Badge variant="destructive" className="text-xs gap-1 whitespace-nowrap">
+              <AlertTriangle className="h-3 w-3" />
               {overdueTasks.length} atrasada{overdueTasks.length !== 1 ? "s" : ""}
             </Badge>}
         </div>
@@ -148,14 +148,7 @@ export function VagaTasksCard({
           </p>}
       </div>
 
-      <TaskDetailDrawer 
-        task={selectedTask} 
-        open={detailDrawerOpen} 
-        onOpenChange={setDetailDrawerOpen} 
-        onEdit={handleEditTask}
-        onDelete={() => {}}
-        onToggleComplete={() => {}}
-      />
+      <TaskDetailDrawer task={selectedTask} open={detailDrawerOpen} onOpenChange={setDetailDrawerOpen} onEdit={handleEditTask} onDelete={() => {}} onToggleComplete={() => {}} />
 
       <TaskModal open={modalOpen} onClose={handleCloseModal} task={editingTask} defaultVagaId={defaultVagaId} />
     </>;

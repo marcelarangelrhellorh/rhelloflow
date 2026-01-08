@@ -18,10 +18,10 @@ const buttonVariants = cva(
         dark: "bg-background-dark text-primary-text-dark hover:bg-background-dark/90",
       },
       size: {
-        default: "h-9 px-4 py-2",
-        sm: "h-8 rounded-md px-3",
-        lg: "h-10 rounded-md px-6",
-        icon: "h-9 w-9",
+        default: "h-11 px-4 py-2 min-h-[44px]", // Touch-friendly 44px
+        sm: "h-9 rounded-md px-3 min-h-[36px]",
+        lg: "h-12 rounded-md px-6 min-h-[44px]",
+        icon: "h-11 w-11 min-h-[44px] min-w-[44px]", // Touch-friendly
       },
     },
     defaultVariants: {

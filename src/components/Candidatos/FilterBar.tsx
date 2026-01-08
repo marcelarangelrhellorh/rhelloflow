@@ -18,16 +18,12 @@ interface FilterBarProps {
 }
 
 const statusOptions = [
-  "Banco de Talentos",
-  "Selecionado",
-  "Entrevista rhello",
-  "Enviado ao Cliente",
-  "Entrevista com Cliente",
-  "Feedback Cliente",
-  "Aguardando Retorno",
-  "Aprovado",
-  "Declinou",
-  "Reprovado Cliente"
+  "Triagem",
+  "Assessment | Teste Técnico",
+  "Entrevista",
+  "Shortlist",
+  "Reprovado",
+  "Contratado"
 ];
 
 export function FilterBar({

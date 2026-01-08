@@ -117,21 +117,21 @@ export function CandidateCard({
         </CardContent>
       </Card>;
   }
-  return <Card className="hover:shadow-lg transition-all duration-200 hover:scale-[1.01] bg-white my-0 ml-0 mr-auto px-0">
-      <CardContent className="p-6 mx-0">
+  return <Card className="hover:shadow-lg transition-all duration-200 hover:scale-[1.01] bg-white focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" role="article" aria-label={`Candidato: ${candidate.nome_completo} - ${candidate.nivel} - ${candidate.area} - ${candidate.status}`}>
+      <CardContent className="p-6 mx-0 shadow-lg">
         {/* Header do card */}
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="h-12 w-12 rounded-full bg-[#F9EC3F]/20 flex items-center justify-center">
-              <User className="h-6 w-6 text-[#00141D]" />
+            <div className="h-12 w-12 rounded-full bg-[#F9EC3F]/20 flex items-center justify-center" role="img" aria-label={`Avatar de ${candidate.nome_completo}`}>
+              <User className="h-6 w-6 text-[#00141D]" aria-hidden="true" />
             </div>
             <div>
               <h3 className="text-lg font-bold text-[#00141D]">{candidate.nome_completo}</h3>
               <p className="text-sm text-[#36404A]">{candidate.nivel} – {candidate.area}</p>
             </div>
           </div>
-          <Button variant="ghost" size="icon" className="text-[#36404A] hover:text-[#F9EC3F]">
-            <Star className="h-5 w-5" />
+          <Button variant="ghost" size="icon" className="text-[#36404A] hover:text-[#F9EC3F]" aria-label={`Favoritar ${candidate.nome_completo}`}>
+            <Star className="h-5 w-5" aria-hidden="true" />
           </Button>
         </div>
 
@@ -169,24 +169,21 @@ export function CandidateCard({
         </div>
 
         {/* Tags (exemplo - pode ser dinâmico) */}
-        <div className="flex flex-wrap gap-2 mb-4">
-          <Badge variant="secondary" className="text-xs">#Comunicação</Badge>
-          <Badge variant="secondary" className="text-xs">#Liderança</Badge>
-        </div>
+        
 
         {/* Ações */}
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="flex-1 hover:bg-[#F9EC3F] hover:text-[#00141D] hover:border-[#F9EC3F]" onClick={onViewProfile}>
-            <ExternalLink className="mr-2 h-4 w-4" />
+        <div className="flex gap-2" role="group" aria-label="Ações do candidato">
+          <Button variant="outline" size="sm" className="flex-1 hover:bg-[#F9EC3F] hover:text-[#00141D] hover:border-[#F9EC3F]" onClick={onViewProfile} aria-label={`Ver perfil de ${candidate.nome_completo}`}>
+            <ExternalLink className="mr-2 h-4 w-4" aria-hidden="true" />
             Ver perfil
           </Button>
-          <Button variant="outline" size="sm" className="flex-1 hover:bg-[#F9EC3F] hover:text-[#00141D] hover:border-[#F9EC3F]" onClick={onLinkToJob}>
-            <LinkIcon className="mr-2 h-4 w-4" />
+          <Button variant="outline" size="sm" className="flex-1 hover:bg-[#F9EC3F] hover:text-[#00141D] hover:border-[#F9EC3F]" onClick={onLinkToJob} aria-label={`Vincular ${candidate.nome_completo} a uma vaga`}>
+            <LinkIcon className="mr-2 h-4 w-4" aria-hidden="true" />
             Vincular
           </Button>
-          {candidate.curriculo_link && <Button variant="ghost" size="icon" asChild>
-              <a href={candidate.curriculo_link} target="_blank" rel="noopener noreferrer" title="Baixar currículo">
-                <Download className="h-4 w-4" />
+          {candidate.curriculo_link && <Button variant="ghost" size="icon" asChild aria-label={`Baixar currículo de ${candidate.nome_completo}`}>
+              <a href={candidate.curriculo_link} target="_blank" rel="noopener noreferrer">
+                <Download className="h-4 w-4" aria-hidden="true" />
               </a>
             </Button>}
         </div>

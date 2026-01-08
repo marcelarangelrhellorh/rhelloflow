@@ -82,7 +82,7 @@ export function VagaDetailsDrawer({
                   {vaga.contato_email && <div>
                       <p className="text-sm font-medium text-muted-foreground mb-1">E-mail</p>
                       <p className="text-base">
-                        <a href={`mailto:${vaga.contato_email}`} className="text-primary hover:underline">
+                        <a href={`mailto:${vaga.contato_email}`} className="hover:underline text-[#00151f]">
                           {vaga.contato_email}
                         </a>
                       </p>
@@ -91,7 +91,7 @@ export function VagaDetailsDrawer({
                   {vaga.contato_telefone && <div>
                       <p className="text-sm font-medium text-muted-foreground mb-1">Telefone</p>
                       <p className="text-base">
-                        <a href={`tel:${vaga.contato_telefone}`} className="text-primary hover:underline">
+                        <a href={`tel:${vaga.contato_telefone}`} className="hover:underline text-[#00151f]">
                           {vaga.contato_telefone}
                         </a>
                       </p>

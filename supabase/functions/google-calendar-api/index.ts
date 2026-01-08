@@ -1,19 +1,62 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from "npm:@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Decrypt token
-function decryptToken(encrypted: string): string {
-  return atob(encrypted).split('').reverse().join('');
+const ENCRYPTION_KEY = Deno.env.get("GOOGLE_TOKEN_ENCRYPTION_KEY") || "default-key-for-dev";
+
+// AES-GCM encryption
+async function encryptToken(token: string): Promise<string> {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const key = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(ENCRYPTION_KEY.padEnd(32, "0").slice(0, 32)),
+    { name: "AES-GCM" },
+    false,
+    ["encrypt"]
+  );
+  const encrypted = await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv },
+    key,
+    new TextEncoder().encode(token)
+  );
+  return btoa(JSON.stringify({
+    iv: Array.from(iv),
+    data: Array.from(new Uint8Array(encrypted))
+  }));
 }
 
-// Encrypt token
-function encryptToken(token: string): string {
-  return btoa(token.split('').reverse().join(''));
+// AES-GCM decryption with legacy fallback
+async function decryptToken(encryptedToken: string): Promise<string> {
+  try {
+    const data = JSON.parse(atob(encryptedToken));
+    if (data.iv && data.data) {
+      const key = await crypto.subtle.importKey(
+        "raw",
+        new TextEncoder().encode(ENCRYPTION_KEY.padEnd(32, "0").slice(0, 32)),
+        { name: "AES-GCM" },
+        false,
+        ["decrypt"]
+      );
+      const decrypted = await crypto.subtle.decrypt(
+        { name: "AES-GCM", iv: new Uint8Array(data.iv) },
+        key,
+        new Uint8Array(data.data)
+      );
+      return new TextDecoder().decode(decrypted);
+    }
+    throw new Error("Not AES-GCM format");
+  } catch {
+    // Legacy fallback
+    try {
+      return atob(encryptedToken).split('').reverse().join('');
+    } catch {
+      return encryptedToken;
+    }
+  }
 }
 
 async function refreshAccessToken(refreshToken: string): Promise<{ accessToken: string; expiresAt: string } | null> {
@@ -55,7 +98,6 @@ async function refreshAccessToken(refreshToken: string): Promise<{ accessToken: 
 }
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -71,7 +113,6 @@ serve(async (req) => {
       }
     );
 
-    // Verify user is authenticated
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
     if (userError || !user) {
       console.error('Authentication error:', userError);
@@ -83,7 +124,6 @@ serve(async (req) => {
 
     const { action, ...params } = await req.json();
 
-    // Get user's Google Calendar credentials
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
@@ -150,15 +190,14 @@ serve(async (req) => {
       );
     }
 
-    let accessToken = decryptToken(profile.google_access_token);
-    const refreshToken = profile.google_refresh_token ? decryptToken(profile.google_refresh_token) : null;
+    let accessToken = await decryptToken(profile.google_access_token);
+    const refreshToken = profile.google_refresh_token ? await decryptToken(profile.google_refresh_token) : null;
     const tokenExpiresAt = new Date(profile.google_token_expires_at);
 
     // Check if token needs refresh (5 minutes buffer)
     if (tokenExpiresAt.getTime() - Date.now() < 5 * 60 * 1000) {
       if (!refreshToken) {
         console.error('Token expired and no refresh token available');
-        // Mark as disconnected
         await supabaseAdmin
           .from('profiles')
           .update({ google_calendar_connected: false })
@@ -174,7 +213,6 @@ serve(async (req) => {
       const newTokens = await refreshAccessToken(refreshToken);
 
       if (!newTokens) {
-        // Mark as disconnected
         await supabaseAdmin
           .from('profiles')
           .update({ google_calendar_connected: false })
@@ -186,11 +224,11 @@ serve(async (req) => {
         );
       }
 
-      // Update tokens in database
+      // Store with AES-GCM encryption
       await supabaseAdmin
         .from('profiles')
         .update({
-          google_access_token: encryptToken(newTokens.accessToken),
+          google_access_token: await encryptToken(newTokens.accessToken),
           google_token_expires_at: newTokens.expiresAt,
         })
         .eq('id', user.id);
@@ -232,7 +270,6 @@ serve(async (req) => {
         });
         result = await response.json();
 
-        // Update last sync
         await supabaseAdmin
           .from('profiles')
           .update({ google_calendar_last_sync: new Date().toISOString() })
@@ -249,7 +286,6 @@ serve(async (req) => {
         });
         result = await response.json();
 
-        // Update last sync
         await supabaseAdmin
           .from('profiles')
           .update({ google_calendar_last_sync: new Date().toISOString() })
@@ -270,7 +306,6 @@ serve(async (req) => {
           result = await response.json();
         }
 
-        // Update last sync
         await supabaseAdmin
           .from('profiles')
           .update({ google_calendar_last_sync: new Date().toISOString() })

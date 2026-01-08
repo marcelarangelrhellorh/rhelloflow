@@ -7,6 +7,7 @@ export type Vaga = {
   id: string;
   titulo: string;
   empresa: string;
+  empresa_id: string | null;
   status: string;
   status_slug: string;
   status_order: number;
@@ -35,6 +36,7 @@ export type Vaga = {
   responsabilidades: string | null;
   observacoes: string | null;
   source: string | null;
+  data_abertura: string | null;
 };
 
 export function useVaga(id: string | undefined) {

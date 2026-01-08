@@ -96,13 +96,13 @@ export function WhatsAppHistory({
   if (sends.length === 0) {
     return <Card className="shadow-md border-gray-300">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MessageSquare className="h-5 w-5" />
+          <CardTitle className="flex items-center gap-2 text-base">
+            <MessageSquare className="h-5 w-5 text-[#ffcc00]" />
             Histórico de WhatsApp
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground font-medium text-base">
+          <p className="text-muted-foreground font-medium text-sm">
             Nenhuma mensagem WhatsApp enviada para este candidato.
           </p>
         </CardContent>

@@ -48,14 +48,12 @@ export function HistoryTimeline({
   };
   return <Card className="shadow-md border-gray-300">
       <CardHeader>
-        <CardTitle className="text-lg">Histórico de Processos</CardTitle>
+        <CardTitle className="text-base">Histórico de Processos</CardTitle>
       </CardHeader>
       <CardContent>
         {historico.length === 0 ? <div className="flex flex-col items-center justify-center py-8 text-center">
-            <div className="mb-4 rounded-full bg-muted/20 p-4">
-              <Briefcase className="h-8 w-8 text-muted-foreground" />
-            </div>
-            <p className="text-muted-foreground text-base font-medium">
+            
+            <p className="text-muted-foreground font-medium text-sm">
               Nenhum histórico de processos registrado
             </p>
           </div> : <div className="relative">

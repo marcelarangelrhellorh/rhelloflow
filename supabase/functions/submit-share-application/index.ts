@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
+import { createClient } from "npm:@supabase/supabase-js@2";
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 
 const corsHeaders = {
@@ -11,6 +11,7 @@ const corsHeaders = {
 const candidateSchema = z.object({
   nome_completo: z.string().trim().min(2, 'Nome muito curto').max(255, 'Nome muito longo'),
   email: z.string().trim().email('Email inválido').max(255, 'Email muito longo'),
+  cpf: z.string().trim().min(11, 'CPF inválido').max(14, 'CPF inválido'),
   telefone: z.string().trim().min(8, 'Telefone inválido').max(50, 'Telefone muito longo'),
   cidade: z.string().trim().max(100).nullable().optional().transform(val => val || null),
   estado: z.string().trim().max(2).nullable().optional().transform(val => val || null),
@@ -285,6 +286,7 @@ serve(async (req) => {
     const sanitizedCandidate = {
       nome_completo: sanitizeText(candidate.nome_completo),
       email: sanitizeText(candidate.email),
+      cpf: candidate.cpf.replace(/\D/g, ''),
       telefone: sanitizeText(candidate.telefone),
       cidade: candidate.cidade ? sanitizeText(candidate.cidade) : null,
       estado: candidate.estado ? sanitizeText(candidate.estado) : null,

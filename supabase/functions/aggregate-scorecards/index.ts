@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
+import { createClient } from "npm:@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -47,7 +47,6 @@ serve(async (req) => {
         created_at,
         evaluator_id,
         comments,
-        recommendation,
         candidatos!inner(nome_completo, email),
         scorecard_evaluations(
           criteria_id,
@@ -76,11 +75,15 @@ serve(async (req) => {
 
     for (const scorecard of scorecards) {
       const candidateId = scorecard.candidate_id;
-      
+
+      const candidato = Array.isArray((scorecard as any).candidatos)
+        ? (scorecard as any).candidatos[0]
+        : (scorecard as any).candidatos;
+
       if (!candidatesMap.has(candidateId)) {
         candidatesMap.set(candidateId, {
           candidate_id: candidateId,
-          candidate_name: scorecard.candidatos.nome_completo,
+          candidate_name: candidato?.nome_completo ?? 'Candidato',
           scorecards: [],
           evaluators_count: 0,
           total_score_avg: 0,
@@ -92,14 +95,13 @@ serve(async (req) => {
 
       const candidate = candidatesMap.get(candidateId);
       candidate.scorecards.push(scorecard);
-      
+
       // Adicionar comentários se existirem
       if (scorecard.comments) {
         candidate.comments.push({
           text: scorecard.comments,
           evaluator_id: scorecard.evaluator_id,
           date: scorecard.created_at,
-          recommendation: scorecard.recommendation,
         });
       }
 
@@ -111,10 +113,14 @@ serve(async (req) => {
       // Processar breakdown por critério
       if (scorecard.scorecard_evaluations) {
         for (const evaluation of scorecard.scorecard_evaluations) {
-          const criteriaName = evaluation.scorecard_criteria?.name || 'Unknown';
-          const weight = evaluation.scorecard_criteria?.weight || 10;
-          const scaleType = evaluation.scorecard_criteria?.scale_type || 'rating_1_5';
-          
+          const criteria = Array.isArray((evaluation as any).scorecard_criteria)
+            ? (evaluation as any).scorecard_criteria[0]
+            : (evaluation as any).scorecard_criteria;
+
+          const criteriaName = criteria?.name || 'Unknown';
+          const weight = criteria?.weight || 10;
+          const scaleType = criteria?.scale_type || 'rating_1_5';
+
           // Normalizar score para 0-100
           let normalizedScore = 0;
           if (scaleType === 'rating_1_5') {
@@ -129,10 +135,10 @@ serve(async (req) => {
             candidate.breakdown[criteriaName] = {
               scores: [],
               weight: weight,
-              category: evaluation.scorecard_criteria?.category,
+              category: criteria?.category,
             };
           }
-          
+
           candidate.breakdown[criteriaName].scores.push(normalizedScore);
         }
       }

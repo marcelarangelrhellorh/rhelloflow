@@ -26,6 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { LoadingButton } from "@/components/ui/loading-button";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Task, useCreateTask, useUpdateTask } from "@/hooks/useTasks";
@@ -33,6 +34,7 @@ import { useTaskSync } from "@/hooks/useTaskSync";
 import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useProfilesByRole } from "@/hooks/data/useProfilesByRole";
 import { ListTodo } from "lucide-react";
 
 const taskSchema = z.object({
@@ -42,7 +44,7 @@ const taskSchema = z.object({
   priority: z.enum(['low', 'medium', 'high', 'urgent']),
   due_date: z.string().optional(),
   assignee_id: z.string().min(1, "Responsável é obrigatório"),
-  vaga_id: z.string().min(1, "Vaga é obrigatória"),
+  vaga_id: z.string().optional(),
   sync_enabled: z.boolean().default(true),
 });
 
@@ -75,18 +77,8 @@ export default function TaskModal({ open, onClose, task, defaultVagaId }: TaskMo
     },
   });
 
-  // Load users for assignee select
-  const { data: users } = useQuery({
-    queryKey: ["users-for-tasks"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("id, full_name")
-        .order("full_name");
-      if (error) throw error;
-      return data;
-    },
-  });
+  // Load recrutadores, CS and admins for assignee select
+  const { data: users } = useProfilesByRole(['recrutador', 'cs', 'admin']);
 
   // Load vagas for select
   const { data: vagas } = useQuery({
@@ -138,7 +130,7 @@ export default function TaskModal({ open, onClose, task, defaultVagaId }: TaskMo
       priority: data.priority,
       due_date: data.due_date ? new Date(data.due_date).toISOString() : null,
       assignee_id: data.assignee_id || null,
-      vaga_id: data.vaga_id || null,
+      vaga_id: data.vaga_id === "none" ? null : data.vaga_id || null,
       sync_enabled: data.sync_enabled,
       task_type: 'task' as const, // Tasks go to Google Tasks API
     };
@@ -208,7 +200,7 @@ export default function TaskModal({ open, onClose, task, defaultVagaId }: TaskMo
               )}
             />
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="status"
@@ -257,7 +249,7 @@ export default function TaskModal({ open, onClose, task, defaultVagaId }: TaskMo
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="due_date"
@@ -303,7 +295,7 @@ export default function TaskModal({ open, onClose, task, defaultVagaId }: TaskMo
               name="vaga_id"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Vincular a Vaga *</FormLabel>
+                  <FormLabel>Vincular a Vaga</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value || undefined}>
                     <FormControl>
                       <SelectTrigger>
@@ -311,6 +303,7 @@ export default function TaskModal({ open, onClose, task, defaultVagaId }: TaskMo
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
+                      <SelectItem value="none">Nenhuma vaga</SelectItem>
                       {vagas?.map((vaga) => (
                         <SelectItem key={vaga.id} value={vaga.id}>
                           {vaga.titulo} - {vaga.empresa}
@@ -349,17 +342,18 @@ export default function TaskModal({ open, onClose, task, defaultVagaId }: TaskMo
               </div>
             )}
 
-            <div className="flex justify-end gap-2 pt-4">
-              <Button type="button" variant="outline" onClick={onClose}>
+            <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-4">
+              <Button type="button" variant="outline" onClick={onClose} className="w-full sm:w-auto">
                 Cancelar
               </Button>
-              <Button
+              <LoadingButton
                 type="submit"
-                className="bg-[#ffcd00] hover:bg-[#ffcd00]/90 text-black font-semibold"
-                disabled={createTask.isPending || updateTask.isPending}
+                className="bg-[#ffcd00] hover:bg-[#ffcd00]/90 text-black font-semibold w-full sm:w-auto"
+                loading={createTask.isPending || updateTask.isPending}
+                loadingText={isEditing ? "Salvando..." : "Criando..."}
               >
                 {isEditing ? "Salvar Alterações" : "Criar Tarefa"}
-              </Button>
+              </LoadingButton>
             </div>
           </form>
         </Form>

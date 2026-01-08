@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { logger } from "@/lib/logger";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -7,11 +8,10 @@ import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { CandidateHeader } from "@/components/CandidatoDetalhes/CandidateHeader";
 import { StatsBar } from "@/components/CandidatoDetalhes/StatsBar";
-import { ContactCard } from "@/components/CandidatoDetalhes/ContactCard";
 import { ProfessionalInfoCard } from "@/components/CandidatoDetalhes/ProfessionalInfoCard";
 import { FeedbackList } from "@/components/CandidatoDetalhes/FeedbackList";
 import { SolicitarFeedbackModal } from "@/components/CandidatoDetalhes/SolicitarFeedbackModal";
-import { ScorecardEvaluation } from "@/components/CandidatoDetalhes/ScorecardEvaluation";
+import { CandidateScorecardSection } from "@/components/CandidatoDetalhes/CandidateScorecardSection";
 import { ScorecardHistory } from "@/components/CandidatoDetalhes/ScorecardHistory";
 import { HistoryTimeline } from "@/components/CandidatoDetalhes/HistoryTimeline";
 import { LinkToJobModal } from "@/components/BancoTalentos/LinkToJobModal";
@@ -20,6 +20,8 @@ import { SendWhatsAppModal } from "@/components/CandidatoDetalhes/SendWhatsAppMo
 import { WhatsAppHistory } from "@/components/CandidatoDetalhes/WhatsAppHistory";
 import { CandidateNotesSection } from "@/components/CandidatoDetalhes/CandidateNotesSection";
 import { CandidateMeetingsCard } from "@/components/CandidatoDetalhes/CandidateMeetingsCard";
+import { FitCulturalCard } from "@/components/CandidatoDetalhes/FitCulturalCard";
+import type { FitCulturalData } from "@/constants/fitCultural";
 type Candidato = {
   id: string;
   nome_completo: string;
@@ -45,6 +47,9 @@ type Candidato = {
   criado_em: string;
   origem: string | null;
   source_link_id: string | null;
+  modelo_contratacao: string | null;
+  formato_trabalho: string | null;
+  fit_cultural: FitCulturalData | null;
 };
 type Vaga = {
   id: string;
@@ -97,7 +102,7 @@ export default function CandidatoDetalhes() {
         table: 'candidatos',
         filter: `id=eq.${id}`
       }, payload => {
-        console.log('Candidato atualizado:', payload);
+        logger.log('Candidato atualizado:', payload);
         if (payload.eventType === 'UPDATE') {
           loadCandidato();
         }
@@ -140,7 +145,12 @@ export default function CandidatoDetalhes() {
         error
       } = await supabase.from("candidatos").select("*").eq("id", id).single();
       if (error) throw error;
-      setCandidato(data);
+      // Cast fit_cultural from Json to FitCulturalData
+      const candidatoData: Candidato = {
+        ...data,
+        fit_cultural: data.fit_cultural as unknown as FitCulturalData | null
+      };
+      setCandidato(candidatoData);
       if (data.vaga_relacionada_id) {
         const {
           data: vagaData
@@ -148,7 +158,7 @@ export default function CandidatoDetalhes() {
         setVaga(vagaData);
       }
     } catch (error) {
-      console.error("Erro ao carregar candidato:", error);
+      logger.error("Erro ao carregar candidato:", error);
       toast.error("Erro ao carregar candidato");
     } finally {
       setLoading(false);
@@ -189,7 +199,7 @@ export default function CandidatoDetalhes() {
         totalFeedbacks: ratingData?.length || 0
       };
     } catch (error) {
-      console.error("Erro ao carregar estatísticas:", error);
+      logger.error("Erro ao carregar estatísticas:", error);
       return {
         ultimoFeedback: null,
         totalProcessos: 0,
@@ -210,7 +220,7 @@ export default function CandidatoDetalhes() {
       if (error) throw error;
       setHistorico(data || []);
     } catch (error) {
-      console.error("Erro ao carregar histórico:", error);
+      logger.error("Erro ao carregar histórico:", error);
     }
   };
   const handleStatusChange = async (newStatus: string) => {
@@ -243,8 +253,27 @@ export default function CandidatoDetalhes() {
       await loadCandidato();
       await loadHistorico();
     } catch (error) {
-      console.error("Erro ao atualizar etapa:", error);
+      logger.error("Erro ao atualizar etapa:", error);
       toast.error("Erro ao atualizar etapa do candidato");
+    }
+  };
+
+  const handleVagaChange = async (newVagaId: string | null) => {
+    if (!id || !candidato) return;
+    try {
+      const { error } = await supabase
+        .from("candidatos")
+        .update({
+          vaga_relacionada_id: newVagaId,
+          status: newVagaId ? "Triagem" : "Banco de Talentos"
+        })
+        .eq("id", id);
+      if (error) throw error;
+      toast.success("Vaga relacionada atualizada!");
+      await loadCandidato();
+    } catch (error: any) {
+      logger.error("Erro ao atualizar vaga:", error);
+      toast.error("Erro ao atualizar vaga relacionada");
     }
   };
   const handleDelete = async () => {
@@ -256,7 +285,7 @@ export default function CandidatoDetalhes() {
       toast.success("Candidato excluído com sucesso!");
       navigate("/candidatos");
     } catch (error) {
-      console.error("Erro ao excluir candidato:", error);
+      logger.error("Erro ao excluir candidato:", error);
       toast.error("Erro ao excluir candidato");
     }
   };
@@ -280,14 +309,14 @@ export default function CandidatoDetalhes() {
         </div>
       </div>;
   }
-  return <div className="relative flex min-h-screen w-full font-display" style={{
+  return <div className="min-h-screen w-full font-display" style={{
     backgroundColor: '#FFFBF0'
   }}>
       {/* Breadcrumb / Back Button */}
       <div className="sticky top-0 z-10 backdrop-blur-sm border-b border-gray-200 dark:border-secondary-text-light/20" style={{
       backgroundColor: 'rgba(255, 251, 240, 0.95)'
     }}>
-        <div className="px-4 sm:px-6 lg:px-10 py-2">
+        <div className="px-6 py-2 bg-white">
           <Button variant="ghost" size="sm" onClick={() => navigate("/candidatos")} className="text-secondary-text-light dark:text-secondary-text-dark text-sm">
             <ArrowLeft className="mr-1 h-3 w-3" />
             <span className="hidden sm:inline">Candidatos</span>
@@ -300,31 +329,22 @@ export default function CandidatoDetalhes() {
       {/* Content with Sidebar Layout */}
       <div className="flex flex-1">
       {/* Main Content */}
-      <main className="flex-1 pl-2 pr-4 sm:pl-3 sm:pr-6 lg:pl-4 lg:pr-10 py-8 bg-[6404a0f] bg-[#faec3e]/[0.01]">
-        <div className="max-w-full space-y-6 py-[100px] mx-0 px-0">
+      <main className="flex-1 px-6 py-6 bg-white">
+        <div className="space-y-6">
           {/* Simplified Header with Stats */}
-          <CandidateHeader nome={candidato.nome_completo} status={candidato.status} nivel={candidato.nivel} area={candidato.area} cidade={candidato.cidade} estado={candidato.estado} onEdit={() => navigate(`/candidatos/${id}/editar`)} onDelete={() => setDeleteDialogOpen(true)} onRelocate={() => setRelocateModalOpen(true)} onStatusChange={handleStatusChange} onSendWhatsApp={() => setWhatsappModalOpen(true)} />
+          <CandidateHeader nome={candidato.nome_completo} status={candidato.status} nivel={candidato.nivel} area={candidato.area} cidade={candidato.cidade} estado={candidato.estado} vagaTitulo={vaga?.titulo || null} vagaId={candidato.vaga_relacionada_id} candidatoId={id!} onEdit={() => navigate(`/candidatos/${id}/editar`)} onDelete={() => setDeleteDialogOpen(true)} onRelocate={() => setRelocateModalOpen(true)} onStatusChange={handleStatusChange} onSendWhatsApp={() => setWhatsappModalOpen(true)} onVagaChange={handleVagaChange} />
 
           {/* Compact Stats Row */}
           <StatsBar criadoEm={candidato.criado_em} ultimoFeedback={stats.ultimoFeedback} processosParticipados={stats.totalProcessos} mediaAvaliacao={stats.mediaRating} qtdAvaliacoes={stats.qtdAvaliacoes} totalFeedbacks={stats.totalFeedbacks} />
 
-          {/* Two Column Layout - Top */}
-          <div className="grid gap-6 lg:grid-cols-12">
-            {/* Left Sidebar - Contact & Tags */}
-            <div className="lg:col-span-4 space-y-6 mx-0 py-0 my-0 shadow-none">
-              <ContactCard email={candidato.email} telefone={candidato.telefone} cidade={candidato.cidade} estado={candidato.estado} linkedin={candidato.linkedin} curriculoLink={candidato.curriculo_link} isFromPublicLink={!!candidato.source_link_id} />
+          {/* Tags - Horizontal Full Width */}
+          <CandidateTagsCard candidateId={id!} />
 
-              <CandidateTagsCard candidateId={id!} />
-            </div>
+          {/* Main Info Card - Full Width */}
+          <ProfessionalInfoCard email={candidato.email} telefone={candidato.telefone} cidade={candidato.cidade} estado={candidato.estado} linkedin={candidato.linkedin} curriculoLink={candidato.curriculo_link} isFromPublicLink={!!candidato.source_link_id} pretensaoSalarial={candidato.pretensao_salarial} vagaTitulo={vaga?.titulo || null} vagaId={candidato.vaga_relacionada_id} dataCadastro={candidato.criado_em} nivel={candidato.nivel} area={candidato.area} curriculoUrl={candidato.curriculo_url} portfolioUrl={candidato.portfolio_url} disponibilidadeMudanca={candidato.disponibilidade_mudanca} disponibilidadeStatus={candidato.disponibilidade_status} pontosFortes={candidato.pontos_fortes} pontosDesenvolver={candidato.pontos_desenvolver} parecerFinal={candidato.parecer_final} origem={candidato.origem} candidatoId={id!} experienciaProfissional={(candidato as any).experiencia_profissional || null} idiomas={(candidato as any).idiomas || null} modeloContratacao={candidato.modelo_contratacao} formatoTrabalho={candidato.formato_trabalho} onUpdate={loadCandidato} onVagaClick={() => vaga && navigate(`/vagas/${vaga.id}`)} />
 
-            {/* Main Content - Professional Info */}
-            <div className="lg:col-span-8">
-              <ProfessionalInfoCard pretensaoSalarial={candidato.pretensao_salarial} vagaTitulo={vaga?.titulo || null} vagaId={candidato.vaga_relacionada_id} dataCadastro={candidato.criado_em} nivel={candidato.nivel} area={candidato.area} curriculoUrl={candidato.curriculo_url} portfolioUrl={candidato.portfolio_url} disponibilidadeMudanca={candidato.disponibilidade_mudanca} disponibilidadeStatus={candidato.disponibilidade_status} pontosFortes={candidato.pontos_fortes} pontosDesenvolver={candidato.pontos_desenvolver} parecerFinal={candidato.parecer_final} origem={candidato.origem} candidatoId={id!} experienciaProfissional={(candidato as any).experiencia_profissional || null} idiomas={(candidato as any).idiomas || null} onUpdate={loadCandidato} onVagaClick={() => vaga && navigate(`/vagas/${vaga.id}`)} />
-            </div>
-          </div>
-
-          {/* Candidate Notes Section */}
-          <CandidateNotesSection candidateId={id!} />
+          {/* Fit Cultural Card - only show if data exists */}
+          {candidato.fit_cultural && <FitCulturalCard fitCultural={candidato.fit_cultural} />}
 
           {/* Feedbacks and WhatsApp History - Side by Side */}
           <div className="grid gap-6 lg:grid-cols-2">
@@ -335,7 +355,7 @@ export default function CandidatoDetalhes() {
           {/* Scorecards and Timeline - Horizontal */}
           <div className="grid gap-6 lg:grid-cols-2">
             <div className="space-y-6">
-              <ScorecardEvaluation candidateId={id!} candidateName={candidato.nome_completo} vagaId={candidato.vaga_relacionada_id} />
+              <CandidateScorecardSection candidateId={id!} candidateName={candidato.nome_completo} vagaId={candidato.vaga_relacionada_id} />
 
               <ScorecardHistory candidateId={id!} />
             </div>
@@ -345,10 +365,13 @@ export default function CandidatoDetalhes() {
         </div>
       </main>
 
-        {/* Right Sidebar - Meetings */}
-        <aside className="hidden xl:block w-80 border-l border-gray-200 dark:border-secondary-text-light/20 bg-white dark:bg-background-dark overflow-y-auto">
-          <div className="sticky top-0 p-6">
-            <CandidateMeetingsCard candidateId={id!} candidateName={candidato.nome_completo} />
+        {/* Right Sidebar - Meetings + Notes */}
+        <aside className="hidden lg:block w-96 border-l border-gray-200 dark:border-secondary-text-light/20 bg-white dark:bg-background-dark overflow-y-auto shadow-lg">
+          <div className="sticky top-0 p-4 space-y-4">
+            <CandidateMeetingsCard candidateId={id!} candidateName={candidato.nome_completo} className="shadow-lg border-gray-200" />
+            
+            {/* Notes Section */}
+            <CandidateNotesSection candidateId={id!} candidateName={candidato.nome_completo} />
           </div>
         </aside>
       </div>

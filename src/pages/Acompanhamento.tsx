@@ -202,6 +202,14 @@ export default function Acompanhamento() {
   };
   const selectedVagaData = vagas.find(v => v.id === selectedVaga);
   const vagaCandidatos = candidatos.filter(c => c.vaga_relacionada_id === selectedVaga);
+  
+  // Candidatos aparecem para o cliente apenas quando a VAGA estiver em "Shortlist disponível"
+  const isShortlistAvailable = selectedVagaData?.status === 'shortlist_disponivel' || 
+                                selectedVagaData?.status === 'Shortlist disponível';
+  const shortlistCandidatos = isShortlistAvailable 
+    ? vagaCandidatos.filter(c => c.status === 'Shortlist')
+    : [];
+  
   const vagaHistory = stageHistory.filter(h => h.job_id === selectedVaga);
 
   // Filter vagas based on search and date
@@ -522,36 +530,91 @@ export default function Acompanhamento() {
               </CardContent>
             </Card>
 
-            {/* Candidates List */}
-            {vagaCandidatos.length > 0 && <Card className="shadow-sm max-w-4xl">
-                <CardContent className="p-6">
-                  <h3 className="font-semibold text-lg mb-4">Candidatos ({vagaCandidatos.length})</h3>
-                  <div className="space-y-3">
-                    {vagaCandidatos.map(candidato => {
-                  const isPendingFeedback = hasPendingFeedback(candidato.id);
-                  return <div key={candidato.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleCandidateClick(candidato.id)}>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <p className="text-foreground text-base font-semibold">{candidato.nome_completo}</p>
-                            {isPendingFeedback && <Badge className="bg-orange-500 text-white border-orange-600 text-sm px-3 py-1 font-bold shadow-sm">
-                                <MessageSquare className="h-4 w-4 mr-1.5" />
-                                Feedback Pendente
-                              </Badge>}
-                          </div>
-                          <p className="text-muted-foreground text-base font-medium">
-                            Desde {format(new Date(candidato.criado_em), "dd/MM/yyyy", {
-                          locale: ptBR
-                        })}
-                          </p>
-                        </div>
-                        <Badge variant={getStatusBadgeVariant(candidato.status)} className="text-base font-semibold bg-[#ffcd00]/[0.36]">
-                          {candidato.status}
-                        </Badge>
-                      </div>;
-                })}
+            {/* Candidates Summary - Total count */}
+            <Card className="shadow-sm max-w-4xl">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Users className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground font-medium text-sm">Total de candidatos no processo</p>
+                      <p className="text-2xl font-bold text-foreground">{vagaCandidatos.length}</p>
+                    </div>
                   </div>
-                </CardContent>
-              </Card>}
+                  {shortlistCandidatos.length > 0 && (
+                    <Badge className="bg-amber-500 text-white border-amber-600 text-sm px-3 py-1 font-bold">
+                      {shortlistCandidatos.length} para avaliação
+                    </Badge>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Shortlist Candidates - Accessible list */}
+            <Card className="shadow-sm max-w-4xl">
+              <CardContent className="p-6">
+                <h3 className="font-semibold text-lg mb-4">
+                  Candidatos para Avaliação ({shortlistCandidatos.length})
+                </h3>
+                {shortlistCandidatos.length > 0 ? (
+                  <div className="space-y-3">
+                    {shortlistCandidatos.map(candidato => {
+                      const isPendingFeedback = hasPendingFeedback(candidato.id);
+                      return (
+                        <div 
+                          key={candidato.id} 
+                          className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border cursor-pointer hover:bg-muted/50 transition-colors" 
+                          onClick={() => handleCandidateClick(candidato.id)}
+                        >
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <p className="text-foreground text-base font-semibold">{candidato.nome_completo}</p>
+                              {isPendingFeedback && (
+                                <Badge className="bg-orange-500 text-white border-orange-600 text-sm px-3 py-1 font-bold shadow-sm">
+                                  <MessageSquare className="h-4 w-4 mr-1.5" />
+                                  Feedback Pendente
+                                </Badge>
+                              )}
+                            </div>
+                            <p className="text-muted-foreground text-base font-medium">
+                              Desde {format(new Date(candidato.criado_em), "dd/MM/yyyy", { locale: ptBR })}
+                            </p>
+                          </div>
+                          <Badge variant={getStatusBadgeVariant(candidato.status)} className="text-base font-semibold bg-amber-100 text-amber-800 border-amber-200">
+                            {candidato.status}
+                          </Badge>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <Users className="h-10 w-10 mx-auto mb-3 text-muted-foreground opacity-50" />
+                    {!isShortlistAvailable ? (
+                      <>
+                        <p className="text-muted-foreground font-medium">
+                          A shortlist está sendo preparada pela equipe de recrutamento.
+                        </p>
+                        <p className="text-muted-foreground text-sm mt-1">
+                          Você será notificado quando os candidatos estiverem prontos para avaliação.
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-muted-foreground font-medium">
+                          Ainda não há candidatos em Shortlist para esta vaga.
+                        </p>
+                        <p className="text-muted-foreground text-sm mt-1">
+                          Os candidatos aparecerão aqui quando estiverem prontos para sua avaliação.
+                        </p>
+                      </>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>}
 
         {/* Empty State */}

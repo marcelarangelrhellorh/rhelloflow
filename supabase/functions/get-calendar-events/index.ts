@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from "npm:@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -54,9 +54,11 @@ async function refreshAccessToken(refreshToken: string): Promise<{ access_token:
   const clientSecret = Deno.env.get("GOOGLE_CLIENT_SECRET");
 
   if (!clientId || !clientSecret) {
-    console.error("Missing Google OAuth credentials");
+    console.error("[get-calendar-events] Missing Google OAuth credentials");
     return null;
   }
+
+  console.log("[get-calendar-events] Attempting to refresh access token...");
 
   const response = await fetch("https://oauth2.googleapis.com/token", {
     method: "POST",
@@ -70,10 +72,12 @@ async function refreshAccessToken(refreshToken: string): Promise<{ access_token:
   });
 
   if (!response.ok) {
-    console.error("Failed to refresh token:", await response.text());
+    const errorText = await response.text();
+    console.error("[get-calendar-events] Failed to refresh token. Status:", response.status, "Error:", errorText);
     return null;
   }
 
+  console.log("[get-calendar-events] Token refreshed successfully");
   return response.json();
 }
 
@@ -121,7 +125,7 @@ serve(async (req) => {
     }
 
     if (!profile.google_calendar_connected || !profile.google_access_token) {
-      return new Response(JSON.stringify({ error: "Google Calendar not connected", events: [] }), {
+      return new Response(JSON.stringify({ error: "Google Calendar not connected", events: [], needsReconnect: false }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -132,8 +136,26 @@ serve(async (req) => {
     // Check if token is expired and refresh if needed
     const expiresAt = profile.google_token_expires_at ? new Date(profile.google_token_expires_at) : null;
     if (expiresAt && expiresAt < new Date()) {
+      console.log("[get-calendar-events] Token expired, attempting refresh...");
+      
       if (!profile.google_refresh_token) {
-        return new Response(JSON.stringify({ error: "Token expired and no refresh token", events: [] }), {
+        console.error("[get-calendar-events] No refresh token available - forcing reconnect");
+        // Force disconnect to allow clean reconnection
+        await supabase
+          .from("profiles")
+          .update({
+            google_calendar_connected: false,
+            google_access_token: null,
+            google_refresh_token: null,
+            google_token_expires_at: null,
+          })
+          .eq("id", user.id);
+          
+        return new Response(JSON.stringify({ 
+          error: "Token expired and no refresh token. Please reconnect.", 
+          events: [], 
+          needsReconnect: true 
+        }), {
           status: 200,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
@@ -143,7 +165,23 @@ serve(async (req) => {
       const newTokens = await refreshAccessToken(refreshToken);
 
       if (!newTokens) {
-        return new Response(JSON.stringify({ error: "Failed to refresh token", events: [] }), {
+        console.error("[get-calendar-events] Token refresh failed - forcing reconnect");
+        // Force disconnect to allow clean reconnection
+        await supabase
+          .from("profiles")
+          .update({
+            google_calendar_connected: false,
+            google_access_token: null,
+            google_refresh_token: null,
+            google_token_expires_at: null,
+          })
+          .eq("id", user.id);
+          
+        return new Response(JSON.stringify({ 
+          error: "Failed to refresh token. Please reconnect.", 
+          events: [], 
+          needsReconnect: true 
+        }), {
           status: 200,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
@@ -160,6 +198,8 @@ serve(async (req) => {
           google_token_expires_at: newExpiresAt,
         })
         .eq("id", user.id);
+        
+      console.log("[get-calendar-events] Token successfully refreshed and saved");
     }
 
     // Parse request body for date range
@@ -167,30 +207,77 @@ serve(async (req) => {
     const timeMin = body.timeMin || new Date().toISOString();
     const timeMax = body.timeMax || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(); // 30 days ahead
 
-    // Fetch events from Google Calendar
-    const calendarUrl = new URL("https://www.googleapis.com/calendar/v3/calendars/primary/events");
-    calendarUrl.searchParams.set("timeMin", timeMin);
-    calendarUrl.searchParams.set("timeMax", timeMax);
-    calendarUrl.searchParams.set("singleEvents", "true");
-    calendarUrl.searchParams.set("orderBy", "startTime");
-    calendarUrl.searchParams.set("maxResults", "100");
+    console.log("[get-calendar-events] Fetching events from", timeMin, "to", timeMax);
 
-    const calendarResponse = await fetch(calendarUrl.toString(), {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
+    // Fetch events from Google Calendar with pagination
+    const MAX_RESULTS_PER_PAGE = 2500; // Maximum allowed by Google API
+    const MAX_PAGES = 4; // Safety limit: 4 pages × 2500 = 10,000 events max
+    let allEvents: any[] = [];
+    let pageToken: string | null = null;
+    let pageCount = 0;
 
-    if (!calendarResponse.ok) {
-      const errorText = await calendarResponse.text();
-      console.error("Google Calendar API error:", errorText);
-      return new Response(JSON.stringify({ error: "Failed to fetch calendar events", events: [] }), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+    do {
+      const calendarUrl = new URL("https://www.googleapis.com/calendar/v3/calendars/primary/events");
+      calendarUrl.searchParams.set("timeMin", timeMin);
+      calendarUrl.searchParams.set("timeMax", timeMax);
+      calendarUrl.searchParams.set("singleEvents", "true");
+      calendarUrl.searchParams.set("orderBy", "startTime");
+      calendarUrl.searchParams.set("maxResults", MAX_RESULTS_PER_PAGE.toString());
+      
+      if (pageToken) {
+        calendarUrl.searchParams.set("pageToken", pageToken);
+      }
+
+      const calendarResponse = await fetch(calendarUrl.toString(), {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
       });
-    }
 
-    const calendarData = await calendarResponse.json();
+      if (!calendarResponse.ok) {
+        const errorText = await calendarResponse.text();
+        console.error("[get-calendar-events] Google Calendar API error:", errorText);
+        
+        // Check if it's an auth error (401) - needs reconnection
+        if (calendarResponse.status === 401) {
+          console.error("[get-calendar-events] 401 Unauthorized - forcing reconnect");
+          // Force disconnect to allow clean reconnection
+          await supabase
+            .from("profiles")
+            .update({
+              google_calendar_connected: false,
+              google_access_token: null,
+              google_refresh_token: null,
+              google_token_expires_at: null,
+            })
+            .eq("id", user.id);
+            
+          return new Response(JSON.stringify({ 
+            error: "Authentication failed. Please reconnect Google Calendar.", 
+            events: [], 
+            needsReconnect: true 
+          }), {
+            status: 200,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        
+        return new Response(JSON.stringify({ error: "Failed to fetch calendar events", events: [], needsReconnect: false }), {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const calendarData = await calendarResponse.json();
+      const pageEvents = calendarData.items || [];
+      allEvents = [...allEvents, ...pageEvents];
+      pageToken = calendarData.nextPageToken || null;
+      pageCount++;
+      
+      console.log(`[get-calendar-events] Page ${pageCount}: ${pageEvents.length} events fetched`);
+    } while (pageToken && pageCount < MAX_PAGES);
+
+    console.log(`[get-calendar-events] Total events fetched: ${allEvents.length} (${pageCount} page(s))`);
     
     // Get synced task google_event_ids to identify which events came from our system
     const { data: syncedTasks } = await supabase
@@ -202,7 +289,7 @@ serve(async (req) => {
     const syncedEventIds = new Set(syncedTasks?.map(t => t.google_event_id) || []);
 
     // Transform events to a standard format - include ALL events now
-    const events = (calendarData.items || [])
+    const events = allEvents
       .map((event: any) => ({
         id: event.id,
         title: event.summary || "Sem título",

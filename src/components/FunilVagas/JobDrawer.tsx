@@ -57,7 +57,7 @@ export function JobDrawer({
   if (!job) {
     return null;
   }
-  const businessDays = getBusinessDaysFromNow(job.criado_em);
+  const businessDays = getBusinessDaysFromNow(job.data_abertura || job.criado_em);
   const isOutOfSLA = businessDays > 30;
   return <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-[480px] sm:max-w-[480px] overflow-y-auto">

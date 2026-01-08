@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { Menu, X, FileText, TrendingUp, MessageSquare } from "lucide-react";
+import { Menu, X, FileText, TrendingUp, MessageSquare, GitCompare } from "lucide-react";
 import { Button } from "./ui/button";
 import { NotificationBell } from "./NotificationBell";
 import { UserMenu } from "./UserMenu";
@@ -64,13 +64,17 @@ export function AppNavbar() {
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-56 bg-background z-[100]">
-              <DropdownMenuItem onClick={() => navigate("/scorecards")} className="cursor-pointer">
+              <DropdownMenuItem onClick={() => navigate("/avaliacoes")} className="cursor-pointer">
                 <FileText className="mr-2 h-5 w-5 text-[#ffcd00]" />
-                <span className="font-bold text-sm sm:text-base">Scorecards</span>
+                <span className="font-bold text-sm sm:text-base">Avaliações</span>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => navigate("/estudo-mercado")} className="cursor-pointer">
                 <TrendingUp className="mr-2 h-5 w-5 text-[#ffcd00]" />
                 <span className="font-bold text-sm sm:text-base">Estudo de Mercado</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/comparador-cargos")} className="cursor-pointer">
+                <GitCompare className="mr-2 h-5 w-5 text-[#ffcd00]" />
+                <span className="font-bold text-sm sm:text-base">Comparador de Cargos</span>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => navigate("/whatsapp-templates")} className="cursor-pointer">
                 <MessageSquare className="mr-2 h-5 w-5 text-[#ffcd00]" />

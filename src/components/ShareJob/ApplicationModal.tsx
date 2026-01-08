@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { X, Upload, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { formatCPF, validateCPF, cleanCPF } from "@/lib/cpfUtils";
 
 interface ApplicationModalProps {
   isOpen: boolean;
@@ -40,6 +41,7 @@ export function ApplicationModal({
   const [formData, setFormData] = useState({
     nome_completo: "",
     email: "",
+    cpf: "",
     telefone: "",
     cidade: "",
     estado: "",
@@ -147,6 +149,16 @@ export function ApplicationModal({
       return;
     }
 
+    // Validar CPF
+    if (!formData.cpf || !validateCPF(formData.cpf)) {
+      toast({
+        title: "CPF obrigatório",
+        description: "Por favor, preencha um CPF válido",
+        variant: "destructive"
+      });
+      return;
+    }
+
     if (!lgpdConsent) {
       toast({
         title: "Consentimento necessário",
@@ -186,6 +198,7 @@ export function ApplicationModal({
       const candidateData = {
         nome_completo: formData.nome_completo.trim(),
         email: formData.email.trim(),
+        cpf: cleanCPF(formData.cpf),
         telefone: formData.telefone.trim(),
         cidade: formData.cidade.trim() || null,
         estado: formData.estado.trim() || null,
@@ -255,7 +268,7 @@ export function ApplicationModal({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm">
-      <div className="fixed inset-y-0 right-0 w-full max-w-2xl bg-[#FFFDF6] shadow-2xl overflow-hidden">
+      <div className="fixed inset-y-0 right-0 w-full max-w-2xl bg-white shadow-2xl overflow-hidden">
         <div className="h-full flex flex-col">
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-[#36404A]/10">
@@ -314,6 +327,23 @@ export function ApplicationModal({
                   className="border-[#36404A]/20 focus:border-[#FFCD00] focus:ring-[#FFCD00]"
                   value={formData.telefone}
                   onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="cpf" className="text-[#00141D] font-medium">
+                  CPF <span className="text-red-600">*</span>
+                </Label>
+                <Input
+                  id="cpf"
+                  type="text"
+                  inputMode="numeric"
+                  required
+                  placeholder="000.000.000-00"
+                  className="border-[#36404A]/20 focus:border-[#FFCD00] focus:ring-[#FFCD00]"
+                  value={formData.cpf}
+                  onChange={(e) => setFormData({ ...formData, cpf: formatCPF(e.target.value) })}
+                  maxLength={14}
                 />
               </div>
 

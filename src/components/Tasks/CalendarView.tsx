@@ -1,14 +1,28 @@
 import { useMemo } from 'react';
-import { Calendar, momentLocalizer, Views } from 'react-big-calendar';
-import moment from 'moment';
-import 'moment/locale/pt-br';
+import { Calendar, dateFnsLocalizer, Views } from 'react-big-calendar';
+import { format, parse, startOfWeek, getDay, parseISO, isSameDay, setHours, setMinutes } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { Task } from '@/hooks/useTasks';
 import { Video, Clock } from 'lucide-react';
+import { logger } from '@/lib/logger';
 
-// Set moment locale to Portuguese
-moment.locale('pt-br');
-const localizer = momentLocalizer(moment);
+// Configure date-fns localizer (replaces moment - saves ~232KB)
+const locales = { 'pt-BR': ptBR };
+const localizer = dateFnsLocalizer({
+  format,
+  parse,
+  startOfWeek: () => startOfWeek(new Date(), { locale: ptBR }),
+  getDay,
+  locales,
+});
+
+// Helper function to parse date and time
+const parseDateTime = (dateStr: string, timeStr: string): Date => {
+  const [hours, minutes] = timeStr.split(':').map(Number);
+  const date = parseISO(dateStr);
+  return setMinutes(setHours(date, hours || 0), minutes || 0);
+};
 interface CalendarEvent {
   id: string;
   title: string;
@@ -16,17 +30,20 @@ interface CalendarEvent {
   end: Date;
   resource?: Task;
   isExternal?: boolean;
+  allDay?: boolean;
   description?: string;
   meetLink?: string;
 }
 
 interface CalendarViewProps {
   meetings: Task[];
+  tasks?: Task[];
   externalEvents?: Array<{
     id: string;
     title: string;
     start: string;
     end: string;
+    allDay?: boolean;
     description?: string;
     meetLink?: string;
     isFromSystem: boolean;
@@ -40,8 +57,8 @@ const EventComponent = ({
 }: {
   event: CalendarEvent;
 }) => {
-  const startTime = moment(event.start).format('HH:mm');
-  const endTime = moment(event.end).format('HH:mm');
+  const startTime = format(event.start, 'HH:mm');
+  const endTime = format(event.end, 'HH:mm');
   return <div className="flex flex-col gap-0.5 p-1 h-full overflow-hidden">
       <div className="flex items-center gap-1.5">
         <Video className="h-3.5 w-3.5 flex-shrink-0 text-white" />
@@ -117,6 +134,7 @@ const CustomToolbar = ({
 };
 export default function CalendarView({
   meetings,
+  tasks = [],
   externalEvents = [],
   onEventClick
 }: CalendarViewProps) {
@@ -129,8 +147,8 @@ export default function CalendarView({
         const dateStr = meeting.due_date!;
         const startTime = meeting.start_time || '09:00';
         const endTime = meeting.end_time || '10:00';
-        const start = moment(`${dateStr} ${startTime}`, 'YYYY-MM-DD HH:mm').toDate();
-        const end = moment(`${dateStr} ${endTime}`, 'YYYY-MM-DD HH:mm').toDate();
+        const start = parseDateTime(dateStr, startTime);
+        const end = parseDateTime(dateStr, endTime);
         return {
           id: meeting.id,
           title: meeting.title,
@@ -138,6 +156,23 @@ export default function CalendarView({
           end,
           resource: meeting,
           isExternal: false,
+          allDay: false,
+        };
+      });
+
+    // Tasks with due_date (shown as all-day events)
+    const taskEvents = tasks
+      .filter(task => task.due_date)
+      .map(task => {
+        const date = parseISO(task.due_date!);
+        return {
+          id: task.id,
+          title: task.title,
+          start: date,
+          end: date,
+          resource: task,
+          isExternal: false,
+          allDay: true,
         };
       });
 
@@ -145,21 +180,49 @@ export default function CalendarView({
     const calendarEvents = externalEvents
       .filter(event => !event.isFromSystem) // Only non-system events
       .map(event => {
-        const start = moment(event.start).toDate();
-        const end = moment(event.end).toDate();
+        // Detect all-day events: either explicit flag or date string without time component
+        const isAllDay = event.allDay || (!event.start.includes('T'));
+        
+        let start: Date;
+        let end: Date;
+        
+        if (isAllDay) {
+          // For all-day events, parse as local date (not UTC)
+          start = parseISO(event.start);
+          end = parseISO(event.end);
+        } else {
+          start = parseISO(event.start);
+          end = parseISO(event.end);
+        }
+        
         return {
           id: event.id,
           title: event.title,
           start,
           end,
           isExternal: true,
+          allDay: isAllDay,
           description: event.description,
           meetLink: event.meetLink,
         };
       });
 
-    return [...systemEvents, ...calendarEvents];
-  }, [meetings, externalEvents]);
+    // Debug logs
+    logger.log('[CalendarView] Processed events:', {
+      systemCount: systemEvents.length,
+      taskCount: taskEvents.length,
+      externalCount: calendarEvents.length,
+      totalEvents: systemEvents.length + taskEvents.length + calendarEvents.length,
+      externalSample: calendarEvents.slice(0, 3).map(e => ({
+        title: e.title,
+        start: e.start.toISOString(),
+        end: e.end.toISOString(),
+        allDay: e.allDay
+      }))
+    });
+
+    return [...systemEvents, ...taskEvents, ...calendarEvents];
+  }, [meetings, tasks, externalEvents]);
   const handleSelectEvent = (event: CalendarEvent) => {
     if (event.isExternal) {
       onEventClick(null, {
@@ -215,7 +278,7 @@ export default function CalendarView({
 
   // Day cell styling
   const dayPropGetter = (date: Date) => {
-    const isToday = moment(date).isSame(moment(), 'day');
+    const isToday = isSameDay(date, new Date());
     return {
       style: {
         backgroundColor: isToday ? 'hsl(var(--primary) / 0.05)' : undefined
@@ -492,27 +555,17 @@ export default function CalendarView({
     }} messages={messages} views={[Views.MONTH, Views.WEEK, Views.DAY, Views.AGENDA]} defaultView={Views.MONTH} onSelectEvent={handleSelectEvent} eventPropGetter={eventStyleGetter} dayPropGetter={dayPropGetter} components={{
       event: EventComponent,
       toolbar: CustomToolbar
-    }} popup selectable={false} step={30} timeslots={2} min={moment().set({
-      hour: 7,
-      minute: 0
-    }).toDate()} max={moment().set({
-      hour: 22,
-      minute: 0
-    }).toDate()} formats={{
-      dayFormat: 'ddd DD/MM',
-      weekdayFormat: 'ddd',
-      monthHeaderFormat: 'MMMM [de] YYYY',
-      dayHeaderFormat: 'dddd, DD [de] MMMM',
-      dayRangeHeaderFormat: ({
-        start,
-        end
-      }) => `${moment(start).format('DD MMM')} - ${moment(end).format('DD MMM YYYY')}`,
-      agendaDateFormat: 'ddd, DD/MM',
-      agendaTimeFormat: 'HH:mm',
-      agendaTimeRangeFormat: ({
-        start,
-        end
-      }) => `${moment(start).format('HH:mm')} - ${moment(end).format('HH:mm')}`
+    }} popup selectable={false} step={30} timeslots={2} min={setMinutes(setHours(new Date(), 7), 0)} max={setMinutes(setHours(new Date(), 22), 0)} formats={{
+      dayFormat: (date: Date) => format(date, 'EEE dd/MM', { locale: ptBR }),
+      weekdayFormat: (date: Date) => format(date, 'EEE', { locale: ptBR }),
+      monthHeaderFormat: (date: Date) => format(date, "MMMM 'de' yyyy", { locale: ptBR }),
+      dayHeaderFormat: (date: Date) => format(date, "EEEE, dd 'de' MMMM", { locale: ptBR }),
+      dayRangeHeaderFormat: ({ start, end }: { start: Date; end: Date }) => 
+        `${format(start, 'dd MMM', { locale: ptBR })} - ${format(end, 'dd MMM yyyy', { locale: ptBR })}`,
+      agendaDateFormat: (date: Date) => format(date, 'EEE, dd/MM', { locale: ptBR }),
+      agendaTimeFormat: (date: Date) => format(date, 'HH:mm', { locale: ptBR }),
+      agendaTimeRangeFormat: ({ start, end }: { start: Date; end: Date }) => 
+        `${format(start, 'HH:mm', { locale: ptBR })} - ${format(end, 'HH:mm', { locale: ptBR })}`
     }} />
     </div>;
 }

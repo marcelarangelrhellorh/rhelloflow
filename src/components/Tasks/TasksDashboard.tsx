@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { AlertCircle, AlertTriangle, Flame } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { AlertCircle, AlertTriangle, Flame, Bell } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { useOverdueTasks, usePriorityTasks, Task } from "@/hooks/useTasks";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -28,13 +29,6 @@ export default function TasksDashboard({
     data: urgentTasks,
     isLoading: loadingUrgent
   } = usePriorityTasks("urgent", isAdmin);
-  if (loadingOverdue || loadingHigh || loadingUrgent) {
-    return <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <Skeleton className="h-24" />
-        <Skeleton className="h-24" />
-        <Skeleton className="h-24" />
-      </div>;
-  }
   const overdueCount = overdueTasks?.length || 0;
   const highCount = highTasks?.length || 0;
   const urgentCount = urgentTasks?.length || 0;
@@ -67,62 +61,76 @@ export default function TasksDashboard({
     }
   };
   const drawerData = getDrawerData();
+  if (loadingOverdue || loadingHigh || loadingUrgent) {
+    return <Card className="w-full shadow-sm">
+        <CardHeader className="p-3 pb-2">
+          <Skeleton className="h-5 w-32" />
+        </CardHeader>
+        <CardContent className="p-3 pt-0 space-y-2">
+          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-12 w-full" />
+        </CardContent>
+      </Card>;
+  }
+  const alertItems = [{
+    key: "overdue" as DrawerType,
+    label: "Atrasadas",
+    count: overdueCount,
+    icon: AlertCircle,
+    bgColor: "bg-red-50",
+    iconBg: "bg-red-100",
+    iconColor: "text-red-600",
+    textColor: "text-red-600",
+    borderColor: "border-red-200"
+  }, {
+    key: "high" as DrawerType,
+    label: "Alta Prioridade",
+    count: highCount,
+    icon: AlertTriangle,
+    bgColor: "bg-orange-50",
+    iconBg: "bg-orange-100",
+    iconColor: "text-orange-600",
+    textColor: "text-orange-600",
+    borderColor: "border-orange-200"
+  }, {
+    key: "urgent" as DrawerType,
+    label: "Urgente",
+    count: urgentCount,
+    icon: Flame,
+    bgColor: "bg-red-100/60",
+    iconBg: "bg-red-200",
+    iconColor: "text-red-700",
+    textColor: "text-red-700",
+    borderColor: "border-red-300"
+  }];
   return <>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 max-w-4xl">
-        <Card className="border-red-200 bg-red-50/50 cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveDrawer("overdue")}>
-          <CardContent className="p-5 shadow-lg">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <p className="text-muted-foreground text-sm font-semibold">
-                  Tarefas Atrasadas {isAdmin && "(Geral)"}
-                </p>
-                <h3 className="text-3xl font-bold text-red-600 mt-2">
-                  {overdueCount}
-                </h3>
+      <Card className="w-full shadow-lg">
+        <CardHeader className="p-3 pb-2">
+          <CardTitle className="text-sm font-semibold flex items-center gap-2 text-[#00141d]">
+            <Bell className="h-4 w-4 text-[#ffcd00]" />
+            Painel de Alertas
+            {isAdmin && <span className="text-xs font-normal text-muted-foreground">(Geral)</span>}
+          </CardTitle>
+        </CardHeader>
+        
+        <Separator />
+        
+        <CardContent className="p-2 space-y-2">
+          {alertItems.map(item => <div key={item.key} onClick={() => setActiveDrawer(item.key)} className={`flex items-center justify-between p-2.5 rounded-md border cursor-pointer 
+                hover:shadow-sm transition-all ${item.bgColor} ${item.borderColor}`}>
+              <div className="flex items-center gap-2.5">
+                <div className={`h-8 w-8 rounded-full ${item.iconBg} flex items-center justify-center`}>
+                  <item.icon className={`h-4 w-4 ${item.iconColor}`} />
+                </div>
+                <span className="text-sm font-medium text-[#00141d]">{item.label}</span>
               </div>
-              <div className="h-12 w-12 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
-                <AlertCircle className="h-6 w-6 text-red-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-orange-200 bg-orange-50/50 cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveDrawer("high")}>
-          <CardContent className="p-5 shadow-lg">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <p className="text-muted-foreground text-sm font-semibold">
-                  Prioridade Alta {isAdmin && "(Geral)"}
-                </p>
-                <h3 className="text-3xl font-bold text-orange-600 mt-2">
-                  {highCount}
-                </h3>
-              </div>
-              <div className="h-12 w-12 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
-                <AlertTriangle className="h-6 w-6 text-orange-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-red-300 bg-red-100/50 cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveDrawer("urgent")}>
-          <CardContent className="p-5 shadow-lg">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <p className="text-muted-foreground text-sm font-semibold">
-                  Prioridade Urgente {isAdmin && "(Geral)"}
-                </p>
-                <h3 className="text-3xl font-bold text-red-700 mt-2">
-                  {urgentCount}
-                </h3>
-              </div>
-              <div className="h-12 w-12 rounded-full bg-red-200 flex items-center justify-center flex-shrink-0">
-                <Flame className="h-6 w-6 text-red-700" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+              <span className={`text-xl font-bold ${item.textColor}`}>
+                {item.count}
+              </span>
+            </div>)}
+        </CardContent>
+      </Card>
 
       <TaskListDrawer open={activeDrawer !== null} onClose={() => setActiveDrawer(null)} title={drawerData.title} tasks={drawerData.tasks} onTaskClick={handleTaskClick} />
     </>;

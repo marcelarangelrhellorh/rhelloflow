@@ -11,6 +11,7 @@ import { BarChart3, Sparkles, Download, User, Calendar, Star } from "lucide-reac
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+import { logger } from "@/lib/logger";
 
 interface CompareCandidatesModalProps {
   open: boolean;
@@ -31,32 +32,17 @@ type CandidateData = {
     average: number;
   }>;
   lastEvaluationDate: string;
-  recommendations: string[];
   evaluators: string[];
   scorecards: Array<{
     id: string;
     templateName: string;
     evaluator: string;
     score: number;
-    recommendation: string;
     comments: string | null;
     date: string;
   }>;
 };
 
-const recommendationLabels: Record<string, string> = {
-  strong_yes: "Fortemente Recomendado",
-  yes: "Recomendado",
-  maybe: "Talvez",
-  no: "Não Recomendado",
-};
-
-const recommendationColors: Record<string, string> = {
-  strong_yes: "bg-green-600 text-white",
-  yes: "bg-green-400 text-white",
-  maybe: "bg-yellow-500 text-white",
-  no: "bg-red-500 text-white",
-};
 
 export function CompareCandidatesModal({
   open,
@@ -76,16 +62,16 @@ export function CompareCandidatesModal({
   const loadData = async () => {
     try {
       setLoading(true);
-      console.log("Loading comparison data for vaga:", vagaId);
+      logger.log("Loading comparison data for vaga:", vagaId);
       
       const { data, error } = await supabase.functions.invoke("compare-candidates", {
         body: { vagaId, anonymize },
       });
 
-      console.log("Response from compare-candidates:", { data, error });
+      logger.log("Response from compare-candidates:", { data, error });
 
       if (error) {
-        console.error("Edge function error:", error);
+        logger.error("Edge function error:", error);
         throw error;
       }
 
@@ -96,7 +82,7 @@ export function CompareCandidatesModal({
       setCandidates(data.candidates || []);
       setStats(data.stats || null);
       
-      console.log(`Found ${data.candidates?.length || 0} candidates with scorecards`);
+      logger.log(`Found ${data.candidates?.length || 0} candidates with scorecards`);
       
       if (!data.candidates || data.candidates.length === 0) {
         toast({
@@ -105,7 +91,7 @@ export function CompareCandidatesModal({
         });
       }
     } catch (error: any) {
-      console.error("Error loading comparison data:", error);
+      logger.error("Error loading comparison data:", error);
       toast({
         title: "Erro ao carregar dados",
         description: error.message || "Erro desconhecido ao carregar dados",
@@ -146,7 +132,7 @@ export function CompareCandidatesModal({
         description: "Resumo executivo gerado com sucesso pela IA.",
       });
     } catch (error: any) {
-      console.error("Error generating AI summary:", error);
+      logger.error("Error generating AI summary:", error);
       toast({
         title: "Erro ao gerar resumo",
         description: error.message,
@@ -335,7 +321,6 @@ export function CompareCandidatesModal({
                         <th className="p-4 text-left font-semibold">Top Critérios</th>
                         <th className="p-4 text-center font-semibold">Avaliações</th>
                         <th className="p-4 text-center font-semibold">Última Avaliação</th>
-                        <th className="p-4 text-left font-semibold">Recomendações</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -401,21 +386,6 @@ export function CompareCandidatesModal({
                               {format(new Date(candidate.lastEvaluationDate), "dd/MM/yyyy", {
                                 locale: ptBR,
                               })}
-                            </div>
-                          </td>
-                          <td className="p-4">
-                            <div className="flex flex-wrap gap-1">
-                              {[...new Set(candidate.recommendations)].map((rec, i) => (
-                                <Badge
-                                  key={i}
-                                  className={cn(
-                                    "text-xs",
-                                    recommendationColors[rec] || "bg-gray-500 text-white"
-                                  )}
-                                >
-                                  {recommendationLabels[rec] || rec}
-                                </Badge>
-                              ))}
                             </div>
                           </td>
                         </tr>

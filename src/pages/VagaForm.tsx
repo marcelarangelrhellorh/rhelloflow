@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,14 +10,21 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeft, Save } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ArrowLeft, Save, CalendarIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Constants } from "@/integrations/supabase/types";
 import { MultiSelect, MultiSelectOption } from "@/components/ui/multi-select";
 import { parseCurrency, applyCurrencyMask } from "@/lib/salaryUtils";
 import { useUsers } from "@/hooks/useUsers";
 import { TagPicker } from "@/components/TagPicker";
-
+import { LoadingButton } from "@/components/ui/loading-button";
+import { handleApiError } from "@/lib/errorHandler";
+import { useCacheInvalidation } from "@/hooks/data/useCacheInvalidation";
+import { VAGA_STATUS } from "@/constants/vagaStatus";
+import { JOB_STAGES, mapLegacyStatusToSlug, getStageBySlug } from "@/lib/jobStages";
 const DIAS_SEMANA = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"];
 
 const BENEFICIOS_OPTIONS: MultiSelectOption[] = [
@@ -42,21 +51,36 @@ export default function VagaForm() {
   const { users: csUsers } = useUsers('cs');
   const { users: clientUsers } = useUsers('client');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const { invalidateVagas } = useCacheInvalidation();
+  const [empresas, setEmpresas] = useState<Array<{id: string, nome: string}>>([]);
+
+  // Carregar empresas cadastradas
+  useEffect(() => {
+    const loadEmpresas = async () => {
+      const { data } = await supabase
+        .from("empresas")
+        .select("id, nome")
+        .order("nome");
+      if (data) setEmpresas(data);
+    };
+    loadEmpresas();
+  }, []);
   
   const [formData, setFormData] = useState({
     titulo: "",
     empresa: "",
+    empresa_id: "",
     confidencial: false,
     motivo_confidencial: "",
     contato_nome: "",
     contato_email: "",
     contato_telefone: "",
-    recrutador_id: "",
+    recrutador_ids: [] as string[], // Suporte para múltiplos recrutadores
     cs_id: "",
     cliente_id: "",
     complexidade: "",
     prioridade: "",
-    status: "A iniciar",
+    status: VAGA_STATUS.DISCOVERY as string,
     salario_min: "",
     salario_max: "",
     salario_modalidade: "FAIXA" as "FAIXA" | "A_COMBINAR",
@@ -71,6 +95,7 @@ export default function VagaForm() {
     requisitos_desejaveis: "",
     responsabilidades: "",
     observacoes: "",
+    data_abertura: "",
   });
 
   useEffect(() => {
@@ -92,17 +117,18 @@ export default function VagaForm() {
         setFormData({
           titulo: data.titulo || "",
           empresa: data.empresa || "",
+          empresa_id: data.empresa_id || "",
           confidencial: data.confidencial || false,
           motivo_confidencial: data.motivo_confidencial || "",
           contato_nome: data.contato_nome || "",
           contato_email: data.contato_email || "",
           contato_telefone: data.contato_telefone || "",
-          recrutador_id: data.recrutador_id || "",
+          recrutador_ids: [], // Será preenchido abaixo
           cs_id: data.cs_id || "",
           cliente_id: data.cliente_id || "",
           complexidade: data.complexidade || "",
           prioridade: data.prioridade || "",
-          status: data.status || "A iniciar",
+          status: data.status || VAGA_STATUS.DISCOVERY,
           salario_min: data.salario_min?.toString() || "",
           salario_max: data.salario_max?.toString() || "",
           salario_modalidade: (data.salario_modalidade as any) || "FAIXA",
@@ -117,7 +143,22 @@ export default function VagaForm() {
           requisitos_desejaveis: data.requisitos_desejaveis || "",
           responsabilidades: data.responsabilidades || "",
           observacoes: data.observacoes || "",
+          data_abertura: data.data_abertura || "",
         });
+
+        // Carregar recrutadores da vaga
+        const { data: recrutadoresData } = await supabase
+          .from("vaga_recrutadores")
+          .select("user_id, is_primary")
+          .eq("vaga_id", id)
+          .order("is_primary", { ascending: false }); // Principal primeiro
+
+        if (recrutadoresData && recrutadoresData.length > 0) {
+          setFormData(prev => ({
+            ...prev,
+            recrutador_ids: recrutadoresData.map(r => r.user_id)
+          }));
+        }
 
         // Carregar tags da vaga
         const { data: vacancyTagsData } = await (supabase as any)
@@ -158,20 +199,27 @@ export default function VagaForm() {
         }
       }
 
+      // Calcular status_slug e status_order baseado no status selecionado
+      const statusSlug = mapLegacyStatusToSlug(formData.status);
+      const stage = getStageBySlug(statusSlug);
+
       const dataToSave = {
         titulo: formData.titulo,
         empresa: formData.empresa,
+        empresa_id: formData.empresa_id || null,
         confidencial: formData.confidencial,
         motivo_confidencial: formData.confidencial ? formData.motivo_confidencial : null,
         contato_nome: formData.contato_nome || null,
         contato_email: formData.contato_email || null,
         contato_telefone: formData.contato_telefone || null,
-        recrutador_id: formData.recrutador_id || null,
+        recrutador_id: formData.recrutador_ids[0] || null, // Primeiro é o principal (compatibilidade)
         cs_id: formData.cs_id || null,
         cliente_id: formData.cliente_id || null,
         complexidade: (formData.complexidade || null) as any,
         prioridade: (formData.prioridade || null) as any,
         status: formData.status as any,
+        status_slug: statusSlug,
+        status_order: stage?.order ?? 1,
         salario_min: formData.salario_modalidade === "A_COMBINAR" ? null : parseCurrency(formData.salario_min),
         salario_max: formData.salario_modalidade === "A_COMBINAR" ? null : parseCurrency(formData.salario_max),
         salario_modalidade: formData.salario_modalidade,
@@ -186,6 +234,7 @@ export default function VagaForm() {
         requisitos_desejaveis: formData.requisitos_desejaveis || null,
         responsabilidades: formData.responsabilidades || null,
         observacoes: formData.observacoes || null,
+        data_abertura: formData.data_abertura || new Date().toISOString().split('T')[0],
       };
 
       if (id) {
@@ -195,9 +244,13 @@ export default function VagaForm() {
           .eq("id", id);
         if (error) throw error;
 
+        // Atualizar recrutadores da vaga
+        await saveRecrutadores(id);
+
         // Atualizar tags da vaga
         await saveTags(id);
 
+        await invalidateVagas();
         toast.success("Vaga atualizada com sucesso!");
       } else {
         const { data: newVaga, error } = await supabase
@@ -208,19 +261,48 @@ export default function VagaForm() {
         
         if (error) throw error;
 
-        // Salvar tags da vaga
+        // Salvar recrutadores e tags da vaga
         if (newVaga) {
+          await saveRecrutadores(newVaga.id);
           await saveTags(newVaga.id);
         }
 
+        await invalidateVagas();
         toast.success("Vaga criada com sucesso!");
       }
       navigate("/vagas");
     } catch (error) {
-      console.error("Erro ao salvar vaga:", error);
-      toast.error("Erro ao salvar vaga");
+      handleApiError(error, { context: "ao salvar vaga" });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const saveRecrutadores = async (vagaId: string) => {
+    try {
+      // Remover todos os recrutadores existentes
+      await supabase
+        .from("vaga_recrutadores")
+        .delete()
+        .eq("vaga_id", vagaId);
+
+      // Inserir novos recrutadores (primeiro é o principal)
+      if (formData.recrutador_ids.length > 0) {
+        const recrutadoresToInsert = formData.recrutador_ids.map((userId, index) => ({
+          vaga_id: vagaId,
+          user_id: userId,
+          is_primary: index === 0, // Primeiro recrutador é o principal
+        }));
+
+        const { error } = await supabase
+          .from("vaga_recrutadores")
+          .insert(recrutadoresToInsert);
+
+        if (error) throw error;
+      }
+    } catch (error) {
+      console.error("Erro ao salvar recrutadores:", error);
+      throw error;
     }
   };
 
@@ -280,13 +362,65 @@ export default function VagaForm() {
               </div>
 
               <div>
-                <Label htmlFor="empresa">Empresa *</Label>
-                <Input
-                  id="empresa"
-                  required
-                  value={formData.empresa}
-                  onChange={(e) => setFormData({ ...formData, empresa: e.target.value })}
-                />
+                <Label htmlFor="empresa">Cliente *</Label>
+                <Select 
+                  value={formData.empresa_id || ""} 
+                  onValueChange={(value) => {
+                    const empresa = empresas.find(e => e.id === value);
+                    setFormData({ 
+                      ...formData, 
+                      empresa_id: value,
+                      empresa: empresa?.nome || ""
+                    });
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um cliente" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {empresas.map((emp) => (
+                      <SelectItem key={emp.id} value={emp.id}>
+                        {emp.nome}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="data_abertura">Data de Abertura</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !formData.data_abertura && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.data_abertura 
+                        ? format(new Date(formData.data_abertura + 'T12:00:00'), "dd/MM/yyyy", { locale: ptBR })
+                        : "Selecione a data (padrão: hoje)"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={formData.data_abertura ? new Date(formData.data_abertura + 'T12:00:00') : undefined}
+                      onSelect={(date) => setFormData({ 
+                        ...formData, 
+                        data_abertura: date ? format(date, 'yyyy-MM-dd') : "" 
+                      })}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                      locale={ptBR}
+                    />
+                  </PopoverContent>
+                </Popover>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Para vagas retroativas, selecione a data real de abertura
+                </p>
               </div>
 
               <div className="flex items-center space-x-2">
@@ -369,19 +503,19 @@ export default function VagaForm() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label htmlFor="recrutador">Recrutador</Label>
-                <Select value={formData.recrutador_id} onValueChange={(value) => setFormData({ ...formData, recrutador_id: value })}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione um recrutador" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {recrutadores.map((rec) => (
-                      <SelectItem key={rec.id} value={rec.id}>
-                        {rec.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="recrutadores">Recrutadores</Label>
+                <p className="text-xs text-muted-foreground mb-2">
+                  O primeiro recrutador selecionado será o principal
+                </p>
+                <MultiSelect
+                  options={recrutadores.map((rec) => ({
+                    label: rec.name,
+                    value: rec.id,
+                  }))}
+                  value={formData.recrutador_ids}
+                  onChange={(ids) => setFormData({ ...formData, recrutador_ids: ids })}
+                  placeholder="Selecione os recrutadores"
+                />
               </div>
 
               <div>
@@ -447,14 +581,22 @@ export default function VagaForm() {
               </div>
 
               <div>
-                <Label htmlFor="status">Status</Label>
-                <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
+                <Label htmlFor="status">Etapa</Label>
+                <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value as string })}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {Constants.public.Enums.status_vaga.map((status) => (
-                      <SelectItem key={status} value={status}>{status}</SelectItem>
+                    {JOB_STAGES.map((stage) => (
+                      <SelectItem key={stage.slug} value={stage.name}>
+                        <div className="flex items-center gap-2">
+                          <div 
+                            className="w-3 h-3 rounded-full" 
+                            style={{ backgroundColor: stage.color.bg }} 
+                          />
+                          {stage.name}
+                        </div>
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -676,10 +818,10 @@ export default function VagaForm() {
           </Card>
 
           <div className="flex gap-4">
-            <Button type="submit" disabled={loading}>
+            <LoadingButton type="submit" loading={loading} loadingText="Salvando...">
               <Save className="mr-2 h-4 w-4" />
-              {loading ? "Salvando..." : "Salvar Vaga"}
-            </Button>
+              Salvar Vaga
+            </LoadingButton>
             <Button type="button" variant="outline" onClick={() => navigate("/vagas")}>
               Cancelar
             </Button>

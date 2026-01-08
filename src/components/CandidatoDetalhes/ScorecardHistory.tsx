@@ -5,10 +5,12 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Star, User, Calendar, Target, ChevronDown } from "lucide-react";
+import { Star, User, Calendar, ChevronDown, Eye } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { ScorecardDetailModal } from "./ScorecardDetailModal";
 interface ScorecardHistoryProps {
   candidateId: string;
 }
@@ -16,7 +18,6 @@ interface Scorecard {
   id: string;
   template_name: string;
   evaluator_name: string;
-  recommendation: string;
   comments: string | null;
   total_score: number;
   match_percentage: number;
@@ -44,27 +45,6 @@ const categoryColors: Record<string, string> = {
   fit_cultural: "bg-orange-100 text-orange-800 border-orange-200",
   outros: "bg-gray-100 text-gray-800 border-gray-200"
 };
-const recommendationConfig: Record<string, {
-  label: string;
-  color: string;
-}> = {
-  strong_yes: {
-    label: "Fortemente Recomendado",
-    color: "bg-green-600 text-white"
-  },
-  yes: {
-    label: "Recomendado",
-    color: "bg-green-400 text-white"
-  },
-  maybe: {
-    label: "Talvez",
-    color: "bg-yellow-500 text-white"
-  },
-  no: {
-    label: "Não Recomendado",
-    color: "bg-red-500 text-white"
-  }
-};
 function getInitials(name: string | undefined): string {
   if (!name || name.trim().length === 0) {
     return "??";
@@ -81,6 +61,7 @@ export function ScorecardHistory({
   const [scorecards, setScorecards] = useState<Scorecard[]>([]);
   const [loading, setLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
+  const [selectedScorecard, setSelectedScorecard] = useState<Scorecard | null>(null);
   useEffect(() => {
     loadScorecards();
   }, [candidateId]);
@@ -139,7 +120,6 @@ export function ScorecardHistory({
           id: scorecard.id,
           template_name: scorecard.scorecard_templates?.name || "Template",
           evaluator_name: usersMap.get(scorecard.evaluator_id) || "Avaliador",
-          recommendation: scorecard.recommendation,
           comments: scorecard.comments,
           total_score: scorecard.total_score,
           match_percentage: scorecard.match_percentage,
@@ -171,11 +151,11 @@ export function ScorecardHistory({
   if (scorecards.length === 0) {
     return <Card className="border border-gray-300 shadow-md">
         <CardHeader>
-          <CardTitle>Histórico de Avaliações</CardTitle>
-          <CardDescription className="text-base font-medium">Scorecards preenchidos para este candidato</CardDescription>
+          <CardTitle className="text-base">Histórico de Avaliações</CardTitle>
+          <CardDescription className="font-medium text-sm">Scorecards preenchidos para este candidato</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col items-center justify-center py-12">
-          <Target className="h-12 w-12 text-muted-foreground mb-4" />
+          
           <p className="text-sm text-muted-foreground">
             Nenhum scorecard preenchido ainda
           </p>
@@ -185,118 +165,122 @@ export function ScorecardHistory({
 
   // Calculate average score
   const averageScore = scorecards.reduce((sum, s) => sum + s.match_percentage, 0) / scorecards.length;
-  return <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <Card className="border border-gray-300 shadow-md">
-        <CardHeader className="border-gray-300">
-          <CollapsibleTrigger className="w-full">
-            <div className="flex items-start justify-between">
-              <div className="text-left">
-                <div className="flex items-center gap-2">
-                  <CardTitle className="text-xl font-bold">Histórico de Avaliações</CardTitle>
-                  <ChevronDown className={cn("h-5 w-5 transition-transform duration-200", isOpen && "rotate-180")} />
+  return <>
+      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+        <Card className="border border-gray-300 shadow-md">
+          <CardHeader className="border-gray-300">
+            <CollapsibleTrigger className="w-full">
+              <div className="flex items-start justify-between">
+                <div className="text-left">
+                  <div className="flex items-center gap-2">
+                    <CardTitle className="font-bold text-base">Histórico de Avaliações</CardTitle>
+                    <ChevronDown className={cn("h-5 w-5 transition-transform duration-200", isOpen && "rotate-180")} />
+                  </div>
+                  <CardDescription className="text-base">
+                    <span className="font-semibold">{scorecards.length}</span> {scorecards.length === 1 ? "avaliação" : "avaliações"} recebidas
+                  </CardDescription>
                 </div>
-                <CardDescription className="text-base">
-                  <span className="font-semibold">{scorecards.length}</span> {scorecards.length === 1 ? "avaliação" : "avaliações"} recebidas
-                </CardDescription>
+                <div className="text-right">
+                  <div className="text-3xl font-bold">{Math.round(averageScore)}%</div>
+                  <p className="text-sm text-muted-foreground font-semibold">Match médio</p>
+                </div>
               </div>
-              <div className="text-right">
-                <div className="text-3xl font-bold">{Math.round(averageScore)}%</div>
-                <p className="text-sm text-muted-foreground font-semibold">Match médio</p>
-              </div>
-            </div>
-          </CollapsibleTrigger>
-        </CardHeader>
-        <CollapsibleContent>
-          <CardContent className="shadow-lg">
-        <div className="grid grid-cols-1 gap-6">
-          {scorecards.map(scorecard => {
-              const recConfig = recommendationConfig[scorecard.recommendation];
-              return <div key={scorecard.id} className="border rounded-lg p-8 space-y-6 hover:shadow-md transition-shadow">
-                {/* Header com título e pontuação */}
-                <div className="flex items-start justify-between gap-6 pb-4 border-b">
-                  <div className="space-y-1">
-                    <h3 className="font-bold text-xl">
-                      {scorecard.template_name}
-                    </h3>
-                    {scorecard.vaga_titulo && <Badge variant="outline" className="text-sm font-medium mt-2">
-                        {scorecard.vaga_titulo}
-                      </Badge>}
-                  </div>
-                  <div className="text-right shrink-0">
-                    <div className="text-4xl font-bold text-primary">
-                      {scorecard.match_percentage}%
-                    </div>
-                    <p className="text-muted-foreground mt-1 font-semibold text-base">Match Score</p>
-                  </div>
-                </div>
-
-                {/* Informações do avaliador e data */}
-                <div className="flex items-center justify-between gap-6 py-2">
-                  <div className="flex items-center gap-4">
-                    <Avatar className="h-14 w-14 bg-primary/10 shrink-0">
-                      <AvatarFallback className="text-base font-bold">
-                        {getInitials(scorecard.evaluator_name)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="space-y-1">
-                      <p className="font-semibold text-base">{scorecard.evaluator_name}</p>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <User className="h-4 w-4" />
-                        <span className="text-base">Avaliador</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground shrink-0">
-                    <Calendar className="h-4 w-4" />
-                    <span className="font-medium text-base">
-                      {format(new Date(scorecard.created_at), "dd MMM yyyy", {
-                        locale: ptBR
-                      })}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Recommendation Badge */}
-                <div className="pt-2">
-                  <Badge className={cn("text-sm font-semibold px-4 py-1.5", recConfig.color)}>
-                    {recConfig.label}
-                  </Badge>
-                </div>
-
-                {/* Progress Bar */}
-                <div className="space-y-3 pt-2">
-                  <Progress value={scorecard.match_percentage} className="h-2.5" />
-                </div>
-
-                {/* Comments */}
-                {scorecard.comments && <div className="bg-muted/50 p-4 rounded-lg space-y-2">
-                    <p className="text-sm font-bold">Comentários:</p>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      {scorecard.comments}
-                    </p>
-                  </div>}
-
-                {/* Evaluations Summary */}
-                <div className="space-y-3 pt-2">
-                  <p className="font-bold text-base">Critérios Avaliados:</p>
-                  <div className="space-y-3">
-                    {scorecard.evaluations.slice(0, 3).map((evaluation, index) => <div key={index} className="flex items-center justify-between text-sm py-1">
-                        <span className="text-muted-foreground font-semibold text-base">{evaluation.criteria_name}</span>
-                        <div className="flex items-center gap-1">
-                          {[1, 2, 3, 4, 5].map(star => <Star key={star} className={cn("h-4 w-4", star <= evaluation.score ? "fill-[#FFCD00] text-[#FFCD00]" : "text-gray-300")} />)}
+            </CollapsibleTrigger>
+          </CardHeader>
+          <CollapsibleContent>
+            <CardContent className="shadow-lg">
+              <div className="grid grid-cols-1 gap-6">
+                {scorecards.map(scorecard => {
+                return <div key={scorecard.id} onClick={() => setSelectedScorecard(scorecard)} className="border rounded-lg p-8 space-y-6 cursor-pointer hover:shadow-lg hover:border-primary/50 transition-all">
+                      {/* Header com título e pontuação */}
+                      <div className="flex items-start justify-between gap-6 pb-4 border-b">
+                        <div className="space-y-1">
+                          <h3 className="font-bold text-base">
+                            {scorecard.template_name}
+                          </h3>
+                          {scorecard.vaga_titulo && <Badge variant="outline" className="text-sm font-medium mt-2 border-[#ffcc00]">
+                              {scorecard.vaga_titulo}
+                            </Badge>}
                         </div>
-                      </div>)}
-                    {scorecard.evaluations.length > 3 && <p className="text-muted-foreground pt-1 text-base">
-                        +{scorecard.evaluations.length - 3} critérios adicionais
-                      </p>}
-                  </div>
-                </div>
-              </div>;
-            })}
-          </div>
-        </CardContent>
-        </CollapsibleContent>
-      </Card>
-    </Collapsible>;
+                        <div className="flex items-center gap-3">
+                          <div className="text-right shrink-0">
+                            <div className="text-4xl font-bold text-primary">
+                              {scorecard.match_percentage}%
+                            </div>
+                            <p className="text-muted-foreground mt-1 font-semibold text-base">Match Score</p>
+                          </div>
+                          <Button variant="ghost" size="icon" className="shrink-0" onClick={e => {
+                        e.stopPropagation();
+                        setSelectedScorecard(scorecard);
+                      }}>
+                            <Eye className="h-5 w-5" />
+                          </Button>
+                        </div>
+                      </div>
+
+                      {/* Informações do avaliador e data */}
+                      <div className="flex items-center justify-between gap-6 py-2">
+                        <div className="flex items-center gap-4">
+                          <Avatar className="h-14 w-14 bg-primary/10 shrink-0">
+                            <AvatarFallback className="text-base font-bold">
+                              {getInitials(scorecard.evaluator_name)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="space-y-1">
+                            <p className="font-semibold text-base">{scorecard.evaluator_name}</p>
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <User className="h-4 w-4" />
+                              <span className="text-base">Avaliador</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground shrink-0">
+                          <Calendar className="h-4 w-4" />
+                          <span className="font-medium text-base">
+                            {format(new Date(scorecard.created_at), "dd MMM yyyy", {
+                          locale: ptBR
+                        })}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Progress Bar */}
+                      <div className="space-y-3 pt-2">
+                        <Progress value={scorecard.match_percentage} className="h-2.5" />
+                      </div>
+
+                      {/* Comments */}
+                      {scorecard.comments && <div className="bg-muted/50 p-4 rounded-lg space-y-2">
+                          <p className="text-sm font-bold">Comentários:</p>
+                          <p className="text-sm text-muted-foreground leading-relaxed">
+                            {scorecard.comments}
+                          </p>
+                        </div>}
+
+                      {/* Evaluations Summary */}
+                      <div className="space-y-3 pt-2">
+                        <p className="font-bold text-base">Critérios Avaliados:</p>
+                        <div className="space-y-3">
+                          {scorecard.evaluations.slice(0, 3).map((evaluation, index) => <div key={index} className="flex items-center justify-between text-sm py-1">
+                              <span className="text-muted-foreground font-semibold text-base">{evaluation.criteria_name}</span>
+                              <div className="flex items-center gap-1">
+                                {[1, 2, 3, 4, 5].map(star => <Star key={star} className={cn("h-4 w-4", star <= evaluation.score ? "fill-[#FFCD00] text-[#FFCD00]" : "text-gray-300")} />)}
+                              </div>
+                            </div>)}
+                          {scorecard.evaluations.length > 3 && <p className="text-muted-foreground pt-1 text-base">
+                              +{scorecard.evaluations.length - 3} critérios adicionais
+                            </p>}
+                        </div>
+                      </div>
+                    </div>;
+              })}
+              </div>
+            </CardContent>
+          </CollapsibleContent>
+        </Card>
+      </Collapsible>
+
+      <ScorecardDetailModal scorecard={selectedScorecard} open={!!selectedScorecard} onOpenChange={open => !open && setSelectedScorecard(null)} />
+    </>;
 }

@@ -11,6 +11,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, Save, Upload, FileText, X } from "lucide-react";
 import { toast } from "sonner";
 import { Constants } from "@/integrations/supabase/types";
+import { LoadingButton } from "@/components/ui/loading-button";
+import { handleApiError } from "@/lib/errorHandler";
+import { MODELO_CONTRATACAO_OPTIONS, FORMATO_TRABALHO_OPTIONS, ORIGEM_OPTIONS } from "@/constants/fitCultural";
+import { useCacheInvalidation } from "@/hooks/data/useCacheInvalidation";
+import { CPFInput } from "@/components/ui/cpf-input";
+import { validateCPF, cleanCPF } from "@/lib/cpfUtils";
 
 export default function CandidatoForm() {
   const { id } = useParams();
@@ -20,9 +26,11 @@ export default function CandidatoForm() {
   const [vagas, setVagas] = useState<{ id: string; titulo: string }[]>([]);
   const [curriculoFile, setCurriculoFile] = useState<File | null>(null);
   const [portfolioFile, setPortfolioFile] = useState<File | null>(null);
+  const { invalidateCandidatos } = useCacheInvalidation();
   const [formData, setFormData] = useState({
     nome_completo: "",
     email: "",
+    cpf: "",
     telefone: "",
     cidade: "",
     estado: "",
@@ -44,6 +52,8 @@ export default function CandidatoForm() {
     idade: "",
     historico_experiencia: "",
     idiomas: "",
+    modelo_contratacao: "",
+    formato_trabalho: "",
   });
 
   useEffect(() => {
@@ -80,6 +90,7 @@ export default function CandidatoForm() {
         setFormData({
           nome_completo: data.nome_completo || "",
           email: data.email || "",
+          cpf: (data as any).cpf || "",
           telefone: data.telefone || "",
           cidade: data.cidade || "",
           estado: data.estado || "",
@@ -103,6 +114,8 @@ export default function CandidatoForm() {
           idade: data.idade ? data.idade.toString() : "",
           historico_experiencia: data.historico_experiencia || "",
           idiomas: data.idiomas || "",
+          modelo_contratacao: (data as any).modelo_contratacao || "",
+          formato_trabalho: (data as any).formato_trabalho || "",
         });
       }
     } catch (error) {
@@ -131,6 +144,12 @@ export default function CandidatoForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate CPF
+    if (!formData.cpf || !validateCPF(formData.cpf)) {
+      toast.error("CPF inválido ou não preenchido");
+      return;
+    }
     
     // Validate required file
     if (!id && !curriculoFile && !formData.curriculo_url) {
@@ -187,6 +206,7 @@ export default function CandidatoForm() {
       const dataToSave = {
         nome_completo: formData.nome_completo,
         email: formData.email,
+        cpf: formData.cpf ? cleanCPF(formData.cpf) : null,
         telefone: formData.telefone || null,
         cidade: formData.cidade || null,
         estado: formData.estado || null,
@@ -210,6 +230,8 @@ export default function CandidatoForm() {
         idade: formData.idade ? parseInt(formData.idade) : null,
         historico_experiencia: formData.historico_experiencia || null,
         idiomas: formData.idiomas || null,
+        modelo_contratacao: formData.modelo_contratacao || null,
+        formato_trabalho: formData.formato_trabalho || null,
       };
 
       const { error } = await supabase
@@ -219,6 +241,7 @@ export default function CandidatoForm() {
 
       if (error) throw error;
       
+      await invalidateCandidatos(formData.vaga_relacionada_id || undefined);
       toast.success(id ? "Candidato atualizado com sucesso!" : "Candidato criado com sucesso!");
       navigate("/candidatos");
     } catch (error) {
@@ -328,6 +351,13 @@ export default function CandidatoForm() {
                   />
                 </div>
               </div>
+
+              <CPFInput
+                value={formData.cpf}
+                onChange={(value) => setFormData({ ...formData, cpf: value })}
+                required={true}
+                showValidation={true}
+              />
 
               <div className="grid grid-cols-3 gap-4">
                 <div>
@@ -495,6 +525,42 @@ export default function CandidatoForm() {
                   </SelectContent>
                 </Select>
               </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="modelo_contratacao">Modelo de Contratação</Label>
+                  <Select 
+                    value={formData.modelo_contratacao} 
+                    onValueChange={(value) => setFormData({ ...formData, modelo_contratacao: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white z-50">
+                      {MODELO_CONTRATACAO_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="formato_trabalho">Formato de Trabalho</Label>
+                  <Select 
+                    value={formData.formato_trabalho} 
+                    onValueChange={(value) => setFormData({ ...formData, formato_trabalho: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white z-50">
+                      {FORMATO_TRABALHO_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
@@ -632,34 +698,32 @@ export default function CandidatoForm() {
             <CardContent>
               <div>
                 <Label htmlFor="origem">Como este candidato chegou até nós?</Label>
-                <Input
-                  id="origem"
-                  placeholder="Ex: LinkedIn, Indicação, Gupy, etc."
-                  value={formData.origem}
-                  onChange={(e) => setFormData({ ...formData, origem: e.target.value })}
-                  className="mt-2"
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  Digite a origem da candidatura. Novas origens serão adicionadas automaticamente.
-                </p>
+                <Select 
+                  value={formData.origem} 
+                  onValueChange={(value) => setFormData({ ...formData, origem: value })}
+                >
+                  <SelectTrigger className="mt-2">
+                    <SelectValue placeholder="Selecione a origem" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover z-50">
+                    {ORIGEM_OPTIONS.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </CardContent>
           </Card>
 
           <div className="flex gap-4">
-            <Button type="submit" disabled={loading || uploading}>
-              {uploading ? (
-                <>
-                  <Upload className="mr-2 h-4 w-4 animate-pulse" />
-                  Fazendo upload...
-                </>
-              ) : (
-                <>
-                  <Save className="mr-2 h-4 w-4" />
-                  {loading ? "Salvando..." : "Salvar Candidato"}
-                </>
-              )}
-            </Button>
+            <LoadingButton 
+              type="submit" 
+              loading={loading || uploading} 
+              loadingText={uploading ? "Fazendo upload..." : "Salvando..."}
+            >
+              <Save className="mr-2 h-4 w-4" />
+              Salvar Candidato
+            </LoadingButton>
             <Button type="button" variant="outline" onClick={() => navigate("/candidatos")} disabled={uploading}>
               Cancelar
             </Button>

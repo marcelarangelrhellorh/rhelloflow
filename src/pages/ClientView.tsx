@@ -82,7 +82,7 @@ export default function ClientView() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#FFFBF0' }}>
+      <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
       </div>
     );
@@ -90,7 +90,7 @@ export default function ClientView() {
 
   if (error || !vaga) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#FFFBF0' }}>
+      <div className="min-h-screen flex items-center justify-center p-4 bg-white">
         <Card className="max-w-md w-full">
           <CardHeader>
             <CardTitle className="text-destructive">Erro</CardTitle>
@@ -106,7 +106,7 @@ export default function ClientView() {
   const currentStageIndex = getCurrentStageIndex();
 
   return (
-    <div className="min-h-screen p-4 sm:p-8" style={{ backgroundColor: '#FFFBF0' }}>
+    <div className="min-h-screen p-4 sm:p-8 bg-white">
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
         <div className="space-y-2">

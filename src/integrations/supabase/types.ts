@@ -85,6 +85,140 @@ export type Database = {
           },
         ]
       }
+      candidate_form_link_events: {
+        Row: {
+          created_at: string | null
+          event_type: string
+          id: string
+          ip_address: string | null
+          link_id: string
+          metadata: Json | null
+          user_agent: string | null
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          event_type: string
+          id?: string
+          ip_address?: string | null
+          link_id: string
+          metadata?: Json | null
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          event_type?: string
+          id?: string
+          ip_address?: string | null
+          link_id?: string
+          metadata?: Json | null
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_form_link_events_link_id_fkey"
+            columns: ["link_id"]
+            isOneToOne: false
+            referencedRelation: "candidate_form_links"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      candidate_form_links: {
+        Row: {
+          active: boolean | null
+          created_at: string | null
+          created_by: string | null
+          expires_at: string | null
+          id: string
+          last_used_at: string | null
+          max_submissions: number | null
+          note: string | null
+          password_hash: string | null
+          revoked: boolean | null
+          revoked_at: string | null
+          submissions_count: number | null
+          token: string
+          vaga_id: string
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string | null
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          last_used_at?: string | null
+          max_submissions?: number | null
+          note?: string | null
+          password_hash?: string | null
+          revoked?: boolean | null
+          revoked_at?: string | null
+          submissions_count?: number | null
+          token: string
+          vaga_id: string
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string | null
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          last_used_at?: string | null
+          max_submissions?: number | null
+          note?: string | null
+          password_hash?: string | null
+          revoked?: boolean | null
+          revoked_at?: string | null
+          submissions_count?: number | null
+          token?: string
+          vaga_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_form_links_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vagas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidate_form_links_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vagas_active"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidate_form_links_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vagas_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidate_form_links_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_cliente_detalhadas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidate_form_links_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_com_stats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       candidate_notes: {
         Row: {
           candidate_id: string
@@ -153,6 +287,13 @@ export type Database = {
             referencedRelation: "vw_candidatos_por_vaga"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "candidate_notes_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "vw_candidatos_reprovados_sem_whatsapp"
+            referencedColumns: ["id"]
+          },
         ]
       }
       candidate_scorecards: {
@@ -160,12 +301,14 @@ export type Database = {
           candidate_id: string
           comments: string | null
           created_at: string | null
+          created_by: string | null
           evaluator_id: string
+          expires_at: string | null
+          external_token: string | null
           id: string
           match_percentage: number | null
-          recommendation:
-            | Database["public"]["Enums"]["scorecard_recommendation"]
-            | null
+          source: string | null
+          submitted_at: string | null
           template_id: string
           total_score: number | null
           updated_at: string | null
@@ -175,12 +318,14 @@ export type Database = {
           candidate_id: string
           comments?: string | null
           created_at?: string | null
+          created_by?: string | null
           evaluator_id: string
+          expires_at?: string | null
+          external_token?: string | null
           id?: string
           match_percentage?: number | null
-          recommendation?:
-            | Database["public"]["Enums"]["scorecard_recommendation"]
-            | null
+          source?: string | null
+          submitted_at?: string | null
           template_id: string
           total_score?: number | null
           updated_at?: string | null
@@ -190,12 +335,14 @@ export type Database = {
           candidate_id?: string
           comments?: string | null
           created_at?: string | null
+          created_by?: string | null
           evaluator_id?: string
+          expires_at?: string | null
+          external_token?: string | null
           id?: string
           match_percentage?: number | null
-          recommendation?:
-            | Database["public"]["Enums"]["scorecard_recommendation"]
-            | null
+          source?: string | null
+          submitted_at?: string | null
           template_id?: string
           total_score?: number | null
           updated_at?: string | null
@@ -245,6 +392,20 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "candidate_scorecards_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "vw_candidatos_reprovados_sem_whatsapp"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidate_scorecards_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "candidate_scorecards_template_id_fkey"
             columns: ["template_id"]
             isOneToOne: false
@@ -277,6 +438,13 @@ export type Database = {
             columns: ["vaga_id"]
             isOneToOne: false
             referencedRelation: "vw_vagas_cliente_detalhadas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidate_scorecards_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_com_stats"
             referencedColumns: ["id"]
           },
         ]
@@ -350,6 +518,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "candidate_tags_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "vw_candidatos_reprovados_sem_whatsapp"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "candidate_tags_tag_id_fkey"
             columns: ["tag_id"]
             isOneToOne: false
@@ -368,7 +543,10 @@ export type Database = {
       candidatos: {
         Row: {
           area: Database["public"]["Enums"]["area_candidato"] | null
+          candidate_form_link_id: string | null
+          cargo: string | null
           cidade: string | null
+          cpf: string | null
           criado_em: string | null
           curriculo_link: string | null
           curriculo_url: string | null
@@ -382,6 +560,8 @@ export type Database = {
           estado: string | null
           experiencia_profissional: string | null
           feedback: string | null
+          fit_cultural: Json | null
+          formato_trabalho: string | null
           hired_at: string | null
           historico_experiencia: string | null
           id: string
@@ -390,6 +570,7 @@ export type Database = {
           idiomas: string | null
           is_visible_for_client: boolean | null
           linkedin: string | null
+          modelo_contratacao: string | null
           nivel: Database["public"]["Enums"]["nivel_candidato"] | null
           nome_completo: string
           origem: string | null
@@ -399,9 +580,13 @@ export type Database = {
           portfolio_url: string | null
           pretensao_salarial: number | null
           recrutador: string | null
+          rejection_feedback_at: string | null
+          rejection_feedback_given: boolean | null
+          rejection_feedback_job_id: string | null
           sexo: string | null
           source_link_id: string | null
           status: Database["public"]["Enums"]["status_candidato"] | null
+          talent_pool_link_id: string | null
           telefone: string | null
           total_feedbacks: number
           ultimo_feedback: string | null
@@ -410,7 +595,10 @@ export type Database = {
         }
         Insert: {
           area?: Database["public"]["Enums"]["area_candidato"] | null
+          candidate_form_link_id?: string | null
+          cargo?: string | null
           cidade?: string | null
+          cpf?: string | null
           criado_em?: string | null
           curriculo_link?: string | null
           curriculo_url?: string | null
@@ -424,6 +612,8 @@ export type Database = {
           estado?: string | null
           experiencia_profissional?: string | null
           feedback?: string | null
+          fit_cultural?: Json | null
+          formato_trabalho?: string | null
           hired_at?: string | null
           historico_experiencia?: string | null
           id?: string
@@ -432,6 +622,7 @@ export type Database = {
           idiomas?: string | null
           is_visible_for_client?: boolean | null
           linkedin?: string | null
+          modelo_contratacao?: string | null
           nivel?: Database["public"]["Enums"]["nivel_candidato"] | null
           nome_completo: string
           origem?: string | null
@@ -441,9 +632,13 @@ export type Database = {
           portfolio_url?: string | null
           pretensao_salarial?: number | null
           recrutador?: string | null
+          rejection_feedback_at?: string | null
+          rejection_feedback_given?: boolean | null
+          rejection_feedback_job_id?: string | null
           sexo?: string | null
           source_link_id?: string | null
           status?: Database["public"]["Enums"]["status_candidato"] | null
+          talent_pool_link_id?: string | null
           telefone?: string | null
           total_feedbacks?: number
           ultimo_feedback?: string | null
@@ -452,7 +647,10 @@ export type Database = {
         }
         Update: {
           area?: Database["public"]["Enums"]["area_candidato"] | null
+          candidate_form_link_id?: string | null
+          cargo?: string | null
           cidade?: string | null
+          cpf?: string | null
           criado_em?: string | null
           curriculo_link?: string | null
           curriculo_url?: string | null
@@ -466,6 +664,8 @@ export type Database = {
           estado?: string | null
           experiencia_profissional?: string | null
           feedback?: string | null
+          fit_cultural?: Json | null
+          formato_trabalho?: string | null
           hired_at?: string | null
           historico_experiencia?: string | null
           id?: string
@@ -474,6 +674,7 @@ export type Database = {
           idiomas?: string | null
           is_visible_for_client?: boolean | null
           linkedin?: string | null
+          modelo_contratacao?: string | null
           nivel?: Database["public"]["Enums"]["nivel_candidato"] | null
           nome_completo?: string
           origem?: string | null
@@ -483,9 +684,13 @@ export type Database = {
           portfolio_url?: string | null
           pretensao_salarial?: number | null
           recrutador?: string | null
+          rejection_feedback_at?: string | null
+          rejection_feedback_given?: boolean | null
+          rejection_feedback_job_id?: string | null
           sexo?: string | null
           source_link_id?: string | null
           status?: Database["public"]["Enums"]["status_candidato"] | null
+          talent_pool_link_id?: string | null
           telefone?: string | null
           total_feedbacks?: number
           ultimo_feedback?: string | null
@@ -494,10 +699,59 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "candidatos_candidate_form_link_id_fkey"
+            columns: ["candidate_form_link_id"]
+            isOneToOne: false
+            referencedRelation: "candidate_form_links"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidatos_rejection_feedback_job_id_fkey"
+            columns: ["rejection_feedback_job_id"]
+            isOneToOne: false
+            referencedRelation: "vagas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidatos_rejection_feedback_job_id_fkey"
+            columns: ["rejection_feedback_job_id"]
+            isOneToOne: false
+            referencedRelation: "vagas_active"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidatos_rejection_feedback_job_id_fkey"
+            columns: ["rejection_feedback_job_id"]
+            isOneToOne: false
+            referencedRelation: "vagas_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidatos_rejection_feedback_job_id_fkey"
+            columns: ["rejection_feedback_job_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_cliente_detalhadas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidatos_rejection_feedback_job_id_fkey"
+            columns: ["rejection_feedback_job_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_com_stats"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "candidatos_source_link_id_fkey"
             columns: ["source_link_id"]
             isOneToOne: false
             referencedRelation: "share_links"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidatos_talent_pool_link_id_fkey"
+            columns: ["talent_pool_link_id"]
+            isOneToOne: false
+            referencedRelation: "talent_pool_links"
             referencedColumns: ["id"]
           },
           {
@@ -526,6 +780,13 @@ export type Database = {
             columns: ["vaga_relacionada_id"]
             isOneToOne: false
             referencedRelation: "vw_vagas_cliente_detalhadas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidatos_vaga_relacionada_id_fkey"
+            columns: ["vaga_relacionada_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_com_stats"
             referencedColumns: ["id"]
           },
         ]
@@ -599,6 +860,13 @@ export type Database = {
             referencedRelation: "vw_vagas_cliente_detalhadas"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "client_view_links_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_com_stats"
+            referencedColumns: ["id"]
+          },
         ]
       }
       deletion_approvals: {
@@ -655,75 +923,161 @@ export type Database = {
         }
         Relationships: []
       }
+      empresa_notes: {
+        Row: {
+          content: string
+          created_at: string
+          documento_nome: string | null
+          documento_url: string | null
+          empresa_id: string
+          id: string
+          title: string | null
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          documento_nome?: string | null
+          documento_url?: string | null
+          empresa_id: string
+          id?: string
+          title?: string | null
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          documento_nome?: string | null
+          documento_url?: string | null
+          empresa_id?: string
+          id?: string
+          title?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "empresa_notes_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       empresas: {
         Row: {
+          atividade_principal: Json | null
+          atividades_secundarias: Json | null
+          bairro: string | null
+          capital_social: number | null
           cep: string | null
           cidade: string | null
           cnpj: string | null
+          cnpj_consultado_em: string | null
+          complemento: string | null
           contato_principal_cargo: string | null
           contato_principal_email: string | null
           contato_principal_nome: string | null
           contato_principal_telefone: string | null
           created_at: string | null
+          cs_responsavel_id: string | null
+          data_abertura: string | null
           data_primeiro_contato: string | null
+          data_situacao_cadastral: string | null
           email: string | null
           endereco: string | null
           estado: string | null
           id: string
+          natureza_juridica: string | null
           nome: string
+          nome_fantasia: string | null
+          numero: string | null
           observacoes: string | null
           pipeline_stage: string | null
           porte: string | null
+          quadro_societario: Json | null
+          razao_social: string | null
           setor: string | null
           site: string | null
+          situacao_cadastral: string | null
           status: string | null
           telefone: string | null
           updated_at: string | null
         }
         Insert: {
+          atividade_principal?: Json | null
+          atividades_secundarias?: Json | null
+          bairro?: string | null
+          capital_social?: number | null
           cep?: string | null
           cidade?: string | null
           cnpj?: string | null
+          cnpj_consultado_em?: string | null
+          complemento?: string | null
           contato_principal_cargo?: string | null
           contato_principal_email?: string | null
           contato_principal_nome?: string | null
           contato_principal_telefone?: string | null
           created_at?: string | null
+          cs_responsavel_id?: string | null
+          data_abertura?: string | null
           data_primeiro_contato?: string | null
+          data_situacao_cadastral?: string | null
           email?: string | null
           endereco?: string | null
           estado?: string | null
           id?: string
+          natureza_juridica?: string | null
           nome: string
+          nome_fantasia?: string | null
+          numero?: string | null
           observacoes?: string | null
           pipeline_stage?: string | null
           porte?: string | null
+          quadro_societario?: Json | null
+          razao_social?: string | null
           setor?: string | null
           site?: string | null
+          situacao_cadastral?: string | null
           status?: string | null
           telefone?: string | null
           updated_at?: string | null
         }
         Update: {
+          atividade_principal?: Json | null
+          atividades_secundarias?: Json | null
+          bairro?: string | null
+          capital_social?: number | null
           cep?: string | null
           cidade?: string | null
           cnpj?: string | null
+          cnpj_consultado_em?: string | null
+          complemento?: string | null
           contato_principal_cargo?: string | null
           contato_principal_email?: string | null
           contato_principal_nome?: string | null
           contato_principal_telefone?: string | null
           created_at?: string | null
+          cs_responsavel_id?: string | null
+          data_abertura?: string | null
           data_primeiro_contato?: string | null
+          data_situacao_cadastral?: string | null
           email?: string | null
           endereco?: string | null
           estado?: string | null
           id?: string
+          natureza_juridica?: string | null
           nome?: string
+          nome_fantasia?: string | null
+          numero?: string | null
           observacoes?: string | null
           pipeline_stage?: string | null
           porte?: string | null
+          quadro_societario?: Json | null
+          razao_social?: string | null
           setor?: string | null
           site?: string | null
+          situacao_cadastral?: string | null
           status?: string | null
           telefone?: string | null
           updated_at?: string | null
@@ -897,6 +1251,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "feedback_requests_candidato_id_fkey"
+            columns: ["candidato_id"]
+            isOneToOne: false
+            referencedRelation: "vw_candidatos_reprovados_sem_whatsapp"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "feedback_requests_vaga_id_fkey"
             columns: ["vaga_id"]
             isOneToOne: false
@@ -922,6 +1283,13 @@ export type Database = {
             columns: ["vaga_id"]
             isOneToOne: false
             referencedRelation: "vw_vagas_cliente_detalhadas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_requests_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_com_stats"
             referencedColumns: ["id"]
           },
         ]
@@ -1046,6 +1414,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "feedbacks_candidato_id_fkey"
+            columns: ["candidato_id"]
+            isOneToOne: false
+            referencedRelation: "vw_candidatos_reprovados_sem_whatsapp"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "feedbacks_request_id_fkey"
             columns: ["request_id"]
             isOneToOne: false
@@ -1078,6 +1453,13 @@ export type Database = {
             columns: ["vaga_id"]
             isOneToOne: false
             referencedRelation: "vw_vagas_cliente_detalhadas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedbacks_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_com_stats"
             referencedColumns: ["id"]
           },
         ]
@@ -1189,6 +1571,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "historico_candidatos_candidato_id_fkey"
+            columns: ["candidato_id"]
+            isOneToOne: false
+            referencedRelation: "vw_candidatos_reprovados_sem_whatsapp"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "historico_candidatos_vaga_id_fkey"
             columns: ["vaga_id"]
             isOneToOne: false
@@ -1214,6 +1603,13 @@ export type Database = {
             columns: ["vaga_id"]
             isOneToOne: false
             referencedRelation: "vw_vagas_cliente_detalhadas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "historico_candidatos_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_com_stats"
             referencedColumns: ["id"]
           },
         ]
@@ -1302,6 +1698,13 @@ export type Database = {
             referencedRelation: "vw_vagas_cliente_detalhadas"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "import_logs_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_com_stats"
+            referencedColumns: ["id"]
+          },
         ]
       }
       job_history: {
@@ -1356,6 +1759,13 @@ export type Database = {
             columns: ["job_id"]
             isOneToOne: false
             referencedRelation: "vw_vagas_cliente_detalhadas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_history_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_com_stats"
             referencedColumns: ["id"]
           },
         ]
@@ -1424,7 +1834,101 @@ export type Database = {
             referencedRelation: "vw_vagas_cliente_detalhadas"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "job_stage_history_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_com_stats"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      job_stage_notifications: {
+        Row: {
+          id: string
+          job_id: string
+          notified_at: string
+          stage_slug: string
+          user_id: string | null
+        }
+        Insert: {
+          id?: string
+          job_id: string
+          notified_at?: string
+          stage_slug: string
+          user_id?: string | null
+        }
+        Update: {
+          id?: string
+          job_id?: string
+          notified_at?: string
+          stage_slug?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_stage_notifications_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "vagas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_stage_notifications_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "vagas_active"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_stage_notifications_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "vagas_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_stage_notifications_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_cliente_detalhadas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_stage_notifications_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_com_stats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mentions: {
+        Row: {
+          created_at: string | null
+          entity_id: string
+          entity_type: string
+          id: string
+          mentioned_user_id: string
+          mentioner_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          entity_id: string
+          entity_type: string
+          id?: string
+          mentioned_user_id: string
+          mentioner_id: string
+        }
+        Update: {
+          created_at?: string | null
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          mentioned_user_id?: string
+          mentioner_id?: string
+        }
+        Relationships: []
       }
       notificacoes: {
         Row: {
@@ -1481,6 +1985,13 @@ export type Database = {
             columns: ["vaga_id"]
             isOneToOne: false
             referencedRelation: "vw_vagas_cliente_detalhadas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notificacoes_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_com_stats"
             referencedColumns: ["id"]
           },
         ]
@@ -1543,6 +2054,13 @@ export type Database = {
             columns: ["job_id"]
             isOneToOne: false
             referencedRelation: "vw_vagas_cliente_detalhadas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_com_stats"
             referencedColumns: ["id"]
           },
           {
@@ -1650,6 +2168,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "fk_candidato_id"
+            columns: ["candidato_id"]
+            isOneToOne: false
+            referencedRelation: "vw_candidatos_reprovados_sem_whatsapp"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "fk_vaga_id"
             columns: ["vaga_id"]
             isOneToOne: false
@@ -1675,6 +2200,13 @@ export type Database = {
             columns: ["vaga_id"]
             isOneToOne: false
             referencedRelation: "vw_vagas_cliente_detalhadas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_vaga_id"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_com_stats"
             referencedColumns: ["id"]
           },
         ]
@@ -1804,6 +2336,144 @@ export type Database = {
         }
         Relationships: []
       }
+      role_comparison_cache: {
+        Row: {
+          cache_key: string
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          result: Json
+        }
+        Insert: {
+          cache_key: string
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          result: Json
+        }
+        Update: {
+          cache_key?: string
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          result?: Json
+        }
+        Relationships: []
+      }
+      salary_benchmarks: {
+        Row: {
+          cargo_canonico: string
+          cargo_original: string | null
+          created_at: string | null
+          fixo_max: number | null
+          fixo_min: number | null
+          id: string
+          page_number: number | null
+          porte_empresa: string | null
+          search_vector: unknown
+          senioridade: string | null
+          setor: string | null
+          source: string
+          trecho_origem: string | null
+          year: number
+        }
+        Insert: {
+          cargo_canonico: string
+          cargo_original?: string | null
+          created_at?: string | null
+          fixo_max?: number | null
+          fixo_min?: number | null
+          id?: string
+          page_number?: number | null
+          porte_empresa?: string | null
+          search_vector?: unknown
+          senioridade?: string | null
+          setor?: string | null
+          source: string
+          trecho_origem?: string | null
+          year?: number
+        }
+        Update: {
+          cargo_canonico?: string
+          cargo_original?: string | null
+          created_at?: string | null
+          fixo_max?: number | null
+          fixo_min?: number | null
+          id?: string
+          page_number?: number | null
+          porte_empresa?: string | null
+          search_vector?: unknown
+          senioridade?: string | null
+          setor?: string | null
+          source?: string
+          trecho_origem?: string | null
+          year?: number
+        }
+        Relationships: []
+      }
+      salary_study_cache: {
+        Row: {
+          cache_key: string
+          cargo: string
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          localidade: string | null
+          resultado: Json
+          senioridade: string | null
+        }
+        Insert: {
+          cache_key: string
+          cargo: string
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          localidade?: string | null
+          resultado: Json
+          senioridade?: string | null
+        }
+        Update: {
+          cache_key?: string
+          cargo?: string
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          localidade?: string | null
+          resultado?: Json
+          senioridade?: string | null
+        }
+        Relationships: []
+      }
+      saved_role_comparisons: {
+        Row: {
+          client_context: string | null
+          created_at: string | null
+          id: string
+          prompt_version: string | null
+          requirements: Json
+          role_ids: string[]
+          user_id: string
+        }
+        Insert: {
+          client_context?: string | null
+          created_at?: string | null
+          id?: string
+          prompt_version?: string | null
+          requirements: Json
+          role_ids: string[]
+          user_id: string
+        }
+        Update: {
+          client_context?: string | null
+          created_at?: string | null
+          id?: string
+          prompt_version?: string | null
+          requirements?: Json
+          role_ids?: string[]
+          user_id?: string
+        }
+        Relationships: []
+      }
       scorecard_analysis_logs: {
         Row: {
           ai_model: string
@@ -1864,6 +2534,13 @@ export type Database = {
             referencedRelation: "vw_vagas_cliente_detalhadas"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "scorecard_analysis_logs_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_com_stats"
+            referencedColumns: ["id"]
+          },
         ]
       }
       scorecard_criteria: {
@@ -1874,6 +2551,8 @@ export type Database = {
           display_order: number | null
           id: string
           name: string
+          options: Json | null
+          question_type: string | null
           scale_type: Database["public"]["Enums"]["scale_type"] | null
           template_id: string
           weight: number | null
@@ -1885,6 +2564,8 @@ export type Database = {
           display_order?: number | null
           id?: string
           name: string
+          options?: Json | null
+          question_type?: string | null
           scale_type?: Database["public"]["Enums"]["scale_type"] | null
           template_id: string
           weight?: number | null
@@ -1896,6 +2577,8 @@ export type Database = {
           display_order?: number | null
           id?: string
           name?: string
+          options?: Json | null
+          question_type?: string | null
           scale_type?: Database["public"]["Enums"]["scale_type"] | null
           template_id?: string
           weight?: number | null
@@ -1914,26 +2597,41 @@ export type Database = {
         Row: {
           created_at: string | null
           criteria_id: string
+          graded_at: string | null
+          graded_by: string | null
           id: string
+          is_correct: boolean | null
           notes: string | null
           score: number | null
           scorecard_id: string
+          selected_option_index: number | null
+          text_answer: string | null
         }
         Insert: {
           created_at?: string | null
           criteria_id: string
+          graded_at?: string | null
+          graded_by?: string | null
           id?: string
+          is_correct?: boolean | null
           notes?: string | null
           score?: number | null
           scorecard_id: string
+          selected_option_index?: number | null
+          text_answer?: string | null
         }
         Update: {
           created_at?: string | null
           criteria_id?: string
+          graded_at?: string | null
+          graded_by?: string | null
           id?: string
+          is_correct?: boolean | null
           notes?: string | null
           score?: number | null
           scorecard_id?: string
+          selected_option_index?: number | null
+          text_answer?: string | null
         }
         Relationships: [
           {
@@ -1941,6 +2639,13 @@ export type Database = {
             columns: ["criteria_id"]
             isOneToOne: false
             referencedRelation: "scorecard_criteria"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scorecard_evaluations_graded_by_fkey"
+            columns: ["graded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
@@ -1960,6 +2665,7 @@ export type Database = {
           description: string | null
           id: string
           name: string
+          type: string | null
           updated_at: string | null
         }
         Insert: {
@@ -1969,6 +2675,7 @@ export type Database = {
           description?: string | null
           id?: string
           name: string
+          type?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -1978,9 +2685,18 @@ export type Database = {
           description?: string | null
           id?: string
           name?: string
+          type?: string | null
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_scorecard_templates_created_by"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       share_link_audit: {
         Row: {
@@ -2163,6 +2879,13 @@ export type Database = {
             referencedRelation: "vw_vagas_cliente_detalhadas"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "share_links_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_com_stats"
+            referencedColumns: ["id"]
+          },
         ]
       }
       sync_logs: {
@@ -2246,6 +2969,107 @@ export type Database = {
         }
         Relationships: []
       }
+      talent_pool_link_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          ip_address: string | null
+          link_id: string
+          metadata: Json | null
+          user_agent: string | null
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          ip_address?: string | null
+          link_id: string
+          metadata?: Json | null
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          ip_address?: string | null
+          link_id?: string
+          metadata?: Json | null
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "talent_pool_link_events_link_id_fkey"
+            columns: ["link_id"]
+            isOneToOne: false
+            referencedRelation: "talent_pool_links"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      talent_pool_links: {
+        Row: {
+          active: boolean
+          created_at: string
+          created_by: string | null
+          expires_at: string | null
+          id: string
+          last_used_at: string | null
+          max_submissions: number | null
+          note: string | null
+          password_hash: string | null
+          revoked: boolean | null
+          revoked_at: string | null
+          revoked_by: string | null
+          submissions_count: number
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          last_used_at?: string | null
+          max_submissions?: number | null
+          note?: string | null
+          password_hash?: string | null
+          revoked?: boolean | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          submissions_count?: number
+          token: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          last_used_at?: string | null
+          max_submissions?: number | null
+          note?: string | null
+          password_hash?: string | null
+          revoked?: boolean | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          submissions_count?: number
+          token?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       tasks: {
         Row: {
           assignee_id: string | null
@@ -2268,6 +3092,7 @@ export type Database = {
           google_task_synced: boolean | null
           id: string
           idempotency_key: string | null
+          meeting_outcome: string | null
           priority: string | null
           reminder_minutes: number | null
           start_time: string | null
@@ -2299,6 +3124,7 @@ export type Database = {
           google_task_synced?: boolean | null
           id?: string
           idempotency_key?: string | null
+          meeting_outcome?: string | null
           priority?: string | null
           reminder_minutes?: number | null
           start_time?: string | null
@@ -2330,6 +3156,7 @@ export type Database = {
           google_task_synced?: boolean | null
           id?: string
           idempotency_key?: string | null
+          meeting_outcome?: string | null
           priority?: string | null
           reminder_minutes?: number | null
           start_time?: string | null
@@ -2391,6 +3218,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "tasks_candidato_id_fkey"
+            columns: ["candidato_id"]
+            isOneToOne: false
+            referencedRelation: "vw_candidatos_reprovados_sem_whatsapp"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "tasks_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
@@ -2430,6 +3264,13 @@ export type Database = {
             columns: ["vaga_id"]
             isOneToOne: false
             referencedRelation: "vw_vagas_cliente_detalhadas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_com_stats"
             referencedColumns: ["id"]
           },
         ]
@@ -2544,6 +3385,13 @@ export type Database = {
             referencedRelation: "vw_vagas_cliente_detalhadas"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "vacancy_tags_vacancy_id_fkey"
+            columns: ["vacancy_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_com_stats"
+            referencedColumns: ["id"]
+          },
         ]
       }
       vaga_eventos: {
@@ -2603,6 +3451,90 @@ export type Database = {
             referencedRelation: "vw_vagas_cliente_detalhadas"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "vaga_eventos_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_com_stats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vaga_recrutadores: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          id: string
+          is_primary: boolean | null
+          user_id: string
+          vaga_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_primary?: boolean | null
+          user_id: string
+          vaga_id: string
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_primary?: boolean | null
+          user_id?: string
+          vaga_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vaga_recrutadores_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vaga_recrutadores_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vaga_recrutadores_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vagas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vaga_recrutadores_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vagas_active"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vaga_recrutadores_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vagas_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vaga_recrutadores_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_cliente_detalhadas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vaga_recrutadores_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_com_stats"
+            referencedColumns: ["id"]
+          },
         ]
       }
       vaga_status_ref: {
@@ -2643,6 +3575,7 @@ export type Database = {
           criado_em: string | null
           cs_id: string | null
           cs_responsavel: string | null
+          data_abertura: string | null
           deleted_at: string | null
           deleted_by: string | null
           deleted_reason: string | null
@@ -2650,6 +3583,7 @@ export type Database = {
           dias_semana: string[] | null
           empresa: string
           empresa_id: string | null
+          habilidades_comportamentais: string | null
           horario_fim: string | null
           horario_inicio: string | null
           id: string
@@ -2659,6 +3593,7 @@ export type Database = {
           motivo_confidencial: string | null
           observacoes: string | null
           prioridade: Database["public"]["Enums"]["prioridade_vaga"] | null
+          quantidade_vagas: number | null
           recruiter_id: string | null
           recrutador: string | null
           recrutador_id: string | null
@@ -2694,6 +3629,7 @@ export type Database = {
           criado_em?: string | null
           cs_id?: string | null
           cs_responsavel?: string | null
+          data_abertura?: string | null
           deleted_at?: string | null
           deleted_by?: string | null
           deleted_reason?: string | null
@@ -2701,6 +3637,7 @@ export type Database = {
           dias_semana?: string[] | null
           empresa: string
           empresa_id?: string | null
+          habilidades_comportamentais?: string | null
           horario_fim?: string | null
           horario_inicio?: string | null
           id?: string
@@ -2712,6 +3649,7 @@ export type Database = {
           motivo_confidencial?: string | null
           observacoes?: string | null
           prioridade?: Database["public"]["Enums"]["prioridade_vaga"] | null
+          quantidade_vagas?: number | null
           recruiter_id?: string | null
           recrutador?: string | null
           recrutador_id?: string | null
@@ -2747,6 +3685,7 @@ export type Database = {
           criado_em?: string | null
           cs_id?: string | null
           cs_responsavel?: string | null
+          data_abertura?: string | null
           deleted_at?: string | null
           deleted_by?: string | null
           deleted_reason?: string | null
@@ -2754,6 +3693,7 @@ export type Database = {
           dias_semana?: string[] | null
           empresa?: string
           empresa_id?: string | null
+          habilidades_comportamentais?: string | null
           horario_fim?: string | null
           horario_inicio?: string | null
           id?: string
@@ -2765,6 +3705,7 @@ export type Database = {
           motivo_confidencial?: string | null
           observacoes?: string | null
           prioridade?: Database["public"]["Enums"]["prioridade_vaga"] | null
+          quantidade_vagas?: number | null
           recruiter_id?: string | null
           recrutador?: string | null
           recrutador_id?: string | null
@@ -2936,6 +3877,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "whatsapp_sends_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "vw_candidatos_reprovados_sem_whatsapp"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "whatsapp_sends_vacancy_id_fkey"
             columns: ["vacancy_id"]
             isOneToOne: false
@@ -2961,6 +3909,13 @@ export type Database = {
             columns: ["vacancy_id"]
             isOneToOne: false
             referencedRelation: "vw_vagas_cliente_detalhadas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whatsapp_sends_vacancy_id_fkey"
+            columns: ["vacancy_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_com_stats"
             referencedColumns: ["id"]
           },
         ]
@@ -3117,6 +4072,13 @@ export type Database = {
             referencedRelation: "vw_vagas_cliente_detalhadas"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "candidatos_vaga_relacionada_id_fkey"
+            columns: ["vaga_relacionada_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_com_stats"
+            referencedColumns: ["id"]
+          },
         ]
       }
       candidatos_active: {
@@ -3258,6 +4220,13 @@ export type Database = {
             referencedRelation: "vw_vagas_cliente_detalhadas"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "candidatos_vaga_relacionada_id_fkey"
+            columns: ["vaga_relacionada_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_com_stats"
+            referencedColumns: ["id"]
+          },
         ]
       }
       candidatos_public_view: {
@@ -3265,10 +4234,22 @@ export type Database = {
           area: Database["public"]["Enums"]["area_candidato"] | null
           cidade: string | null
           criado_em: string | null
+          curriculo_url: string | null
+          deleted_at: string | null
+          disponibilidade_mudanca: string | null
+          disponibilidade_status: string | null
           estado: string | null
+          hired_at: string | null
           id: string | null
+          is_visible_for_client: boolean | null
+          linkedin: string | null
           nivel: Database["public"]["Enums"]["nivel_candidato"] | null
           nome_completo: string | null
+          origem: string | null
+          parecer_final: string | null
+          pontos_desenvolver: string | null
+          pontos_fortes: string | null
+          portfolio_url: string | null
           status: Database["public"]["Enums"]["status_candidato"] | null
           vaga_relacionada_id: string | null
         }
@@ -3276,10 +4257,22 @@ export type Database = {
           area?: Database["public"]["Enums"]["area_candidato"] | null
           cidade?: string | null
           criado_em?: string | null
+          curriculo_url?: string | null
+          deleted_at?: string | null
+          disponibilidade_mudanca?: string | null
+          disponibilidade_status?: string | null
           estado?: string | null
+          hired_at?: string | null
           id?: string | null
+          is_visible_for_client?: boolean | null
+          linkedin?: string | null
           nivel?: Database["public"]["Enums"]["nivel_candidato"] | null
           nome_completo?: string | null
+          origem?: string | null
+          parecer_final?: string | null
+          pontos_desenvolver?: string | null
+          pontos_fortes?: string | null
+          portfolio_url?: string | null
           status?: Database["public"]["Enums"]["status_candidato"] | null
           vaga_relacionada_id?: string | null
         }
@@ -3287,10 +4280,22 @@ export type Database = {
           area?: Database["public"]["Enums"]["area_candidato"] | null
           cidade?: string | null
           criado_em?: string | null
+          curriculo_url?: string | null
+          deleted_at?: string | null
+          disponibilidade_mudanca?: string | null
+          disponibilidade_status?: string | null
           estado?: string | null
+          hired_at?: string | null
           id?: string | null
+          is_visible_for_client?: boolean | null
+          linkedin?: string | null
           nivel?: Database["public"]["Enums"]["nivel_candidato"] | null
           nome_completo?: string | null
+          origem?: string | null
+          parecer_final?: string | null
+          pontos_desenvolver?: string | null
+          pontos_fortes?: string | null
+          portfolio_url?: string | null
           status?: Database["public"]["Enums"]["status_candidato"] | null
           vaga_relacionada_id?: string | null
         }
@@ -3321,6 +4326,13 @@ export type Database = {
             columns: ["vaga_relacionada_id"]
             isOneToOne: false
             referencedRelation: "vw_vagas_cliente_detalhadas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidatos_vaga_relacionada_id_fkey"
+            columns: ["vaga_relacionada_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_com_stats"
             referencedColumns: ["id"]
           },
         ]
@@ -3466,6 +4478,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "feedbacks_candidato_id_fkey"
+            columns: ["candidato_id"]
+            isOneToOne: false
+            referencedRelation: "vw_candidatos_reprovados_sem_whatsapp"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "feedbacks_request_id_fkey"
             columns: ["request_id"]
             isOneToOne: false
@@ -3500,7 +4519,26 @@ export type Database = {
             referencedRelation: "vw_vagas_cliente_detalhadas"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "feedbacks_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_com_stats"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      mv_dashboard_overview: {
+        Row: {
+          candidatos_ativos: number | null
+          feedbacks_pendentes: number | null
+          ids_vagas_atencao: string[] | null
+          media_dias_fechamento: number | null
+          taxa_aprovacao: number | null
+          vagas_abertas: number | null
+          vagas_atencao: number | null
+        }
+        Relationships: []
       }
       mv_recruitment_kpis: {
         Row: {
@@ -3836,6 +4874,13 @@ export type Database = {
             referencedRelation: "vw_candidatos_por_vaga"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "feedbacks_candidato_id_fkey"
+            columns: ["candidato_id"]
+            isOneToOne: false
+            referencedRelation: "vw_candidatos_reprovados_sem_whatsapp"
+            referencedColumns: ["id"]
+          },
         ]
       }
       vw_candidatos_por_vaga: {
@@ -3882,6 +4927,156 @@ export type Database = {
             columns: ["vaga_relacionada_id"]
             isOneToOne: false
             referencedRelation: "vw_vagas_cliente_detalhadas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidatos_vaga_relacionada_id_fkey"
+            columns: ["vaga_relacionada_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_com_stats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vw_candidatos_reprovados_sem_whatsapp: {
+        Row: {
+          criado_em: string | null
+          dias_desde_status: number | null
+          email: string | null
+          id: string | null
+          nome_completo: string | null
+          rejection_feedback_at: string | null
+          rejection_feedback_given: boolean | null
+          rejection_feedback_job_id: string | null
+          status: Database["public"]["Enums"]["status_candidato"] | null
+          telefone: string | null
+          vaga_relacionada_id: string | null
+          vaga_titulo: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidatos_rejection_feedback_job_id_fkey"
+            columns: ["rejection_feedback_job_id"]
+            isOneToOne: false
+            referencedRelation: "vagas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidatos_rejection_feedback_job_id_fkey"
+            columns: ["rejection_feedback_job_id"]
+            isOneToOne: false
+            referencedRelation: "vagas_active"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidatos_rejection_feedback_job_id_fkey"
+            columns: ["rejection_feedback_job_id"]
+            isOneToOne: false
+            referencedRelation: "vagas_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidatos_rejection_feedback_job_id_fkey"
+            columns: ["rejection_feedback_job_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_cliente_detalhadas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidatos_rejection_feedback_job_id_fkey"
+            columns: ["rejection_feedback_job_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_com_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidatos_vaga_relacionada_id_fkey"
+            columns: ["vaga_relacionada_id"]
+            isOneToOne: false
+            referencedRelation: "vagas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidatos_vaga_relacionada_id_fkey"
+            columns: ["vaga_relacionada_id"]
+            isOneToOne: false
+            referencedRelation: "vagas_active"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidatos_vaga_relacionada_id_fkey"
+            columns: ["vaga_relacionada_id"]
+            isOneToOne: false
+            referencedRelation: "vagas_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidatos_vaga_relacionada_id_fkey"
+            columns: ["vaga_relacionada_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_cliente_detalhadas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidatos_vaga_relacionada_id_fkey"
+            columns: ["vaga_relacionada_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_com_stats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vw_vaga_recrutadores: {
+        Row: {
+          created_at: string | null
+          id: string | null
+          is_primary: boolean | null
+          recrutador_email: string | null
+          recrutador_nome: string | null
+          user_id: string | null
+          vaga_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vaga_recrutadores_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vaga_recrutadores_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vagas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vaga_recrutadores_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vagas_active"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vaga_recrutadores_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vagas_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vaga_recrutadores_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_cliente_detalhadas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vaga_recrutadores_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_com_stats"
             referencedColumns: ["id"]
           },
         ]
@@ -3934,6 +5129,55 @@ export type Database = {
           },
         ]
       }
+      vw_vagas_com_stats: {
+        Row: {
+          candidatos_count: number | null
+          complexidade: Database["public"]["Enums"]["complexidade_vaga"] | null
+          confidencial: boolean | null
+          criado_em: string | null
+          cs_id: string | null
+          cs_responsavel: string | null
+          data_abertura: string | null
+          deleted_at: string | null
+          dias_etapa_atual: number | null
+          empresa: string | null
+          id: string | null
+          last_stage_change: string | null
+          modelo_trabalho: Database["public"]["Enums"]["modelo_trabalho"] | null
+          prioridade: Database["public"]["Enums"]["prioridade_vaga"] | null
+          recrutador: string | null
+          recrutador_id: string | null
+          salario_max: number | null
+          salario_min: number | null
+          status: Database["public"]["Enums"]["status_vaga"] | null
+          status_order: number | null
+          status_slug: string | null
+          titulo: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_vagas_status_slug"
+            columns: ["status_slug"]
+            isOneToOne: false
+            referencedRelation: "vaga_status_ref"
+            referencedColumns: ["slug"]
+          },
+          {
+            foreignKeyName: "vagas_cs_id_fkey"
+            columns: ["cs_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vagas_recrutador_id_fkey"
+            columns: ["recrutador_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       assess_deletion_risk: {
@@ -3947,8 +5191,14 @@ export type Database = {
       can_manage_user_roles: { Args: never; Returns: boolean }
       can_submit_feedback: { Args: { p_request_id: string }; Returns: boolean }
       can_view_analytics: { Args: never; Returns: boolean }
+      can_view_whatsapp_send: {
+        Args: { p_vacancy_id: string }
+        Returns: boolean
+      }
       cleanup_expired_pdf_imports: { Args: never; Returns: undefined }
       cleanup_old_submission_logs: { Args: never; Returns: undefined }
+      cleanup_role_comparison_cache: { Args: never; Returns: undefined }
+      cleanup_salary_study_cache: { Args: never; Returns: undefined }
       compute_audit_event_hash: {
         Args: {
           p_action: string
@@ -3992,6 +5242,22 @@ export type Database = {
         }
         Returns: string
       }
+      generate_salary_study_cache_key: {
+        Args: { p_cargo: string; p_localidade?: string; p_senioridade?: string }
+        Returns: string
+      }
+      get_dashboard_overview_secure: {
+        Args: never
+        Returns: {
+          candidatos_ativos: number
+          feedbacks_pendentes: number
+          ids_vagas_atencao: string[]
+          media_dias_fechamento: number
+          taxa_aprovacao: number
+          vagas_abertas: number
+          vagas_atencao: number
+        }[]
+      }
       get_latest_audit_event_hash: { Args: never; Returns: string }
       get_recruitment_kpis_secure: {
         Args: never
@@ -4007,6 +5273,19 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      get_salary_benchmarks_aggregated: {
+        Args: { p_cargo: string; p_limit?: number; p_senioridade?: string }
+        Returns: {
+          avg_salary: number
+          max_salary: number
+          min_salary: number
+          porte_empresa: string
+          record_count: number
+          sample_trecho: string
+          setor: string
+          source: string
+        }[]
+      }
       get_share_link_by_token: {
         Args: { p_token: string }
         Returns: {
@@ -4021,12 +5300,39 @@ export type Database = {
           vaga_id: string
         }[]
       }
+      get_talent_pool_link_by_token: {
+        Args: { p_token: string }
+        Returns: {
+          active: boolean
+          created_at: string
+          expires_at: string
+          id: string
+          max_submissions: number
+          requires_password: boolean
+          submissions_count: number
+          token: string
+        }[]
+      }
+      get_technical_test_by_token: {
+        Args: { p_token: string }
+        Returns: {
+          candidate_id: string
+          candidate_name: string
+          expires_at: string
+          scorecard_id: string
+          submitted_at: string
+          template_id: string
+          vaga_id: string
+          vaga_titulo: string
+        }[]
+      }
       get_user_role: { Args: { user_id: string }; Returns: string }
       get_user_roles: {
         Args: { user_id: string }
         Returns: Database["public"]["Enums"]["app_role"][]
       }
       has_active_share_link: { Args: { p_vaga_id: string }; Returns: boolean }
+      has_active_talent_pool_link: { Args: never; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -4049,6 +5355,7 @@ export type Database = {
         Args: { old_status: string }
         Returns: string
       }
+      refresh_dashboard_overview: { Args: never; Returns: undefined }
       refresh_recruitment_kpis: { Args: never; Returns: undefined }
       validate_feedback_token: {
         Args: { p_token: string }
@@ -4113,7 +5420,6 @@ export type Database = {
         | "Contratado"
         | "Em andamento"
       scale_type: "rating_1_5" | "text_options"
-      scorecard_recommendation: "strong_yes" | "yes" | "maybe" | "no"
       status_candidato:
         | "Banco de Talentos"
         | "Selecionado"
@@ -4127,6 +5433,10 @@ export type Database = {
         | "Contratado"
         | "Reprovado Rhello"
         | "Aprovado Rhello"
+        | "Assessment | Teste Técnico"
+        | "Entrevista"
+        | "Reprovado"
+        | "Triagem"
       status_vaga:
         | "A iniciar"
         | "Discovery"
@@ -4138,6 +5448,11 @@ export type Database = {
         | "Em processo de contratação"
         | "Concluído"
         | "Cancelada"
+        | "Divulgação"
+        | "Entrevistas"
+        | "Shortlist disponível"
+        | "Concluída"
+        | "Congelada"
       user_type: "rhello" | "external"
     }
     CompositeTypes: {
@@ -4306,7 +5621,6 @@ export const Constants = {
         "Em andamento",
       ],
       scale_type: ["rating_1_5", "text_options"],
-      scorecard_recommendation: ["strong_yes", "yes", "maybe", "no"],
       status_candidato: [
         "Banco de Talentos",
         "Selecionado",
@@ -4320,6 +5634,10 @@ export const Constants = {
         "Contratado",
         "Reprovado Rhello",
         "Aprovado Rhello",
+        "Assessment | Teste Técnico",
+        "Entrevista",
+        "Reprovado",
+        "Triagem",
       ],
       status_vaga: [
         "A iniciar",
@@ -4332,6 +5650,11 @@ export const Constants = {
         "Em processo de contratação",
         "Concluído",
         "Cancelada",
+        "Divulgação",
+        "Entrevistas",
+        "Shortlist disponível",
+        "Concluída",
+        "Congelada",
       ],
       user_type: ["rhello", "external"],
     },

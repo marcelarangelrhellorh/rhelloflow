@@ -1,9 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { handleApiError } from "@/lib/errorHandler";
 
 export type TaskStatus = 'to_do' | 'in_progress' | 'done';
 export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
+export type MeetingOutcome = 'completed' | 'cancelled' | 'no_show' | null;
 
 export type TaskType = 'task' | 'meeting';
 
@@ -39,6 +41,8 @@ export interface Task {
   google_task_synced: boolean;
   google_task_last_sync: string | null;
   google_task_list_id: string | null;
+  // Meeting outcome field
+  meeting_outcome: MeetingOutcome;
   // Relations
   assignee?: {
     id: string;
@@ -65,19 +69,22 @@ export interface TaskFilters {
   search?: string;
 }
 
+// Shared select fields for all task queries to ensure consistency
+const TASK_SELECT_FIELDS = `
+  *,
+  assignee:profiles!tasks_assignee_id_fkey(id, full_name),
+  vaga:vagas(id, titulo),
+  empresa:empresas(id, nome),
+  candidato:candidatos(id, nome_completo)
+` as const;
+
 export function useTasks(filters?: TaskFilters) {
   return useQuery({
     queryKey: ["tasks", filters],
     queryFn: async () => {
       let query = supabase
         .from("tasks")
-        .select(`
-          *,
-          assignee:profiles!tasks_assignee_id_fkey(id, full_name),
-          vaga:vagas(id, titulo),
-          empresa:empresas(id, nome),
-          candidato:candidatos(id, nome_completo)
-        `)
+        .select(TASK_SELECT_FIELDS)
         .order("due_date", { ascending: true, nullsFirst: false })
         .order("created_at", { ascending: false });
 
@@ -125,13 +132,13 @@ export function useCreateTask() {
 
       return data;
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       queryClient.invalidateQueries({ queryKey: ["vaga-tasks"] });
       toast.success("Tarefa criada com sucesso");
     },
     onError: (error) => {
-      toast.error("Erro ao criar tarefa: " + error.message);
+      handleApiError(error, { context: "ao criar tarefa" });
     },
   });
 }
@@ -160,7 +167,7 @@ export function useUpdateTask() {
       toast.success("Tarefa atualizada com sucesso");
     },
     onError: (error) => {
-      toast.error("Erro ao atualizar tarefa: " + error.message);
+      handleApiError(error, { context: "ao atualizar tarefa" });
     },
   });
 }
@@ -179,7 +186,7 @@ export function useDeleteTask() {
       toast.success("Tarefa excluída com sucesso");
     },
     onError: (error) => {
-      toast.error("Erro ao excluir tarefa: " + error.message);
+      handleApiError(error, { context: "ao excluir tarefa" });
     },
   });
 }
@@ -195,13 +202,7 @@ export function useOverdueTasks(isAdmin: boolean = false) {
 
       let query = supabase
         .from("tasks")
-        .select(`
-          *,
-          assignee:profiles!tasks_assignee_id_fkey(id, full_name),
-          vaga:vagas(id, titulo),
-          empresa:empresas(id, nome),
-          candidato:candidatos(id, nome_completo)
-        `)
+        .select(TASK_SELECT_FIELDS)
         .neq("status", "done")
         .lt("due_date", now)
         .not("due_date", "is", null);
@@ -228,13 +229,7 @@ export function usePriorityTasks(priority: TaskPriority, isAdmin: boolean = fals
 
       let query = supabase
         .from("tasks")
-        .select(`
-          *,
-          assignee:profiles!tasks_assignee_id_fkey(id, full_name),
-          vaga:vagas(id, titulo),
-          empresa:empresas(id, nome),
-          candidato:candidatos(id, nome_completo)
-        `)
+        .select(TASK_SELECT_FIELDS)
         .eq("priority", priority)
         .neq("status", "done");
 

@@ -10,6 +10,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Save, X } from "lucide-react";
 import { toast } from "sonner";
 import { Constants } from "@/integrations/supabase/types";
+import { ORIGEM_OPTIONS } from "@/constants/fitCultural";
+import { useCacheInvalidation } from "@/hooks/data/useCacheInvalidation";
+import { CPFInput } from "@/components/ui/cpf-input";
+import { validateCPF, cleanCPF } from "@/lib/cpfUtils";
 
 interface CandidateModalProps {
   open: boolean;
@@ -23,9 +27,11 @@ const RECRUTADORES = ["Ítalo", "Bianca Marques", "Victor", "Mariana", "Isabella
 export function CandidateModal({ open, onClose, candidatoId, onSave }: CandidateModalProps) {
   const [loading, setLoading] = useState(false);
   const [vagas, setVagas] = useState<{ id: string; titulo: string }[]>([]);
+  const { invalidateCandidatos } = useCacheInvalidation();
   const [formData, setFormData] = useState({
     nome_completo: "",
     email: "",
+    cpf: "",
     telefone: "",
     cidade: "",
     estado: "",
@@ -57,6 +63,7 @@ export function CandidateModal({ open, onClose, candidatoId, onSave }: Candidate
     setFormData({
       nome_completo: "",
       email: "",
+      cpf: "",
       telefone: "",
       cidade: "",
       estado: "",
@@ -105,6 +112,7 @@ export function CandidateModal({ open, onClose, candidatoId, onSave }: Candidate
         setFormData({
           nome_completo: data.nome_completo || "",
           email: data.email || "",
+          cpf: data.cpf || "",
           telefone: data.telefone || "",
           cidade: data.cidade || "",
           estado: data.estado || "",
@@ -129,12 +137,41 @@ export function CandidateModal({ open, onClose, candidatoId, onSave }: Candidate
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validar CPF
+    if (!formData.cpf || !validateCPF(formData.cpf)) {
+      toast.error("CPF inválido. Por favor, verifique.");
+      return;
+    }
+    
     setLoading(true);
 
     try {
+      const cpfLimpo = cleanCPF(formData.cpf);
+      
+      // Verificar se CPF já existe (excluindo o próprio candidato se estiver editando)
+      const cpfQuery = supabase
+        .from("candidatos")
+        .select("id, nome_completo")
+        .eq("cpf", cpfLimpo)
+        .is("deleted_at", null);
+      
+      if (candidatoId) {
+        cpfQuery.neq("id", candidatoId);
+      }
+      
+      const { data: existingCPF } = await cpfQuery.maybeSingle();
+      
+      if (existingCPF) {
+        toast.error(`Já existe um candidato cadastrado com este CPF: ${existingCPF.nome_completo}`);
+        setLoading(false);
+        return;
+      }
+
       const dataToSave = {
         nome_completo: formData.nome_completo,
         email: formData.email,
+        cpf: cpfLimpo,
         telefone: formData.telefone || null,
         cidade: formData.cidade || null,
         estado: formData.estado || null,
@@ -186,6 +223,7 @@ export function CandidateModal({ open, onClose, candidatoId, onSave }: Candidate
         toast.success("Candidato criado com sucesso!");
       }
       
+      await invalidateCandidatos(dataToSave.vaga_relacionada_id || undefined);
       onSave();
       onClose();
     } catch (error) {
@@ -245,6 +283,12 @@ export function CandidateModal({ open, onClose, candidatoId, onSave }: Candidate
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <CPFInput
+                  value={formData.cpf}
+                  onChange={(value) => setFormData({ ...formData, cpf: value })}
+                  required
+                />
+
                 <div>
                   <Label htmlFor="cidade">Cidade</Label>
                   <Input
@@ -253,7 +297,9 @@ export function CandidateModal({ open, onClose, candidatoId, onSave }: Candidate
                     onChange={(e) => setFormData({ ...formData, cidade: e.target.value })}
                   />
                 </div>
+              </div>
 
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="estado">Estado</Label>
                   <Input
@@ -264,16 +310,16 @@ export function CandidateModal({ open, onClose, candidatoId, onSave }: Candidate
                     onChange={(e) => setFormData({ ...formData, estado: e.target.value.toUpperCase() })}
                   />
                 </div>
-              </div>
 
-              <div>
-                <Label htmlFor="linkedin">LinkedIn</Label>
-                <Input
-                  id="linkedin"
-                  placeholder="https://linkedin.com/in/..."
-                  value={formData.linkedin}
-                  onChange={(e) => setFormData({ ...formData, linkedin: e.target.value })}
-                />
+                <div>
+                  <Label htmlFor="linkedin">LinkedIn</Label>
+                  <Input
+                    id="linkedin"
+                    placeholder="https://linkedin.com/in/..."
+                    value={formData.linkedin}
+                    onChange={(e) => setFormData({ ...formData, linkedin: e.target.value })}
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -358,19 +404,9 @@ export function CandidateModal({ open, onClose, candidatoId, onSave }: Candidate
                     <SelectValue placeholder={hasSourceLink ? "Link de Divulgação" : "Selecione a origem"} />
                   </SelectTrigger>
                   <SelectContent className="bg-popover z-50">
-                    <SelectItem value="Link de Divulgação">🔗 Link de Divulgação</SelectItem>
-                    <SelectItem value="Pandapé">🐼 Pandapé</SelectItem>
-                    <SelectItem value="LinkedIn">💼 LinkedIn</SelectItem>
-                    <SelectItem value="Gupy">🎯 Gupy</SelectItem>
-                    <SelectItem value="Indeed">📋 Indeed</SelectItem>
-                    <SelectItem value="Catho">📊 Catho</SelectItem>
-                    <SelectItem value="Indicação">👥 Indicação</SelectItem>
-                    <SelectItem value="Site da Empresa">🌐 Site da Empresa</SelectItem>
-                    <SelectItem value="Instagram">📸 Instagram</SelectItem>
-                    <SelectItem value="WhatsApp">💬 WhatsApp</SelectItem>
-                    <SelectItem value="E-mail Direto">✉️ E-mail Direto</SelectItem>
-                    <SelectItem value="Hunting">🎯 Hunting</SelectItem>
-                    <SelectItem value="Outra">➕ Outra</SelectItem>
+                    {ORIGEM_OPTIONS.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 {hasSourceLink && (

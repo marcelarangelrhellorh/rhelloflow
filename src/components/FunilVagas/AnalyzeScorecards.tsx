@@ -12,6 +12,7 @@ import { FileDown, Copy, Sparkles, AlertCircle, TrendingUp, AlertTriangle, Light
 import jsPDF from "jspdf";
 import logoRhelloDark from "@/assets/logo-rhello-dark.png";
 import symbolRhelloDark from "@/assets/symbol-rhello-dark.png";
+import { logger } from "@/lib/logger";
 interface AnalyzeScorecardProps {
   vagaId: string;
   vagaTitulo: string;
@@ -90,7 +91,7 @@ export function AnalyzeScorecards({
         description: `${aggregateResult.candidates.length} candidatos analisados com sucesso.`
       });
     } catch (error: any) {
-      console.error('Erro na análise:', error);
+      logger.error('Erro na análise:', error);
       toast({
         title: "Erro na análise",
         description: error.message || "Tente novamente mais tarde.",
@@ -166,7 +167,7 @@ export function AnalyzeScorecards({
       try {
         doc.addImage(logoRhelloDark, 'PNG', pageWidth / 2 - 25, 30, 50, 15);
       } catch (e) {
-        console.log("Erro ao adicionar logo:", e);
+        logger.log("Erro ao adicionar logo:", e);
       }
 
       // Título principal
@@ -189,7 +190,7 @@ export function AnalyzeScorecards({
       try {
         doc.addImage(symbolRhelloDark, 'PNG', pageWidth / 2 - 15, pageHeight - 50, 30, 30);
       } catch (e) {
-        console.log("Erro ao adicionar símbolo:", e);
+        logger.log("Erro ao adicionar símbolo:", e);
       }
 
       // Faixa amarela decorativa no rodapé da capa
@@ -403,7 +404,7 @@ export function AnalyzeScorecards({
         description: `Arquivo ${fileName} baixado.`
       });
     } catch (error) {
-      console.error('Erro ao gerar PDF:', error);
+      logger.error('Erro ao gerar PDF:', error);
       toast({
         title: "Erro ao gerar PDF",
         description: "Tente novamente mais tarde.",

@@ -1,9 +1,11 @@
+import React from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { User, Mail, MapPin, Briefcase, Eye, Edit, Trash2, Link as LinkIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+
 interface Candidato {
   id: string;
   nome_completo: string;
@@ -49,7 +51,7 @@ const statusIcons: Record<string, string> = {
   "Aprovado Solicitante": "🟡",
   "Contratado": "✅"
 };
-export function CandidateCard({
+export const CandidateCard = React.memo(function CandidateCard({
   candidato,
   onView,
   onEdit,
@@ -62,7 +64,11 @@ export function CandidateCard({
     return parts.length >= 2 ? `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase() : name.substring(0, 2).toUpperCase();
   };
   const isAvailable = candidato.disponibilidade_status !== 'não_disponível';
-  return <Card className={cn("bg-[#fffdf6] border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden rounded-lg", !isAvailable && "opacity-70")}>
+  return <Card 
+    className={cn("bg-[#fffdf6] border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden rounded-lg focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2", !isAvailable && "opacity-70")}
+    role="article"
+    aria-label={`Candidato: ${candidato.nome_completo} - Status: ${candidato.status}${candidato.vaga_titulo ? ` - Vaga: ${candidato.vaga_titulo}` : ''}`}
+  >
       <CardHeader className="pb-3 pt-4 px-4">
         {/* Header with avatar and status */}
         <div className="flex items-start gap-3 mb-3">
@@ -128,14 +134,20 @@ export function CandidateCard({
 
         {/* Quick Actions */}
         <TooltipProvider>
-          <div className="flex gap-1.5 pt-3 mt-3 border-t border-gray-200">
+          <div className="flex gap-1.5 pt-3 mt-3 border-t border-gray-200" role="group" aria-label="Ações do candidato">
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 flex-1 hover:bg-[#faec3e]/20 hover:text-[#00141d] text-[#36404a] px-2" onClick={e => {
-                e.stopPropagation();
-                onView();
-              }}>
-                  <Eye className="h-4 w-4" />
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-8 flex-1 hover:bg-[#faec3e]/20 hover:text-[#00141d] text-[#36404a] px-2" 
+                  onClick={e => {
+                    e.stopPropagation();
+                    onView();
+                  }}
+                  aria-label={`Ver detalhes de ${candidato.nome_completo}`}
+                >
+                  <Eye className="h-4 w-4" aria-hidden="true" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -145,11 +157,17 @@ export function CandidateCard({
 
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 flex-1 hover:bg-[#faec3e]/20 hover:text-[#00141d] text-[#36404a] px-2" onClick={e => {
-                e.stopPropagation();
-                onEdit();
-              }}>
-                  <Edit className="h-4 w-4" />
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-8 flex-1 hover:bg-[#faec3e]/20 hover:text-[#00141d] text-[#36404a] px-2" 
+                  onClick={e => {
+                    e.stopPropagation();
+                    onEdit();
+                  }}
+                  aria-label={`Editar ${candidato.nome_completo}`}
+                >
+                  <Edit className="h-4 w-4" aria-hidden="true" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -159,11 +177,17 @@ export function CandidateCard({
 
             {!candidato.vaga_relacionada_id && <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-8 flex-1 hover:bg-[#faec3e]/20 hover:text-[#00141d] text-[#36404a] px-2" onClick={e => {
-                e.stopPropagation();
-                onLinkJob();
-              }}>
-                    <LinkIcon className="h-4 w-4" />
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-8 flex-1 hover:bg-[#faec3e]/20 hover:text-[#00141d] text-[#36404a] px-2" 
+                    onClick={e => {
+                      e.stopPropagation();
+                      onLinkJob();
+                    }}
+                    aria-label={`Vincular vaga a ${candidato.nome_completo}`}
+                  >
+                    <LinkIcon className="h-4 w-4" aria-hidden="true" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -173,11 +197,17 @@ export function CandidateCard({
 
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 flex-1 text-destructive hover:text-destructive hover:bg-destructive/10 px-2" onClick={e => {
-                e.stopPropagation();
-                onDelete();
-              }}>
-                  <Trash2 className="h-4 w-4" />
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-8 flex-1 text-destructive hover:text-destructive hover:bg-destructive/10 px-2" 
+                  onClick={e => {
+                    e.stopPropagation();
+                    onDelete();
+                  }}
+                  aria-label={`Excluir ${candidato.nome_completo}`}
+                >
+                  <Trash2 className="h-4 w-4" aria-hidden="true" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -188,4 +218,4 @@ export function CandidateCard({
         </TooltipProvider>
       </CardContent>
     </Card>;
-}
+});

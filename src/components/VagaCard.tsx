@@ -1,3 +1,4 @@
+import React, { useState, useEffect, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -7,13 +8,21 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { MoreVertical, Edit, Trash2, AlertTriangle, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { getBusinessDaysFromNow } from "@/lib/dateUtils";
 import { formatSalaryRange } from "@/lib/salaryUtils";
+import { calculateProgress } from "@/lib/jobStages";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { useState, useEffect } from "react";
 import { handleDelete as performDeletion } from "@/lib/deletionUtils";
 import { useUserRole } from "@/hooks/useUserRole";
+interface VagaRecrutador {
+  user_id: string;
+  is_primary: boolean;
+  users: {
+    name: string;
+  } | null;
+}
 interface VagaCardProps {
   vaga: {
     id: string;
@@ -23,6 +32,7 @@ interface VagaCardProps {
     recrutador_id?: string | null;
     status: string;
     criado_em: string | null;
+    data_abertura?: string | null;
     candidatos_count?: number;
     salario_min?: number | null;
     salario_max?: number | null;
@@ -34,18 +44,6 @@ interface VagaCardProps {
   onClick?: () => void;
   viewMode?: "grid" | "list";
 }
-const statusProgressMap: Record<string, number> = {
-  "A iniciar": 10,
-  "Discovery": 20,
-  "Triagem": 25,
-  "Entrevistas rhello": 40,
-  "Aguardando retorno do cliente": 50,
-  "Apresentação de Candidatos": 60,
-  "Entrevista cliente": 75,
-  "Em processo de contratação": 85,
-  "Concluído": 100,
-  "Cancelada": 0
-};
 
 // Função para obter iniciais do nome
 const getInitials = (name: string | null): string => {
@@ -83,7 +81,7 @@ const getStatusBadgeColor = (status: string): {
     text: "#00141D"
   };
 };
-export function VagaCard({
+export const VagaCard = React.memo(function VagaCard({
   vaga,
   draggable = false,
   onDragStart,
@@ -91,6 +89,7 @@ export function VagaCard({
   viewMode = "grid"
 }: VagaCardProps) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const {
     isAdmin
   } = useUserRole();
@@ -98,15 +97,53 @@ export function VagaCard({
   const [isDeleting, setIsDeleting] = useState(false);
   const [deletionReason, setDeletionReason] = useState("");
   const [requiresApproval, setRequiresApproval] = useState(false);
+  const [recrutadores, setRecrutadores] = useState<VagaRecrutador[]>([]);
   const [recrutadorName, setRecrutadorName] = useState<string | null>(vaga.recrutador);
-  const progress = statusProgressMap[vaga.status] || 0;
-  const daysOpen = vaga.criado_em ? getBusinessDaysFromNow(vaga.criado_em) : 0;
+  const progress = calculateProgress(vaga.status);
+  const daysOpen = getBusinessDaysFromNow(vaga.data_abertura || vaga.criado_em);
   const statusColors = getStatusBadgeColor(vaga.status);
+
+  // Carregar múltiplos recrutadores
   useEffect(() => {
-    if (vaga.recrutador_id && !vaga.recrutador) {
+    loadRecrutadores();
+  }, [vaga.id]);
+  const loadRecrutadores = async () => {
+    try {
+      const {
+        data,
+        error
+      } = await supabase.from('vaga_recrutadores').select('user_id, is_primary, users!vaga_recrutadores_user_id_fkey(name)').eq('vaga_id', vaga.id).order('is_primary', {
+        ascending: false
+      });
+      if (error) throw error;
+      if (data && data.length > 0) {
+        const mapped = data.map(r => ({
+          user_id: r.user_id,
+          is_primary: r.is_primary,
+          users: r.users as {
+            name: string;
+          } | null
+        }));
+        setRecrutadores(mapped);
+        // Define o nome do recrutador principal para compatibilidade
+        const principal = mapped.find(r => r.is_primary);
+        if (principal?.users?.name) {
+          setRecrutadorName(principal.users.name);
+        }
+      } else if (vaga.recrutador_id && !vaga.recrutador) {
+        // Fallback: carregar do campo legado se não houver na nova tabela
+        loadRecrutadorName();
+      }
+    } catch (error) {
+      console.error('Erro ao carregar recrutadores:', error);
+    }
+  };
+  // Fallback: carregar nome do recrutador do campo legado
+  useEffect(() => {
+    if (vaga.recrutador_id && !vaga.recrutador && recrutadores.length === 0) {
       loadRecrutadorName();
     }
-  }, [vaga.recrutador_id]);
+  }, [vaga.recrutador_id, recrutadores.length]);
   const loadRecrutadorName = async () => {
     try {
       const {
@@ -162,8 +199,11 @@ export function VagaCard({
         setShowDeleteDialog(false);
         return;
       }
-      toast.success("✅ Vaga marcada para exclusão com sucesso");
-      setTimeout(() => window.location.reload(), 1000);
+      toast.success("✅ Vaga excluída com sucesso");
+      setShowDeleteDialog(false);
+      queryClient.invalidateQueries({
+        queryKey: ['vagas']
+      });
     } catch (error) {
       console.error("Erro ao excluir vaga:", error);
       toast.error("❌ Erro ao excluir a vaga. Tente novamente.");
@@ -175,11 +215,11 @@ export function VagaCard({
     }
   };
   return <>
-      <Card draggable={draggable} onDragStart={onDragStart} onClick={handleClick} className="relative cursor-pointer bg-[#FFFDF6] border border-gray-200 overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-200 hover:scale-[1.01]">
+      <Card draggable={draggable} onDragStart={onDragStart} onClick={handleClick} onKeyDown={e => e.key === 'Enter' && handleClick()} className="relative cursor-pointer bg-white border border-gray-200 overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-200 hover:scale-[1.01] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" role="article" tabIndex={0} aria-label={`Vaga: ${vaga.titulo} - ${vaga.empresa} - Status: ${vaga.status}`}>
         <CardContent className={viewMode === "list" ? "p-4" : "p-5 space-y-4"}>
-          {viewMode === "list" ? (
-            // Layout horizontal compacto para visualização em lista
-            <div className="flex items-center gap-4">
+          {viewMode === "list" ?
+        // Layout horizontal compacto para visualização em lista
+        <div className="flex items-center gap-4">
               {/* Coluna 1: Título e Status */}
               <div className="flex-1 min-w-0 space-y-2">
                 <div className="flex items-start justify-between gap-2">
@@ -188,8 +228,8 @@ export function VagaCard({
                   </h3>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild onClick={e => e.stopPropagation()}>
-                      <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 text-[#36404A] hover:text-[#00141D]">
-                        <MoreVertical className="h-4 w-4" />
+                      <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 text-[#36404A] hover:text-[#00141D]" aria-label={`Menu de ações da vaga ${vaga.titulo}`} aria-haspopup="menu">
+                        <MoreVertical className="h-4 w-4" aria-hidden="true" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-48 bg-white">
@@ -198,9 +238,9 @@ export function VagaCard({
                         Editar vaga
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={e => {
-                        e.stopPropagation();
-                        setShowDeleteDialog(true);
-                      }} className="text-destructive cursor-pointer">
+                    e.stopPropagation();
+                    setShowDeleteDialog(true);
+                  }} className="text-destructive cursor-pointer">
                         <Trash2 className="h-4 w-4 mr-2" />
                         Excluir vaga
                       </DropdownMenuItem>
@@ -209,18 +249,16 @@ export function VagaCard({
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge className="border font-semibold rounded-md px-2 py-0.5 text-xs" style={{
-                    backgroundColor: statusColors.bg,
-                    color: statusColors.text,
-                    borderColor: statusColors.bg
-                  }}>
+                backgroundColor: statusColors.bg,
+                color: statusColors.text,
+                borderColor: statusColors.bg
+              }}>
                     {vaga.status}
                   </Badge>
-                  {vaga.confidencial && (
-                    <Badge className="bg-orange-100 text-orange-700 border-orange-200 border font-semibold rounded-md px-2 py-0.5 text-xs flex items-center gap-1">
+                  {vaga.confidencial && <Badge className="bg-orange-100 text-orange-700 border-orange-200 border font-semibold rounded-md px-2 py-0.5 text-xs flex items-center gap-1">
                       <EyeOff className="h-3 w-3" />
                       Confidencial
-                    </Badge>
-                  )}
+                    </Badge>}
                 </div>
               </div>
 
@@ -233,7 +271,10 @@ export function VagaCard({
                 <div className="space-y-0.5">
                   <p className="text-[#36404A] text-xs font-semibold">Recrutador</p>
                   <p className="text-sm font-semibold text-[#00141D] line-clamp-1 max-w-[150px]">
-                    {recrutadorName || "Não atribuído"}
+                    {recrutadores.length > 0 ? recrutadores.map(r => r.users?.name).filter(Boolean).join(", ") : recrutadorName || "Não atribuído"}
+                    {recrutadores.length > 1 && <span className="text-xs text-muted-foreground ml-1">
+                        ({recrutadores.length})
+                      </span>}
                   </p>
                 </div>
               </div>
@@ -246,9 +287,9 @@ export function VagaCard({
                 </div>
                 <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                   <div className="h-full transition-all duration-300" style={{
-                    width: `${progress}%`,
-                    backgroundColor: "#FFCD00"
-                  }} />
+                width: `${progress}%`,
+                backgroundColor: "#FFCD00"
+              }} />
                 </div>
               </div>
 
@@ -265,18 +306,15 @@ export function VagaCard({
               </div>
 
               {/* Avatar do recrutador */}
-              {recrutadorName && (
-                <div className="flex items-center justify-center w-9 h-9 rounded-full font-bold text-sm shrink-0" style={{
-                  backgroundColor: "#00141D",
-                  color: "#FFFDF6"
-                }} title={recrutadorName}>
+              {recrutadorName && <div className="flex items-center justify-center w-9 h-9 rounded-full font-bold text-sm shrink-0" style={{
+            backgroundColor: "#00141D",
+            color: "#FFFFFF"
+          }} title={recrutadorName}>
                   {getInitials(recrutadorName)}
-                </div>
-              )}
-            </div>
-          ) : (
-            // Layout vertical para visualização em grid (mantido original)
-            <>
+                </div>}
+            </div> :
+        // Layout vertical para visualização em grid (mantido original)
+        <>
               <div className="space-y-2">
                 <div className="flex items-start justify-between gap-2">
                   <h3 className="text-lg font-bold text-[#00141D] leading-tight flex-1 line-clamp-2">
@@ -295,9 +333,9 @@ export function VagaCard({
                         Editar vaga
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={e => {
-                        e.stopPropagation();
-                        setShowDeleteDialog(true);
-                      }} className="text-destructive cursor-pointer">
+                    e.stopPropagation();
+                    setShowDeleteDialog(true);
+                  }} className="text-destructive cursor-pointer">
                         <Trash2 className="h-4 w-4 mr-2" />
                         Excluir vaga
                       </DropdownMenuItem>
@@ -306,11 +344,11 @@ export function VagaCard({
                 </div>
                 
                 <div className="flex flex-wrap items-center gap-2">
-                  <Badge className="border font-semibold rounded-md px-2 py-1 text-sm" style={{
-                    backgroundColor: statusColors.bg,
-                    color: statusColors.text,
-                    borderColor: statusColors.bg
-                  }}>
+                  <Badge style={{
+                backgroundColor: statusColors.bg,
+                color: statusColors.text,
+                borderColor: statusColors.bg
+              }} className="border font-semibold rounded-md px-2 py-1 text-sm bg-[#ffcc00]">
                     {vaga.status}
                   </Badge>
                   
@@ -328,9 +366,17 @@ export function VagaCard({
                 </div>
                 <div className="space-y-1">
                   <p className="text-[#36404A] text-base font-semibold">Recrutador</p>
-                  <p className="text-sm font-semibold text-[#00141D] line-clamp-1">
-                    {recrutadorName || "Não atribuído"}
-                  </p>
+                  <div className="space-y-0.5">
+                    {recrutadores.length > 0 ? <div className="flex flex-wrap gap-1">
+                        {recrutadores.map((r, idx) => <span key={r.user_id} className="text-sm font-semibold text-[#00141D]">
+                            {r.users?.name}
+                            {r.is_primary && <span className="text-xs text-muted-foreground ml-0.5">(P)</span>}
+                            {idx < recrutadores.length - 1 && ","}
+                          </span>)}
+                      </div> : <p className="text-sm font-semibold text-[#00141D] line-clamp-1">
+                        {recrutadorName || "Não atribuído"}
+                      </p>}
+                  </div>
                 </div>
               </div>
 
@@ -348,9 +394,9 @@ export function VagaCard({
                 </div>
                 <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                   <div className="h-full transition-all duration-300" style={{
-                    width: `${progress}%`,
-                    backgroundColor: "#FFCD00"
-                  }} />
+                width: `${progress}%`,
+                backgroundColor: "#FFCD00"
+              }} />
                 </div>
               </div>
 
@@ -367,14 +413,13 @@ export function VagaCard({
                 </div>
 
                 {recrutadorName && <div className="flex items-center justify-center w-10 h-10 rounded-full font-bold text-sm" style={{
-                  backgroundColor: "#00141D",
-                  color: "#FFFDF6"
-                }} title={recrutadorName}>
+              backgroundColor: "#00141D",
+              color: "#FFFFFF"
+            }} title={recrutadorName}>
                     {getInitials(recrutadorName)}
                   </div>}
               </div>
-            </>
-          )}
+            </>}
         </CardContent>
       </Card>
 
@@ -425,4 +470,4 @@ export function VagaCard({
         </AlertDialogContent>
       </AlertDialog>
     </>;
-}
+});

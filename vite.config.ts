@@ -45,6 +45,11 @@ export default defineConfig(({ mode }) => ({
           'vendor-query': ['@tanstack/react-query'],
           'vendor-supabase': ['@supabase/supabase-js'],
           'vendor-utils': ['clsx', 'tailwind-merge', 'date-fns'],
+          // Heavy libraries - lazy loaded
+          'vendor-calendar': ['react-big-calendar'],
+          'vendor-excel': ['xlsx'],
+          'vendor-pdf': ['jspdf'],
+          'vendor-dnd': ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities'],
         },
       },
     },

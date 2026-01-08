@@ -1,53 +1,133 @@
-import { useMemo } from "react";
 import { Video, Calendar, Clock, ExternalLink } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
-import { format, isToday, parseISO } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import moment from "moment";
+import { format } from "date-fns";
+import { supabase } from "@/integrations/supabase/client";
+import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
 
 interface TodayMeetingsSidebarProps {
-  onEventClick?: (event: any) => void;
+  onEventClick?: (meeting: any) => void;
 }
 
-export default function TodayMeetingsSidebar({ onEventClick }: TodayMeetingsSidebarProps) {
-  const { isConnected, isLoading: connectionLoading, getSyncedEvents } = useGoogleCalendar();
+interface MergedMeeting {
+  id: string;
+  title: string;
+  start_time: string | null;
+  end_time: string | null;
+  google_meet_link?: string | null;
+  isExternal: boolean;
+}
 
-  const { data: events, isLoading: eventsLoading } = useQuery({
-    queryKey: ['today-calendar-events'],
+export default function TodayMeetingsSidebar({
+  onEventClick
+}: TodayMeetingsSidebarProps) {
+  const today = format(new Date(), 'yyyy-MM-dd');
+  const { getSyncedEvents, isConnected } = useGoogleCalendar();
+
+  // Fetch local meetings from tasks table
+  const { data: localMeetings, isLoading: isLoadingLocal } = useQuery({
+    queryKey: ['today-meetings-local', today],
     queryFn: async () => {
-      const startOfDay = moment().startOf('day').toISOString();
-      const endOfDay = moment().endOf('day').toISOString();
-      return await getSyncedEvents(startOfDay, endOfDay);
+      const { data, error } = await supabase
+        .from('tasks')
+        .select('*')
+        .eq('task_type', 'meeting')
+        .gte('due_date', `${today}T00:00:00`)
+        .lte('due_date', `${today}T23:59:59`)
+        .order('start_time', { ascending: true });
+
+      if (error) throw error;
+      return data || [];
+    },
+    refetchInterval: 60 * 1000
+  });
+
+  // Fetch external Google Calendar events for today
+  const { data: externalEvents, isLoading: isLoadingExternal } = useQuery({
+    queryKey: ['today-meetings-external', today],
+    queryFn: async () => {
+      if (!isConnected) return [];
+      const timeMin = `${today}T00:00:00Z`;
+      const timeMax = `${today}T23:59:59Z`;
+      const events = await getSyncedEvents(timeMin, timeMax);
+      // Filter only events NOT from the system (external events)
+      return events?.filter(e => !e.isFromSystem) || [];
     },
     enabled: isConnected,
     refetchInterval: 5 * 60 * 1000
   });
 
-  const todayMeetings = useMemo(() => {
-    if (!events) return [];
-    return events
-      .filter((event: any) => {
-        const eventDate = event.start?.dateTime || event.start?.date;
-        if (!eventDate) return false;
-        return isToday(parseISO(eventDate));
-      })
-      .sort((a: any, b: any) => {
-        const dateA = a.start?.dateTime || a.start?.date;
-        const dateB = b.start?.dateTime || b.start?.date;
-        return new Date(dateA).getTime() - new Date(dateB).getTime();
-      });
-  }, [events]);
+  // Merge and sort all meetings
+  const todayMeetings: MergedMeeting[] = [];
 
-  if (connectionLoading) {
+  // Add local meetings
+  localMeetings?.forEach((meeting: any) => {
+    todayMeetings.push({
+      id: meeting.id,
+      title: meeting.title || "Sem título",
+      start_time: meeting.start_time,
+      end_time: meeting.end_time,
+      google_meet_link: meeting.google_meet_link,
+      isExternal: false
+    });
+  });
+
+  // Add external events (not already in local)
+  externalEvents?.forEach((event: any) => {
+    // Check if this event is already synced locally (by google_calendar_event_id)
+    const alreadyLocal = localMeetings?.some(
+      (m: any) => m.google_calendar_event_id === event.id
+    );
+    if (!alreadyLocal) {
+      todayMeetings.push({
+        id: event.id,
+        title: event.title || "Sem título",
+        start_time: event.start ? format(new Date(event.start), 'HH:mm:ss') : null,
+        end_time: event.end ? format(new Date(event.end), 'HH:mm:ss') : null,
+        google_meet_link: event.hangoutLink,
+        isExternal: true
+      });
+    }
+  });
+
+  // Sort by start_time
+  todayMeetings.sort((a, b) => {
+    if (!a.start_time) return 1;
+    if (!b.start_time) return -1;
+    return a.start_time.localeCompare(b.start_time);
+  });
+
+  const formatMeetingTime = (meeting: MergedMeeting) => {
+    if (!meeting.start_time) return "Dia inteiro";
+    const start = meeting.start_time.substring(0, 5);
+    const end = meeting.end_time ? meeting.end_time.substring(0, 5) : "";
+    return end ? `${start} - ${end}` : start;
+  };
+
+  const isMeetingNow = (meeting: MergedMeeting) => {
+    if (!meeting.start_time || !meeting.end_time) return false;
+    const now = new Date();
+    const currentTime = format(now, 'HH:mm:ss');
+    return currentTime >= meeting.start_time && currentTime <= meeting.end_time;
+  };
+
+  const isMeetingPast = (meeting: MergedMeeting) => {
+    if (!meeting.end_time) return false;
+    const now = new Date();
+    const currentTime = format(now, 'HH:mm:ss');
+    return currentTime > meeting.end_time;
+  };
+
+  const isLoading = isLoadingLocal || isLoadingExternal;
+
+  if (isLoading) {
     return (
-      <Card className="h-fit">
-        <CardHeader className="p-3">
+      <Card className="w-full shadow-sm">
+        <CardHeader className="p-3 pb-2">
           <Skeleton className="h-5 w-32" />
         </CardHeader>
         <CardContent className="p-3 pt-0">
@@ -57,129 +137,96 @@ export default function TodayMeetingsSidebar({ onEventClick }: TodayMeetingsSide
     );
   }
 
-  if (!isConnected) {
-    return null;
-  }
-
-  const formatEventTime = (event: any) => {
-    const startTime = event.start?.dateTime;
-    const endTime = event.end?.dateTime;
-    
-    if (!startTime) return "Dia inteiro";
-    
-    const start = format(parseISO(startTime), "HH:mm", { locale: ptBR });
-    const end = endTime ? format(parseISO(endTime), "HH:mm", { locale: ptBR }) : "";
-    
-    return end ? `${start} - ${end}` : start;
-  };
-
-  const isEventNow = (event: any) => {
-    const startTime = event.start?.dateTime;
-    const endTime = event.end?.dateTime;
-    if (!startTime || !endTime) return false;
-    
-    const now = new Date();
-    return now >= new Date(startTime) && now <= new Date(endTime);
-  };
-
-  const isEventPast = (event: any) => {
-    const endTime = event.end?.dateTime || event.end?.date;
-    if (!endTime) return false;
-    return new Date() > new Date(endTime);
-  };
-
   return (
-    <div className="w-full xl:w-56 flex-shrink-0">
-      <Card className="h-fit shadow-sm">
-        <CardHeader className="p-3 pb-2">
-          <CardTitle className="text-sm font-semibold flex items-center gap-2 text-[#00141d]">
-            <Calendar className="h-4 w-4 text-[#ffcd00]" />
-            Reuniões de Hoje
-            {todayMeetings.length > 0 && (
-              <Badge variant="secondary" className="ml-auto text-xs px-1.5 py-0">
-                {todayMeetings.length}
-              </Badge>
-            )}
-          </CardTitle>
-        </CardHeader>
-        
-        <Separator />
-        
-        <CardContent className="p-2">
-          {eventsLoading ? (
-            <div className="space-y-2">
-              {[1, 2].map(i => (
-                <Skeleton key={i} className="h-14 w-full" />
-              ))}
-            </div>
-          ) : todayMeetings.length === 0 ? (
-            <div className="text-center py-4">
-              <Video className="h-8 w-8 mx-auto text-muted-foreground/40 mb-2" />
-              <p className="text-xs text-muted-foreground">
-                Nenhuma reunião hoje
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-2 max-h-[400px] overflow-y-auto">
-              {todayMeetings.map((event: any) => {
-                const isNow = isEventNow(event);
-                const isPast = isEventPast(event);
-                
-                return (
-                  <div
-                    key={event.id}
-                    onClick={() => onEventClick?.(event)}
-                    className={`p-2 rounded-md border cursor-pointer transition-colors ${
-                      isNow 
-                        ? "bg-[#ffcd00]/20 border-[#ffcd00]" 
-                        : isPast 
-                          ? "bg-muted/50 opacity-60" 
-                          : "bg-white hover:bg-muted/50 border-border"
-                    }`}
-                  >
-                    <div className="flex items-start gap-2">
-                      <div className={`p-1 rounded ${isNow ? "bg-[#ffcd00]" : "bg-[#00141d]"}`}>
-                        <Video className={`h-3 w-3 ${isNow ? "text-[#00141d]" : "text-white"}`} />
-                      </div>
-                      <div className="flex-1 min-w-0">
+    <Card className="w-full shadow-lg">
+      <CardHeader className="p-3 pb-2">
+        <CardTitle className="text-sm font-semibold flex items-center gap-2 text-[#00141d]">
+          <Calendar className="h-4 w-4 text-[#ffcd00]" />
+          Reuniões de Hoje
+          {todayMeetings.length > 0 && (
+            <Badge variant="secondary" className="ml-auto text-xs px-1.5 py-0">
+              {todayMeetings.length}
+            </Badge>
+          )}
+        </CardTitle>
+      </CardHeader>
+      
+      <Separator />
+      
+      <CardContent className="p-2">
+        {todayMeetings.length === 0 ? (
+          <div className="text-center py-4">
+            <Video className="h-8 w-8 mx-auto text-muted-foreground/40 mb-2" />
+            <p className="text-xs text-muted-foreground">
+              Nenhuma reunião hoje
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-2 max-h-[300px] overflow-y-auto">
+            {todayMeetings.map((meeting) => {
+              const isNow = isMeetingNow(meeting);
+              const isPast = isMeetingPast(meeting);
+              return (
+                <div 
+                  key={meeting.id} 
+                  onClick={() => onEventClick?.(meeting)} 
+                  className={`p-2 rounded-md border cursor-pointer transition-colors ${
+                    isNow 
+                      ? "bg-[#ffcd00]/20 border-[#ffcd00]" 
+                      : isPast 
+                        ? "bg-muted/50 opacity-60" 
+                        : "bg-white hover:bg-muted/50 border-border"
+                  }`}
+                >
+                  <div className="flex items-start gap-2">
+                    <div className={`p-1 rounded ${isNow ? "bg-[#ffcd00]" : "bg-[#00141d]"}`}>
+                      <Video className={`h-3 w-3 ${isNow ? "text-[#00141d]" : "text-white"}`} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5">
                         <p className={`text-xs font-medium truncate ${isPast ? "line-through" : ""}`}>
-                          {event.summary || "Sem título"}
+                          {meeting.title}
                         </p>
-                        <div className="flex items-center gap-1 mt-0.5">
-                          <Clock className="h-3 w-3 text-muted-foreground" />
-                          <span className="text-[10px] text-muted-foreground">
-                            {formatEventTime(event)}
-                          </span>
-                          {isNow && (
-                            <Badge className="text-[9px] px-1 py-0 h-4 bg-green-500">
-                              Agora
-                            </Badge>
-                          )}
-                        </div>
+                        {meeting.isExternal && (
+                          <Badge variant="outline" className="text-[8px] px-1 py-0 h-3.5 bg-blue-50 text-blue-600 border-blue-200">
+                            Google
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1 mt-0.5">
+                        <Clock className="h-3 w-3 text-muted-foreground" />
+                        <span className="text-[10px] text-muted-foreground">
+                          {formatMeetingTime(meeting)}
+                        </span>
+                        {isNow && (
+                          <Badge className="text-[9px] px-1 py-0 h-4 bg-green-500">
+                            Agora
+                          </Badge>
+                        )}
                       </div>
                     </div>
-                    
-                    {event.hangoutLink && !isPast && (
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="w-full mt-1.5 h-6 text-[10px] gap-1"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          window.open(event.hangoutLink, '_blank');
-                        }}
-                      >
-                        <ExternalLink className="h-3 w-3" />
-                        Entrar na reunião
-                      </Button>
-                    )}
                   </div>
-                );
-              })}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+                  
+                  {meeting.google_meet_link && !isPast && (
+                    <Button 
+                      size="sm" 
+                      variant="ghost" 
+                      className="w-full mt-1.5 h-6 text-[10px] gap-1" 
+                      onClick={e => {
+                        e.stopPropagation();
+                        window.open(meeting.google_meet_link!, '_blank');
+                      }}
+                    >
+                      <ExternalLink className="h-3 w-3" />
+                      Entrar na reunião
+                    </Button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }

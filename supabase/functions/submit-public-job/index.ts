@@ -1,4 +1,4 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from "npm:@supabase/supabase-js@2";
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 
 const corsHeaders = {
@@ -10,6 +10,9 @@ const corsHeaders = {
 const publicJobSchema = z.object({
   titulo: z.string().trim().min(3, 'Título muito curto').max(200, 'Título muito longo'),
   empresa: z.string().trim().min(2, 'Nome da empresa muito curto').max(200, 'Nome da empresa muito longo'),
+  cnpj: z.string()
+    .transform(s => s.replace(/\D/g, ''))
+    .refine(s => s.length === 14, 'CNPJ deve ter 14 dígitos'),
   contato_email: z.string().trim().email('Email inválido').max(255, 'Email muito longo'),
   contato_nome: z.string().trim().min(2, 'Nome muito curto').max(100, 'Nome muito longo'),
   contato_telefone: z.string().trim().max(50).nullable().optional(),
@@ -24,7 +27,9 @@ const publicJobSchema = z.object({
   beneficios: z.array(z.string()).nullable().optional(),
   beneficios_outros: z.string().trim().max(500).nullable().optional(),
   requisitos_obrigatorios: z.string().trim().max(5000).nullable().optional(),
-  requisitos_desejaveis: z.string().trim().max(5000).nullable().optional(),
+  requisitos_desejaveis: z.string().trim().min(10, 'Requisitos desejáveis muito curtos').max(5000),
+  habilidades_comportamentais: z.string().trim().min(10, 'Descreva as habilidades comportamentais').max(5000),
+  quantidade_vagas: z.number().int().min(1).max(100).default(1),
   responsabilidades: z.string().trim().max(5000).nullable().optional(),
   observacoes: z.string().trim().max(2000).nullable().optional(),
   confidencial: z.boolean().nullable().optional(),
@@ -216,13 +221,56 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Vincular ou criar empresa com base no CNPJ
+    let empresaId = null;
+    const sanitizedEmpresa = sanitizeText(validatedData.empresa);
+    const sanitizedContatoNome = sanitizeText(validatedData.contato_nome);
+    const sanitizedContatoEmail = sanitizeText(validatedData.contato_email);
+    const sanitizedContatoTelefone = validatedData.contato_telefone ? sanitizeText(validatedData.contato_telefone) : null;
+
+    // Verificar se empresa já existe
+    const { data: empresaExistente } = await supabaseAdmin
+      .from('empresas')
+      .select('id, nome')
+      .eq('cnpj', validatedData.cnpj)
+      .maybeSingle();
+
+    if (empresaExistente) {
+      // Vincular à empresa existente
+      empresaId = empresaExistente.id;
+      console.log(`Vaga vinculada à empresa existente: ${empresaExistente.nome} (${empresaExistente.id})`);
+    } else {
+      // Criar empresa básica com dados fornecidos
+      const { data: novaEmpresa, error: empresaError } = await supabaseAdmin
+        .from('empresas')
+        .insert([{
+          nome: sanitizedEmpresa,
+          cnpj: validatedData.cnpj,
+          status: 'Lead',
+          contato_principal_nome: sanitizedContatoNome,
+          contato_principal_email: sanitizedContatoEmail,
+          contato_principal_telefone: sanitizedContatoTelefone,
+        }])
+        .select('id, nome')
+        .single();
+      
+      if (!empresaError && novaEmpresa) {
+        empresaId = novaEmpresa.id;
+        console.log(`Nova empresa criada automaticamente: ${novaEmpresa.nome} (${novaEmpresa.id})`);
+      } else {
+        console.error('Erro ao criar empresa:', empresaError);
+        // Continua sem vincular empresa - não bloqueia criação da vaga
+      }
+    }
+
     // Prepare sanitized data for insertion
     const sanitizedData = {
       titulo: sanitizeText(validatedData.titulo),
-      empresa: sanitizeText(validatedData.empresa),
-      contato_nome: sanitizeText(validatedData.contato_nome),
-      contato_email: sanitizeText(validatedData.contato_email),
-      contato_telefone: validatedData.contato_telefone ? sanitizeText(validatedData.contato_telefone) : null,
+      empresa: sanitizedEmpresa,
+      empresa_id: empresaId,
+      contato_nome: sanitizedContatoNome,
+      contato_email: sanitizedContatoEmail,
+      contato_telefone: sanitizedContatoTelefone,
       salario_min: validatedData.salario_min || null,
       salario_max: validatedData.salario_max || null,
       salario_modalidade: validatedData.salario_modalidade || 'FAIXA',
@@ -234,14 +282,17 @@ Deno.serve(async (req) => {
       beneficios: validatedData.beneficios || null,
       beneficios_outros: validatedData.beneficios_outros ? sanitizeText(validatedData.beneficios_outros) : null,
       requisitos_obrigatorios: validatedData.requisitos_obrigatorios ? sanitizeText(validatedData.requisitos_obrigatorios) : null,
-      requisitos_desejaveis: validatedData.requisitos_desejaveis ? sanitizeText(validatedData.requisitos_desejaveis) : null,
+      requisitos_desejaveis: sanitizeText(validatedData.requisitos_desejaveis),
+      habilidades_comportamentais: sanitizeText(validatedData.habilidades_comportamentais),
+      quantidade_vagas: validatedData.quantidade_vagas,
       responsabilidades: validatedData.responsabilidades ? sanitizeText(validatedData.responsabilidades) : null,
       observacoes: validatedData.observacoes ? sanitizeText(validatedData.observacoes) : null,
       confidencial: validatedData.confidencial || false,
       motivo_confidencial: validatedData.motivo_confidencial ? sanitizeText(validatedData.motivo_confidencial) : null,
       source: 'externo',
-      status: 'A iniciar',
-      status_slug: 'a_iniciar',
+      status: 'Discovery',
+      status_slug: 'discovery',
+      status_order: 1,
     };
 
     // Insert job into database
@@ -267,7 +318,7 @@ Deno.serve(async (req) => {
         blocked: false,
       }]);
 
-    console.log(`Job submission successful from IP ${clientIp}: ${data.id}`);
+    console.log(`Job submission successful from IP ${clientIp}: ${data.id}, empresa_id: ${empresaId}`);
 
     return new Response(
       JSON.stringify({ 
