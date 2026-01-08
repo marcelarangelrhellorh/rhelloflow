@@ -227,7 +227,7 @@ export function AppSidebar() {
                   
                   {!collapsed && <CollapsibleContent className="pl-4 space-y-1">
                       {toolsItems.map(item => <SidebarMenuItem key={item.title}>
-                          <SidebarMenuButton onClick={() => navigate(item.url)} onMouseEnter={() => prefetchRoute(item.url)} isActive={location.pathname === item.url} className="pl-4">
+                          <SidebarMenuButton onClick={() => navigate(item.url)} onMouseEnter={() => prefetchRoute(item.url)} isActive={location.pathname === item.url} className="pl-4 text-sm">
                             <item.icon className="h-5 w-5" aria-hidden="true" />
                             <span className="text-sm">{item.title}</span>
                           </SidebarMenuButton>
