@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
         submissions_count,
         password_hash,
         revoked,
-        vaga:vagas(id, titulo, empresa, cidade, estado, formato_trabalho, modelo_contratacao)
+        vaga:vagas(id, titulo, empresa, modelo_trabalho, tipo_contratacao)
       `)
       .eq('token', token)
       .eq('revoked', false)
@@ -89,6 +89,9 @@ Deno.serve(async (req) => {
 
     console.log(`Candidate form link viewed: ${link.id}`);
 
+    // Handle vaga which can be object or array from join
+    const vagaData = Array.isArray(link.vaga) ? link.vaga[0] : link.vaga;
+
     return new Response(JSON.stringify({
       id: link.id,
       active: link.active,
@@ -96,7 +99,13 @@ Deno.serve(async (req) => {
       max_submissions: link.max_submissions,
       submissions_count: link.submissions_count,
       requires_password: !!link.password_hash,
-      vaga: link.vaga,
+      vaga: vagaData ? {
+        id: vagaData.id,
+        titulo: vagaData.titulo,
+        empresa: vagaData.empresa,
+        formato_trabalho: vagaData.modelo_trabalho,
+        modelo_contratacao: vagaData.tipo_contratacao,
+      } : null,
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

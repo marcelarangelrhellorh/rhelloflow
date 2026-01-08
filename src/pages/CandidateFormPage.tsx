@@ -49,8 +49,6 @@ interface LinkData {
     id: string;
     titulo: string;
     empresa: string;
-    cidade?: string;
-    estado?: string;
     formato_trabalho?: string;
     modelo_contratacao?: string;
   } | null;
@@ -449,12 +447,6 @@ export default function CandidateFormPage() {
                 {linkData.vaga.titulo}
               </h1>
               <div className="flex flex-wrap items-center gap-4 text-sm text-gray-300">
-                {linkData.vaga.cidade && linkData.vaga.estado && (
-                  <div className="flex items-center gap-1">
-                    <MapPin className="h-4 w-4" />
-                    <span>{linkData.vaga.cidade}, {linkData.vaga.estado}</span>
-                  </div>
-                )}
                 {linkData.vaga.formato_trabalho && (
                   <Badge variant="secondary" className="bg-white/10 text-white border-none">
                     {linkData.vaga.formato_trabalho}
