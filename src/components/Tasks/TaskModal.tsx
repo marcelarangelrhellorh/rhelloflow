@@ -130,7 +130,7 @@ export default function TaskModal({ open, onClose, task, defaultVagaId }: TaskMo
       priority: data.priority,
       due_date: data.due_date ? new Date(data.due_date).toISOString() : null,
       assignee_id: data.assignee_id || null,
-      vaga_id: data.vaga_id || null,
+      vaga_id: data.vaga_id === "none" ? null : data.vaga_id || null,
       sync_enabled: data.sync_enabled,
       task_type: 'task' as const, // Tasks go to Google Tasks API
     };
@@ -303,7 +303,7 @@ export default function TaskModal({ open, onClose, task, defaultVagaId }: TaskMo
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">Nenhuma vaga</SelectItem>
+                      <SelectItem value="none">Nenhuma vaga</SelectItem>
                       {vagas?.map((vaga) => (
                         <SelectItem key={vaga.id} value={vaga.id}>
                           {vaga.titulo} - {vaga.empresa}
