@@ -15,6 +15,8 @@ import { LoadingButton } from "@/components/ui/loading-button";
 import { handleApiError } from "@/lib/errorHandler";
 import { MODELO_CONTRATACAO_OPTIONS, FORMATO_TRABALHO_OPTIONS, ORIGEM_OPTIONS } from "@/constants/fitCultural";
 import { useCacheInvalidation } from "@/hooks/data/useCacheInvalidation";
+import { CPFInput } from "@/components/ui/cpf-input";
+import { validateCPF, cleanCPF } from "@/lib/cpfUtils";
 
 export default function CandidatoForm() {
   const { id } = useParams();
@@ -28,6 +30,7 @@ export default function CandidatoForm() {
   const [formData, setFormData] = useState({
     nome_completo: "",
     email: "",
+    cpf: "",
     telefone: "",
     cidade: "",
     estado: "",
@@ -87,6 +90,7 @@ export default function CandidatoForm() {
         setFormData({
           nome_completo: data.nome_completo || "",
           email: data.email || "",
+          cpf: (data as any).cpf || "",
           telefone: data.telefone || "",
           cidade: data.cidade || "",
           estado: data.estado || "",

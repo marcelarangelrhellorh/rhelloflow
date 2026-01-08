@@ -104,7 +104,7 @@ Deno.serve(async (req) => {
     }
 
     // Validate required fields
-    if (!candidate.nome_completo || !candidate.email || !candidate.telefone) {
+    if (!candidate.nome_completo || !candidate.email || !candidate.telefone || !candidate.cpf) {
       return new Response(JSON.stringify({ error: 'Preencha todos os campos obrigatórios' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -146,6 +146,7 @@ Deno.serve(async (req) => {
     const candidateData = {
       nome_completo: candidate.nome_completo.trim(),
       email: candidate.email.trim().toLowerCase(),
+      cpf: candidate.cpf.replace(/\D/g, ''),
       telefone: candidate.telefone.trim(),
       cidade: candidate.cidade?.trim() || null,
       estado: candidate.estado?.trim() || null,
