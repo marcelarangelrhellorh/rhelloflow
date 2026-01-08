@@ -34,6 +34,7 @@ import { useTaskSync } from "@/hooks/useTaskSync";
 import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useProfilesByRole } from "@/hooks/data/useProfilesByRole";
 import { ListTodo } from "lucide-react";
 
 const taskSchema = z.object({
@@ -76,18 +77,8 @@ export default function TaskModal({ open, onClose, task, defaultVagaId }: TaskMo
     },
   });
 
-  // Load users for assignee select
-  const { data: users } = useQuery({
-    queryKey: ["users-for-tasks"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("id, full_name")
-        .order("full_name");
-      if (error) throw error;
-      return data;
-    },
-  });
+  // Load only recrutadores and CS for assignee select
+  const { data: users } = useProfilesByRole(['recrutador', 'cs']);
 
   // Load vagas for select
   const { data: vagas } = useQuery({
