@@ -77,7 +77,7 @@ export function VagaKPICards({
       </div>
 
       <div className="flex items-center justify-center rounded-lg p-4 bg-white dark:bg-background-dark border border-gray-200 dark:border-secondary-text-light/20 shadow-lg">
-        <Button onClick={onViewDetails} variant="outline" className="rounded-full min-w-[140px] border-0 text-base font-semibold text-gray-700">
+        <Button onClick={onViewDetails} variant="outline" className="rounded-full min-w-[140px] border-0 text-base font-semibold text-gray-700 text-center">
           <span className="material-symbols-outlined text-lg text-[#ffcc00]">visibility</span>
           Detalhes da Vaga
         </Button>
