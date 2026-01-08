@@ -44,7 +44,7 @@ const taskSchema = z.object({
   priority: z.enum(['low', 'medium', 'high', 'urgent']),
   due_date: z.string().optional(),
   assignee_id: z.string().min(1, "Responsável é obrigatório"),
-  vaga_id: z.string().min(1, "Vaga é obrigatória"),
+  vaga_id: z.string().optional(),
   sync_enabled: z.boolean().default(true),
 });
 
@@ -295,7 +295,7 @@ export default function TaskModal({ open, onClose, task, defaultVagaId }: TaskMo
               name="vaga_id"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Vincular a Vaga *</FormLabel>
+                  <FormLabel>Vincular a Vaga</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value || undefined}>
                     <FormControl>
                       <SelectTrigger>
@@ -303,6 +303,7 @@ export default function TaskModal({ open, onClose, task, defaultVagaId }: TaskMo
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
+                      <SelectItem value="">Nenhuma vaga</SelectItem>
                       {vagas?.map((vaga) => (
                         <SelectItem key={vaga.id} value={vaga.id}>
                           {vaga.titulo} - {vaga.empresa}
