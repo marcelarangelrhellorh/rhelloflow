@@ -77,8 +77,8 @@ export default function TaskModal({ open, onClose, task, defaultVagaId }: TaskMo
     },
   });
 
-  // Load only recrutadores and CS for assignee select
-  const { data: users } = useProfilesByRole(['recrutador', 'cs']);
+  // Load recrutadores, CS and admins for assignee select
+  const { data: users } = useProfilesByRole(['recrutador', 'cs', 'admin']);
 
   // Load vagas for select
   const { data: vagas } = useQuery({

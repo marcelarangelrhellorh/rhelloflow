@@ -94,8 +94,8 @@ export default function MeetingModal({ open, onClose, task, defaultVagaId, defau
     staleTime: 1000 * 60 * 30, // 30 minutes
   });
 
-  // Load only recrutadores and CS for assignee select
-  const { data: users } = useProfilesByRole(['recrutador', 'cs']);
+  // Load recrutadores, CS and admins for assignee select
+  const { data: users } = useProfilesByRole(['recrutador', 'cs', 'admin']);
 
   // Load vagas for select
   const { data: vagas } = useQuery({
