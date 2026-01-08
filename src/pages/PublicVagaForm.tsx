@@ -383,6 +383,23 @@ export default function PublicVagaForm() {
                   />
                 </div>
               )}
+
+              <div>
+                <Label htmlFor="quantidade_vagas">Quantidade de Contratações para a Vaga *</Label>
+                <Input
+                  id="quantidade_vagas"
+                  type="number"
+                  min="1"
+                  max="100"
+                  required
+                  placeholder="1"
+                  value={formData.quantidade_vagas}
+                  onChange={(e) => setFormData({ ...formData, quantidade_vagas: e.target.value })}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Quantas pessoas serão contratadas para esta posição?
+                </p>
+              </div>
             </CardContent>
           </Card>
 
@@ -597,23 +614,6 @@ export default function PublicVagaForm() {
                 />
                 <p className="text-xs text-muted-foreground mt-1">
                   Soft skills e competências interpessoais importantes para o cargo
-                </p>
-              </div>
-
-              <div>
-                <Label htmlFor="quantidade_vagas">Quantidade de Vagas para este Cargo *</Label>
-                <Input
-                  id="quantidade_vagas"
-                  type="number"
-                  min="1"
-                  max="100"
-                  required
-                  placeholder="1"
-                  value={formData.quantidade_vagas}
-                  onChange={(e) => setFormData({ ...formData, quantidade_vagas: e.target.value })}
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  Quantas pessoas serão contratadas para esta posição?
                 </p>
               </div>
 
