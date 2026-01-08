@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { getBusinessDaysFromNow } from "@/lib/dateUtils";
 import { JOB_STAGES, calculateProgress } from "@/lib/jobStages";
@@ -24,41 +24,30 @@ import { useVaga } from "@/hooks/data/useVagaQuery";
 import { useCandidatos } from "@/hooks/data/useCandidatosQuery";
 import { useVagaEventos } from "@/hooks/data/useVagaEventosQuery";
 import { useVagaTags } from "@/hooks/data/useVagaTagsQuery";
+
 export default function VagaDetalhes() {
-  const {
-    id
-  } = useParams();
+  const { id } = useParams();
 
   // Custom hooks - centralized data management
-  const {
-    vaga,
-    loading,
-    reload: reloadVaga,
-    updateVaga
-  } = useVaga(id);
-  const {
-    candidatos,
-    candidatoContratado
-  } = useCandidatos(id);
-  const {
-    eventos,
-    reload: reloadEventos
-  } = useVagaEventos(id);
-  const {
-    selectedTags,
-    setSelectedTags,
-    vagaTags,
-    saving: savingTags,
-    saveTags
-  } = useVagaTags(id);
+  const { vaga, loading, reload: reloadVaga, updateVaga } = useVaga(id);
+  const { candidatos, candidatoContratado } = useCandidatos(id);
+  const { eventos, reload: reloadEventos } = useVagaEventos(id);
+  const { selectedTags, setSelectedTags, vagaTags, saving: savingTags, saveTags } = useVagaTags(id);
 
   // Local UI state
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [clientViewManagerOpen, setClientViewManagerOpen] = useState(false);
+  const [candidateFormManagerOpen, setCandidateFormManagerOpen] = useState(false);
   const [detailsDrawerOpen, setDetailsDrawerOpen] = useState(false);
+
   const handleGenerateClientLink = () => {
     setClientViewManagerOpen(true);
   };
+
+  const handleCandidateForm = () => {
+    setCandidateFormManagerOpen(true);
+  };
+
   const handleStatusChange = async (newStatusSlug: string) => {
     if (!id || !vaga) return;
     const newStage = JOB_STAGES.find(s => s.slug === newStatusSlug);
@@ -71,14 +60,8 @@ export default function VagaDetalhes() {
       return;
     }
     try {
-      const {
-        data: {
-          user
-        }
-      } = await supabase.auth.getUser();
-      const {
-        error: updateError
-      } = await supabase.from("vagas").update({
+      const { data: { user } } = await supabase.auth.getUser();
+      const { error: updateError } = await supabase.from("vagas").update({
         status_slug: newStage.slug,
         status_order: newStage.order,
         status_changed_at: new Date().toISOString(),
@@ -127,38 +110,91 @@ export default function VagaDetalhes() {
       });
     }
   };
+
   if (loading) {
-    return <div className="flex min-h-screen items-center justify-center bg-background-light dark:bg-background-dark">
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background-light dark:bg-background-dark">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-      </div>;
+      </div>
+    );
   }
+
   if (!vaga) {
-    return <div className="min-h-screen bg-background-light dark:bg-background-dark p-8">
+    return (
+      <div className="min-h-screen bg-background-light dark:bg-background-dark p-8">
         <p className="text-primary-text-light dark:text-primary-text-dark">
           Vaga não encontrada
         </p>
-      </div>;
+      </div>
+    );
   }
+
   const daysOpen = getBusinessDaysFromNow(vaga.data_abertura || vaga.criado_em);
   const progress = calculateProgress(vaga.status_slug || "discovery");
-  return <div className="relative flex min-h-screen w-full font-display bg-white dark:bg-background-dark">
+
+  return (
+    <div className="relative flex min-h-screen w-full font-display bg-white dark:bg-background-dark">
       {/* Main Content */}
       <main className="flex-1 px-6 sm:px-10 lg:px-16 py-8">
         <div className="w-full mx-0 py-0 px-0">
           {/* External Job Banner */}
-          {vaga.source === "externo" && <div className="mb-6">
-              <ExternalJobBanner vagaId={vaga.id} recrutador={vaga.recrutador} csResponsavel={vaga.cs_responsavel} complexidade={vaga.complexidade} prioridade={vaga.prioridade} />
-            </div>}
+          {vaga.source === "externo" && (
+            <div className="mb-6">
+              <ExternalJobBanner 
+                vagaId={vaga.id} 
+                recrutador={vaga.recrutador} 
+                csResponsavel={vaga.cs_responsavel} 
+                complexidade={vaga.complexidade} 
+                prioridade={vaga.prioridade} 
+              />
+            </div>
+          )}
 
-          <VagaHeader vaga={vaga} vagaTags={vagaTags} onGenerateClientLink={handleGenerateClientLink} onShare={() => setShareModalOpen(true)} />
+          <VagaHeader 
+            vaga={vaga} 
+            vagaTags={vagaTags} 
+            onGenerateClientLink={handleGenerateClientLink} 
+            onShare={() => setShareModalOpen(true)} 
+            onCandidateForm={handleCandidateForm}
+          />
 
-          <ShareJobModal open={shareModalOpen} onOpenChange={setShareModalOpen} vagaId={vaga.id} vagaTitulo={vaga.titulo} />
+          <ShareJobModal 
+            open={shareModalOpen} 
+            onOpenChange={setShareModalOpen} 
+            vagaId={vaga.id} 
+            vagaTitulo={vaga.titulo} 
+          />
 
-          <ClientViewLinkManager vagaId={vaga.id} open={clientViewManagerOpen} onOpenChange={setClientViewManagerOpen} />
+          <ClientViewLinkManager 
+            vagaId={vaga.id} 
+            open={clientViewManagerOpen} 
+            onOpenChange={setClientViewManagerOpen} 
+          />
 
-          <VagaDetailsDrawer open={detailsDrawerOpen} onOpenChange={setDetailsDrawerOpen} vaga={vaga} selectedTags={selectedTags} onTagsChange={setSelectedTags} onSaveTags={saveTags} savingTags={savingTags} />
+          <CandidateFormLinkManager 
+            vagaId={vaga.id} 
+            vagaTitulo={vaga.titulo} 
+            open={candidateFormManagerOpen} 
+            onOpenChange={setCandidateFormManagerOpen} 
+          />
 
-          <VagaKPICards vaga={vaga} candidatos={candidatos} daysOpen={daysOpen} onStatusChange={handleStatusChange} onViewDetails={() => setDetailsDrawerOpen(true)} />
+          <VagaDetailsDrawer 
+            open={detailsDrawerOpen} 
+            onOpenChange={setDetailsDrawerOpen} 
+            vaga={vaga} 
+            selectedTags={selectedTags} 
+            onTagsChange={setSelectedTags} 
+            onSaveTags={saveTags} 
+            savingTags={savingTags} 
+          />
+
+          <VagaKPICards 
+            vaga={vaga} 
+            candidatos={candidatos} 
+            daysOpen={daysOpen} 
+            onStatusChange={handleStatusChange} 
+            onViewDetails={() => setDetailsDrawerOpen(true)} 
+          />
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
@@ -166,7 +202,8 @@ export default function VagaDetalhes() {
 
               <JobHistorySection vagaId={vaga.id} vagaTitle={vaga.titulo} />
 
-              {vaga.status === "Concluído" && candidatoContratado && <div className="mb-8 p-6 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border-2 border-green-500 dark:border-green-400 rounded-lg shadow-sm">
+              {vaga.status === "Concluído" && candidatoContratado && (
+                <div className="mb-8 p-6 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border-2 border-green-500 dark:border-green-400 rounded-lg shadow-sm">
                   <div className="flex items-center gap-3">
                     <span className="material-symbols-outlined text-green-600 dark:text-green-400 text-3xl">
                       celebration
@@ -181,7 +218,8 @@ export default function VagaDetalhes() {
                       </p>
                     </div>
                   </div>
-                </div>}
+                </div>
+              )}
 
               <VagaCandidatesTable candidatos={candidatos} vagaId={vaga.id} vagaTitulo={vaga.titulo} />
             </div>
@@ -197,7 +235,7 @@ export default function VagaDetalhes() {
       <aside className="hidden xl:flex w-96 flex-shrink-0 flex-col gap-6 border-l border-border bg-white dark:bg-background-dark p-4 sticky top-0 h-screen overflow-y-auto">
         <VagaTasksCard vagaId={vaga.id} vagaTitulo={vaga.titulo} className="shadow-md" />
         <VagaMeetingsCard vagaId={vaga.id} vagaTitulo={vaga.titulo} className="shadow-md" />
-        <CandidateFormLinkManager vagaId={vaga.id} vagaTitulo={vaga.titulo} />
       </aside>
-    </div>;
+    </div>
+  );
 }
