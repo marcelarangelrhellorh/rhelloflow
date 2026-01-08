@@ -7,6 +7,7 @@ import { logVagaEvento } from "@/lib/vagaEventos";
 import { ExternalJobBanner } from "@/components/ExternalJobBanner";
 import { ShareJobModal } from "@/components/ShareJobModal";
 import { ClientViewLinkManager } from "@/components/ClientViewLinkManager";
+import { CandidateFormLinkManager } from "@/components/CandidateFormLinkManager";
 import { VagaHeader } from "@/components/VagaDetalhes/VagaHeader";
 import { VagaKPICards } from "@/components/VagaDetalhes/VagaKPICards";
 import { VagaTimeline } from "@/components/VagaDetalhes/VagaTimeline";
@@ -196,6 +197,7 @@ export default function VagaDetalhes() {
       <aside className="hidden xl:flex w-96 flex-shrink-0 flex-col gap-6 border-l border-border bg-white dark:bg-background-dark p-4 sticky top-0 h-screen overflow-y-auto">
         <VagaTasksCard vagaId={vaga.id} vagaTitulo={vaga.titulo} className="shadow-md" />
         <VagaMeetingsCard vagaId={vaga.id} vagaTitulo={vaga.titulo} className="shadow-md" />
+        <CandidateFormLinkManager vagaId={vaga.id} vagaTitulo={vaga.titulo} />
       </aside>
     </div>;
 }

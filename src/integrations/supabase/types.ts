@@ -85,6 +85,140 @@ export type Database = {
           },
         ]
       }
+      candidate_form_link_events: {
+        Row: {
+          created_at: string | null
+          event_type: string
+          id: string
+          ip_address: string | null
+          link_id: string
+          metadata: Json | null
+          user_agent: string | null
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          event_type: string
+          id?: string
+          ip_address?: string | null
+          link_id: string
+          metadata?: Json | null
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          event_type?: string
+          id?: string
+          ip_address?: string | null
+          link_id?: string
+          metadata?: Json | null
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_form_link_events_link_id_fkey"
+            columns: ["link_id"]
+            isOneToOne: false
+            referencedRelation: "candidate_form_links"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      candidate_form_links: {
+        Row: {
+          active: boolean | null
+          created_at: string | null
+          created_by: string | null
+          expires_at: string | null
+          id: string
+          last_used_at: string | null
+          max_submissions: number | null
+          note: string | null
+          password_hash: string | null
+          revoked: boolean | null
+          revoked_at: string | null
+          submissions_count: number | null
+          token: string
+          vaga_id: string
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string | null
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          last_used_at?: string | null
+          max_submissions?: number | null
+          note?: string | null
+          password_hash?: string | null
+          revoked?: boolean | null
+          revoked_at?: string | null
+          submissions_count?: number | null
+          token: string
+          vaga_id: string
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string | null
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          last_used_at?: string | null
+          max_submissions?: number | null
+          note?: string | null
+          password_hash?: string | null
+          revoked?: boolean | null
+          revoked_at?: string | null
+          submissions_count?: number | null
+          token?: string
+          vaga_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_form_links_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vagas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidate_form_links_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vagas_active"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidate_form_links_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vagas_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidate_form_links_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_cliente_detalhadas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidate_form_links_vaga_id_fkey"
+            columns: ["vaga_id"]
+            isOneToOne: false
+            referencedRelation: "vw_vagas_com_stats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       candidate_notes: {
         Row: {
           candidate_id: string
@@ -409,6 +543,7 @@ export type Database = {
       candidatos: {
         Row: {
           area: Database["public"]["Enums"]["area_candidato"] | null
+          candidate_form_link_id: string | null
           cargo: string | null
           cidade: string | null
           cpf: string | null
@@ -460,6 +595,7 @@ export type Database = {
         }
         Insert: {
           area?: Database["public"]["Enums"]["area_candidato"] | null
+          candidate_form_link_id?: string | null
           cargo?: string | null
           cidade?: string | null
           cpf?: string | null
@@ -511,6 +647,7 @@ export type Database = {
         }
         Update: {
           area?: Database["public"]["Enums"]["area_candidato"] | null
+          candidate_form_link_id?: string | null
           cargo?: string | null
           cidade?: string | null
           cpf?: string | null
@@ -561,6 +698,13 @@ export type Database = {
           vaga_relacionada_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "candidatos_candidate_form_link_id_fkey"
+            columns: ["candidate_form_link_id"]
+            isOneToOne: false
+            referencedRelation: "candidate_form_links"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "candidatos_rejection_feedback_job_id_fkey"
             columns: ["rejection_feedback_job_id"]
