@@ -37,7 +37,7 @@ export function VagaCandidatesTable({
       </button>
 
       {/* Content - Visible when expanded */}
-      {isExpanded && <div className="px-4 pb-4 border-t border-border">
+      {isExpanded && <div className="px-4 pb-4 border-t border-border shadow-lg">
           <div className="overflow-x-auto bg-white dark:bg-background-dark border border-gray-200 dark:border-secondary-text-light/20 rounded-lg shadow-sm mt-4">
             <table className="w-full text-left">
               <thead className="border-b border-gray-200 dark:border-secondary-text-light/20 text-base text-secondary-text-light dark:text-secondary-text-dark">
@@ -62,8 +62,8 @@ export function VagaCandidatesTable({
                       </td>
                       <td className="p-4 text-secondary-text-light dark:text-secondary-text-dark text-base font-medium">
                         {format(new Date(candidato.criado_em), "d 'de' MMM", {
-                    locale: ptBR
-                  })}
+                  locale: ptBR
+                })}
                       </td>
                       <td className="p-4 text-right">
                         <button onClick={() => navigate(`/candidatos/${candidato.id}`)} className="text-primary font-bold text-base hover:brightness-95 transition-all">
