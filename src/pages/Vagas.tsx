@@ -295,31 +295,31 @@ export default function Vagas() {
                   <Input placeholder="Buscar por título ou empresa..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 text-base font-medium" />
                 </div>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-[160px] text-base font-medium">
+                  <SelectTrigger className="w-[180px] text-base font-medium">
                     <SelectValue placeholder="Status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all" className="text-base font-medium">Todos</SelectItem>
+                    <SelectItem value="all" className="text-base font-medium">Todos os status</SelectItem>
                     {statusOptions.map(status => <SelectItem key={status.slug} value={status.label} className="text-base font-medium">
                         {status.label}
                       </SelectItem>)}
                   </SelectContent>
                 </Select>
                 <Select value={recrutadorFilter} onValueChange={setRecrutadorFilter}>
-                  <SelectTrigger className="w-[160px] text-base font-medium">
+                  <SelectTrigger className="w-[200px] text-base font-medium">
                     <SelectValue placeholder="Recrutador" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all" className="text-base font-medium">Todos</SelectItem>
+                    <SelectItem value="all" className="text-base font-medium">Todos os recrutadores</SelectItem>
                     {recrutadores.map(rec => <SelectItem key={rec} value={rec} className="text-base font-medium">{rec}</SelectItem>)}
                   </SelectContent>
                 </Select>
                 <Select value={clienteFilter} onValueChange={setClienteFilter}>
-                  <SelectTrigger className="w-[160px] text-base font-medium">
+                  <SelectTrigger className="w-[180px] text-base font-medium">
                     <SelectValue placeholder="Cliente" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all" className="text-base font-medium">Todos</SelectItem>
+                    <SelectItem value="all" className="text-base font-medium">Todos os clientes</SelectItem>
                     {clientes.map(cliente => <SelectItem key={cliente} value={cliente} className="text-base font-medium">{cliente}</SelectItem>)}
                   </SelectContent>
                 </Select>
