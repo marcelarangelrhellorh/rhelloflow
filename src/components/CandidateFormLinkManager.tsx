@@ -6,8 +6,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { Copy, ExternalLink, Plus, Trash2, Calendar, Users, Shield, FileText } from "lucide-react";
@@ -32,9 +37,11 @@ interface CandidateFormLink {
 interface CandidateFormLinkManagerProps {
   vagaId: string;
   vagaTitulo?: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-export function CandidateFormLinkManager({ vagaId, vagaTitulo }: CandidateFormLinkManagerProps) {
+export function CandidateFormLinkManager({ vagaId, vagaTitulo, open, onOpenChange }: CandidateFormLinkManagerProps) {
   const [links, setLinks] = useState<CandidateFormLink[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
@@ -51,8 +58,10 @@ export function CandidateFormLinkManager({ vagaId, vagaTitulo }: CandidateFormLi
   });
 
   useEffect(() => {
-    loadLinks();
-  }, [vagaId]);
+    if (open) {
+      loadLinks();
+    }
+  }, [vagaId, open]);
 
   const loadLinks = async () => {
     try {
@@ -170,193 +179,200 @@ export function CandidateFormLinkManager({ vagaId, vagaTitulo }: CandidateFormLi
     return <Badge className="bg-green-500">Ativo</Badge>;
   };
 
-  if (loading) {
-    return (
-      <Card>
-        <CardContent className="flex items-center justify-center py-8">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
-    <Card>
-      <CardHeader className="pb-4">
-        <div className="flex items-center justify-between gap-4">
-          <div className="space-y-1">
-            <CardTitle className="text-lg flex items-center gap-2">
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5 text-[#FFCD00]" />
               Formulário de Candidato
-            </CardTitle>
-            <CardDescription className="text-sm">
-              Links para candidatos se inscreverem diretamente nesta vaga
-            </CardDescription>
-          </div>
-          <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-            <DialogTrigger asChild>
-              <Button size="sm" className="shrink-0 bg-[#00141D] hover:bg-[#00141D]/90 text-white">
+            </DialogTitle>
+            <DialogDescription>
+              Links para candidatos se inscreverem diretamente {vagaTitulo && <>na vaga <span className="font-semibold">"{vagaTitulo}"</span></>}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 pt-2">
+            {/* Header with Create Button */}
+            <div className="flex justify-end">
+              <Button 
+                size="sm" 
+                className="bg-[#00141D] hover:bg-[#00141D]/90 text-white"
+                onClick={() => setCreateDialogOpen(true)}
+              >
                 <Plus className="mr-1 h-3 w-3" />
                 Novo Link
               </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Criar Formulário de Candidatura</DialogTitle>
-                <DialogDescription>
-                  Configure o link do formulário para a vaga {vagaTitulo && <span className="font-semibold">"{vagaTitulo}"</span>}
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4 pt-4">
-                <div>
-                  <Label htmlFor="password">Senha de Acesso (opcional)</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="Deixe vazio para acesso livre"
-                    value={newLinkConfig.password}
-                    onChange={(e) => setNewLinkConfig({ ...newLinkConfig, password: e.target.value })}
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Proteja o formulário com uma senha
-                  </p>
-                </div>
-                
-                <div>
-                  <Label htmlFor="expires_days">Expirar em (dias)</Label>
-                  <Input
-                    id="expires_days"
-                    type="number"
-                    min="1"
-                    placeholder="Ex: 30"
-                    value={newLinkConfig.expires_days}
-                    onChange={(e) => setNewLinkConfig({ ...newLinkConfig, expires_days: e.target.value })}
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Deixe vazio para link sem expiração
-                  </p>
-                </div>
-
-                <div>
-                  <Label htmlFor="max_submissions">Limite de Candidaturas</Label>
-                  <Input
-                    id="max_submissions"
-                    type="number"
-                    min="1"
-                    placeholder="Ex: 100"
-                    value={newLinkConfig.max_submissions}
-                    onChange={(e) => setNewLinkConfig({ ...newLinkConfig, max_submissions: e.target.value })}
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Deixe vazio para candidaturas ilimitadas
-                  </p>
-                </div>
-
-                <div>
-                  <Label htmlFor="note">Nota/Descrição</Label>
-                  <Textarea
-                    id="note"
-                    placeholder="Ex: Link para divulgação no LinkedIn"
-                    value={newLinkConfig.note}
-                    onChange={(e) => setNewLinkConfig({ ...newLinkConfig, note: e.target.value })}
-                    rows={2}
-                  />
-                </div>
-
-                <div className="flex justify-end gap-2 pt-4">
-                  <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>
-                    Cancelar
-                  </Button>
-                  <Button onClick={createLink} disabled={creating}>
-                    {creating ? "Criando..." : "Criar Link"}
-                  </Button>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {links.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            <FileText className="h-12 w-12 mx-auto mb-4 opacity-30" />
-            <p>Nenhum link de formulário criado.</p>
-            <p className="text-sm">Crie um link para receber candidaturas para esta vaga.</p>
-          </div>
-        ) : (
-          links.map((link) => (
-            <div key={link.id} className="border rounded-lg p-4 space-y-3 hover:bg-muted/50 transition-colors">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-2">
-                  {getStatusBadge(link)}
-                  {link.password_hash && (
-                    <Badge variant="outline" className="border-blue-500 text-blue-600">
-                      <Shield className="h-3 w-3 mr-1" />
-                      Protegido
-                    </Badge>
-                  )}
-                </div>
-                <Switch
-                  checked={link.active}
-                  onCheckedChange={(checked) => toggleLink(link.id, checked)}
-                />
-              </div>
-
-              {link.note && (
-                <p className="text-sm text-muted-foreground">{link.note}</p>
-              )}
-
-              <div className="flex items-center gap-2">
-                <Input
-                  readOnly
-                  value={`${window.location.origin}/candidatura/${link.token}`}
-                  className="text-xs font-mono bg-muted"
-                />
-                <Button variant="outline" size="icon" onClick={() => copyLink(link.token)}>
-                  <Copy className="h-4 w-4" />
-                </Button>
-                <Button variant="outline" size="icon" onClick={() => openLink(link.token)}>
-                  <ExternalLink className="h-4 w-4" />
-                </Button>
-              </div>
-
-              <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  <Users className="h-3 w-3" />
-                  {link.submissions_count} candidaturas
-                  {link.max_submissions && ` / ${link.max_submissions}`}
-                </span>
-                <span className="flex items-center gap-1">
-                  <Calendar className="h-3 w-3" />
-                  Criado em {format(new Date(link.created_at), "dd/MM/yyyy", { locale: ptBR })}
-                </span>
-                {link.expires_at && (
-                  <span className="flex items-center gap-1">
-                    <Calendar className="h-3 w-3" />
-                    Expira em {format(new Date(link.expires_at), "dd/MM/yyyy", { locale: ptBR })}
-                  </span>
-                )}
-              </div>
-
-              <div className="flex justify-end">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-destructive hover:text-destructive"
-                  onClick={() => {
-                    setSelectedLinkId(link.id);
-                    setDeleteDialogOpen(true);
-                  }}
-                >
-                  <Trash2 className="h-4 w-4 mr-1" />
-                  Remover
-                </Button>
-              </div>
             </div>
-          ))
-        )}
-      </CardContent>
 
+            {/* Loading State */}
+            {loading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+              </div>
+            ) : links.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <FileText className="h-12 w-12 mx-auto mb-4 opacity-30" />
+                <p>Nenhum link de formulário criado.</p>
+                <p className="text-sm">Crie um link para receber candidaturas para esta vaga.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {links.map((link) => (
+                  <div key={link.id} className="border rounded-lg p-4 space-y-3 hover:bg-muted/50 transition-colors">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-2">
+                        {getStatusBadge(link)}
+                        {link.password_hash && (
+                          <Badge variant="outline" className="border-blue-500 text-blue-600">
+                            <Shield className="h-3 w-3 mr-1" />
+                            Protegido
+                          </Badge>
+                        )}
+                      </div>
+                      <Switch
+                        checked={link.active}
+                        onCheckedChange={(checked) => toggleLink(link.id, checked)}
+                      />
+                    </div>
+
+                    {link.note && (
+                      <p className="text-sm text-muted-foreground">{link.note}</p>
+                    )}
+
+                    <div className="flex items-center gap-2">
+                      <Input
+                        readOnly
+                        value={`${window.location.origin}/candidatura/${link.token}`}
+                        className="text-xs font-mono bg-muted"
+                      />
+                      <Button variant="outline" size="icon" onClick={() => copyLink(link.token)}>
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                      <Button variant="outline" size="icon" onClick={() => openLink(link.token)}>
+                        <ExternalLink className="h-4 w-4" />
+                      </Button>
+                    </div>
+
+                    <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <Users className="h-3 w-3" />
+                        {link.submissions_count} candidaturas
+                        {link.max_submissions && ` / ${link.max_submissions}`}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Calendar className="h-3 w-3" />
+                        Criado em {format(new Date(link.created_at), "dd/MM/yyyy", { locale: ptBR })}
+                      </span>
+                      {link.expires_at && (
+                        <span className="flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          Expira em {format(new Date(link.expires_at), "dd/MM/yyyy", { locale: ptBR })}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex justify-end">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-destructive hover:text-destructive"
+                        onClick={() => {
+                          setSelectedLinkId(link.id);
+                          setDeleteDialogOpen(true);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        Remover
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Link Dialog */}
+      <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Criar Formulário de Candidatura</DialogTitle>
+            <DialogDescription>
+              Configure o link do formulário {vagaTitulo && <>para a vaga <span className="font-semibold">"{vagaTitulo}"</span></>}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 pt-4">
+            <div>
+              <Label htmlFor="password">Senha de Acesso (opcional)</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Deixe vazio para acesso livre"
+                value={newLinkConfig.password}
+                onChange={(e) => setNewLinkConfig({ ...newLinkConfig, password: e.target.value })}
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Proteja o formulário com uma senha
+              </p>
+            </div>
+            
+            <div>
+              <Label htmlFor="expires_days">Expirar em (dias)</Label>
+              <Input
+                id="expires_days"
+                type="number"
+                min="1"
+                placeholder="Ex: 30"
+                value={newLinkConfig.expires_days}
+                onChange={(e) => setNewLinkConfig({ ...newLinkConfig, expires_days: e.target.value })}
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Deixe vazio para link sem expiração
+              </p>
+            </div>
+
+            <div>
+              <Label htmlFor="max_submissions">Limite de Candidaturas</Label>
+              <Input
+                id="max_submissions"
+                type="number"
+                min="1"
+                placeholder="Ex: 100"
+                value={newLinkConfig.max_submissions}
+                onChange={(e) => setNewLinkConfig({ ...newLinkConfig, max_submissions: e.target.value })}
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Deixe vazio para candidaturas ilimitadas
+              </p>
+            </div>
+
+            <div>
+              <Label htmlFor="note">Nota/Descrição</Label>
+              <Textarea
+                id="note"
+                placeholder="Ex: Link para divulgação no LinkedIn"
+                value={newLinkConfig.note}
+                onChange={(e) => setNewLinkConfig({ ...newLinkConfig, note: e.target.value })}
+                rows={2}
+              />
+            </div>
+
+            <div className="flex justify-end gap-2 pt-4">
+              <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>
+                Cancelar
+              </Button>
+              <Button onClick={createLink} disabled={creating}>
+                {creating ? "Criando..." : "Criar Link"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -373,6 +389,6 @@ export function CandidateFormLinkManager({ vagaId, vagaTitulo }: CandidateFormLi
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </Card>
+    </>
   );
 }
