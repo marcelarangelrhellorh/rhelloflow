@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo, useCallback, Suspense, lazy } from "react
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, AlertTriangle, Grid3x3, List, LayoutGrid } from "lucide-react";
+import { Plus, Search, AlertTriangle, Grid3x3, List, LayoutGrid, Share2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
@@ -178,6 +178,12 @@ export default function Vagas() {
   const handleCardClick = (id: string) => {
     navigate(`/vagas/${id}`);
   };
+
+  const copyPublicFormLink = () => {
+    const link = `${window.location.origin}/solicitar-vaga`;
+    navigator.clipboard.writeText(link);
+    toast.success("Link do formulário copiado para a área de transferência!");
+  };
   const handleMoveJob = async (jobId: string, fromSlug: string, toSlug: string) => {
     const job = vagas.find(j => j.id === jobId);
     if (!job) return;
@@ -243,10 +249,23 @@ export default function Vagas() {
                 {viewType === "cards" ? "Gerencie todas as vagas abertas" : "Visualize o pipeline completo de vagas"}
               </p>
             </div>
-            <Button onClick={() => navigate("/vagas/nova")} className="bg-[#00141d] hover:bg-[#00141d]/90 text-white font-bold h-11 text-sm px-4">
-              <Plus className="mr-2 h-4 w-4" />
-              Nova Vaga
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                onClick={copyPublicFormLink} 
+                variant="outline"
+                className="h-11 text-sm px-4 font-bold"
+              >
+                <Share2 className="mr-2 h-4 w-4" />
+                Formulário de Vaga
+              </Button>
+              <Button 
+                onClick={() => navigate("/vagas/nova")} 
+                className="bg-[#00141d] hover:bg-[#00141d]/90 text-white font-bold h-11 text-sm px-4"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Nova Vaga
+              </Button>
+            </div>
           </div>
         </div>
       </div>
