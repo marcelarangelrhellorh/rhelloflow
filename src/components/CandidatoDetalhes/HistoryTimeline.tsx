@@ -48,7 +48,7 @@ export function HistoryTimeline({
   };
   return <Card className="shadow-md border-gray-300">
       <CardHeader>
-        <CardTitle className="text-lg">Histórico de Processos</CardTitle>
+        <CardTitle className="text-base">Histórico de Processos</CardTitle>
       </CardHeader>
       <CardContent>
         {historico.length === 0 ? <div className="flex flex-col items-center justify-center py-8 text-center">

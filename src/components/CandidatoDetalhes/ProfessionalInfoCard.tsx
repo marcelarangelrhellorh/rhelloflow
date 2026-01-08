@@ -431,7 +431,7 @@ Localização: ${[cidade, estado].filter(Boolean).join(", ") || "Não informada"
         {/* Documentos */}
         <div>
           <p className="mb-3 flex items-center gap-1 font-semibold text-base">
-            <FileText className="h-4 w-4" />
+            <FileText className="h-4 w-4 text-[#ffcc00]" />
             Documentos Anexados
           </p>
           <div className="space-y-2">
@@ -452,6 +452,33 @@ Localização: ${[cidade, estado].filter(Boolean).join(", ") || "Não informada"
             {!curriculoUrl && !portfolioUrl && <p className="text-sm text-muted-foreground italic">Nenhum documento anexado</p>}
           </div>
         </div>
+
+        <Separator />
+
+        {/* Vaga Relacionada - Editável */}
+        <div>
+          <p className="text-muted-foreground mb-2 flex items-center gap-1 font-semibold text-base">
+            <Briefcase className="h-3.5 w-3.5" />
+            Vaga Relacionada
+          </p>
+          <div className="flex gap-2">
+            <Select value={vagaId || "none"} onValueChange={handleVagaChange} disabled={loadingVagas}>
+              <SelectTrigger className="w-full bg-background">
+                <SelectValue placeholder="Selecione uma vaga" />
+              </SelectTrigger>
+              <SelectContent className="bg-popover z-50">
+                <SelectItem value="none">Nenhuma vaga</SelectItem>
+                {vagas.map(vaga => <SelectItem key={vaga.id} value={vaga.id}>
+                    {vaga.titulo} - {vaga.empresa}
+                  </SelectItem>)}
+              </SelectContent>
+            </Select>
+            {vagaId && <Button variant="outline" size="sm" onClick={onVagaClick} className="flex-shrink-0">
+                <ExternalLink className="h-4 w-4" />
+              </Button>}
+          </div>
+        </div>
+
         {/* Avaliação */}
         {(pontosFortes || pontosDesenvolver || parecerFinal) && <>
             <Separator />

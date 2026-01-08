@@ -134,7 +134,7 @@ export function FeedbackList({
   return <Card className="h-full px-0 py-0 shadow-md border-gray-300">
       <CardHeader className="mx-[10px]">
         <div className="flex items-center justify-between px-0 mx-[14px]">
-          <CardTitle className="font-bold text-base">
+          <CardTitle className="font-bold text-base px-0 mx-0">
             Feedbacks do Cliente    <span className="font-normal text-muted-foreground">({feedbacks.length})</span>
           </CardTitle>
           {onSolicitarFeedback && <Button onClick={onSolicitarFeedback} size="sm" className="font-semibold bg-[#00141d] text-background hover:bg-[#00141d]/90">

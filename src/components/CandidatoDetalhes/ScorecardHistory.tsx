@@ -11,11 +11,9 @@ import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScorecardDetailModal } from "./ScorecardDetailModal";
-
 interface ScorecardHistoryProps {
   candidateId: string;
 }
-
 interface Scorecard {
   id: string;
   template_name: string;
@@ -33,7 +31,6 @@ interface Scorecard {
     notes: string | null;
   }>;
 }
-
 const categoryLabels: Record<string, string> = {
   hard_skills: "Hard Skills",
   soft_skills: "Soft Skills",
@@ -41,7 +38,6 @@ const categoryLabels: Record<string, string> = {
   fit_cultural: "Fit Cultural",
   outros: "Outros"
 };
-
 const categoryColors: Record<string, string> = {
   hard_skills: "bg-blue-100 text-blue-800 border-blue-200",
   soft_skills: "bg-green-100 text-green-800 border-green-200",
@@ -49,7 +45,6 @@ const categoryColors: Record<string, string> = {
   fit_cultural: "bg-orange-100 text-orange-800 border-orange-200",
   outros: "bg-gray-100 text-gray-800 border-gray-200"
 };
-
 function getInitials(name: string | undefined): string {
   if (!name || name.trim().length === 0) {
     return "??";
@@ -60,7 +55,6 @@ function getInitials(name: string | undefined): string {
   }
   return parts[0].substring(0, 2).toUpperCase();
 }
-
 export function ScorecardHistory({
   candidateId
 }: ScorecardHistoryProps) {
@@ -68,11 +62,9 @@ export function ScorecardHistory({
   const [loading, setLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
   const [selectedScorecard, setSelectedScorecard] = useState<Scorecard | null>(null);
-
   useEffect(() => {
     loadScorecards();
   }, [candidateId]);
-
   async function loadScorecards() {
     try {
       setLoading(true);
@@ -149,7 +141,6 @@ export function ScorecardHistory({
       setLoading(false);
     }
   }
-
   if (loading) {
     return <Card className="border border-gray-300 shadow-md">
         <CardContent className="flex items-center justify-center py-8">
@@ -157,7 +148,6 @@ export function ScorecardHistory({
         </CardContent>
       </Card>;
   }
-
   if (scorecards.length === 0) {
     return <Card className="border border-gray-300 shadow-md">
         <CardHeader>
@@ -175,9 +165,7 @@ export function ScorecardHistory({
 
   // Calculate average score
   const averageScore = scorecards.reduce((sum, s) => sum + s.match_percentage, 0) / scorecards.length;
-
-  return (
-    <>
+  return <>
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <Card className="border border-gray-300 shadow-md">
           <CardHeader className="border-gray-300">
@@ -185,7 +173,7 @@ export function ScorecardHistory({
               <div className="flex items-start justify-between">
                 <div className="text-left">
                   <div className="flex items-center gap-2">
-                    <CardTitle className="text-xl font-bold">Histórico de Avaliações</CardTitle>
+                    <CardTitle className="font-bold text-base">Histórico de Avaliações</CardTitle>
                     <ChevronDown className={cn("h-5 w-5 transition-transform duration-200", isOpen && "rotate-180")} />
                   </div>
                   <CardDescription className="text-base">
@@ -203,23 +191,16 @@ export function ScorecardHistory({
             <CardContent className="shadow-lg">
               <div className="grid grid-cols-1 gap-6">
                 {scorecards.map(scorecard => {
-                  return (
-                    <div 
-                      key={scorecard.id} 
-                      onClick={() => setSelectedScorecard(scorecard)}
-                      className="border rounded-lg p-8 space-y-6 cursor-pointer hover:shadow-lg hover:border-primary/50 transition-all"
-                    >
+                return <div key={scorecard.id} onClick={() => setSelectedScorecard(scorecard)} className="border rounded-lg p-8 space-y-6 cursor-pointer hover:shadow-lg hover:border-primary/50 transition-all">
                       {/* Header com título e pontuação */}
                       <div className="flex items-start justify-between gap-6 pb-4 border-b">
                         <div className="space-y-1">
-                          <h3 className="font-bold text-xl">
+                          <h3 className="font-bold text-base">
                             {scorecard.template_name}
                           </h3>
-                          {scorecard.vaga_titulo && (
-                            <Badge variant="outline" className="text-sm font-medium mt-2">
+                          {scorecard.vaga_titulo && <Badge variant="outline" className="text-sm font-medium mt-2 border-[#ffcc00]">
                               {scorecard.vaga_titulo}
-                            </Badge>
-                          )}
+                            </Badge>}
                         </div>
                         <div className="flex items-center gap-3">
                           <div className="text-right shrink-0">
@@ -228,15 +209,10 @@ export function ScorecardHistory({
                             </div>
                             <p className="text-muted-foreground mt-1 font-semibold text-base">Match Score</p>
                           </div>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="shrink-0"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedScorecard(scorecard);
-                            }}
-                          >
+                          <Button variant="ghost" size="icon" className="shrink-0" onClick={e => {
+                        e.stopPropagation();
+                        setSelectedScorecard(scorecard);
+                      }}>
                             <Eye className="h-5 w-5" />
                           </Button>
                         </div>
@@ -263,8 +239,8 @@ export function ScorecardHistory({
                           <Calendar className="h-4 w-4" />
                           <span className="font-medium text-base">
                             {format(new Date(scorecard.created_at), "dd MMM yyyy", {
-                              locale: ptBR
-                            })}
+                          locale: ptBR
+                        })}
                           </span>
                         </div>
                       </div>
@@ -275,50 +251,36 @@ export function ScorecardHistory({
                       </div>
 
                       {/* Comments */}
-                      {scorecard.comments && (
-                        <div className="bg-muted/50 p-4 rounded-lg space-y-2">
+                      {scorecard.comments && <div className="bg-muted/50 p-4 rounded-lg space-y-2">
                           <p className="text-sm font-bold">Comentários:</p>
                           <p className="text-sm text-muted-foreground leading-relaxed">
                             {scorecard.comments}
                           </p>
-                        </div>
-                      )}
+                        </div>}
 
                       {/* Evaluations Summary */}
                       <div className="space-y-3 pt-2">
                         <p className="font-bold text-base">Critérios Avaliados:</p>
                         <div className="space-y-3">
-                          {scorecard.evaluations.slice(0, 3).map((evaluation, index) => (
-                            <div key={index} className="flex items-center justify-between text-sm py-1">
+                          {scorecard.evaluations.slice(0, 3).map((evaluation, index) => <div key={index} className="flex items-center justify-between text-sm py-1">
                               <span className="text-muted-foreground font-semibold text-base">{evaluation.criteria_name}</span>
                               <div className="flex items-center gap-1">
-                                {[1, 2, 3, 4, 5].map(star => (
-                                  <Star key={star} className={cn("h-4 w-4", star <= evaluation.score ? "fill-[#FFCD00] text-[#FFCD00]" : "text-gray-300")} />
-                                ))}
+                                {[1, 2, 3, 4, 5].map(star => <Star key={star} className={cn("h-4 w-4", star <= evaluation.score ? "fill-[#FFCD00] text-[#FFCD00]" : "text-gray-300")} />)}
                               </div>
-                            </div>
-                          ))}
-                          {scorecard.evaluations.length > 3 && (
-                            <p className="text-muted-foreground pt-1 text-base">
+                            </div>)}
+                          {scorecard.evaluations.length > 3 && <p className="text-muted-foreground pt-1 text-base">
                               +{scorecard.evaluations.length - 3} critérios adicionais
-                            </p>
-                          )}
+                            </p>}
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    </div>;
+              })}
               </div>
             </CardContent>
           </CollapsibleContent>
         </Card>
       </Collapsible>
 
-      <ScorecardDetailModal
-        scorecard={selectedScorecard}
-        open={!!selectedScorecard}
-        onOpenChange={(open) => !open && setSelectedScorecard(null)}
-      />
-    </>
-  );
+      <ScorecardDetailModal scorecard={selectedScorecard} open={!!selectedScorecard} onOpenChange={open => !open && setSelectedScorecard(null)} />
+    </>;
 }
