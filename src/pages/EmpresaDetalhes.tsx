@@ -109,12 +109,6 @@ export default function EmpresaDetalhes() {
 
             {/* Quadro Societário */}
             <EmpresaSociosCard empresa={empresa} />
-
-            {/* Histórico de Contratações */}
-            <EmpresaContratacoesTable
-              contratacoes={contratacoes}
-              isLoading={contratacoesLoading}
-            />
           </div>
 
           {/* Right Column - Sidebar */}
@@ -138,6 +132,12 @@ export default function EmpresaDetalhes() {
               isLoading={vagasLoading} 
               empresaId={empresa.id}
               empresaNome={empresa.nome}
+            />
+
+            {/* Histórico de Contratações */}
+            <EmpresaContratacoesTable
+              contratacoes={contratacoes}
+              isLoading={contratacoesLoading}
             />
           </div>
         </div>
