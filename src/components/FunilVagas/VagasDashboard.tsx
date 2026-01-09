@@ -29,9 +29,10 @@ export function VagasDashboard({
   const vagasAbertas = vagas.filter(v => v.status_slug !== "concluida" && v.status_slug !== "cancelada").length;
 
   // Contagem por prioridade
+  const prioridadeCritica = vagas.filter(v => v.prioridade === "Crítica").length;
   const prioridadeAlta = vagas.filter(v => v.prioridade === "Alta").length;
-  const prioridadeMedia = vagas.filter(v => v.prioridade === "Média").length;
-  const prioridadeBaixa = vagas.filter(v => v.prioridade === "Baixa" || !v.prioridade).length;
+  const prioridadeNormal = vagas.filter(v => v.prioridade === "Normal" || !v.prioridade).length;
+  const prioridadeBaixa = vagas.filter(v => v.prioridade === "Baixa").length;
 
   // Contagem por etapa
   const vagasPorEtapa = JOB_STAGES.map(stage => ({
@@ -46,7 +47,7 @@ export function VagasDashboard({
       {/* Resumo do Pipeline */}
       <Card className="border-gray-300 shadow-md">
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-bold text-foreground flex items-center gap-2">
+          <CardTitle className="font-bold text-foreground flex items-center gap-2 text-base">
             <TrendingUp className="h-4 w-4 text-primary" />
             Resumo do Pipeline
           </CardTitle>
@@ -86,7 +87,7 @@ export function VagasDashboard({
       {/* Por Prioridade */}
       <Card className="border-gray-300 shadow-md">
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-bold text-foreground flex items-center gap-2">
+          <CardTitle className="font-bold text-foreground flex items-center gap-2 text-base">
             <Flame className="h-4 w-4 text-orange-500" />
             Por Prioridade
           </CardTitle>
@@ -95,20 +96,27 @@ export function VagasDashboard({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-sm">
               <div className="w-2 h-2 rounded-full bg-red-500" />
+              <span className="text-muted-foreground font-medium">Crítica</span>
+            </div>
+            <span className="font-bold text-foreground">{prioridadeCritica}</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-sm">
+              <div className="w-2 h-2 rounded-full bg-orange-500" />
               <span className="text-muted-foreground font-medium">Alta</span>
             </div>
             <span className="font-bold text-foreground">{prioridadeAlta}</span>
           </div>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-sm">
-              <div className="w-2 h-2 rounded-full bg-yellow-500" />
-              <span className="text-muted-foreground font-medium">Média</span>
+              <div className="w-2 h-2 rounded-full bg-blue-500" />
+              <span className="text-muted-foreground font-medium">Normal</span>
             </div>
-            <span className="font-bold text-foreground">{prioridadeMedia}</span>
+            <span className="font-bold text-foreground">{prioridadeNormal}</span>
           </div>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-sm">
-              <div className="w-2 h-2 rounded-full bg-green-500" />
+              <div className="w-2 h-2 rounded-full bg-gray-400" />
               <span className="text-muted-foreground font-medium">Baixa</span>
             </div>
             <span className="font-bold text-foreground">{prioridadeBaixa}</span>

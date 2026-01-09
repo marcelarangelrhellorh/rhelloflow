@@ -174,6 +174,22 @@ serve(async (req) => {
           console.error('Failed to create notification:', notifError);
         } else {
           console.log(`Notification sent to user ${scorecard.created_by}`);
+          
+          // Send email notification (non-blocking)
+          try {
+            await supabase.functions.invoke('send-notification-email', {
+              body: {
+                user_id: scorecard.created_by,
+                kind: 'teste_tecnico',
+                title: 'Teste técnico respondido',
+                body: `${candidateName} completou o teste técnico com score de ${matchPercentage}%`,
+                job_id: scorecard.vaga_id,
+              },
+            });
+            console.log(`Email sent to user ${scorecard.created_by}`);
+          } catch (emailErr) {
+            console.error('Error sending notification email:', emailErr);
+          }
         }
       } catch (notifErr) {
         console.error('Notification error (non-blocking):', notifErr);

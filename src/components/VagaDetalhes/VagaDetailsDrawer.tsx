@@ -52,6 +52,28 @@ export function VagaDetailsDrawer({
               </div>
 
               <div>
+                <p className="text-sm font-medium text-muted-foreground mb-1">Quantidade de Vagas</p>
+                <p className="text-base">{vaga.quantidade_vagas || 1} {(vaga.quantidade_vagas || 1) === 1 ? 'posição' : 'posições'}</p>
+              </div>
+
+              {vaga.motivo_contratacao && (
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground mb-1">Tipo de Contratação</p>
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                    vaga.motivo_contratacao === 'aumento_quadro' 
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' 
+                      : vaga.motivo_contratacao === 'substituicao'
+                      ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+                      : 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
+                  }`}>
+                    {vaga.motivo_contratacao === 'aumento_quadro' && 'Aumento de Quadro'}
+                    {vaga.motivo_contratacao === 'substituicao' && 'Substituição'}
+                    {vaga.motivo_contratacao === 'reposicao' && 'Reposição'}
+                  </span>
+                </div>
+              )}
+
+              <div>
                 <p className="text-sm font-medium text-muted-foreground mb-1">Empresa</p>
                 <p className="text-base">
                   {vaga.confidencial ? "Confidencial" : vaga.empresa}
@@ -130,6 +152,28 @@ export function VagaDetailsDrawer({
                 </div>}
             </div>
           </div>
+
+          {/* Sobre a Empresa */}
+          {(vaga.resumo_empresa || vaga.endereco_empresa) && (
+            <div className="bg-muted/30 rounded-lg p-6">
+              <h3 className="text-2xl font-bold mb-4">Sobre a Empresa</h3>
+              <div className="space-y-4">
+                {vaga.resumo_empresa && (
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground mb-1">Resumo</p>
+                    <p className="text-base whitespace-pre-wrap">{vaga.resumo_empresa}</p>
+                  </div>
+                )}
+                
+                {vaga.endereco_empresa && (
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground mb-1">Endereço</p>
+                    <p className="text-base">{vaga.endereco_empresa}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Responsabilidades */}
           {vaga.responsabilidades && <div className="bg-muted/30 rounded-lg p-6">

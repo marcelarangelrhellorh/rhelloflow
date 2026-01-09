@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ChevronDown, ChevronRight, Plus, X, Save, FileText, Paperclip, Download, Upload } from "lucide-react";
+import { ChevronDown, ChevronRight, Plus, X, Save, FileText, Paperclip, Download, Upload, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -9,6 +9,17 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { MentionEditor } from "@/components/ui/mention-editor";
 import { useMentions } from "@/hooks/useMentions";
+import { useUserRoleQuery } from "@/hooks/data/useUserRoleQuery";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface EmpresaNote {
   id: string;
@@ -38,7 +49,18 @@ export function EmpresaNotesSection({ empresaId, empresaName = "Empresa" }: Empr
   const [isUploading, setIsUploading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
+  // Estados de exclusão
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Estados de edição
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editContent, setEditContent] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+
   const { mentionUsers, processMentions } = useMentions();
+  const { isAdmin, user } = useUserRoleQuery();
 
   const fetchNotes = async () => {
     if (!empresaId) return;
@@ -95,7 +117,6 @@ export function EmpresaNotesSection({ empresaId, empresaName = "Empresa" }: Empr
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
     const allowedTypes = [
       "application/pdf",
       "application/msword",
@@ -110,7 +131,6 @@ export function EmpresaNotesSection({ empresaId, empresaName = "Empresa" }: Empr
       return;
     }
 
-    // Validate file size (max 10MB)
     if (file.size > 10 * 1024 * 1024) {
       toast({
         title: "Arquivo muito grande",
@@ -169,14 +189,12 @@ export function EmpresaNotesSection({ empresaId, empresaName = "Empresa" }: Empr
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
-      // Buscar nome do usuário atual
       const { data: profile } = await supabase
         .from("profiles")
         .select("full_name")
         .eq("id", user.id)
         .single();
 
-      // Upload file if selected
       let fileData: { url: string; name: string } | null = null;
       if (selectedFile) {
         fileData = await uploadFile();
@@ -197,7 +215,6 @@ export function EmpresaNotesSection({ empresaId, empresaName = "Empresa" }: Empr
 
       if (error) throw error;
 
-      // Processar menções e enviar notificações
       if (insertedNote) {
         await processMentions(
           formContent,
@@ -237,6 +254,74 @@ export function EmpresaNotesSection({ empresaId, empresaName = "Empresa" }: Empr
     setShowForm(false);
   };
 
+  // Funções de exclusão
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    setIsDeleting(true);
+    try {
+      const noteToDelete = notes.find(n => n.id === deleteId);
+      
+      // Delete document from storage if exists
+      if (noteToDelete?.documento_url) {
+        await supabase.storage
+          .from("empresa-documentos")
+          .remove([noteToDelete.documento_url]);
+      }
+
+      const { error } = await supabase
+        .from("empresa_notes")
+        .delete()
+        .eq("id", deleteId);
+      if (error) throw error;
+
+      toast({ title: "Sucesso", description: "Anotação excluída." });
+      setNotes(prev => prev.filter(n => n.id !== deleteId));
+    } catch (error) {
+      console.error("Error deleting empresa note:", error);
+      toast({ title: "Erro", description: "Não foi possível excluir.", variant: "destructive" });
+    } finally {
+      setIsDeleting(false);
+      setDeleteId(null);
+    }
+  };
+
+  // Funções de edição
+  const handleStartEdit = (note: EmpresaNote) => {
+    setEditingId(note.id);
+    setEditTitle(note.title || "");
+    setEditContent(note.content);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditTitle("");
+    setEditContent("");
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingId || !editContent.trim()) return;
+    setIsEditing(true);
+    try {
+      const { error } = await supabase
+        .from("empresa_notes")
+        .update({
+          title: editTitle.trim() || null,
+          content: editContent
+        })
+        .eq("id", editingId);
+      if (error) throw error;
+
+      toast({ title: "Sucesso", description: "Anotação atualizada." });
+      handleCancelEdit();
+      fetchNotes();
+    } catch (error) {
+      console.error("Error updating empresa note:", error);
+      toast({ title: "Erro", description: "Não foi possível atualizar.", variant: "destructive" });
+    } finally {
+      setIsEditing(false);
+    }
+  };
+
   const handleDownload = async (documentoUrl: string, documentoNome: string) => {
     try {
       const { data, error } = await supabase.storage
@@ -262,6 +347,8 @@ export function EmpresaNotesSection({ empresaId, empresaName = "Empresa" }: Empr
       });
     }
   };
+
+  const canEditDelete = (note: EmpresaNote) => isAdmin || note.user_id === user?.id;
 
   return (
     <div className="mt-6 rounded-lg border border-gray-300 bg-card shadow-md">
@@ -418,63 +505,154 @@ export function EmpresaNotesSection({ empresaId, empresaName = "Empresa" }: Empr
           {!isLoading && notes.length > 0 && (
             <div className="space-y-3">
               {notes.map((note) => (
-                <div
-                  key={note.id}
-                  className="p-4 rounded-lg border border-border bg-background hover:bg-muted/30 transition-colors"
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold text-foreground truncate text-base">
-                        {note.title || "Sem título"}
-                      </h4>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-                        <span className="text-base font-medium">
-                          {format(
-                            new Date(note.created_at),
-                            "dd 'de' MMMM 'de' yyyy 'às' HH:mm",
-                            { locale: ptBR }
-                          )}
-                        </span>
-                        {note.user_name && (
-                          <>
-                            <span>•</span>
-                            <span className="text-base font-medium">
-                              {note.user_name}
-                            </span>
-                          </>
-                        )}
-                      </div>
-                      <div
-                        className="mt-2 text-base text-foreground/80 prose prose-base max-w-none [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_.mention]:bg-primary/15 [&_.mention]:text-primary [&_.mention]:px-1.5 [&_.mention]:py-0.5 [&_.mention]:rounded [&_.mention]:font-medium"
-                        dangerouslySetInnerHTML={{ __html: note.content }}
-                      />
-                      {/* Attachment */}
-                      {note.documento_url && note.documento_nome && (
-                        <div className="mt-3 flex items-center gap-2">
-                          <Paperclip className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm text-muted-foreground">
-                            {note.documento_nome}
-                          </span>
+                <div key={note.id}>
+                  {editingId === note.id ? (
+                    <div className="p-4 rounded-lg border border-primary/50 bg-muted/30">
+                      <div className="space-y-4">
+                        <div>
+                          <label className="font-medium text-foreground mb-1 block text-base">
+                            Título (opcional)
+                          </label>
+                          <Input
+                            value={editTitle}
+                            onChange={(e) => setEditTitle(e.target.value)}
+                            placeholder="Ex: Reunião de alinhamento..."
+                            className="bg-background text-base"
+                          />
+                        </div>
+                        <div>
+                          <label className="font-medium text-foreground mb-1 block text-base">
+                            Conteúdo * <span className="text-muted-foreground text-sm">(use @ para mencionar)</span>
+                          </label>
+                          <MentionEditor
+                            value={editContent}
+                            onChange={setEditContent}
+                            users={mentionUsers}
+                            placeholder="Descreva a reunião, negociação ou observação..."
+                            minHeight="120px"
+                          />
+                        </div>
+                        <div className="flex justify-end gap-2">
                           <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() =>
-                              handleDownload(note.documento_url!, note.documento_nome!)
-                            }
-                            className="text-primary hover:text-primary/80 h-auto p-1"
+                            variant="outline"
+                            onClick={handleCancelEdit}
+                            disabled={isEditing}
+                            className="text-sm font-semibold"
                           >
-                            <Download className="h-4 w-4" />
+                            <X className="h-4 w-4 mr-1" />
+                            Cancelar
+                          </Button>
+                          <Button
+                            onClick={handleSaveEdit}
+                            disabled={isEditing || !editContent.trim()}
+                            className="font-semibold bg-[#00141d]"
+                          >
+                            <Save className="h-4 w-4 mr-1" />
+                            {isEditing ? "Salvando..." : "Salvar"}
                           </Button>
                         </div>
-                      )}
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="p-4 rounded-lg border border-border bg-background hover:bg-muted/30 transition-colors">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-semibold text-foreground truncate text-base">
+                            {note.title || "Sem título"}
+                          </h4>
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                            <span className="text-base font-medium">
+                              {format(
+                                new Date(note.created_at),
+                                "dd 'de' MMMM 'de' yyyy 'às' HH:mm",
+                                { locale: ptBR }
+                              )}
+                            </span>
+                            {note.user_name && (
+                              <>
+                                <span>•</span>
+                                <span className="text-base font-medium">
+                                  {note.user_name}
+                                </span>
+                              </>
+                            )}
+                          </div>
+                          <div
+                            className="mt-2 text-base text-foreground/80 prose prose-base max-w-none [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_.mention]:bg-primary/15 [&_.mention]:text-primary [&_.mention]:px-1.5 [&_.mention]:py-0.5 [&_.mention]:rounded [&_.mention]:font-medium"
+                            dangerouslySetInnerHTML={{ __html: note.content }}
+                          />
+                          {/* Attachment */}
+                          {note.documento_url && note.documento_nome && (
+                            <div className="mt-3 flex items-center gap-2">
+                              <Paperclip className="h-4 w-4 text-muted-foreground" />
+                              <span className="text-sm text-muted-foreground">
+                                {note.documento_nome}
+                              </span>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() =>
+                                  handleDownload(note.documento_url!, note.documento_nome!)
+                                }
+                                className="text-primary hover:text-primary/80 h-auto p-1"
+                              >
+                                <Download className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+
+                        {canEditDelete(note) && !editingId && (
+                          <div className="flex gap-1 shrink-0">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleStartEdit(note)}
+                              className="text-muted-foreground hover:text-foreground h-8 w-8 p-0"
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setDeleteId(note.id)}
+                              className="text-destructive hover:bg-destructive/10 h-8 w-8 p-0"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
           )}
         </div>
       )}
+
+      {/* Dialog de confirmação de exclusão */}
+      <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir anotação?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. A anotação será permanentemente removida.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? "Excluindo..." : "Excluir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

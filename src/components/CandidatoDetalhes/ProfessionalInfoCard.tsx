@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Briefcase, DollarSign, Calendar, ExternalLink, FileText, MapPin, CheckCircle2, XCircle, Mail, Phone, Linkedin, Copy, Link2 } from "lucide-react";
+import { Briefcase, DollarSign, Calendar, ExternalLink, FileText, MapPin, CheckCircle2, XCircle, Mail, Phone, Linkedin, Copy, Link2, User, Building2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { formatCPF } from "@/lib/cpfUtils";
 const ORIGENS = [{
   value: "Link de Divulgação",
   label: "🔗 Link de Divulgação"
@@ -61,6 +62,7 @@ interface ProfessionalInfoCardProps {
   linkedin: string | null;
   curriculoLink: string | null;
   isFromPublicLink?: boolean;
+  cpf?: string | null;
   // Professional props
   pretensaoSalarial: number | null;
   vagaTitulo: string | null;
@@ -68,6 +70,8 @@ interface ProfessionalInfoCardProps {
   dataCadastro: string;
   nivel: string | null;
   area: string | null;
+  cargo?: string | null;
+  idade?: number | null;
   curriculoUrl: string | null;
   portfolioUrl: string | null;
   disponibilidadeMudanca: string | null;
@@ -93,6 +97,7 @@ export function ProfessionalInfoCard({
   linkedin,
   curriculoLink,
   isFromPublicLink = false,
+  cpf,
   // Professional
   pretensaoSalarial,
   vagaTitulo,
@@ -100,6 +105,8 @@ export function ProfessionalInfoCard({
   dataCadastro,
   nivel,
   area,
+  cargo,
+  idade,
   curriculoUrl,
   portfolioUrl,
   disponibilidadeMudanca,
@@ -169,11 +176,19 @@ Localização: ${[cidade, estado].filter(Boolean).join(", ") || "Não informada"
       year: "numeric"
     });
   };
-  const handleDownload = async (url: string, fileName: string) => {
+  const handleDownload = async (filePath: string, bucketName: 'curriculos' | 'portfolios') => {
     try {
-      // Open URL in new tab for public files
-      window.open(url, '_blank');
-      toast.success("Abrindo arquivo");
+      // Gerar URL assinada válida por 1 hora
+      const { data, error } = await supabase.storage
+        .from(bucketName)
+        .createSignedUrl(filePath, 3600);
+      
+      if (error) throw error;
+      
+      if (data?.signedUrl) {
+        window.open(data.signedUrl, '_blank');
+        toast.success("Abrindo arquivo");
+      }
     } catch (error) {
       console.error("Erro ao abrir arquivo:", error);
       toast.error("Erro ao abrir arquivo");
@@ -261,6 +276,14 @@ Localização: ${[cidade, estado].filter(Boolean).join(", ") || "Não informada"
           </Button>
         </div>
 
+        {/* CPF */}
+        {cpf && <div className="flex items-center justify-between group hover:bg-primary/5 dark:hover:bg-primary/10 -mx-2 px-2 py-2 rounded transition-colors">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <FileText className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+              <span className="text-sm text-card-foreground">CPF: {formatCPF(cpf)}</span>
+            </div>
+          </div>}
+
         {/* Phone */}
         {telefone && <div className="flex items-center justify-between group hover:bg-primary/5 dark:hover:bg-primary/10 -mx-2 px-2 py-2 rounded transition-colors">
             <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -332,17 +355,44 @@ Localização: ${[cidade, estado].filter(Boolean).join(", ") || "Não informada"
 
           {/* Nível */}
           {nivel && <div>
-              <p className="text-muted-foreground mb-1 text-base font-semibold">Nível</p>
+              <p className="text-muted-foreground mb-1 text-base font-semibold">Senioridade</p>
               <p className="text-base font-medium text-card-foreground">{nivel}</p>
             </div>}
-
-          {/* Nível */}
-          {nivel}
 
           {/* Área */}
           {area && <div>
               <p className="text-muted-foreground mb-1 text-base font-semibold">Área</p>
               <p className="text-base font-medium text-card-foreground">{area}</p>
+            </div>}
+
+          {/* Cargo */}
+          {cargo && <div>
+              <p className="text-muted-foreground mb-1 flex items-center gap-1 text-base font-semibold">
+                <Building2 className="h-3.5 w-3.5" />
+                Cargo
+              </p>
+              <p className="text-base font-medium text-card-foreground">{cargo}</p>
+            </div>}
+
+          {/* Idade */}
+          {idade && <div>
+              <p className="text-muted-foreground mb-1 flex items-center gap-1 text-base font-semibold">
+                <User className="h-3.5 w-3.5" />
+                Idade
+              </p>
+              <p className="text-base font-medium text-card-foreground">{idade} anos</p>
+            </div>}
+
+          {/* Modelo de Contratação */}
+          {modeloContratacao && <div>
+              <p className="text-muted-foreground mb-1 text-base font-semibold">Modelo de Contratação</p>
+              <Badge variant="secondary" className="text-sm">{modeloContratacao}</Badge>
+            </div>}
+
+          {/* Formato de Trabalho */}
+          {formatoTrabalho && <div>
+              <p className="text-muted-foreground mb-1 text-base font-semibold">Formato de Trabalho</p>
+              <Badge variant="outline" className="text-sm">{formatoTrabalho}</Badge>
             </div>}
 
           {/* Experiência Profissional */}
@@ -435,14 +485,14 @@ Localização: ${[cidade, estado].filter(Boolean).join(", ") || "Não informada"
             Documentos Anexados
           </p>
           <div className="space-y-2">
-            {curriculoUrl && <Button variant="outline" size="sm" className="w-full justify-between" onClick={() => handleDownload(curriculoUrl, 'curriculo.pdf')}>
+            {curriculoUrl && <Button variant="outline" size="sm" className="w-full justify-between" onClick={() => handleDownload(curriculoUrl, 'curriculos')}>
                 <div className="flex items-center gap-2">
                   <FileText className="h-4 w-4" />
                   <span>Ver Currículo</span>
                 </div>
                 <ExternalLink className="h-4 w-4" />
               </Button>}
-            {portfolioUrl && <Button variant="outline" size="sm" className="w-full justify-between" onClick={() => handleDownload(portfolioUrl, 'portfolio.pdf')}>
+            {portfolioUrl && <Button variant="outline" size="sm" className="w-full justify-between" onClick={() => handleDownload(portfolioUrl, 'portfolios')}>
                 <div className="flex items-center gap-2">
                   <FileText className="h-4 w-4" />
                   <span>Ver Portfólio</span>

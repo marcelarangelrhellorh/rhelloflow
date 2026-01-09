@@ -7,7 +7,7 @@ import { logVagaEvento } from "@/lib/vagaEventos";
 import { ExternalJobBanner } from "@/components/ExternalJobBanner";
 import { ShareJobModal } from "@/components/ShareJobModal";
 import { ClientViewLinkManager } from "@/components/ClientViewLinkManager";
-import { CandidateFormLinkManager } from "@/components/CandidateFormLinkManager";
+
 import { VagaHeader } from "@/components/VagaDetalhes/VagaHeader";
 import { VagaKPICards } from "@/components/VagaDetalhes/VagaKPICards";
 import { VagaTimeline } from "@/components/VagaDetalhes/VagaTimeline";
@@ -18,6 +18,7 @@ import { VagaTasksCard } from "@/components/VagaDetalhes/VagaTasksCard";
 import { VagaMeetingsCard } from "@/components/VagaDetalhes/VagaMeetingsCard";
 import { JobHistorySection } from "@/components/VagaDetalhes/JobHistorySection";
 import { toast } from "@/hooks/use-toast";
+import { useNotifications } from "@/hooks/useNotifications";
 
 // Custom hooks with React Query
 import { useVaga } from "@/hooks/data/useVagaQuery";
@@ -33,20 +34,18 @@ export default function VagaDetalhes() {
   const { candidatos, candidatoContratado } = useCandidatos(id);
   const { eventos, reload: reloadEventos } = useVagaEventos(id);
   const { selectedTags, setSelectedTags, vagaTags, saving: savingTags, saveTags } = useVagaTags(id);
+  const { notifyClientsAboutStageChange, notifyClientsShortlistAvailable } = useNotifications();
 
   // Local UI state
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [clientViewManagerOpen, setClientViewManagerOpen] = useState(false);
-  const [candidateFormManagerOpen, setCandidateFormManagerOpen] = useState(false);
+  
   const [detailsDrawerOpen, setDetailsDrawerOpen] = useState(false);
 
   const handleGenerateClientLink = () => {
     setClientViewManagerOpen(true);
   };
 
-  const handleCandidateForm = () => {
-    setCandidateFormManagerOpen(true);
-  };
 
   const handleStatusChange = async (newStatusSlug: string) => {
     if (!id || !vaga) return;
@@ -80,6 +79,28 @@ export default function VagaDetalhes() {
           status_novo_slug: newStage.slug
         }
       });
+
+      // Notificar clientes externos sobre mudança de etapa
+      if (vaga.empresa_id) {
+        notifyClientsAboutStageChange(
+          id,
+          vaga.titulo,
+          newStage.name,
+          vaga.empresa_id
+        );
+
+        // Se mudou para "Shortlist disponível", notificação especial com contagem de candidatos
+        if (newStage.slug === 'shortlist_disponivel') {
+          const candidatosShortlist = candidatos.filter(c => c.status === 'Shortlist').length;
+          notifyClientsShortlistAvailable(
+            id,
+            vaga.titulo,
+            vaga.empresa_id,
+            candidatosShortlist
+          );
+        }
+      }
+
       updateVaga({
         status: newStage.name,
         status_slug: newStage.slug,
@@ -154,8 +175,7 @@ export default function VagaDetalhes() {
             vaga={vaga} 
             vagaTags={vagaTags} 
             onGenerateClientLink={handleGenerateClientLink} 
-            onShare={() => setShareModalOpen(true)} 
-            onCandidateForm={handleCandidateForm}
+            onShare={() => setShareModalOpen(true)}
           />
 
           <ShareJobModal 
@@ -171,12 +191,6 @@ export default function VagaDetalhes() {
             onOpenChange={setClientViewManagerOpen} 
           />
 
-          <CandidateFormLinkManager 
-            vagaId={vaga.id} 
-            vagaTitulo={vaga.titulo} 
-            open={candidateFormManagerOpen} 
-            onOpenChange={setCandidateFormManagerOpen} 
-          />
 
           <VagaDetailsDrawer 
             open={detailsDrawerOpen} 

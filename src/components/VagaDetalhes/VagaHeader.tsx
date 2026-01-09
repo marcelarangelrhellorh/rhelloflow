@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatSalaryRange } from "@/lib/salaryUtils";
-import { FileText } from "lucide-react";
+
 import type { Vaga } from "@/hooks/data/useVaga";
 import type { VagaTag } from "@/hooks/data/useVagaTags";
 
@@ -11,15 +11,13 @@ interface VagaHeaderProps {
   vagaTags: VagaTag[];
   onGenerateClientLink: () => void;
   onShare: () => void;
-  onCandidateForm: () => void;
 }
 
 export function VagaHeader({
   vaga,
   vagaTags,
   onGenerateClientLink,
-  onShare,
-  onCandidateForm
+  onShare
 }: VagaHeaderProps) {
   const categoryColors: Record<string, string> = {
     area: "bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900/30 dark:text-blue-200 dark:border-blue-700",
@@ -38,7 +36,7 @@ export function VagaHeader({
         <p className="text-[#36404a] mt-1 font-medium text-base">
           {vaga.empresa_id ? (
             <Link 
-              to={`/empresa/${vaga.empresa_id}`}
+              to={`/empresas/${vaga.empresa_id}`}
               className="text-primary hover:underline font-semibold"
             >
               {vaga.empresa}
@@ -48,6 +46,13 @@ export function VagaHeader({
           )}
           {" "}• Acompanhe o progresso do processo de contratação
         </p>
+        {vaga.resumo_empresa && (
+          <p className="text-muted-foreground text-sm mt-2 max-w-2xl leading-relaxed">
+            {vaga.resumo_empresa.length > 200 
+              ? `${vaga.resumo_empresa.substring(0, 200)}...` 
+              : vaga.resumo_empresa}
+          </p>
+        )}
         <div className="flex items-center gap-2 mt-3 flex-wrap">
           {(vaga.salario_min || vaga.salario_max || vaga.salario_modalidade) && (
             <Badge className="bg-[#ffcd00]/20 text-[#00141d] border-[#ffcd00]/30 font-bold text-sm px-3 py-1">
@@ -70,10 +75,6 @@ export function VagaHeader({
         </div>
       </div>
       <div className="flex gap-2">
-        <Button onClick={onCandidateForm} variant="outline" className="rounded-full font-bold min-w-[140px] text-sm">
-          <FileText className="h-4 w-4 mr-1" />
-          Formulário Candidato
-        </Button>
         <Button onClick={onGenerateClientLink} variant="outline" className="rounded-full font-bold min-w-[140px] text-sm">
           <span className="material-symbols-outlined text-lg">link</span>
           Link Cliente

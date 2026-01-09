@@ -7,7 +7,7 @@ const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 function generateProtocol(): string {
   const timestamp = Date.now().toString(36).toUpperCase();
   const random = Math.random().toString(36).substring(2, 6).toUpperCase();
-  return `CF-${timestamp}-${random}`;
+  return `CC-${timestamp}-${random}`;
 }
 
 async function hashPassword(password: string): Promise<string> {
@@ -58,47 +58,18 @@ Deno.serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Get link details with vaga info
-    const { data: link, error: linkError } = await supabase
-      .from('candidate_form_links')
-      .select(`
-        id,
-        vaga_id,
-        active,
-        expires_at,
-        max_submissions,
-        submissions_count,
-        password_hash,
-        revoked,
-        created_by,
-        vaga:vagas(id, titulo, empresa)
-      `)
-      .eq('token', token)
-      .eq('revoked', false)
-      .single();
+    // Get link details
+    const { data: links, error: linkError } = await supabase
+      .rpc('get_candidate_registration_link_by_token', { p_token: token });
 
-    if (linkError || !link) {
+    if (linkError || !links?.[0]) {
       return new Response(JSON.stringify({ error: 'Link não encontrado ou expirado' }), {
         status: 404,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // Check if link is active
-    if (!link.active) {
-      return new Response(JSON.stringify({ error: 'Link desativado' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    // Check expiration
-    if (link.expires_at && new Date(link.expires_at) < new Date()) {
-      return new Response(JSON.stringify({ error: 'Link expirado' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
+    const link = links[0];
 
     // Check submission limit
     if (link.max_submissions && link.submissions_count >= link.max_submissions) {
@@ -109,7 +80,7 @@ Deno.serve(async (req) => {
     }
 
     // Verify password if required
-    if (link.password_hash) {
+    if (link.requires_password) {
       if (!password) {
         return new Response(JSON.stringify({ error: 'Senha obrigatória' }), {
           status: 400,
@@ -117,8 +88,14 @@ Deno.serve(async (req) => {
         });
       }
 
+      const { data: fullLink } = await supabase
+        .from('candidate_registration_links')
+        .select('password_hash')
+        .eq('id', link.id)
+        .single();
+
       const passwordHash = await hashPassword(password);
-      if (link.password_hash !== passwordHash) {
+      if (fullLink?.password_hash !== passwordHash) {
         return new Response(JSON.stringify({ error: 'Senha incorreta' }), {
           status: 401,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -163,9 +140,9 @@ Deno.serve(async (req) => {
 
     // Generate protocol
     const protocol = generateProtocol();
-    const idempotencyKey = `cf_${link.id}_${candidate.email}_${Date.now()}`;
+    const idempotencyKey = `cr_${link.id}_${candidate.email}_${Date.now()}`;
 
-    // Create candidate record with status "Triagem" and linked to the job
+    // Create candidate record
     const candidateData = {
       nome_completo: candidate.nome_completo.trim(),
       email: candidate.email.trim().toLowerCase(),
@@ -181,11 +158,10 @@ Deno.serve(async (req) => {
       idade: candidate.idade ? parseInt(candidate.idade) : null,
       modelo_contratacao: candidate.modelo_contratacao || null,
       formato_trabalho: candidate.formato_trabalho || null,
-      origem: candidate.origem || 'Formulário de Candidatura',
+      origem: candidate.origem || 'Link Cadastro de Candidato',
       fit_cultural: fitCultural,
-      status: 'Triagem', // Candidates from this form start in "Triagem"
-      vaga_relacionada_id: link.vaga_id, // Link to the job
-      candidate_form_link_id: link.id,
+      status: 'Banco de Talentos',
+      candidate_registration_link_id: link.id,
       idempotency_key: idempotencyKey,
       utm: utm || null,
     };
@@ -279,7 +255,7 @@ Deno.serve(async (req) => {
 
     // Update submission count
     await supabase
-      .from('candidate_form_links')
+      .from('candidate_registration_links')
       .update({ 
         submissions_count: link.submissions_count + 1,
         last_used_at: new Date().toISOString(),
@@ -290,7 +266,7 @@ Deno.serve(async (req) => {
     const ipAddress = req.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown';
     const userAgent = req.headers.get('user-agent') || 'unknown';
 
-    await supabase.from('candidate_form_link_events').insert({
+    await supabase.from('candidate_registration_link_events').insert({
       link_id: link.id,
       event_type: 'submit',
       ip_address: ipAddress,
@@ -304,46 +280,44 @@ Deno.serve(async (req) => {
       },
     });
 
-    // Create notification for the user who created the link
-    if (link.created_by) {
-      const vagaInfo = link.vaga as { titulo?: string; empresa?: string } | null;
-      const vagaTitulo = vagaInfo?.titulo || 'Vaga';
-      
-      await supabase.from('notificacoes').insert({
-        user_id: link.created_by,
-        tipo: 'candidatura_formulario',
-        titulo: 'Nova candidatura recebida',
-        mensagem: `${candidate.nome_completo} se candidatou à vaga ${vagaTitulo}`,
-        vaga_id: link.vaga_id,
-        lida: false,
-      });
+    console.log(`Candidate registration submitted: ${newCandidate.id}, protocol: ${protocol}`);
 
-      // Trigger email notification in background
-      try {
+    // Notify link creator about new candidate registration (non-blocking)
+    try {
+      const { data: fullLinkData } = await supabase
+        .from('candidate_registration_links')
+        .select('created_by')
+        .eq('id', link.id)
+        .single();
+
+      if (fullLinkData?.created_by) {
+        const candidateFullName = candidate.nome_completo.trim();
+        
+        // Create notification
+        await supabase.rpc('create_notification', {
+          p_user_id: fullLinkData.created_by,
+          p_kind: 'cadastro_candidato',
+          p_title: 'Novo cadastro de candidato',
+          p_body: `${candidateFullName} se cadastrou via link de Cadastro de Candidato`,
+          p_job_id: null,
+        });
+        
+        // Send email
         await supabase.functions.invoke('send-notification-email', {
           body: {
-            user_id: link.created_by,
-            kind: 'candidatura_formulario',
-            title: 'Nova candidatura recebida',
-            body: `${candidate.nome_completo} se candidatou à vaga ${vagaTitulo}`,
-            job_id: link.vaga_id,
+            user_id: fullLinkData.created_by,
+            kind: 'cadastro_candidato',
+            title: 'Novo cadastro de candidato',
+            body: `${candidateFullName} se cadastrou via link de Cadastro de Candidato`,
+            job_id: null,
           },
         });
-      } catch (emailError) {
-        console.error('Error sending notification email:', emailError);
-        // Don't fail the submission if email fails
+        
+        console.log(`Notification and email sent for candidate registration`);
       }
+    } catch (notifyErr) {
+      console.error('Error sending notification:', notifyErr);
     }
-
-    // Create history entry
-    await supabase.from('historico_candidatos').insert({
-      candidato_id: newCandidate.id,
-      vaga_id: link.vaga_id,
-      resultado: 'Inscrito',
-      feedback: `Candidatura via formulário vinculado à vaga. Protocolo: ${protocol}`,
-    });
-
-    console.log(`Candidate form application submitted: ${newCandidate.id}, protocol: ${protocol}, vaga: ${link.vaga_id}`);
 
     return new Response(JSON.stringify({
       success: true,
@@ -354,7 +328,7 @@ Deno.serve(async (req) => {
     });
 
   } catch (error) {
-    console.error('Error in submit-candidate-form-application:', error);
+    console.error('Error in submit-candidate-registration:', error);
     return new Response(JSON.stringify({ error: 'Erro interno' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

@@ -41,7 +41,7 @@ export function SharedJobsCard() {
           <div className="flex items-start justify-between">
             <div className="space-y-2 flex-1">
               <p className="text-muted-foreground font-semibold text-base">Vagas Compartilhadas</p>
-              <p className="text-[42px] font-semibold leading-none text-card-foreground">
+              <p className="font-semibold leading-none text-card-foreground text-2xl">
                 {loading ? '...' : count}
               </p>
               <p className="text-muted-foreground font-medium text-base">Com link de divulgação ativo</p>

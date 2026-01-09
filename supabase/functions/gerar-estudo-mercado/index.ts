@@ -337,12 +337,11 @@ Gere 4 insights consultivos curtos sobre este cargo, considerando todas as fonte
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
+        model: 'openai/gpt-5',
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
           { role: 'user', content: userPrompt }
         ],
-        temperature: 0.2,
         tools: [
           {
             type: 'function',

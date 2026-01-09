@@ -153,7 +153,7 @@ export function AppSidebar() {
                       </TooltipContent>
                     </Tooltip> : <SidebarMenuButton onClick={() => navigate(item.url)} onMouseEnter={() => prefetchRoute(item.url)} isActive={isActive(item.url)}>
                       <item.icon className="h-7 w-7" />
-                      <span className="text-base">{item.title}</span>
+                      <span className="text-sm font-medium">{item.title}</span>
                     </SidebarMenuButton>}
                 </SidebarMenuItem>)}
 
@@ -172,7 +172,7 @@ export function AppSidebar() {
                       </Tooltip> : <CollapsibleTrigger asChild>
                         <SidebarMenuButton isActive={location.pathname.startsWith('/candidatos') || location.pathname.startsWith('/banco-talentos')} aria-label="Candidatos" aria-expanded={candidatosOpen}>
                           <Users className="h-7 w-7" aria-hidden="true" />
-                          <span className="text-base flex-1">Candidatos</span>
+                          <span className="flex-1 text-sm font-medium">Candidatos</span>
                           <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${candidatosOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
                         </SidebarMenuButton>
                       </CollapsibleTrigger>}
@@ -200,7 +200,7 @@ export function AppSidebar() {
                       </TooltipContent>
                     </Tooltip> : <SidebarMenuButton onClick={() => navigate(item.url)} onMouseEnter={() => prefetchRoute(item.url)} isActive={isActive(item.url)}>
                       <item.icon className="h-7 w-7" />
-                      <span className="text-base">{item.title}</span>
+                      <span className="text-sm font-medium">{item.title}</span>
                     </SidebarMenuButton>}
                 </SidebarMenuItem>)}
 
@@ -219,7 +219,7 @@ export function AppSidebar() {
                       </Tooltip> : <CollapsibleTrigger asChild>
                         <SidebarMenuButton isActive={toolsItems.some(t => location.pathname.startsWith(t.url))} aria-label="Ferramentas" aria-expanded={ferramentasOpen}>
                           <Wrench className="h-7 w-7" aria-hidden="true" />
-                          <span className="text-base flex-1">Ferramentas</span>
+                          <span className="flex-1 text-sm font-medium">Ferramentas</span>
                           <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${ferramentasOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
                         </SidebarMenuButton>
                       </CollapsibleTrigger>}

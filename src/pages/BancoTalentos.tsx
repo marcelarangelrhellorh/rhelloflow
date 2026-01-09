@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Plus, Grid3x3, List, Search } from "lucide-react";
+import { Plus, Grid3x3, List, Search, Link2, UserPlus, ChevronDown } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -10,8 +11,8 @@ import { CandidateCard } from "@/components/BancoTalentos/CandidateCard";
 import { LinkToJobModal } from "@/components/BancoTalentos/LinkToJobModal";
 import { ImportXlsModal } from "@/components/ImportXlsModal";
 import { TalentPoolLinkManager } from "@/components/TalentPoolLinkManager";
+import { CandidateRegistrationLinkManager } from "@/components/CandidateRegistrationLinkManager";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Link2 } from "lucide-react";
 import { differenceInDays } from "date-fns";
 import { CARGO_OPTIONS } from "@/constants/fitCultural";
 
@@ -31,16 +32,12 @@ interface Candidato {
   pretensao_salarial: number | null;
   linkedin: string | null;
   status: string;
-  recrutador: string | null;
-  recruiter_id: string | null;
   criado_em: string;
   curriculo_link: string | null;
   feedback: string | null;
-  profiles?: {
-    full_name: string;
-  } | null;
   mediaRating?: number | null;
   qtdAvaliacoes?: number;
+  tags?: Array<{ id: string; label: string; category: string }>;
 }
 export default function BancoTalentos() {
   const navigate = useNavigate();
@@ -131,7 +128,7 @@ export default function BancoTalentos() {
     let matchesTags = true;
     if (tagFilter !== "all") {
       const candidateTags = (candidato as any).tags || [];
-      matchesTags = candidateTags.some((ct: any) => ct.tag_id === tagFilter);
+      matchesTags = candidateTags.some((ct: any) => ct.id === tagFilter);
     }
 
     // Novos filtros
@@ -173,22 +170,49 @@ export default function BancoTalentos() {
           </div>
         </div>
         <div className="flex gap-2">
-          <Sheet>
-            <SheetTrigger asChild>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
               <Button variant="outline" className="border-[#00141D] text-[#00141D] hover:bg-[#00141D]/10">
                 <Link2 className="mr-2 h-5 w-5" />
-                Link Banco de Talentos   
+                Gerenciar Links
+                <ChevronDown className="ml-2 h-4 w-4" />
               </Button>
-            </SheetTrigger>
-            <SheetContent className="w-[500px] sm:w-[600px] overflow-y-auto">
-              <SheetHeader>
-                <SheetTitle>Gerenciar Links do Banco de Talentos</SheetTitle>
-              </SheetHeader>
-              <div className="mt-6">
-                <TalentPoolLinkManager />
-              </div>
-            </SheetContent>
-          </Sheet>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56 bg-background">
+              <Sheet>
+                <SheetTrigger asChild>
+                  <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="cursor-pointer">
+                    <Link2 className="mr-2 h-4 w-4" />
+                    Link Banco de Talentos
+                  </DropdownMenuItem>
+                </SheetTrigger>
+                <SheetContent className="w-[500px] sm:w-[600px] overflow-y-auto">
+                  <SheetHeader>
+                    <SheetTitle>Gerenciar Links do Banco de Talentos</SheetTitle>
+                  </SheetHeader>
+                  <div className="mt-6">
+                    <TalentPoolLinkManager />
+                  </div>
+                </SheetContent>
+              </Sheet>
+              <Sheet>
+                <SheetTrigger asChild>
+                  <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="cursor-pointer">
+                    <UserPlus className="mr-2 h-4 w-4" />
+                    Link Cadastro de Candidato
+                  </DropdownMenuItem>
+                </SheetTrigger>
+                <SheetContent className="w-[500px] sm:w-[600px] overflow-y-auto">
+                  <SheetHeader>
+                    <SheetTitle>Gerenciar Links de Cadastro de Candidato</SheetTitle>
+                  </SheetHeader>
+                  <div className="mt-6">
+                    <CandidateRegistrationLinkManager />
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Button onClick={() => navigate('/candidatos/novo')} className="bg-[#00141D] hover:bg-[#00141D]/90 text-white font-bold text-sm">
             <Plus className="mr-2 h-5 w-5" />
             Adicionar Candidato
@@ -201,7 +225,7 @@ export default function BancoTalentos() {
       </div>
 
       {/* Filtros e busca */}
-      <div className="sticky top-20 z-10 bg-background/95 backdrop-blur-sm pb-6 mb-6 border-b">
+      <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-sm pb-6 mb-6 border-b pt-4 -mt-4">
         <div className="flex flex-wrap gap-4 mb-4">
           <div className="relative flex-1 min-w-[250px]">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -350,8 +374,8 @@ export default function BancoTalentos() {
         </div> : <div className={viewMode === "grid" ? "grid gap-6 md:grid-cols-2" : "space-y-4"}>
           {filteredCandidatos.map(candidato => <CandidateCard key={candidato.id} candidate={{
         ...candidato,
-        recruiter_name: candidato.profiles?.full_name || candidato.recrutador || "Não atribuído",
-        days_in_bank: getDaysInBank(candidato.criado_em)
+        days_in_bank: getDaysInBank(candidato.criado_em),
+        tags: candidato.tags || []
       }} onViewProfile={() => handleViewProfile(candidato)} onLinkToJob={() => handleLinkToJob(candidato.id)} viewMode={viewMode} />)}
         </div>}
 

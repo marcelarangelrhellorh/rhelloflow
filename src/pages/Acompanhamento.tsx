@@ -203,10 +203,12 @@ export default function Acompanhamento() {
   const selectedVagaData = vagas.find(v => v.id === selectedVaga);
   const vagaCandidatos = candidatos.filter(c => c.vaga_relacionada_id === selectedVaga);
   
-  // Candidatos aparecem para o cliente apenas quando a VAGA estiver em "Shortlist disponível"
-  const isShortlistAvailable = selectedVagaData?.status === 'shortlist_disponivel' || 
-                                selectedVagaData?.status === 'Shortlist disponível';
-  const shortlistCandidatos = isShortlistAvailable 
+  // Candidatos aparecem para o cliente quando a VAGA estiver em "Shortlist disponível" ou "Entrevista cliente"
+  const isClientViewStage = selectedVagaData?.status === 'shortlist_disponivel' || 
+                            selectedVagaData?.status === 'Shortlist disponível' ||
+                            selectedVagaData?.status === 'entrevista_cliente' ||
+                            selectedVagaData?.status === 'Entrevista cliente';
+  const shortlistCandidatos = isClientViewStage 
     ? vagaCandidatos.filter(c => c.status === 'Shortlist')
     : [];
   
@@ -592,7 +594,7 @@ export default function Acompanhamento() {
                 ) : (
                   <div className="text-center py-8">
                     <Users className="h-10 w-10 mx-auto mb-3 text-muted-foreground opacity-50" />
-                    {!isShortlistAvailable ? (
+                    {!isClientViewStage ? (
                       <>
                         <p className="text-muted-foreground font-medium">
                           A shortlist está sendo preparada pela equipe de recrutamento.

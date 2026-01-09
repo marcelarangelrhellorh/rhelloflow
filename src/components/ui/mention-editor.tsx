@@ -1,11 +1,8 @@
-import React, { useMemo, useEffect, useRef } from "react";
-import ReactQuill, { Quill } from "react-quill";
+import React, { useMemo, useEffect, useRef, useState } from "react";
+import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import { Mention } from "quill-mention";
 import "quill-mention/dist/quill.mention.css";
-
-// Registrar módulo de menção com o Quill
-Quill.register("modules/mention", Mention, true);
+import { Skeleton } from "./skeleton";
 
 export interface MentionUser {
   id: string;
@@ -31,6 +28,42 @@ export function MentionEditor({
   minHeight = "120px",
 }: MentionEditorProps) {
   const quillRef = useRef<ReactQuill>(null);
+  const [ready, setReady] = useState(false);
+  const [error, setError] = useState(false);
+
+  // Dynamically import and register quill-mention before mounting the editor
+  useEffect(() => {
+    let mounted = true;
+
+    const initMention = async () => {
+      try {
+        // Dynamic import ensures quill-mention registers with Quill
+        await import("quill-mention");
+        
+        // Small delay to ensure registration completes
+        await new Promise(resolve => setTimeout(resolve, 50));
+        
+        if (mounted) {
+          setReady(true);
+        }
+      } catch (err) {
+        console.error("Failed to load quill-mention:", err);
+        if (mounted) {
+          setError(true);
+        }
+      }
+    };
+
+    initMention();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  // Usar ref para sempre ter acesso à versão mais atual sem causar re-render
+  const usersRef = useRef(users);
+  usersRef.current = users;
 
   const modules = useMemo(() => ({
     toolbar: [
@@ -47,31 +80,39 @@ export function MentionEditor({
       defaultMenuOrientation: "bottom",
       source: function (
         searchTerm: string,
-        renderList: (matches: MentionUser[], searchTerm: string) => void
+        renderList: (matches: MentionUser[], searchTerm: string) => void,
+        mentionChar: string
       ) {
+        const currentUsers = usersRef.current;
         if (searchTerm.length === 0) {
-          renderList(users.slice(0, 10), searchTerm);
+          renderList(currentUsers.slice(0, 10), searchTerm);
         } else {
-          const matches = users.filter((user) =>
+          const matches = currentUsers.filter((user) =>
             user.value.toLowerCase().includes(searchTerm.toLowerCase())
           );
           renderList(matches.slice(0, 10), searchTerm);
         }
       },
-      renderItem: function (item: MentionUser) {
-        return `<div class="mention-item">
-          <span class="mention-name">${item.value}</span>
-          ${item.email ? `<span class="mention-email">${item.email}</span>` : ''}
-        </div>`;
-      },
-      onSelect: function (
-        item: MentionUser,
-        insertItem: (item: MentionUser) => void
-      ) {
-        insertItem(item);
+      renderItem: function (item: MentionUser, searchTerm: string) {
+        const container = document.createElement('div');
+        container.className = 'mention-item';
+        
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'mention-name';
+        nameSpan.textContent = item.value;
+        container.appendChild(nameSpan);
+        
+        if (item.email) {
+          const emailSpan = document.createElement('span');
+          emailSpan.className = 'mention-email';
+          emailSpan.textContent = item.email;
+          container.appendChild(emailSpan);
+        }
+        
+        return container;
       },
     },
-  }), [users]);
+  }), []); // Array vazio - modules nunca recriam
 
   const formats = useMemo(() => [
     "bold",
@@ -169,6 +210,42 @@ export function MentionEditor({
       document.head.removeChild(style);
     };
   }, [minHeight]);
+
+  // Show loading state while quill-mention is being loaded
+  if (!ready) {
+    return (
+      <div className={`mention-editor ${className}`}>
+        <div 
+          className="border border-border rounded-lg overflow-hidden"
+          style={{ minHeight }}
+        >
+          <Skeleton className="h-10 rounded-none" />
+          <div className="p-3">
+            <Skeleton className="h-4 w-3/4 mb-2" />
+            <Skeleton className="h-4 w-1/2" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show fallback textarea if quill-mention failed to load
+  if (error) {
+    return (
+      <div className={`mention-editor ${className}`}>
+        <textarea
+          value={value.replace(/<[^>]*>/g, '')}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          className="w-full p-3 border border-border rounded-lg min-h-[120px] resize-y bg-background text-foreground"
+          style={{ minHeight }}
+        />
+        <p className="text-xs text-muted-foreground mt-1">
+          Editor simplificado (menções indisponíveis)
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className={`mention-editor ${className}`}>

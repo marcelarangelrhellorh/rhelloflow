@@ -14,6 +14,10 @@ export default defineConfig(({ mode }) => ({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+    dedupe: ['quill'],
+  },
+  optimizeDeps: {
+    include: ['quill', 'react-quill', 'quill-mention'],
   },
   build: {
     outDir: 'dist',

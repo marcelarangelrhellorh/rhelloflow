@@ -282,6 +282,43 @@ Deno.serve(async (req) => {
 
     console.log(`Talent pool application submitted: ${newCandidate.id}, protocol: ${protocol}`);
 
+    // Notify link creator about new talent pool application (non-blocking)
+    try {
+      const { data: fullLinkData } = await supabase
+        .from('talent_pool_links')
+        .select('created_by')
+        .eq('id', link.id)
+        .single();
+
+      if (fullLinkData?.created_by) {
+        const candidateFullName = candidate.nome_completo.trim();
+        
+        // Create notification
+        await supabase.rpc('create_notification', {
+          p_user_id: fullLinkData.created_by,
+          p_kind: 'banco_talentos',
+          p_title: 'Nova inscrição no Banco de Talentos',
+          p_body: `${candidateFullName} se inscreveu via link do banco de talentos`,
+          p_job_id: null,
+        });
+        
+        // Send email
+        await supabase.functions.invoke('send-notification-email', {
+          body: {
+            user_id: fullLinkData.created_by,
+            kind: 'banco_talentos',
+            title: 'Nova inscrição no Banco de Talentos',
+            body: `${candidateFullName} se inscreveu via link do banco de talentos`,
+            job_id: null,
+          },
+        });
+        
+        console.log(`Notification and email sent for talent pool application`);
+      }
+    } catch (notifyErr) {
+      console.error('Error sending notification:', notifyErr);
+    }
+
     return new Response(JSON.stringify({
       success: true,
       protocol,

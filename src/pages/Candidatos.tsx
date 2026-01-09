@@ -21,6 +21,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DualScrollContainer } from "@/components/ui/dual-scroll-container";
 import { CandidatosSkeleton } from "@/components/skeletons/CandidatosSkeleton";
 import { FunnelSkeleton } from "@/components/skeletons/FunnelSkeleton";
+import { useNotifications } from "@/hooks/useNotifications";
 
 // Lazy load heavy components
 const CandidatosDashboard = lazy(() => import("@/components/Candidatos/CandidatosDashboard").then(m => ({ default: m.CandidatosDashboard })));
@@ -76,6 +77,7 @@ const statusColors: Record<StatusCandidato, string> = {
 export default function Candidatos() {
   const navigate = useNavigate();
   const { isAdmin } = useUserRole();
+  const { notifyClientsAboutShortlist } = useNotifications();
 
   // Estados comuns
   const [viewType, setViewType] = useState<"cards" | "funnel">("cards");
@@ -215,44 +217,6 @@ export default function Candidatos() {
     }
   };
 
-  // Função para notificar clientes externos sobre candidato em Shortlist
-  const notifyClientsAboutShortlist = async (
-    candidatoName: string,
-    vagaId: string,
-    vagaTitulo: string
-  ) => {
-    try {
-      // Buscar empresa_id da vaga
-      const { data: vaga, error: vagaError } = await supabase
-        .from('vagas')
-        .select('empresa_id')
-        .eq('id', vagaId)
-        .single();
-
-      if (vagaError || !vaga?.empresa_id) return;
-
-      // Buscar clientes externos vinculados à empresa
-      const { data: clients, error: clientsError } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('empresa_id', vaga.empresa_id)
-        .eq('user_type', 'external');
-
-      if (clientsError || !clients?.length) return;
-
-      // Criar notificação para cada cliente
-      const clientIds = clients.map(c => c.id);
-      await supabase.rpc('create_notifications_for_users', {
-        p_user_ids: clientIds,
-        p_kind: 'shortlist',
-        p_title: 'Novo candidato em Shortlist',
-        p_body: `${candidatoName} foi adicionado à shortlist da vaga ${vagaTitulo}`,
-        p_job_id: vagaId,
-      });
-    } catch (error) {
-      logger.warn('Erro ao notificar clientes sobre shortlist:', error);
-    }
-  };
 
   // Handler para confirmação de feedback de reprovação
   const handleRejectionFeedbackConfirm = async (gaveFeedback: boolean) => {

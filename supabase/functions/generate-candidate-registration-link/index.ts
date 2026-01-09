@@ -54,38 +54,17 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json();
-    const { vaga_id, password, expires_in_days, max_submissions, note } = body;
-
-    if (!vaga_id) {
-      return new Response(JSON.stringify({ error: 'ID da vaga é obrigatório' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
+    const { password, expires_days, max_submissions, note } = body;
 
     // Use service role for database operations
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-    // Verify vaga exists
-    const { data: vaga, error: vagaError } = await supabase
-      .from('vagas')
-      .select('id, titulo, empresa')
-      .eq('id', vaga_id)
-      .single();
-
-    if (vagaError || !vaga) {
-      return new Response(JSON.stringify({ error: 'Vaga não encontrada' }), {
-        status: 404,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
 
     // Generate unique token
     let token = generateToken(12);
     let attempts = 0;
     while (attempts < 5) {
       const { data: existing } = await supabase
-        .from('candidate_form_links')
+        .from('candidate_registration_links')
         .select('id')
         .eq('token', token)
         .single();
@@ -98,23 +77,22 @@ Deno.serve(async (req) => {
     // Hash password if provided
     const passwordHash = password ? await hashPassword(password) : null;
 
-    // Calculate expiration date
+    // Calculate expiration date if expires_days is provided
     let expiresAt = null;
-    if (expires_in_days) {
-      const expirationDate = new Date();
-      expirationDate.setDate(expirationDate.getDate() + parseInt(expires_in_days));
-      expiresAt = expirationDate.toISOString();
+    if (expires_days && expires_days > 0) {
+      const expDate = new Date();
+      expDate.setDate(expDate.getDate() + expires_days);
+      expiresAt = expDate.toISOString();
     }
 
     // Create the link
     const { data: link, error } = await supabase
-      .from('candidate_form_links')
+      .from('candidate_registration_links')
       .insert({
-        vaga_id,
         token,
         password_hash: passwordHash,
         expires_at: expiresAt,
-        max_submissions: max_submissions ? parseInt(max_submissions) : null,
+        max_submissions: max_submissions || null,
         note: note || null,
         created_by: user.id,
       })
@@ -122,7 +100,7 @@ Deno.serve(async (req) => {
       .single();
 
     if (error) {
-      console.error('Error creating candidate form link:', error);
+      console.error('Error creating candidate registration link:', error);
       return new Response(JSON.stringify({ error: 'Erro ao criar link' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -130,32 +108,27 @@ Deno.serve(async (req) => {
     }
 
     // Log event
-    await supabase.from('candidate_form_link_events').insert({
+    await supabase.from('candidate_registration_link_events').insert({
       link_id: link.id,
       event_type: 'created',
-      metadata: { created_by: user.id, vaga_id },
+      metadata: { created_by: user.id },
     });
 
-    console.log(`Candidate form link created: ${link.id} for vaga: ${vaga_id}`);
+    console.log(`Candidate registration link created: ${link.id}`);
 
     return new Response(JSON.stringify({
       id: link.id,
       token: link.token,
-      url: `${req.headers.get('origin')}/candidatura/${link.token}`,
+      url: `${req.headers.get('origin')}/cadastro-candidato/${link.token}`,
       expires_at: link.expires_at,
       max_submissions: link.max_submissions,
       requires_password: !!passwordHash,
-      vaga: {
-        id: vaga.id,
-        titulo: vaga.titulo,
-        empresa: vaga.empresa,
-      },
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
   } catch (error) {
-    console.error('Error in generate-candidate-form-link:', error);
+    console.error('Error in generate-candidate-registration-link:', error);
     return new Response(JSON.stringify({ error: 'Erro interno' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

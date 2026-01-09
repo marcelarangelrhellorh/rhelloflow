@@ -13,6 +13,8 @@ const publicJobSchema = z.object({
   cnpj: z.string()
     .transform(s => s.replace(/\D/g, ''))
     .refine(s => s.length === 14, 'CNPJ deve ter 14 dígitos'),
+  resumo_empresa: z.string().trim().max(2000, 'Resumo muito longo').nullable().optional(),
+  endereco_empresa: z.string().trim().max(500, 'Endereço muito longo').nullable().optional(),
   contato_email: z.string().trim().email('Email inválido').max(255, 'Email muito longo'),
   contato_nome: z.string().trim().min(2, 'Nome muito curto').max(100, 'Nome muito longo'),
   contato_telefone: z.string().trim().max(50).nullable().optional(),
@@ -34,6 +36,7 @@ const publicJobSchema = z.object({
   observacoes: z.string().trim().max(2000).nullable().optional(),
   confidencial: z.boolean().nullable().optional(),
   motivo_confidencial: z.string().trim().max(500).nullable().optional(),
+  motivo_contratacao: z.enum(['aumento_quadro', 'substituicao', 'reposicao']).nullable().optional(),
   // Honeypot field - should always be empty
   website: z.string().max(0).optional(),
   // Timing check - submission should take at least 3 seconds
@@ -241,6 +244,9 @@ Deno.serve(async (req) => {
       console.log(`Vaga vinculada à empresa existente: ${empresaExistente.nome} (${empresaExistente.id})`);
     } else {
       // Criar empresa básica com dados fornecidos
+      const sanitizedResumo = validatedData.resumo_empresa ? sanitizeText(validatedData.resumo_empresa) : null;
+      const sanitizedEndereco = validatedData.endereco_empresa ? sanitizeText(validatedData.endereco_empresa) : null;
+      
       const { data: novaEmpresa, error: empresaError } = await supabaseAdmin
         .from('empresas')
         .insert([{
@@ -250,6 +256,8 @@ Deno.serve(async (req) => {
           contato_principal_nome: sanitizedContatoNome,
           contato_principal_email: sanitizedContatoEmail,
           contato_principal_telefone: sanitizedContatoTelefone,
+          endereco: sanitizedEndereco, // Copiar endereço para empresa
+          observacoes: sanitizedResumo, // Copiar resumo para observações
         }])
         .select('id, nome')
         .single();
@@ -268,6 +276,8 @@ Deno.serve(async (req) => {
       titulo: sanitizeText(validatedData.titulo),
       empresa: sanitizedEmpresa,
       empresa_id: empresaId,
+      resumo_empresa: validatedData.resumo_empresa ? sanitizeText(validatedData.resumo_empresa) : null,
+      endereco_empresa: validatedData.endereco_empresa ? sanitizeText(validatedData.endereco_empresa) : null,
       contato_nome: sanitizedContatoNome,
       contato_email: sanitizedContatoEmail,
       contato_telefone: sanitizedContatoTelefone,
@@ -289,6 +299,7 @@ Deno.serve(async (req) => {
       observacoes: validatedData.observacoes ? sanitizeText(validatedData.observacoes) : null,
       confidencial: validatedData.confidencial || false,
       motivo_confidencial: validatedData.motivo_confidencial ? sanitizeText(validatedData.motivo_confidencial) : null,
+      motivo_contratacao: validatedData.motivo_contratacao || null,
       source: 'externo',
       status: 'Discovery',
       status_slug: 'discovery',
@@ -319,6 +330,41 @@ Deno.serve(async (req) => {
       }]);
 
     console.log(`Job submission successful from IP ${clientIp}: ${data.id}, empresa_id: ${empresaId}`);
+
+    // Notify admins about new external job (non-blocking)
+    try {
+      const { data: admins } = await supabaseAdmin
+        .from('user_roles')
+        .select('user_id')
+        .eq('role', 'admin');
+
+      if (admins?.length) {
+        for (const admin of admins) {
+          // Create notification
+          await supabaseAdmin.rpc('create_notification', {
+            p_user_id: admin.user_id,
+            p_kind: 'vaga_externa',
+            p_title: 'Nova vaga recebida',
+            p_body: `${sanitizedData.empresa} enviou a vaga: ${sanitizedData.titulo}`,
+            p_job_id: data.id,
+          });
+          
+          // Send email
+          await supabaseAdmin.functions.invoke('send-notification-email', {
+            body: {
+              user_id: admin.user_id,
+              kind: 'vaga_externa',
+              title: 'Nova vaga recebida',
+              body: `${sanitizedData.empresa} enviou a vaga: ${sanitizedData.titulo}`,
+              job_id: data.id,
+            },
+          });
+        }
+        console.log(`Notifications sent to ${admins.length} admins`);
+      }
+    } catch (notifyErr) {
+      console.error('Error notifying admins:', notifyErr);
+    }
 
     return new Response(
       JSON.stringify({ 

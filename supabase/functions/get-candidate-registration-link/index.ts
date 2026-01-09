@@ -22,44 +22,23 @@ Deno.serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Get link details with vaga info
-    const { data: link, error } = await supabase
-      .from('candidate_form_links')
-      .select(`
-        id,
-        token,
-        active,
-        expires_at,
-        max_submissions,
-        submissions_count,
-        password_hash,
-        revoked,
-        vaga:vagas(id, titulo, empresa, cidade, estado, formato_trabalho, modelo_contratacao)
-      `)
-      .eq('token', token)
-      .eq('revoked', false)
-      .single();
+    // Get link details using the secure function
+    const { data: links, error } = await supabase
+      .rpc('get_candidate_registration_link_by_token', { p_token: token });
 
-    if (error || !link) {
-      console.error('Error fetching candidate form link:', error);
-      return new Response(JSON.stringify({ error: 'Link não encontrado' }), {
+    if (error) {
+      console.error('Error fetching candidate registration link:', error);
+      return new Response(JSON.stringify({ error: 'Erro ao buscar link' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const link = links?.[0];
+
+    if (!link) {
+      return new Response(JSON.stringify({ error: 'Link não encontrado ou expirado' }), {
         status: 404,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    // Check if link is active
-    if (!link.active) {
-      return new Response(JSON.stringify({ error: 'Link desativado' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    // Check expiration
-    if (link.expires_at && new Date(link.expires_at) < new Date()) {
-      return new Response(JSON.stringify({ error: 'Link expirado' }), {
-        status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
@@ -77,7 +56,7 @@ Deno.serve(async (req) => {
     const userAgent = req.headers.get('user-agent') || 'unknown';
     const urlParams = new URL(req.url);
     
-    await supabase.from('candidate_form_link_events').insert({
+    await supabase.from('candidate_registration_link_events').insert({
       link_id: link.id,
       event_type: 'view',
       ip_address: ipAddress,
@@ -87,7 +66,7 @@ Deno.serve(async (req) => {
       utm_campaign: urlParams.searchParams.get('utm_campaign'),
     });
 
-    console.log(`Candidate form link viewed: ${link.id}`);
+    console.log(`Candidate registration link viewed: ${link.id}`);
 
     return new Response(JSON.stringify({
       id: link.id,
@@ -95,14 +74,13 @@ Deno.serve(async (req) => {
       expires_at: link.expires_at,
       max_submissions: link.max_submissions,
       submissions_count: link.submissions_count,
-      requires_password: !!link.password_hash,
-      vaga: link.vaga,
+      requires_password: link.requires_password,
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
   } catch (error) {
-    console.error('Error in get-candidate-form-link:', error);
+    console.error('Error in get-candidate-registration-link:', error);
     return new Response(JSON.stringify({ error: 'Erro interno' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

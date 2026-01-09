@@ -118,6 +118,22 @@ Deno.serve(async (req) => {
       } else {
         notificationsCreated++;
         console.log(`[check-stale-jobs] Created notification for job ${job.id} (${job.titulo})`);
+        
+        // Send email notification (non-blocking)
+        try {
+          await supabase.functions.invoke('send-notification-email', {
+            body: {
+              user_id: job.recrutador_id,
+              kind: 'vaga_parada',
+              title: `Vaga parada há ${daysSinceChange} dias`,
+              body: `A vaga "${job.titulo}" está há ${daysSinceChange} dias na etapa "${job.status_slug}". Verifique se há atualizações.`,
+              job_id: job.id,
+            },
+          });
+          console.log(`[check-stale-jobs] Email sent for job ${job.id}`);
+        } catch (emailErr) {
+          console.error(`[check-stale-jobs] Error sending email for job ${job.id}:`, emailErr);
+        }
       }
     }
 

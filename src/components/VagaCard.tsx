@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { MoreVertical, Edit, Trash2, AlertTriangle, EyeOff } from "lucide-react";
+import { MoreVertical, Edit, Trash2, AlertTriangle, EyeOff, Target } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { getBusinessDaysFromNow } from "@/lib/dateUtils";
@@ -31,6 +31,7 @@ interface VagaCardProps {
     recrutador: string | null;
     recrutador_id?: string | null;
     status: string;
+    prioridade?: string | null;
     criado_em: string | null;
     data_abertura?: string | null;
     candidatos_count?: number;
@@ -44,6 +45,13 @@ interface VagaCardProps {
   onClick?: () => void;
   viewMode?: "grid" | "list";
 }
+
+// Cores de prioridade
+const priorityColors: Record<string, string> = {
+  "Baixa": "bg-gray-100 text-gray-600 border-gray-200",
+  "Alta": "bg-orange-100 text-orange-700 border-orange-200",
+  "Crítica": "bg-red-100 text-red-700 border-red-200",
+};
 
 // Função para obter iniciais do nome
 const getInitials = (name: string | null): string => {
@@ -77,7 +85,7 @@ const getStatusBadgeColor = (status: string): {
     text: "#00141D"
   };
   return {
-    bg: "#FAEC3E",
+    bg: "#ffcd00",
     text: "#00141D"
   };
 };
@@ -255,6 +263,14 @@ export const VagaCard = React.memo(function VagaCard({
               }}>
                     {vaga.status}
                   </Badge>
+                  {vaga.prioridade && vaga.prioridade !== 'Normal' && (
+                    <Badge className={`border font-semibold rounded-md px-2 py-0.5 text-xs flex items-center gap-1 ${priorityColors[vaga.prioridade] || "bg-gray-100 text-gray-600 border-gray-200"}`}>
+                      {(vaga.prioridade === 'Alta' || vaga.prioridade === 'Crítica') && (
+                        <Target className="h-3 w-3" />
+                      )}
+                      {vaga.prioridade}
+                    </Badge>
+                  )}
                   {vaga.confidencial && <Badge className="bg-orange-100 text-orange-700 border-orange-200 border font-semibold rounded-md px-2 py-0.5 text-xs flex items-center gap-1">
                       <EyeOff className="h-3 w-3" />
                       Confidencial
@@ -351,6 +367,15 @@ export const VagaCard = React.memo(function VagaCard({
               }} className="border font-semibold rounded-md px-2 py-1 text-sm bg-[#ffcc00]">
                     {vaga.status}
                   </Badge>
+                  
+                  {vaga.prioridade && vaga.prioridade !== 'Normal' && (
+                    <Badge className={`border font-semibold rounded-md px-2 py-1 text-sm flex items-center gap-1 ${priorityColors[vaga.prioridade] || "bg-gray-100 text-gray-600 border-gray-200"}`}>
+                      {(vaga.prioridade === 'Alta' || vaga.prioridade === 'Crítica') && (
+                        <Target className="h-3.5 w-3.5" />
+                      )}
+                      {vaga.prioridade}
+                    </Badge>
+                  )}
                   
                   {vaga.confidencial && <Badge className="bg-orange-100 text-orange-700 border-orange-200 border font-semibold rounded-md px-2 py-1 text-sm flex items-center gap-1">
                       <EyeOff className="h-3.5 w-3.5" />

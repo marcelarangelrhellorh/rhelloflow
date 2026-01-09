@@ -85,140 +85,6 @@ export type Database = {
           },
         ]
       }
-      candidate_form_link_events: {
-        Row: {
-          created_at: string | null
-          event_type: string
-          id: string
-          ip_address: string | null
-          link_id: string
-          metadata: Json | null
-          user_agent: string | null
-          utm_campaign: string | null
-          utm_medium: string | null
-          utm_source: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          event_type: string
-          id?: string
-          ip_address?: string | null
-          link_id: string
-          metadata?: Json | null
-          user_agent?: string | null
-          utm_campaign?: string | null
-          utm_medium?: string | null
-          utm_source?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          event_type?: string
-          id?: string
-          ip_address?: string | null
-          link_id?: string
-          metadata?: Json | null
-          user_agent?: string | null
-          utm_campaign?: string | null
-          utm_medium?: string | null
-          utm_source?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "candidate_form_link_events_link_id_fkey"
-            columns: ["link_id"]
-            isOneToOne: false
-            referencedRelation: "candidate_form_links"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      candidate_form_links: {
-        Row: {
-          active: boolean | null
-          created_at: string | null
-          created_by: string | null
-          expires_at: string | null
-          id: string
-          last_used_at: string | null
-          max_submissions: number | null
-          note: string | null
-          password_hash: string | null
-          revoked: boolean | null
-          revoked_at: string | null
-          submissions_count: number | null
-          token: string
-          vaga_id: string
-        }
-        Insert: {
-          active?: boolean | null
-          created_at?: string | null
-          created_by?: string | null
-          expires_at?: string | null
-          id?: string
-          last_used_at?: string | null
-          max_submissions?: number | null
-          note?: string | null
-          password_hash?: string | null
-          revoked?: boolean | null
-          revoked_at?: string | null
-          submissions_count?: number | null
-          token: string
-          vaga_id: string
-        }
-        Update: {
-          active?: boolean | null
-          created_at?: string | null
-          created_by?: string | null
-          expires_at?: string | null
-          id?: string
-          last_used_at?: string | null
-          max_submissions?: number | null
-          note?: string | null
-          password_hash?: string | null
-          revoked?: boolean | null
-          revoked_at?: string | null
-          submissions_count?: number | null
-          token?: string
-          vaga_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "candidate_form_links_vaga_id_fkey"
-            columns: ["vaga_id"]
-            isOneToOne: false
-            referencedRelation: "vagas"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "candidate_form_links_vaga_id_fkey"
-            columns: ["vaga_id"]
-            isOneToOne: false
-            referencedRelation: "vagas_active"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "candidate_form_links_vaga_id_fkey"
-            columns: ["vaga_id"]
-            isOneToOne: false
-            referencedRelation: "vagas_public_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "candidate_form_links_vaga_id_fkey"
-            columns: ["vaga_id"]
-            isOneToOne: false
-            referencedRelation: "vw_vagas_cliente_detalhadas"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "candidate_form_links_vaga_id_fkey"
-            columns: ["vaga_id"]
-            isOneToOne: false
-            referencedRelation: "vw_vagas_com_stats"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       candidate_notes: {
         Row: {
           candidate_id: string
@@ -295,6 +161,104 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      candidate_registration_link_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          ip_address: string | null
+          link_id: string
+          metadata: Json | null
+          user_agent: string | null
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          ip_address?: string | null
+          link_id: string
+          metadata?: Json | null
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          ip_address?: string | null
+          link_id?: string
+          metadata?: Json | null
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_registration_link_events_link_id_fkey"
+            columns: ["link_id"]
+            isOneToOne: false
+            referencedRelation: "candidate_registration_links"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      candidate_registration_links: {
+        Row: {
+          active: boolean
+          created_at: string
+          created_by: string | null
+          expires_at: string | null
+          id: string
+          last_used_at: string | null
+          max_submissions: number | null
+          note: string | null
+          password_hash: string | null
+          revoked: boolean
+          revoked_at: string | null
+          submissions_count: number
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          last_used_at?: string | null
+          max_submissions?: number | null
+          note?: string | null
+          password_hash?: string | null
+          revoked?: boolean
+          revoked_at?: string | null
+          submissions_count?: number
+          token: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          last_used_at?: string | null
+          max_submissions?: number | null
+          note?: string | null
+          password_hash?: string | null
+          revoked?: boolean
+          revoked_at?: string | null
+          submissions_count?: number
+          token?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       candidate_scorecards: {
         Row: {
@@ -543,7 +507,7 @@ export type Database = {
       candidatos: {
         Row: {
           area: Database["public"]["Enums"]["area_candidato"] | null
-          candidate_form_link_id: string | null
+          candidate_registration_link_id: string | null
           cargo: string | null
           cidade: string | null
           cpf: string | null
@@ -595,7 +559,7 @@ export type Database = {
         }
         Insert: {
           area?: Database["public"]["Enums"]["area_candidato"] | null
-          candidate_form_link_id?: string | null
+          candidate_registration_link_id?: string | null
           cargo?: string | null
           cidade?: string | null
           cpf?: string | null
@@ -647,7 +611,7 @@ export type Database = {
         }
         Update: {
           area?: Database["public"]["Enums"]["area_candidato"] | null
-          candidate_form_link_id?: string | null
+          candidate_registration_link_id?: string | null
           cargo?: string | null
           cidade?: string | null
           cpf?: string | null
@@ -699,10 +663,10 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "candidatos_candidate_form_link_id_fkey"
-            columns: ["candidate_form_link_id"]
+            foreignKeyName: "candidatos_candidate_registration_link_id_fkey"
+            columns: ["candidate_registration_link_id"]
             isOneToOne: false
-            referencedRelation: "candidate_form_links"
+            referencedRelation: "candidate_registration_links"
             referencedColumns: ["id"]
           },
           {
@@ -3583,6 +3547,7 @@ export type Database = {
           dias_semana: string[] | null
           empresa: string
           empresa_id: string | null
+          endereco_empresa: string | null
           habilidades_comportamentais: string | null
           horario_fim: string | null
           horario_inicio: string | null
@@ -3591,6 +3556,7 @@ export type Database = {
           last_status_change_by: string | null
           modelo_trabalho: Database["public"]["Enums"]["modelo_trabalho"] | null
           motivo_confidencial: string | null
+          motivo_contratacao: string | null
           observacoes: string | null
           prioridade: Database["public"]["Enums"]["prioridade_vaga"] | null
           quantidade_vagas: number | null
@@ -3600,6 +3566,7 @@ export type Database = {
           requisitos_desejaveis: string | null
           requisitos_obrigatorios: string | null
           responsabilidades: string | null
+          resumo_empresa: string | null
           salario_max: number | null
           salario_min: number | null
           salario_modalidade: string | null
@@ -3637,6 +3604,7 @@ export type Database = {
           dias_semana?: string[] | null
           empresa: string
           empresa_id?: string | null
+          endereco_empresa?: string | null
           habilidades_comportamentais?: string | null
           horario_fim?: string | null
           horario_inicio?: string | null
@@ -3647,6 +3615,7 @@ export type Database = {
             | Database["public"]["Enums"]["modelo_trabalho"]
             | null
           motivo_confidencial?: string | null
+          motivo_contratacao?: string | null
           observacoes?: string | null
           prioridade?: Database["public"]["Enums"]["prioridade_vaga"] | null
           quantidade_vagas?: number | null
@@ -3656,6 +3625,7 @@ export type Database = {
           requisitos_desejaveis?: string | null
           requisitos_obrigatorios?: string | null
           responsabilidades?: string | null
+          resumo_empresa?: string | null
           salario_max?: number | null
           salario_min?: number | null
           salario_modalidade?: string | null
@@ -3693,6 +3663,7 @@ export type Database = {
           dias_semana?: string[] | null
           empresa?: string
           empresa_id?: string | null
+          endereco_empresa?: string | null
           habilidades_comportamentais?: string | null
           horario_fim?: string | null
           horario_inicio?: string | null
@@ -3703,6 +3674,7 @@ export type Database = {
             | Database["public"]["Enums"]["modelo_trabalho"]
             | null
           motivo_confidencial?: string | null
+          motivo_contratacao?: string | null
           observacoes?: string | null
           prioridade?: Database["public"]["Enums"]["prioridade_vaga"] | null
           quantidade_vagas?: number | null
@@ -3712,6 +3684,7 @@ export type Database = {
           requisitos_desejaveis?: string | null
           requisitos_obrigatorios?: string | null
           responsabilidades?: string | null
+          resumo_empresa?: string | null
           salario_max?: number | null
           salario_min?: number | null
           salario_modalidade?: string | null
@@ -5245,6 +5218,19 @@ export type Database = {
       generate_salary_study_cache_key: {
         Args: { p_cargo: string; p_localidade?: string; p_senioridade?: string }
         Returns: string
+      }
+      get_candidate_registration_link_by_token: {
+        Args: { p_token: string }
+        Returns: {
+          active: boolean
+          created_at: string
+          expires_at: string
+          id: string
+          max_submissions: number
+          requires_password: boolean
+          submissions_count: number
+          token: string
+        }[]
       }
       get_dashboard_overview_secure: {
         Args: never

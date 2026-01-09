@@ -17,9 +17,7 @@ import {
   User,
   Briefcase,
   Heart,
-  FileText,
-  MapPin,
-  Building2
+  FileText
 } from "lucide-react";
 import { toast } from "sonner";
 import { Constants } from "@/integrations/supabase/types";
@@ -45,18 +43,9 @@ interface LinkData {
   max_submissions: number | null;
   submissions_count: number;
   requires_password: boolean;
-  vaga: {
-    id: string;
-    titulo: string;
-    empresa: string;
-    cidade?: string;
-    estado?: string;
-    formato_trabalho?: string;
-    modelo_contratacao?: string;
-  } | null;
 }
 
-export default function CandidateFormPage() {
+export default function CandidateRegistrationForm() {
   const { token } = useParams<{ token: string }>();
   const [searchParams] = useSearchParams();
 
@@ -126,7 +115,7 @@ export default function CandidateFormPage() {
 
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-candidate-form-link?token=${token}`,
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-candidate-registration-link?token=${token}`,
         {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
@@ -141,7 +130,7 @@ export default function CandidateFormPage() {
         setLinkData(data);
       }
     } catch (err) {
-      console.error('Error loading candidate form link:', err);
+      console.error('Error loading candidate registration link:', err);
       setError("Erro ao carregar formulário");
     } finally {
       setLoading(false);
@@ -327,7 +316,7 @@ export default function CandidateFormPage() {
         company: formData.company, // Honeypot
       };
 
-      const { data, error } = await supabase.functions.invoke('submit-candidate-form-application', {
+      const { data, error } = await supabase.functions.invoke('submit-candidate-registration', {
         body: {
           token,
           candidate: candidateData,
@@ -360,7 +349,7 @@ export default function CandidateFormPage() {
       }
     } catch (error: any) {
       console.error('Error submitting application:', error);
-      toast.error(error?.message || "Erro ao enviar candidatura");
+      toast.error(error?.message || "Erro ao enviar cadastro");
     } finally {
       setSubmitting(false);
     }
@@ -400,23 +389,16 @@ export default function CandidateFormPage() {
           <CardContent className="pt-6">
             <div className="flex items-center gap-2 text-green-600 mb-4">
               <CheckCircle className="h-5 w-5" />
-              <h2 className="text-xl font-bold text-[#00141D]">Candidatura Enviada!</h2>
+              <h2 className="text-xl font-bold text-[#00141D]">Cadastro Realizado!</h2>
             </div>
-            <p className="text-[#36404A] mb-4">Sua candidatura foi enviada com sucesso.</p>
+            <p className="text-[#36404A] mb-4">Seu cadastro foi recebido com sucesso!</p>
             <div className="p-4 bg-[#FFCD00]/10 rounded-lg border border-[#FFCD00]/30 mb-4">
               <p className="text-sm text-[#36404A] font-medium">Protocolo:</p>
               <p className="font-mono font-bold text-lg text-[#00141D]">{protocol}</p>
             </div>
-            {linkData?.vaga && (
-              <div className="p-4 bg-gray-50 rounded-lg border mb-4">
-                <p className="text-sm text-[#36404A] font-medium">Vaga:</p>
-                <p className="font-semibold text-[#00141D]">{linkData.vaga.titulo}</p>
-                <p className="text-sm text-[#36404A]">{linkData.vaga.empresa}</p>
-              </div>
-            )}
             <Alert className="border-[#36404A]/20">
               <AlertDescription className="text-[#36404A]">
-                Acompanhe seu processo seletivo. Entraremos em contato em breve!
+                Nosso time irá analisar seu perfil e entrar em contato quando houver uma vaga compatível com seus interesses e habilidades.
               </AlertDescription>
             </Alert>
           </CardContent>
@@ -436,40 +418,14 @@ export default function CandidateFormPage() {
         </div>
       </header>
 
-      {/* Hero Section with Job Info */}
-      <section className="bg-gradient-to-r from-[#00141D] to-[#1a2e38] text-white py-8">
+      {/* Hero Section */}
+      <section className="bg-white border-b border-[#36404A]/10 py-8">
         <div className="max-w-4xl mx-auto px-4">
-          {linkData?.vaga && (
-            <>
-              <div className="flex items-center gap-2 mb-2">
-                <Building2 className="h-5 w-5 text-[#FFCD00]" />
-                <span className="text-[#FFCD00] font-medium">{linkData.vaga.empresa}</span>
-              </div>
-              <h1 className="text-3xl md:text-4xl font-extrabold mb-3">
-                {linkData.vaga.titulo}
-              </h1>
-              <div className="flex flex-wrap items-center gap-4 text-sm text-gray-300">
-                {linkData.vaga.cidade && linkData.vaga.estado && (
-                  <div className="flex items-center gap-1">
-                    <MapPin className="h-4 w-4" />
-                    <span>{linkData.vaga.cidade}, {linkData.vaga.estado}</span>
-                  </div>
-                )}
-                {linkData.vaga.formato_trabalho && (
-                  <Badge variant="secondary" className="bg-white/10 text-white border-none">
-                    {linkData.vaga.formato_trabalho}
-                  </Badge>
-                )}
-                {linkData.vaga.modelo_contratacao && (
-                  <Badge variant="secondary" className="bg-white/10 text-white border-none">
-                    {linkData.vaga.modelo_contratacao}
-                  </Badge>
-                )}
-              </div>
-            </>
-          )}
-          <p className="text-gray-300 mt-4">
-            Preencha o formulário abaixo para se candidatar a esta vaga.
+          <h1 className="text-3xl md:text-4xl font-extrabold text-[#00141D] mb-2">
+            Cadastro de Candidato
+          </h1>
+          <p className="text-lg text-[#36404A]">
+            Preencha o formulário abaixo para se cadastrar. Ao finalizar, nosso time irá analisar seu perfil e alocá-lo para a vaga que melhor se encaixa com seus interesses e habilidades.
           </p>
         </div>
       </section>
@@ -918,13 +874,13 @@ export default function CandidateFormPage() {
               className="mt-1"
             />
             <Label htmlFor="lgpd" className="text-sm text-[#00141D] leading-relaxed cursor-pointer">
-              Autorizo o tratamento dos meus dados pessoais para participar do processo seletivo da Rhello, conforme a Lei Geral de Proteção de Dados (LGPD). <span className="text-red-600">*</span>
+              Autorizo o tratamento dos meus dados pessoais para processos seletivos da Rhello, conforme a Lei Geral de Proteção de Dados (LGPD). <span className="text-red-600">*</span>
             </Label>
           </div>
 
           <Alert className="border-[#36404A]/20">
             <AlertDescription className="text-xs text-[#36404A]">
-              Ao enviar, seus dados serão utilizados exclusivamente para este processo seletivo e mantidos de forma segura conforme nossa política de privacidade.
+              Ao enviar, seus dados serão utilizados exclusivamente para processos seletivos e mantidos de forma segura conforme nossa política de privacidade.
             </AlertDescription>
           </Alert>
 
@@ -939,33 +895,23 @@ export default function CandidateFormPage() {
             onChange={(e) => setFormData({ ...formData, company: e.target.value })}
           />
 
-          <Button
-            type="submit"
-            size="lg"
+          {/* Submit button */}
+          <Button 
+            type="submit" 
+            className="w-full bg-[#00141D] hover:bg-[#00141D]/90 text-white font-bold py-6 text-lg"
             disabled={submitting}
-            className="w-full bg-[#FFCD00] text-[#00141D] hover:bg-[#FFCD00]/90 font-bold text-lg py-6"
           >
             {submitting ? (
               <>
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                Enviando candidatura...
+                Enviando...
               </>
             ) : (
-              "Enviar Candidatura"
+              "Enviar Cadastro"
             )}
           </Button>
         </form>
       </main>
-
-      {/* Footer */}
-      <footer className="bg-[#00141D] text-white py-6 mt-12">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <img src={logoLight} alt="Rhello" className="h-6 mx-auto mb-2 brightness-0 invert" />
-          <p className="text-sm text-gray-400">
-            © {new Date().getFullYear()} Rhello. Todos os direitos reservados.
-          </p>
-        </div>
-      </footer>
     </div>
   );
 }
