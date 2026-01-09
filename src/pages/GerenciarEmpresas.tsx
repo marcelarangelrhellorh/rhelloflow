@@ -158,58 +158,107 @@ export default function GerenciarEmpresas() {
           {/* Coluna Principal (3/4) */}
           <div className="lg:col-span-3 space-y-4">
             {/* Filters and View Toggle */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-3">
+              {/* Linha 1: Campo de busca */}
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#36404A]" />
-                <Input placeholder="Buscar por nome ou CNPJ..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input 
+                  placeholder="Buscar por nome ou CNPJ..." 
+                  value={searchTerm} 
+                  onChange={e => setSearchTerm(e.target.value)} 
+                  className="pl-10 h-10 bg-background border-border" 
+                />
               </div>
-            <div className="flex gap-2 justify-between flex-wrap">
-                <div className="flex gap-2 flex-wrap">
-                  <Button variant={filterStatus === "todos" ? "default" : "outline"} onClick={() => setFilterStatus("todos")} className={filterStatus === "todos" ? "bg-[#00141D] text-white" : ""}>
+              
+              {/* Linha 2: Filtros e controles */}
+              <div className="flex items-center justify-between flex-wrap gap-3">
+                {/* Grupo: Filtros de Status */}
+                <div className="flex gap-1 border rounded-md p-1 bg-muted/50">
+                  <Button 
+                    variant={filterStatus === "todos" ? "default" : "ghost"} 
+                    size="sm"
+                    onClick={() => setFilterStatus("todos")} 
+                    className={filterStatus === "todos" ? "bg-[#00141D] text-white" : ""}
+                  >
                     Todos
                   </Button>
-                  <Button variant={filterStatus === "ativo" ? "default" : "outline"} onClick={() => setFilterStatus("ativo")} className={filterStatus === "ativo" ? "bg-green-600 text-white" : ""}>
+                  <Button 
+                    variant={filterStatus === "ativo" ? "default" : "ghost"} 
+                    size="sm"
+                    onClick={() => setFilterStatus("ativo")} 
+                    className={filterStatus === "ativo" ? "bg-green-600 text-white" : ""}
+                  >
                     Ativos
                   </Button>
-                  <Button variant={filterStatus === "prospect" ? "default" : "outline"} onClick={() => setFilterStatus("prospect")} className={filterStatus === "prospect" ? "bg-blue-600 text-white" : ""}>
+                  <Button 
+                    variant={filterStatus === "prospect" ? "default" : "ghost"} 
+                    size="sm"
+                    onClick={() => setFilterStatus("prospect")} 
+                    className={filterStatus === "prospect" ? "bg-blue-600 text-white" : ""}
+                  >
                     Prospects
                   </Button>
-                  <Button variant={filterStatus === "inativo" ? "default" : "outline"} onClick={() => setFilterStatus("inativo")} className={filterStatus === "inativo" ? "bg-red-600 text-white" : ""}>
+                  <Button 
+                    variant={filterStatus === "inativo" ? "default" : "ghost"} 
+                    size="sm"
+                    onClick={() => setFilterStatus("inativo")} 
+                    className={filterStatus === "inativo" ? "bg-red-600 text-white" : ""}
+                  >
                     Inativos
                   </Button>
-                  
-                  {/* Ordenação */}
-                  <div className="flex gap-1 border rounded-md ml-2">
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => setSortOrder("nome")} 
-                      className={sortOrder === "nome" ? "bg-muted" : ""}
-                      title="Ordenar por nome A-Z"
-                    >
-                      <ArrowUpDown className="h-4 w-4 mr-1" />
-                      A-Z
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => setSortOrder("created_at")} 
-                      className={sortOrder === "created_at" ? "bg-muted" : ""}
-                      title="Ordenar por mais recentes"
-                    >
-                      <Clock className="h-4 w-4 mr-1" />
-                      Recentes
-                    </Button>
-                  </div>
                 </div>
-                <div className="flex gap-1 border rounded-md">
-                  <Button variant="ghost" size="sm" onClick={() => setViewMode("cards")} className={viewMode === "cards" ? "bg-muted" : ""}>
+                
+                {/* Grupo: Ordenação */}
+                <div className="flex gap-1 border rounded-md p-1 bg-muted/50">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setSortOrder("nome")} 
+                    className={sortOrder === "nome" ? "bg-background shadow-sm" : ""}
+                    title="Ordenar por nome A-Z"
+                  >
+                    <ArrowUpDown className="h-4 w-4 mr-1" />
+                    A-Z
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setSortOrder("created_at")} 
+                    className={sortOrder === "created_at" ? "bg-background shadow-sm" : ""}
+                    title="Ordenar por mais recentes"
+                  >
+                    <Clock className="h-4 w-4 mr-1" />
+                    Recentes
+                  </Button>
+                </div>
+                
+                {/* Grupo: Modos de Visualização */}
+                <div className="flex gap-1 border rounded-md p-1 bg-muted/50">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setViewMode("cards")} 
+                    className={viewMode === "cards" ? "bg-background shadow-sm" : ""}
+                    title="Visualização em cards"
+                  >
                     <LayoutGrid className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => setViewMode("list")} className={viewMode === "list" ? "bg-muted" : ""}>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setViewMode("list")} 
+                    className={viewMode === "list" ? "bg-background shadow-sm" : ""}
+                    title="Visualização em lista"
+                  >
                     <List className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => setViewMode("funnel")} className={viewMode === "funnel" ? "bg-muted" : ""}>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setViewMode("funnel")} 
+                    className={viewMode === "funnel" ? "bg-background shadow-sm" : ""}
+                    title="Visualização em funil"
+                  >
                     <Kanban className="h-4 w-4" />
                   </Button>
                 </div>
