@@ -1,5 +1,4 @@
-import { useEffect, useState, useMemo, useCallback, Suspense, lazy } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useState, useMemo, useCallback, Suspense, lazy } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,8 +19,10 @@ import { logger } from "@/lib/logger";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DualScrollContainer } from "@/components/ui/dual-scroll-container";
 import { CandidatosSkeleton } from "@/components/skeletons/CandidatosSkeleton";
-import { FunnelSkeleton } from "@/components/skeletons/FunnelSkeleton";
 import { useNotifications } from "@/hooks/useNotifications";
+import { useCandidatosListQuery, CandidatoListItem } from "@/hooks/data/useCandidatosListQuery";
+import { useVagasListQuery } from "@/hooks/data/useVagasListQuery";
+import { useUsersQuery } from "@/hooks/data/useUsersQuery";
 
 // Lazy load heavy components
 const CandidatosDashboard = lazy(() => import("@/components/Candidatos/CandidatosDashboard").then(m => ({ default: m.CandidatosDashboard })));
@@ -32,27 +33,7 @@ const CandidateFunnelCard = lazy(() => import("@/components/FunilCandidatos/Cand
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, PointerSensor, useSensor, useSensors, closestCenter } from "@dnd-kit/core";
 import { FilterBar as FunnelFilterBar } from "@/components/FunilCandidatos/FilterBar";
 
-type Candidato = {
-  id: string;
-  nome_completo: string;
-  email: string;
-  telefone: string | null;
-  cidade: string | null;
-  estado: string | null;
-  nivel: string | null;
-  area: string | null;
-  status: string;
-  recrutador: string | null;
-  vaga_relacionada_id: string | null;
-  disponibilidade_status?: string | null;
-  vaga_titulo?: string | null;
-  criado_em: string;
-  vaga?: {
-    empresa: string | null;
-    recrutador_id: string | null;
-    titulo: string | null;
-  };
-};
+type Candidato = CandidatoListItem;
 
 type StatusCandidato = "Triagem" | "Assessment | Teste Técnico" | "Entrevista" | "Shortlist" | "Reprovado" | "Contratado";
 
@@ -79,10 +60,21 @@ export default function Candidatos() {
   const { isAdmin } = useUserRole();
   const { notifyClientsAboutShortlist } = useNotifications();
 
-  // Estados comuns
+  // ============ REACT QUERY HOOKS ============
+  const { 
+    candidatos, 
+    isLoading: candidatosLoading, 
+    updateStatus,
+    invalidate: invalidateCandidatos 
+  } = useCandidatosListQuery();
+  
+  const { vagas, isLoading: vagasLoading } = useVagasListQuery();
+  const { users } = useUsersQuery();
+  
+  const loading = candidatosLoading || vagasLoading;
+
+  // Estados de UI
   const [viewType, setViewType] = useState<"cards" | "funnel">("cards");
-  const [candidatos, setCandidatos] = useState<Candidato[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [disponibilidadeFilter, setDisponibilidadeFilter] = useState<string>("disponível");
@@ -94,19 +86,12 @@ export default function Candidatos() {
   const [requiresApproval, setRequiresApproval] = useState(false);
   const [linkingJobId, setLinkingJobId] = useState<string | null>(null);
   const [importModalOpen, setImportModalOpen] = useState(false);
-  const [vagas, setVagas] = useState<{
-    id: string;
-    titulo: string;
-    empresa: string;
-    recrutador_id?: string | null;
-  }[]>([]);
 
   // Estados específicos do funil
   const [activeId, setActiveId] = useState<string | null>(null);
   const [recrutadorVagaFilter, setRecrutadorVagaFilter] = useState<string>("all");
   const [recrutadorFilter, setRecrutadorFilter] = useState<string>("all");
   const [dragOverColumn, setDragOverColumn] = useState<string | null>(null);
-  const [users, setUsers] = useState<Array<{ id: string; name: string }>>([]);
 
   // Estado para modal de feedback de reprovação
   const [rejectionModalData, setRejectionModalData] = useState<{
@@ -124,61 +109,6 @@ export default function Candidatos() {
   // Verificar se há filtro de atenção pela URL
   const searchParams = new URLSearchParams(window.location.search);
   const attentionFilter = searchParams.get('attention');
-
-  // ============ MEMOIZED DATA LOADERS ============
-  const loadVagas = useCallback(async () => {
-    try {
-      const { data, error } = await supabase.from("vagas").select("id, titulo, empresa, recrutador_id").is("deleted_at", null).order("titulo");
-      if (error) throw error;
-      setVagas(data || []);
-      return data || [];
-    } catch (error) {
-      logger.error("Erro ao carregar vagas:", error);
-      return [];
-    }
-  }, []);
-
-  const loadUsers = useCallback(async () => {
-    try {
-      const { data, error } = await supabase.from("users").select("id, name").eq("active", true).order("name");
-      if (error) throw error;
-      setUsers(data || []);
-    } catch (error) {
-      logger.error("Erro ao carregar usuários:", error);
-    }
-  }, []);
-
-  const loadCandidatos = useCallback(async () => {
-    try {
-      const { data, error } = await supabase.from("candidatos").select(`
-        *,
-        vaga:vaga_relacionada_id (
-          id,
-          titulo
-        )
-      `).order("criado_em", { ascending: false });
-      if (error) throw error;
-
-      const candidatosEnriquecidos = (data || []).map((candidato: any) => ({
-        ...candidato,
-        vaga_titulo: candidato.vaga?.titulo || null
-      }));
-      setCandidatos(candidatosEnriquecidos);
-    } catch (error) {
-      logger.error("Erro ao carregar candidatos:", error);
-      toast.error("Erro ao carregar candidatos");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    loadCandidatos();
-    loadVagas();
-    if (viewType === "funnel") {
-      loadUsers();
-    }
-  }, [viewType, loadCandidatos, loadVagas, loadUsers]);
 
   // ============ MEMOIZED HANDLERS ============
   const handleDragStart = useCallback((event: DragStartEvent) => {
@@ -210,38 +140,37 @@ export default function Candidatos() {
         vagaId: candidato.vaga_relacionada_id || undefined,
         previousStatus: candidato.status,
       });
-      // Atualização otimista visual
-      setCandidatos(prev => prev.map(c => c.id === candidatoId ? { ...c, status: newStatus } : c));
+      // Atualização otimista via mutation
+      updateStatus({ id: candidatoId, status: newStatus });
       setActiveId(null);
       return;
     }
 
-    // Atualização otimista
-    setCandidatos(prev => prev.map(c => c.id === candidatoId ? { ...c, status: newStatus } : c));
-    try {
-      const { error } = await supabase.from("candidatos").update({ status: newStatus }).eq("id", candidatoId);
-      if (error) throw error;
-      toast.success(`Candidato movido para ${newStatus}`);
-
-      // Se moveu para Shortlist, notificar clientes externos
-      if (newStatus === "Shortlist" && candidato.vaga_relacionada_id) {
-        const vagaInfo = vagas.find(v => v.id === candidato.vaga_relacionada_id);
-        if (vagaInfo) {
-          notifyClientsAboutShortlist(
-            candidato.nome_completo,
-            candidato.vaga_relacionada_id,
-            vagaInfo.titulo
-          );
-        }
+    // Atualização via mutation com optimistic update automático
+    updateStatus(
+      { id: candidatoId, status: newStatus },
+      {
+        onSuccess: () => {
+          toast.success(`Candidato movido para ${newStatus}`);
+          // Se moveu para Shortlist, notificar clientes externos
+          if (newStatus === "Shortlist" && candidato.vaga_relacionada_id) {
+            const vagaInfo = vagas.find(v => v.id === candidato.vaga_relacionada_id);
+            if (vagaInfo) {
+              notifyClientsAboutShortlist(
+                candidato.nome_completo,
+                candidato.vaga_relacionada_id,
+                vagaInfo.titulo
+              );
+            }
+          }
+        },
+        onError: () => {
+          toast.error("Erro ao mover candidato");
+        },
       }
-    } catch (error) {
-      logger.error("Erro ao mover candidato:", error);
-      toast.error("Erro ao mover candidato");
-      setCandidatos(prev => prev.map(c => c.id === candidatoId ? { ...c, status: candidato.status } : c));
-    } finally {
-      setActiveId(null);
-    }
-  }, [candidatos, vagas, notifyClientsAboutShortlist]);
+    );
+    setActiveId(null);
+  }, [candidatos, vagas, notifyClientsAboutShortlist, updateStatus]);
 
   // Handler para confirmação de feedback de reprovação
   const handleRejectionFeedbackConfirm = useCallback(async (gaveFeedback: boolean) => {
@@ -250,36 +179,33 @@ export default function Candidatos() {
     const { candidatoId, vagaId, previousStatus } = rejectionModalData;
 
     try {
-      const updateData: Record<string, unknown> = {
-        status: "Reprovado",
-        rejection_feedback_given: gaveFeedback,
-        rejection_feedback_at: gaveFeedback ? new Date().toISOString() : null,
-        rejection_feedback_job_id: vagaId || null,
-      };
-
-      const { error } = await supabase
-        .from("candidatos")
-        .update(updateData)
-        .eq("id", candidatoId);
-
-      if (error) throw error;
-      
-      toast.success(
-        gaveFeedback 
-          ? "Candidato movido para Reprovado (retorno já dado)" 
-          : "Candidato movido para Reprovado (pendente de retorno)"
-      );
-    } catch (error) {
-      logger.error("Erro ao mover candidato para reprovado:", error);
-      toast.error("Erro ao mover candidato");
-      // Reverter atualização otimista
-      setCandidatos(prev => 
-        prev.map(c => c.id === candidatoId ? { ...c, status: previousStatus } : c)
+      updateStatus(
+        { 
+          id: candidatoId, 
+          status: "Reprovado",
+          additionalData: {
+            rejection_feedback_given: gaveFeedback,
+            rejection_feedback_at: gaveFeedback ? new Date().toISOString() : null,
+            rejection_feedback_job_id: vagaId || null,
+          }
+        },
+        {
+          onSuccess: () => {
+            toast.success(
+              gaveFeedback 
+                ? "Candidato movido para Reprovado (retorno já dado)" 
+                : "Candidato movido para Reprovado (pendente de retorno)"
+            );
+          },
+          onError: () => {
+            toast.error("Erro ao mover candidato para reprovado");
+          },
+        }
       );
     } finally {
       setRejectionModalData(null);
     }
-  }, [rejectionModalData]);
+  }, [rejectionModalData, updateStatus]);
 
   const handleDelete = useCallback(async () => {
     if (!deletingId) return;
@@ -316,7 +242,7 @@ export default function Candidatos() {
         return;
       }
       toast.success("Candidato marcado para exclusão com sucesso");
-      loadCandidatos();
+      invalidateCandidatos();
     } catch (error) {
       logger.error("Erro ao excluir candidato:", error);
       toast.error("Erro ao excluir candidato");
@@ -325,7 +251,7 @@ export default function Candidatos() {
       setDeletionReason("");
       setRequiresApproval(false);
     }
-  }, [deletingId, isAdmin, deletionReason, candidatos, loadCandidatos]);
+  }, [deletingId, isAdmin, deletionReason, candidatos, invalidateCandidatos]);
 
   const clearAttentionFilter = useCallback(() => {
     navigate('/candidatos');
@@ -634,7 +560,7 @@ export default function Candidatos() {
       </div>
 
       {/* Modals */}
-      <LinkToJobModal open={!!linkingJobId} onOpenChange={handleLinkJobModalClose} candidateId={linkingJobId || ""} onSuccess={loadCandidatos} />
+      <LinkToJobModal open={!!linkingJobId} onOpenChange={handleLinkJobModalClose} candidateId={linkingJobId || ""} onSuccess={invalidateCandidatos} />
 
       <AlertDialog open={!!deletingId} onOpenChange={handleDeleteModalClose}>
         <AlertDialogContent>
@@ -675,7 +601,7 @@ export default function Candidatos() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <ImportXlsModal open={importModalOpen} onOpenChange={setImportModalOpen} sourceType="vaga" showVagaSelector={true} onSuccess={() => { loadCandidatos(); }} />
+      <ImportXlsModal open={importModalOpen} onOpenChange={setImportModalOpen} sourceType="vaga" showVagaSelector={true} onSuccess={invalidateCandidatos} />
 
       {/* Modal de confirmação de feedback de reprovação */}
       <RejectionFeedbackModal
