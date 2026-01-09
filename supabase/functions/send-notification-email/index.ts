@@ -24,8 +24,20 @@ const handler = async (req: Request): Promise<Response> => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     
-    if (!resendApiKey || !supabaseUrl || !supabaseKey) {
-      throw new Error("Missing configuration");
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error("Missing Supabase configuration");
+    }
+
+    // Se não tiver RESEND_API_KEY, retorna sucesso sem enviar email
+    if (!resendApiKey) {
+      console.log("RESEND_API_KEY not configured, skipping email send");
+      return new Response(
+        JSON.stringify({ success: true, skipped: true, reason: "RESEND_API_KEY not configured" }),
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
     }
 
     const supabase = createClient(supabaseUrl, supabaseKey);
@@ -43,7 +55,14 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (profileError) {
       console.error("Error fetching profile:", profileError);
-      throw profileError;
+      // Não bloqueia - apenas loga o erro
+      return new Response(
+        JSON.stringify({ success: true, skipped: true, reason: "Profile not found" }),
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
     }
 
     // Buscar email do auth.users
@@ -51,7 +70,13 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (userError || !user?.email) {
       console.error("Error fetching user email:", userError);
-      throw new Error("User email not found");
+      return new Response(
+        JSON.stringify({ success: true, skipped: true, reason: "User email not found" }),
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
     }
 
     // Buscar informações da vaga se houver job_id
@@ -129,8 +154,37 @@ const handler = async (req: Request): Promise<Response> => {
     const emailData = await emailResponse.json();
 
     if (!emailResponse.ok) {
-      console.error("Error from Resend:", emailData);
-      throw new Error(emailData.message || "Failed to send email");
+      // Log o erro mas não falha - o email é secundário
+      console.warn("Email send failed (non-blocking):", emailData);
+      
+      // Verifica se é erro de domínio não verificado
+      if (emailData.message?.includes("verify a domain") || emailData.statusCode === 403) {
+        console.log("Resend domain not verified - email skipped");
+        return new Response(
+          JSON.stringify({ 
+            success: true, 
+            skipped: true, 
+            reason: "Resend domain not verified. Configure at resend.com/domains" 
+          }),
+          {
+            status: 200,
+            headers: { "Content-Type": "application/json", ...corsHeaders },
+          }
+        );
+      }
+      
+      // Para outros erros, ainda retorna sucesso (notificação no app foi criada)
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          skipped: true, 
+          reason: emailData.message || "Email send failed" 
+        }),
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
     }
 
     console.log("Email sent successfully:", emailData);
@@ -143,11 +197,12 @@ const handler = async (req: Request): Promise<Response> => {
       }
     );
   } catch (error: any) {
-    console.error("Error sending notification email:", error);
+    console.error("Error in send-notification-email:", error);
+    // Ainda retorna sucesso - o email é secundário à notificação no app
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ success: true, skipped: true, reason: error.message }),
       {
-        status: 500,
+        status: 200,
         headers: { "Content-Type": "application/json", ...corsHeaders },
       }
     );
