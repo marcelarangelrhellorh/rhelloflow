@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ChevronDown, ChevronRight, Plus, X, Save, History } from "lucide-react";
+import { ChevronDown, ChevronRight, Plus, X, Save, History, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -9,6 +9,17 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { MentionEditor } from "@/components/ui/mention-editor";
 import { useMentions } from "@/hooks/useMentions";
+import { useUserRoleQuery } from "@/hooks/data/useUserRoleQuery";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface JobHistoryRecord {
   id: string;
@@ -37,12 +48,23 @@ export function JobHistorySection({
   const [formContent, setFormContent] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
+  // Estados de exclusão
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Estados de edição
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editContent, setEditContent] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+
   const { mentionUsers, processMentions } = useMentions();
+  const { isAdmin, user } = useUserRoleQuery();
+
   const fetchRecords = async () => {
     if (!vagaId) return;
     setIsLoading(true);
     try {
-      // Fetch history records with user info
       const {
         data,
         error
@@ -51,7 +73,6 @@ export function JobHistorySection({
       });
       if (error) throw error;
 
-      // Fetch user names for each record
       if (data && data.length > 0) {
         const userIds = [...new Set(data.map(r => r.user_id))];
         const {
@@ -77,11 +98,13 @@ export function JobHistorySection({
       setIsLoading(false);
     }
   };
+
   useEffect(() => {
     if (isExpanded && records.length === 0) {
       fetchRecords();
     }
   }, [isExpanded, vagaId]);
+
   const handleSave = async () => {
     if (!formContent.trim()) {
       toast({
@@ -96,7 +119,6 @@ export function JobHistorySection({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
-      // Buscar nome do usuário atual
       const { data: profile } = await supabase
         .from("profiles")
         .select("full_name")
@@ -116,7 +138,6 @@ export function JobHistorySection({
 
       if (error) throw error;
 
-      // Processar menções e notificar usuários
       if (insertedRecord) {
         await processMentions(
           formContent,
@@ -146,17 +167,76 @@ export function JobHistorySection({
       setIsSaving(false);
     }
   };
+
   const handleCancel = () => {
     setFormTitle("");
     setFormContent("");
     setShowForm(false);
   };
-  const stripHtml = (html: string) => {
-    const tmp = document.createElement("DIV");
-    tmp.innerHTML = html;
-    return tmp.textContent || tmp.innerText || "";
+
+  // Funções de exclusão
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase
+        .from("job_history")
+        .delete()
+        .eq("id", deleteId);
+      if (error) throw error;
+
+      toast({ title: "Sucesso", description: "Registro excluído." });
+      setRecords(prev => prev.filter(r => r.id !== deleteId));
+    } catch (error) {
+      console.error("Error deleting job history:", error);
+      toast({ title: "Erro", description: "Não foi possível excluir.", variant: "destructive" });
+    } finally {
+      setIsDeleting(false);
+      setDeleteId(null);
+    }
   };
-  return <div className="mt-8 rounded-lg border border-border bg-card">
+
+  // Funções de edição
+  const handleStartEdit = (record: JobHistoryRecord) => {
+    setEditingId(record.id);
+    setEditTitle(record.title || "");
+    setEditContent(record.content);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditTitle("");
+    setEditContent("");
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingId || !editContent.trim()) return;
+    setIsEditing(true);
+    try {
+      const { error } = await supabase
+        .from("job_history")
+        .update({
+          title: editTitle.trim() || null,
+          content: editContent
+        })
+        .eq("id", editingId);
+      if (error) throw error;
+
+      toast({ title: "Sucesso", description: "Registro atualizado." });
+      handleCancelEdit();
+      fetchRecords();
+    } catch (error) {
+      console.error("Error updating job history:", error);
+      toast({ title: "Erro", description: "Não foi possível atualizar.", variant: "destructive" });
+    } finally {
+      setIsEditing(false);
+    }
+  };
+
+  const canEditDelete = (record: JobHistoryRecord) => isAdmin || record.user_id === user?.id;
+
+  return (
+    <div className="mt-8 rounded-lg border border-border bg-card">
       {/* Header - Always visible */}
       <button onClick={() => setIsExpanded(!isExpanded)} className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors rounded-lg">
         <div className="flex items-center gap-2">
@@ -234,31 +314,119 @@ export function JobHistorySection({
 
           {/* Records list */}
           {!isLoading && records.length > 0 && <div className="space-y-3">
-              {records.map(record => <div key={record.id} className="p-4 rounded-lg border border-border bg-background hover:bg-muted/30 transition-colors">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold text-foreground truncate text-base">
-                        {record.title || "Sem título"}
-                      </h4>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-                        <span className="text-base font-medium">
-                          {format(new Date(record.created_at), "dd 'de' MMMM 'de' yyyy 'às' HH:mm", {
-                    locale: ptBR
-                  })}
-                        </span>
-                        {record.user_name && <>
-                            <span>•</span>
-                            <span className="text-base font-medium">{record.user_name}</span>
-                          </>}
+              {records.map(record => (
+                <div key={record.id}>
+                  {editingId === record.id ? (
+                    <div className="p-4 rounded-lg border border-primary/50 bg-muted/30">
+                      <div className="space-y-4">
+                        <div>
+                          <label className="font-medium text-foreground mb-1 block text-base">
+                            Título (opcional)
+                          </label>
+                          <Input 
+                            value={editTitle} 
+                            onChange={e => setEditTitle(e.target.value)} 
+                            placeholder="Ex: Reunião com cliente..." 
+                            className="bg-background text-base" 
+                          />
+                        </div>
+                        <div>
+                          <label className="font-medium text-foreground mb-1 block text-base">
+                            Conteúdo * <span className="text-muted-foreground text-sm">(use @ para mencionar)</span>
+                          </label>
+                          <MentionEditor
+                            value={editContent}
+                            onChange={setEditContent}
+                            users={mentionUsers}
+                            placeholder="Descreva o que aconteceu..."
+                            minHeight="120px"
+                          />
+                        </div>
+                        <div className="flex justify-end gap-2">
+                          <Button variant="outline" onClick={handleCancelEdit} disabled={isEditing} className="text-sm font-semibold">
+                            <X className="h-4 w-4 mr-1" />
+                            Cancelar
+                          </Button>
+                          <Button onClick={handleSaveEdit} disabled={isEditing || !editContent.trim()} className="font-semibold bg-[#00141d]">
+                            <Save className="h-4 w-4 mr-1" />
+                            {isEditing ? "Salvando..." : "Salvar"}
+                          </Button>
+                        </div>
                       </div>
-                      <div 
-                        className="mt-2 text-base text-foreground/80 line-clamp-3 prose prose-base max-w-none [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_.mention]:bg-primary/15 [&_.mention]:text-primary [&_.mention]:px-1 [&_.mention]:py-0.5 [&_.mention]:rounded [&_.mention]:font-medium" 
-                        dangerouslySetInnerHTML={{ __html: record.content }}
-                      />
                     </div>
-                  </div>
-                </div>)}
+                  ) : (
+                    <div className="p-4 rounded-lg border border-border bg-background hover:bg-muted/30 transition-colors">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-semibold text-foreground truncate text-base">
+                            {record.title || "Sem título"}
+                          </h4>
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                            <span className="text-base font-medium">
+                              {format(new Date(record.created_at), "dd 'de' MMMM 'de' yyyy 'às' HH:mm", {
+                                locale: ptBR
+                              })}
+                            </span>
+                            {record.user_name && <>
+                                <span>•</span>
+                                <span className="text-base font-medium">{record.user_name}</span>
+                              </>}
+                          </div>
+                          <div 
+                            className="mt-2 text-base text-foreground/80 line-clamp-3 prose prose-base max-w-none [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_.mention]:bg-primary/15 [&_.mention]:text-primary [&_.mention]:px-1 [&_.mention]:py-0.5 [&_.mention]:rounded [&_.mention]:font-medium" 
+                            dangerouslySetInnerHTML={{ __html: record.content }}
+                          />
+                        </div>
+
+                        {canEditDelete(record) && !editingId && (
+                          <div className="flex gap-1 shrink-0">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleStartEdit(record)}
+                              className="text-muted-foreground hover:text-foreground h-8 w-8 p-0"
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setDeleteId(record.id)}
+                              className="text-destructive hover:bg-destructive/10 h-8 w-8 p-0"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>}
         </div>}
-    </div>;
+
+      {/* Dialog de confirmação de exclusão */}
+      <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir registro?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. O registro será permanentemente removido.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? "Excluindo..." : "Excluir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
 }

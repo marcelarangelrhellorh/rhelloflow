@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ChevronDown, ChevronRight, Plus, X, Save, FileText } from "lucide-react";
+import { ChevronDown, ChevronRight, Plus, X, Save, FileText, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -9,6 +9,17 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { MentionEditor } from "@/components/ui/mention-editor";
 import { useMentions } from "@/hooks/useMentions";
+import { useUserRoleQuery } from "@/hooks/data/useUserRoleQuery";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface CandidateNote {
   id: string;
@@ -37,7 +48,18 @@ export function CandidateNotesSection({
   const [formContent, setFormContent] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
+  // Estados de exclusão
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Estados de edição
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editContent, setEditContent] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+
   const { mentionUsers, processMentions } = useMentions();
+  const { isAdmin, user } = useUserRoleQuery();
 
   const fetchNotes = async () => {
     if (!candidateId) return;
@@ -100,7 +122,6 @@ export function CandidateNotesSection({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
-      // Buscar nome do usuário atual
       const { data: profile } = await supabase
         .from("profiles")
         .select("full_name")
@@ -120,7 +141,6 @@ export function CandidateNotesSection({
 
       if (error) throw error;
 
-      // Processar menções e enviar notificações
       if (insertedNote) {
         await processMentions(
           formContent,
@@ -157,6 +177,67 @@ export function CandidateNotesSection({
     setFormContent("");
     setShowForm(false);
   };
+
+  // Funções de exclusão
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase
+        .from("candidate_notes")
+        .delete()
+        .eq("id", deleteId);
+      if (error) throw error;
+
+      toast({ title: "Sucesso", description: "Anotação excluída." });
+      setNotes(prev => prev.filter(n => n.id !== deleteId));
+    } catch (error) {
+      console.error("Error deleting candidate note:", error);
+      toast({ title: "Erro", description: "Não foi possível excluir.", variant: "destructive" });
+    } finally {
+      setIsDeleting(false);
+      setDeleteId(null);
+    }
+  };
+
+  // Funções de edição
+  const handleStartEdit = (note: CandidateNote) => {
+    setEditingId(note.id);
+    setEditTitle(note.title || "");
+    setEditContent(note.content);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditTitle("");
+    setEditContent("");
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingId || !editContent.trim()) return;
+    setIsEditing(true);
+    try {
+      const { error } = await supabase
+        .from("candidate_notes")
+        .update({
+          title: editTitle.trim() || null,
+          content: editContent
+        })
+        .eq("id", editingId);
+      if (error) throw error;
+
+      toast({ title: "Sucesso", description: "Anotação atualizada." });
+      handleCancelEdit();
+      fetchNotes();
+    } catch (error) {
+      console.error("Error updating candidate note:", error);
+      toast({ title: "Erro", description: "Não foi possível atualizar.", variant: "destructive" });
+    } finally {
+      setIsEditing(false);
+    }
+  };
+
+  const canEditDelete = (note: CandidateNote) => isAdmin || note.user_id === user?.id;
 
   return (
     <div className="rounded-lg border border-gray-200 dark:border-secondary-text-light/20 bg-card shadow-lg overflow-hidden">
@@ -277,33 +358,130 @@ export function CandidateNotesSection({
           {!isLoading && notes.length > 0 && (
             <div className="space-y-2 max-h-[300px] overflow-y-auto">
               {notes.map(note => (
-                <div
-                  key={note.id}
-                  className="p-3 rounded-lg border border-border bg-background hover:bg-muted/30 transition-colors"
-                >
-                  <h4 className="font-semibold text-foreground truncate text-sm">
-                    {note.title || "Sem título"}
-                  </h4>
-                  <div className="flex flex-col gap-0.5 text-xs text-muted-foreground mt-1">
-                    <span className="font-medium">
-                      {format(new Date(note.created_at), "dd/MM/yy 'às' HH:mm", {
-                        locale: ptBR
-                      })}
-                    </span>
-                    {note.user_name && (
-                      <span className="truncate font-medium">{note.user_name}</span>
-                    )}
-                  </div>
-                  <div
-                    className="mt-2 text-xs text-foreground/80 line-clamp-2 prose prose-sm max-w-none [&_ul]:list-disc [&_ul]:pl-3 [&_ol]:list-decimal [&_ol]:pl-3 [&_.mention]:bg-primary/15 [&_.mention]:text-primary [&_.mention]:px-1 [&_.mention]:py-0.5 [&_.mention]:rounded [&_.mention]:font-medium"
-                    dangerouslySetInnerHTML={{ __html: note.content }}
-                  />
+                <div key={note.id}>
+                  {editingId === note.id ? (
+                    <div className="p-3 rounded-lg border border-primary/50 bg-muted/30">
+                      <div className="space-y-3">
+                        <div>
+                          <label className="font-medium text-foreground mb-1 block text-xs">
+                            Título (opcional)
+                          </label>
+                          <Input
+                            value={editTitle}
+                            onChange={e => setEditTitle(e.target.value)}
+                            placeholder="Ex: Follow-up..."
+                            className="bg-background text-sm h-8"
+                          />
+                        </div>
+                        <div>
+                          <label className="font-medium text-foreground mb-1 block text-xs">
+                            Conteúdo * <span className="text-muted-foreground">(use @ para mencionar)</span>
+                          </label>
+                          <MentionEditor
+                            value={editContent}
+                            onChange={setEditContent}
+                            users={mentionUsers}
+                            placeholder="Observações..."
+                            minHeight="100px"
+                          />
+                        </div>
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleCancelEdit}
+                            disabled={isEditing}
+                            className="text-xs h-7 px-2"
+                          >
+                            <X className="h-3 w-3 mr-1" />
+                            Cancelar
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={handleSaveEdit}
+                            disabled={isEditing || !editContent.trim()}
+                            className="text-xs h-7 px-2 bg-primary"
+                          >
+                            <Save className="h-3 w-3 mr-1" />
+                            {isEditing ? "..." : "Salvar"}
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-3 rounded-lg border border-border bg-background hover:bg-muted/30 transition-colors">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-semibold text-foreground truncate text-sm">
+                            {note.title || "Sem título"}
+                          </h4>
+                          <div className="flex flex-col gap-0.5 text-xs text-muted-foreground mt-1">
+                            <span className="font-medium">
+                              {format(new Date(note.created_at), "dd/MM/yy 'às' HH:mm", {
+                                locale: ptBR
+                              })}
+                            </span>
+                            {note.user_name && (
+                              <span className="truncate font-medium">{note.user_name}</span>
+                            )}
+                          </div>
+                          <div
+                            className="mt-2 text-xs text-foreground/80 line-clamp-2 prose prose-sm max-w-none [&_ul]:list-disc [&_ul]:pl-3 [&_ol]:list-decimal [&_ol]:pl-3 [&_.mention]:bg-primary/15 [&_.mention]:text-primary [&_.mention]:px-1 [&_.mention]:py-0.5 [&_.mention]:rounded [&_.mention]:font-medium"
+                            dangerouslySetInnerHTML={{ __html: note.content }}
+                          />
+                        </div>
+
+                        {canEditDelete(note) && !editingId && (
+                          <div className="flex gap-1 shrink-0">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleStartEdit(note)}
+                              className="text-muted-foreground hover:text-foreground h-6 w-6 p-0"
+                            >
+                              <Pencil className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setDeleteId(note.id)}
+                              className="text-destructive hover:bg-destructive/10 h-6 w-6 p-0"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
           )}
         </div>
       )}
+
+      {/* Dialog de confirmação de exclusão */}
+      <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir anotação?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. A anotação será permanentemente removida.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? "Excluindo..." : "Excluir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
