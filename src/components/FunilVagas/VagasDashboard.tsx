@@ -46,7 +46,7 @@ export function VagasDashboard({
       {/* Resumo do Pipeline */}
       <Card className="border-gray-300 shadow-md">
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-bold text-foreground flex items-center gap-2">
+          <CardTitle className="font-bold text-foreground flex items-center gap-2 text-base">
             <TrendingUp className="h-4 w-4 text-primary" />
             Resumo do Pipeline
           </CardTitle>
@@ -86,7 +86,7 @@ export function VagasDashboard({
       {/* Por Prioridade */}
       <Card className="border-gray-300 shadow-md">
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-bold text-foreground flex items-center gap-2">
+          <CardTitle className="font-bold text-foreground flex items-center gap-2 text-base">
             <Flame className="h-4 w-4 text-orange-500" />
             Por Prioridade
           </CardTitle>

@@ -52,7 +52,7 @@ export function PaceCard({
         <CardHeader className="pb-2">
           <Tooltip>
             <TooltipTrigger asChild>
-              <CardTitle className="text-sm font-bold text-foreground flex items-center gap-2 cursor-help">
+              <CardTitle className="font-bold text-foreground flex items-center gap-2 cursor-help text-base">
                 <Gauge className="h-4 w-4 text-primary" />
                 Pace de Fechamento
               </CardTitle>
@@ -69,7 +69,7 @@ export function PaceCard({
           {/* Current Week - Highlighted */}
           <div className="bg-primary/10 rounded-lg p-3">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-muted-foreground text-sm font-medium">Esta Semana</span>
+              <span className="text-muted-foreground text-sm font-semibold">Esta Semana</span>
               {renderChangeIndicator()}
             </div>
             <div className="flex items-baseline gap-2">
