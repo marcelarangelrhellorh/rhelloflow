@@ -755,6 +755,30 @@ export type Database = {
           },
         ]
       }
+      cargo_synonyms: {
+        Row: {
+          categoria: string | null
+          created_at: string | null
+          id: string
+          sinonimos: string[]
+          termo_principal: string
+        }
+        Insert: {
+          categoria?: string | null
+          created_at?: string | null
+          id?: string
+          sinonimos: string[]
+          termo_principal: string
+        }
+        Update: {
+          categoria?: string | null
+          created_at?: string | null
+          id?: string
+          sinonimos?: string[]
+          termo_principal?: string
+        }
+        Relationships: []
+      }
       client_view_links: {
         Row: {
           active: boolean
@@ -5243,6 +5267,10 @@ export type Database = {
           vagas_abertas: number
           vagas_atencao: number
         }[]
+      }
+      get_expanded_search_terms: {
+        Args: { p_cargo: string }
+        Returns: string[]
       }
       get_latest_audit_event_hash: { Args: never; Returns: string }
       get_recruitment_kpis_secure: {
