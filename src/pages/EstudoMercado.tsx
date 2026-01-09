@@ -133,6 +133,7 @@ interface EstudoMercadoNovo {
     glassdoor?: GlassdoorResultado;
   };
   consultoria: string[];
+  termos_expandidos?: string[];
 }
 
 export default function EstudoMercado() {
@@ -604,6 +605,20 @@ export default function EstudoMercado() {
                 Exportar PDF
               </Button>
             </div>
+
+            {/* Indicador de termos expandidos (sinônimos) */}
+            {estudo.termos_expandidos && estudo.termos_expandidos.length > 1 && (
+              <Alert className="border-blue-200 bg-blue-50">
+                <Tags className="h-4 w-4 text-blue-600" />
+                <AlertTitle className="text-blue-800">Busca expandida com sinônimos</AlertTitle>
+                <AlertDescription className="text-blue-700">
+                  Para ampliar os resultados, a busca incluiu termos relacionados: {' '}
+                  <span className="font-medium">
+                    {estudo.termos_expandidos.join(', ')}
+                  </span>
+                </AlertDescription>
+              </Alert>
+            )}
 
             {/* Aviso sobre regime CLT */}
             <Alert className="border-amber-200 bg-amber-50">
