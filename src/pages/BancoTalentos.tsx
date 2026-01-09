@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
+import { useDebounce } from "@/hooks/useDebounce";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Plus, Grid3x3, List, Search, Link2, UserPlus, ChevronDown } from "lucide-react";
@@ -44,6 +45,7 @@ export default function BancoTalentos() {
   const [candidatos, setCandidatos] = useState<Candidato[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const debouncedSearch = useDebounce(searchTerm, 300);
   const [estadoFilter, setEstadoFilter] = useState<string>("all");
   const [avaliacaoFilter, setAvaliacaoFilter] = useState<string>("all");
   const [tagFilter, setTagFilter] = useState<string>("all");
@@ -112,32 +114,34 @@ export default function BancoTalentos() {
       setLoading(false);
     }
   };
-  const filteredCandidatos = candidatos.filter(candidato => {
-    // Filtro de busca por nome
-    const matchesSearch = searchTerm === "" || candidato.nome_completo.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesEstado = estadoFilter === "all" || candidato.estado === estadoFilter;
+  const filteredCandidatos = useMemo(() => {
+    return candidatos.filter(candidato => {
+      // Filtro de busca por nome
+      const matchesSearch = debouncedSearch === "" || candidato.nome_completo.toLowerCase().includes(debouncedSearch.toLowerCase());
+      const matchesEstado = estadoFilter === "all" || candidato.estado === estadoFilter;
 
-    // Filtro de avaliação
-    let matchesAvaliacao = true;
-    if (avaliacaoFilter !== "all") {
-      const minRating = Number(avaliacaoFilter.replace("+", ""));
-      matchesAvaliacao = (candidato.mediaRating ?? 0) >= minRating;
-    }
+      // Filtro de avaliação
+      let matchesAvaliacao = true;
+      if (avaliacaoFilter !== "all") {
+        const minRating = Number(avaliacaoFilter.replace("+", ""));
+        matchesAvaliacao = (candidato.mediaRating ?? 0) >= minRating;
+      }
 
-    // Filtro de tags
-    let matchesTags = true;
-    if (tagFilter !== "all") {
-      const candidateTags = (candidato as any).tags || [];
-      matchesTags = candidateTags.some((ct: any) => ct.id === tagFilter);
-    }
+      // Filtro de tags
+      let matchesTags = true;
+      if (tagFilter !== "all") {
+        const candidateTags = (candidato as any).tags || [];
+        matchesTags = candidateTags.some((ct: any) => ct.id === tagFilter);
+      }
 
-    // Novos filtros
-    const matchesSenioridade = senioridadeFilter === "all" || candidato.nivel === senioridadeFilter;
-    const matchesArea = areaFilter === "all" || candidato.area === areaFilter;
-    const matchesCargo = cargoFilter === "all" || candidato.cargo === cargoFilter;
+      // Novos filtros
+      const matchesSenioridade = senioridadeFilter === "all" || candidato.nivel === senioridadeFilter;
+      const matchesArea = areaFilter === "all" || candidato.area === areaFilter;
+      const matchesCargo = cargoFilter === "all" || candidato.cargo === cargoFilter;
 
-    return matchesSearch && matchesEstado && matchesAvaliacao && matchesTags && matchesSenioridade && matchesArea && matchesCargo;
-  });
+      return matchesSearch && matchesEstado && matchesAvaliacao && matchesTags && matchesSenioridade && matchesArea && matchesCargo;
+    });
+  }, [candidatos, debouncedSearch, estadoFilter, avaliacaoFilter, tagFilter, senioridadeFilter, areaFilter, cargoFilter]);
   const getDaysInBank = (dateString: string) => {
     return differenceInDays(new Date(), new Date(dateString));
   };
