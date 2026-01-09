@@ -13,6 +13,7 @@ const publicJobSchema = z.object({
   cnpj: z.string()
     .transform(s => s.replace(/\D/g, ''))
     .refine(s => s.length === 14, 'CNPJ deve ter 14 dígitos'),
+  resumo_empresa: z.string().trim().max(2000, 'Resumo muito longo').nullable().optional(),
   contato_email: z.string().trim().email('Email inválido').max(255, 'Email muito longo'),
   contato_nome: z.string().trim().min(2, 'Nome muito curto').max(100, 'Nome muito longo'),
   contato_telefone: z.string().trim().max(50).nullable().optional(),
@@ -34,6 +35,7 @@ const publicJobSchema = z.object({
   observacoes: z.string().trim().max(2000).nullable().optional(),
   confidencial: z.boolean().nullable().optional(),
   motivo_confidencial: z.string().trim().max(500).nullable().optional(),
+  motivo_contratacao: z.enum(['aumento_quadro', 'substituicao', 'reposicao']).nullable().optional(),
   // Honeypot field - should always be empty
   website: z.string().max(0).optional(),
   // Timing check - submission should take at least 3 seconds
@@ -268,6 +270,7 @@ Deno.serve(async (req) => {
       titulo: sanitizeText(validatedData.titulo),
       empresa: sanitizedEmpresa,
       empresa_id: empresaId,
+      resumo_empresa: validatedData.resumo_empresa ? sanitizeText(validatedData.resumo_empresa) : null,
       contato_nome: sanitizedContatoNome,
       contato_email: sanitizedContatoEmail,
       contato_telefone: sanitizedContatoTelefone,
@@ -289,6 +292,7 @@ Deno.serve(async (req) => {
       observacoes: validatedData.observacoes ? sanitizeText(validatedData.observacoes) : null,
       confidencial: validatedData.confidencial || false,
       motivo_confidencial: validatedData.motivo_confidencial ? sanitizeText(validatedData.motivo_confidencial) : null,
+      motivo_contratacao: validatedData.motivo_contratacao || null,
       source: 'externo',
       status: 'Discovery',
       status_slug: 'discovery',
