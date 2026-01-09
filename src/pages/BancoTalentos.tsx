@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Plus, Grid3x3, List, Search, Link2, UserPlus } from "lucide-react";
+import { Plus, Grid3x3, List, Search, Link2, UserPlus, ChevronDown } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -169,38 +170,49 @@ export default function BancoTalentos() {
           </div>
         </div>
         <div className="flex gap-2">
-          <Sheet>
-            <SheetTrigger asChild>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
               <Button variant="outline" className="border-[#00141D] text-[#00141D] hover:bg-[#00141D]/10">
                 <Link2 className="mr-2 h-5 w-5" />
-                Link Banco de Talentos   
+                Gerenciar Links
+                <ChevronDown className="ml-2 h-4 w-4" />
               </Button>
-            </SheetTrigger>
-            <SheetContent className="w-[500px] sm:w-[600px] overflow-y-auto">
-              <SheetHeader>
-                <SheetTitle>Gerenciar Links do Banco de Talentos</SheetTitle>
-              </SheetHeader>
-              <div className="mt-6">
-                <TalentPoolLinkManager />
-              </div>
-            </SheetContent>
-          </Sheet>
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="outline" className="border-[#00141D] text-[#00141D] hover:bg-[#00141D]/10">
-                <UserPlus className="mr-2 h-5 w-5" />
-                Link Cadastro de Candidato
-              </Button>
-            </SheetTrigger>
-            <SheetContent className="w-[500px] sm:w-[600px] overflow-y-auto">
-              <SheetHeader>
-                <SheetTitle>Gerenciar Links de Cadastro de Candidato</SheetTitle>
-              </SheetHeader>
-              <div className="mt-6">
-                <CandidateRegistrationLinkManager />
-              </div>
-            </SheetContent>
-          </Sheet>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56 bg-background">
+              <Sheet>
+                <SheetTrigger asChild>
+                  <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="cursor-pointer">
+                    <Link2 className="mr-2 h-4 w-4" />
+                    Link Banco de Talentos
+                  </DropdownMenuItem>
+                </SheetTrigger>
+                <SheetContent className="w-[500px] sm:w-[600px] overflow-y-auto">
+                  <SheetHeader>
+                    <SheetTitle>Gerenciar Links do Banco de Talentos</SheetTitle>
+                  </SheetHeader>
+                  <div className="mt-6">
+                    <TalentPoolLinkManager />
+                  </div>
+                </SheetContent>
+              </Sheet>
+              <Sheet>
+                <SheetTrigger asChild>
+                  <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="cursor-pointer">
+                    <UserPlus className="mr-2 h-4 w-4" />
+                    Link Cadastro de Candidato
+                  </DropdownMenuItem>
+                </SheetTrigger>
+                <SheetContent className="w-[500px] sm:w-[600px] overflow-y-auto">
+                  <SheetHeader>
+                    <SheetTitle>Gerenciar Links de Cadastro de Candidato</SheetTitle>
+                  </SheetHeader>
+                  <div className="mt-6">
+                    <CandidateRegistrationLinkManager />
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Button onClick={() => navigate('/candidatos/novo')} className="bg-[#00141D] hover:bg-[#00141D]/90 text-white font-bold text-sm">
             <Plus className="mr-2 h-5 w-5" />
             Adicionar Candidato
