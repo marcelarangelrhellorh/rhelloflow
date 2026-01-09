@@ -250,7 +250,7 @@ export default function GerenciarEmpresas() {
                             <Eye className="h-2 w-2 mr-0.5" />
                             Detalhes
                           </Button>
-                          <Button size="sm" variant="outline" onClick={() => handleEdit(empresa)} className="px-1.5 py-0.5 h-6 text-xs">
+                          <Button size="sm" variant="outline" onClick={() => handleEdit(empresa)} className="px-1.5 py-0.5 h-6 text-xs font-semibold">
                             <Pencil className="mr-0.5 h-2 w-2" />
                             Editar
                           </Button>
