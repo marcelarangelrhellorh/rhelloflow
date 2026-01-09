@@ -19,7 +19,9 @@ import {
   ExternalLink,
   Download,
   MessageSquare,
-  Link as LinkIcon
+  Link as LinkIcon,
+  FileText,
+  Video
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
@@ -221,29 +223,96 @@ export function ClientCandidateDrawer({ open, onOpenChange, candidateId }: Clien
             )}
           </div>
 
-          {(candidate.curriculo_link || candidate.curriculo_url) && (
+          {(candidate.curriculo_link || candidate.curriculo_url || candidate.portfolio_url || candidate.disc_url || candidate.gravacao_entrevista_url) && (
             <>
               <Separator />
               <div className="space-y-3">
                 <h4 className="font-semibold text-foreground text-lg flex items-center gap-2">
                   <Download className="h-5 w-5" />
-                  Currículo
+                  Documentos
                 </h4>
-                <Button 
-                  className="w-full"
-                  variant="outline"
-                  asChild
-                >
-                  <a 
-                    href={candidate.curriculo_link || candidate.curriculo_url} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    download
+                
+                {/* Currículo */}
+                {(candidate.curriculo_link || candidate.curriculo_url) && (
+                  <Button 
+                    className="w-full"
+                    variant="outline"
+                    asChild
                   >
-                    <Download className="mr-2 h-4 w-4" />
-                    Baixar Currículo
-                  </a>
-                </Button>
+                    <a 
+                      href={candidate.curriculo_link || candidate.curriculo_url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                    >
+                      <FileText className="mr-2 h-4 w-4" />
+                      Ver Currículo
+                      <ExternalLink className="ml-auto h-4 w-4" />
+                    </a>
+                  </Button>
+                )}
+
+                {/* Portfólio */}
+                {candidate.portfolio_url && (
+                  <Button 
+                    className="w-full"
+                    variant="outline"
+                    asChild
+                  >
+                    <a 
+                      href={candidate.portfolio_url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                    >
+                      <FileText className="mr-2 h-4 w-4" />
+                      Ver Portfólio
+                      <ExternalLink className="ml-auto h-4 w-4" />
+                    </a>
+                  </Button>
+                )}
+
+                {/* DISC */}
+                {candidate.disc_url && (
+                  <Button 
+                    className="w-full"
+                    variant="outline"
+                    onClick={async () => {
+                      try {
+                        const { data, error } = await supabase.storage
+                          .from("disc-documents")
+                          .createSignedUrl(candidate.disc_url, 3600);
+                        if (error) throw error;
+                        if (data?.signedUrl) {
+                          window.open(data.signedUrl, '_blank');
+                        }
+                      } catch (error) {
+                        logger.error("Erro ao abrir DISC:", error);
+                      }
+                    }}
+                  >
+                    <FileText className="mr-2 h-4 w-4 text-primary" />
+                    Ver DISC
+                    <ExternalLink className="ml-auto h-4 w-4" />
+                  </Button>
+                )}
+
+                {/* Gravação da Entrevista */}
+                {candidate.gravacao_entrevista_url && (
+                  <Button 
+                    className="w-full"
+                    variant="outline"
+                    asChild
+                  >
+                    <a 
+                      href={candidate.gravacao_entrevista_url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                    >
+                      <Video className="mr-2 h-4 w-4" />
+                      Ver Gravação da Entrevista
+                      <ExternalLink className="ml-auto h-4 w-4" />
+                    </a>
+                  </Button>
+                )}
               </div>
             </>
           )}

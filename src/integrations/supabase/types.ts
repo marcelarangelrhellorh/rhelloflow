@@ -518,6 +518,7 @@ export type Database = {
           deleted_by: string | null
           deleted_reason: string | null
           deletion_type: string | null
+          disc_url: string | null
           disponibilidade_mudanca: string | null
           disponibilidade_status: string | null
           email: string
@@ -526,6 +527,7 @@ export type Database = {
           feedback: string | null
           fit_cultural: Json | null
           formato_trabalho: string | null
+          gravacao_entrevista_url: string | null
           hired_at: string | null
           historico_experiencia: string | null
           id: string
@@ -570,6 +572,7 @@ export type Database = {
           deleted_by?: string | null
           deleted_reason?: string | null
           deletion_type?: string | null
+          disc_url?: string | null
           disponibilidade_mudanca?: string | null
           disponibilidade_status?: string | null
           email: string
@@ -578,6 +581,7 @@ export type Database = {
           feedback?: string | null
           fit_cultural?: Json | null
           formato_trabalho?: string | null
+          gravacao_entrevista_url?: string | null
           hired_at?: string | null
           historico_experiencia?: string | null
           id?: string
@@ -622,6 +626,7 @@ export type Database = {
           deleted_by?: string | null
           deleted_reason?: string | null
           deletion_type?: string | null
+          disc_url?: string | null
           disponibilidade_mudanca?: string | null
           disponibilidade_status?: string | null
           email?: string
@@ -630,6 +635,7 @@ export type Database = {
           feedback?: string | null
           fit_cultural?: Json | null
           formato_trabalho?: string | null
+          gravacao_entrevista_url?: string | null
           hired_at?: string | null
           historico_experiencia?: string | null
           id?: string

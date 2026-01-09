@@ -4,10 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Briefcase, DollarSign, Calendar, ExternalLink, FileText, MapPin, CheckCircle2, XCircle, Mail, Phone, Linkedin, Copy, Link2, User, Building2 } from "lucide-react";
+import { Briefcase, DollarSign, Calendar, ExternalLink, FileText, MapPin, CheckCircle2, XCircle, Mail, Phone, Linkedin, Copy, Link2, User, Building2, Upload, Video, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { formatCPF } from "@/lib/cpfUtils";
+import { Input } from "@/components/ui/input";
 const ORIGENS = [{
   value: "Link de Divulgação",
   label: "🔗 Link de Divulgação"
@@ -85,6 +86,8 @@ interface ProfessionalInfoCardProps {
   idiomas: string | null;
   modeloContratacao?: string | null;
   formatoTrabalho?: string | null;
+  discUrl?: string | null;
+  gravacaoEntrevistaUrl?: string | null;
   onUpdate?: () => void;
   onVagaClick?: () => void;
 }
@@ -120,6 +123,8 @@ export function ProfessionalInfoCard({
   idiomas,
   modeloContratacao,
   formatoTrabalho,
+  discUrl,
+  gravacaoEntrevistaUrl,
   onUpdate,
   onVagaClick
 }: ProfessionalInfoCardProps) {
@@ -144,9 +149,18 @@ Localização: ${[cidade, estado].filter(Boolean).join(", ") || "Não informada"
   };
   const [vagas, setVagas] = useState<Vaga[]>([]);
   const [loadingVagas, setLoadingVagas] = useState(false);
+  const [uploadingDisc, setUploadingDisc] = useState(false);
+  const [savingGravacao, setSavingGravacao] = useState(false);
+  const [gravacaoLink, setGravacaoLink] = useState(gravacaoEntrevistaUrl || "");
+
   useEffect(() => {
     loadVagas();
   }, []);
+
+  useEffect(() => {
+    setGravacaoLink(gravacaoEntrevistaUrl || "");
+  }, [gravacaoEntrevistaUrl]);
+
   const loadVagas = async () => {
     setLoadingVagas(true);
     try {
@@ -224,6 +238,91 @@ Localização: ${[cidade, estado].filter(Boolean).join(", ") || "Não informada"
       toast.error("Erro ao atualizar origem");
     }
   };
+
+  const handleDiscUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (file.type !== "application/pdf") {
+      toast.error("Por favor, selecione um arquivo PDF");
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) { // 10MB limit
+      toast.error("O arquivo deve ter no máximo 10MB");
+      return;
+    }
+
+    setUploadingDisc(true);
+    try {
+      const fileName = `${candidatoId}/${Date.now()}_disc.pdf`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from("disc-documents")
+        .upload(fileName, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { error: updateError } = await supabase
+        .from("candidatos")
+        .update({ disc_url: fileName })
+        .eq("id", candidatoId);
+
+      if (updateError) throw updateError;
+
+      toast.success("DISC enviado com sucesso!");
+      onUpdate?.();
+    } catch (error) {
+      console.error("Erro ao enviar DISC:", error);
+      toast.error("Erro ao enviar arquivo DISC");
+    } finally {
+      setUploadingDisc(false);
+    }
+  };
+
+  const handleGravacaoSave = async () => {
+    if (!gravacaoLink.trim()) {
+      toast.error("Por favor, insira um link válido");
+      return;
+    }
+
+    setSavingGravacao(true);
+    try {
+      const { error } = await supabase
+        .from("candidatos")
+        .update({ gravacao_entrevista_url: gravacaoLink.trim() })
+        .eq("id", candidatoId);
+
+      if (error) throw error;
+
+      toast.success("Link da gravação salvo com sucesso!");
+      onUpdate?.();
+    } catch (error) {
+      console.error("Erro ao salvar link da gravação:", error);
+      toast.error("Erro ao salvar link da gravação");
+    } finally {
+      setSavingGravacao(false);
+    }
+  };
+
+  const handleViewDisc = async () => {
+    if (!discUrl) return;
+    try {
+      const { data, error } = await supabase.storage
+        .from("disc-documents")
+        .createSignedUrl(discUrl, 3600);
+
+      if (error) throw error;
+
+      if (data?.signedUrl) {
+        window.open(data.signedUrl, '_blank');
+      }
+    } catch (error) {
+      console.error("Erro ao abrir DISC:", error);
+      toast.error("Erro ao abrir arquivo DISC");
+    }
+  };
+
   const handleVagaChange = async (newVagaId: string) => {
     try {
       const vagaIdToSet = newVagaId === "none" ? null : newVagaId;
@@ -484,22 +583,106 @@ Localização: ${[cidade, estado].filter(Boolean).join(", ") || "Não informada"
             <FileText className="h-4 w-4 text-[#ffcc00]" />
             Documentos Anexados
           </p>
-          <div className="space-y-2">
-            {curriculoUrl && <Button variant="outline" size="sm" className="w-full justify-between" onClick={() => handleDownload(curriculoUrl, 'curriculos')}>
+          <div className="space-y-3">
+            {/* Currículo */}
+            {curriculoUrl && (
+              <Button variant="outline" size="sm" className="w-full justify-between" onClick={() => handleDownload(curriculoUrl, 'curriculos')}>
                 <div className="flex items-center gap-2">
                   <FileText className="h-4 w-4" />
                   <span>Ver Currículo</span>
                 </div>
                 <ExternalLink className="h-4 w-4" />
-              </Button>}
-            {portfolioUrl && <Button variant="outline" size="sm" className="w-full justify-between" onClick={() => handleDownload(portfolioUrl, 'portfolios')}>
+              </Button>
+            )}
+
+            {/* Portfólio */}
+            {portfolioUrl && (
+              <Button variant="outline" size="sm" className="w-full justify-between" onClick={() => handleDownload(portfolioUrl, 'portfolios')}>
                 <div className="flex items-center gap-2">
                   <FileText className="h-4 w-4" />
                   <span>Ver Portfólio</span>
                 </div>
                 <ExternalLink className="h-4 w-4" />
-              </Button>}
-            {!curriculoUrl && !portfolioUrl && <p className="text-sm text-muted-foreground italic">Nenhum documento anexado</p>}
+              </Button>
+            )}
+
+            {/* DISC */}
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-muted-foreground">DISC</p>
+              {discUrl ? (
+                <Button variant="outline" size="sm" className="w-full justify-between" onClick={handleViewDisc}>
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-primary" />
+                    <span>Ver DISC PDF</span>
+                  </div>
+                  <ExternalLink className="h-4 w-4" />
+                </Button>
+              ) : (
+                <div className="relative">
+                  <input
+                    type="file"
+                    accept=".pdf"
+                    onChange={handleDiscUpload}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    disabled={uploadingDisc}
+                  />
+                  <Button variant="outline" size="sm" className="w-full justify-center" disabled={uploadingDisc}>
+                    {uploadingDisc ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Enviando...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="mr-2 h-4 w-4" />
+                        Fazer Upload do DISC
+                      </>
+                    )}
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            {/* Gravação da Entrevista */}
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+                <Video className="h-4 w-4" />
+                Gravação da Entrevista
+              </p>
+              <div className="flex gap-2">
+                <Input
+                  type="url"
+                  placeholder="Cole o link da gravação (YouTube, Drive, etc.)"
+                  value={gravacaoLink}
+                  onChange={(e) => setGravacaoLink(e.target.value)}
+                  className="flex-1"
+                />
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleGravacaoSave}
+                  disabled={savingGravacao || gravacaoLink === (gravacaoEntrevistaUrl || "")}
+                >
+                  {savingGravacao ? <Loader2 className="h-4 w-4 animate-spin" /> : "Salvar"}
+                </Button>
+              </div>
+              {gravacaoEntrevistaUrl && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-info hover:text-info/80"
+                  onClick={() => window.open(gravacaoEntrevistaUrl, '_blank')}
+                >
+                  <Video className="mr-2 h-4 w-4" />
+                  Ver Gravação
+                  <ExternalLink className="ml-2 h-3 w-3" />
+                </Button>
+              )}
+            </div>
+
+            {!curriculoUrl && !portfolioUrl && !discUrl && !gravacaoEntrevistaUrl && (
+              <p className="text-sm text-muted-foreground italic">Nenhum documento anexado</p>
+            )}
           </div>
         </div>
 
