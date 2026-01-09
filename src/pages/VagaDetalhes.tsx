@@ -18,6 +18,7 @@ import { VagaTasksCard } from "@/components/VagaDetalhes/VagaTasksCard";
 import { VagaMeetingsCard } from "@/components/VagaDetalhes/VagaMeetingsCard";
 import { JobHistorySection } from "@/components/VagaDetalhes/JobHistorySection";
 import { toast } from "@/hooks/use-toast";
+import { useNotifications } from "@/hooks/useNotifications";
 
 // Custom hooks with React Query
 import { useVaga } from "@/hooks/data/useVagaQuery";
@@ -33,6 +34,7 @@ export default function VagaDetalhes() {
   const { candidatos, candidatoContratado } = useCandidatos(id);
   const { eventos, reload: reloadEventos } = useVagaEventos(id);
   const { selectedTags, setSelectedTags, vagaTags, saving: savingTags, saveTags } = useVagaTags(id);
+  const { notifyClientsAboutStageChange, notifyClientsShortlistAvailable } = useNotifications();
 
   // Local UI state
   const [shareModalOpen, setShareModalOpen] = useState(false);
@@ -80,6 +82,28 @@ export default function VagaDetalhes() {
           status_novo_slug: newStage.slug
         }
       });
+
+      // Notificar clientes externos sobre mudança de etapa
+      if (vaga.empresa_id) {
+        notifyClientsAboutStageChange(
+          id,
+          vaga.titulo,
+          newStage.name,
+          vaga.empresa_id
+        );
+
+        // Se mudou para "Shortlist disponível", notificação especial com contagem de candidatos
+        if (newStage.slug === 'shortlist_disponivel') {
+          const candidatosShortlist = candidatos.filter(c => c.status === 'Shortlist').length;
+          notifyClientsShortlistAvailable(
+            id,
+            vaga.titulo,
+            vaga.empresa_id,
+            candidatosShortlist
+          );
+        }
+      }
+
       updateVaga({
         status: newStage.name,
         status_slug: newStage.slug,
