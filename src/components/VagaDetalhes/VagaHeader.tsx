@@ -38,7 +38,7 @@ export function VagaHeader({
         <p className="text-[#36404a] mt-1 font-medium text-base">
           {vaga.empresa_id ? (
             <Link 
-              to={`/empresa/${vaga.empresa_id}`}
+              to={`/empresas/${vaga.empresa_id}`}
               className="text-primary hover:underline font-semibold"
             >
               {vaga.empresa}
