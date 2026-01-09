@@ -89,7 +89,7 @@ const TaskCard = React.memo(function TaskCard({
               {isMeeting && (
                 <Video className="h-4 w-4 text-primary shrink-0" />
               )}
-              <h3 className={cn("font-semibold text-base", task.status === 'done' && "line-through")}>
+              <h3 className={cn("font-semibold text-sm", task.status === 'done' && "line-through")}>
                 {task.title}
               </h3>
               <TaskSyncIndicator 
