@@ -14,6 +14,7 @@ import { Plus, Pencil, Trash2, MessageSquare, Search, Grid3x3, List, User } from
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { TemplatesSkeleton } from "@/components/skeletons";
 interface WhatsAppTemplate {
   id: string;
   key: string;
@@ -347,9 +348,7 @@ const WhatsAppTemplates = () => {
       {/* Content Area */}
       <div className="px-6 py-6">
         {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <p className="text-muted-foreground">Carregando templates...</p>
-          </div>
+          <TemplatesSkeleton />
         ) : filteredTemplates.length > 0 ? (
           viewMode === "cards" ? (
             <div className="grid gap-4 md:grid-cols-2">

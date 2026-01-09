@@ -20,6 +20,7 @@ import { VagaMeetingsCard } from "@/components/VagaDetalhes/VagaMeetingsCard";
 import { JobHistorySection } from "@/components/VagaDetalhes/JobHistorySection";
 import { toast } from "@/hooks/use-toast";
 import { useNotifications } from "@/hooks/useNotifications";
+import { VagaDetalhesSkeleton } from "@/components/skeletons";
 
 // Custom hooks with React Query
 import { useVaga } from "@/hooks/data/useVagaQuery";
@@ -134,11 +135,7 @@ export default function VagaDetalhes() {
   };
 
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background-light dark:bg-background-dark">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-      </div>
-    );
+    return <VagaDetalhesSkeleton />;
   }
 
   if (!vaga) {

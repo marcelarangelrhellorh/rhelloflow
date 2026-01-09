@@ -21,6 +21,7 @@ import { WhatsAppHistory } from "@/components/CandidatoDetalhes/WhatsAppHistory"
 import { CandidateNotesSection } from "@/components/CandidatoDetalhes/CandidateNotesSection";
 import { CandidateMeetingsCard } from "@/components/CandidatoDetalhes/CandidateMeetingsCard";
 import { FitCulturalCard } from "@/components/CandidatoDetalhes/FitCulturalCard";
+import { CandidatoDetalhesSkeleton } from "@/components/skeletons";
 import type { FitCulturalData } from "@/constants/fitCultural";
 type Candidato = {
   id: string;
@@ -323,11 +324,7 @@ export default function CandidatoDetalhes() {
     }
   };
   if (loading) {
-    return <div className="flex min-h-screen items-center justify-center" style={{
-      backgroundColor: '#FFFBF0'
-    }}>
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-      </div>;
+    return <CandidatoDetalhesSkeleton />;
   }
   if (!candidato) {
     return <div className="min-h-screen p-8" style={{

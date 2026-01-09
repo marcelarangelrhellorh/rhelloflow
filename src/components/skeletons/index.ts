@@ -7,3 +7,6 @@ export { LayoutSkeleton } from './LayoutSkeleton';
 export { VagasSkeleton } from './VagasSkeleton';
 export { CandidatosSkeleton } from './CandidatosSkeleton';
 export { FunnelSkeleton } from './FunnelSkeleton';
+export { VagaDetalhesSkeleton } from './VagaDetalhesSkeleton';
+export { CandidatoDetalhesSkeleton } from './CandidatoDetalhesSkeleton';
+export { TemplatesSkeleton } from './TemplatesSkeleton';
