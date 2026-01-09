@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 import rolesCatalog from '@/data/roles_catalog.json';
 
 interface Role {
@@ -12,7 +12,7 @@ interface Role {
 export function useRolesSynonyms() {
   const roles = useMemo(() => rolesCatalog as Role[], []);
 
-  const findRoleByTitle = (title: string): Role | undefined => {
+  const findRoleByTitle = useCallback((title: string): Role | undefined => {
     const normalizedTitle = title.toLowerCase().trim();
     
     // Busca exata pelo título
@@ -45,15 +45,15 @@ export function useRolesSynonyms() {
     );
     
     return partialSynonymMatch;
-  };
+  }, [roles]);
 
-  const getSynonymsForRole = (title: string): string[] => {
+  const getSynonymsForRole = useCallback((title: string): string[] => {
     const role = findRoleByTitle(title);
     if (!role) return [];
     return role.synonyms || [];
-  };
+  }, [findRoleByTitle]);
 
-  const getAllSearchTerms = (title: string, additionalTerms: string[] = []): string[] => {
+  const getAllSearchTerms = useCallback((title: string, additionalTerms: string[] = []): string[] => {
     const role = findRoleByTitle(title);
     const terms = new Set<string>();
     
@@ -71,7 +71,7 @@ export function useRolesSynonyms() {
     });
     
     return Array.from(terms);
-  };
+  }, [findRoleByTitle]);
 
   return {
     roles,

@@ -105,12 +105,16 @@ export default function EstudoMercado() {
   const [sinonimos, setSinonimos] = useState<string[]>([]);
   const [novoSinonimo, setNovoSinonimo] = useState("");
   const [showSynonyms, setShowSynonyms] = useState(false);
+  const [lastLoadedCargo, setLastLoadedCargo] = useState("");
   
   const { getSynonymsForRole } = useRolesSynonyms();
 
-  // Auto-load synonyms when cargo changes
+  // Auto-load synonyms when cargo changes (only when it actually changes)
   useEffect(() => {
-    if (cargo.trim()) {
+    const trimmedCargo = cargo.trim().toLowerCase();
+    
+    // Only reload synonyms if cargo actually changed
+    if (trimmedCargo && trimmedCargo !== lastLoadedCargo) {
       const catalogSynonyms = getSynonymsForRole(cargo);
       if (catalogSynonyms.length > 0) {
         setSinonimos(catalogSynonyms);
@@ -118,11 +122,14 @@ export default function EstudoMercado() {
       } else {
         setSinonimos([]);
       }
-    } else {
+      setLastLoadedCargo(trimmedCargo);
+    } else if (!trimmedCargo && lastLoadedCargo) {
       setSinonimos([]);
       setShowSynonyms(false);
+      setLastLoadedCargo("");
     }
-  }, [cargo, getSynonymsForRole]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cargo]);
 
   const handleAddSinonimo = () => {
     const term = novoSinonimo.trim();
