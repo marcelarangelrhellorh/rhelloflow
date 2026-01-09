@@ -3591,6 +3591,7 @@ export type Database = {
           last_status_change_by: string | null
           modelo_trabalho: Database["public"]["Enums"]["modelo_trabalho"] | null
           motivo_confidencial: string | null
+          motivo_contratacao: string | null
           observacoes: string | null
           prioridade: Database["public"]["Enums"]["prioridade_vaga"] | null
           quantidade_vagas: number | null
@@ -3600,6 +3601,7 @@ export type Database = {
           requisitos_desejaveis: string | null
           requisitos_obrigatorios: string | null
           responsabilidades: string | null
+          resumo_empresa: string | null
           salario_max: number | null
           salario_min: number | null
           salario_modalidade: string | null
@@ -3647,6 +3649,7 @@ export type Database = {
             | Database["public"]["Enums"]["modelo_trabalho"]
             | null
           motivo_confidencial?: string | null
+          motivo_contratacao?: string | null
           observacoes?: string | null
           prioridade?: Database["public"]["Enums"]["prioridade_vaga"] | null
           quantidade_vagas?: number | null
@@ -3656,6 +3659,7 @@ export type Database = {
           requisitos_desejaveis?: string | null
           requisitos_obrigatorios?: string | null
           responsabilidades?: string | null
+          resumo_empresa?: string | null
           salario_max?: number | null
           salario_min?: number | null
           salario_modalidade?: string | null
@@ -3703,6 +3707,7 @@ export type Database = {
             | Database["public"]["Enums"]["modelo_trabalho"]
             | null
           motivo_confidencial?: string | null
+          motivo_contratacao?: string | null
           observacoes?: string | null
           prioridade?: Database["public"]["Enums"]["prioridade_vaga"] | null
           quantidade_vagas?: number | null
@@ -3712,6 +3717,7 @@ export type Database = {
           requisitos_desejaveis?: string | null
           requisitos_obrigatorios?: string | null
           responsabilidades?: string | null
+          resumo_empresa?: string | null
           salario_max?: number | null
           salario_min?: number | null
           salario_modalidade?: string | null

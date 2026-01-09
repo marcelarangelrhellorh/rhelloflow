@@ -8,7 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Save, CheckCircle2, Loader2 } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Save, CheckCircle2, Loader2, Building2, Briefcase } from "lucide-react";
 import { toast } from "sonner";
 import { Constants } from "@/integrations/supabase/types";
 import { MultiSelect, MultiSelectOption } from "@/components/ui/multi-select";
@@ -44,8 +45,10 @@ export default function PublicVagaForm() {
     titulo: "",
     empresa: "",
     cnpj: "",
+    resumo_empresa: "",
     confidencial: false,
     motivo_confidencial: "",
+    motivo_contratacao: "",
     salario_min: "",
     salario_max: "",
     salario_modalidade: "FAIXA" as "FAIXA" | "A_COMBINAR",
@@ -142,6 +145,7 @@ export default function PublicVagaForm() {
         titulo: formData.titulo,
         empresa: formData.empresa,
         cnpj: cleanCNPJ(formData.cnpj),
+        resumo_empresa: formData.resumo_empresa || null,
         contato_nome: formData.contato_nome,
         contato_email: formData.contato_email,
         contato_telefone: formData.contato_telefone || null,
@@ -149,6 +153,7 @@ export default function PublicVagaForm() {
         formStartTime, // Timing check
         confidencial: formData.confidencial,
         motivo_confidencial: formData.confidencial ? formData.motivo_confidencial : null,
+        motivo_contratacao: formData.motivo_contratacao || null,
         salario_min: formData.salario_modalidade === "A_COMBINAR" ? null : parseCurrency(formData.salario_min),
         salario_max: formData.salario_modalidade === "A_COMBINAR" ? null : parseCurrency(formData.salario_max),
         salario_modalidade: formData.salario_modalidade,
@@ -302,23 +307,18 @@ export default function PublicVagaForm() {
             </CardContent>
           </Card>
 
-          {/* Informações Gerais */}
+          {/* Informações da Empresa */}
           <Card>
             <CardHeader>
-              <CardTitle>Informações da Vaga</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Building2 className="h-5 w-5 text-primary" />
+                Informações da Empresa
+              </CardTitle>
+              <CardDescription>
+                Dados da empresa contratante
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="titulo">Título da Vaga *</Label>
-                <Input
-                  id="titulo"
-                  required
-                  placeholder="Ex: Analista de Marketing Pleno"
-                  value={formData.titulo}
-                  onChange={(e) => setFormData({ ...formData, titulo: e.target.value })}
-                />
-              </div>
-
               <div>
                 <Label htmlFor="cnpj">CNPJ da Empresa *</Label>
                 <div className="relative">
@@ -361,6 +361,42 @@ export default function PublicVagaForm() {
                 />
               </div>
 
+              <div>
+                <Label htmlFor="resumo_empresa">Resumo da Empresa</Label>
+                <Textarea
+                  id="resumo_empresa"
+                  rows={3}
+                  placeholder="Descreva brevemente a empresa, seu segmento de atuação, cultura organizacional..."
+                  value={formData.resumo_empresa}
+                  onChange={(e) => setFormData({ ...formData, resumo_empresa: e.target.value })}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Informações que ajudam os candidatos a conhecer melhor a empresa
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Informações da Vaga */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Briefcase className="h-5 w-5 text-primary" />
+                Informações da Vaga
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="titulo">Título da Vaga *</Label>
+                <Input
+                  id="titulo"
+                  required
+                  placeholder="Ex: Analista de Marketing Pleno"
+                  value={formData.titulo}
+                  onChange={(e) => setFormData({ ...formData, titulo: e.target.value })}
+                />
+              </div>
+
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="confidencial"
@@ -399,6 +435,52 @@ export default function PublicVagaForm() {
                 <p className="text-xs text-muted-foreground mt-1">
                   Quantas pessoas serão contratadas para esta posição?
                 </p>
+              </div>
+
+              {/* Motivo da Contratação */}
+              <div className="space-y-3">
+                <Label>Trata-se de um(a):</Label>
+                <RadioGroup 
+                  value={formData.motivo_contratacao}
+                  onValueChange={(value) => setFormData({ ...formData, motivo_contratacao: value })}
+                  className="space-y-2"
+                >
+                  <div className="flex items-start space-x-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
+                    <RadioGroupItem value="aumento_quadro" id="aumento_quadro" className="mt-1" />
+                    <div className="flex-1">
+                      <Label htmlFor="aumento_quadro" className="font-medium cursor-pointer">
+                        Aumento de quadro
+                      </Label>
+                      <p className="text-sm text-muted-foreground">
+                        Expansão da empresa, fortalecimento da área e abertura de novas oportunidades. Movimento positivo de crescimento e investimento em pessoas.
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start space-x-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
+                    <RadioGroupItem value="substituicao" id="substituicao" className="mt-1" />
+                    <div className="flex-1">
+                      <Label htmlFor="substituicao" className="font-medium cursor-pointer">
+                        Substituição
+                      </Label>
+                      <p className="text-sm text-muted-foreground">
+                        Necessidade de trocar profissional ainda alocado. Conduzimos com máxima confidencialidade, respeitando tanto a empresa quanto o colaborador em transição.
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start space-x-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
+                    <RadioGroupItem value="reposicao" id="reposicao" className="mt-1" />
+                    <div className="flex-1">
+                      <Label htmlFor="reposicao" className="font-medium cursor-pointer">
+                        Reposição
+                      </Label>
+                      <p className="text-sm text-muted-foreground">
+                        Cargo ficou disponível após saída ou desligamento. Continuidade do papel e importância estratégica da posição para a empresa.
+                      </p>
+                    </div>
+                  </div>
+                </RadioGroup>
               </div>
             </CardContent>
           </Card>
