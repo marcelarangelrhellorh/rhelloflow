@@ -31,16 +31,12 @@ interface Candidato {
   pretensao_salarial: number | null;
   linkedin: string | null;
   status: string;
-  recrutador: string | null;
-  recruiter_id: string | null;
   criado_em: string;
   curriculo_link: string | null;
   feedback: string | null;
-  profiles?: {
-    full_name: string;
-  } | null;
   mediaRating?: number | null;
   qtdAvaliacoes?: number;
+  tags?: Array<{ id: string; label: string; category: string }>;
 }
 export default function BancoTalentos() {
   const navigate = useNavigate();
@@ -131,7 +127,7 @@ export default function BancoTalentos() {
     let matchesTags = true;
     if (tagFilter !== "all") {
       const candidateTags = (candidato as any).tags || [];
-      matchesTags = candidateTags.some((ct: any) => ct.tag_id === tagFilter);
+      matchesTags = candidateTags.some((ct: any) => ct.id === tagFilter);
     }
 
     // Novos filtros
@@ -350,8 +346,8 @@ export default function BancoTalentos() {
         </div> : <div className={viewMode === "grid" ? "grid gap-6 md:grid-cols-2" : "space-y-4"}>
           {filteredCandidatos.map(candidato => <CandidateCard key={candidato.id} candidate={{
         ...candidato,
-        recruiter_name: candidato.profiles?.full_name || candidato.recrutador || "Não atribuído",
-        days_in_bank: getDaysInBank(candidato.criado_em)
+        days_in_bank: getDaysInBank(candidato.criado_em),
+        tags: candidato.tags || []
       }} onViewProfile={() => handleViewProfile(candidato)} onLinkToJob={() => handleLinkToJob(candidato.id)} viewMode={viewMode} />)}
         </div>}
 
