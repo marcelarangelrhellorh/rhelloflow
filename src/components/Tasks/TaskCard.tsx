@@ -83,29 +83,31 @@ const TaskCard = React.memo(function TaskCard({
         onClick={() => onCardClick?.(task)}
       >
         <div className="space-y-3">
-          {/* Header */}
-          <div className="flex items-start justify-between gap-2">
-            <div className="flex-1 flex items-center gap-2">
-              {isMeeting && (
-                <Video className="h-4 w-4 text-primary shrink-0" />
-              )}
-              <h3 className={cn("font-semibold text-sm", task.status === 'done' && "line-through")}>
+          {/* Header - Título */}
+          <div className="flex items-start gap-2">
+            {isMeeting && (
+              <Video className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+            )}
+            <div className="flex-1 min-w-0">
+              <h3 className={cn("font-semibold text-sm leading-snug", task.status === 'done' && "line-through")}>
                 {task.title}
               </h3>
-              <TaskSyncIndicator 
-                isSynced={task.google_calendar_synced} 
-                lastSync={task.google_calendar_last_sync} 
-                syncEnabled={task.sync_enabled} 
-              />
             </div>
-            <div className="flex items-center gap-2">
-              {task.status === 'done' && isMeeting && task.meeting_outcome && (
-                <MeetingOutcomeBadge outcome={task.meeting_outcome} />
-              )}
-              <Badge className={`text-sm font-medium ${priorityColors[task.priority]}`}>
-                {priorityLabels[task.priority]}
-              </Badge>
-            </div>
+            <TaskSyncIndicator 
+              isSynced={task.google_calendar_synced} 
+              lastSync={task.google_calendar_last_sync} 
+              syncEnabled={task.sync_enabled} 
+            />
+          </div>
+
+          {/* Badges - Linha separada */}
+          <div className="flex items-center flex-wrap gap-1.5">
+            {task.status === 'done' && isMeeting && task.meeting_outcome && (
+              <MeetingOutcomeBadge outcome={task.meeting_outcome} />
+            )}
+            <Badge className={`text-xs font-medium ${priorityColors[task.priority]}`}>
+              {priorityLabels[task.priority]}
+            </Badge>
           </div>
 
           {/* Meta information */}
