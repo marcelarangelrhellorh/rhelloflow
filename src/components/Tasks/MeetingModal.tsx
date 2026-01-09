@@ -113,11 +113,23 @@ export default function MeetingModal({ open, onClose, task, defaultVagaId, defau
 
   useEffect(() => {
     if (task && task.id && task.task_type === 'meeting') {
-      const dueDate = task.due_date ? new Date(task.due_date) : null;
+      // Robust date extraction with validation
+      let dueDateStr = "";
+      if (task.due_date) {
+        try {
+          const dueDate = new Date(task.due_date);
+          if (!isNaN(dueDate.getTime())) {
+            dueDateStr = dueDate.toISOString().slice(0, 10);
+          }
+        } catch (e) {
+          console.error('Error parsing due_date:', task.due_date);
+        }
+      }
+      
       form.reset({
         title: task.title,
         description: task.description || "",
-        due_date: dueDate ? dueDate.toISOString().slice(0, 10) : "",
+        due_date: dueDateStr,
         start_time: task.start_time || "09:00",
         end_time: task.end_time || "10:00",
         assignee_id: task.assignee_id || "",
@@ -158,6 +170,16 @@ export default function MeetingModal({ open, onClose, task, defaultVagaId, defau
 
     // Combine date and time for due_date
     const dueDateTime = new Date(`${data.due_date}T${data.start_time}:00`);
+
+    // Validate that the date is valid before proceeding
+    if (isNaN(dueDateTime.getTime())) {
+      console.error('Invalid date:', data.due_date, data.start_time);
+      form.setError('due_date', { 
+        type: 'manual', 
+        message: 'Data inválida. Por favor, selecione uma data válida.' 
+      });
+      return;
+    }
 
     const taskData = {
       title: data.title,
