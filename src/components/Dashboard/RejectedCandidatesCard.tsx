@@ -75,7 +75,7 @@ export function RejectedCandidatesCard() {
                   Candidatos reprovados sem feedback
                 </p>
               </div>
-              <p className="text-[42px] font-semibold leading-none text-card-foreground">
+              <p className="font-semibold leading-none text-card-foreground text-2xl">
                 {loading ? '...' : count}
               </p>
               <p className="text-muted-foreground font-medium text-base">
