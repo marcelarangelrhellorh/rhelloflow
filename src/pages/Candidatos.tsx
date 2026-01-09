@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback, Suspense, lazy } from "react";
+import { useDebounce } from "@/hooks/useDebounce";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -76,6 +77,7 @@ export default function Candidatos() {
   // Estados de UI
   const [viewType, setViewType] = useState<"cards" | "funnel">("cards");
   const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearch = useDebounce(searchTerm, 300);
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [disponibilidadeFilter, setDisponibilidadeFilter] = useState<string>("disponível");
   const [vagaFilter, setVagaFilter] = useState<string>("all");
@@ -300,14 +302,14 @@ export default function Candidatos() {
       // Excluir candidatos no Banco de Talentos (gerenciados em /banco-talentos)
       if (candidato.status === "Banco de Talentos") return false;
       
-      const matchesSearch = searchTerm === "" || candidato.nome_completo.toLowerCase().includes(searchTerm.toLowerCase()) || candidato.email.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch = debouncedSearch === "" || candidato.nome_completo.toLowerCase().includes(debouncedSearch.toLowerCase()) || candidato.email.toLowerCase().includes(debouncedSearch.toLowerCase());
       const matchesVaga = vagaFilter === "all" || candidato.vaga_relacionada_id === vagaFilter;
       const matchesCliente = clienteFilter === "all" || candidato.vaga_relacionada_id && vagas.find(v => v.id === candidato.vaga_relacionada_id)?.empresa === clienteFilter;
       const matchesRecrutadorVaga = recrutadorVagaFilter === "all" || candidato.vaga_relacionada_id && vagas.find(v => v.id === candidato.vaga_relacionada_id)?.recrutador_id === recrutadorVagaFilter;
       const matchesRecrutador = recrutadorFilter === "all" || candidato.recrutador === recrutadorFilter;
       return matchesSearch && matchesVaga && matchesCliente && matchesRecrutadorVaga && matchesRecrutador;
     });
-  }, [candidatos, searchTerm, vagaFilter, clienteFilter, recrutadorVagaFilter, recrutadorFilter, vagas]);
+  }, [candidatos, debouncedSearch, vagaFilter, clienteFilter, recrutadorVagaFilter, recrutadorFilter, vagas]);
 
   // Filtragem para Cards (exclui Banco de Talentos)
   const filteredCandidatos = useMemo(() => {
@@ -315,7 +317,7 @@ export default function Candidatos() {
       // Excluir candidatos no Banco de Talentos (gerenciados em /banco-talentos)
       if (candidato.status === "Banco de Talentos") return false;
       
-      const matchesSearch = candidato.nome_completo.toLowerCase().includes(searchTerm.toLowerCase()) || candidato.email.toLowerCase().includes(searchTerm.toLowerCase()) || candidato.cidade && candidato.cidade.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch = debouncedSearch === "" || candidato.nome_completo.toLowerCase().includes(debouncedSearch.toLowerCase()) || candidato.email.toLowerCase().includes(debouncedSearch.toLowerCase()) || candidato.cidade && candidato.cidade.toLowerCase().includes(debouncedSearch.toLowerCase());
       const matchesStatus = statusFilter === "all" || candidato.status === statusFilter;
       const matchesDisponibilidade = disponibilidadeFilter === "all" || candidato.disponibilidade_status === disponibilidadeFilter;
       const matchesVaga = vagaFilter === "all" || candidato.vaga_relacionada_id === vagaFilter;
@@ -323,7 +325,7 @@ export default function Candidatos() {
       const matchesAttention = attentionFilter !== 'awaiting_client_feedback' || candidato.status === 'Shortlist';
       return matchesSearch && matchesStatus && matchesDisponibilidade && matchesVaga && matchesCliente && matchesAttention;
     });
-  }, [candidatos, searchTerm, statusFilter, disponibilidadeFilter, vagaFilter, clienteFilter, attentionFilter, vagas]);
+  }, [candidatos, debouncedSearch, statusFilter, disponibilidadeFilter, vagaFilter, clienteFilter, attentionFilter, vagas]);
 
   // Pre-compute candidates by status for funnel (avoids 6 separate filter calls)
   const candidatesByStatus = useMemo(() => {
