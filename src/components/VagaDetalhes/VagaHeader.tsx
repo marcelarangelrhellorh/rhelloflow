@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatSalaryRange } from "@/lib/salaryUtils";
-import { FileText } from "lucide-react";
+
 import type { Vaga } from "@/hooks/data/useVaga";
 import type { VagaTag } from "@/hooks/data/useVagaTags";
 
@@ -11,15 +11,13 @@ interface VagaHeaderProps {
   vagaTags: VagaTag[];
   onGenerateClientLink: () => void;
   onShare: () => void;
-  onCandidateForm: () => void;
 }
 
 export function VagaHeader({
   vaga,
   vagaTags,
   onGenerateClientLink,
-  onShare,
-  onCandidateForm
+  onShare
 }: VagaHeaderProps) {
   const categoryColors: Record<string, string> = {
     area: "bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900/30 dark:text-blue-200 dark:border-blue-700",
@@ -77,10 +75,6 @@ export function VagaHeader({
         </div>
       </div>
       <div className="flex gap-2">
-        <Button onClick={onCandidateForm} variant="outline" className="rounded-full font-bold min-w-[140px] text-sm">
-          <FileText className="h-4 w-4 mr-1" />
-          Formulário Candidato
-        </Button>
         <Button onClick={onGenerateClientLink} variant="outline" className="rounded-full font-bold min-w-[140px] text-sm">
           <span className="material-symbols-outlined text-lg">link</span>
           Link Cliente
