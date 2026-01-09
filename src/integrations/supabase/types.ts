@@ -514,6 +514,7 @@ export type Database = {
           criado_em: string | null
           curriculo_link: string | null
           curriculo_url: string | null
+          data_retention_until: string | null
           deleted_at: string | null
           deleted_by: string | null
           deleted_reason: string | null
@@ -535,6 +536,8 @@ export type Database = {
           idempotency_key: string | null
           idiomas: string | null
           is_visible_for_client: boolean | null
+          lgpd_deletion_requested_at: string | null
+          lgpd_export_requested_at: string | null
           linkedin: string | null
           modelo_contratacao: string | null
           nivel: Database["public"]["Enums"]["nivel_candidato"] | null
@@ -568,6 +571,7 @@ export type Database = {
           criado_em?: string | null
           curriculo_link?: string | null
           curriculo_url?: string | null
+          data_retention_until?: string | null
           deleted_at?: string | null
           deleted_by?: string | null
           deleted_reason?: string | null
@@ -589,6 +593,8 @@ export type Database = {
           idempotency_key?: string | null
           idiomas?: string | null
           is_visible_for_client?: boolean | null
+          lgpd_deletion_requested_at?: string | null
+          lgpd_export_requested_at?: string | null
           linkedin?: string | null
           modelo_contratacao?: string | null
           nivel?: Database["public"]["Enums"]["nivel_candidato"] | null
@@ -622,6 +628,7 @@ export type Database = {
           criado_em?: string | null
           curriculo_link?: string | null
           curriculo_url?: string | null
+          data_retention_until?: string | null
           deleted_at?: string | null
           deleted_by?: string | null
           deleted_reason?: string | null
@@ -643,6 +650,8 @@ export type Database = {
           idempotency_key?: string | null
           idiomas?: string | null
           is_visible_for_client?: boolean | null
+          lgpd_deletion_requested_at?: string | null
+          lgpd_export_requested_at?: string | null
           linkedin?: string | null
           modelo_contratacao?: string | null
           nivel?: Database["public"]["Enums"]["nivel_candidato"] | null
@@ -859,6 +868,104 @@ export type Database = {
             columns: ["vaga_id"]
             isOneToOne: false
             referencedRelation: "vw_vagas_com_stats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      data_processing_consents: {
+        Row: {
+          candidato_id: string
+          consent_given: boolean
+          consent_given_at: string | null
+          consent_type: string
+          consent_withdrawn_at: string | null
+          created_at: string | null
+          form_version: string | null
+          id: string
+          ip_address: string | null
+          legal_basis: string
+          source: string
+          updated_at: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          candidato_id: string
+          consent_given?: boolean
+          consent_given_at?: string | null
+          consent_type: string
+          consent_withdrawn_at?: string | null
+          created_at?: string | null
+          form_version?: string | null
+          id?: string
+          ip_address?: string | null
+          legal_basis: string
+          source: string
+          updated_at?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          candidato_id?: string
+          consent_given?: boolean
+          consent_given_at?: string | null
+          consent_type?: string
+          consent_withdrawn_at?: string | null
+          created_at?: string | null
+          form_version?: string | null
+          id?: string
+          ip_address?: string | null
+          legal_basis?: string
+          source?: string
+          updated_at?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "data_processing_consents_candidato_id_fkey"
+            columns: ["candidato_id"]
+            isOneToOne: false
+            referencedRelation: "candidates_with_tags"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "data_processing_consents_candidato_id_fkey"
+            columns: ["candidato_id"]
+            isOneToOne: false
+            referencedRelation: "candidatos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "data_processing_consents_candidato_id_fkey"
+            columns: ["candidato_id"]
+            isOneToOne: false
+            referencedRelation: "candidatos_active"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "data_processing_consents_candidato_id_fkey"
+            columns: ["candidato_id"]
+            isOneToOne: false
+            referencedRelation: "candidatos_public_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "data_processing_consents_candidato_id_fkey"
+            columns: ["candidato_id"]
+            isOneToOne: false
+            referencedRelation: "view_candidate_tags"
+            referencedColumns: ["candidate_id"]
+          },
+          {
+            foreignKeyName: "data_processing_consents_candidato_id_fkey"
+            columns: ["candidato_id"]
+            isOneToOne: false
+            referencedRelation: "vw_candidatos_por_vaga"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "data_processing_consents_candidato_id_fkey"
+            columns: ["candidato_id"]
+            isOneToOne: false
+            referencedRelation: "vw_candidatos_reprovados_sem_whatsapp"
             referencedColumns: ["id"]
           },
         ]
