@@ -105,7 +105,7 @@ function extractSalaryFromMarkdown(markdown: string): {
 }
 
 async function scrapeWithFirecrawl(url: string): Promise<{ success: boolean; content: string; error?: string }> {
-  const apiKey = Deno.env.get('FIRECRAWL_API_KEY');
+  const apiKey = Deno.env.get('FIRECRAWL_API_KEY') || Deno.env.get('FIRECRAWL_API_KEY_1');
   if (!apiKey) {
     return { success: false, content: '', error: 'FIRECRAWL_API_KEY não configurada' };
   }
@@ -140,7 +140,7 @@ async function scrapeWithFirecrawl(url: string): Promise<{ success: boolean; con
 }
 
 async function searchGoogleWithFirecrawl(query: string): Promise<{ success: boolean; data: any[]; error?: string }> {
-  const apiKey = Deno.env.get('FIRECRAWL_API_KEY');
+  const apiKey = Deno.env.get('FIRECRAWL_API_KEY') || Deno.env.get('FIRECRAWL_API_KEY_1');
   if (!apiKey) {
     return { success: false, data: [], error: 'FIRECRAWL_API_KEY não configurada' };
   }
