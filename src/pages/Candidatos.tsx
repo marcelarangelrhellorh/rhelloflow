@@ -125,15 +125,8 @@ export default function Candidatos() {
   const searchParams = new URLSearchParams(window.location.search);
   const attentionFilter = searchParams.get('attention');
 
-  useEffect(() => {
-    loadCandidatos();
-    loadVagas();
-    if (viewType === "funnel") {
-      loadUsers();
-    }
-  }, [viewType]);
-
-  const loadVagas = async () => {
+  // ============ MEMOIZED DATA LOADERS ============
+  const loadVagas = useCallback(async () => {
     try {
       const { data, error } = await supabase.from("vagas").select("id, titulo, empresa, recrutador_id").is("deleted_at", null).order("titulo");
       if (error) throw error;
@@ -143,9 +136,9 @@ export default function Candidatos() {
       logger.error("Erro ao carregar vagas:", error);
       return [];
     }
-  };
+  }, []);
 
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     try {
       const { data, error } = await supabase.from("users").select("id, name").eq("active", true).order("name");
       if (error) throw error;
@@ -153,13 +146,46 @@ export default function Candidatos() {
     } catch (error) {
       logger.error("Erro ao carregar usuários:", error);
     }
-  };
+  }, []);
 
-  const handleDragStart = (event: DragStartEvent) => {
+  const loadCandidatos = useCallback(async () => {
+    try {
+      const { data, error } = await supabase.from("candidatos").select(`
+        *,
+        vaga:vaga_relacionada_id (
+          id,
+          titulo
+        )
+      `).order("criado_em", { ascending: false });
+      if (error) throw error;
+
+      const candidatosEnriquecidos = (data || []).map((candidato: any) => ({
+        ...candidato,
+        vaga_titulo: candidato.vaga?.titulo || null
+      }));
+      setCandidatos(candidatosEnriquecidos);
+    } catch (error) {
+      logger.error("Erro ao carregar candidatos:", error);
+      toast.error("Erro ao carregar candidatos");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadCandidatos();
+    loadVagas();
+    if (viewType === "funnel") {
+      loadUsers();
+    }
+  }, [viewType, loadCandidatos, loadVagas, loadUsers]);
+
+  // ============ MEMOIZED HANDLERS ============
+  const handleDragStart = useCallback((event: DragStartEvent) => {
     setActiveId(event.active.id as string);
-  };
+  }, []);
 
-  const handleDragEnd = async (event: DragEndEvent) => {
+  const handleDragEnd = useCallback(async (event: DragEndEvent) => {
     const { active, over } = event;
     setDragOverColumn(null);
     if (!over || active.id === over.id) {
@@ -215,11 +241,10 @@ export default function Candidatos() {
     } finally {
       setActiveId(null);
     }
-  };
-
+  }, [candidatos, vagas, notifyClientsAboutShortlist]);
 
   // Handler para confirmação de feedback de reprovação
-  const handleRejectionFeedbackConfirm = async (gaveFeedback: boolean) => {
+  const handleRejectionFeedbackConfirm = useCallback(async (gaveFeedback: boolean) => {
     if (!rejectionModalData) return;
 
     const { candidatoId, vagaId, previousStatus } = rejectionModalData;
@@ -254,37 +279,9 @@ export default function Candidatos() {
     } finally {
       setRejectionModalData(null);
     }
-  };
+  }, [rejectionModalData]);
 
-  const getCandidatesByStatus = (status: StatusCandidato) => {
-    return filteredFunnelCandidates.filter(c => c.status === status);
-  };
-
-  const loadCandidatos = async () => {
-    try {
-      const { data, error } = await supabase.from("candidatos").select(`
-        *,
-        vaga:vaga_relacionada_id (
-          id,
-          titulo
-        )
-      `).order("criado_em", { ascending: false });
-      if (error) throw error;
-
-      const candidatosEnriquecidos = (data || []).map((candidato: any) => ({
-        ...candidato,
-        vaga_titulo: candidato.vaga?.titulo || null
-      }));
-      setCandidatos(candidatosEnriquecidos);
-    } catch (error) {
-      logger.error("Erro ao carregar candidatos:", error);
-      toast.error("Erro ao carregar candidatos");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDelete = async () => {
+  const handleDelete = useCallback(async () => {
     if (!deletingId) return;
 
     if (!isAdmin && !deletionReason.trim()) {
@@ -328,47 +325,101 @@ export default function Candidatos() {
       setDeletionReason("");
       setRequiresApproval(false);
     }
-  };
+  }, [deletingId, isAdmin, deletionReason, candidatos, loadCandidatos]);
 
-  // Filtragem para o funil (exclui Banco de Talentos)
-  const filteredFunnelCandidates = candidatos.filter(candidato => {
-    // Excluir candidatos no Banco de Talentos (gerenciados em /banco-talentos)
-    if (candidato.status === "Banco de Talentos") return false;
-    
-    const matchesSearch = searchTerm === "" || candidato.nome_completo.toLowerCase().includes(searchTerm.toLowerCase()) || candidato.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesVaga = vagaFilter === "all" || candidato.vaga_relacionada_id === vagaFilter;
-    const matchesCliente = clienteFilter === "all" || candidato.vaga_relacionada_id && vagas.find(v => v.id === candidato.vaga_relacionada_id)?.empresa === clienteFilter;
-    const matchesRecrutadorVaga = recrutadorVagaFilter === "all" || candidato.vaga_relacionada_id && vagas.find(v => v.id === candidato.vaga_relacionada_id)?.recrutador_id === recrutadorVagaFilter;
-    const matchesRecrutador = recrutadorFilter === "all" || candidato.recrutador === recrutadorFilter;
-    return matchesSearch && matchesVaga && matchesCliente && matchesRecrutadorVaga && matchesRecrutador;
-  });
-
-  // Filtragem para Cards (exclui Banco de Talentos)
-  const filteredCandidatos = candidatos.filter(candidato => {
-    // Excluir candidatos no Banco de Talentos (gerenciados em /banco-talentos)
-    if (candidato.status === "Banco de Talentos") return false;
-    
-    const matchesSearch = candidato.nome_completo.toLowerCase().includes(searchTerm.toLowerCase()) || candidato.email.toLowerCase().includes(searchTerm.toLowerCase()) || candidato.cidade && candidato.cidade.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "all" || candidato.status === statusFilter;
-    const matchesDisponibilidade = disponibilidadeFilter === "all" || candidato.disponibilidade_status === disponibilidadeFilter;
-    const matchesVaga = vagaFilter === "all" || candidato.vaga_relacionada_id === vagaFilter;
-    const matchesCliente = clienteFilter === "all" || candidato.vaga_relacionada_id && vagas.find(v => v.id === candidato.vaga_relacionada_id)?.empresa === clienteFilter;
-    const matchesAttention = attentionFilter !== 'awaiting_client_feedback' || candidato.status === 'Shortlist';
-    return matchesSearch && matchesStatus && matchesDisponibilidade && matchesVaga && matchesCliente && matchesAttention;
-  });
-
-  const hasActiveFilter = attentionFilter === 'awaiting_client_feedback';
-  const clearAttentionFilter = () => {
+  const clearAttentionFilter = useCallback(() => {
     navigate('/candidatos');
     window.location.reload();
-  };
+  }, [navigate]);
 
-  const clientes = Array.from(new Set(vagas.map(v => v.empresa).filter(Boolean))) as string[];
+  // ============ MEMOIZED MODAL CALLBACKS ============
+  const handleLinkJobModalClose = useCallback(() => {
+    setLinkingJobId(null);
+  }, []);
 
-  const statsByStatus = candidatos.reduce((acc, c) => {
-    acc[c.status] = (acc[c.status] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  const handleDeleteModalClose = useCallback(() => {
+    setDeletingId(null);
+    setDeletionReason("");
+  }, []);
+
+  // ============ MEMOIZED DERIVED DATA ============
+  
+  // Memoized clientes list
+  const clientes = useMemo(() => {
+    return Array.from(new Set(vagas.map(v => v.empresa).filter(Boolean))) as string[];
+  }, [vagas]);
+
+  // Memoized stats by status
+  const statsByStatus = useMemo(() => {
+    return candidatos.reduce((acc, c) => {
+      acc[c.status] = (acc[c.status] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+  }, [candidatos]);
+
+  // Memoized recrutadores for funnel filter
+  const recrutadoresVaga = useMemo(() => {
+    return Array.from(new Set(vagas.map(v => v.recrutador_id).filter(Boolean)));
+  }, [vagas]);
+
+  const recrutadores = useMemo(() => {
+    return Array.from(new Set(candidatos.map(c => c.recrutador).filter(Boolean))) as string[];
+  }, [candidatos]);
+
+  // ============ MEMOIZED FILTERED DATA ============
+  
+  // Filtragem para o funil (exclui Banco de Talentos)
+  const filteredFunnelCandidates = useMemo(() => {
+    return candidatos.filter(candidato => {
+      // Excluir candidatos no Banco de Talentos (gerenciados em /banco-talentos)
+      if (candidato.status === "Banco de Talentos") return false;
+      
+      const matchesSearch = searchTerm === "" || candidato.nome_completo.toLowerCase().includes(searchTerm.toLowerCase()) || candidato.email.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesVaga = vagaFilter === "all" || candidato.vaga_relacionada_id === vagaFilter;
+      const matchesCliente = clienteFilter === "all" || candidato.vaga_relacionada_id && vagas.find(v => v.id === candidato.vaga_relacionada_id)?.empresa === clienteFilter;
+      const matchesRecrutadorVaga = recrutadorVagaFilter === "all" || candidato.vaga_relacionada_id && vagas.find(v => v.id === candidato.vaga_relacionada_id)?.recrutador_id === recrutadorVagaFilter;
+      const matchesRecrutador = recrutadorFilter === "all" || candidato.recrutador === recrutadorFilter;
+      return matchesSearch && matchesVaga && matchesCliente && matchesRecrutadorVaga && matchesRecrutador;
+    });
+  }, [candidatos, searchTerm, vagaFilter, clienteFilter, recrutadorVagaFilter, recrutadorFilter, vagas]);
+
+  // Filtragem para Cards (exclui Banco de Talentos)
+  const filteredCandidatos = useMemo(() => {
+    return candidatos.filter(candidato => {
+      // Excluir candidatos no Banco de Talentos (gerenciados em /banco-talentos)
+      if (candidato.status === "Banco de Talentos") return false;
+      
+      const matchesSearch = candidato.nome_completo.toLowerCase().includes(searchTerm.toLowerCase()) || candidato.email.toLowerCase().includes(searchTerm.toLowerCase()) || candidato.cidade && candidato.cidade.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesStatus = statusFilter === "all" || candidato.status === statusFilter;
+      const matchesDisponibilidade = disponibilidadeFilter === "all" || candidato.disponibilidade_status === disponibilidadeFilter;
+      const matchesVaga = vagaFilter === "all" || candidato.vaga_relacionada_id === vagaFilter;
+      const matchesCliente = clienteFilter === "all" || candidato.vaga_relacionada_id && vagas.find(v => v.id === candidato.vaga_relacionada_id)?.empresa === clienteFilter;
+      const matchesAttention = attentionFilter !== 'awaiting_client_feedback' || candidato.status === 'Shortlist';
+      return matchesSearch && matchesStatus && matchesDisponibilidade && matchesVaga && matchesCliente && matchesAttention;
+    });
+  }, [candidatos, searchTerm, statusFilter, disponibilidadeFilter, vagaFilter, clienteFilter, attentionFilter, vagas]);
+
+  // Pre-compute candidates by status for funnel (avoids 6 separate filter calls)
+  const candidatesByStatus = useMemo(() => {
+    const grouped: Record<StatusCandidato, Candidato[]> = {
+      "Triagem": [],
+      "Assessment | Teste Técnico": [],
+      "Entrevista": [],
+      "Shortlist": [],
+      "Reprovado": [],
+      "Contratado": []
+    };
+    
+    filteredFunnelCandidates.forEach(c => {
+      if (grouped[c.status as StatusCandidato]) {
+        grouped[c.status as StatusCandidato].push(c);
+      }
+    });
+    
+    return grouped;
+  }, [filteredFunnelCandidates]);
+
+  const hasActiveFilter = attentionFilter === 'awaiting_client_feedback';
 
   const {
     paginatedData: paginatedCandidatos,
@@ -380,6 +431,28 @@ export default function Candidatos() {
     startIndex,
     endIndex
   } = usePagination(filteredCandidatos, 50);
+
+  // ============ MEMOIZED CARD HANDLERS (for map iterations) ============
+  const handleViewCandidate = useCallback((id: string) => {
+    navigate(`/candidatos/${id}`);
+  }, [navigate]);
+
+  const handleEditCandidate = useCallback((id: string) => {
+    navigate(`/candidatos/${id}/editar`);
+  }, [navigate]);
+
+  const handleDeleteCandidate = useCallback((id: string) => {
+    setDeletingId(id);
+  }, []);
+
+  const handleLinkJobCandidate = useCallback((id: string) => {
+    setLinkingJobId(id);
+  }, []);
+
+  // Memoized vagas for funnel filter bar
+  const vagasForFilter = useMemo(() => {
+    return vagas.map(v => ({ id: v.id, titulo: v.titulo }));
+  }, [vagas]);
 
   if (loading) {
     return <CandidatosSkeleton />;
@@ -483,7 +556,15 @@ export default function Candidatos() {
                   <>
                     <div className={viewMode === "grid" ? "grid gap-4 md:grid-cols-2 xl:grid-cols-3" : "space-y-4"}>
                       {paginatedCandidatos.map(candidato => (
-                        <CandidateCard key={candidato.id} candidato={candidato} onView={() => navigate(`/candidatos/${candidato.id}`)} onEdit={() => navigate(`/candidatos/${candidato.id}/editar`)} onDelete={() => setDeletingId(candidato.id)} onLinkJob={() => setLinkingJobId(candidato.id)} viewMode={viewMode} />
+                        <CandidateCard 
+                          key={candidato.id} 
+                          candidato={candidato} 
+                          onView={() => handleViewCandidate(candidato.id)} 
+                          onEdit={() => handleEditCandidate(candidato.id)} 
+                          onDelete={() => handleDeleteCandidate(candidato.id)} 
+                          onLinkJob={() => handleLinkJobCandidate(candidato.id)} 
+                          viewMode={viewMode} 
+                        />
                       ))}
                     </div>
                     <div className="mt-6">
@@ -496,18 +577,34 @@ export default function Candidatos() {
 
             {/* Visualização em Funil */}
             <TabsContent value="funnel" className="space-y-4 mt-4">
-              <FunnelFilterBar searchQuery={searchTerm} onSearchChange={setSearchTerm} vagaFilter={vagaFilter} onVagaChange={setVagaFilter} clienteFilter={clienteFilter} onClienteChange={setClienteFilter} recrutadorVagaFilter={recrutadorVagaFilter} onRecrutadorVagaChange={setRecrutadorVagaFilter} recrutadorFilter={recrutadorFilter} onRecrutadorChange={setRecrutadorFilter} vagas={vagas.map(v => ({ id: v.id, titulo: v.titulo }))} clientes={clientes} recrutadoresVaga={Array.from(new Set(vagas.map(v => v.recrutador_id).filter(Boolean)))} recrutadores={Array.from(new Set(candidatos.map(c => c.recrutador).filter(Boolean))) as string[]} users={users} />
+              <FunnelFilterBar 
+                searchQuery={searchTerm} 
+                onSearchChange={setSearchTerm} 
+                vagaFilter={vagaFilter} 
+                onVagaChange={setVagaFilter} 
+                clienteFilter={clienteFilter} 
+                onClienteChange={setClienteFilter} 
+                recrutadorVagaFilter={recrutadorVagaFilter} 
+                onRecrutadorVagaChange={setRecrutadorVagaFilter} 
+                recrutadorFilter={recrutadorFilter} 
+                onRecrutadorChange={setRecrutadorFilter} 
+                vagas={vagasForFilter} 
+                clientes={clientes} 
+                recrutadoresVaga={recrutadoresVaga} 
+                recrutadores={recrutadores} 
+                users={users} 
+              />
 
               <div className="bg-[#36404a]/[0.12] rounded-lg p-4">
                 <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
                   <DualScrollContainer>
                     <div className="flex gap-4 pb-4">
                       {statusColumns.map(status => {
-                        const candidatosStatus = getCandidatesByStatus(status);
+                        const candidatosStatus = candidatesByStatus[status];
                         return (
                           <FunnelColumn key={status} status={status} count={candidatosStatus.length} colorClass={statusColors[status]}>
                             {candidatosStatus.map(candidato => (
-                              <div key={candidato.id} onClick={() => navigate(`/candidatos/${candidato.id}`)}>
+                              <div key={candidato.id} onClick={() => handleViewCandidate(candidato.id)}>
                                 <CandidateFunnelCard candidato={candidato} onDragStart={() => {}} />
                               </div>
                             ))}
@@ -537,12 +634,9 @@ export default function Candidatos() {
       </div>
 
       {/* Modals */}
-      <LinkToJobModal open={!!linkingJobId} onOpenChange={() => setLinkingJobId(null)} candidateId={linkingJobId || ""} onSuccess={loadCandidatos} />
+      <LinkToJobModal open={!!linkingJobId} onOpenChange={handleLinkJobModalClose} candidateId={linkingJobId || ""} onSuccess={loadCandidatos} />
 
-      <AlertDialog open={!!deletingId} onOpenChange={() => {
-        setDeletingId(null);
-        setDeletionReason("");
-      }}>
+      <AlertDialog open={!!deletingId} onOpenChange={handleDeleteModalClose}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
