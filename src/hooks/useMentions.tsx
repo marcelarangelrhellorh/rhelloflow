@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUsersQuery } from "./data/useUsersQuery";
 import { useNotifications } from "./useNotifications";
@@ -21,12 +21,15 @@ export function useMentions() {
   const { users, loading } = useUsersQuery();
   const { createNotification } = useNotifications();
 
-  // Formata usuários para o formato esperado pelo quill-mention
-  const mentionUsers: MentionUser[] = users.map(user => ({
-    id: user.id,
-    value: user.name,
-    email: user.email,
-  }));
+  // Memoizar para evitar recriação a cada render
+  const mentionUsers: MentionUser[] = useMemo(() => 
+    users.map(user => ({
+      id: user.id,
+      value: user.name,
+      email: user.email,
+    })),
+    [users]
+  );
 
   // Extrai IDs de usuários mencionados do conteúdo HTML
   const extractMentions = useCallback((htmlContent: string): string[] => {
