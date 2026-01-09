@@ -49,7 +49,7 @@ interface VagaCardProps {
 // Cores de prioridade
 const priorityColors: Record<string, string> = {
   "Baixa": "bg-gray-100 text-gray-600 border-gray-200",
-  "Alta": "bg-yellow-100 text-yellow-700 border-yellow-200",
+  "Alta": "bg-orange-100 text-orange-700 border-orange-200",
   "Crítica": "bg-red-100 text-red-700 border-red-200",
 };
 
