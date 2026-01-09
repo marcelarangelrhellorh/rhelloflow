@@ -54,6 +54,7 @@ interface InfoJobsResultado {
   fonte: string;
   url: string | null;
   erro?: string | null;
+  via_google?: boolean;
 }
 
 interface GlassdoorResultado {
@@ -73,6 +74,7 @@ interface GlassdoorResultado {
   fonte: string;
   url: string | null;
   erro?: string | null;
+  via_google?: boolean;
 }
 
 // Helper function para mapear erros técnicos para mensagens amigáveis
@@ -646,22 +648,30 @@ export default function EstudoMercado() {
                       <Globe className="h-5 w-5 text-green-600" />
                       InfoJobs Brasil
                     </CardTitle>
-                    {estudo.resultado.infojobs.encontrado ? (
-                      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                        <CheckCircle className="h-3 w-3 mr-1" />
-                        Dados em tempo real
-                      </Badge>
-                    ) : estudo.resultado.infojobs.erro ? (
-                      <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
-                        <AlertTriangle className="h-3 w-3 mr-1" />
-                        Indisponível
-                      </Badge>
-                    ) : (
-                      <Badge variant="outline" className="bg-gray-50 text-gray-600 border-gray-200">
-                        <XCircle className="h-3 w-3 mr-1" />
-                        Não encontrado
-                      </Badge>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {estudo.resultado.infojobs.encontrado && estudo.resultado.infojobs.via_google && (
+                        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                          <Globe className="h-3 w-3 mr-1" />
+                          Via busca Google
+                        </Badge>
+                      )}
+                      {estudo.resultado.infojobs.encontrado ? (
+                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                          <CheckCircle className="h-3 w-3 mr-1" />
+                          {estudo.resultado.infojobs.via_google ? 'Dados encontrados' : 'Dados em tempo real'}
+                        </Badge>
+                      ) : estudo.resultado.infojobs.erro ? (
+                        <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+                          <AlertTriangle className="h-3 w-3 mr-1" />
+                          Indisponível
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="bg-gray-50 text-gray-600 border-gray-200">
+                          <XCircle className="h-3 w-3 mr-1" />
+                          Não encontrado
+                        </Badge>
+                      )}
+                    </div>
                   </div>
                 </CardHeader>
                 
@@ -757,28 +767,36 @@ export default function EstudoMercado() {
                       <TrendingUp className="h-5 w-5 text-teal-600" />
                       Glassdoor Brasil
                     </CardTitle>
-                    {estudo.resultado.glassdoor.encontrado ? (
-                      <Badge variant="outline" className="bg-teal-50 text-teal-700 border-teal-200">
-                        <CheckCircle className="h-3 w-3 mr-1" />
-                        Dados em tempo real
-                      </Badge>
-                    ) : estudo.resultado.glassdoor.erro?.toLowerCase().includes('bloqueou') || 
-                         estudo.resultado.glassdoor.erro?.toLowerCase().includes('captcha') ? (
-                      <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
-                        <ShieldAlert className="h-3 w-3 mr-1" />
-                        Bloqueado
-                      </Badge>
-                    ) : estudo.resultado.glassdoor.erro ? (
-                      <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
-                        <AlertTriangle className="h-3 w-3 mr-1" />
-                        Indisponível
-                      </Badge>
-                    ) : (
-                      <Badge variant="outline" className="bg-gray-50 text-gray-600 border-gray-200">
-                        <XCircle className="h-3 w-3 mr-1" />
-                        Não encontrado
-                      </Badge>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {estudo.resultado.glassdoor.encontrado && estudo.resultado.glassdoor.via_google && (
+                        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                          <Globe className="h-3 w-3 mr-1" />
+                          Via busca Google
+                        </Badge>
+                      )}
+                      {estudo.resultado.glassdoor.encontrado ? (
+                        <Badge variant="outline" className="bg-teal-50 text-teal-700 border-teal-200">
+                          <CheckCircle className="h-3 w-3 mr-1" />
+                          {estudo.resultado.glassdoor.via_google ? 'Dados encontrados' : 'Dados em tempo real'}
+                        </Badge>
+                      ) : estudo.resultado.glassdoor.erro?.toLowerCase().includes('bloqueou') || 
+                           estudo.resultado.glassdoor.erro?.toLowerCase().includes('captcha') ? (
+                        <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+                          <ShieldAlert className="h-3 w-3 mr-1" />
+                          Bloqueado
+                        </Badge>
+                      ) : estudo.resultado.glassdoor.erro ? (
+                        <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+                          <AlertTriangle className="h-3 w-3 mr-1" />
+                          Indisponível
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="bg-gray-50 text-gray-600 border-gray-200">
+                          <XCircle className="h-3 w-3 mr-1" />
+                          Não encontrado
+                        </Badge>
+                      )}
+                    </div>
                   </div>
                 </CardHeader>
                 
