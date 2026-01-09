@@ -111,7 +111,12 @@ export default function EmpresaDetalhes() {
             <EmpresaSociosCard empresa={empresa} />
 
             {/* Histórico de Vagas */}
-            <EmpresaVagasTable vagas={vagas} isLoading={vagasLoading} />
+            <EmpresaVagasTable 
+              vagas={vagas} 
+              isLoading={vagasLoading} 
+              empresaId={empresa.id}
+              empresaNome={empresa.nome}
+            />
 
             {/* Histórico de Contratações */}
             <EmpresaContratacoesTable

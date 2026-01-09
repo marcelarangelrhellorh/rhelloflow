@@ -36,6 +36,7 @@ import { toast } from "sonner";
 import { formatCNPJ } from "@/lib/cnpjUtils";
 import { useCNPJLookup, Socio, AtividadeEconomica, CNPJData } from "@/hooks/useCNPJLookup";
 import { useCacheInvalidation } from "@/hooks/data/useCacheInvalidation";
+import { CreateExternalUserInline } from "./CreateExternalUserInline";
 
 interface ClientUser {
   id: string;
@@ -884,54 +885,67 @@ export function EmpresaFormModal({
                 Usuários Externos Vinculados
               </h3>
               
-              {availableUsers.length === 0 ? (
+              {/* Usuários selecionados (badges) */}
+              {selectedUserIds.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {selectedUserIds.map((userId) => {
+                    const user = clientUsers.find((u) => u.id === userId);
+                    return user ? (
+                      <Badge
+                        key={userId}
+                        variant="secondary"
+                        className="flex items-center gap-1"
+                      >
+                        {user.full_name}
+                        <X
+                          className="h-3 w-3 cursor-pointer"
+                          onClick={() => toggleUserSelection(userId)}
+                        />
+                      </Badge>
+                    ) : null;
+                  })}
+                </div>
+              )}
+
+              {/* Lista de usuários disponíveis para vincular */}
+              {availableUsers.length > 0 && (
+                <div className="border rounded-md p-3 max-h-40 overflow-y-auto space-y-2">
+                  {availableUsers.map((user) => (
+                    <div
+                      key={user.id}
+                      className="flex items-center space-x-2"
+                    >
+                      <Checkbox
+                        id={user.id}
+                        checked={selectedUserIds.includes(user.id)}
+                        onCheckedChange={() => toggleUserSelection(user.id)}
+                      />
+                      <label
+                        htmlFor={user.id}
+                        className="text-sm font-medium leading-none cursor-pointer"
+                      >
+                        {user.full_name}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {availableUsers.length === 0 && selectedUserIds.length === 0 && (
                 <p className="text-sm text-muted-foreground">
                   Nenhum usuário externo disponível para vincular.
                 </p>
-              ) : (
-                <div className="space-y-2">
-                  {selectedUserIds.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      {selectedUserIds.map((userId) => {
-                        const user = clientUsers.find((u) => u.id === userId);
-                        return user ? (
-                          <Badge
-                            key={userId}
-                            variant="secondary"
-                            className="flex items-center gap-1"
-                          >
-                            {user.full_name}
-                            <X
-                              className="h-3 w-3 cursor-pointer"
-                              onClick={() => toggleUserSelection(userId)}
-                            />
-                          </Badge>
-                        ) : null;
-                      })}
-                    </div>
-                  )}
-                  <div className="border rounded-md p-3 max-h-40 overflow-y-auto space-y-2">
-                    {availableUsers.map((user) => (
-                      <div
-                        key={user.id}
-                        className="flex items-center space-x-2"
-                      >
-                        <Checkbox
-                          id={user.id}
-                          checked={selectedUserIds.includes(user.id)}
-                          onCheckedChange={() => toggleUserSelection(user.id)}
-                        />
-                        <label
-                          htmlFor={user.id}
-                          className="text-sm font-medium leading-none cursor-pointer"
-                        >
-                          {user.full_name}
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
               )}
+
+              {/* Criar novo usuário externo inline */}
+              <CreateExternalUserInline
+                empresaId={empresa?.id}
+                empresaNome={form.watch("nome") || ""}
+                onUserCreated={(newUserId) => {
+                  // Adicionar o novo usuário à lista de selecionados
+                  setSelectedUserIds(prev => [...prev, newUserId]);
+                }}
+              />
             </div>
 
             {/* Observações */}
