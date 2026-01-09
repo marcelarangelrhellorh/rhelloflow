@@ -1,10 +1,8 @@
-import React, { useMemo, useEffect, useRef } from "react";
+import React, { useMemo, useEffect, useRef, useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import "quill-mention";
 import "quill-mention/dist/quill.mention.css";
-
-// O quill-mention v4 se auto-registra ao ser importado
+import { Skeleton } from "./skeleton";
 
 export interface MentionUser {
   id: string;
@@ -30,6 +28,38 @@ export function MentionEditor({
   minHeight = "120px",
 }: MentionEditorProps) {
   const quillRef = useRef<ReactQuill>(null);
+  const [ready, setReady] = useState(false);
+  const [error, setError] = useState(false);
+
+  // Dynamically import and register quill-mention before mounting the editor
+  useEffect(() => {
+    let mounted = true;
+
+    const initMention = async () => {
+      try {
+        // Dynamic import ensures quill-mention registers with Quill
+        await import("quill-mention");
+        
+        // Small delay to ensure registration completes
+        await new Promise(resolve => setTimeout(resolve, 50));
+        
+        if (mounted) {
+          setReady(true);
+        }
+      } catch (err) {
+        console.error("Failed to load quill-mention:", err);
+        if (mounted) {
+          setError(true);
+        }
+      }
+    };
+
+    initMention();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const modules = useMemo(() => ({
     toolbar: [
@@ -163,6 +193,42 @@ export function MentionEditor({
       document.head.removeChild(style);
     };
   }, [minHeight]);
+
+  // Show loading state while quill-mention is being loaded
+  if (!ready) {
+    return (
+      <div className={`mention-editor ${className}`}>
+        <div 
+          className="border border-border rounded-lg overflow-hidden"
+          style={{ minHeight }}
+        >
+          <Skeleton className="h-10 rounded-none" />
+          <div className="p-3">
+            <Skeleton className="h-4 w-3/4 mb-2" />
+            <Skeleton className="h-4 w-1/2" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show fallback textarea if quill-mention failed to load
+  if (error) {
+    return (
+      <div className={`mention-editor ${className}`}>
+        <textarea
+          value={value.replace(/<[^>]*>/g, '')}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          className="w-full p-3 border border-border rounded-lg min-h-[120px] resize-y bg-background text-foreground"
+          style={{ minHeight }}
+        />
+        <p className="text-xs text-muted-foreground mt-1">
+          Editor simplificado (menções indisponíveis)
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className={`mention-editor ${className}`}>
