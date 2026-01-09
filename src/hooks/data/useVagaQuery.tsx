@@ -44,8 +44,13 @@ export function useVagaQuery(id: string | undefined) {
   React.useEffect(() => {
     if (!id) return;
 
+    let isMounted = true;
+    
+    // Use timestamp to guarantee unique channel name
+    const channelName = `vaga-${id}-${Date.now()}`;
+    
     const channel = supabase
-      .channel(`vaga-${id}`)
+      .channel(channelName)
       .on(
         "postgres_changes",
         {
@@ -55,13 +60,20 @@ export function useVagaQuery(id: string | undefined) {
           filter: `id=eq.${id}`,
         },
         () => {
-          queryClient.invalidateQueries({ queryKey: vagaKeys.detail(id) });
+          // Only update if still mounted
+          if (isMounted) {
+            queryClient.invalidateQueries({ queryKey: vagaKeys.detail(id) });
+          }
         }
       )
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      isMounted = false;
+      // Use unsubscribe before removing the channel
+      channel.unsubscribe().then(() => {
+        supabase.removeChannel(channel);
+      });
     };
   }, [id, queryClient]);
 

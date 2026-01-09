@@ -32,8 +32,11 @@ export function useCandidatosQuery(vagaId: string | undefined) {
   React.useEffect(() => {
     if (!vagaId) return;
 
+    let isMounted = true;
+    const channelName = `candidatos-vaga-${vagaId}-${Date.now()}`;
+
     const channel = supabase
-      .channel(`candidatos-vaga-${vagaId}`)
+      .channel(channelName)
       .on(
         "postgres_changes",
         {
@@ -43,13 +46,18 @@ export function useCandidatosQuery(vagaId: string | undefined) {
           filter: `vaga_relacionada_id=eq.${vagaId}`,
         },
         () => {
-          queryClient.invalidateQueries({ queryKey: candidatosKeys.byVaga(vagaId) });
+          if (isMounted) {
+            queryClient.invalidateQueries({ queryKey: candidatosKeys.byVaga(vagaId) });
+          }
         }
       )
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      isMounted = false;
+      channel.unsubscribe().then(() => {
+        supabase.removeChannel(channel);
+      });
     };
   }, [vagaId, queryClient]);
 
