@@ -83,7 +83,7 @@ export function VagaActivityLog({
   };
   const activities = getRecentActivities();
   return <div>
-      <h2 className="text-primary-text-light dark:text-primary-text-dark font-bold tracking-tight mb-6 mx-[15px] px-4 py-2 rounded-full text-lg my-[15px] bg-transparent">
+      <h2 className="text-primary-text-light dark:text-primary-text-dark font-bold tracking-tight mb-6 px-4 py-2 rounded-full text-lg my-[15px] bg-transparent mx-[50px]">
         Atividade Recente
       </h2>
 
