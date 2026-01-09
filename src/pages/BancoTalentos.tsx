@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Plus, Grid3x3, List, Search } from "lucide-react";
+import { Plus, Grid3x3, List, Search, Link2, UserPlus } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -10,8 +10,8 @@ import { CandidateCard } from "@/components/BancoTalentos/CandidateCard";
 import { LinkToJobModal } from "@/components/BancoTalentos/LinkToJobModal";
 import { ImportXlsModal } from "@/components/ImportXlsModal";
 import { TalentPoolLinkManager } from "@/components/TalentPoolLinkManager";
+import { CandidateRegistrationLinkManager } from "@/components/CandidateRegistrationLinkManager";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Link2 } from "lucide-react";
 import { differenceInDays } from "date-fns";
 import { CARGO_OPTIONS } from "@/constants/fitCultural";
 
@@ -182,6 +182,22 @@ export default function BancoTalentos() {
               </SheetHeader>
               <div className="mt-6">
                 <TalentPoolLinkManager />
+              </div>
+            </SheetContent>
+          </Sheet>
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="outline" className="border-[#00141D] text-[#00141D] hover:bg-[#00141D]/10">
+                <UserPlus className="mr-2 h-5 w-5" />
+                Link Cadastro de Candidato
+              </Button>
+            </SheetTrigger>
+            <SheetContent className="w-[500px] sm:w-[600px] overflow-y-auto">
+              <SheetHeader>
+                <SheetTitle>Gerenciar Links de Cadastro de Candidato</SheetTitle>
+              </SheetHeader>
+              <div className="mt-6">
+                <CandidateRegistrationLinkManager />
               </div>
             </SheetContent>
           </Sheet>

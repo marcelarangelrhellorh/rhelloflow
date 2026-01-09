@@ -162,6 +162,104 @@ export type Database = {
           },
         ]
       }
+      candidate_registration_link_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          ip_address: string | null
+          link_id: string
+          metadata: Json | null
+          user_agent: string | null
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          ip_address?: string | null
+          link_id: string
+          metadata?: Json | null
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          ip_address?: string | null
+          link_id?: string
+          metadata?: Json | null
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_registration_link_events_link_id_fkey"
+            columns: ["link_id"]
+            isOneToOne: false
+            referencedRelation: "candidate_registration_links"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      candidate_registration_links: {
+        Row: {
+          active: boolean
+          created_at: string
+          created_by: string | null
+          expires_at: string | null
+          id: string
+          last_used_at: string | null
+          max_submissions: number | null
+          note: string | null
+          password_hash: string | null
+          revoked: boolean
+          revoked_at: string | null
+          submissions_count: number
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          last_used_at?: string | null
+          max_submissions?: number | null
+          note?: string | null
+          password_hash?: string | null
+          revoked?: boolean
+          revoked_at?: string | null
+          submissions_count?: number
+          token: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          last_used_at?: string | null
+          max_submissions?: number | null
+          note?: string | null
+          password_hash?: string | null
+          revoked?: boolean
+          revoked_at?: string | null
+          submissions_count?: number
+          token?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       candidate_scorecards: {
         Row: {
           candidate_id: string
@@ -409,6 +507,7 @@ export type Database = {
       candidatos: {
         Row: {
           area: Database["public"]["Enums"]["area_candidato"] | null
+          candidate_registration_link_id: string | null
           cargo: string | null
           cidade: string | null
           cpf: string | null
@@ -460,6 +559,7 @@ export type Database = {
         }
         Insert: {
           area?: Database["public"]["Enums"]["area_candidato"] | null
+          candidate_registration_link_id?: string | null
           cargo?: string | null
           cidade?: string | null
           cpf?: string | null
@@ -511,6 +611,7 @@ export type Database = {
         }
         Update: {
           area?: Database["public"]["Enums"]["area_candidato"] | null
+          candidate_registration_link_id?: string | null
           cargo?: string | null
           cidade?: string | null
           cpf?: string | null
@@ -561,6 +662,13 @@ export type Database = {
           vaga_relacionada_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "candidatos_candidate_registration_link_id_fkey"
+            columns: ["candidate_registration_link_id"]
+            isOneToOne: false
+            referencedRelation: "candidate_registration_links"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "candidatos_rejection_feedback_job_id_fkey"
             columns: ["rejection_feedback_job_id"]
@@ -5110,6 +5218,19 @@ export type Database = {
       generate_salary_study_cache_key: {
         Args: { p_cargo: string; p_localidade?: string; p_senioridade?: string }
         Returns: string
+      }
+      get_candidate_registration_link_by_token: {
+        Args: { p_token: string }
+        Returns: {
+          active: boolean
+          created_at: string
+          expires_at: string
+          id: string
+          max_submissions: number
+          requires_password: boolean
+          submissions_count: number
+          token: string
+        }[]
       }
       get_dashboard_overview_secure: {
         Args: never
