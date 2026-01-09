@@ -7,7 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, FileDown, CheckCircle, XCircle, Lightbulb, Info, Database, RefreshCw, Zap, ExternalLink, Globe, DollarSign, TrendingUp, X, Plus, Tags } from "lucide-react";
+import { Loader2, FileDown, CheckCircle, XCircle, Lightbulb, Info, Database, RefreshCw, Zap, ExternalLink, Globe, DollarSign, TrendingUp, X, Plus, Tags, AlertTriangle } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import logoRhelloDark from "@/assets/logo-rhello-dark.png";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -550,6 +551,17 @@ export default function EstudoMercado() {
               </Button>
             </div>
 
+            {/* Aviso sobre regime CLT */}
+            <Alert className="border-amber-200 bg-amber-50">
+              <AlertTriangle className="h-4 w-4 text-amber-600" />
+              <AlertTitle className="text-amber-800">Importante: Valores baseados em regime CLT</AlertTitle>
+              <AlertDescription className="text-amber-700">
+                Os dados salariais apresentados por todas as fontes consultadas (Hays, Michael Page, InfoJobs e Glassdoor) 
+                são referentes ao regime de contratação CLT. Para estimativas de valores PJ, considere um acréscimo 
+                de aproximadamente 30% a 45% sobre os valores apresentados.
+              </AlertDescription>
+            </Alert>
+
             {/* Comparativo lado a lado */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {renderResultadoFonte(estudo.resultado.hays, "Hays 2026", "border-l-blue-500")}
@@ -785,7 +797,8 @@ export default function EstudoMercado() {
                   )}
                 </div>
                 <p className="text-xs text-muted-foreground mt-2">
-                  Todos os valores em R$/mês. Hays e Michael Page: guias salariais 2026. InfoJobs e Glassdoor: dados em tempo real.
+                  Todos os valores em R$/mês (regime CLT). Hays e Michael Page: guias salariais 2026. InfoJobs e Glassdoor: dados em tempo real. 
+                  Para estimativas PJ, considere acréscimo de 30-45%.
                 </p>
               </CardContent>
             </Card>

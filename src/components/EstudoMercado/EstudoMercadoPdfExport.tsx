@@ -380,6 +380,36 @@ export async function generateEstudoMercadoPdf(estudo: EstudoMercadoNovo): Promi
     return yPos + lines.length * 5 + 12;
   };
   
+  const drawCltWarningBox = (yPos: number): number => {
+    // Warning box with amber/yellow styling
+    doc.setFillColor(254, 243, 199); // Light amber background
+    doc.setDrawColor(251, 191, 36); // Amber border
+    doc.setLineWidth(0.5);
+    doc.roundedRect(margin, yPos, contentWidth, 28, 3, 3, "FD");
+    
+    // Warning icon indicator (exclamation circle)
+    doc.setFillColor(251, 191, 36);
+    doc.circle(margin + 12, yPos + 14, 6, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.text("!", margin + 10.5, yPos + 17);
+    
+    // Warning title
+    doc.setTextColor(146, 64, 14); // Amber-800
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
+    doc.text("VALORES BASEADOS EM REGIME CLT", margin + 25, yPos + 12);
+    
+    // Warning description
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(180, 83, 9); // Amber-700
+    doc.text("Todas as fontes consultadas reportam valores para contratação CLT. Para PJ, considere acréscimo de 30-45%.", margin + 25, yPos + 22);
+    
+    return yPos + 35;
+  };
+  
   const drawFooter = (pageNum: number, totalPages: number) => {
     // Footer line
     doc.setDrawColor(...colors.primary);
@@ -390,7 +420,7 @@ export async function generateEstudoMercadoPdf(estudo: EstudoMercadoNovo): Promi
     doc.setTextColor(...colors.textSecondary);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8);
-    doc.text("rhello flow | Inteligência em Recrutamento", margin, pageHeight - 10);
+    doc.text("rhello flow | Valores em R$/mês (regime CLT)", margin, pageHeight - 10);
     doc.text("www.rhello.com.br", pageWidth / 2, pageHeight - 10, { align: "center" });
     doc.text(`${pageNum}/${totalPages}`, pageWidth - margin, pageHeight - 10, { align: "right" });
   };
@@ -510,6 +540,9 @@ export async function generateEstudoMercadoPdf(estudo: EstudoMercadoNovo): Promi
   if (hasHays || hasMichaelPage) {
     yPos = addNewPage();
     yPos = drawHeader("COMPARATIVO DE FONTES", "Análise detalhada por fonte");
+    
+    // Add CLT warning box
+    yPos = drawCltWarningBox(yPos);
     
     yPos = drawSectionTitle("Guias Salariais 2026", yPos);
     
