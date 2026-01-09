@@ -63,10 +63,22 @@ export const JOB_STAGES = [
     },
   },
   {
+    id: "entrevista-cliente",
+    slug: "entrevista_cliente",
+    name: "Entrevista cliente",
+    order: 6,
+    kind: "normal" as const,
+    color: {
+      bg: "#8B5CF6",
+      text: "#FFFFFF",
+      columnBg: "#F5F3FF",
+    },
+  },
+  {
     id: "concluida",
     slug: "concluida",
     name: "Concluída",
-    order: 6,
+    order: 7,
     kind: "final" as const,
     color: {
       bg: "#22C55E",
@@ -78,7 +90,7 @@ export const JOB_STAGES = [
     id: "congelada",
     slug: "congelada",
     name: "Congelada",
-    order: 7,
+    order: 8,
     kind: "frozen" as const,
     color: {
       bg: "#94A3B8",
@@ -90,7 +102,7 @@ export const JOB_STAGES = [
     id: "cancelada",
     slug: "cancelada",
     name: "Cancelada",
-    order: 8,
+    order: 9,
     kind: "canceled" as const,
     color: {
       bg: "#EF4444",
@@ -144,7 +156,7 @@ export const mapLegacyStatusToSlug = (oldStatus: string): string => {
     'Aguardando retorno do cliente': 'entrevistas',
     'entrevistas_solicitante': 'entrevistas',
     'Entrevistas solicitante': 'entrevistas',
-    'Entrevista cliente': 'entrevistas',
+    'Entrevista cliente': 'entrevista_cliente',
     'apresentacao_candidatos': 'shortlist_disponivel',
     'Apresentação de candidatos': 'shortlist_disponivel',
     'Apresentação de Candidatos': 'shortlist_disponivel',
