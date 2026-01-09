@@ -243,6 +243,81 @@ export const useNotifications = () => {
     }
   };
 
+  /**
+   * Notify external clients about job stage change
+   */
+  const notifyClientsAboutStageChange = async (
+    vagaId: string,
+    vagaTitulo: string,
+    novaEtapa: string,
+    empresaId: string
+  ): Promise<number> => {
+    try {
+      // Get external clients linked to this empresa
+      const { data: clients, error: clientsError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('empresa_id', empresaId)
+        .eq('user_type', 'external');
+
+      if (clientsError) throw clientsError;
+      if (!clients?.length) {
+        logger.info('No external clients found for empresa:', empresaId);
+        return 0;
+      }
+
+      const clientIds = clients.map(c => c.id);
+      return await createNotificationsForUsers({
+        userIds: clientIds,
+        kind: 'etapa_vaga',
+        title: 'Atualização no processo seletivo',
+        body: `A vaga ${vagaTitulo} avançou para: ${novaEtapa}`,
+        jobId: vagaId,
+      });
+    } catch (error) {
+      logger.error('Error notifying clients about stage change:', error);
+      return 0;
+    }
+  };
+
+  /**
+   * Notify external clients when job moves to "Shortlist disponível" stage
+   * with count of candidates ready for review
+   */
+  const notifyClientsShortlistAvailable = async (
+    vagaId: string,
+    vagaTitulo: string,
+    empresaId: string,
+    candidatosCount: number
+  ): Promise<number> => {
+    try {
+      const { data: clients, error: clientsError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('empresa_id', empresaId)
+        .eq('user_type', 'external');
+
+      if (clientsError) throw clientsError;
+      if (!clients?.length) return 0;
+
+      const clientIds = clients.map(c => c.id);
+      const bodyMessage = candidatosCount === 1
+        ? `Há 1 candidato disponível para análise na vaga ${vagaTitulo}`
+        : `Há ${candidatosCount} candidatos disponíveis para análise na vaga ${vagaTitulo}`;
+
+      return await createNotificationsForUsers({
+        userIds: clientIds,
+        kind: 'shortlist_disponivel',
+        title: 'Candidatos prontos para avaliação',
+        body: bodyMessage,
+        jobId: vagaId,
+      });
+    } catch (error) {
+      logger.error('Error notifying clients about shortlist available:', error);
+      return 0;
+    }
+  };
+
   return {
     createNotification,
     createNotificationsForUsers,
@@ -251,6 +326,8 @@ export const useNotifications = () => {
     notifyCandidateStatusChange,
     notifyNewFeedback,
     notifyClientsAboutShortlist,
+    notifyClientsAboutStageChange,
+    notifyClientsShortlistAvailable,
   };
 };
 
