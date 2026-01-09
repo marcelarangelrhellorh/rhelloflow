@@ -94,10 +94,22 @@ export function MentionEditor({
         }
       },
       renderItem: function (item: MentionUser, searchTerm: string) {
-        return `<div class="mention-item">
-          <span class="mention-name">${item.value}</span>
-          ${item.email ? `<span class="mention-email">${item.email}</span>` : ''}
-        </div>`;
+        const container = document.createElement('div');
+        container.className = 'mention-item';
+        
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'mention-name';
+        nameSpan.textContent = item.value;
+        container.appendChild(nameSpan);
+        
+        if (item.email) {
+          const emailSpan = document.createElement('span');
+          emailSpan.className = 'mention-email';
+          emailSpan.textContent = item.email;
+          container.appendChild(emailSpan);
+        }
+        
+        return container;
       },
     },
   }), []); // Array vazio - modules nunca recriam
