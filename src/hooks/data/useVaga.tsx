@@ -37,6 +37,10 @@ export type Vaga = {
   observacoes: string | null;
   source: string | null;
   data_abertura: string | null;
+  resumo_empresa: string | null;
+  endereco_empresa: string | null;
+  motivo_contratacao: string | null;
+  quantidade_vagas: number | null;
 };
 
 export function useVaga(id: string | undefined) {
