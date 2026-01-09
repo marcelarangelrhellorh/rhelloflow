@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
@@ -46,6 +46,7 @@ const BENEFICIOS_OPTIONS: MultiSelectOption[] = [
 export default function VagaForm() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const { users: recrutadores } = useUsers('recrutador');
   const { users: csUsers } = useUsers('cs');
@@ -65,6 +66,22 @@ export default function VagaForm() {
     };
     loadEmpresas();
   }, []);
+
+  // Ler parâmetros da URL para pré-preencher empresa
+  useEffect(() => {
+    if (!id) { // Apenas para nova vaga
+      const empresaIdParam = searchParams.get('empresa_id');
+      const empresaNomeParam = searchParams.get('empresa');
+      
+      if (empresaIdParam || empresaNomeParam) {
+        setFormData(prev => ({
+          ...prev,
+          empresa_id: empresaIdParam || prev.empresa_id,
+          empresa: empresaNomeParam ? decodeURIComponent(empresaNomeParam) : prev.empresa
+        }));
+      }
+    }
+  }, [id, searchParams]);
   
   const [formData, setFormData] = useState({
     titulo: "",

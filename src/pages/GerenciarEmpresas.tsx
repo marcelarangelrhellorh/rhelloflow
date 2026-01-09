@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Plus, Search, Eye, Pencil, LayoutGrid, List, FileSpreadsheet, Kanban } from "lucide-react";
+import { Building2, Plus, Search, Eye, Pencil, LayoutGrid, List, FileSpreadsheet, Kanban, ArrowUpDown, Clock } from "lucide-react";
 import { EmpresaFormModal } from "@/components/Empresas/EmpresaFormModal";
 import { ImportEmpresasModal } from "@/components/Empresas/ImportEmpresasModal";
 import { ClientPipelineBoard } from "@/components/Empresas/ClientPipelineBoard";
@@ -44,14 +44,23 @@ export default function GerenciarEmpresas() {
   const [filterStatus, setFilterStatus] = useState<string>("todos");
   const [viewMode, setViewMode] = useState<"cards" | "list" | "funnel">("cards");
   const [importModalOpen, setImportModalOpen] = useState(false);
+  const [sortOrder, setSortOrder] = useState<"nome" | "created_at">("nome");
   const {
     data: empresas,
     isLoading,
     refetch
   } = useQuery({
-    queryKey: ["empresas", searchTerm, filterStatus],
+    queryKey: ["empresas", searchTerm, filterStatus, sortOrder],
     queryFn: async () => {
-      let query = supabase.from("empresas").select("*").order("nome");
+      let query = supabase.from("empresas").select("*");
+      
+      // Aplicar ordenação
+      if (sortOrder === "created_at") {
+        query = query.order("created_at", { ascending: false }); // Mais recentes primeiro
+      } else {
+        query = query.order("nome");
+      }
+      
       if (searchTerm) {
         query = query.or(`nome.ilike.%${searchTerm}%,cnpj.ilike.%${searchTerm}%`);
       }
@@ -154,8 +163,8 @@ export default function GerenciarEmpresas() {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#36404A]" />
                 <Input placeholder="Buscar por nome ou CNPJ..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10" />
               </div>
-              <div className="flex gap-2 justify-between">
-                <div className="flex gap-2">
+            <div className="flex gap-2 justify-between flex-wrap">
+                <div className="flex gap-2 flex-wrap">
                   <Button variant={filterStatus === "todos" ? "default" : "outline"} onClick={() => setFilterStatus("todos")} className={filterStatus === "todos" ? "bg-[#00141D] text-white" : ""}>
                     Todos
                   </Button>
@@ -168,6 +177,30 @@ export default function GerenciarEmpresas() {
                   <Button variant={filterStatus === "inativo" ? "default" : "outline"} onClick={() => setFilterStatus("inativo")} className={filterStatus === "inativo" ? "bg-red-600 text-white" : ""}>
                     Inativos
                   </Button>
+                  
+                  {/* Ordenação */}
+                  <div className="flex gap-1 border rounded-md ml-2">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => setSortOrder("nome")} 
+                      className={sortOrder === "nome" ? "bg-muted" : ""}
+                      title="Ordenar por nome A-Z"
+                    >
+                      <ArrowUpDown className="h-4 w-4 mr-1" />
+                      A-Z
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => setSortOrder("created_at")} 
+                      className={sortOrder === "created_at" ? "bg-muted" : ""}
+                      title="Ordenar por mais recentes"
+                    >
+                      <Clock className="h-4 w-4 mr-1" />
+                      Recentes
+                    </Button>
+                  </div>
                 </div>
                 <div className="flex gap-1 border rounded-md">
                   <Button variant="ghost" size="sm" onClick={() => setViewMode("cards")} className={viewMode === "cards" ? "bg-muted" : ""}>
