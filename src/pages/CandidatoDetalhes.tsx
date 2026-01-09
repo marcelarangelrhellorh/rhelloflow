@@ -97,49 +97,75 @@ export default function CandidatoDetalhes() {
   const [solicitarFeedbackModalOpen, setSolicitarFeedbackModalOpen] = useState(false);
   const [whatsappModalOpen, setWhatsappModalOpen] = useState(false);
   useEffect(() => {
-    if (id) {
-      loadCandidato();
-      loadHistorico();
-      refreshStats();
+    if (!id) return;
+    
+    let isMounted = true;
+    const timestamp = Date.now();
+    
+    loadCandidato();
+    loadHistorico();
+    refreshStats();
 
-      // Subscribe to realtime updates
-      const candidatoChannel = supabase.channel('candidato-changes').on('postgres_changes', {
+    // Subscribe to realtime updates
+    const candidatoChannel = supabase
+      .channel(`candidato-changes-${id}-${timestamp}`)
+      .on('postgres_changes', {
         event: '*',
         schema: 'public',
         table: 'candidatos',
         filter: `id=eq.${id}`
       }, payload => {
-        logger.log('Candidato atualizado:', payload);
-        if (payload.eventType === 'UPDATE') {
+        if (isMounted && payload.eventType === 'UPDATE') {
+          logger.log('Candidato atualizado:', payload);
           loadCandidato();
         }
-      }).subscribe();
+      })
+      .subscribe();
 
-      // Subscribe to feedback updates
-      const feedbackChannel = supabase.channel('feedback-changes').on('postgres_changes', {
+    // Subscribe to feedback updates
+    const feedbackChannel = supabase
+      .channel(`feedback-changes-${id}-${timestamp}`)
+      .on('postgres_changes', {
         event: '*',
         schema: 'public',
         table: 'feedbacks',
         filter: `candidato_id=eq.${id}`
       }, () => {
-        refreshStats();
-      }).subscribe();
+        if (isMounted) {
+          refreshStats();
+        }
+      })
+      .subscribe();
 
-      // Subscribe to historico updates
-      const historicoChannel = supabase.channel('historico-changes').on('postgres_changes', {
+    // Subscribe to historico updates
+    const historicoChannel = supabase
+      .channel(`historico-changes-${id}-${timestamp}`)
+      .on('postgres_changes', {
         event: '*',
         schema: 'public',
         table: 'historico_candidatos',
         filter: `candidato_id=eq.${id}`
       }, () => {
-        loadHistorico();
-      }).subscribe();
-      return () => {
+        if (isMounted) {
+          loadHistorico();
+        }
+      })
+      .subscribe();
+
+    return () => {
+      isMounted = false;
+      
+      // Async cleanup for multiple channels
+      Promise.all([
+        candidatoChannel.unsubscribe(),
+        feedbackChannel.unsubscribe(),
+        historicoChannel.unsubscribe()
+      ]).then(() => {
         supabase.removeChannel(candidatoChannel);
         supabase.removeChannel(feedbackChannel);
         supabase.removeChannel(historicoChannel);
-      };
-    }
+      });
+    };
   }, [id]);
   const refreshStats = async () => {
     const newStats = await loadStats();

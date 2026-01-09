@@ -61,19 +61,27 @@ export function useCandidatosListQuery() {
 
   // Realtime subscription para atualizar lista
   useEffect(() => {
+    let isMounted = true;
+    const channelName = `candidatos-list-changes-${Date.now()}`;
+    
     const channel = supabase
-      .channel("candidatos-list-changes")
+      .channel(channelName)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "candidatos" },
         () => {
-          queryClient.invalidateQueries({ queryKey: queryKeys.candidatos.list() });
+          if (isMounted) {
+            queryClient.invalidateQueries({ queryKey: queryKeys.candidatos.list() });
+          }
         }
       )
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      isMounted = false;
+      channel.unsubscribe().then(() => {
+        supabase.removeChannel(channel);
+      });
     };
   }, [queryClient]);
 
