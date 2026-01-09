@@ -3,7 +3,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { EyeOff } from "lucide-react";
+import { EyeOff, Target } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Vaga {
@@ -53,6 +53,13 @@ const statusColors: Record<string, { bg: string; text: string }> = {
   "Congelada": { bg: "#455A64", text: "#FFFFFF" },
   "Pausada": { bg: "#757575", text: "#FFFFFF" },
   "Cancelada": { bg: "#D32F2F", text: "#FFFFFF" },
+};
+
+// Cores de prioridade
+const priorityColors: Record<string, string> = {
+  "Baixa": "bg-gray-100 text-gray-600 border-gray-200",
+  "Alta": "bg-yellow-100 text-yellow-700 border-yellow-200",
+  "Crítica": "bg-red-100 text-red-700 border-red-200",
 };
 
 // Função para obter iniciais do nome
@@ -145,7 +152,7 @@ export const JobCard = React.memo(function JobCard({
           </div>
 
           {/* Status Badge */}
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Badge 
               className="border font-semibold rounded-md px-2 py-0.5 text-xs"
               style={{
@@ -156,10 +163,21 @@ export const JobCard = React.memo(function JobCard({
             >
               {vaga.status}
             </Badge>
+            {vaga.prioridade && vaga.prioridade !== 'Normal' && (
+              <Badge className={cn(
+                "border font-semibold rounded-md px-2 py-0.5 text-xs flex items-center gap-1",
+                priorityColors[vaga.prioridade] || "bg-gray-100 text-gray-600 border-gray-200"
+              )}>
+                {(vaga.prioridade === 'Alta' || vaga.prioridade === 'Crítica') && (
+                  <Target className="h-3 w-3" />
+                )}
+                {vaga.prioridade}
+              </Badge>
+            )}
             {vaga.confidencial && (
               <Badge className="bg-orange-100 text-orange-700 border-orange-200 border font-semibold rounded-md px-2 py-0.5 text-xs flex items-center gap-1">
                 <EyeOff className="h-3 w-3" />
-                Entrevistas
+                Confidencial
               </Badge>
             )}
           </div>
