@@ -175,7 +175,7 @@ export default function Dashboard() {
         <div className="mb-4 sm:mb-6">
           <h2 className="text-sm sm:text-base font-semibold text-foreground mb-2 sm:mb-3">Ações rápidas</h2>
           <div className="flex flex-wrap gap-2 sm:gap-3">
-            <Button onClick={copyPublicFormLink} className="font-bold transition-all duration-150 rounded-xl h-11 px-4 sm:px-6 text-sm sm:text-base">
+            <Button onClick={copyPublicFormLink} className="font-bold transition-all duration-150 rounded-xl h-11 px-4 sm:px-6 text-sm sm:text-sm">
               <Share2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
               <span className="hidden sm:inline">Formulário de vaga</span>
               <span className="sm:hidden">Nova vaga</span>
