@@ -51,12 +51,10 @@ export function VagaDetailsDrawer({
                 <p className="text-lg font-semibold">{vaga.titulo}</p>
               </div>
 
-              {vaga.quantidade_vagas && vaga.quantidade_vagas > 1 && (
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground mb-1">Quantidade de Vagas</p>
-                  <p className="text-base">{vaga.quantidade_vagas} posições</p>
-                </div>
-              )}
+              <div>
+                <p className="text-sm font-medium text-muted-foreground mb-1">Quantidade de Vagas</p>
+                <p className="text-base">{vaga.quantidade_vagas || 1} {(vaga.quantidade_vagas || 1) === 1 ? 'posição' : 'posições'}</p>
+              </div>
 
               {vaga.motivo_contratacao && (
                 <div>

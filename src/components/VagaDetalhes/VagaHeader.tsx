@@ -48,6 +48,13 @@ export function VagaHeader({
           )}
           {" "}• Acompanhe o progresso do processo de contratação
         </p>
+        {vaga.resumo_empresa && (
+          <p className="text-muted-foreground text-sm mt-2 max-w-2xl leading-relaxed">
+            {vaga.resumo_empresa.length > 200 
+              ? `${vaga.resumo_empresa.substring(0, 200)}...` 
+              : vaga.resumo_empresa}
+          </p>
+        )}
         <div className="flex items-center gap-2 mt-3 flex-wrap">
           {(vaga.salario_min || vaga.salario_max || vaga.salario_modalidade) && (
             <Badge className="bg-[#ffcd00]/20 text-[#00141d] border-[#ffcd00]/30 font-bold text-sm px-3 py-1">

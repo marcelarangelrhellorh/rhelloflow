@@ -76,6 +76,34 @@ export function VagaKPICards({
         </p>
       </div>
 
+      <div className="flex flex-col gap-1 rounded-lg p-4 bg-white dark:bg-background-dark border border-gray-200 dark:border-secondary-text-light/20 shadow-lg">
+        <p className="text-secondary-text-light dark:text-secondary-text-dark text-base font-semibold">
+          Quantidade de Posições
+        </p>
+        <p className="text-primary-text-light dark:text-primary-text-dark font-bold text-base">
+          {vaga.quantidade_vagas || 1}
+        </p>
+      </div>
+
+      {vaga.motivo_contratacao && (
+        <div className="flex flex-col gap-1 rounded-lg p-4 bg-white dark:bg-background-dark border border-gray-200 dark:border-secondary-text-light/20 shadow-lg">
+          <p className="text-secondary-text-light dark:text-secondary-text-dark text-base font-semibold">
+            Trata-se de uma
+          </p>
+          <span className={`px-3 py-1 rounded-full text-sm font-medium w-fit ${
+            vaga.motivo_contratacao === 'aumento_quadro' 
+              ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' 
+              : vaga.motivo_contratacao === 'substituicao'
+              ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+              : 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
+          }`}>
+            {vaga.motivo_contratacao === 'aumento_quadro' && 'Aumento de Quadro'}
+            {vaga.motivo_contratacao === 'substituicao' && 'Substituição'}
+            {vaga.motivo_contratacao === 'reposicao' && 'Reposição'}
+          </span>
+        </div>
+      )}
+
       <div className="flex items-center justify-center rounded-lg p-4 bg-white dark:bg-background-dark border border-gray-200 dark:border-secondary-text-light/20 shadow-lg">
         <Button onClick={onViewDetails} variant="outline" className="rounded-full min-w-[140px] border-0 text-base font-semibold text-gray-700 text-center">
           <span className="material-symbols-outlined text-lg text-[#ffcc00]">visibility</span>
