@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import logoDark from "@/assets/logo-rhello-dark.png";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -199,7 +200,7 @@ export default function PublicVagaForm() {
           <CardContent className="pt-12 pb-12 text-center">
             <div className="flex justify-center mb-6">
               <img 
-                src="/src/assets/logo-rhello-dark.png" 
+                src={logoDark} 
                 alt="Rhello" 
                 className="h-20 object-contain mb-4"
               />
@@ -237,7 +238,7 @@ export default function PublicVagaForm() {
         <div className="text-center mb-8">
           <div className="flex justify-center mb-6">
             <img 
-              src="/src/assets/logo-rhello-dark.png" 
+              src={logoDark} 
               alt="Rhello" 
               className="h-16 object-contain"
             />
