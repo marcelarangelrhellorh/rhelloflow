@@ -3583,6 +3583,7 @@ export type Database = {
           dias_semana: string[] | null
           empresa: string
           empresa_id: string | null
+          endereco_empresa: string | null
           habilidades_comportamentais: string | null
           horario_fim: string | null
           horario_inicio: string | null
@@ -3639,6 +3640,7 @@ export type Database = {
           dias_semana?: string[] | null
           empresa: string
           empresa_id?: string | null
+          endereco_empresa?: string | null
           habilidades_comportamentais?: string | null
           horario_fim?: string | null
           horario_inicio?: string | null
@@ -3697,6 +3699,7 @@ export type Database = {
           dias_semana?: string[] | null
           empresa?: string
           empresa_id?: string | null
+          endereco_empresa?: string | null
           habilidades_comportamentais?: string | null
           horario_fim?: string | null
           horario_inicio?: string | null

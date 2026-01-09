@@ -46,6 +46,7 @@ export default function PublicVagaForm() {
     empresa: "",
     cnpj: "",
     resumo_empresa: "",
+    endereco_empresa: "",
     confidencial: false,
     motivo_confidencial: "",
     motivo_contratacao: "",
@@ -146,6 +147,7 @@ export default function PublicVagaForm() {
         empresa: formData.empresa,
         cnpj: cleanCNPJ(formData.cnpj),
         resumo_empresa: formData.resumo_empresa || null,
+        endereco_empresa: formData.endereco_empresa || null,
         contato_nome: formData.contato_nome,
         contato_email: formData.contato_email,
         contato_telefone: formData.contato_telefone || null,
@@ -372,6 +374,19 @@ export default function PublicVagaForm() {
                 />
                 <p className="text-xs text-muted-foreground mt-1">
                   Informações que ajudam os candidatos a conhecer melhor a empresa
+                </p>
+              </div>
+
+              <div>
+                <Label htmlFor="endereco_empresa">Endereço</Label>
+                <Input
+                  id="endereco_empresa"
+                  placeholder="Ex: Av. Paulista, 1000 - Bela Vista, São Paulo - SP"
+                  value={formData.endereco_empresa}
+                  onChange={(e) => setFormData({ ...formData, endereco_empresa: e.target.value })}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Endereço completo da empresa ou local de trabalho
                 </p>
               </div>
             </CardContent>
