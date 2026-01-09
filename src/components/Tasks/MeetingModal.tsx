@@ -169,7 +169,9 @@ export default function MeetingModal({ open, onClose, task, defaultVagaId, defau
     }
 
     // Combine date and time for due_date
-    const dueDateTime = new Date(`${data.due_date}T${data.start_time}:00`);
+    // Ensure start_time is only HH:MM (may come with seconds from DB)
+    const timeOnly = data.start_time.slice(0, 5);
+    const dueDateTime = new Date(`${data.due_date}T${timeOnly}:00`);
 
     // Validate that the date is valid before proceeding
     if (isNaN(dueDateTime.getTime())) {
