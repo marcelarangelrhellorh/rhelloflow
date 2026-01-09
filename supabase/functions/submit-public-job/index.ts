@@ -320,6 +320,41 @@ Deno.serve(async (req) => {
 
     console.log(`Job submission successful from IP ${clientIp}: ${data.id}, empresa_id: ${empresaId}`);
 
+    // Notify admins about new external job (non-blocking)
+    try {
+      const { data: admins } = await supabaseAdmin
+        .from('user_roles')
+        .select('user_id')
+        .eq('role', 'admin');
+
+      if (admins?.length) {
+        for (const admin of admins) {
+          // Create notification
+          await supabaseAdmin.rpc('create_notification', {
+            p_user_id: admin.user_id,
+            p_kind: 'vaga_externa',
+            p_title: 'Nova vaga recebida',
+            p_body: `${sanitizedData.empresa} enviou a vaga: ${sanitizedData.titulo}`,
+            p_job_id: data.id,
+          });
+          
+          // Send email
+          await supabaseAdmin.functions.invoke('send-notification-email', {
+            body: {
+              user_id: admin.user_id,
+              kind: 'vaga_externa',
+              title: 'Nova vaga recebida',
+              body: `${sanitizedData.empresa} enviou a vaga: ${sanitizedData.titulo}`,
+              job_id: data.id,
+            },
+          });
+        }
+        console.log(`Notifications sent to ${admins.length} admins`);
+      }
+    } catch (notifyErr) {
+      console.error('Error notifying admins:', notifyErr);
+    }
+
     return new Response(
       JSON.stringify({ 
         success: true, 

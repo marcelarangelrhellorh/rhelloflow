@@ -114,7 +114,14 @@ export function NotificationBell() {
       stage_age_threshold: "⚠️",
       no_activity: "📅",
       candidatura_externa: "📨",
-      etapa_vaga: "📋"
+      etapa_vaga: "📋",
+      vaga_parada: "⏰",
+      teste_tecnico: "📝",
+      banco_talentos: "👥",
+      vaga_externa: "🏢",
+      candidatura_formulario: "📋",
+      mention: "💬",
+      shortlist: "⭐",
     };
     return icons[kind as keyof typeof icons] || "🔔";
   };
