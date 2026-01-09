@@ -7,7 +7,7 @@ import { logVagaEvento } from "@/lib/vagaEventos";
 import { ExternalJobBanner } from "@/components/ExternalJobBanner";
 import { ShareJobModal } from "@/components/ShareJobModal";
 import { ClientViewLinkManager } from "@/components/ClientViewLinkManager";
-import { CandidateFormLinkManager } from "@/components/CandidateFormLinkManager";
+
 import { VagaHeader } from "@/components/VagaDetalhes/VagaHeader";
 import { VagaKPICards } from "@/components/VagaDetalhes/VagaKPICards";
 import { VagaTimeline } from "@/components/VagaDetalhes/VagaTimeline";
@@ -39,16 +39,13 @@ export default function VagaDetalhes() {
   // Local UI state
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [clientViewManagerOpen, setClientViewManagerOpen] = useState(false);
-  const [candidateFormManagerOpen, setCandidateFormManagerOpen] = useState(false);
+  
   const [detailsDrawerOpen, setDetailsDrawerOpen] = useState(false);
 
   const handleGenerateClientLink = () => {
     setClientViewManagerOpen(true);
   };
 
-  const handleCandidateForm = () => {
-    setCandidateFormManagerOpen(true);
-  };
 
   const handleStatusChange = async (newStatusSlug: string) => {
     if (!id || !vaga) return;
@@ -178,8 +175,7 @@ export default function VagaDetalhes() {
             vaga={vaga} 
             vagaTags={vagaTags} 
             onGenerateClientLink={handleGenerateClientLink} 
-            onShare={() => setShareModalOpen(true)} 
-            onCandidateForm={handleCandidateForm}
+            onShare={() => setShareModalOpen(true)}
           />
 
           <ShareJobModal 
@@ -195,12 +191,6 @@ export default function VagaDetalhes() {
             onOpenChange={setClientViewManagerOpen} 
           />
 
-          <CandidateFormLinkManager 
-            vagaId={vaga.id} 
-            vagaTitulo={vaga.titulo} 
-            open={candidateFormManagerOpen} 
-            onOpenChange={setCandidateFormManagerOpen} 
-          />
 
           <VagaDetailsDrawer 
             open={detailsDrawerOpen} 
