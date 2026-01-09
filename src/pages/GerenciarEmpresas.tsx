@@ -53,14 +53,15 @@ export default function GerenciarEmpresas() {
     queryKey: ["empresas", searchTerm, filterStatus, sortOrder],
     queryFn: async () => {
       let query = supabase.from("empresas").select("*");
-      
+
       // Aplicar ordenação
       if (sortOrder === "created_at") {
-        query = query.order("created_at", { ascending: false }); // Mais recentes primeiro
+        query = query.order("created_at", {
+          ascending: false
+        }); // Mais recentes primeiro
       } else {
         query = query.order("nome");
       }
-      
       if (searchTerm) {
         query = query.or(`nome.ilike.%${searchTerm}%,cnpj.ilike.%${searchTerm}%`);
       }
@@ -162,71 +163,34 @@ export default function GerenciarEmpresas() {
               {/* Linha 1: Campo de busca */}
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input 
-                  placeholder="Buscar por nome ou CNPJ..." 
-                  value={searchTerm} 
-                  onChange={e => setSearchTerm(e.target.value)} 
-                  className="pl-10 h-10 bg-background border-border" 
-                />
+                <Input placeholder="Buscar por nome ou CNPJ..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 h-10 bg-background border-border" />
               </div>
               
               {/* Linha 2: Filtros e controles */}
               <div className="flex items-center justify-between flex-wrap gap-3">
                 {/* Grupo: Filtros de Status */}
                 <div className="flex gap-1 border rounded-md p-1 bg-muted/50">
-                  <Button 
-                    variant={filterStatus === "todos" ? "default" : "ghost"} 
-                    size="sm"
-                    onClick={() => setFilterStatus("todos")} 
-                    className={filterStatus === "todos" ? "bg-[#00141D] text-white" : ""}
-                  >
+                  <Button variant={filterStatus === "todos" ? "default" : "ghost"} size="sm" onClick={() => setFilterStatus("todos")} className={filterStatus === "todos" ? "bg-[#00141D] text-white" : ""}>
                     Todos
                   </Button>
-                  <Button 
-                    variant={filterStatus === "ativo" ? "default" : "ghost"} 
-                    size="sm"
-                    onClick={() => setFilterStatus("ativo")} 
-                    className={filterStatus === "ativo" ? "bg-green-600 text-white" : ""}
-                  >
+                  <Button variant={filterStatus === "ativo" ? "default" : "ghost"} size="sm" onClick={() => setFilterStatus("ativo")} className={filterStatus === "ativo" ? "bg-green-600 text-white" : ""}>
                     Ativos
                   </Button>
-                  <Button 
-                    variant={filterStatus === "prospect" ? "default" : "ghost"} 
-                    size="sm"
-                    onClick={() => setFilterStatus("prospect")} 
-                    className={filterStatus === "prospect" ? "bg-blue-600 text-white" : ""}
-                  >
+                  <Button variant={filterStatus === "prospect" ? "default" : "ghost"} size="sm" onClick={() => setFilterStatus("prospect")} className={filterStatus === "prospect" ? "bg-blue-600 text-white" : ""}>
                     Prospects
                   </Button>
-                  <Button 
-                    variant={filterStatus === "inativo" ? "default" : "ghost"} 
-                    size="sm"
-                    onClick={() => setFilterStatus("inativo")} 
-                    className={filterStatus === "inativo" ? "bg-red-600 text-white" : ""}
-                  >
+                  <Button variant={filterStatus === "inativo" ? "default" : "ghost"} size="sm" onClick={() => setFilterStatus("inativo")} className={filterStatus === "inativo" ? "bg-red-600 text-white" : ""}>
                     Inativos
                   </Button>
                 </div>
                 
                 {/* Grupo: Ordenação */}
                 <div className="flex gap-1 border rounded-md p-1 bg-muted/50">
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => setSortOrder("nome")} 
-                    className={sortOrder === "nome" ? "bg-background shadow-sm" : ""}
-                    title="Ordenar por nome A-Z"
-                  >
+                  <Button variant="ghost" size="sm" onClick={() => setSortOrder("nome")} className={sortOrder === "nome" ? "bg-background shadow-sm" : ""} title="Ordenar por nome A-Z">
                     <ArrowUpDown className="h-4 w-4 mr-1" />
                     A-Z
                   </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => setSortOrder("created_at")} 
-                    className={sortOrder === "created_at" ? "bg-background shadow-sm" : ""}
-                    title="Ordenar por mais recentes"
-                  >
+                  <Button variant="ghost" size="sm" onClick={() => setSortOrder("created_at")} className={sortOrder === "created_at" ? "bg-background shadow-sm" : ""} title="Ordenar por mais recentes">
                     <Clock className="h-4 w-4 mr-1" />
                     Recentes
                   </Button>
@@ -234,31 +198,13 @@ export default function GerenciarEmpresas() {
                 
                 {/* Grupo: Modos de Visualização */}
                 <div className="flex gap-1 border rounded-md p-1 bg-muted/50">
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => setViewMode("cards")} 
-                    className={viewMode === "cards" ? "bg-background shadow-sm" : ""}
-                    title="Visualização em cards"
-                  >
+                  <Button variant="ghost" size="sm" onClick={() => setViewMode("cards")} className={viewMode === "cards" ? "bg-background shadow-sm" : ""} title="Visualização em cards">
                     <LayoutGrid className="h-4 w-4" />
                   </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => setViewMode("list")} 
-                    className={viewMode === "list" ? "bg-background shadow-sm" : ""}
-                    title="Visualização em lista"
-                  >
+                  <Button variant="ghost" size="sm" onClick={() => setViewMode("list")} className={viewMode === "list" ? "bg-background shadow-sm" : ""} title="Visualização em lista">
                     <List className="h-4 w-4" />
                   </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => setViewMode("funnel")} 
-                    className={viewMode === "funnel" ? "bg-background shadow-sm" : ""}
-                    title="Visualização em funil"
-                  >
+                  <Button variant="ghost" size="sm" onClick={() => setViewMode("funnel")} className={viewMode === "funnel" ? "bg-background shadow-sm" : ""} title="Visualização em funil">
                     <Kanban className="h-4 w-4" />
                   </Button>
                 </div>
@@ -300,7 +246,7 @@ export default function GerenciarEmpresas() {
                         </p>}
 
                         <div className="flex gap-1.5 pt-2 border-t border-gray-200">
-                          <Button size="sm" variant="outline" onClick={() => handleViewDetails(empresa)} className="px-1 py-0.5 h-6 text-xs bg-[#ffcd00] text-[#00141d] border-[#ffcd00] hover:bg-[#ffcd00]/90 hover:border-[#ffcd00]">
+                          <Button size="sm" variant="outline" onClick={() => handleViewDetails(empresa)} className="py-0.5 h-6 text-xs bg-[#ffcd00] text-[#00141d] border-[#ffcd00] hover:bg-[#ffcd00]/90 hover:border-[#ffcd00] mx-0 px-[6px] font-semibold">
                             <Eye className="h-2 w-2 mr-0.5" />
                             Detalhes
                           </Button>
