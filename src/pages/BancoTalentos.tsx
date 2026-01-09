@@ -201,7 +201,7 @@ export default function BancoTalentos() {
       </div>
 
       {/* Filtros e busca */}
-      <div className="sticky top-20 z-10 bg-background/95 backdrop-blur-sm pb-6 mb-6 border-b">
+      <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-sm pb-6 mb-6 border-b pt-4 -mt-4">
         <div className="flex flex-wrap gap-4 mb-4">
           <div className="relative flex-1 min-w-[250px]">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
