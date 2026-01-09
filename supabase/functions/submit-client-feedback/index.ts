@@ -152,6 +152,21 @@ Deno.serve(async (req) => {
       p_job_id: request.vaga_id,
     });
 
+    // Send email notification (non-blocking)
+    try {
+      await supabase.functions.invoke('send-notification-email', {
+        body: {
+          user_id: request.recrutador_id,
+          kind: 'feedback_cliente',
+          title: 'Novo feedback do cliente',
+          body: `Feedback recebido sobre ${candidato?.nome_completo || 'candidato'} - ⭐ ${rating}/5`,
+          job_id: request.vaga_id,
+        },
+      });
+    } catch (emailError) {
+      console.error('Error sending notification email:', emailError);
+    }
+
     return new Response(
       JSON.stringify({
         feedback_id: feedback.id,

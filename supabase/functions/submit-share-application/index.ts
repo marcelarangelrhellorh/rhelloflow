@@ -346,6 +346,38 @@ serve(async (req) => {
 
     const protocol = generateProtocol();
 
+    // Notify recruiter about new application (non-blocking)
+    if (shareLink.vagas?.recrutador_id) {
+      const vagaTitulo = shareLink.vagas?.titulo || 'Vaga';
+      const candidateFullName = sanitizeText(candidate.nome_completo);
+      
+      try {
+        // Create notification
+        await supabase.rpc('create_notification', {
+          p_user_id: shareLink.vagas.recrutador_id,
+          p_kind: 'candidatura_externa',
+          p_title: 'Nova candidatura via link',
+          p_body: `${candidateFullName} se candidatou à vaga ${vagaTitulo}`,
+          p_job_id: shareLink.vaga_id,
+        });
+        
+        // Send email
+        await supabase.functions.invoke('send-notification-email', {
+          body: {
+            user_id: shareLink.vagas.recrutador_id,
+            kind: 'candidatura_externa',
+            title: 'Nova candidatura via link',
+            body: `${candidateFullName} se candidatou à vaga ${vagaTitulo}`,
+            job_id: shareLink.vaga_id,
+          },
+        });
+        
+        console.log(`Notification and email sent for new application to job ${shareLink.vaga_id}`);
+      } catch (notifyErr) {
+        console.error('Error sending notification:', notifyErr);
+      }
+    }
+
     return new Response(
       JSON.stringify({ 
         success: true, 
