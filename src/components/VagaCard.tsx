@@ -85,7 +85,7 @@ const getStatusBadgeColor = (status: string): {
     text: "#00141D"
   };
   return {
-    bg: "#FAEC3E",
+    bg: "#ffcd00",
     text: "#00141D"
   };
 };
