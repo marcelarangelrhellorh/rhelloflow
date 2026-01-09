@@ -1,11 +1,10 @@
 import React, { useMemo, useEffect, useRef } from "react";
-import ReactQuill, { Quill } from "react-quill";
+import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import { Mention } from "quill-mention";
+import "quill-mention";
 import "quill-mention/dist/quill.mention.css";
 
-// Registrar módulo de menção com o Quill
-Quill.register("modules/mention", Mention, true);
+// O quill-mention v4 se auto-registra ao ser importado
 
 export interface MentionUser {
   id: string;
@@ -47,7 +46,8 @@ export function MentionEditor({
       defaultMenuOrientation: "bottom",
       source: function (
         searchTerm: string,
-        renderList: (matches: MentionUser[], searchTerm: string) => void
+        renderList: (matches: MentionUser[], searchTerm: string) => void,
+        mentionChar: string
       ) {
         if (searchTerm.length === 0) {
           renderList(users.slice(0, 10), searchTerm);
@@ -58,17 +58,11 @@ export function MentionEditor({
           renderList(matches.slice(0, 10), searchTerm);
         }
       },
-      renderItem: function (item: MentionUser) {
+      renderItem: function (item: MentionUser, searchTerm: string) {
         return `<div class="mention-item">
           <span class="mention-name">${item.value}</span>
           ${item.email ? `<span class="mention-email">${item.email}</span>` : ''}
         </div>`;
-      },
-      onSelect: function (
-        item: MentionUser,
-        insertItem: (item: MentionUser) => void
-      ) {
-        insertItem(item);
       },
     },
   }), [users]);
