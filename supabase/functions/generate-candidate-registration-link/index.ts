@@ -1,0 +1,137 @@
+import { createClient } from "npm:@supabase/supabase-js@2";
+import { getRestrictedCorsHeaders } from '../_shared/cors.ts';
+
+const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+
+function generateToken(length = 12): string {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+  let result = '';
+  const randomValues = new Uint8Array(length);
+  crypto.getRandomValues(randomValues);
+  for (let i = 0; i < length; i++) {
+    result += chars[randomValues[i] % chars.length];
+  }
+  return result;
+}
+
+async function hashPassword(password: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+Deno.serve(async (req) => {
+  const origin = req.headers.get('origin');
+  const corsHeaders = getRestrictedCorsHeaders(origin);
+
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'Não autorizado' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Verify user is authenticated
+    const supabaseAuth = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY')!, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const { data: { user }, error: authError } = await supabaseAuth.auth.getUser();
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: 'Não autorizado' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const body = await req.json();
+    const { password, expires_days, max_submissions, note } = body;
+
+    // Use service role for database operations
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Generate unique token
+    let token = generateToken(12);
+    let attempts = 0;
+    while (attempts < 5) {
+      const { data: existing } = await supabase
+        .from('candidate_registration_links')
+        .select('id')
+        .eq('token', token)
+        .single();
+      
+      if (!existing) break;
+      token = generateToken(12);
+      attempts++;
+    }
+
+    // Hash password if provided
+    const passwordHash = password ? await hashPassword(password) : null;
+
+    // Calculate expiration date if expires_days is provided
+    let expiresAt = null;
+    if (expires_days && expires_days > 0) {
+      const expDate = new Date();
+      expDate.setDate(expDate.getDate() + expires_days);
+      expiresAt = expDate.toISOString();
+    }
+
+    // Create the link
+    const { data: link, error } = await supabase
+      .from('candidate_registration_links')
+      .insert({
+        token,
+        password_hash: passwordHash,
+        expires_at: expiresAt,
+        max_submissions: max_submissions || null,
+        note: note || null,
+        created_by: user.id,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating candidate registration link:', error);
+      return new Response(JSON.stringify({ error: 'Erro ao criar link' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Log event
+    await supabase.from('candidate_registration_link_events').insert({
+      link_id: link.id,
+      event_type: 'created',
+      metadata: { created_by: user.id },
+    });
+
+    console.log(`Candidate registration link created: ${link.id}`);
+
+    return new Response(JSON.stringify({
+      id: link.id,
+      token: link.token,
+      url: `${req.headers.get('origin')}/cadastro-candidato/${link.token}`,
+      expires_at: link.expires_at,
+      max_submissions: link.max_submissions,
+      requires_password: !!passwordHash,
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+
+  } catch (error) {
+    console.error('Error in generate-candidate-registration-link:', error);
+    return new Response(JSON.stringify({ error: 'Erro interno' }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+});
