@@ -10,12 +10,12 @@ interface CandidateCardProps {
     nivel: string | null;
     cidade: string | null;
     estado: string | null;
-    recruiter_name: string;
     days_in_bank: number;
     status: string;
     curriculo_link: string | null;
     mediaRating?: number | null;
     qtdAvaliacoes?: number;
+    tags?: Array<{ id: string; label: string; category: string }>;
   };
   onViewProfile: () => void;
   onLinkToJob: () => void;
@@ -71,7 +71,7 @@ export function CandidateCard({
                   </Badge>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-[#36404A]">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm text-[#36404A]">
                   <div className="flex items-center gap-2">
                     <Briefcase className="h-4 w-4" />
                     <span className="truncate">{candidate.nivel} - {candidate.area}</span>
@@ -81,14 +81,29 @@ export function CandidateCard({
                     <span className="truncate">{candidate.cidade}, {candidate.estado}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <User className="h-4 w-4" />
-                    <span className="truncate">{candidate.recruiter_name}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
                     <span>Disponível há {candidate.days_in_bank} dias</span>
                   </div>
                 </div>
+                {/* Tags no modo lista */}
+                {candidate.tags && candidate.tags.length > 0 && (
+                  <div className="flex items-center gap-2 flex-wrap mt-2">
+                    {candidate.tags.slice(0, 3).map((tag) => (
+                      <Badge 
+                        key={tag.id} 
+                        variant="secondary" 
+                        className="text-xs bg-[#F9EC3F]/20 text-[#00141D]"
+                      >
+                        {tag.label}
+                      </Badge>
+                    ))}
+                    {candidate.tags.length > 3 && (
+                      <Badge variant="outline" className="text-xs">
+                        +{candidate.tags.length - 3}
+                      </Badge>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -143,11 +158,6 @@ export function CandidateCard({
           </div>
 
           <div className="flex items-center gap-2 text-sm text-[#36404A]">
-            <User className="h-4 w-4 flex-shrink-0" />
-            <span className="font-semibold">{candidate.recruiter_name}</span>
-          </div>
-
-          <div className="flex items-center gap-2 text-sm text-[#36404A]">
             <Calendar className="h-4 w-4 flex-shrink-0" />
             <span className="font-semibold">Disponível há {candidate.days_in_bank} dias</span>
           </div>
@@ -168,8 +178,25 @@ export function CandidateCard({
           </Badge>
         </div>
 
-        {/* Tags (exemplo - pode ser dinâmico) */}
-        
+        {/* Tags */}
+        {candidate.tags && candidate.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1 mb-4">
+            {candidate.tags.slice(0, 5).map((tag) => (
+              <Badge 
+                key={tag.id} 
+                variant="secondary" 
+                className="text-xs bg-[#F9EC3F]/20 text-[#00141D] hover:bg-[#F9EC3F]/30"
+              >
+                {tag.label}
+              </Badge>
+            ))}
+            {candidate.tags.length > 5 && (
+              <Badge variant="outline" className="text-xs">
+                +{candidate.tags.length - 5}
+              </Badge>
+            )}
+          </div>
+        )}
 
         {/* Ações */}
         <div className="flex gap-2" role="group" aria-label="Ações do candidato">
