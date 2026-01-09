@@ -8,10 +8,15 @@ const pageChunks: Record<string, () => Promise<unknown>> = {
   "/": () => import("@/pages/Dashboard"),
   "/vagas": () => import("@/pages/Vagas"),
   "/candidatos": () => import("@/pages/Candidatos"),
+  "/banco-talentos": () => import("@/pages/BancoTalentos"),
   "/gerenciar-empresas": () => import("@/pages/GerenciarEmpresas"),
   "/tarefas": () => import("@/pages/Tarefas"),
   "/relatorios": () => import("@/pages/Relatorios"),
   "/acompanhamento": () => import("@/pages/Acompanhamento"),
+  "/avaliacoes": () => import("@/pages/Scorecards"),
+  "/estudo-mercado": () => import("@/pages/EstudoMercado"),
+  "/comparador-cargos": () => import("@/pages/ComparadorCargos"),
+  "/whatsapp-templates": () => import("@/pages/WhatsAppTemplates"),
 };
 
 // Track which routes have been prefetched to avoid duplicate work
@@ -22,7 +27,6 @@ export function useSidebarPrefetch() {
   const debounceRef = useRef<Record<string, NodeJS.Timeout>>({});
 
   const prefetchDashboard = useCallback(async () => {
-    // Prefetch dashboard overview
     queryClient.prefetchQuery({
       queryKey: ["dashboard-overview"],
       queryFn: async () => {
@@ -67,6 +71,22 @@ export function useSidebarPrefetch() {
     });
   }, [queryClient]);
 
+  const prefetchBancoTalentos = useCallback(async () => {
+    queryClient.prefetchQuery({
+      queryKey: ["banco-talentos"],
+      queryFn: async () => {
+        const { data } = await supabase
+          .from("candidatos_active")
+          .select("*")
+          .is("vaga_relacionada_id", null)
+          .order("criado_em", { ascending: false })
+          .limit(50);
+        return data;
+      },
+      staleTime: CACHE_TIMES.DEFAULT.staleTime,
+    });
+  }, [queryClient]);
+
   const prefetchEmpresas = useCallback(async () => {
     queryClient.prefetchQuery({
       queryKey: ["empresas"],
@@ -94,6 +114,48 @@ export function useSidebarPrefetch() {
         return data;
       },
       staleTime: CACHE_TIMES.DEFAULT.staleTime,
+    });
+  }, [queryClient]);
+
+  const prefetchRelatorios = useCallback(async () => {
+    queryClient.prefetchQuery({
+      queryKey: ["kpis"],
+      queryFn: async () => {
+        const { data } = await supabase
+          .from("vw_vagas_com_stats")
+          .select("*")
+          .is("deleted_at", null);
+        return data;
+      },
+      staleTime: CACHE_TIMES.DEFAULT.staleTime,
+    });
+  }, [queryClient]);
+
+  const prefetchAcompanhamento = useCallback(async () => {
+    queryClient.prefetchQuery({
+      queryKey: ["client-jobs"],
+      queryFn: async () => {
+        const { data } = await supabase
+          .from("vw_vagas_com_stats")
+          .select("*")
+          .is("deleted_at", null);
+        return data;
+      },
+      staleTime: CACHE_TIMES.DEFAULT.staleTime,
+    });
+  }, [queryClient]);
+
+  const prefetchWhatsAppTemplates = useCallback(async () => {
+    queryClient.prefetchQuery({
+      queryKey: ["whatsapp-templates"],
+      queryFn: async () => {
+        const { data } = await supabase
+          .from("whatsapp_templates")
+          .select("*")
+          .order("created_at", { ascending: false });
+        return data;
+      },
+      staleTime: CACHE_TIMES.STATIC_DATA.staleTime,
     });
   }, [queryClient]);
 
@@ -130,16 +192,42 @@ export function useSidebarPrefetch() {
         case "/candidatos":
           prefetchCandidatos();
           break;
+        case "/banco-talentos":
+          prefetchBancoTalentos();
+          break;
         case "/gerenciar-empresas":
           prefetchEmpresas();
           break;
         case "/tarefas":
           prefetchTarefas();
           break;
-        // Add more routes as needed
+        case "/relatorios":
+          prefetchRelatorios();
+          break;
+        case "/acompanhamento":
+          prefetchAcompanhamento();
+          break;
+        case "/whatsapp-templates":
+          prefetchWhatsAppTemplates();
+          break;
+        // Routes without data prefetch (chunk only)
+        case "/avaliacoes":
+        case "/estudo-mercado":
+        case "/comparador-cargos":
+          break;
       }
     }, 100); // 100ms debounce
-  }, [prefetchDashboard, prefetchVagas, prefetchCandidatos, prefetchEmpresas, prefetchTarefas]);
+  }, [
+    prefetchDashboard,
+    prefetchVagas,
+    prefetchCandidatos,
+    prefetchBancoTalentos,
+    prefetchEmpresas,
+    prefetchTarefas,
+    prefetchRelatorios,
+    prefetchAcompanhamento,
+    prefetchWhatsAppTemplates,
+  ]);
 
   return { prefetchRoute };
 }
