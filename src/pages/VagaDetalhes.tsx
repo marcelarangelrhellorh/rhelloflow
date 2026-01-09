@@ -7,6 +7,7 @@ import { logVagaEvento } from "@/lib/vagaEventos";
 import { ExternalJobBanner } from "@/components/ExternalJobBanner";
 import { ShareJobModal } from "@/components/ShareJobModal";
 import { ClientViewLinkManager } from "@/components/ClientViewLinkManager";
+import type { VagaUpdate } from "@/types/database";
 
 import { VagaHeader } from "@/components/VagaDetalhes/VagaHeader";
 import { VagaKPICards } from "@/components/VagaDetalhes/VagaKPICards";
@@ -102,7 +103,7 @@ export default function VagaDetalhes() {
       }
 
       updateVaga({
-        status: newStage.name,
+        status: newStage.name as VagaUpdate['status'],
         status_slug: newStage.slug,
         status_order: newStage.order
       });

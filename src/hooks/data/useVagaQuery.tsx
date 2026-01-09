@@ -2,6 +2,7 @@ import React from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Vaga } from "./useVaga";
+import type { VagaUpdate } from "@/types/database";
 
 export const vagaKeys = {
   all: ["vagas"] as const,
@@ -78,12 +79,12 @@ export function useVagaQuery(id: string | undefined) {
   }, [id, queryClient]);
 
   const updateMutation = useMutation({
-    mutationFn: async (updates: Partial<Vaga>) => {
+    mutationFn: async (updates: VagaUpdate) => {
       if (!id) throw new Error("No vaga ID");
       
       const { error } = await supabase
         .from("vagas")
-        .update(updates as any) // Type assertion needed for partial updates
+        .update(updates)
         .eq("id", id);
 
       if (error) throw error;
@@ -122,7 +123,7 @@ export function useVagaQuery(id: string | undefined) {
     loading: query.isLoading,
     error: query.error as Error | null,
     reload: query.refetch,
-    updateVaga: (updates: Partial<Vaga>) => updateMutation.mutate(updates),
+    updateVaga: (updates: VagaUpdate) => updateMutation.mutate(updates),
   };
 }
 
