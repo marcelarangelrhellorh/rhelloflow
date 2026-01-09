@@ -61,6 +61,10 @@ export function MentionEditor({
     };
   }, []);
 
+  // Usar ref para sempre ter acesso à versão mais atual sem causar re-render
+  const usersRef = useRef(users);
+  usersRef.current = users;
+
   const modules = useMemo(() => ({
     toolbar: [
       ["bold", "italic", "underline"],
@@ -79,10 +83,11 @@ export function MentionEditor({
         renderList: (matches: MentionUser[], searchTerm: string) => void,
         mentionChar: string
       ) {
+        const currentUsers = usersRef.current;
         if (searchTerm.length === 0) {
-          renderList(users.slice(0, 10), searchTerm);
+          renderList(currentUsers.slice(0, 10), searchTerm);
         } else {
-          const matches = users.filter((user) =>
+          const matches = currentUsers.filter((user) =>
             user.value.toLowerCase().includes(searchTerm.toLowerCase())
           );
           renderList(matches.slice(0, 10), searchTerm);
@@ -95,7 +100,7 @@ export function MentionEditor({
         </div>`;
       },
     },
-  }), [users]);
+  }), []); // Array vazio - modules nunca recriam
 
   const formats = useMemo(() => [
     "bold",
