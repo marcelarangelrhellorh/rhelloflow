@@ -44,19 +44,30 @@ export function FeedbackList({
   const [isLoading, setIsLoading] = useState(true);
   const [profiles, setProfiles] = useState<Record<string, string>>({});
   useEffect(() => {
+    let isMounted = true;
+    
     loadFeedbacks();
 
     // Subscribe to realtime changes
-    const channel = supabase.channel(`feedbacks-${candidatoId}`).on('postgres_changes', {
-      event: '*',
-      schema: 'public',
-      table: 'feedbacks',
-      filter: `candidato_id=eq.${candidatoId}`
-    }, () => {
-      loadFeedbacks();
-    }).subscribe();
+    const channel = supabase
+      .channel(`feedbacks-${candidatoId}-${Date.now()}`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'feedbacks',
+        filter: `candidato_id=eq.${candidatoId}`
+      }, () => {
+        if (isMounted) {
+          loadFeedbacks();
+        }
+      })
+      .subscribe();
+
     return () => {
-      supabase.removeChannel(channel);
+      isMounted = false;
+      channel.unsubscribe().then(() => {
+        supabase.removeChannel(channel);
+      });
     };
   }, [candidatoId]);
   const loadFeedbacks = async () => {

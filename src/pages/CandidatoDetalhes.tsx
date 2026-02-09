@@ -21,6 +21,7 @@ import { WhatsAppHistory } from "@/components/CandidatoDetalhes/WhatsAppHistory"
 import { CandidateNotesSection } from "@/components/CandidatoDetalhes/CandidateNotesSection";
 import { CandidateMeetingsCard } from "@/components/CandidatoDetalhes/CandidateMeetingsCard";
 import { FitCulturalCard } from "@/components/CandidatoDetalhes/FitCulturalCard";
+import { CandidatoDetalhesSkeleton } from "@/components/skeletons";
 import type { FitCulturalData } from "@/constants/fitCultural";
 type Candidato = {
   id: string;
@@ -55,6 +56,8 @@ type Candidato = {
   fit_cultural: FitCulturalData | null;
   experiencia_profissional: string | null;
   idiomas: string | null;
+  disc_url: string | null;
+  gravacao_entrevista_url: string | null;
 };
 type Vaga = {
   id: string;
@@ -95,49 +98,75 @@ export default function CandidatoDetalhes() {
   const [solicitarFeedbackModalOpen, setSolicitarFeedbackModalOpen] = useState(false);
   const [whatsappModalOpen, setWhatsappModalOpen] = useState(false);
   useEffect(() => {
-    if (id) {
-      loadCandidato();
-      loadHistorico();
-      refreshStats();
+    if (!id) return;
+    
+    let isMounted = true;
+    const timestamp = Date.now();
+    
+    loadCandidato();
+    loadHistorico();
+    refreshStats();
 
-      // Subscribe to realtime updates
-      const candidatoChannel = supabase.channel('candidato-changes').on('postgres_changes', {
+    // Subscribe to realtime updates
+    const candidatoChannel = supabase
+      .channel(`candidato-changes-${id}-${timestamp}`)
+      .on('postgres_changes', {
         event: '*',
         schema: 'public',
         table: 'candidatos',
         filter: `id=eq.${id}`
       }, payload => {
-        logger.log('Candidato atualizado:', payload);
-        if (payload.eventType === 'UPDATE') {
+        if (isMounted && payload.eventType === 'UPDATE') {
+          logger.log('Candidato atualizado:', payload);
           loadCandidato();
         }
-      }).subscribe();
+      })
+      .subscribe();
 
-      // Subscribe to feedback updates
-      const feedbackChannel = supabase.channel('feedback-changes').on('postgres_changes', {
+    // Subscribe to feedback updates
+    const feedbackChannel = supabase
+      .channel(`feedback-changes-${id}-${timestamp}`)
+      .on('postgres_changes', {
         event: '*',
         schema: 'public',
         table: 'feedbacks',
         filter: `candidato_id=eq.${id}`
       }, () => {
-        refreshStats();
-      }).subscribe();
+        if (isMounted) {
+          refreshStats();
+        }
+      })
+      .subscribe();
 
-      // Subscribe to historico updates
-      const historicoChannel = supabase.channel('historico-changes').on('postgres_changes', {
+    // Subscribe to historico updates
+    const historicoChannel = supabase
+      .channel(`historico-changes-${id}-${timestamp}`)
+      .on('postgres_changes', {
         event: '*',
         schema: 'public',
         table: 'historico_candidatos',
         filter: `candidato_id=eq.${id}`
       }, () => {
-        loadHistorico();
-      }).subscribe();
-      return () => {
+        if (isMounted) {
+          loadHistorico();
+        }
+      })
+      .subscribe();
+
+    return () => {
+      isMounted = false;
+      
+      // Async cleanup for multiple channels
+      Promise.all([
+        candidatoChannel.unsubscribe(),
+        feedbackChannel.unsubscribe(),
+        historicoChannel.unsubscribe()
+      ]).then(() => {
         supabase.removeChannel(candidatoChannel);
         supabase.removeChannel(feedbackChannel);
         supabase.removeChannel(historicoChannel);
-      };
-    }
+      });
+    };
   }, [id]);
   const refreshStats = async () => {
     const newStats = await loadStats();
@@ -295,11 +324,7 @@ export default function CandidatoDetalhes() {
     }
   };
   if (loading) {
-    return <div className="flex min-h-screen items-center justify-center" style={{
-      backgroundColor: '#FFFBF0'
-    }}>
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-      </div>;
+    return <CandidatoDetalhesSkeleton />;
   }
   if (!candidato) {
     return <div className="min-h-screen p-8" style={{
@@ -346,7 +371,7 @@ export default function CandidatoDetalhes() {
           <CandidateTagsCard candidateId={id!} />
 
           {/* Main Info Card - Full Width */}
-          <ProfessionalInfoCard email={candidato.email} telefone={candidato.telefone} cidade={candidato.cidade} estado={candidato.estado} linkedin={candidato.linkedin} curriculoLink={candidato.curriculo_link} isFromPublicLink={!!candidato.source_link_id} pretensaoSalarial={candidato.pretensao_salarial} vagaTitulo={vaga?.titulo || null} vagaId={candidato.vaga_relacionada_id} dataCadastro={candidato.criado_em} nivel={candidato.nivel} area={candidato.area} curriculoUrl={candidato.curriculo_url} portfolioUrl={candidato.portfolio_url} disponibilidadeMudanca={candidato.disponibilidade_mudanca} disponibilidadeStatus={candidato.disponibilidade_status} pontosFortes={candidato.pontos_fortes} pontosDesenvolver={candidato.pontos_desenvolver} parecerFinal={candidato.parecer_final} origem={candidato.origem} candidatoId={id!} experienciaProfissional={candidato.experiencia_profissional} idiomas={candidato.idiomas} modeloContratacao={candidato.modelo_contratacao} formatoTrabalho={candidato.formato_trabalho} cpf={candidato.cpf} cargo={candidato.cargo} idade={candidato.idade} onUpdate={loadCandidato} onVagaClick={() => vaga && navigate(`/vagas/${vaga.id}`)} />
+          <ProfessionalInfoCard email={candidato.email} telefone={candidato.telefone} cidade={candidato.cidade} estado={candidato.estado} linkedin={candidato.linkedin} curriculoLink={candidato.curriculo_link} isFromPublicLink={!!candidato.source_link_id} pretensaoSalarial={candidato.pretensao_salarial} vagaTitulo={vaga?.titulo || null} vagaId={candidato.vaga_relacionada_id} dataCadastro={candidato.criado_em} nivel={candidato.nivel} area={candidato.area} curriculoUrl={candidato.curriculo_url} portfolioUrl={candidato.portfolio_url} disponibilidadeMudanca={candidato.disponibilidade_mudanca} disponibilidadeStatus={candidato.disponibilidade_status} pontosFortes={candidato.pontos_fortes} pontosDesenvolver={candidato.pontos_desenvolver} parecerFinal={candidato.parecer_final} origem={candidato.origem} candidatoId={id!} experienciaProfissional={candidato.experiencia_profissional} idiomas={candidato.idiomas} modeloContratacao={candidato.modelo_contratacao} formatoTrabalho={candidato.formato_trabalho} cpf={candidato.cpf} cargo={candidato.cargo} idade={candidato.idade} discUrl={candidato.disc_url} gravacaoEntrevistaUrl={candidato.gravacao_entrevista_url} onUpdate={loadCandidato} onVagaClick={() => vaga && navigate(`/vagas/${vaga.id}`)} />
 
           {/* Fit Cultural Card - only show if data exists */}
           {candidato.fit_cultural && <FitCulturalCard fitCultural={candidato.fit_cultural} />}

@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { useDebounce } from "@/hooks/useDebounce";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -39,6 +40,7 @@ export default function GerenciarEmpresas() {
     prefetchEmpresa
   } = useEmpresaPrefetch();
   const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearch = useDebounce(searchTerm, 300);
   const [formModalOpen, setFormModalOpen] = useState(false);
   const [selectedEmpresa, setSelectedEmpresa] = useState<Empresa | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>("todos");
@@ -50,7 +52,7 @@ export default function GerenciarEmpresas() {
     isLoading,
     refetch
   } = useQuery({
-    queryKey: ["empresas", searchTerm, filterStatus, sortOrder],
+    queryKey: ["empresas", debouncedSearch, filterStatus, sortOrder],
     queryFn: async () => {
       let query = supabase.from("empresas").select("*");
 
@@ -62,8 +64,8 @@ export default function GerenciarEmpresas() {
       } else {
         query = query.order("nome");
       }
-      if (searchTerm) {
-        query = query.or(`nome.ilike.%${searchTerm}%,cnpj.ilike.%${searchTerm}%`);
+      if (debouncedSearch) {
+        query = query.or(`nome.ilike.%${debouncedSearch}%,cnpj.ilike.%${debouncedSearch}%`);
       }
       if (filterStatus !== "todos") {
         query = query.eq("status", filterStatus);

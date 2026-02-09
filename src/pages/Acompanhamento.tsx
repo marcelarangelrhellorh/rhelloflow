@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
+import { useDebounce } from "@/hooks/useDebounce";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -74,6 +75,7 @@ export default function Acompanhamento() {
   const [candidatesWithoutFeedback, setCandidatesWithoutFeedback] = useState<CandidateWithoutFeedback[]>([]);
   const [noFeedbackDrawerOpen, setNoFeedbackDrawerOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearch = useDebounce(searchTerm, 300);
   const [dateFilter, setDateFilter] = useState<Date | undefined>(undefined);
 
   // FASE 3: Usar hooks otimizados com views materializadas
@@ -218,13 +220,13 @@ export default function Acompanhamento() {
   const filteredVagas = useMemo(() => {
     return vagas.filter(vaga => {
       // Text search filter
-      const matchesSearch = searchTerm === "" || vaga.titulo.toLowerCase().includes(searchTerm.toLowerCase()) || vaga.empresa.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch = debouncedSearch === "" || vaga.titulo.toLowerCase().includes(debouncedSearch.toLowerCase()) || vaga.empresa.toLowerCase().includes(debouncedSearch.toLowerCase());
 
       // Date filter - show vagas created on or after selected date
       const matchesDate = !dateFilter || !isBefore(startOfDay(new Date(vaga.criado_em)), startOfDay(dateFilter));
       return matchesSearch && matchesDate;
     });
-  }, [vagas, searchTerm, dateFilter]);
+  }, [vagas, debouncedSearch, dateFilter]);
 
   // Calculate metrics
   const totalVagasAbertas = vagas.length;

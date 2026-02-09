@@ -13,6 +13,16 @@ interface InfoJobsSalaryData {
   fonte: string;
   url: string;
   erro?: string;
+  via_google?: boolean;
+}
+
+interface AIExtractedSalary {
+  encontrado: boolean;
+  salario_medio?: number;
+  salario_min?: number;
+  salario_max?: number;
+  registros_base?: number;
+  confianca?: 'alta' | 'media' | 'baixa';
 }
 
 function cargoToSlug(cargo: string): string {
@@ -95,7 +105,7 @@ function extractSalaryFromMarkdown(markdown: string): {
 }
 
 async function scrapeWithFirecrawl(url: string): Promise<{ success: boolean; content: string; error?: string }> {
-  const apiKey = Deno.env.get('FIRECRAWL_API_KEY_1') || Deno.env.get('FIRECRAWL_API_KEY');
+  const apiKey = Deno.env.get('FIRECRAWL_API_KEY') || Deno.env.get('FIRECRAWL_API_KEY_1');
   if (!apiKey) {
     return { success: false, content: '', error: 'FIRECRAWL_API_KEY não configurada' };
   }
@@ -129,6 +139,201 @@ async function scrapeWithFirecrawl(url: string): Promise<{ success: boolean; con
   }
 }
 
+async function searchGoogleWithFirecrawl(query: string): Promise<{ success: boolean; data: any[]; error?: string }> {
+  const apiKey = Deno.env.get('FIRECRAWL_API_KEY') || Deno.env.get('FIRECRAWL_API_KEY_1');
+  if (!apiKey) {
+    return { success: false, data: [], error: 'FIRECRAWL_API_KEY não configurada' };
+  }
+
+  try {
+    console.log(`Buscando Google via Firecrawl: ${query}`);
+    
+    const response = await fetch('https://api.firecrawl.dev/v1/search', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query,
+        limit: 5,
+        lang: 'pt',
+        country: 'BR',
+      }),
+      signal: AbortSignal.timeout(15000),
+    });
+
+    const data = await response.json();
+    console.log(`Resultado busca Google:`, JSON.stringify(data).substring(0, 500));
+
+    if (!response.ok || !data.success) {
+      return { success: false, data: [], error: data.error || `Status ${response.status}` };
+    }
+
+    return { success: true, data: data.data || [] };
+  } catch (error) {
+    console.error('Erro na busca Google:', error);
+    return { success: false, data: [], error: error instanceof Error ? error.message : 'Erro desconhecido' };
+  }
+}
+
+async function extractSalaryWithAI(snippets: string, cargo: string): Promise<AIExtractedSalary> {
+  const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
+  if (!lovableApiKey) {
+    console.error('LOVABLE_API_KEY não configurada');
+    return { encontrado: false };
+  }
+
+  try {
+    console.log('Extraindo dados salariais com Lovable AI...');
+    
+    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${lovableApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'google/gemini-2.5-flash',
+        messages: [
+          {
+            role: 'system',
+            content: `Você é um assistente especializado em extrair dados salariais de textos. 
+Analise os resultados de busca e extraia informações sobre salários para o cargo especificado.
+Retorne APENAS dados que você encontrar explicitamente no texto. NÃO invente valores.
+Se não encontrar dados salariais claros, retorne encontrado=false.`
+          },
+          {
+            role: 'user',
+            content: `Extraia dados salariais para o cargo "${cargo}" dos seguintes resultados de busca do InfoJobs:
+
+${snippets}
+
+Se encontrar valores salariais, extraia o salário médio, mínimo e máximo mensal em reais (números inteiros).`
+          }
+        ],
+        tools: [{
+          type: 'function',
+          function: {
+            name: 'extract_salary',
+            description: 'Extrai dados salariais estruturados dos resultados de busca',
+            parameters: {
+              type: 'object',
+              properties: {
+                encontrado: { 
+                  type: 'boolean', 
+                  description: 'true se encontrou dados salariais relevantes, false caso contrário' 
+                },
+                salario_medio: { 
+                  type: 'number', 
+                  description: 'Salário médio mensal em reais (número inteiro)' 
+                },
+                salario_min: { 
+                  type: 'number', 
+                  description: 'Salário mínimo da faixa em reais (número inteiro)' 
+                },
+                salario_max: { 
+                  type: 'number', 
+                  description: 'Salário máximo da faixa em reais (número inteiro)' 
+                },
+                registros_base: { 
+                  type: 'number', 
+                  description: 'Número de salários/registros que baseiam a informação' 
+                },
+                confianca: { 
+                  type: 'string', 
+                  enum: ['alta', 'media', 'baixa'],
+                  description: 'Nível de confiança nos dados extraídos'
+                }
+              },
+              required: ['encontrado'],
+              additionalProperties: false
+            }
+          }
+        }],
+        tool_choice: { type: 'function', function: { name: 'extract_salary' } }
+      }),
+      signal: AbortSignal.timeout(30000),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Erro na API Lovable AI:', response.status, errorText);
+      return { encontrado: false };
+    }
+
+    const data = await response.json();
+    console.log('Resposta Lovable AI:', JSON.stringify(data).substring(0, 500));
+    
+    // Extrair o resultado da tool call
+    const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
+    if (toolCall?.function?.arguments) {
+      const args = JSON.parse(toolCall.function.arguments);
+      return {
+        encontrado: args.encontrado || false,
+        salario_medio: args.salario_medio,
+        salario_min: args.salario_min,
+        salario_max: args.salario_max,
+        registros_base: args.registros_base,
+        confianca: args.confianca,
+      };
+    }
+
+    return { encontrado: false };
+  } catch (error) {
+    console.error('Erro ao extrair com IA:', error);
+    return { encontrado: false };
+  }
+}
+
+async function fallbackGoogleSearch(cargo: string, localidade: string): Promise<InfoJobsSalaryData | null> {
+  try {
+    // Buscar no Google via Firecrawl
+    const query = `salário ${cargo} site:infojobs.com.br`;
+    const searchResult = await searchGoogleWithFirecrawl(query);
+
+    if (!searchResult.success || searchResult.data.length === 0) {
+      console.log('Busca Google não retornou resultados');
+      return null;
+    }
+
+    // Combinar snippets dos resultados
+    const snippets = searchResult.data
+      .map((r: any) => `Título: ${r.title || ''}\nDescrição: ${r.description || ''}\nConteúdo: ${r.markdown?.substring(0, 500) || ''}`)
+      .join('\n\n---\n\n');
+
+    console.log(`Snippets combinados (${snippets.length} chars)`);
+
+    // Extrair dados com Lovable AI
+    const aiResult = await extractSalaryWithAI(snippets, cargo);
+
+    if (aiResult.encontrado && (aiResult.salario_medio || aiResult.salario_min)) {
+      const url = searchResult.data[0]?.url || `https://www.infojobs.com.br/salario/${cargoToSlug(cargo)}`;
+      
+      return {
+        encontrado: true,
+        cargo,
+        salario_medio: aiResult.salario_medio ? formatCurrency(aiResult.salario_medio) : null,
+        faixa: {
+          min: aiResult.salario_min ? formatCurrency(aiResult.salario_min) : null,
+          max: aiResult.salario_max ? formatCurrency(aiResult.salario_max) : null,
+        },
+        registros_base: aiResult.registros_base || null,
+        localidade: localidade || 'Brasil',
+        fonte: 'InfoJobs Brasil (via Google)',
+        url,
+        via_google: true,
+      };
+    }
+
+    console.log('IA não encontrou dados salariais nos resultados do Google');
+    return null;
+  } catch (error) {
+    console.error('Fallback Google falhou:', error);
+    return null;
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -151,12 +356,24 @@ Deno.serve(async (req) => {
     console.log(`Buscando InfoJobs para: ${cargo} (slug: ${slug})`);
     console.log(`URL: ${infojobsUrl}`);
 
-    // Usar Firecrawl para scraping
+    // Usar Firecrawl para scraping direto
     const scrapeResult = await scrapeWithFirecrawl(infojobsUrl);
 
+    // Se scraping direto falhou, tentar fallback via Google
     if (!scrapeResult.success) {
-      console.warn(`Firecrawl falhou: ${scrapeResult.error}`);
+      console.warn(`Firecrawl scraping direto falhou: ${scrapeResult.error}`);
+      console.log('Tentando fallback via Google Search + IA...');
       
+      const googleResult = await fallbackGoogleSearch(cargo, localidade);
+      if (googleResult) {
+        console.log('Fallback Google bem-sucedido!');
+        return new Response(
+          JSON.stringify(googleResult),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      // Se Google também falhou
       const result: InfoJobsSalaryData = {
         encontrado: false,
         cargo,
@@ -177,13 +394,21 @@ Deno.serve(async (req) => {
 
     const markdown = scrapeResult.content;
     console.log(`Markdown recebido: ${markdown.length} caracteres`);
-    console.log(`Markdown preview: ${markdown.substring(0, 800)}`);
 
     // Verificar se InfoJobs retornou erro 500 ou página de erro
     if (markdown.includes('500 Internal Server Error') || 
         markdown.includes('Erro interno') ||
         markdown.includes('temporarily unavailable')) {
-      console.log('InfoJobs retornou erro interno 500');
+      console.log('InfoJobs retornou erro interno 500, tentando fallback via Google...');
+      
+      const googleResult = await fallbackGoogleSearch(cargo, localidade);
+      if (googleResult) {
+        console.log('Fallback Google bem-sucedido após erro 500!');
+        return new Response(
+          JSON.stringify(googleResult),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
       
       const result: InfoJobsSalaryData = {
         encontrado: false,
@@ -205,7 +430,16 @@ Deno.serve(async (req) => {
 
     // Verificar se a página existe (não é 404 ou erro)
     if (markdown.includes('não encontrada') || markdown.includes('404') || markdown.length < 200) {
-      console.log('Página InfoJobs não encontrada para este cargo');
+      console.log('Página InfoJobs não encontrada, tentando fallback via Google...');
+      
+      const googleResult = await fallbackGoogleSearch(cargo, localidade);
+      if (googleResult) {
+        console.log('Fallback Google bem-sucedido após 404!');
+        return new Response(
+          JSON.stringify(googleResult),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
       
       const result: InfoJobsSalaryData = {
         encontrado: false,
@@ -229,6 +463,20 @@ Deno.serve(async (req) => {
     const { salarioMedio, salarioMin, salarioMax, totalRegistros } = extractSalaryFromMarkdown(markdown);
 
     const encontrado = salarioMedio !== null || (salarioMin !== null && salarioMax !== null);
+
+    // Se não encontrou dados no scraping direto, tentar fallback
+    if (!encontrado) {
+      console.log('Scraping não extraiu dados, tentando fallback via Google...');
+      
+      const googleResult = await fallbackGoogleSearch(cargo, localidade);
+      if (googleResult) {
+        console.log('Fallback Google bem-sucedido após scraping sem dados!');
+        return new Response(
+          JSON.stringify(googleResult),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
 
     const result: InfoJobsSalaryData = {
       encontrado,

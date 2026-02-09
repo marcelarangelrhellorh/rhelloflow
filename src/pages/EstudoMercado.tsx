@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, FileDown, CheckCircle, XCircle, Lightbulb, Info, Database, RefreshCw, Zap, ExternalLink, Globe, DollarSign, TrendingUp, X, Plus, Tags, AlertTriangle } from "lucide-react";
+import { Loader2, FileDown, CheckCircle, XCircle, Lightbulb, Info, Database, RefreshCw, Zap, ExternalLink, Globe, DollarSign, TrendingUp, X, Plus, Tags, AlertTriangle, ShieldAlert, Server, SearchX } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import logoRhelloDark from "@/assets/logo-rhello-dark.png";
@@ -53,6 +53,8 @@ interface InfoJobsResultado {
   registros_base: number | null;
   fonte: string;
   url: string | null;
+  erro?: string | null;
+  via_google?: boolean;
 }
 
 interface GlassdoorResultado {
@@ -71,7 +73,54 @@ interface GlassdoorResultado {
   ultima_atualizacao: string | null;
   fonte: string;
   url: string | null;
+  erro?: string | null;
+  via_google?: boolean;
 }
+
+// Helper function para mapear erros técnicos para mensagens amigáveis
+const getErrorMessage = (erro: string | null | undefined) => {
+  if (!erro) return null;
+  
+  const erroLower = erro.toLowerCase();
+  
+  // Erro de servidor (500, erro ao extrair dados)
+  if (erroLower.includes('500') || erroLower.includes('extrair dados') || erroLower.includes('internal server')) {
+    return {
+      tipo: 'servidor' as const,
+      titulo: 'Servidor indisponível',
+      descricao: 'O site está temporariamente fora do ar ou com problemas técnicos. Tente novamente mais tarde.',
+      Icone: Server
+    };
+  }
+  
+  // Bloqueio por captcha/anti-bot
+  if (erroLower.includes('bloqueou') || erroLower.includes('captcha') || erroLower.includes('protect')) {
+    return {
+      tipo: 'bloqueio' as const,
+      titulo: 'Acesso bloqueado',
+      descricao: 'O site está bloqueando consultas automáticas para proteção contra bots. Você pode consultar manualmente.',
+      Icone: ShieldAlert
+    };
+  }
+  
+  // Cargo não encontrado
+  if (erroLower.includes('não encontrado') || erroLower.includes('not found') || erroLower.includes('nenhum resultado')) {
+    return {
+      tipo: 'nao_encontrado' as const,
+      titulo: 'Cargo não encontrado',
+      descricao: 'Não há dados salariais para este cargo nesta fonte. Tente usar termos alternativos.',
+      Icone: SearchX
+    };
+  }
+  
+  // Erro genérico
+  return {
+    tipo: 'generico' as const,
+    titulo: 'Erro ao consultar',
+    descricao: erro || 'Não foi possível obter os dados desta fonte.',
+    Icone: AlertTriangle
+  };
+};
 
 interface EstudoMercadoNovo {
   consulta: {
@@ -86,6 +135,7 @@ interface EstudoMercadoNovo {
     glassdoor?: GlassdoorResultado;
   };
   consultoria: string[];
+  termos_expandidos?: string[];
 }
 
 export default function EstudoMercado() {
@@ -558,6 +608,20 @@ export default function EstudoMercado() {
               </Button>
             </div>
 
+            {/* Indicador de termos expandidos (sinônimos) */}
+            {estudo.termos_expandidos && estudo.termos_expandidos.length > 1 && (
+              <Alert className="border-blue-200 bg-blue-50">
+                <Tags className="h-4 w-4 text-blue-600" />
+                <AlertTitle className="text-blue-800">Busca expandida com sinônimos</AlertTitle>
+                <AlertDescription className="text-blue-700">
+                  Para ampliar os resultados, a busca incluiu termos relacionados: {' '}
+                  <span className="font-medium">
+                    {estudo.termos_expandidos.join(', ')}
+                  </span>
+                </AlertDescription>
+              </Alert>
+            )}
+
             {/* Aviso sobre regime CLT */}
             <Alert className="border-amber-200 bg-amber-50">
               <AlertTriangle className="h-4 w-4 text-amber-600" />
@@ -584,19 +648,64 @@ export default function EstudoMercado() {
                       <Globe className="h-5 w-5 text-green-600" />
                       InfoJobs Brasil
                     </CardTitle>
-                    {estudo.resultado.infojobs.encontrado ? (
-                      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                        <CheckCircle className="h-3 w-3 mr-1" />
-                        Dados em tempo real
-                      </Badge>
-                    ) : (
-                      <Badge variant="outline" className="bg-gray-50 text-gray-600 border-gray-200">
-                        <XCircle className="h-3 w-3 mr-1" />
-                        Não encontrado
-                      </Badge>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {estudo.resultado.infojobs.encontrado && estudo.resultado.infojobs.via_google && (
+                        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                          <Globe className="h-3 w-3 mr-1" />
+                          Via busca Google
+                        </Badge>
+                      )}
+                      {estudo.resultado.infojobs.encontrado ? (
+                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                          <CheckCircle className="h-3 w-3 mr-1" />
+                          {estudo.resultado.infojobs.via_google ? 'Dados encontrados' : 'Dados em tempo real'}
+                        </Badge>
+                      ) : estudo.resultado.infojobs.erro ? (
+                        <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+                          <AlertTriangle className="h-3 w-3 mr-1" />
+                          Indisponível
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="bg-gray-50 text-gray-600 border-gray-200">
+                          <XCircle className="h-3 w-3 mr-1" />
+                          Não encontrado
+                        </Badge>
+                      )}
+                    </div>
                   </div>
                 </CardHeader>
+                
+                {/* Exibir mensagem de erro quando não encontrado */}
+                {!estudo.resultado.infojobs.encontrado && estudo.resultado.infojobs.erro && (
+                  <CardContent>
+                    {(() => {
+                      const errorInfo = getErrorMessage(estudo.resultado.infojobs.erro);
+                      if (!errorInfo) return null;
+                      const { Icone } = errorInfo;
+                      return (
+                        <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                          <Icone className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                          <div className="space-y-1 flex-1">
+                            <p className="font-medium text-amber-800">{errorInfo.titulo}</p>
+                            <p className="text-sm text-amber-700">{errorInfo.descricao}</p>
+                            {estudo.resultado.infojobs.url && (
+                              <a 
+                                href={estudo.resultado.infojobs.url} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="text-sm text-green-600 hover:text-green-700 flex items-center gap-1 mt-2"
+                              >
+                                Consultar manualmente no InfoJobs
+                                <ExternalLink className="h-3 w-3" />
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </CardContent>
+                )}
+                
                 {estudo.resultado.infojobs.encontrado && (
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -658,19 +767,70 @@ export default function EstudoMercado() {
                       <TrendingUp className="h-5 w-5 text-teal-600" />
                       Glassdoor Brasil
                     </CardTitle>
-                    {estudo.resultado.glassdoor.encontrado ? (
-                      <Badge variant="outline" className="bg-teal-50 text-teal-700 border-teal-200">
-                        <CheckCircle className="h-3 w-3 mr-1" />
-                        Dados em tempo real
-                      </Badge>
-                    ) : (
-                      <Badge variant="outline" className="bg-gray-50 text-gray-600 border-gray-200">
-                        <XCircle className="h-3 w-3 mr-1" />
-                        Não encontrado
-                      </Badge>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {estudo.resultado.glassdoor.encontrado && estudo.resultado.glassdoor.via_google && (
+                        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                          <Globe className="h-3 w-3 mr-1" />
+                          Via busca Google
+                        </Badge>
+                      )}
+                      {estudo.resultado.glassdoor.encontrado ? (
+                        <Badge variant="outline" className="bg-teal-50 text-teal-700 border-teal-200">
+                          <CheckCircle className="h-3 w-3 mr-1" />
+                          {estudo.resultado.glassdoor.via_google ? 'Dados encontrados' : 'Dados em tempo real'}
+                        </Badge>
+                      ) : estudo.resultado.glassdoor.erro?.toLowerCase().includes('bloqueou') || 
+                           estudo.resultado.glassdoor.erro?.toLowerCase().includes('captcha') ? (
+                        <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+                          <ShieldAlert className="h-3 w-3 mr-1" />
+                          Bloqueado
+                        </Badge>
+                      ) : estudo.resultado.glassdoor.erro ? (
+                        <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+                          <AlertTriangle className="h-3 w-3 mr-1" />
+                          Indisponível
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="bg-gray-50 text-gray-600 border-gray-200">
+                          <XCircle className="h-3 w-3 mr-1" />
+                          Não encontrado
+                        </Badge>
+                      )}
+                    </div>
                   </div>
                 </CardHeader>
+                
+                {/* Exibir mensagem de erro quando não encontrado */}
+                {!estudo.resultado.glassdoor.encontrado && estudo.resultado.glassdoor.erro && (
+                  <CardContent>
+                    {(() => {
+                      const errorInfo = getErrorMessage(estudo.resultado.glassdoor.erro);
+                      if (!errorInfo) return null;
+                      const { Icone } = errorInfo;
+                      return (
+                        <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                          <Icone className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                          <div className="space-y-1 flex-1">
+                            <p className="font-medium text-amber-800">{errorInfo.titulo}</p>
+                            <p className="text-sm text-amber-700">{errorInfo.descricao}</p>
+                            {estudo.resultado.glassdoor.url && (
+                              <a 
+                                href={estudo.resultado.glassdoor.url} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="text-sm text-teal-600 hover:text-teal-700 flex items-center gap-1 mt-2"
+                              >
+                                Consultar manualmente no Glassdoor
+                                <ExternalLink className="h-3 w-3" />
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </CardContent>
+                )}
+                
                 {estudo.resultado.glassdoor.encontrado && (
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

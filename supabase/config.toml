@@ -122,3 +122,12 @@ verify_jwt = false
 
 [functions.check-stale-jobs]
 verify_jwt = false
+
+[functions.export-candidate-data]
+verify_jwt = true
+
+[functions.delete-candidate-permanently]
+verify_jwt = true
+
+[functions.cleanup-expired-data]
+verify_jwt = false

@@ -22,18 +22,29 @@ export function NotificationBell() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   useEffect(() => {
+    let isMounted = true;
+    
     loadNotifications();
 
     // Subscribe to realtime updates
-    const channel = supabase.channel("notifications-changes").on("postgres_changes", {
-      event: "*",
-      schema: "public",
-      table: "notifications"
-    }, () => {
-      loadNotifications();
-    }).subscribe();
+    const channel = supabase
+      .channel(`notifications-changes-${Date.now()}`)
+      .on("postgres_changes", {
+        event: "*",
+        schema: "public",
+        table: "notifications"
+      }, () => {
+        if (isMounted) {
+          loadNotifications();
+        }
+      })
+      .subscribe();
+
     return () => {
-      supabase.removeChannel(channel);
+      isMounted = false;
+      channel.unsubscribe().then(() => {
+        supabase.removeChannel(channel);
+      });
     };
   }, []);
   const loadNotifications = async () => {

@@ -68,9 +68,9 @@ const getStatusBadgeColor = (status: string): {
   bg: string;
   text: string;
 } => {
-  if (status === "Concluído") return {
-    bg: "#D9F99D",
-    text: "#00141D"
+  if (status === "Concluída") return {
+    bg: "#22c55e",
+    text: "#ffffff"
   };
   if (status === "Cancelada") return {
     bg: "#FECACA",

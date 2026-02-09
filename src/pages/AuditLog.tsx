@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { useDebounce } from "@/hooks/useDebounce";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useNavigate } from "react-router-dom";
@@ -43,6 +44,7 @@ export default function AuditLog() {
   const [events, setEvents] = useState<AuditEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearch = useDebounce(searchTerm, 300);
   const [actionFilter, setActionFilter] = useState<string>("all");
   const [dateFrom, setDateFrom] = useState<Date>();
   const [dateTo, setDateTo] = useState<Date>();
@@ -136,11 +138,13 @@ export default function AuditLog() {
     URL.revokeObjectURL(url);
     toast.success("Log de auditoria exportado");
   };
-  const filteredEvents = events.filter(event => {
-    const matchesSearch = searchTerm === "" || event.actor.display_name.toLowerCase().includes(searchTerm.toLowerCase()) || event.action.toLowerCase().includes(searchTerm.toLowerCase()) || event.resource.type.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesAction = actionFilter === "all" || event.action === actionFilter;
-    return matchesSearch && matchesAction;
-  });
+  const filteredEvents = useMemo(() => {
+    return events.filter(event => {
+      const matchesSearch = debouncedSearch === "" || event.actor.display_name.toLowerCase().includes(debouncedSearch.toLowerCase()) || event.action.toLowerCase().includes(debouncedSearch.toLowerCase()) || event.resource.type.toLowerCase().includes(debouncedSearch.toLowerCase());
+      const matchesAction = actionFilter === "all" || event.action === actionFilter;
+      return matchesSearch && matchesAction;
+    });
+  }, [events, debouncedSearch, actionFilter]);
   const getActionBadgeVariant = (action: string) => {
     if (action.includes("FAILURE") || action.includes("DELETE") || action.includes("ERASURE")) {
       return "destructive";

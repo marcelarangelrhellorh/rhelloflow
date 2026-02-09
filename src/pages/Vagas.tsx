@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo, useCallback, Suspense, lazy } from "react";
+import { useDebounce } from "@/hooks/useDebounce";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -55,6 +56,7 @@ export default function Vagas() {
   const [statusOptions, setStatusOptions] = useState<StatusRef[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearch = useDebounce(searchTerm, 300);
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [recrutadorFilter, setRecrutadorFilter] = useState<string>("all");
   const [clienteFilter, setClienteFilter] = useState<string>("all");
@@ -139,14 +141,16 @@ export default function Vagas() {
     }).neq("status", "Contratado").neq("status", "Reprovado rhello").neq("status", "Reprovado Solicitante");
     setTotalCandidatosAtivos(count || 0);
   };
-  const filteredVagas = vagas.filter(vaga => {
-    const matchesSearch = vaga.titulo.toLowerCase().includes(searchTerm.toLowerCase()) || vaga.empresa.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "all" || vaga.status === statusFilter;
-    const matchesRecrutador = recrutadorFilter === "all" || vaga.recrutador === recrutadorFilter;
-    const matchesCliente = clienteFilter === "all" || vaga.empresa === clienteFilter;
-    const matchesAttention = !attentionFilter || attentionIds.includes(vaga.id);
-    return matchesSearch && matchesStatus && matchesRecrutador && matchesCliente && matchesAttention;
-  });
+  const filteredVagas = useMemo(() => {
+    return vagas.filter(vaga => {
+      const matchesSearch = debouncedSearch === "" || vaga.titulo.toLowerCase().includes(debouncedSearch.toLowerCase()) || vaga.empresa.toLowerCase().includes(debouncedSearch.toLowerCase());
+      const matchesStatus = statusFilter === "all" || vaga.status === statusFilter;
+      const matchesRecrutador = recrutadorFilter === "all" || vaga.recrutador === recrutadorFilter;
+      const matchesCliente = clienteFilter === "all" || vaga.empresa === clienteFilter;
+      const matchesAttention = !attentionFilter || attentionIds.includes(vaga.id);
+      return matchesSearch && matchesStatus && matchesRecrutador && matchesCliente && matchesAttention;
+    });
+  }, [vagas, debouncedSearch, statusFilter, recrutadorFilter, clienteFilter, attentionFilter, attentionIds]);
   const sortedVagas = [...filteredVagas].sort((a, b) => {
     if (ordenacao === "recentes") {
       return new Date(b.criado_em).getTime() - new Date(a.criado_em).getTime();

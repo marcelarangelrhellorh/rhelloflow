@@ -53,6 +53,8 @@ export interface Candidato {
   formato_trabalho: string | null;
   fit_cultural: FitCulturalData | null;
   talent_pool_link_id: string | null;
+  disc_url: string | null;
+  gravacao_entrevista_url: string | null;
 }
 
 export interface CandidatoHistorico {

@@ -100,6 +100,22 @@ Deno.serve(async (req) => {
     console.log('Buscando benchmarks para:', { cargo, senioridade, localidade, forceRefresh });
 
     // ============================================
+    // NOVA FASE: Buscar termos expandidos (sinônimos)
+    // ============================================
+    let termosExpandidos: string[] = [cargo];
+    try {
+      const { data: expandedTerms } = await supabaseClient
+        .rpc('get_expanded_search_terms', { p_cargo: cargo });
+      
+      if (expandedTerms && expandedTerms.length > 0) {
+        termosExpandidos = expandedTerms;
+        console.log('Termos expandidos:', termosExpandidos);
+      }
+    } catch (e) {
+      console.warn('Erro ao buscar termos expandidos:', e);
+    }
+
+    // ============================================
     // FASE 4: Verificar cache primeiro (skip se forceRefresh)
     // ============================================
     const { data: cacheKeyData } = await supabaseClient
@@ -465,7 +481,8 @@ Gere 4 insights consultivos curtos sobre este cargo, considerando todas as fonte
           erro: glassdoorData?.erro || null
         }
       },
-      consultoria: consultoriaInsights
+      consultoria: consultoriaInsights,
+      termos_expandidos: termosExpandidos.length > 1 ? termosExpandidos : undefined
     };
 
     if (!parsedEstudo.consulta || !parsedEstudo.resultado) {
