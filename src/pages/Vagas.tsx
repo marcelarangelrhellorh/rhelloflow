@@ -3,7 +3,7 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, AlertTriangle, Grid3x3, List, LayoutGrid, Share2 } from "lucide-react";
+import { Plus, Search, AlertTriangle, Grid3x3, List, LayoutGrid, Share2, FileSpreadsheet } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
@@ -25,6 +25,7 @@ const PipelineBoard = lazy(() => import("@/components/FunilVagas/PipelineBoard")
 import { JOB_STAGES, calculateProgress } from "@/lib/jobStages";
 import { logVagaEvento } from "@/lib/vagaEventos";
 import { getBusinessDaysFromNow } from "@/lib/dateUtils";
+import { exportVagasToXLS } from "@/lib/exportVagasToXLS";
 type Vaga = {
   id: string;
   titulo: string;
@@ -183,6 +184,16 @@ export default function Vagas() {
     navigate(`/vagas/${id}`);
   };
 
+  const handleExportarVagas = useCallback(() => {
+    if (sortedVagas.length === 0) {
+      toast.warning("Nenhuma vaga disponível para exportação.");
+      return;
+    }
+
+    exportVagasToXLS(sortedVagas, "vagas");
+    toast.success("Planilha XLSX exportada com sucesso!");
+  }, [sortedVagas]);
+
   const copyPublicFormLink = () => {
     const link = `${window.location.origin}/solicitar-vaga`;
     navigator.clipboard.writeText(link);
@@ -254,6 +265,10 @@ export default function Vagas() {
               </p>
             </div>
             <div className="flex gap-2">
+              <Button onClick={handleExportarVagas} variant="outline" className="h-11 text-sm px-4 font-bold">
+                <FileSpreadsheet className="mr-2 h-4 w-4" />
+                Exportar XLS
+              </Button>
               <Button 
                 onClick={copyPublicFormLink} 
                 variant="outline"
