@@ -55,6 +55,11 @@ export default function VagaForm() {
   const { invalidateVagas } = useCacheInvalidation();
   const [empresas, setEmpresas] = useState<Array<{id: string, nome: string}>>([]);
 
+  const selectedEmpresaId =
+    formData.empresa_id ||
+    empresas.find((empresa) => empresa.nome === formData.empresa)?.id ||
+    "";
+
   // Carregar empresas cadastradas
   useEffect(() => {
     const loadEmpresas = async () => {
@@ -381,7 +386,7 @@ export default function VagaForm() {
               <div>
                 <Label htmlFor="empresa">Cliente *</Label>
                 <Select 
-                  value={formData.empresa_id || ""} 
+                  value={selectedEmpresaId} 
                   onValueChange={(value) => {
                     const empresa = empresas.find(e => e.id === value);
                     setFormData({ 
